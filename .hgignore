@@ -49,5 +49,8 @@ syntax: regexp
 ^src/hd.conf
 ^src/hd.locations
 ^src/watcher
+^src/legacyWatcher/depend
+^src/legacyWatcher/watcher
+
 
 
