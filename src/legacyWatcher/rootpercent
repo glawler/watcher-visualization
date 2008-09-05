@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+#  Copyright (C) 2004  Networks Associates Technology, Inc.
+#  All rights reserved.
+#
+# $Id: rootpercent,v 1.2 2004/08/27 16:28:59 tjohnson Exp $
+#
+#  Computes the percent time during which the MANET has a root
+
+dist=`grep numroots $*  | awk ' $2>0 { print 1 } $2 == 0 { print 0 } ' | stats`
+echo "root percentage: $dist"
+

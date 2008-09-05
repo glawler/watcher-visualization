@@ -1,0 +1,472 @@
+#!/bin/sh
+#
+#  Copyright (C) 2004  Networks Associates Technology, Inc.
+#  All rights reserved.
+#
+# $Id: getresults,v 1.15 2005/11/07 18:57:48 tjohnson Exp $
+# 
+# Script to generate experiment results
+
+alglist="nailed.bft nonailed.bft nailed.interim nonailed.interim nailed.interim2 nonailed.interim2"
+manetlist="20 80 200"
+mobilitylist="1 4"
+nailist="nailed nonailed"
+
+TMP=/tmp
+
+finddeglist()
+{
+case $manet in
+20) deglist="4"
+;;
+80) deglist="4 8"  
+;;
+200) deglist="4 8 12"
+;;
+esac
+}
+
+if true
+then
+
+# FIXME: this needs to check the file modification times...
+if true
+then
+for i in *.res
+do
+(
+cd $i 
+../plotavail
+../plotpart
+../plotpathlen
+../plotstability
+) &
+done
+
+wait 
+fi
+
+
+echo "Last Timestamp (is run complete?)"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+echo "Size, Degree, Mobility Speed, TimeStamp"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+dist=`tail -1000 $name/foo | grep "^time:" | tail -1 | awk ' { print $2 } ' `
+
+echo "$manet, $degree, $mobility, $dist" 
+
+done
+done
+done
+done
+
+
+echo "Time to Root Formation:"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+echo "Size, Degree, Mobility Speed, Time (milliseconds)"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+dist=`grep "^root formed at" $name/foo | awk ' { print $4 } ' `
+
+echo "$manet, $degree, $mobility, $dist" 
+
+done
+done
+done
+done
+
+
+
+
+echo "Mantainance Cost:"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+
+echo "Size, Degree, Mobility speed, K-packet originated, K-packet transmission, transmissions per second, transmissions/node/second"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+origin=`grep "^packet origin:" $name/foo | tail -1 | awk ' { print $3/1000 } '  `
+repeat=`grep "^packet repeat:" $name/foo | tail -1 | awk ' { print $3/1000 } '  `
+transmit=`echo "$origin $repeat" | awk ' { print $1 + $2 } '`
+packetstick=`grep "^packets/tick:" $name/foo | tail -1 | awk ' { print $2 } '  `
+packetsnode=`echo "$packetstick $manet" | awk ' { print $1 / $2 } '`
+
+echo "$manet, $degree, $mobility, $origin, $transmit, $packetstick, $packetsnode" 
+
+done
+done
+done
+done
+
+echo
+echo
+
+
+
+
+
+echo
+echo
+for partition in mobility hierarchy
+do
+
+echo "Partition type: $partition"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+echo "Size, Degree, Mobility Speed, Min partitions, Mean partitions, Std Dev partitions, Max partitions"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+dist=`grep $partition $name/foo | awk ' $2 == "num" && $3 == "partitions:" { print $4 } ' | stats | awk ' { print $1 ", " $2 ", " $3 ", " $4 } ' `  2> /dev/null
+
+echo "$manet, $degree, $mobility, $dist" 
+
+done
+done
+done
+done
+
+echo
+echo
+
+done
+
+
+echo "AMRoute partitioning:"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+echo "Size, Degree, Mobility Speed, Min partitions, Mean partitions, Std Dev partitions, Max partitions"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+dist=`grep "tree is" $name/foo  | awk ' { print substr($8,13)+0 } '  | stats | awk ' { print $1 ", " $2 ", " $3 ", " $4 } ' `  2> /dev/null
+
+echo "$manet, $degree, $mobility, $dist" 
+
+done
+done
+done
+done
+
+echo
+echo
+
+echo "Path Length:"
+
+for length in "physical all" "physical root" "hierarchy all" "hierarchy root" "hierarchy CH" "hierarchy leaf-CH"
+do
+
+echo "Min path lengths for $length"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+
+echo "Size, Degree, Mobility speed, min mean path length, mean mean path length, std dev mean path length, max mean path length"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+# example log lines:
+#
+#physical all path length dist: 1.000000 4.077201 1.932733 9.000000
+#physical root path length dist: 0.000000 0.000000 nan 0.000000
+#hierarchy all path length dist: 0.000000 0.000000 nan 0.000000
+#hierarchy root path length dist: 0.000000 0.000000 nan 0.000000
+#hierarchy CH path length dist: 0.000000 0.000000 nan 0.000000
+#hierarchy leaf-CH path length dist: 0.000000 0.000000 nan 0.000000
+
+
+dist=`grep "$length" $name/foo | awk ' $3 == "path" && $4 == "length" && ($7>0) { print $7 } ' | stats | awk ' { print $1 ", " $2 ", " $3 ", " $4 } ' `
+
+echo "$manet, $degree, $mobility, $dist"
+
+done
+done
+done
+done
+done
+
+echo
+echo
+
+
+echo "Stability:"
+
+for events in "mobilityevents" "hierarchyevents" 
+do
+
+echo "$events"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+
+echo "Size, Degree, Mobility speed, total mobility kilo-events, min mean events/sec, mean events/sec, std dev events/sec, max events/sec"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+tot=`awk ' { tot += $0 } END { print tot/1000 } ' $name/$events `
+
+dist=` stats < $name/$events| awk ' { print $1 ", " $2 ", " $3 ", " $4 } ' `
+
+echo "$manet, $degree, $mobility, $tot, $dist"
+
+done
+done
+done
+done
+done
+
+echo
+echo
+
+echo "Availability:"
+
+label="Size, Degree, Mobility speed,"
+
+for alg in $alglist
+do
+
+rm -f $TMP/availability.$alg
+rm -f $TMP/vars
+
+echo "Algorithm: $alg"
+
+echo "Size, Degree, Mobility speed, final availability "
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+tot=`tail -1 $name/availability | awk ' { print $1 } ' `
+
+echo "$manet, $degree, $mobility, $tot"
+
+echo " $tot , " >> $TMP/availability.$alg
+echo "$manet, $degree, $mobility, " >> $TMP/vars
+
+
+done
+done
+done
+label="$label $alg , "
+done
+
+echo
+echo
+
+list="$TMP/vars"
+for alg in $alglist
+do
+list="$list $TMP/availability.$alg"
+done
+
+echo "Availability of all algorithms:"
+echo $label
+paste -d \\0 $list
+
+echo
+echo
+
+echo "Link Layer node degree:"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+
+echo "Size, Degree, Mobility speed, min mean degree, mean mean degree, std dev mean degree, max mean degree"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+#distribution of 1 hop neighbors: 2.000000 8.275000 2.837252 15.000000
+
+dist=`grep "distribution of 1 hop neighbors:" $name/foo | awk ' { print $7 } ' | stats | awk ' { print $1 ", " $2 ", " $3 ", " $4 } ' `
+
+echo "$manet, $degree, $mobility, $dist"
+
+done
+done
+done
+done
+
+
+echo
+echo
+echo "Hierarchy node degree:"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+
+echo "Size, Degree, Mobility speed, min mean degree, mean mean degree, std dev mean degree, max mean degree"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+dist=`cat $name/foo | awk ' $1 =="numroots:" { numroots=$2}  ($1=="hierarchy:") && ($2 == "node") && ($3=="child") && ($4=="degree:") && (numroots>0) { print $6 } ' | stats | awk ' { print $1 ", " $2 ", " $3 ", " $4 } ' `
+
+echo "$manet, $degree, $mobility, $dist"
+
+done
+done
+done
+done
+
+
+fi
+
+echo
+echo
+echo "Aggregation:"
+
+for alg in $alglist
+do
+
+echo "Algorithm: $alg"
+
+echo "Size, Degree, Mobility speed, min mean degree, mean mean degree, std dev mean degree, max mean degree"
+
+for manet in $manetlist
+do
+
+finddeglist
+
+for degree in $deglist
+do
+for mobility in $mobilitylist
+do
+
+name=manet$manet.deg$degree.mob$mobility.$alg.res
+
+#  awk ' $1=="aggregation:" {lines++} $1=="aggregation:" && ($2>0) { count++; tot+=$2 } END { print "percent established " count/lines " avg while established: " tot/count } ' 
+
+dist=`cat $name/foo | awk ' $1 =="aggregation:" && ($2>0) { print $2 } ' | stats | awk ' { print $1 ", " $2 ", " $3 ", " $4 } ' `
+
+echo "$manet, $degree, $mobility, $dist"
+
+done
+done
+done
+done

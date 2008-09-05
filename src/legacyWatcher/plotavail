@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# $Id: plotavail,v 1.4 2005/01/21 20:59:50 tjohnson Exp $
+#
+
+name=`pwd`
+numnodes=` basename $name | awk ' BEGIN { FS="\."} { print substr($1,6) } ' `
+
+grep "availability:"  foo | awk ' $6 != "nan" { print $6 } ' > availability
+
+grep "availability:"  foo | awk ' $6 != "nan" { print $4 / $2 } ' | smooth 2000 > availabilitypersec
+
+cat <<EOF | gnuplot
+set title "Hierarchy Availability"
+set key
+set terminal postscript color
+set output "avail.ps"
+plot "availability" with line
+EOF
+
+
+

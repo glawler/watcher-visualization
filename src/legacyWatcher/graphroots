@@ -1,0 +1,43 @@
+#!/bin/sh
+
+#  Copyright (C) 2004  Networks Associates Technology, Inc.
+#  All rights reserved.
+#
+# $Id: graphroots,v 1.6 2004/09/10 18:19:51 tjohnson Exp $
+#
+# Draw a graph of the number of kids per root as a function
+# of time.
+
+roots=`grep "recursive" $1 | awk ' { print $2 } ' | sort | uniq`
+
+TMP=/tmp
+
+# This logs the number of mobility events...
+awk ' $1== "mobility" && $2== "events:" { print time/1000 " " $3 } $1 == "time:" { time = $2 } ' $1  > $TMP/mobility.dat
+
+echo $roots
+
+for i in $roots
+do
+echo $i
+awk ' $2 == "'$i'" && $5 == "recursive"  { print time/1000 " " $4 } $1 == "time:" { time = $2 } ' $1  > $TMP/$i.dat
+
+graph="$graph $comma \"$TMP/$i.dat\" with line"
+list="$list $TMP/$i.dat"
+
+comma=","
+
+done
+
+graph="$graph $comma \"$TMP/mobility.dat\" with line"
+list="$list $TMP/mobility.dat"
+
+cat <<EOF | gnuplot
+set title "Number of children per root node"
+set key
+set terminal postscript color
+set output "roots.ps"
+plot $graph
+EOF
+
+rm $list

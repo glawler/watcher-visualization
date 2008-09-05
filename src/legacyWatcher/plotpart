@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# $Id: plotpart,v 1.1 2004/09/27 14:54:24 tjohnson Exp $
+#
+
+grep "mobility: num partitions:"  foo | awk ' { print $4 } ' > physicalpart
+grep "hierarchy: num partitions:"  foo | awk ' { print $4 } ' > hierarchypart
+
+cat <<EOF | gnuplot
+set title "MANET partitions"
+set key
+set terminal postscript color
+set output "partitions.ps"
+set yrange[0:40]
+plot "hierarchypart" with line, "physicalpart" with line
+EOF
+
+
+

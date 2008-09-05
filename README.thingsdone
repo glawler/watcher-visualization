@@ -1,0 +1,82 @@
+Installed QT4:
+    yum install qt4.i386 qt4-x11.i386 PyQt4.i386 PyQt4-devel.i386 qt4-devel.i386 qt4-sqlite.i386 qt4-doc.i386
+    49M download on current glory Fedora 8 image.
+
+Installed Boost Libraries:
+    1. yum install boost-doc.i386 boost-devel.i386 boost-devel-static.i386 boost.i386
+    2. Discovered that the asio library for network development is in boost version 1.36 and Fedora 8
+    only installs boost version1.34, so I uninstalled boost:
+        yum erase boost-doc.i386 boost-devel.i386 boost-devel-static.i386 boost.i386
+    and pulled down the source (boost_1_36_0.tar.bz2) from boost.org, then
+        tar jxvf boost_1_36_0.tar.bz2
+        cd boost_1_36_0
+        ./configure
+        make 
+        sudo make install
+
+Ran throught the 14 step QT Tutorial, which builds a simple cannon game.
+
+Thought about network clients/server implemenation:
+1. Server runs 'panopticond', a daemon which listens for connections from clients. 
+    A. Accepts timestamped messages (events) from clients.
+    B. Feeds demulitplexed message stream to GUI that connects to it.
+    C. Supports time-based message queries:
+        I. 'Send current stream' - 'now' according to server, forward in time at 1x speed.
+        II. 'Send stream starting at time t'
+            a. Send stream in reverse or forward.
+            b. Send stream at different speeds (1/2x, 1x, 2x, fast as possible, etc)
+    D. Saving/Reading messages.
+        I. Support for saving message stream.
+        II. Support for reading saved message streams.
+        III. Use a database for message storage/retrival? 
+            a. May be nice for 2ndary tools.
+            b. Will help with speed of retrival/playback?
+            c. Will help with post-run analysis?
+    F. "Messages" above are messages sent directly from clients. Should there be support
+        for knowledge specific messages, e.g. network-topology-at-time-t-is messages? These
+        messages would use knowledge of what the messages contain to answer specific 
+        questions based on the stream of all messages from all clients. (although I can't
+        think of an example other than topology).
+            a. This would mean there would be messsage above and beyond client messages
+            sent from panopticond
+            b. Would need to add an analysis module to the server
+                i. would cease being a straight messages demultiplexer and 
+                become demulitplexer/analysis. Do we want
+                this functionality here or somewhere else?
+2. Clients run a watcherd which listens for connections from localhost and has a message-sending API
+    A. Support for current Hierarchy/Watcher message API (draw label, draw line, etc)
+    B. Simple message send API
+        I. Support for python interface.
+        II. Support for other scripting interface, perl, bash, etc.
+3. GUI connects to panopticond deamon and requests message streams.
+4. Everything is sockets-based connection-location agnostic, if possible.
+5. Support for compressed (gzipped) messages on the wire.
+            TCP                 TCP             UDP
+    GUI    <----> panopticond  <--->  watcherd <---> client1, client2, client3
+    [GUI]  <---->              <--->  watcherd <---> client1, client2, client3
+    [...]  ...                 <--->  ...
+    [GUI]  <--->               <--->  watcherd <---> client1, client2, client3
+
+Network programming questions:
+1. What to write it in?
+    A. Use ACE?
+        I. Heavyweight
+        II. Must install as download/configure/make
+    B Use Boost?
+        I. Somewhat standard for C++ - 10 libs from boost are being added to the STL
+        II. Network interface based on ASIO
+        III. Takes some pattern ideas from ACE
+        IV. Easy install on Fedora - 'yum install boost.i368 ...'
+            a. Fedora 8 Boost library does not include ASIO library - the networking library. So a 
+            download/compile installation of Boost may be needed anyway. Although the boost
+            people do support a static build configuration, so statically linked binaries
+            can be given, keeping the messiness to just build machines.
+        V. Support for ssl sockets?
+        VI. Is there support for compressed packets?
+    C. Straight select()/poll() Steven's style UNIX network programming?
+    D. Leaning towards boost. (May use boost for graph reprsentation of
+        network topology as well). 
+
+Crammed the 'legacy watcher' into a QTGLWidget instance.
+1. Added menus, etc.
+2. The hierarchy view is still borked.

@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w 
+use strict; 
+
+if($#ARGV+1 != 2) { print "Usage: simulator2maneconf [simout file] [directory]\n"; exit; } 
+
+my $time, my $nodeTime, my $nodeId, my $lat, my $long ;
+my $sec, my $min, my $hour, my $mday, my $mon, my $year, my $wday, my $yday, my $isdst;
+my %fds;
+my $dir=$ARGV[1];
+my $confFile=$ARGV[0]; 
+my $pixelsPerDegree=111319.45505080583333333333;	# 1 pixel == 1 meter at the equator. We can use the same conf file (w/same antenna radius) 
+
+# 6378135.0 is the radius of the equator in meters, from CEarth's WGS_84 model
+print "Using ",$pixelsPerDegree," pixels per degree, so a pixel is ",((2*3.14159263*6378135.0)/360.0)/ $pixelsPerDegree  ," meters (at the equator)\n";
+
+system("mkdir -p $dir"); 
+open my $nodeconffile, ">$dir/maneGPS.conf" || die "Unable to open mane GPS config file for writing"; 
+open my $rd, "<$confFile" || die "Unable to open $confFile for reading"; 
+
+my $now = time() ;
+
+while(<$rd>)
+{
+	chop; 
+	if(/^time: (\d+)$/) 
+	{ 
+		$time=($1/1000)+1; 
+				
+		($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($now+$time);
+	}
+	if(/^mobility: time (\d+) node (\d+) at ([^ ]+) ([^ ]+)$/)
+	{
+		$nodeTime=$1/1000;
+		$nodeId=$2;
+		$lat=$3/$pixelsPerDegree;
+		$long=$4/$pixelsPerDegree;
+
+		if($nodeTime==0)
+		{
+			open $fds{$nodeId}, ">$dir/node_$nodeId.log" || die "Unable to open node_$nodeId.spec for writing"; 
+			print $nodeconffile "$nodeId,node_$nodeId.log\n"; 
+		}
+
+		if($nodeTime == $time) 
+		{
+			printf {$fds{$nodeId}} "time>%02s:%02s:%02s.000000 position>%02.06f,%02.06f,0.000000\n", $hour, $min, $sec, $lat, $long;
+		}
+	}
+}
+
+# What? This isn't messy or hard to read or understand is it?
+my $str="pushd $dir; rm -f scenario; declare i; let \"i=1\"; for f in *.spec; do echo \"\$i,\$f\">> scenario; let \"i++\"; done; popd";
+system($str);
+
+exit $?;
+
+

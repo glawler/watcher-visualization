@@ -1,0 +1,148 @@
+
+                         Message Disposition
+
+
+How messages are "routed" by the infrastructure:
+
+The basic idea is sort of like how the ipfw packet filter works under
+FreeBSD.  There are two "chains", of clients through which messages are
+processed: the incoming messages chain; and the outgoing messages chain.
+The chains contain the clients which have requested to be sent various
+message types.  There is an independent pair of chains (incoming and
+outgoing) one each node for each message type.  
+
+See the figure in file chains.fig.
+
+As a message arrives or is transmitted, it is sent to each client on
+the chain in turn, in the order of the chain.  So the ordering of the
+clients on the chain is extremely important.
+
+When clients register to be sent a message type, they also request if
+they wish to be sent incoming or outgoing messages, if they will be
+getting the messages read-only or read-write (so they may modify or delete
+messages), and a numeric position or before-all/after-all (Which means
+that the order in which the clients attach to the demon is what determines
+their final order on the chain.).
+
+The outgoing chain:
+
+When a client sends a message, it creates a payload, specifies a destination
+address (usually PARENTSOF LOCALNODE), and sends it.  The message then starts
+at the top of the outgoing chain,  and is passed in turn to each client.
+If a client is read-only, it is sent a copy of the message and all it may do
+is look at it.  If a client is read-write, it must pass the message back
+(by re-sending it) after it has looked at it, and may modify or delete the
+message.
+
+If a client deletes a message, processing stops there.  The message will not
+be sent to any other clients on the chain, and it will not be transmitted.
+
+If the message (possibly modified several times) makes it to the bottom of
+the outgoing chain, it is transmitted.  The destination will probably be
+the original destination specified when the original client sent the message,
+BUT clients on the outgoing chain may also rewrite the destination address.
+
+The message will eventually arrive at its destination node, where it goes
+down that node's incoming chain the same way.  A read-only client is sent a
+copy, a read-write client is sent the message and must return a possibly
+rewritten version.  If a client deletes an incoming message, the message 
+stops there and does not proceed further down the incoming chain.  When the
+message hits the bottom of the chain, processing is complete and it is
+discarded.
+
+If a client registers to receive the same message type that it transmits,
+it will see its own messages.  This is a potentially confusing aspect of this
+design, so you may wish to read previous sentence again.  (We may change this
+behavior in a subsequent iteration.) 
+
+How Messages get passed up the hierarchy:
+
+To allow for data reduction, aggregation, and false alarm filtering by clients
+on higher-level nodes in the hierarchy, a client on a child node should address
+an upward flowing message to its parent (address PARENTSOF NODE_LOCAL).  This
+will cause each such message to travel one level upward in the hierarchy.  To
+travel multiple levels (e.g., from a leaf to the root), messages must be
+received and explicitly forwarded (or replaced) by a client at each level along
+the way.  
+
+So, a detector on a child node will send a message.  That message then
+goes down that node's outgoing chain, and may be rewritten, or deleted.
+It will then get transmitted to its parent node.  The message then goes
+down the parent node's incoming chain, and read by an aggregator.  That
+aggregator then creates a new message, and sends whatever was in the
+child node's message.
+
+
+
+Now for some specific examples:
+
+Suppose we have a simple hierarchy that includes a leaf node A, an
+intermediate node B, and the root, node C.  (B and C are coordinators.)
+
+The program demodetector is a simple example of a detector.  (It detects
+demos, which it assumes are occurring if it is executed.)  It will generate
+a simple message every 2 seconds, and send it to PARENTSOF LOCALNODE.
+
+Let's run the demodetector on node A.  It does not register for anything,
+and simply sends out its messages every 2 seconds.
+
+Then, demoresponder is another example which will display messages it 
+receives on stdout.  If we run demoresponder on node B, which is node A's
+parent node, we will be able to see the demodetector's messages.
+
+However, if we have a node C, which is node B's parent, we will not see any
+messages on node C.  Node A's messages are not forwarded, and node B is
+not generating any of its own.
+
+So, then we can run demoaggregator on node B.  It will receive demodetector
+Messages from node A, and send to its parent node C a union of all the 
+messages it has received every 2 seconds.  So, if node B has more than one
+child, it will receive more than one demodetector messages in a 2 second
+period, and generate a single message.
+
+So now, we will see demodetector messages from node A on node C.
+
+That is the basic operation of the Hierarchy.  Now, there is one potentially
+confusing detail:
+
+Node B is a coordinator, so as far as node B's leaf functions are concerned,
+node B is its own parent.  If node B is running demodetector, node B's 
+demoaggregator should also be aggregating node B's demodetector messages.
+However, the infrastructure does not currently indicate whether an 
+outgoing message is intended for local consumption (from the demodetector)
+or an outgoing message intended for remote consumption (from the demoaggregator).  
+
+The solution to this problem is to have an aggregator register for their
+message types on both the incoming chain (where child node messages will
+come in), and the outgoing chain (where locally generated messages will come
+out).  If the aggregator gets a message on the outgoing chain, it must look
+at the message to make sure it is not its own outgoing message (since a
+client will see its own messages), and then if it is not, aggregate and
+then delete the outgoing demodetector messages.  (We are considering
+ways of "hiding" such messages in subsequent versions.  Note also that
+distinct message types could be used to distinguish between locally-produced
+raw messages and locally-aggregated messages.) 
+
+The current version of demoaggregator, however, does not register to receive
+messages on the outgoing chain; it registers only on the incoming chain.  As
+a result, demoagregator aggregates only messages from child nodes; it does not
+aggregate these with locally generated messages.  So, if you run a copy
+of demodetector on node B as well, you will see 2 messages every 2 seconds
+on node C. One is from node B's demoaggregator which contains node A's
+demodetector message, and the other contains node B's demodetector messages.
+
+Now, let's get fancier:
+
+On node A, execute demorewriter in addition to demo detector.  demorewriter
+will register for outgoing messages read-write, add an additional xml tag (a
+visited tag), and delete every other message.
+
+So looking at node B, there will be a message every 4 seconds.  Those messages
+will also have an additional tag with the IP addr and PID of demorewriter,
+and if you look at the sequence numbers, every other one is missing.
+
+If you run a second copy of demorewriter on node A, there will be a second
+visited tag (with a different PID), and only every 4'th message from node B
+will be delivered.
+
+

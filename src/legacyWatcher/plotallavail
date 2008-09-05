@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# $Id: plotallavail,v 1.5 2005/01/28 23:43:00 tjohnson Exp $
+#
+
+for i in $*
+do
+LIST="$LIST $comma \"$i\" with line"
+comma=","
+done
+
+#LIST="$LIST $comma x*200*1000 with line"
+#LIST="$LIST $comma x*80*1000 with line"
+#LIST="$LIST $comma x*200*1000 with line"
+
+cat <<EOF | gnuplot
+set title "Hierarchy Availability"
+set key
+set terminal postscript mono
+set output "avail.ps"
+set yrange [0:1]
+plot $LIST
+EOF
+
+
+cat <<EOF | gnuplot
+set title "Hierarchy Availability"
+set key
+set terminal pbm mono
+set size 2
+set output "avail.ppm"
+set yrange [0:1]
+plot $LIST
+EOF
+
+

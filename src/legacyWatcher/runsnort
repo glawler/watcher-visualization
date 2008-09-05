@@ -1,0 +1,267 @@
+#!/bin/sh
+#
+# $Id: runsnort,v 1.1 2005/11/07 19:15:37 tjohnson Exp $
+#
+# Script to run snort from data in a simulator config file
+# intended to be called by runcoke
+#
+# Based on the startSnort script from the cast of buffy.
+
+PATH=$PATH:/sbin:/usr/local/sbin
+
+CONFFILE=$1
+
+if test x$CONFFILE = x
+then
+echo "usage: runsnort configfile"
+exit
+fi
+
+manetnetwork=`awk ' BEGIN {FS=":"} $1=="manetnetwork" {  split($2,addr,"[:.]") ; print addr[1] "." addr[2] "." addr[3]  } ' $CONFFILE `
+
+foo=`/sbin/ifconfig -a | awk ' $2=="Link" { interface= $1 } $1=="inet" { if (index($2,"'$manetnetwork'")==6) print interface " " substr($2,6) } '`
+
+interface=`echo $foo | awk ' { print $1 } ' `
+address=`echo $foo | awk ' { print $2 } ' `
+
+echo "interface $interface"
+echo "adress $address"
+
+
+cat > $address.snort.conf << HERE
+ var HOME_NET \$${interface}_ADDRESS
+var EXTERNAL_NET !$HOME_NET
+
+# List of DNS servers on your network 
+var DNS_SERVERS $HOME_NET
+
+# List of SMTP servers on your network
+var SMTP_SERVERS $HOME_NET
+
+# List of web servers on your network
+var HTTP_SERVERS $HOME_NET
+
+# List of sql servers on your network 
+var SQL_SERVERS $HOME_NET
+
+# List of telnet servers on your network
+var TELNET_SERVERS $HOME_NET
+
+# List of snmp servers on your network
+var SNMP_SERVERS $HOME_NET
+
+var HTTP_PORTS 80
+
+# Ports you want to look for SHELLCODE on.
+var SHELLCODE_PORTS !80
+
+# Ports you do oracle attacks on
+var ORACLE_PORTS 1521
+
+# other variables
+# 
+# AIM servers.  AOL has a habit of adding new AIM servers, so instead of
+# modifying the signatures when they do, we add them to this list of servers.
+var AIM_SERVERS [64.12.24.0/23,64.12.28.0/23,64.12.161.0/24,64.12.163.0/24,64.12.200.0/24,205.188.3.0/24,205.188.5.0/24,205.188.7.0/24,205.188.9.0/24,205.188.153.0/24,205.188.179.0/24,205.188.248.0/24]
+
+# Path to your rules files (this can be a relative path)
+# Note for Windows users:  You are advised to make this an absolute path,
+# such as:  c:\snort\rules
+var RULE_PATH ../rules
+
+preprocessor scheduler: LogLevel trace
+
+#
+# OLSR Detector
+# -----------------------------
+#
+# Argument: 
+# 	"LogLevel" - sets the default logging level of the OLSR detector. Use
+#   		the following values:
+# 			  0 or "Fatal",
+# 			100 or "Alert",
+# 			200 or "Critical",
+# 			300 or "Error",
+# 			400 or "Warning",
+# 			500 or "Notice",
+# 			600 or "Info,
+# 			700 or "Debug,
+# 			800 or "Trace,
+#   default:
+#       "TRACE"
+#
+# 	"MainInterface" -- The main interface for OLSR on this machine. 
+#			   If it is not supplied, then the first interface
+#			   found is assumed to be the main interface. If the 
+#			   interface listed is not found, the first one found
+#			   assumed to be the main interface.
+#
+# See HSLS for further option information.
+#
+###########################################################################
+#   Detection Algorithm Tweaks (See detection algorithm document or 
+#				sigidetect.h for details). 
+#   The default values follow the key in (). All values are in whole 
+#   seconds.
+#
+#	LinkHistoryDeliveryPeriod (20)
+#	HistoryCheckPeriod (5)
+#	HistoryCheckFrom (100)
+#	HistoryCheckTo (40)
+#	HistoryKeepFor (120)
+#	HistoryDeliverFrom (120)
+#	HistoryDeliverTo (0)
+#	FictitiousNeighborMinimumSecondsCutoff (5)
+#	FictitiousNeighborMinimumPercentCutoff (20)
+#	MissingNeighborMinimumSecondsCutoff (30)
+#	MissingNeighborMinimumPercentCutoff (50)
+#	NotNeighborCheckPeriod (3)
+#	
+#
+#preprocessor olsr: 				\\
+#	LogLevel 		debug		\\
+#	DoDetect		yes		\\
+#	DoEnhancedDetect 	yes		\\
+#	AlertTimeout		10		\\
+#	MainInterface		$interface
+	
+
+# HSLS Detector
+# -----------------------------
+#
+# Argument: 
+# 	LogLevel - sets the default logging level of the HSLS detector. Use
+#   the following values:
+# 		  0 or "Fatal",
+# 		100 or "Alert",
+# 		200 or "Critical",
+# 		300 or "Error",
+# 		400 or "Warning",
+# 		500 or "Notice",
+# 		600 or "Info,
+# 		700 or "Debug,
+# 		800 or "Trace,
+#   default:
+#       "TRACE"
+#
+#   LogTimestampType - sets the type of timestamp to place on log lines.
+#   values:
+#       Long - long timestamp
+#       Short - short timestamp with just minutes and seconds.
+#       no - no timetamp
+#   default:
+#       no timestamp
+#
+#   LogFile - name the log file for the detector.
+#   values:
+#       a file path to any place that is writable.
+#   default:
+#       "/var/log/sigidetect.log"
+#
+#   Detect - boolean whether or not to do simple detection
+#   values;
+#       "yes", "true", "y", "t", or non-zero
+#       any other text, or zero for "no".
+#   default:
+#       "Yes"
+#
+#   EnhancedDetect - boolean whether or not to do enhanced detection
+#   values;
+#       "yes", "true", "y", "t", or non-zero
+#       any other text, or zero for "no".
+#   default:
+#       "Yes"
+#
+#   LinkHistories - boolean whether or not to pass around link
+#   histories.
+#   values;
+#       "yes", "true", "y", "t", or non-zero
+#       any other text, or zero for "no".
+#   default:
+#       "Yes"
+#
+#   NeighborsViaInfrastructure - boolean whether to do neighbor sensing
+#   via the infrastructure or to do it via listening to hellos.
+#   values:
+#       "yes", "true", "y", "t", or non-zero
+#       any other text, or zero for "no".
+#   default:
+#       "Yes"
+#
+#   UseExternalAlertForwarder - Use the external alert correlator module.
+#   	If this is false, the detector will send alerts via the hierarchy directly
+#   	and forward its own alerts up the hierarchy. If true, then the detector
+#   	will only send alerts to the LOCAL_HOST and assume that something
+#   	else is correlating and forwarding alerts up the hierarchy.
+#   values:
+#       "yes", "true", "y", "t", or non-zero
+#       any other text, or zero for "no".
+#   default:
+#       "Yes"
+#
+#   AlertTimeout - integer value which specifices the amount of time to 
+#	suppress multiple alerts for the same attack. Without self throttle
+#	the enhanced detector will (usually) alert mutliple times a second. 
+# 	If the AlertTimeout value is set, the detector will only issue an 
+#	alert for each separate attack it detects every 'AlertTimeout'
+#	seconds. 
+#   values: 
+#	integer - less than or equal to zero means do not throttle
+#	alerts at all.
+#   default: 
+#	10 
+#
+###########################################################################
+#   Detection Algorithm Tweaks (See detection algorithm document or 
+#				sigidetect.h for details). 
+#   The default values follow the key in (). All values are in whole 
+#   seconds.
+#
+#	LinkHistoryDeliveryPeriod (20)
+#	HistoryCheckPeriod (5)
+#	HistoryCheckFrom (100)
+#	HistoryCheckTo (40)
+#	HistoryKeepFor (120)
+#	HistoryDeliverFrom (120)
+#	HistoryDeliverTo (0)
+#	FictitiousNeighborMinimumSecondsCutoff (5)
+#	FictitiousNeighborMinimumPercentCutoff (20)
+#	MissingNeighborMinimumSecondsCutoff (30)
+#	MissingNeighborMinimumPercentCutoff (50)
+#	NotNeighborCheckPeriod (3)
+#	
+#
+preprocessor hsls: 			\\
+	LogLevel debug 			\\
+	logtimestamptype short 		\\
+	detect yes 			\\
+	EnhancedDetect yes 		\\
+	LinkHistories yes 		\\
+	NeighborsViaInfrastructure yes	\\
+	AlertTimeout 10			\\
+	FictitiousNeighborMinimumSecondsCutoff 7 	\\
+	FictitiousNeighborMinimumPercentCutoff 20	\\
+	MissingNeighborMinimumPercentCutoff 90		\\
+	LinkHistoryDeliveryPeriod 10			\\
+	HistoryCheckTo 30
+	
+
+config checksum_mode: none
+
+HERE
+
+modprobe ip_queue;
+iptables -t mangle -A PREROUTING -p udp --dport hsls -j QUEUE;
+iptables -t mangle -A POSTROUTING -p udp --dport hsls -j QUEUE;
+iptables -t mangle -A PREROUTING -p udp --dport 698 -j QUEUE;
+iptables -t mangle -A POSTROUTING -p udp --dport 698 -j QUEUE;
+
+
+( ( ulimit -c unlimited ;
+      snort -Qc $address.snort.conf 2>&1;
+      iptables -t mangle -D PREROUTING -p udp --dport hsls -j QUEUE > /dev/null 2>&1;
+      iptables -t mangle -D POSTROUTING -p udp --dport hsls -j QUEUE > /dev/null 2>&1;
+      iptables -t mangle -D PREROUTING -p udp --dport 698 -j QUEUE > /dev/null 2>&1;
+      iptables -t mangle -D POSTROUTING -p udp --dport 698 -j QUEUE > /dev/null 2>&1;
+     ) &);
+

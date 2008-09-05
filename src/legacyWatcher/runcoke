@@ -1,0 +1,120 @@
+#!/bin/sh
+
+# $Id: runcoke,v 1.13 2006/11/13 16:06:35 tjohnson Exp $
+#
+# script to execute an infrastructure demon on a network of machines.
+# It is assumed that all the machines can be accessed via rsh from the
+# machine where this script is executing, and that all the machines 
+# can access the directory where this script is executing via NFS or
+# similar.
+
+#demon=liveamroute
+demon=liveinterim2
+#demon=livetesthello
+#clients="demodetector demoaggregator demorewriter demoresponder routingdetector"
+clients="demodetector demoaggregator demoresponder routingdetectorwrapper"
+#clients=""
+duration=$2
+CONFFILE=$1
+
+if test x$CONFFILE = x -o x$duration = x
+then
+cat <<HERE
+runcoke configfilename duration
+
+where configfilename is the configuration file to use, and 
+duration is the time to run the programs.
+
+A duration of 0 means just kill all the processes.
+HERE
+exit
+fi
+
+directory=`pwd`
+
+echo "directory $directory"
+
+# read the number of nodes from the config file...
+numnodes=`awk ' BEGIN {FS=":"} $1=="numnodes" { print $2 } ' $CONFFILE `
+manetnetwork=`awk ' BEGIN {FS=":"} $1=="manetnetwork" { print $2 } ' $CONFFILE `
+
+count=1
+for i in $MOB_NODELIST
+do
+	if test $count -le $numnodes
+	then
+		ips="$ips $i"
+	fi
+	count=`expr $count + 1`
+done
+
+# now $ips is the first numnodes machines from the MOB_NODELIST
+
+echo "killing things..."
+echo $ips
+# cleanum processes from the last run, if they still exist...
+for i in $ips
+do
+        ssh $i "killall $demon" &
+        ssh -l root $i "killall hslsd" &
+        ssh -l root $i "killall olsrd" &
+        ssh -l root $i "killall mulletFeeder" &
+        ssh -l root $i "killall gpsDaemon" &
+	for j in $clients
+	do
+		ssh $i "killall $j" &
+	done
+	rm -f demon.stdout.$i demon.stderr.$i hslsd.stdout.$i hslsd.stderr.$i
+done
+
+wait
+
+# if duration is 0, we just want to do the cleanup step
+if test x$duration = x0
+then
+exit
+fi
+
+sleep 5
+
+rm -f *core
+
+for i in $ips
+do
+	echo "starting $i"
+	( ssh $i "cd $directory ; nohup ./$demon $CONFFILE> demon.stdout.$i 2> demon.stderr.$i & < /dev/null "  )&
+	( ssh -l root $i "sh -c \" sleep 8 ; cd $directory ; ./runolsrd $CONFFILE > olsrd.stdout.$i 2> olsrd.stderr.$i & < /dev/null \" "  )&
+	( ssh -l root $i "sh -c \" sleep 8 ; cd $directory ; ./rungpsDaemon $CONFFILE > gpsDaemon.stdout.$i 2> gpsDaemon.stderr.$i & < /dev/null \" "  )&
+	( ssh -l root $i "sh -c \" sleep 8 ; cd $directory ; ./runmulletFeeder $CONFFILE > mulletFeeder.stdout.$i 2> mulletFeeder.stderr.$i & < /dev/null \" "  )&
+#	( ssh -l root $i "sh -c \" sleep 8 ; cd $directory ; ./runhslsd $CONFFILE > hslsd.stdout.$i 2> hslsd.stderr.$i & < /dev/null \" "  )&
+	for j in $clients
+	do
+		( ssh $i "cd $directory ; sleep 8 ; nohup ./$j > $j.stdout.$i 2> $j.stderr.$i & < /dev/null "  )&
+	done
+done
+
+echo "---- Ready -----"
+
+wait 
+
+echo "---- Running -----"
+
+sleep $duration
+
+echo "---- Shutting down -----"
+
+for i in $ips
+do
+        ssh $i "killall $demon" &
+        ssh -l root $i "killall olsrd" &
+        ssh -l root $i "killall mulletFeeder" &
+        ssh -l root $i "killall gpsDaemon" &
+        ssh -l root $i "killall hslsd" &
+
+	for j in $clients
+	do
+		ssh $i "killall $j" &
+	done
+done
+
+wait

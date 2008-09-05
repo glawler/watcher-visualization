@@ -1,0 +1,118 @@
+#!/usr/bin/perl -w
+use strict;
+use Getopt::Std;
+
+# Default values.
+my $color="0.255.128"; 
+my $alpha="255"; 
+my $pathEnd="";
+my $width=30;
+my $timeout=5;
+my $colluderNetwork="10.0.1"; 
+#my $tunnelNetwork="10.0.0"; 
+my $manetNetwork="192.168.2"; 
+
+my %options;
+if(!getopts('C:T:M:a:c:e:w:t:Hhd', \%options))  { usage(); }
+if(defined $options{h} || defined $options{H}) { usage(); }
+if(!defined $options{e}) { usage(); }
+
+if(defined $options{a}) { $alpha=$options{a}; } 
+if(defined $options{c}) { $color=$options{c}; }
+if(defined $options{e}) { $pathEnd=$options{e}; } 
+if(defined $options{w}) { $width=$options{w}; } 
+if(defined $options{t}) { $timeout=$options{t}; } 
+if(defined $options{C}) { $colluderNetwork=$options{C}; } 
+#if(defined $options{T}) { $tunnelNetwork=$options{T}; } 
+if(defined $options{M}) { $manetNetwork=$options{M}; }
+
+my @path; 
+
+#
+# Run ping to get the path.
+#
+my $pingStr="ping -c 3 -n -R $pathEnd"; 
+getPathFromPing($pingStr, \@path); 
+if(defined $options{d}) { print "Path=@path\n"; } 
+
+$timeout*=1000; 
+$color=$color . "." . $alpha;
+
+
+# now loop over path and call edgeTest to display them in the watcher
+for my $i ( 0 .. $#path-1 )
+{
+	# draw one directions
+	if (($i > 0) && ($path[$i] eq $path[$i-1])) {
+	  last ;
+	}
+
+	my $sysStr="./edgetest -h $path[$i] -t $path[$i+1] -e $timeout -w $width -c $color"; 
+	print "sysStr=$sysStr\n" unless !defined $options{d};
+	system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
+
+	$sysStr="./edgetest -h $path[$i+1] -t $path[$i] -e $timeout -w $width -c $color"; 
+	print "sysStr=$sysStr\n" unless !defined $options{d};
+	system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
+
+	# ssh -l root 192.168.1.123 'ping -c 1 -R -n 10.0.0.126'
+}
+
+#
+# End of "main"
+#
+	
+sub usage
+{
+	print "$0 [flags]\n"; 
+	print "-c red.green.blue	- rgb color of the path to be drawn, default = $color\n";  
+	print "-a alpha			- transparency of path 255=opaque, 0=invisible, Default = $alpha\n"; 
+	print "-e xxx.xxx.xxx.xxx	- end of path. Start of path is always localhost. This is a req. flag.\n"; 
+	print "-w int			- width of path, default = $width\n"; 
+	print "-t seconds		- expiration time in seconds for drawn path, default = $timeout\n"; 
+	print "-C network		- colluder network in XX.XX.XX format, default = $colluderNetwork\n"; 
+#	print "-T network		- tunnel network in XX.XX.XX format, default = $tunnelNetwork\n"; 
+	print "-M network		- MANET network in XX.XX.XX format, default = $manetNetwork\n"; 
+	exit(); 
+}
+
+# args - ping command, path array
+sub getPathFromPing
+{
+	my ($pingCommand, $pathArrayRef) = @_; 
+	my $prevId; 
+	open(FD, "$pingCommand |") || die "Unable to run \"$pingCommand\""; 
+	if($options{d}) { print "Output of $pingCommand:\n"; } 
+	while(<FD>)
+	{
+		chomp;
+		if($options{d}) { print "$_\n"; }
+
+		if(/^[RR:|\s]+(\d{1,3}\.\d{1,3}\.\d{1,3}\.)(\d{1,3})$/)
+		{
+			my $id=$2; 
+			my $addr=$1 . $2; 
+
+			# Aborted attempt to recurse on the tunnel network. May get back to it if there's time. heh. 
+			# if($prevId) # previous line was start if tunnel
+			# {
+			# 	print "---- prevId = $prevId, curId=$id\n"; 
+			#
+		        #	my $controlNet = "192.168.1.$prevId";
+			#	my $tunAddr = "$tunnelNetwork.$id"; 
+			#	$prevId=""; 
+                        #
+			#	my $pingStr="ssh -l root $controlNet 'ping -c 1 -R -n $tunAddr'"; 
+			#	if(defined $options{d}) { print "Found tunnel. Recursing on ping with command: $pingStr\n"; }
+			#	getPathFromPing($pingStr, \@$pathArrayRef); 
+			# }
+			#
+			# if($addr =~ /$colluderNetwork/) { $prevId = $id; }
+			# $addr =~ s/$tunnelNetwork/$manetNetwork/; 
+
+			$addr =~ s/$colluderNetwork/$manetNetwork/; 
+			push @$pathArrayRef, $addr;
+		}
+	}
+	close FD; 
+}

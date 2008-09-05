@@ -1,0 +1,23 @@
+
+$Id: hello.txt,v 1.2 2007/04/23 18:51:07 dkindred Exp $
+
+The hello module is a partial clustering algorithm.  It will send and receive
+OLSR style hello messages, and maintain the neighbor list.  It does not use the
+neighbor->clustering field, instead it has a couple of hello module specific
+fields in the neighbor structure itself.  (That should actually be fixed, it
+should use a pointer to a partially defined struct like the rest of the modules.)
+
+The hello module is intended to be used by other full clustering algorithms
+which just need generic hello packets.  There is also a mechanism (helloPayloadSet())
+for the calling clustering module to put data into the hello module's hello
+packets.  The payload will be delivered to the calling clustering algorithm
+using a callback (defined in the call to helloInit()).  Note that there is
+no way for the calling clustering algorithm to affect when the hello module
+sends its hello packets.  The payload defined by helloPayloadSet() will be
+sent in every outgoing hello packet until it is called again with a new payload.
+
+Geoff and I were discussing a better mechansim for allocating the module pointers,
+but have not actually done anything with it.
+
+See the hellotest clustering algorithm for an example on how to use it.  The
+justneighbors clustering algorithm also uses it in a straight forward manner.

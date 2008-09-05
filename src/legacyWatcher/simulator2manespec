@@ -1,0 +1,51 @@
+#!/usr/bin/perl -w 
+use strict; 
+
+if($#ARGV+1 != 2) { print "Usage: simulator2manespec [simout file] [directory]\n"; exit; } 
+
+my $time, my $nodeTime, my $nodeId, my $lat, my $long;
+my %fds;
+my $dir=$ARGV[1];
+my $confFile=$ARGV[0]; 
+my $pixelsPerDegree=111319.45505080583333333333;	# 1 pixel == 1 meter at the equator. We can use the same conf file (w/same antenna radius) 
+
+# 6378135.0 is the radius of the equator in meters, from CEarth's WGS_84 model
+print "Using ",$pixelsPerDegree," pixels per degree, so a pixel is ",((2*3.14159263*6378135.0)/360.0)/ $pixelsPerDegree  ," meters (at the equator)\n";
+
+system("mkdir -p $dir"); 
+open my $nodeconffile, ">$dir/maneGPS.conf" || die "Unable to open mane GPS config file for writing"; 
+open my $rd, "<$confFile" || die "Unable to open $confFile for reading"; 
+
+while(<$rd>)
+{
+	chop; 
+	if(/^time: (\d+)$/) 
+	{ 
+		$time=($1/1000)+1; 
+	}
+	if(/^mobility: time (\d+) node (\d+) at ([^ ]+) ([^ ]+)$/)
+	{
+		$nodeTime=$1/1000;
+		$nodeId=$2;
+		$lat=$3/$pixelsPerDegree;
+		$long=$4/$pixelsPerDegree;
+
+		if($nodeTime==0)
+		{
+			open $fds{$nodeId}, ">$dir/node_$nodeId.spec" || die "Unable to open node_$nodeId.spec for writing"; 
+			print $nodeconffile "$nodeId,node_$nodeId.spec\n"; 
+		}
+
+		if($nodeTime == $time) 
+		{
+			print {$fds{$nodeId}} "$nodeTime,$lat,$long,0\n";
+		}
+	}
+}
+
+# What? This isn't messy or hard to read or understand is it?
+my $str="pushd $dir; rm -f scenario; declare i; let \"i=1\"; for f in *.spec; do echo \"\$i,\$f\">> scenario; let \"i++\"; done; popd";
+system($str);
+
+exit $?;
+

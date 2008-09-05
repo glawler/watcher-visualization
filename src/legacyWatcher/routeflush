@@ -1,0 +1,14 @@
+#
+# $Id: routeflush,v 1.2 2005/10/31 15:30:10 tjohnson Exp $
+#
+# for some unknown (and insufficient) reason, under linux
+# the command "/sbin/route flush" results in the message:
+# "Flushing `inet' routing table not supported"
+#
+# Why they neglected to implement such basic functionality
+# is a mystery.
+#
+# So, this script implements the route flush command.
+
+/bin/netstat -rn | awk ' $1~/[0-9.]*/ $1 != "0.0.0.0" { print "/sbin/route delete " $1 } ' | sh
+

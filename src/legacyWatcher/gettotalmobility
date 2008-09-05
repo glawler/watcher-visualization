@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Copyright (C) 2004  Networks Associates Technology, Inc.
+#  All rights reserved.
+#
+# $Id: gettotalmobility,v 1.1 2004/10/28 15:02:02 tjohnson Exp $
+
+grep "mobility events" $* | awk ' { tot+=$3 } END { print "total number of mobility events: " tot } '  

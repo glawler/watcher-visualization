@@ -1,0 +1,76 @@
+#!/bin/sh
+. execNet
+#
+# Script which runs an experiment on the tara testbed
+#
+# $Id: runtara,v 1.1 2005/03/11 22:40:09 tjohnson Exp $
+
+ips="101 102 103 104 105 106 107 108 109 110 111"
+
+rm foo2.* core.*
+
+# do we want to distribute new binaries?
+if true
+then
+
+for i in $ips
+do
+	(
+	ssh $net4.$i "killall liveinterim" 
+	ssh $net4.$i "killall demodetector" 
+	ssh $net4.$i "rm /root/manet/liveinterim /root/manet/foo /root/manet/foo2 /root/manet/demodetector /root/manet/detector.stderr /root/manet/detector.stdout core*" 
+	) &
+done
+
+wait
+
+
+for i in $ips
+do
+	scp liveinterim demodetector live.conf live.locations $net4.$i:/root/manet &
+done
+wait
+
+sleep 3
+
+fi
+
+echo "-----------------------------------------------------"
+
+for i in $ips
+do
+	echo "starting $i"
+	( ssh $net4.$i "ulimit -c unlimited; export me=\`hostname\`; nohup /root/manet/liveinterim /root/manet/live.conf > /root/manet/foo 2> /root/manet/foo2 &  < /dev/null " ) &
+	( ssh $net4.$i "ulimit -c unlimited; export me=\`hostname\`; sleep 5 ; nohup /root/manet/demodetector > /root/manet/detector.stdout 2> /root/manet/detector.stderr &  < /dev/null " ) &
+done
+
+echo "---- Ready -----"
+
+wait
+
+echo "---- Running -----"
+
+sleep 30 
+#ssh $net4.106 "killall liveinterim"
+#sleep 90
+
+for i in $ips
+do
+	ssh $net4.$i "killall liveinterim" &
+done
+
+wait
+
+rm foo2.*
+
+for i in $ips
+do
+	(
+	scp $net4.$i:/root/manet/foo2 ./foo2.$i 
+	scp $net4.$i:core.* ./core.$i 
+	scp $net4.$i:/root/manet/detector.stdout ./detector.stdout.$i 
+	scp $net4.$i:/root/manet/detector.stderr ./detector.stderr.$i 
+	) &
+done
+
+wait

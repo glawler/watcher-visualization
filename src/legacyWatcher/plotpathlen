@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# $Id: plotpathlen,v 1.1 2004/09/27 14:54:24 tjohnson Exp $
+#
+
+grep "hierarchy root path"  foo | awk ' { print $7 } ' > hierarchyrootpath &
+grep "physical root path"  foo | awk ' { print $7 } ' > physicalrootpath &
+grep "physical all path"  foo | awk ' { print $7 } ' > physicalallpath &
+
+wait
+
+cat <<EOF | gnuplot
+set title "Mean path lengths"
+set key
+set terminal postscript color
+set output "path.ps"
+plot "hierarchyrootpath" with line, "physicalrootpath" with line, "physicalallpath" with line
+EOF
+
+
+

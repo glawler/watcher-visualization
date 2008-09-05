@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# $Id: plotstability,v 1.6 2005/11/07 18:59:18 tjohnson Exp $
+#
+
+if test x$1 = x
+then
+LOG=foo
+else
+LOG=$1
+fi
+
+awk ' BEGIN {tim=1; tot=0; } $1 == "mobility"  && $2 == "events:" { tot+=$3 } $1=="time:" && int($2/1000) > tim { tim=int($5/1000) ; print  tot ; tot=0 }  ' < $LOG > mobilityevents &
+awk ' BEGIN {tim=1; tot=0; } $1 == "hierarchy" && $2 == "events:" { tot+=$3 } $1=="time:" && int($2/1000) > tim { tim=int($5/1000) ; print  tot ; tot=0 }  ' < $LOG > hierarchyevents &
+
+wait
+
+cat <<EOF | gnuplot
+set title "Mobility and Hierarchy events"
+set key
+set terminal postscript color
+set output "stability.ps"
+plot "hierarchyevents" with line, "mobilityevents" with line
+EOF
+
+
+

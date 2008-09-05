@@ -1,0 +1,54 @@
+
+$Id: data.txt,v 1.2 2007/04/02 14:04:53 dkindred Exp $
+
+How the idsCommunications API implements reliable transmission of messages:
+
+This is not a sophisticated mechanism, its really a place holder until we
+get something more intelligent.  And, we need something more intelligent now...
+
+First some background, how does a message get sent:
+
+The API accepts a message from a client, records that message as being
+"in flight", and sends that message to the infrastructure demon.  The
+infrastructure demon then does the outgoing chain of the message dissemination
+code.  If that message is not deleted, the infrastructure demon then
+determines which node or nodes the message will actually be delivered to,
+and hands the message and list of destinations to an internal module named
+data.
+
+The data module then implements several things: transmission of data packets,
+retransmission of unacked data packets, acking of data packets, and
+"multicast".  In this context "multicast" means that a message can have an
+array of destination addresses, and the data module will send a single
+message for all the destinations which are one hop away on the manet, and
+then multiple unicast messages for each destination which is more than one
+hop away.
+
+The data module does its transmission of one or more data packets, and
+then waits for a period of 10 seconds [[parameter name? -dk]].  During
+that period, it will gather ack packets from each destination, and
+once per second [[parameter name? -dk]], retransmit data packets for
+all the destinations which have not acked.
+
+When the last ack packet is received, or the 10 second period passes, the
+data module then sends a final ack packet to the module which originally
+sent the data module the packet to be sent (in this case, that module is
+the live network code).  That final ack contains a list of which destinations
+responded with an ack.  (That list is NOT exposed by the API at this time.)
+The infrastructure demon then takes that final ack packet, and passes an
+API ACK to the sending client if all the destinations acked, or an API NAK
+otherwise.  The client's API then calls the status call-back.
+
+So the questions are:
+
+All the timeout and retransmission times were chosen arbitrarily.  What should
+they really be?  How should retransmission intervals back off?
+
+Then, when should any backup routing algorithms be used?  [[what code 
+implements the selection of fallback delivery methods?  -dk]]
+We have two available backup routing algorithms, aodv-lite and flood
+routing.  One possible use is to try sending the message with olsr
+[[do you mean send the message via unicast with the normal unicast
+routing mechanism? -dk]], and then after 10 seconds, to try sending
+the message with aodv-lite for 10 seconds, and if it still doesn't get
+through try flood routing for 10 seconds.

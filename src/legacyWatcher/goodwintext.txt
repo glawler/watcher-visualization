@@ -1,0 +1,29 @@
+#
+#
+# $Id: goodwintext.txt,v 1.2 2007/03/27 22:01:19 tjohnson Exp $
+#
+# Example of the text representation of a goodwin file (very work in progress)
+#
+# The entire text representation is not yet determined.  Only floating labels can be
+# used.  The intent is to write a proper lex/yacc parser.
+# 
+# a timestamp is either an absolute number, or an @ and a relative number from the last
+# timestamp.  Don't use negative numbers...
+#
+# the next field is the type of the message.
+#  vis - visualization
+#
+#  if its  visualization:
+#    then the family, priority, and tag numbers (which all visualization messages have)
+#    then the specific visualization type
+#      floatinglabel - a floating label
+         if its a floating label: x,y,z, foregound color, background color, then text  (delimited by the last newline)
+#
+#timestamp vis family priority  tag expiration floatinglabel x,y,z r.g.b.a r.g.b.a text
+#
+1173314416681 vis 1 1 1 0 floatinglabel 20,20,0 0.0.0.255 255.100.100.255 Test Floating Label1
+@1000 vis 1 1 1 0 floatinglabel 40,20,0 0.0.0.255 255.100.100.255 Test Floating Label2
+@1000 vis 1 1 1 0 floatinglabel 50,20,0 0.0.0.255 255.100.100.255 Test Floating Label3
+@1000 vis 1 1 1 0 floatinglabel 60,20,0 0.0.0.255 255.100.100.255 Test Floating Label4
+@1000 vis 1 1 1 0 floatinglabel 70,20,0 0.0.0.255 255.100.100.255 Test Floating Label5
+

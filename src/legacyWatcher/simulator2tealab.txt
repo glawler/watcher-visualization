@@ -1,0 +1,24 @@
+
+First, write a config file, and a locations file with the correct IP addrs
+and initial physical locations.
+
+Then, run the simulator:
+	./inteirm2 tommy.conf 1000 > foo 2> foo2
+
+The second argument is the time to simulate, in seconds.
+
+Set your mob set:  (must match the locations file)
+	mobpickset control tommy
+(simulator2tealab uses the mob stuff to figure out what the MAC addrs of the
+nodes are, for tealab.)
+
+Then run simulator2tealab
+	mkdir tommy
+	simulator2telab foo tommy
+The second argument is a directory in which to put the config files.  It will
+create a tealab.tdf file, and a locations file for each timestamp.
+
+Then, copy your config file into the directory, and use the file
+tick1.locations as the locations file in it.
+
+To run it, read tealabcontrol.txt.
