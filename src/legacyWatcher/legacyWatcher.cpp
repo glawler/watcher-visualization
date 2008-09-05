@@ -2378,16 +2378,16 @@ static void manetWindowInit(void)
     if (globalWatcherMovementEnableFlag)
         globalWatcherMovementState = watcherMovementInit(globalManet);
 
-    legacyWatcher::viewpointReset();
+    globalManetAdj = globalManetAdjInit;
 
     return;
-} /* manetWindowInit */
+} 
 
 static void hierarchyWindowInit()
 {
-    legacyWatcher::viewpointReset();
+    globalHierarchyAdj = globalHierarchyAdjInit;
     return;
-} /* hierarchyWindowInit */
+} 
 
 
 int legacyWatcher::legacyWatcherMain(int argc, char **argv)
