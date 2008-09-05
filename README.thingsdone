@@ -80,3 +80,6 @@ Network programming questions:
 Crammed the 'legacy watcher' into a QTGLWidget instance.
 1. Added menus, etc.
 2. The hierarchy view is still borked.
+
+Created new repository on src: /project/watcher/hg/watcher and cloned current source there. 
+
