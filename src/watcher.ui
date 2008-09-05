@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>909</width>
+    <width>766</width>
     <height>597</height>
    </rect>
   </property>
@@ -15,7 +15,11 @@
   <widget class="QWidget" name="centralwidget" >
    <layout class="QVBoxLayout" >
     <item>
-     <widget class="manetGLView" native="1" name="manetGLViewWindow" />
+     <widget class="manetGLView" native="1" name="manetGLViewWindow" >
+      <property name="focusPolicy" >
+       <enum>Qt::StrongFocus</enum>
+      </property>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" >
@@ -23,6 +27,9 @@
        <spacer>
         <property name="orientation" >
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType" >
+         <enum>QSizePolicy::Expanding</enum>
         </property>
         <property name="sizeHint" >
          <size>
@@ -62,7 +69,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>909</width>
+     <width>766</width>
      <height>31</height>
     </rect>
    </property>
