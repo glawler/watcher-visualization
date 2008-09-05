@@ -51,6 +51,7 @@ syntax: regexp
 ^src/watcher
 ^src/legacyWatcher/depend
 ^src/legacyWatcher/watcher
+^src/Makefile
 
 
 
