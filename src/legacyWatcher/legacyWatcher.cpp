@@ -161,8 +161,7 @@ struct GlobalManetAdj
 GlobalManetAdj globalManetAdj;
 GlobalManetAdj globalHierarchyAdj;
 GlobalManetAdj globalManetAdjInit =     { 0.0, 0.0, 0.0, .035, .035, .1, 0.0, 0.0, 0.0 }; 
-// GlobalManetAdj globalHierarchyAdjInit = { 0.0, 0.0, .035, .035, .1, 1.0, 0.0, 0.0, 0.0 };
-GlobalManetAdj globalHierarchyAdjInit = { 0.0, 0.0, 0.0, .095, .095, .9, 0.0, 0.0, 0.0 }; 
+GlobalManetAdj globalHierarchyAdjInit = { 0.0, 0.0, 0.0, 1.9, 1.5, 0.0, 0.0, 0.0, 0.0 };
 
 int globalShowPositionFlag = 0;
 int globalExitAtEofFlag = 0;
@@ -449,8 +448,7 @@ static void scaleAndShiftToSeeOnManet(
             prevWidth != viewport[2] ||
             prevHeight != viewport[3])
     {
-        GlobalManetAdj *manetAdj = 
-            globalActiveView == legacyWatcher::ManetView ? &globalManetAdj : &globalHierarchyAdj;
+        GlobalManetAdj *manetAdj = &globalManetAdj;
         double wXMin;
         double wYMin;
         double wXMax;
@@ -623,8 +621,8 @@ static void scaleAndShiftToCenter(manet *m, ScaleAndShiftUpdate onChangeOrAlways
 
 void legacyWatcher::ReshapeManet(int awidth, int aheight)
 {
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    // GLint viewport[4];
+    // glGetIntegerv(GL_VIEWPORT, viewport);
     // fprintf(stderr, "Reshape cur (%d, %d)\n", viewport[2], viewport[3]);
     // fprintf(stderr, "Reshape given (%d, %d)\n", awidth, aheight);
     glViewport(0, 0, awidth, aheight);
@@ -647,8 +645,7 @@ void legacyWatcher::ReshapeHierarchy(int awidth, int aheight)
 
 static void getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
 {
-    GlobalManetAdj *manetAdj = 
-        globalActiveView == legacyWatcher::ManetView ? &globalManetAdj : &globalHierarchyAdj;
+    GlobalManetAdj *manetAdj = &globalManetAdj;
     GLdouble z;
     int i;
     GLdouble modelmatrix[16];
@@ -1463,8 +1460,7 @@ void legacyWatcher::drawHierarchy(void)
 
     glLoadIdentity();
 
-    // GTL glTranslatef(0.0, 0.0, -20.0);
-    glTranslatef(0.0, 0.0, 0.0);
+    glTranslatef(0.0, 0.0, -20.0);
 
     glPushMatrix();
     glTranslatef(0.0, 0.0, -50.0);
@@ -1472,9 +1468,7 @@ void legacyWatcher::drawHierarchy(void)
     glPopMatrix();
 
     glScalef(0.02, 0.02, 0.10);
-
-    // GTL HSCALE TROUBLE glTranslatef(-400.0, 350.0, 0.0);
-    glTranslatef(0.0, 0.0, -20.0);
+    glTranslatef(-350.0, 450.0, 75.0);
 
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, hierarchy);
 

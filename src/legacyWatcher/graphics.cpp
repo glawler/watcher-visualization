@@ -951,8 +951,7 @@ void drawHierarchy(manet *m,NodeDisplayStatus const *dispStat)
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
 
 	glPushMatrix();
-	// GTL HSCALE TROUBLE glTranslatef(22.0, -400.0, 0.0);
-	glTranslatef(0.0, 0.0, 225.0);
+	glTranslatef(22.0, -400.0, 0.0);
 
     int width = 0;
 	for(i=0;i<=maxlevel;i++)
@@ -1104,8 +1103,7 @@ static int drawHierarchyrecurse(
         drawText(xcoord[m->nlist[nodeidx[i]].index]-6,levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING-5,0,dispStat->scaleText[NODE_DISPLAY_HIERARCHY], buff);
 
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neighborcolors[(levels[nodeidx[i]])%NBR_COLOR_NUM(neighborcolors)]);
-        // GTL HSCALE TROUBLES drawCircle(xcoord[m->nlist[nodeidx[i]].index],levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING,0,10);
-        drawCircle(xcoord[m->nlist[nodeidx[i]].index],levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING,0,11);
+        drawCircle(xcoord[m->nlist[nodeidx[i]].index],levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING,0,10);
 
         if (m->nlist[nodeidx[i]].clusterhead)
         {
