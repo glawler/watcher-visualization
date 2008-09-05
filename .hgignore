@@ -1,0 +1,53 @@
+# use glob syntax.
+syntax: glob
+
+# CVS default ignore patterns:
+.make.state
+.nse_depinfo
+*~
+#*
+.#*
+,*
+_$*
+*$
+*.old
+*.bak
+*.BAK
+*.orig
+*.rej
+.del-*
+*.a
+*.olb
+*.o
+*.obj
+*.so
+*.exe
+*.Z
+*.elc
+*.ln
+*.swp
+core
+
+# some automake/autoconf/libtool things
+stamp-h1
+.deps
+.libs
+config.log
+config.cache
+config.status
+
+tags
+
+# switch to regexp syntax.
+syntax: regexp
+
+# Ignore qt generated files. 
+^src/moc_.*.cpp
+^src/ui_watcher.h
+
+# ignore bins and conf files.
+^src/hd.conf
+^src/hd.locations
+^src/watcher
+
+
