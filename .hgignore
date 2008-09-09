@@ -53,8 +53,23 @@ syntax: regexp
 ^src/watcher/legacyWatcher/watcher
 ^src/watcher/Makefile
 
+# ignore libconfig files
 ^src/libconfig-1.3.1/*
+^include/libconfig.*
+^lib/pkgconfig/libconfig*
+^lib/libconfig*
+^lib/pkgconfig/libconfig.pc
+^share/info/libconfig.info
+
+# ignore log4cpp files
+^doc/log4cpp-1.0/*
+^include/log4cpp/*
 ^src/log4cpp-1.0/*
+^bin/log4cpp-config
+^lib/liblog4cpp*
+^lib/pkgconfig/log4cpp.pc
+^share/aclocal/log4cpp.m4
+^share/man/man3/log4cpp*
 
 ^etc/nerod.sample.cfg
 
