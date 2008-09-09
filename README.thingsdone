@@ -32,6 +32,9 @@ Thought about network clients/server implemenation:
             a. May be nice for 2ndary tools.
             b. Will help with speed of retrival/playback?
             c. Will help with post-run analysis?
+            d. Will get correct time-oriented message ordering for free? (i.e.
+                insert all messages, then query SORTed by time for sending
+                to clients. Is this fast or not?)
     F. "Messages" above are messages sent directly from clients. Should there be support
         for knowledge specific messages, e.g. network-topology-at-time-t-is messages? These
         messages would use knowledge of what the messages contain to answer specific 
@@ -43,6 +46,9 @@ Thought about network clients/server implemenation:
                 i. would cease being a straight messages demultiplexer and 
                 become demulitplexer/analysis. Do we want
                 this functionality here or somewhere else?
+            c. An advantage is that many messages can be compressed into a single message using 
+            knowledge of what the messsages contain. i.e. send 1 topolgy message instead of 
+            N node-is-connected-to-these-nodes messages. 
 2. Clients run a watcherd which listens for connections from localhost and has a message-sending API
     A. Support for current Hierarchy/Watcher message API (draw label, draw line, etc)
     B. Simple message send API
@@ -82,4 +88,18 @@ Crammed the 'legacy watcher' into a QTGLWidget instance.
 2. The hierarchy view is still borked.
 
 Created new repository on src: /project/watcher/hg/watcher and cloned current source there. 
+
+Checked out Horde3D graphics engine. I was led to it as it is very easy to create a Horde3D window
+as an QTWidget. Spent Sunday morning playing around with that - embedded the "Chicago" sample into 
+a Qt widget and displayed it. Needed to add an animating timer and the FPS was removed. Other than
+that, it was pretty straight forward. 
+
+Wrote basic description of network infrastructure in email to Dan, Darrell, and Michael for 
+feedback.
+
+Installed libconfig into top level dir. libconfig is a C and C++ library for reading and 
+writing configuration files. This will replace all the commandline and config file stuff. 
+
+Installed lib4cpp for logging. We'll see if we actually use it as we had some troubles
+with it when we used it a few years ago. It's at 1.0 now, so maybe things are better.
 
