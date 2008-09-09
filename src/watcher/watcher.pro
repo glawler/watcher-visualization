@@ -12,7 +12,7 @@ OBJECTS_DIR = ./objs
 DEFINES += GRAPHICS MODULE_MOBILITY
 
 unix {
-    LIBS += -L../lib -lidsCommunications 
+    LIBS += -L../../lib -lidsCommunications 
     LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
     LIBS += -L/usr/local/lib -lidmef 
     LIBS += -xml2
