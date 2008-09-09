@@ -42,16 +42,20 @@ tags
 syntax: regexp
 
 # Ignore qt generated files. 
-^src/moc_.*.cpp
-^src/ui_watcher.h
+^src/watcher/moc_.*.cpp
+^src/watcher/ui_watcher.h
 
 # ignore bins and conf files.
-^src/hd.conf
-^src/hd.locations
-^src/watcher
-^src/legacyWatcher/depend
-^src/legacyWatcher/watcher
-^src/Makefile
+^src/watcher/hd.conf
+^src/watcher/hd.locations
+^src/watcher/watcher
+^src/watcher/legacyWatcher/depend
+^src/watcher/legacyWatcher/watcher
+^src/watcher/Makefile
 
+^src/libconfig-1.3.1/*
+^src/log4cpp-1.0/*
+
+^etc/nerod.sample.cfg
 
 
