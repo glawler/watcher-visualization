@@ -1,0 +1,9 @@
+log:
+{
+    file="log.txt";
+    append=false;
+};
+
+host="glory";
+
+
