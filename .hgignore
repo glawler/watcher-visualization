@@ -44,6 +44,7 @@ syntax: regexp
 # Ignore qt generated files. 
 ^src/watcher/moc_.*.cpp
 ^src/watcher/ui_watcher.h
+^src/watcher/log.properties
 
 # ignore bins and conf files.
 ^src/watcher/hd.conf
