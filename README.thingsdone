@@ -103,3 +103,10 @@ writing configuration files. This will replace all the commandline and config fi
 Installed lib4cpp for logging. We'll see if we actually use it as we had some troubles
 with it when we used it a few years ago. It's at 1.0 now, so maybe things are better.
 
+Wasted a whole day looking into the boost::serialize library for serializing messages
+on the wire. It likes to do everything as strings (or, grr, XML), so it's not very good
+for compat messages. Which is annoying. 
+
+Removed log4cpp after I couldn't find any useful documention on it. 
+Installed Apache's log4cxx - which appaers to be excellent.
+
