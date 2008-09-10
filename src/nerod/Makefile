@@ -1,6 +1,7 @@
 
 LIBS+=-L/usr/local/lib
 CXXFLAGS+=-I/usr/local/include/boost-1_36 -I../../include
+CXXDFLAGS+=O0 -ggdb
 LDFLAGS+=-L../../lib
 LDFLAGS+=-lconfig++
 LDFLAGS+=-lboost_system-gcc41-mt -lpthread -lboost_thread-gcc41-mt
