@@ -26,21 +26,60 @@ cd src/watcher/legacyWatcher
 make libidsCommunications.a
 cp libidsCommunications.a ../../../lib
 
-liblog4cpp
+# log4cpp has been replaced by Apache's log4cxx
+#
+# liblog4cpp
+# ----------------------------------------------------
+# Similar to libconfig. log4cpp is a c++ clone of the 
+# java logging package. Does all kinds of fancy logging.
+# 
+# It's been installed in the top level of the source
+# tree, but if you need to rebuild it:
+# (make sure to replace the --prefix with the location of 
+# your source tree)
+# 
+# cd src
+# tar zxvf ../tars/log4cpp-1.0.tar.gz
+# cd log4cpp-1.0
+# ./configure --prefix=/home/glawler/src/watcher
+# make 
+# make install
+
+log4cxx
 ----------------------------------------------------
-Similar to libconfig. log4cpp is a c++ clone of the 
-java logging package. Does all kinds of fancy logging.
+This lib requires that two others be installed. Here's 
+how I did it:
 
-It's been installed in the top level of the source
-tree, but if you need to rebuild it:
-(make sure to replace the --prefix with the location of 
-your source tree)
-
+# install APR (Apache run-time)
+cd /home/glawler/src/watcher
 cd src
-tar zxvf ../tars/log4cpp-1.0.tar.gz
-cd log4cpp-1.0
+tar zxvf ../tars/apr-1.3.3.tar.gz
+cd apr-1.3.3
 ./configure --prefix=/home/glawler/src/watcher
 make 
+make check
 make install
+
+# install apr-utils
+cd /home/glawler/src/watcher
+cd src
+tar zxvf ../tars/apr-util-1.3.4.tar.gz
+cd apr-util-1.3.4
+./configure --prefix=/home/glawler/src/watcher --with-apr=/home/glawler/src/watcher
+make 
+make check
+make install
+
+# install log4cxx
+cd /home/glawler/src/watcher
+cd src
+tar zxvf ../tars/apache-log4cxx-0.10.0.tar.gz
+cd apache-log4cxx-0.10.0
+./configure --prefix=/home/glawler/src/watcher --with-apr=/home/glawler/src/watcher --with-apr-utils=/home/glawler/src/watcher
+make 
+make check
+make install
+
+
 
 
