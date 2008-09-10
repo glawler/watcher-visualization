@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include "legacyWatcher/legacyWatcher.h"
+#include "logger.h"
 
 class manetGLView : public QGLWidget
 {
@@ -18,6 +19,8 @@ class manetGLView : public QGLWidget
 
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
+
+        DECLARE_LOGGER();
 
     public slots:
         void resetPosition();
@@ -78,5 +81,6 @@ class manetGLView : public QGLWidget
         legacyWatcher::WatcherView currentView;
         QPoint lastPos;
 };
+
 
 #endif

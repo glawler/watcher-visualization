@@ -5,18 +5,19 @@
 TEMPLATE = app
 TARGET = watcher
 DEPENDPATH += .
-INCLUDEPATH += . ./legacyWatcher /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include
+INCLUDEPATH += . ./legacyWatcher ../../include 
+INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include
 QT += opengl 
 CONFIG += qt x11
 OBJECTS_DIR = ./objs
 DEFINES += GRAPHICS MODULE_MOBILITY
 
-unix {
-    LIBS += -L../../lib -lidsCommunications 
-    LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
-    LIBS += -L/usr/local/lib -lidmef 
-    LIBS += -xml2
-}
+LIBS += -L../../lib -lidsCommunications 
+LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
+LIBS += -L/usr/local/lib -lidmef 
+LIBS += -llog4cxx
+LIBS += -xml2
+
 win32 {
     error("No support for windows in watcher")
 }

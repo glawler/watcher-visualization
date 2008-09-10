@@ -5,17 +5,27 @@
 #include "manetglview.h"
 #include "legacyWatcher/legacyWatcher.h"
 
+INIT_LOGGER(manetGLView, "manetGLView");
+
 manetGLView::manetGLView(QWidget *parent) : QGLWidget(parent), currentView(legacyWatcher::ManetView)
 {
+    TRACE_ENTER();
+
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
+    
+    TRACE_EXIT();
 }
 
 manetGLView::~manetGLView()
 {
+    TRACE_ENTER();
+    TRACE_EXIT();
 }
 
 void manetGLView::runLegacyWatcherMain(int argc, char **argv)
 {
+    TRACE_ENTER();
+
     legacyWatcher::legacyWatcherMain(argc, argv);
 
     // "main()" may have set different watcher layers, so we need to 
@@ -43,20 +53,29 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     QTimer *timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(checkIO()));
     timer->start(100);
+
+    TRACE_EXIT();
 }
 
 QSize manetGLView::minimumSizeHint() const
 {
-    return QSize(50, 50);
+    TRACE_ENTER();
+    QSize retVal=QSize(50, 50);
+    TRACE_EXIT_RET(retVal.width() << retVal.height()); 
+    return retVal;
 }
 
 QSize manetGLView::sizeHint() const
 {
-    return QSize(400, 400);
+    TRACE_ENTER();
+    QSize retVal=QSize(400, 400);
+    TRACE_EXIT_RET(retVal.width() << retVal.height()); 
+    return retVal;
 }
 
 void manetGLView::initializeGL()
 {
+    TRACE_ENTER();
     // qglClearColor(trolltechPurple.dark());
     // object = makeObject();
     // glShadeModel(GL_FLAT);
@@ -64,10 +83,12 @@ void manetGLView::initializeGL()
     // glEnable(GL_CULL_FACE);
 
     legacyWatcher::initWatcherGL(); 
+    TRACE_EXIT();
 }
 
 void manetGLView::checkIO()
 {
+    TRACE_ENTER();
     int update=0;
     if (legacyWatcher::isRunningInPlaybackMode())
         update=legacyWatcher::checkIOGoodwin(0);
@@ -76,10 +97,14 @@ void manetGLView::checkIO()
     
     if (update)
         updateGL();
+
+    TRACE_EXIT();
 }
 
 void manetGLView::paintGL()
 {
+    TRACE_ENTER();
+
     //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //  glLoadIdentity();
     //  glTranslated(0.0, 0.0, -10.0);
@@ -144,10 +169,14 @@ void manetGLView::paintGL()
     // painter.drawText(width()/2, height()/2, QString("Hello"));
     // painter.restore(); 
     // painter.end();
+    
+    TRACE_EXIT();
 }
 
 void manetGLView::resizeGL(int width, int height)
 {
+    TRACE_ENTER();
+
 //     int side = qMin(width, height);
 //     glViewport((width - side) / 2, (height - side) / 2, side, side);
 // 
@@ -160,17 +189,25 @@ void manetGLView::resizeGL(int width, int height)
         legacyWatcher::ReshapeManet(width, height);
     else 
         legacyWatcher::ReshapeHierarchy(width, height);
+
+    TRACE_EXIT();
 }
 
 void manetGLView::resetPosition()
 {
+    TRACE_ENTER();
+
     legacyWatcher::viewpointReset();
     updateGL();
+
+    TRACE_EXIT();
 }
 
 
 void manetGLView::keyPressEvent(QKeyEvent * event)
 {
+    TRACE_ENTER();
+
     quint32 nativeKey = event->nativeVirtualKey();
     int qtKey = event->key();
 
@@ -203,31 +240,45 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
     }
     else
         event->ignore();
+
+    TRACE_EXIT();
 }
 
 void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    TRACE_ENTER();
+    
     // GTL - Currently does not work!
     legacyWatcher::jumpToX(event->x());
     legacyWatcher::jumpToY(event->y());
     updateGL();
+
+    TRACE_EXIT();
 }
 void manetGLView::mousePressEvent(QMouseEvent *event)
 {
+    TRACE_ENTER();
     lastPos = event->pos();
+    TRACE_EXIT();
 }
 
 void manetGLView::fitToWindow()
 {
+    TRACE_ENTER();
+    
     // Just use the existing keyboard shortcut in the legacy watcher
     if (legacyWatcher::Key('+') != 0)
     {
         updateGL();
     }
+
+    TRACE_EXIT();
 }
 
 void manetGLView::mouseMoveEvent(QMouseEvent *event)
 {
+    TRACE_ENTER();
+
     int dx = event->x() - lastPos.x();
     int dy = event->y() - lastPos.y();
 
@@ -254,120 +305,159 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
         updateGL();
     }
     lastPos = event->pos();
+
+    TRACE_EXIT();
 }
 
 void manetGLView::setLegacyWatcherView(const legacyWatcher::WatcherView &view)
 {
+    TRACE_ENTER();
     legacyWatcher::setActiveView(view);
     currentView=view;
 }
 
 void manetGLView::manetView()
 {
+    TRACE_ENTER();
     setLegacyWatcherView(legacyWatcher::ManetView);
     updateGL();
+    TRACE_ENTER();
 }
 
 void manetGLView::hierarchyView()
 {
+    TRACE_ENTER();
     setLegacyWatcherView(legacyWatcher::HierarchyView);
     updateGL();
+    TRACE_ENTER();
 }
 
 void manetGLView::toggleBandwidth(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Bandwidth, isOn);
     emit bandwidthToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 
 void manetGLView::toggleUndefined(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Undefined, isOn);
     emit undefinedToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleNeighbors(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Neighbors, isOn);
     emit neighborsToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleHierarchy(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Hierarchy, isOn);
     emit hierarchyToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleRouting(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Routing, isOn);
     emit routingToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleRoutingOnehop(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::RoutingOnehop, isOn);
     emit routingOnehopToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleAntennaRadius(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::AntennaRadius, isOn);
     emit antennaRadiusToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleSanityCheck(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::SanityCheck, isOn);
     emit sanityCheckToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleAnomPaths(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::AnomPaths, isOn);
     emit anomPathsToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleCorrelation(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Correlation, isOn);
     emit correlationToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleAlert(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Alert, isOn);
     emit alertToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleCorrelation3Hop(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::Correlation3Hop, isOn);
     emit correlation3HopToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleWormholeRouting(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::WormholeRouting, isOn);
     emit wormholeRoutingToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleWormholeRoutingOnehop(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::WormholeRoutingOnehop, isOn);
     emit wormholeRoutingOnehopToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleFloatingGraph(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::FloatingGraph, isOn);
     emit floatingGraphToggled(isOn); 
     updateGL();
+    TRACE_ENTER();
 }
 void manetGLView::toggleNormPaths(bool isOn)
 {
+    TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::NormPaths, isOn);
     emit normPathsToggled(isOn); 
     updateGL();
+    TRACE_EXIT();
 }
