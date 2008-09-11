@@ -28,18 +28,23 @@ using namespace log4cxx;
 
 #ifndef DISABLE_LOGGING
 
+// The one and only global logger for non-class-functions
+// Initialized in logger.cpp. Used as a global scope instance
+// of 'logger' in the macros below.
+extern LoggerPtr logger;
+
 //
 // Logging enabled
 //
 #define DECLARE_LOGGER()            static LoggerPtr logger
 #define INIT_LOGGER(class,name)     LoggerPtr class::logger(Logger::getLogger(name))
 
-#define LOG_TRACE(message, ...)     LOG4CXX_TRACE(this->logger, message ## __VA_ARGS__);
-#define LOG_DEBUG(message, ...)     LOG4CXX_DEBUG(this->logger, message ## __VA_ARGS__);
-#define LOG_INFO(message, ...)      LOG4CXX_INFO(this->logger, message ## __VA_ARGS__);
-#define LOG_WARN(message, ...)      LOG4CXX_WARN(this->logger, message ## __VA_ARGS__);
-#define LOG_ERROR(message, ...)     LOG4CXX_ERROR(this->logger, message ## __VA_ARGS__);
-#define LOG_FATAL(message, ...)     LOG4CXX_FATAL(this->logger, message ## __VA_ARGS__);
+#define LOG_TRACE(message, ...)     LOG4CXX_TRACE(logger, message ## __VA_ARGS__);
+#define LOG_DEBUG(message, ...)     LOG4CXX_DEBUG(logger, message ## __VA_ARGS__);
+#define LOG_INFO(message, ...)      LOG4CXX_INFO(logger, message ## __VA_ARGS__);
+#define LOG_WARN(message, ...)      LOG4CXX_WARN(logger, message ## __VA_ARGS__);
+#define LOG_ERROR(message, ...)     LOG4CXX_ERROR(logger, message ## __VA_ARGS__);
+#define LOG_FATAL(message, ...)     LOG4CXX_FATAL(logger, message ## __VA_ARGS__);
 
 #define LOG_ASSERT(condition, message, ...) LOG4CXX_ASSERT(this->logger, condition, message ## __VA_ARGS)
 
