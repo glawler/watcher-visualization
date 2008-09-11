@@ -20,7 +20,7 @@ LDFLAGS+=-lpthread
 
 SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp 
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h
-HDRS=connection.hpp
+HDRS+=connection.hpp
 OBJS=$(SRCS:.cpp=.o)
 BINS=watcheed server client
 
@@ -38,7 +38,7 @@ client: $(OBJS) client.o
 depend: $(SRCS)
 	@echo makedepend
 	@$(RM) depend
-	@makedepend -f- ${HDRS} ${SRCS} > $@ 2>/dev/null;
+	@makedepend -f- watcheed.cpp server.cpp client.cpp ${HDRS} ${SRCS} > $@ 2>/dev/null;
 	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
 
 clean: 

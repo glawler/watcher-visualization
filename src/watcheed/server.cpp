@@ -17,6 +17,7 @@
 
 #include "testMessage.h"
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/shared_ptr.hpp>
 
 namespace watcher {
 
@@ -35,8 +36,9 @@ namespace watcher {
             for (int i = 0; i < 24; i++) 
                 ints.push_back(i);
 
-            messages_.push_back(TestMessage("Hello World", ints));
-            messages_.push_back(TestMessage("Goodbye World", ints));
+            messages_.push_back(boost::shared_ptr<Message>(new TestMessage("Hello World", ints)));
+            messages_.push_back(boost::shared_ptr<Message>(new Message));
+            messages_.push_back(boost::shared_ptr<Message>(new TestMessage("Goodbye World", ints)));
 
             // Start an accept operation for a new connection.
             connection_ptr new_conn(new connection(acceptor_.io_service()));
@@ -89,7 +91,8 @@ namespace watcher {
 
             /// The data to be sent to each client.
             // std::vector<boost::shared_ptr<Message> > messages_;
-            std::vector<TestMessage> messages_;
+            //std::vector<TestMessage> messages_;
+            std::vector<boost::shared_ptr<Message> > messages_;
 
     };
 

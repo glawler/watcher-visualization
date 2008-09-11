@@ -12,6 +12,9 @@
 
 #include "../messageFactory.h"
 #include "../testMessage.h"
+#include "../message.h"
+
+#include <boost/serialization/shared_ptr.hpp>
 
 #include "logger.h"
 #include "log4cxx/basicconfigurator.h"
@@ -34,21 +37,25 @@ int main(int argc, char **argv)
     // archive::text_oarchive archive(archiveStream);
     // archive << *m;
     // LOG_INFO("Message m: [" << *m << "]");
-    // cout << "Arch Stream: " << archiveStream.str() << endl;
+    // cout << "Arch Stream: " << archiveStream.str() << e
+    //
+    
 
     vector<int> ints;
     ints.push_back(argc);
-    vector<TestMessage> tms;
-    tms.push_back(TestMessage(argv[0], ints));
+    vector<shared_ptr<Message> > tms;
+    tms.push_back(shared_ptr<Message>(new TestMessage(argv[0], ints)));
     ints.push_back(argc+1);
-    tms.push_back(TestMessage(argv[0], ints));
+    tms.push_back(shared_ptr<Message>(new Message));
     ints.push_back(argc+2);
-    tms.push_back(TestMessage(argv[0], ints));
+    tms.push_back(shared_ptr<Message>(new TestMessage(argv[0], ints)));
     ints.push_back(argc+3);
 
     // Write it out
     cout << "TestMessage Out: [";
-    copy(tms.begin(), tms.end(), ostream_iterator<TestMessage>(cout, "|"));
+    //copy(tms.begin(), tms.end(), ostream_iterator<shared_ptr::<Message>>(cout, "|"));
+    for (vector<shared_ptr<Message> >::const_iterator i = tms.begin(); i != tms.end(); ++i)
+        cout << **i << " ";
     cout << "]" << endl;
 
     ofstream otfs("archived.txt");
@@ -62,13 +69,15 @@ int main(int argc, char **argv)
     obfs.close();
 
     // Read it in.
-    vector<TestMessage> fromtms;
+    vector<shared_ptr<Message> > fromtms;
     ifstream itfs("archived.txt");
     archive::text_iarchive ita(itfs);
     ita >> fromtms;
     itfs.close();
     cout << "TestMessage From Text: [";
-    copy(tms.begin(), tms.end(), ostream_iterator<TestMessage>(cout, "|"));
+    //copy(tms.begin(), tms.end(), ostream_iterator<shared_ptr::<Message>>(cout, "|"));
+    for (vector<shared_ptr<Message> >::const_iterator i = tms.begin(); i != tms.end(); ++i)
+        cout << **i << " ";
     cout << "]" << endl;
 
     ifstream ibfs("archived.dat");
@@ -76,7 +85,9 @@ int main(int argc, char **argv)
     iba >> fromtms;
     ibfs.close();
     cout << "TestMessage From Bin: [";
-    copy(tms.begin(), tms.end(), ostream_iterator<TestMessage>(cout, "|"));
+    // copy(tms.begin(), tms.end(), ostream_iterator<TestMessage>(cout, "|"));
+    for (vector<shared_ptr<Message> >::const_iterator i = tms.begin(); i != tms.end(); ++i)
+        cout << **i << " ";
     cout << "]" << endl;
 
     TRACE_EXIT();

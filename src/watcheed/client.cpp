@@ -13,8 +13,9 @@
 #include <iostream>
 #include <vector>
 #include "connection.hpp" // Must come before boost/serialization headers.
-#include <boost/serialization/vector.hpp>
 #include "testMessage.h"
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/shared_ptr.hpp>
 
 namespace watcher {
 class client
@@ -78,7 +79,10 @@ public:
       for (std::size_t i = 0; i < messages_.size(); ++i)
       {
         std::cout << "Message number " << i << "\n";
-        std::cout << messages_[i] << std::endl;
+        if(messages_[i]->type==TEST_MESSAGE_TYPE)
+            std::cout << *static_cast<TestMessage*>(&*messages_[i]) << std::endl;
+        else
+            std::cout << *messages_[i] << std::endl;
       }
     }
     else
@@ -96,7 +100,8 @@ private:
   connection connection_;
 
   /// The data received from the server.
-  std::vector<TestMessage> messages_;
+  // std::vector<TestMessage> messages_;
+  std::vector<boost::shared_ptr<Message> >messages_;
 };
 
 } // namespace s11n_example

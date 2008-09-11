@@ -30,6 +30,7 @@ namespace watcher
                 void serialize(Archive &ar, const unsigned int /*version*/)
                 {
                     TRACE_ENTER();
+                    ar.template register_type<Message>();
                     ar & boost::serialization::base_object<Message>(*this);
                     ar & stringData;
                     ar & intsData;
@@ -39,7 +40,11 @@ namespace watcher
             DECLARE_LOGGER();
     };
 
+
     std::ostream &operator<<(std::ostream &out, const TestMessage &mess);
 }
+
+#include <boost/serialization/export.hpp>
+BOOST_CLASS_EXPORT_GUID(watcher::TestMessage, "TestMessage")
 
 #endif // TEST_MESSAGE_DATA_H
