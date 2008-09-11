@@ -88,4 +88,6 @@ syntax: regexp
 
 ^etc/nerod.sample.cfg
 
+^src/watcheed/watcheed.log.properties
+
 

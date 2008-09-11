@@ -2,35 +2,44 @@
 #define TEST_MESSAGE_DATA_H
 
 #include <string>
-#include <vector>
-#include "baseMessage.h"
+#include <iostream>
+#include <boost/serialization/vector.hpp>
+
+#include "message.h"
 #include "logger.h"
 
 namespace watcher 
 {
-    class TestMessage : public BaseMessage
+    class TestMessage : public Message
     {
         public:
             // The data
             std::string stringData;
             std::vector<int> intsData;
 
-            TestMessage(const std::string &str, const std::vector<int> ints) 
-                : BaseMessage(TEST_MESSAGE_VERSION, TEST_MESSAGE_TYPE),
-                stringData(str),
-                intsData(ints)
-            {
-                TRACE_ENTER();
-                LOG_DEBUG("debug statment");
-                LOG_INFO("info statement");
-                TRACE_EXIT();
-            }
+            TestMessage();
+            TestMessage(const std::string &str, const std::vector<int> ints);
+            TestMessage(const TestMessage &other);
+
+            bool operator==(const TestMessage &other) const;
+            TestMessage &operator=(const TestMessage &other);
+
+            std::ostream &operator<<(std::ostream &out) const;
+
+            template <class Archive>
+                void serialize(Archive &ar, const unsigned int /*version*/)
+                {
+                    TRACE_ENTER();
+                    ar & boost::serialization::base_object<Message>(*this);
+                    ar & stringData;
+                    ar & intsData;
+                    TRACE_EXIT();
+                }
 
             DECLARE_LOGGER();
     };
 
-    INIT_LOGGER(TestMessage, "BaseMessage.TestMessage");
-
+    std::ostream &operator<<(std::ostream &out, const TestMessage &mess);
 }
 
 #endif // TEST_MESSAGE_DATA_H
