@@ -76,14 +76,18 @@ public:
     if (!e)
     {
       // Print out the data that was received.
-      for (std::size_t i = 0; i < messages_.size(); ++i)
-      {
-        std::cout << "Message number " << i << "\n";
-        if(messages_[i]->type==TEST_MESSAGE_TYPE)
-            std::cout << *static_cast<TestMessage*>(&*messages_[i]) << std::endl;
+      //for (std::size_t i = 0; i < messages_.size(); ++i)
+      //{
+      //  std::cout << "Message number " << i << "\n";
+      //  if(messages_[i]->type==TEST_MESSAGE_TYPE)
+      //      std::cout << *static_cast<TestMessage*>(&*messages_[i]) << std::endl;
+      //  else
+      //      std::cout << *messages_[i] << std::endl;
+        if(messages_->type==TEST_MESSAGE_TYPE)
+            std::cout << *static_cast<TestMessage*>(&*messages_) << std::endl;
         else
-            std::cout << *messages_[i] << std::endl;
-      }
+            std::cout << *messages_ << std::endl;
+      // }
     }
     else
     {
@@ -101,7 +105,8 @@ private:
 
   /// The data received from the server.
   // std::vector<TestMessage> messages_;
-  std::vector<boost::shared_ptr<Message> >messages_;
+  // std::vector<boost::shared_ptr<Message> >messages_;
+  boost::shared_ptr<Message> messages_;
 };
 
 } // namespace s11n_example

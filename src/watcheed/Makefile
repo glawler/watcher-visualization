@@ -1,13 +1,15 @@
 
+TOPDIR=../..
+
 LIBS+=-L/usr/local/lib 
-LIBS+=-L../../lib
+LIBS+=-L$(TOPDIR)/lib
 
 CXXFLAGS+=-I/usr/local/include/boost-1_36
-CXXFLAGS+=-I../../include 
-CXXFLAGS+=-I../util
+CXXFLAGS+=-I$(TOPDIR)/include 
+CXXFLAGS+=-I$(TOPDIR)/src/util
 CXXFLAGS+=-I.
-CXXFLAGS+=-O0 -ggdb
-CXXFLAGS+=-Wall
+#CXXFLAGS+=-O0 -ggdb
+#CXXFLAGS+=-Wall
 
 LDFLAGS+=-lconfig++
 LDFLAGS+=-llogger
@@ -18,27 +20,23 @@ LDFLAGS+=-lboost_thread-gcc41-mt
 LDFLAGS+=-lboost_serialization-gcc41-mt
 LDFLAGS+=-lpthread
 
-SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp 
-HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h
-HDRS+=connection.hpp
+SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp \
+	 connection.cpp dataMarshaller.cpp posix_main.cpp request_handler.cpp server.cpp 
+HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
+	connection.hpp dataMarshaller.hpp request_handler.hpp server.hpp 
 OBJS=$(SRCS:.cpp=.o)
-BINS=watcheed server client
+
+BINS=watcherServer
 
 all: $(BINS)
 
-watcheed: $(OBJS) watcheed.o
-	$(CXX) $(OBJS) watcheed.o -o watcheed $(LIBS) $(LDFLAGS)
-
-server: $(OBJS) server.o
-	$(CXX) $(OBJS) server.o -o server $(LIBS) $(LDFLAGS)
-
-client: $(OBJS) client.o
-	$(CXX) $(OBJS) client.o -o client $(LIBS) $(LDFLAGS)
+watcherServer: $(OBJS)
+	$(CXX) $(OBJS) -o watcherServer $(LIBS) $(LDFLAGS)
 
 depend: $(SRCS)
 	@echo makedepend
 	@$(RM) depend
-	@makedepend -f- watcheed.cpp server.cpp client.cpp ${HDRS} ${SRCS} > $@ 2>/dev/null;
+	@makedepend -f- ${HDRS} ${SRCS} > $@ 2>/dev/null;
 	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
 
 clean: 

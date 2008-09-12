@@ -8,181 +8,73 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef SERIALIZATION_CONNECTION_HPP
-#define SERIALIZATION_CONNECTION_HPP
+#ifndef HTTP_SERVER3_CONNECTION_HPP
+#define HTTP_SERVER3_CONNECTION_HPP
 
 #include <boost/asio.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/bind.hpp>
+#include <boost/array.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <iomanip>
-#include <string>
-#include <sstream>
-#include <vector>
+#include <boost/enable_shared_from_this.hpp>
+#include "request_handler.hpp"
 
-namespace watcher {
+#include "message.h"
+#include "dataMarshaller.hpp"
 
-/// The connection class provides serialization primitives on top of a socket.
-/**
- * Each message sent using this class consists of:
- * @li An 8-byte header containing the length of the serialized data in
- * hexadecimal.
- * @li The serialized data.
- */
-class connection
+namespace watcher 
 {
-public:
-  /// Constructor.
-  connection(boost::asio::io_service& io_service)
-    : socket_(io_service)
-  {
-  }
-
-  /// Get the underlying socket. Used for making a connection or for accepting
-  /// an incoming connection.
-  boost::asio::ip::tcp::socket& socket()
-  {
-    return socket_;
-  }
-
-  /// Asynchronously write a data structure to the socket.
-  template <typename T, typename Handler>
-  void async_write(const T& t, Handler handler)
-  {
-    // Serialize the data first so we know how large it is.
-    std::ostringstream archive_stream;
-    boost::archive::text_oarchive archive(archive_stream);
-    archive << t;
-    outbound_data_ = archive_stream.str();
-
-    // Format the header.
-    std::ostringstream header_stream;
-    header_stream << std::setw(header_length)
-      << std::hex << outbound_data_.size();
-    if (!header_stream || header_stream.str().size() != header_length)
+    namespace server 
     {
-      // Something went wrong, inform the caller.
-      boost::system::error_code error(boost::asio::error::invalid_argument);
-      socket_.io_service().post(boost::bind(handler, error));
-      return;
-    }
-    outbound_header_ = header_stream.str();
+        /// Represents a single connection from a client.
+        class connection : public boost::enable_shared_from_this<connection>, private boost::noncopyable
+        {
+            public:
+                /// Construct a connection with the given io_service.
+                explicit connection(boost::asio::io_service& io_service, request_handler& handler);
 
-    // Write the serialized data to the socket. We use "gather-write" to send
-    // both the header and the data in a single write operation.
-    std::vector<boost::asio::const_buffer> buffers;
-    buffers.push_back(boost::asio::buffer(outbound_header_));
-    buffers.push_back(boost::asio::buffer(outbound_data_));
-    boost::asio::async_write(socket_, buffers, handler);
-  }
+                /// Get the socket associated with the connection.
+                boost::asio::ip::tcp::socket& socket();
 
-  /// Asynchronously read a data structure from the socket.
-  template <typename T, typename Handler>
-  void async_read(T& t, Handler handler)
-  {
-    // Issue a read operation to read exactly the number of bytes in a header.
-    void (connection::*f)(
-        const boost::system::error_code&,
-        T&, boost::tuple<Handler>)
-      = &connection::handle_read_header<T, Handler>;
-    boost::asio::async_read(socket_, boost::asio::buffer(inbound_header_),
-        boost::bind(f,
-          this, boost::asio::placeholders::error, boost::ref(t),
-          boost::make_tuple(handler)));
-  }
+                /// Start the first asynchronous operation for the connection.
+                void start();
 
-  /// Handle a completed read of a message header. The handler is passed using
-  /// a tuple since boost::bind seems to have trouble binding a function object
-  /// created using boost::bind as a parameter.
-  template <typename T, typename Handler>
-  void handle_read_header(const boost::system::error_code& e,
-      T& t, boost::tuple<Handler> handler)
-  {
-    if (e)
-    {
-      boost::get<0>(handler)(e);
-    }
-    else
-    {
-      // Determine the length of the serialized data.
-      std::istringstream is(std::string(inbound_header_, header_length));
-      std::size_t inbound_data_size = 0;
-      if (!(is >> std::hex >> inbound_data_size))
-      {
-        // Header doesn't seem to be valid. Inform the caller.
-        boost::system::error_code error(boost::asio::error::invalid_argument);
-        boost::get<0>(handler)(error);
-        return;
-      }
+                DECLARE_LOGGER();
 
-      // Start an asynchronous call to receive the data.
-      inbound_data_.resize(inbound_data_size);
-      void (connection::*f)(
-          const boost::system::error_code&,
-          T&, boost::tuple<Handler>)
-        = &connection::handle_read_data<T, Handler>;
-      boost::asio::async_read(socket_, boost::asio::buffer(inbound_data_),
-        boost::bind(f, this,
-          boost::asio::placeholders::error, boost::ref(t), handler));
-    }
-  }
+            private:
+                /// Handle completion of a read operation.
+                void handle_read(const boost::system::error_code& e, std::size_t bytes_transferred);
 
-  /// Handle a completed read of message data.
-  template <typename T, typename Handler>
-  void handle_read_data(const boost::system::error_code& e,
-      T& t, boost::tuple<Handler> handler)
-  {
-    if (e)
-    {
-      boost::get<0>(handler)(e);
-    }
-    else
-    {
-      // Extract the data structure from the data just received.
-      try
-      {
-        std::string archive_data(&inbound_data_[0], inbound_data_.size());
-        std::istringstream archive_stream(archive_data);
-        boost::archive::text_iarchive archive(archive_stream);
-        archive >> t;
-      }
-      catch (std::exception& e)
-      {
-        // Unable to decode data.
-        boost::system::error_code error(boost::asio::error::invalid_argument);
-        boost::get<0>(handler)(error);
-        return;
-      }
+                /// Handle completion of a write operation.
+                void handle_write(const boost::system::error_code& e);
 
-      // Inform caller that data has been received ok.
-      boost::get<0>(handler)(e);
-    }
-  }
+                /// Strand to ensure the connection's handlers are not called concurrently.
+                boost::asio::io_service::strand strand_;
 
-private:
-  /// The underlying socket.
-  boost::asio::ip::tcp::socket socket_;
+                /// Socket for the connection.
+                boost::asio::ip::tcp::socket socket_;
 
-  /// The size of a fixed length header.
-  enum { header_length = 8 };
+                /// The handler used to process the incoming request.
+                request_handler& request_handler_;
 
-  /// Holds an outbound header.
-  std::string outbound_header_;
+                /// Buffer for incoming data.
+                boost::array<char, 8192> buffer_;
 
-  /// Holds the outbound data.
-  std::string outbound_data_;
+                /// Buffer for outgoing data
+                std::vector<boost::asio::const_buffer> outboundDataBuffers;
 
-  /// Holds an inbound header.
-  char inbound_header_[header_length];
+                /// The incoming message.
+                boost::shared_ptr<Message> request_;
 
-  /// Holds the inbound data.
-  std::vector<char> inbound_data_;
-};
+                /// The reply to be sent back to the client.
+                boost::shared_ptr<Message> reply_;
 
-typedef boost::shared_ptr<connection> connection_ptr;
+                // Use the utiliity class for arbitrary marshal/unmarhasl
+                DataMarshaller dataMarshaller;
+        };
 
-} // namespace s11n_example
+        typedef boost::shared_ptr<connection> connection_ptr;
 
-#endif // SERIALIZATION_CONNECTION_HPP
+    } // namespace server3
+} // namespace http
+
+#endif // HTTP_SERVER3_CONNECTION_HPP
