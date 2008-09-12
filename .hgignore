@@ -93,5 +93,6 @@ syntax: regexp
 ^src/watcheed/test/archived.txt
 ^src/watcheed/test/archived.dat
 ^src/watcheed/test/testMessage
+^src/watcheed/watcherServer
 
 
