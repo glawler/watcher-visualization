@@ -12,6 +12,7 @@ bool watcher::initConfig(
             libconfig::Config &config, 
             int argc, 
             char **argv, 
+            std::string &configFilename,
             const char configFileChar,
             const char *configFileString)
 {
@@ -38,10 +39,13 @@ bool watcher::initConfig(
             try
             {
                 config.readFile(optarg);
+                configFilename=optarg;
                 return true;
             }
             catch (ParseException &e)
             {
+                // Can't use logging here - if we're reading the config file we probably have not
+                // init'd the logging mechanism. 
                 cerr << "Error reading configuration file " << optarg << ": " << e.what() << endl;
                 cerr << "Error: \"" << e.getError() << "\" on line: " << e.getLine() << endl;
             }

@@ -1,6 +1,7 @@
 #ifndef INIT_CONFIG_H
 #define INIT_CONFIG_H
 
+#include <string>
 #include "libconfig.h++"
 
 namespace watcher
@@ -16,8 +17,9 @@ namespace watcher
             libconfig::Config &config, 
             int argc, 
             char **argv, 
-            const char configFileChar='c',
-            const char *configFileString="configFile");
+            std::string &configFilename,
+            const char commandLineiShort='c',
+            const char *commandLineLong="configFile");
 }
 
 #endif // INIT_CONFIG_H
