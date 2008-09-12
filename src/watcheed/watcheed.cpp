@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include "logger.h"
 #include "libconfig.h++"
@@ -13,9 +14,11 @@ int main(int argc, char *argv[])
 {
     TRACE_ENTER();
 
+    string configFilename;
+
     Config &config=singletonConfig::instance();
     singletonConfig::lock();
-    if (false==initConfig(config, argc, argv))
+    if (false==initConfig(config, argc, argv, configFilename))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;
         cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
@@ -32,4 +35,10 @@ int main(int argc, char *argv[])
     PropertyConfigurator::configureAndWatch(logConf);
 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
+
+
+    singletonConfig::lock();
+    config.writeFile(configFilename.c_str());
+
+    return EXIT_SUCCESS;
 }
