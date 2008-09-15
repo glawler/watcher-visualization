@@ -8,8 +8,8 @@ CXXFLAGS+=-I/usr/local/include/boost-1_36
 CXXFLAGS+=-I$(TOPDIR)/include 
 CXXFLAGS+=-I$(TOPDIR)/src/util
 CXXFLAGS+=-I.
-#CXXFLAGS+=-O0 -ggdb
-#CXXFLAGS+=-Wall
+CXXFLAGS+=-O0 -ggdb
+CXXFLAGS+=-Wall
 
 LDFLAGS+=-lconfig++
 LDFLAGS+=-llogger
@@ -28,14 +28,18 @@ OBJS=$(SRCS:.cpp=.o)
 
 BINS=watcherd
 
-all: $(BINS) watcherd.cfg 
+all: depend $(BINS) watcherd.cfg log.properties
 
-watcherd: $(OBJS)
+watcherd: $(OBJS) depend
 	$(CXX) $(OBJS) -o watcherd $(LIBS) $(LDFLAGS)
 
 watcherd.cfg: 
 	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample
 	cp ../../etc/watcherd.cfg.sample ./watcherd.cfg
+
+log.properties: 
+	@ echo Creating log.properties from sample configuration in ../../etc/watcher.log.properties.sample
+	cp ../../etc/watcher.log.properties.sample ./log.properties
 
 depend: $(SRCS)
 	@echo makedepend

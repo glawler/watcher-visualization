@@ -18,6 +18,11 @@ namespace watcher
 {
     namespace server 
     {
+        //
+        // The DataMarshaller class uses the boost::serialization functionality 
+        // to marshal and unmarshal any type T into and outof databuffers. These
+        // data buffers are perfect for sending as network packets.  
+        //
         class DataMarshaller : private boost::noncopyable
         {
             public:

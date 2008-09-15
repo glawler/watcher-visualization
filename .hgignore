@@ -95,5 +95,6 @@ syntax: regexp
 ^src/watcherd/test/testMessage
 ^src/watcherd/watcherd.cfg
 ^src/watcherd/watcherd
+^src/watcherd/depend
 
 
