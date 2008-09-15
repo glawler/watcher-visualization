@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        string address("127.0.0.1");
+        string address("glory");
         string port("8095");
         std::size_t numThreads = 4;
 

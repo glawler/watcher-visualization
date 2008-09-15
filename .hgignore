@@ -88,11 +88,12 @@ syntax: regexp
 
 ^etc/nerod.sample.cfg
 
-^src/watcheed/client
-^src/watcheed/log.properties
-^src/watcheed/test/archived.txt
-^src/watcheed/test/archived.dat
-^src/watcheed/test/testMessage
-^src/watcheed/watcherServer
+^src/watcherd/client
+^src/watcherd/log.properties
+^src/watcherd/test/archived.txt
+^src/watcherd/test/archived.dat
+^src/watcherd/test/testMessage
+^src/watcherd/watcherd.cfg
+^src/watcherd/watcherd
 
 
