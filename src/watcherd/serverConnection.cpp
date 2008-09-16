@@ -76,6 +76,8 @@ void serverConnection::handle_read(const boost::system::error_code& e, std::size
 
         if (result)
         {
+            LOG_DEBUG("Recvd message: " << *request_); 
+
             request_handler_->handle_request(request_, reply_);
             LOG_DEBUG("Got reply from handler: " << *reply_);
 

@@ -22,10 +22,10 @@ LDFLAGS+=-lpthread
 
 SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp \
 	 serverConnection.cpp dataMarshaller.cpp watcherd.cpp request_handler.cpp server.cpp \
-	 messageStatus.cpp clientConnection.cpp
+	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
 	serverConnection.hpp dataMarshaller.hpp request_handler.hpp server.hpp messageStatus.h \
-	clientConnection.hpp
+	clientConnection.hpp gpsMessage.h
 OBJS=$(SRCS:.cpp=.o)
 
 BINS=watcherd testClientConnection
@@ -35,8 +35,8 @@ all: depend tags $(BINS) watcherd.cfg log.properties
 watcherd: $(OBJS) depend
 	$(CXX) $(OBJS) -o watcherd $(LIBS) $(LDFLAGS)
 
-testClientConnection: message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./test/testCC.o
-	$(CXX) message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./test/testCC.o -o testClientConnection $(LIBS) $(LDFLAGS)
+testClientConnection: message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./test/testCC.o gpsMessage.o
+	$(CXX) message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./gpsMessage.o ./test/testCC.o -o testClientConnection $(LIBS) $(LDFLAGS)
 
 watcherd.cfg: 
 	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample

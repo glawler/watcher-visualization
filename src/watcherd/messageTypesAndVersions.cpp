@@ -17,6 +17,9 @@ ostream &watcher::operator<<(ostream &out, const MessageType &type)
         case TEST_MESSAGE_TYPE: 
             out << "Test (" << static_cast<int>(TEST_MESSAGE_TYPE) << ")";
             break;
+        case GPS_MESSAGE_TYPE: 
+            out << "GPS (" << static_cast<int>(GPS_MESSAGE_TYPE) << ")";
+            break;
         default: 
             out << "Error - undefined message type"; 
     }

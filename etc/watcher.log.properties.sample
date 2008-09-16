@@ -1,16 +1,4 @@
-# log4j.rootLogger=TRACE, stdout, flog
-log4j.rootLogger=debug, flog, stdout
-
-# stdout is set to be a ConsoleAppender.
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c - %m%n
-
-# flog is set to log to a file
-log4j.appender.flog=org.apache.log4j.FileAppender
-log4j.appender.flog.layout=org.apache.log4j.PatternLayout
-log4j.appender.flog.file=watcher.log
-log4j.appender.flog.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
-
-
-
+logPropertiesFile = "log.properties";
+server = "glory";
+port = "8095";
+serverThreadNum = 1;
