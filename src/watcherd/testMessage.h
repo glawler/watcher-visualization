@@ -2,11 +2,16 @@
 #define TEST_MESSAGE_DATA_H
 
 #include <string>
-#include <iostream>
-#include <boost/serialization/vector.hpp>
 
-#include "message.h"
 #include "logger.h"
+#include "message.h"
+
+namespace boost {
+    namespace archive {
+        class polymorphic_iarchive;
+        class polymorphic_oarchive;
+    }
+}
 
 namespace watcher 
 {
@@ -24,27 +29,17 @@ namespace watcher
             bool operator==(const TestMessage &other) const;
             TestMessage &operator=(const TestMessage &other);
 
-            std::ostream &operator<<(std::ostream &out) const;
+            virtual std::ostream &toStream(std::ostream &out) const;
+            std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
-            template <class Archive>
-                void serialize(Archive &ar, const unsigned int /*version*/)
-                {
-                    TRACE_ENTER();
-                    ar.template register_type<Message>();
-                    ar & boost::serialization::base_object<Message>(*this);
-                    ar & stringData;
-                    ar & intsData;
-                    TRACE_EXIT();
-                }
+            virtual void serialize(boost::archive::polymorphic_iarchive & ar, const unsigned int file_version);
+            virtual void serialize(boost::archive::polymorphic_oarchive & ar, const unsigned int file_version);
 
+        private:
             DECLARE_LOGGER();
     };
 
-
     std::ostream &operator<<(std::ostream &out, const TestMessage &mess);
 }
-
-#include <boost/serialization/export.hpp>
-BOOST_CLASS_EXPORT_GUID(watcher::TestMessage, "TestMessage")
 
 #endif // TEST_MESSAGE_DATA_H

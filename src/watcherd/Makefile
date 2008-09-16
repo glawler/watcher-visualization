@@ -21,17 +21,22 @@ LDFLAGS+=-lboost_serialization-gcc41-mt
 LDFLAGS+=-lpthread
 
 SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp \
-	 connection.cpp dataMarshaller.cpp watcherd.cpp request_handler.cpp server.cpp 
+	 serverConnection.cpp dataMarshaller.cpp watcherd.cpp request_handler.cpp server.cpp \
+	 messageStatus.cpp clientConnection.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
-	connection.hpp dataMarshaller.hpp request_handler.hpp server.hpp 
+	serverConnection.hpp dataMarshaller.hpp request_handler.hpp server.hpp messageStatus.h \
+	clientConnection.hpp
 OBJS=$(SRCS:.cpp=.o)
 
-BINS=watcherd
+BINS=watcherd testClientConnection
 
-all: depend $(BINS) watcherd.cfg log.properties
+all: depend tags $(BINS) watcherd.cfg log.properties 
 
 watcherd: $(OBJS) depend
 	$(CXX) $(OBJS) -o watcherd $(LIBS) $(LDFLAGS)
+
+testClientConnection: message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./test/testCC.o
+	$(CXX) message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./test/testCC.o -o testClientConnection $(LIBS) $(LDFLAGS)
 
 watcherd.cfg: 
 	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample

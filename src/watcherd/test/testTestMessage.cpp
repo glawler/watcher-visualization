@@ -4,22 +4,20 @@
 #include <vector>
 #include <algorithm>
 
-#include <boost/serialization/access.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/polymorphic_text_iarchive.hpp>
+#include <boost/archive/polymorphic_text_oarchive.hpp>
+#include <boost/archive/polymorphic_binary_iarchive.hpp>
+#include <boost/archive/polymorphic_binary_oarchive.hpp>
+
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "../messageFactory.h"
 #include "../testMessage.h"
+#include "../messageStatus.h"
 #include "../message.h"
 
-#include <boost/serialization/shared_ptr.hpp>
-
 #include "logger.h"
-#include "log4cxx/basicconfigurator.h"
-#include "log4cxx/propertyconfigurator.h"
-#include "log4cxx/helpers/exception.h"
 
 using namespace std;
 using namespace watcher;
@@ -40,55 +38,61 @@ int main(int argc, char **argv)
     // cout << "Arch Stream: " << archiveStream.str() << e
     //
     
-
     vector<int> ints;
     ints.push_back(argc);
     vector<shared_ptr<Message> > tms;
-    tms.push_back(shared_ptr<Message>(new TestMessage(argv[0], ints)));
+
+    tms.push_back(shared_ptr<TestMessage>(new TestMessage(argv[0], ints)));
     ints.push_back(argc+1);
     tms.push_back(shared_ptr<Message>(new Message));
     ints.push_back(argc+2);
-    tms.push_back(shared_ptr<Message>(new TestMessage(argv[0], ints)));
+    tms.push_back(shared_ptr<TestMessage>(new TestMessage(argv[0], ints)));
     ints.push_back(argc+3);
 
     // Write it out
     cout << "TestMessage Out: [";
     //copy(tms.begin(), tms.end(), ostream_iterator<shared_ptr::<Message>>(cout, "|"));
     for (vector<shared_ptr<Message> >::const_iterator i = tms.begin(); i != tms.end(); ++i)
-        cout << **i << " ";
-    cout << "]" << endl;
+        // if ((*i)->type == TEST_MESSAGE_TYPE) 
+        //    cout << static_cast<TestMessage*>(&**i) << " ";
+        // else 
+        cout << "\n\t " << **i;
+    cout << "\n]" << endl;
 
     ofstream otfs("archived.txt");
-    archive::text_oarchive ota(otfs);
+    archive::polymorphic_text_oarchive ota(otfs);
     ota << tms;
     otfs.close();
 
     ofstream obfs("archived.dat", ios::out|ios::binary);
-    archive::binary_oarchive oba(obfs);
+    archive::polymorphic_binary_oarchive oba(obfs);
     oba << tms;
     obfs.close();
 
     // Read it in.
     vector<shared_ptr<Message> > fromtms;
     ifstream itfs("archived.txt");
-    archive::text_iarchive ita(itfs);
+    archive::polymorphic_text_iarchive ita(itfs);
     ita >> fromtms;
     itfs.close();
     cout << "TestMessage From Text: [";
     //copy(tms.begin(), tms.end(), ostream_iterator<shared_ptr::<Message>>(cout, "|"));
     for (vector<shared_ptr<Message> >::const_iterator i = tms.begin(); i != tms.end(); ++i)
-        cout << **i << " ";
-    cout << "]" << endl;
+        cout << "\n\t " << **i;
+    cout << "\n]" << endl;
 
     ifstream ibfs("archived.dat");
-    archive::binary_iarchive iba(ibfs);
+    archive::polymorphic_binary_iarchive iba(ibfs);
     iba >> fromtms;
     ibfs.close();
     cout << "TestMessage From Bin: [";
     // copy(tms.begin(), tms.end(), ostream_iterator<TestMessage>(cout, "|"));
     for (vector<shared_ptr<Message> >::const_iterator i = tms.begin(); i != tms.end(); ++i)
-        cout << **i << " ";
-    cout << "]" << endl;
+        cout << "\n\t " << **i;
+    cout << "\n]" << endl;
+
+    // MessageStatus statMess(MessageStatus::status_ok);
+    // cout << statMess;
 
     TRACE_EXIT();
     return 0;

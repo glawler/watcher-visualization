@@ -8,12 +8,13 @@ namespace watcher
     typedef enum 
     {
         UNKNOWN_MESSAGE_TYPE      = 0,
-        MESSAGE_HEADER,
-        TEST_MESSAGE_TYPE
+        MESSAGE_STATUS_TYPE       = 1,
+        TEST_MESSAGE_TYPE         = 2
     } MessageType;
 
     const unsigned int BASE_MESSAGE_VERSION      = 1;
-    const unsigned int TEST_MESSAGE_VERSION      = 1;
+    const unsigned int MESSAGE_STATUS_VERSION    = 1;
+    const unsigned int MESSAGE_TEST_VERSION      = 1;
 
     std::ostream &operator<<(std::ostream &out, const MessageType &type);
 }

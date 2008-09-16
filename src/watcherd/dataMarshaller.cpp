@@ -2,9 +2,8 @@
 #include "dataMarshaller.hpp"
 
 using namespace watcher;
-using namespace server;
 
-INIT_LOGGER(watcher::server::DataMarshaller, "DataMarshaller"); 
+INIT_LOGGER(watcher::DataMarshaller, "DataMarshaller"); 
 
 // Everything is in the header. 
 

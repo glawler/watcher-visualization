@@ -14,6 +14,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
 #include "server.hpp"
 
 #if !defined(_WIN32)
@@ -29,7 +30,7 @@
 using namespace std;
 using namespace watcher;
 using namespace libconfig; 
-    
+
 int main(int argc, char* argv[])
 {
     TRACE_ENTER();
@@ -48,7 +49,8 @@ int main(int argc, char* argv[])
     string logConf("log.properties");
     if (!config.lookupValue("logPropertiesFile", logConf))
     {
-        cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf << " and adding it to the configuration file." << endl;
+        cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf 
+             << " and adding it to the configuration file." << endl;
         config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
     }
 
@@ -64,19 +66,22 @@ int main(int argc, char* argv[])
 
         if (!config.lookupValue("server", address))
         {
-            LOG_INFO("'server' not found in the configuration file, using default: " << address << " and adding this to the configuration file.");
+            LOG_INFO("'server' not found in the configuration file, using default: " << address 
+                    << " and adding this to the configuration file.");
             config.getRoot().add("server", libconfig::Setting::TypeString) = address;
         }
 
         if (!config.lookupValue("port", port))
         {
-            LOG_INFO("'port' not found in the configuration file, using default: " << port  << " and adding this to the configuration file.");
+            LOG_INFO("'port' not found in the configuration file, using default: " << port  
+                    << " and adding this to the configuration file.");
             config.getRoot().add("port", libconfig::Setting::TypeString)=port;
         }
 
         if (!config.lookupValue("serverThreadNum", numThreads))
         {
-            LOG_INFO("'serverThreadNum' not found in the configuration file, using default: " << numThreads << " and adding this to the configuration file.")
+            LOG_INFO("'serverThreadNum' not found in the configuration file, using default: " << numThreads 
+                    << " and adding this to the configuration file.")
             config.getRoot().add("serverThreadNum", libconfig::Setting::TypeInt)=static_cast<int>(numThreads);
         }
 
@@ -87,7 +92,12 @@ int main(int argc, char* argv[])
         pthread_sigmask(SIG_BLOCK, &new_mask, &old_mask);
 
         // Run server in background thread.
-        watcher::server::server s(address, port, numThreads);
+        // boost::shared_ptr<request_handler> requestHandler = boost::shared_ptr<request_handler>(new request_handler);
+        watcher::server::server s(
+                address, 
+                port, 
+                // requestHandler, 
+                numThreads);
         boost::thread t(boost::bind(&watcher::server::server::run, &s));
 
         // Restore previous signals.
@@ -109,6 +119,7 @@ int main(int argc, char* argv[])
     }
     catch (std::exception& e)
     {
+        LOG_FATAL("Exception: " << e.what());
         std::cerr << "exception: " << e.what() << "\n";
     }
 

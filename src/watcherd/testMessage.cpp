@@ -1,19 +1,26 @@
+
+#include <boost/archive/polymorphic_iarchive.hpp>
+#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/export.hpp>
+
 #include "testMessage.h"
 
 using namespace std;
 using namespace watcher;
 
 INIT_LOGGER(TestMessage, "Message.TestMessage");
+BOOST_CLASS_EXPORT_GUID(TestMessage, "TestMessage");
 
-TestMessage::TestMessage() : 
-    Message(TEST_MESSAGE_TYPE, TEST_MESSAGE_VERSION)
+TestMessage::TestMessage() : Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION)
 {
     TRACE_ENTER();
     TRACE_EXIT();
 }
 
 TestMessage::TestMessage(const string &str, const vector<int> ints) :
-    Message(TEST_MESSAGE_TYPE, TEST_MESSAGE_VERSION),
+    Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION),
     stringData(str),
     intsData(ints)
 {
@@ -53,11 +60,12 @@ TestMessage &TestMessage::operator=(const TestMessage &other)
     return *this;
 }
 
-ostream &TestMessage::operator<<(ostream &out) const
+// virtual 
+std::ostream &TestMessage::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
 
-    Message::operator<<(out); 
+    Message::toStream(out);
     out << " stringData: " << stringData;
     out << " intsData:[";
     // Compiler cant' find this: copy(intsData.begin(), intsData.end(), ostream_iterator<int>(out,","));
@@ -77,4 +85,27 @@ ostream &watcher::operator<<(ostream &out, const TestMessage &mess)
     return out;
 }
 
+
+void TestMessage::serialize(boost::archive::polymorphic_iarchive & ar, const unsigned int file_version)
+{
+    TRACE_ENTER();
+    
+    ar & boost::serialization::base_object<Message>(*this);
+
+    Message::serialize(ar, file_version);
+    ar & stringData;
+    ar & intsData;
+    TRACE_EXIT();
+}
+void TestMessage::serialize(boost::archive::polymorphic_oarchive & ar, const unsigned int file_version)
+{
+    TRACE_ENTER();
+    
+    ar & boost::serialization::base_object<Message>(*this);
+
+    Message::serialize(ar, file_version);
+    ar & stringData;
+    ar & intsData;
+    TRACE_EXIT();
+}
 

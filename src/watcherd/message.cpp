@@ -1,9 +1,15 @@
 #include "message.h"
 
+#include <boost/archive/polymorphic_iarchive.hpp>
+#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/serialization/export.hpp>
+
 using namespace std;
 using namespace watcher;
 
 INIT_LOGGER(Message, "Message");
+
+BOOST_CLASS_EXPORT_GUID(Message, "Message");
 
 Message::Message() : 
     version(0), type(UNKNOWN_MESSAGE_TYPE)
@@ -48,7 +54,8 @@ Message &Message::operator=(const Message &other)
     return *this;
 }
 
-ostream &Message::operator<<(ostream &out) const
+// virtual 
+std::ostream &Message::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
     out << " version: " << version << " type: " << type << " "; 
@@ -64,3 +71,17 @@ ostream &watcher::operator<<(ostream &out, const Message &mess)
     return out;
 }
 
+void Message::serialize(boost::archive::polymorphic_iarchive & ar, const unsigned int file_version)
+{
+    TRACE_ENTER();
+    ar & version;
+    ar & type;
+    TRACE_EXIT();
+}
+void Message::serialize(boost::archive::polymorphic_oarchive & ar, const unsigned int file_version)
+{
+    TRACE_ENTER();
+    ar & version;
+    ar & type;
+    TRACE_EXIT();
+}

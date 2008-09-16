@@ -1,5 +1,5 @@
-#ifndef REQ_HANDLER_WATCHER_FOOBAR_YEEHAH_H
-#define REQ_HANDLER_WATCHER_FOOBAR_YEEHAH_H
+#ifndef RESP_HANDLER_WATCHER_FOOBAR_YEEHAH_H
+#define RESP_HANDLER_WATCHER_FOOBAR_YEEHAH_H
 
 #include <string>
 #include <boost/noncopyable.hpp>
@@ -10,14 +10,14 @@
 namespace watcher 
 {
     /// The common handler for all incoming requests.
-    class request_handler : private boost::noncopyable
+    class response_handler : private boost::noncopyable
     {
         public:
             /// Construct with a directory containing files to be served.
-            explicit request_handler();
+            explicit response_handler();
 
             /// Handle a request and produce a reply.
-            void handle_request(const boost::shared_ptr<Message> req, boost::shared_ptr<Message> &rep);
+            void handle_response(const boost::shared_ptr<Message> request, boost::shared_ptr<Message> reply);
 
         private:
             DECLARE_LOGGER();
@@ -26,4 +26,4 @@ namespace watcher
 
 } // namespace 
 
-#endif // REQ_HANDLER_WATCHER_FOOBAR_YEEHAH_H
+#endif // RESP_HANDLER_WATCHER_FOOBAR_YEEHAH_H

@@ -2,6 +2,7 @@
 
 #include "message.h"
 #include "testMessage.h"
+#include "messageStatus.h"
 
 using namespace watcher;
 
@@ -15,8 +16,8 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
         case UNKNOWN_MESSAGE_TYPE: 
             return boost::shared_ptr<Message>(); 
             break;
-        case MESSAGE_HEADER:
-            return boost::shared_ptr<Message>(new Message(MESSAGE_HEADER, 0));
+        case MESSAGE_STATUS_TYPE:
+            return boost::shared_ptr<MessageStatus>(new MessageStatus);
             break;
         case TEST_MESSAGE_TYPE:
             return boost::shared_ptr<TestMessage>(new TestMessage);

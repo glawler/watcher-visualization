@@ -97,4 +97,9 @@ syntax: regexp
 ^src/watcherd/watcherd
 ^src/watcherd/depend
 
+^src/watcherd/archived.dat
+^src/watcherd/archived.txt
+^src/watcherd/test/depend
+^src/watcherd/test/testClientConnection
+
 

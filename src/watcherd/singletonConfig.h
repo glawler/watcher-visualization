@@ -15,9 +15,9 @@ namespace watcher
             static void lock();
             static void unlock();
 
+        private:
             DECLARE_LOGGER();
 
-        private:
             singletonConfig();
             ~singletonConfig();
 

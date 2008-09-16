@@ -11,8 +11,8 @@ ostream &watcher::operator<<(ostream &out, const MessageType &type)
         case UNKNOWN_MESSAGE_TYPE: 
             out << "Unknown (" << static_cast<int>(UNKNOWN_MESSAGE_TYPE) << ")"; 
             break;
-        case MESSAGE_HEADER: 
-            out << "Header (" << static_cast<int>(MESSAGE_HEADER) << ")";
+        case MESSAGE_STATUS_TYPE: 
+            out << "Status (" << static_cast<int>(MESSAGE_STATUS_TYPE) << ")";
             break;
         case TEST_MESSAGE_TYPE: 
             out << "Test (" << static_cast<int>(TEST_MESSAGE_TYPE) << ")";

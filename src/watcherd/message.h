@@ -1,8 +1,15 @@
 #ifndef BASE_MESSAGE_H
 #define BASE_MESSAGE_H
 
-#include "messageTypesAndVersions.h"
 #include "logger.h"
+#include "messageTypesAndVersions.h"
+
+namespace boost {
+    namespace archive {
+        class polymorphic_iarchive;
+        class polymorphic_oarchive;
+    }
+}
 
 namespace watcher 
 {
@@ -22,18 +29,17 @@ namespace watcher
             bool operator==(const Message &other) const;
             Message &operator=(const Message &other);
 
-            std::ostream &operator<<(std::ostream &out) const;
+            // output the class as a stream. Derived classes 
+            // should call the base classes' implementation.
+            virtual std::ostream &toStream(std::ostream &out) const;
+            std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
-            template<class Archive>
-                void serialize(Archive& ar, const unsigned int /*version*/)
-                {
-                    ar & version & type;
-                }
-
-            DECLARE_LOGGER();
+            virtual void serialize(boost::archive::polymorphic_iarchive & ar, const unsigned int file_version);
+            virtual void serialize(boost::archive::polymorphic_oarchive & ar, const unsigned int file_version);
 
         protected:
         private:
+            DECLARE_LOGGER();
     };
 
     std::ostream &operator<<(std::ostream &out, const Message &mess);
