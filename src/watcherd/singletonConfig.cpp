@@ -3,12 +3,12 @@
 using namespace watcher;
 using namespace libconfig;
 
-pthread_mutex_t singletonConfig::accessMutex=PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t SingletonConfig::accessMutex=PTHREAD_MUTEX_INITIALIZER;
 
-INIT_LOGGER(singletonConfig, "singletonConfig");
+INIT_LOGGER(SingletonConfig, "SingletonConfig");
 
 // static
-Config &singletonConfig::instance()
+Config &SingletonConfig::instance()
 {
     TRACE_ENTER();
     static Config theInstance;
@@ -16,14 +16,14 @@ Config &singletonConfig::instance()
     return theInstance;
 }
 
-void singletonConfig::lock()
+void SingletonConfig::lock()
 {
     TRACE_ENTER();
     pthread_mutex_lock(&accessMutex);
     TRACE_EXIT();
 }
 
-void singletonConfig::unlock()
+void SingletonConfig::unlock()
 {
     TRACE_ENTER();
     pthread_mutex_unlock(&accessMutex);

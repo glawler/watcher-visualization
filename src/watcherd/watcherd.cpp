@@ -36,15 +36,15 @@ int main(int argc, char* argv[])
     TRACE_ENTER();
 
     string configFilename;
-    Config &config=singletonConfig::instance();
-    singletonConfig::lock();
+    Config &config=SingletonConfig::instance();
+    SingletonConfig::lock();
     if (false==initConfig(config, argc, argv, configFilename))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;
         cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
         return 1;
     }
-    singletonConfig::unlock();
+    SingletonConfig::unlock();
 
     string logConf("log.properties");
     if (!config.lookupValue("logPropertiesFile", logConf))
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
         std::cerr << "exception: " << e.what() << "\n";
     }
 
-    singletonConfig::lock();
+    SingletonConfig::lock();
     config.writeFile(configFilename.c_str());
 
     return 0;

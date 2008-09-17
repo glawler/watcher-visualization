@@ -7,7 +7,7 @@
 
 namespace watcher
 {
-    class singletonConfig
+    class SingletonConfig
     {
         public:
             static libconfig::Config &instance();
@@ -18,8 +18,8 @@ namespace watcher
         private:
             DECLARE_LOGGER();
 
-            singletonConfig();
-            ~singletonConfig();
+            SingletonConfig();
+            ~SingletonConfig();
 
             static pthread_mutex_t accessMutex;
     };
