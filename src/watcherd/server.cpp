@@ -17,22 +17,21 @@
 
 using namespace watcher;
 
-INIT_LOGGER(watcher::server, "server");
+INIT_LOGGER(watcher::Server, "Server");
 
-server::server(
+Server::Server(
         const std::string& address, 
         const std::string& port, 
         // boost::shared_ptr<request_handler> &handler,
         std::size_t thread_pool_size) :
     thread_pool_size_(thread_pool_size),
     acceptor_(io_service_)
-    // new_connection_(new serverConnection(io_service_, request_handler_)),
+    // new_connection_(new Server(io_service_, request_handler_)),
     // request_handler_(boost::shared_ptr<request_handler>(new request_handler))
 {
     TRACE_ENTER();
 
-    request_handler_=boost::shared_ptr<request_handler>(new request_handler);
-    new_connection_=server_connection_ptr(new serverConnection(io_service_, request_handler_));
+    new_connection_=serverConnectionPtr(new ServerConnection(io_service_));
 
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::resolver resolver(io_service_);
@@ -47,14 +46,14 @@ server::server(
     acceptor_.async_accept(
             new_connection_->socket(),
             boost::bind(
-                &server::handle_accept, 
+                &Server::handle_accept, 
                 this, 
                 boost::asio::placeholders::error));
 
     TRACE_EXIT();
 }
 
-void server::run()
+void Server::run()
 {
     TRACE_ENTER();
     // Create a pool of threads to run all of the io_services.
@@ -73,24 +72,24 @@ void server::run()
     TRACE_EXIT();
 }
 
-void server::stop()
+void Server::stop()
 {
     TRACE_ENTER();
     io_service_.stop();
     TRACE_EXIT();
 }
 
-void server::handle_accept(const boost::system::error_code& e)
+void Server::handle_accept(const boost::system::error_code& e)
 {
     TRACE_ENTER();
     if (!e)
     {
         new_connection_->start();
-        new_connection_.reset(new serverConnection(io_service_, request_handler_));
+        new_connection_.reset(new ServerConnection(io_service_));
         acceptor_.async_accept(
                 new_connection_->socket(),
                 boost::bind(
-                    &server::handle_accept, 
+                    &Server::handle_accept, 
                     this,
                     boost::asio::placeholders::error));
     }

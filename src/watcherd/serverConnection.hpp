@@ -16,7 +16,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include "request_handler.hpp"
+#include "messageHandlerFactory.h"
 
 #include "dataMarshaller.hpp"
 #include "message.h"
@@ -24,18 +24,18 @@
 namespace watcher 
 {
     /// Represents a single connection from a client.
-    class serverConnection : 
-        public boost::enable_shared_from_this<serverConnection>, 
+    class ServerConnection : 
+        public boost::enable_shared_from_this<ServerConnection>, 
         private boost::noncopyable
     {
         public:
             /// Construct a connection with the given io_service.
-            explicit serverConnection(boost::asio::io_service& io_service, boost::shared_ptr<request_handler> handler);
+            explicit ServerConnection(boost::asio::io_service& io_service);
 
             /// Get the socket associated with the connection.
             boost::asio::ip::tcp::socket& socket();
 
-            /// Start the first asynchronous operation for the serverConnection.
+            /// Start the first asynchronous operation for the ServerConnection.
             void start();
 
         private:
@@ -53,26 +53,23 @@ namespace watcher
             /// Socket for the connection.
             boost::asio::ip::tcp::socket socket_;
 
-            /// The handler used to process the incoming request.
-            boost::shared_ptr<request_handler> request_handler_;
-
             /// Buffer for incoming data.
-            boost::array<char, 8192> buffer_;
+            boost::array<char, 8192> incomingBuffer;
 
             /// Buffer for outgoing data
             std::vector<boost::asio::const_buffer> outboundDataBuffers;
 
             /// The incoming message.
-            boost::shared_ptr<Message> request_;
+            boost::shared_ptr<Message> request;
 
             /// The reply to be sent back to the client.
-            boost::shared_ptr<Message> reply_;
+            boost::shared_ptr<Message> reply;
 
             // Use the utiliity class for arbitrary marshal/unmarhasl
             DataMarshaller dataMarshaller;
     };
 
-    typedef boost::shared_ptr<serverConnection> server_connection_ptr;
+    typedef boost::shared_ptr<ServerConnection> serverConnectionPtr;
 
 } // namespace http
 

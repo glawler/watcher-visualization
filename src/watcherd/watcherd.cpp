@@ -93,12 +93,12 @@ int main(int argc, char* argv[])
 
         // Run server in background thread.
         // boost::shared_ptr<request_handler> requestHandler = boost::shared_ptr<request_handler>(new request_handler);
-        watcher::server::server s(
+        watcher::Server s(
                 address, 
                 port, 
                 // requestHandler, 
                 numThreads);
-        boost::thread t(boost::bind(&watcher::server::server::run, &s));
+        boost::thread t(boost::bind(&watcher::Server::run, &s));
 
         // Restore previous signals.
         pthread_sigmask(SIG_SETMASK, &old_mask, 0);

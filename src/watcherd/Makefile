@@ -21,11 +21,13 @@ LDFLAGS+=-lboost_serialization-gcc41-mt
 LDFLAGS+=-lpthread
 
 SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp \
-	 serverConnection.cpp dataMarshaller.cpp watcherd.cpp request_handler.cpp server.cpp \
-	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp
+	 serverConnection.cpp dataMarshaller.cpp watcherd.cpp server.cpp \
+	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
+	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
-	serverConnection.hpp dataMarshaller.hpp request_handler.hpp server.hpp messageStatus.h \
-	clientConnection.hpp gpsMessage.h
+	serverConnection.hpp dataMarshaller.hpp server.hpp messageStatus.h \
+	clientConnection.hpp gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
+	testMessageHandler.h messageHandlerFactory.h
 OBJS=$(SRCS:.cpp=.o)
 
 BINS=watcherd testClientConnection
@@ -56,7 +58,7 @@ clean:
 	$(RM) $(BINS) depend $(OBJS)
 
 tags: $(SRCS) $(HDRS)
-	ctags -R . 
+	ctags -R . ../../include
 
 # Use the shell to set DEPEND so we don't get spurrious warnings when
 # the "depend" file does not exist

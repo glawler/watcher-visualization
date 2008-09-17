@@ -19,22 +19,22 @@
 
 namespace watcher 
 {
-    /// The top-level class of a watcher server.
-    class server : private boost::noncopyable
+    /// The top-level class of a watcher Server.
+    class Server : private boost::noncopyable
     {
         public:
-            /// Construct the server to listen on the specified TCP address and port, and
+            /// Construct the Server to listen on the specified TCP address and port, and
             /// serve up files from the given directory.
-            explicit server(
+            explicit Server(
                     const std::string& address, 
                     const std::string& port,
                     // boost::shared_ptr<request_handler> &handler,
                     std::size_t thread_pool_size);
 
-            /// Run the server's io_service loop.
+            /// Run the Server's io_service loop.
             void run();
 
-            /// Stop the server.
+            /// Stop the Server.
             void stop();
 
         private:
@@ -53,10 +53,7 @@ namespace watcher
             boost::asio::ip::tcp::acceptor acceptor_;
 
             /// The next connection to be accepted.
-            server_connection_ptr new_connection_;
-
-            /// The handler for all incoming requests.
-            boost::shared_ptr<request_handler> request_handler_;
+            serverConnectionPtr new_connection_;
     };
 } // namespace watcher
 
