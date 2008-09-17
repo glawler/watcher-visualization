@@ -110,3 +110,10 @@ for compat messages. Which is annoying.
 Removed log4cpp after I couldn't find any useful documention on it. 
 Installed Apache's log4cxx - which appaers to be excellent.
 
+Got basic server and client classes up and running. There is now a message class which is 
+easily serializable and can be sent across the network. The server connection and client  
+connection classes understand this format and can transfer it. 
+
+log4cxx segfaults sometimes, so I had to wrap the calls to it in a try/catch block. Which 
+is annoying. 
+
