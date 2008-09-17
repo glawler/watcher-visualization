@@ -11,9 +11,8 @@
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/vector.hpp>
 
-#include "testMessage.h"
-#include "messageStatus.h"
 #include "message.h"
+#include "messageStatus.h"
 
 #include "dataMarshaller.hpp"
 

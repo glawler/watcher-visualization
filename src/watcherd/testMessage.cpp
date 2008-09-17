@@ -16,6 +16,13 @@ BOOST_CLASS_EXPORT_GUID(TestMessage, "TestMessage");
 TestMessage::TestMessage() : Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION)
 {
     TRACE_ENTER();
+    stringData="Hello world";
+    intsData.push_back(1);
+    intsData.push_back(666);
+    intsData.push_back(2);
+    intsData.push_back(666);
+    intsData.push_back(3);
+    intsData.push_back(668);
     TRACE_EXIT();
 }
 
@@ -66,7 +73,7 @@ std::ostream &TestMessage::toStream(std::ostream &out) const
     TRACE_ENTER();
 
     Message::toStream(out);
-    out << " stringData: " << stringData;
+    out << " stringData:\"" << stringData << "\""; 
     out << " intsData:[";
     // Compiler cant' find this: copy(intsData.begin(), intsData.end(), ostream_iterator<int>(out,","));
     for (vector<int>::const_iterator i=intsData.begin(); i != intsData.end(); ++i)

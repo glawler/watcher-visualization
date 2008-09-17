@@ -39,6 +39,7 @@ namespace watcher
             DECLARE_LOGGER();
     };
 
+    typedef boost::shared_ptr<GPSMessage> gpsMessagePtr; 
     std::ostream &operator<<(std::ostream &out, const GPSMessage &mess);
 }
 

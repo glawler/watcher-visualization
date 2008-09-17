@@ -96,10 +96,9 @@ syntax: regexp
 ^src/watcherd/watcherd.cfg
 ^src/watcherd/watcherd
 ^src/watcherd/depend
-
-^src/watcherd/archived.dat
-^src/watcherd/archived.txt
 ^src/watcherd/test/depend
 ^src/watcherd/test/testClientConnection
+^src/watcherd/gpsMessageTest
+^src/watcherd/testCC
 
 

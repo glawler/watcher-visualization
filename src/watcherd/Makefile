@@ -20,25 +20,33 @@ LDFLAGS+=-lboost_thread-gcc41-mt
 LDFLAGS+=-lboost_serialization-gcc41-mt
 LDFLAGS+=-lpthread
 
+#
+# SRCS and HDRS come in pairs, MAINS contain main() and do not have an associated header.
+#
 SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp \
-	 serverConnection.cpp dataMarshaller.cpp watcherd.cpp server.cpp \
+	 serverConnection.cpp dataMarshaller.cpp server.cpp \
 	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
-	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp
+	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
 	serverConnection.hpp dataMarshaller.hpp server.hpp messageStatus.h \
 	clientConnection.hpp gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
-	testMessageHandler.h messageHandlerFactory.h
-OBJS=$(SRCS:.cpp=.o)
+	testMessageHandler.h messageHandlerFactory.h client.hpp
+OBJS=$(SRCS:.cpp=.o) 
 
-BINS=watcherd testClientConnection
+MAINS=gpsMessageTest.cpp watcherd.cpp ./test/testCC.cpp
+
+BINS=$(MAINS:.cpp=)
 
 all: depend tags $(BINS) watcherd.cfg log.properties 
 
-watcherd: $(OBJS) depend
-	$(CXX) $(OBJS) -o watcherd $(LIBS) $(LDFLAGS)
+watcherd: $(OBJS) watcherd.o
+	$(CXX) $^ -o watcherd $(LIBS) $(LDFLAGS)
 
-testClientConnection: message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./test/testCC.o gpsMessage.o
-	$(CXX) message.o messageTypesAndVersions.o testMessage.o dataMarshaller.o messageStatus.o clientConnection.o ./gpsMessage.o ./test/testCC.o -o testClientConnection $(LIBS) $(LDFLAGS)
+gpsMessageTest: client.o gpsMessage.o gpsMessageTest.o clientConnection.o message.o dataMarshaller.o messageTypesAndVersions.o
+	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
+
+test/testCC: $(OBJS) ./test/testCC.o
+	$(CXX) $^ -o testCC $(LIBS) $(LDFLAGS)
 
 watcherd.cfg: 
 	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample
@@ -48,14 +56,14 @@ log.properties:
 	@ echo Creating log.properties from sample configuration in ../../etc/watcher.log.properties.sample
 	cp ../../etc/watcher.log.properties.sample ./log.properties
 
-depend: $(SRCS)
+depend: $(SRCS) $(HDRS) $(MAINS)
 	@echo makedepend
 	@$(RM) depend
-	@makedepend -f- ${HDRS} ${SRCS} > $@ 2>/dev/null;
+	@makedepend -f- $^ > $@ 2>/dev/null;
 	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
 
 clean: 
-	$(RM) $(BINS) depend $(OBJS)
+	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o)
 
 tags: $(SRCS) $(HDRS)
 	ctags -R . ../../include

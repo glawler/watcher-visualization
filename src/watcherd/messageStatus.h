@@ -51,6 +51,7 @@ namespace watcher
 
     };
 
+    typedef boost::shared_ptr<MessageStatus> MessageStatusPtr;
     std::ostream &operator<<(std::ostream &out, const MessageStatus &mess);
 
 }
