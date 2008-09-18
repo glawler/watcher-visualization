@@ -22,6 +22,7 @@ bool TestMessageHandler::produceReply(const boost::shared_ptr<Message> &request,
 {
     TRACE_ENTER();
     
+    LOG_DEBUG("Producing reply for message: " << *request);
     reply=MessageStatusPtr(new MessageStatus(MessageStatus::status_ack));
     LOG_DEBUG("Produced reply: " << *reply);
 

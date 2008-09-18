@@ -40,6 +40,7 @@ namespace watcher
     };
 
     typedef boost::shared_ptr<GPSMessage> gpsMessagePtr; 
+
     std::ostream &operator<<(std::ostream &out, const GPSMessage &mess);
 }
 

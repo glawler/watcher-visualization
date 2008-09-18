@@ -81,7 +81,6 @@ void GPSMessage::serialize(boost::archive::polymorphic_iarchive & ar, const unsi
 {
     TRACE_ENTER();
     ar & boost::serialization::base_object<Message>(*this);
-    Message::serialize(ar, file_version);
     ar & lat;
     ar & lng;
     ar & alt;
@@ -91,7 +90,6 @@ void GPSMessage::serialize(boost::archive::polymorphic_oarchive & ar, const unsi
 {
     TRACE_ENTER();
     ar & boost::serialization::base_object<Message>(*this);
-    Message::serialize(ar, file_version);
     ar & lat;
     ar & lng;
     ar & alt;

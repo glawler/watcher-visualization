@@ -91,20 +91,14 @@ ostream &watcher::operator<<(ostream &out, const MessageStatus &mess)
 void MessageStatus::serialize(boost::archive::polymorphic_iarchive & ar, const unsigned int file_version)
 {
     TRACE_ENTER();
-    
     ar & boost::serialization::base_object<Message>(*this);
-
-    Message::serialize(ar, file_version);
     ar & status;
     TRACE_EXIT();
 }
 void MessageStatus::serialize(boost::archive::polymorphic_oarchive & ar, const unsigned int file_version)
 {
     TRACE_ENTER();
-    
     ar & boost::serialization::base_object<Message>(*this);
-
-    Message::serialize(ar, file_version);
     ar & status;
     TRACE_EXIT();
 }

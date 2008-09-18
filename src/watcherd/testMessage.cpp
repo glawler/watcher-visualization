@@ -98,8 +98,6 @@ void TestMessage::serialize(boost::archive::polymorphic_iarchive & ar, const uns
     TRACE_ENTER();
     
     ar & boost::serialization::base_object<Message>(*this);
-
-    Message::serialize(ar, file_version);
     ar & stringData;
     ar & intsData;
     TRACE_EXIT();
@@ -109,8 +107,6 @@ void TestMessage::serialize(boost::archive::polymorphic_oarchive & ar, const uns
     TRACE_ENTER();
     
     ar & boost::serialization::base_object<Message>(*this);
-
-    Message::serialize(ar, file_version);
     ar & stringData;
     ar & intsData;
     TRACE_EXIT();

@@ -22,8 +22,8 @@ bool GPSMessageHandler::produceReply(const boost::shared_ptr<Message> &request, 
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
-
-    reply=boost::shared_ptr<MessageStatus>(new MessageStatus(MessageStatus::status_ack));
+    reply=MessageStatusPtr(new MessageStatus(MessageStatus::status_ack));
+    LOG_DEBUG("Produced reply: " << *reply);
 
     TRACE_EXIT_RET("true"); 
     return true;
