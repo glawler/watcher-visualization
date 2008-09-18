@@ -12,6 +12,7 @@
 
 #include "message.h"
 
+#include <boost/serialization/export.hpp>
 #include <boost/archive/polymorphic_text_iarchive.hpp>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
 #include <boost/archive/polymorphic_binary_iarchive.hpp>

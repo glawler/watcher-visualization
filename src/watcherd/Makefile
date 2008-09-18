@@ -33,7 +33,7 @@ HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h test
 	testMessageHandler.h messageHandlerFactory.h client.hpp
 OBJS=$(SRCS:.cpp=.o) 
 
-MAINS=gpsMessageTest.cpp watcherd.cpp ./test/testCC.cpp
+MAINS=gpsMessageTest.cpp watcherd.cpp testCC.cpp
 
 BINS=$(MAINS:.cpp=)
 
@@ -45,7 +45,7 @@ watcherd: $(OBJS) watcherd.o
 gpsMessageTest: client.o gpsMessage.o gpsMessageTest.o clientConnection.o message.o dataMarshaller.o messageTypesAndVersions.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
-test/testCC: $(OBJS) ./test/testCC.o
+testCC: $(OBJS) testCC.o
 	$(CXX) $^ -o testCC $(LIBS) $(LDFLAGS)
 
 watcherd.cfg: 
