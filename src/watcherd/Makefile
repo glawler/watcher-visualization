@@ -42,7 +42,7 @@ all: depend tags $(BINS) watcherd.cfg log.properties
 watcherd: $(OBJS) watcherd.o
 	$(CXX) $^ -o watcherd $(LIBS) $(LDFLAGS)
 
-gpsMessageTest: client.o gpsMessage.o gpsMessageTest.o clientConnection.o message.o dataMarshaller.o messageTypesAndVersions.o
+gpsMessageTest: $(OBJS) gpsMessageTest.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
 testCC: $(OBJS) testCC.o

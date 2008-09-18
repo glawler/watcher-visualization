@@ -1,23 +1,24 @@
-# log4j.rootLogger=DEBUG, stdout, flog
-log4j.rootLogger=debug, flog, stdout
+log4j.rootLogger=warn, flog, stdout
+# log4j.rootLogger=trace, flog, stdout
 
 # Set levels per logger
-log4j.logger.Client=debug
+# log4j.logger.Client=debug
 log4j.logger.ClientConnection=debug
-log4j.logger.DataMarshaller=debug
-log4j.logger.GPSMessage=debug
-log4j.logger.GPSMessageHandler=debug
-log4j.logger.Message=debug
-log4j.logger.MessageFactory=debug
-log4j.logger.MessageHandler=debug
-log4j.logger.MessageHandlerFactory=debug
-log4j.logger.MessageStatus=debug
-log4j.logger.MessageStatusHandler=debug
-log4j.logger.Server=debug
+# log4j.logger.DataMarshaller=debug
+# log4j.logger.GPSMessage=debug
+# log4j.logger.GPSMessageHandler=debug
+# log4j.logger.Message=debug
+# log4j.logger.MessageFactory=debug
+# log4j.logger.MessageHandler=debug
+# log4j.logger.MessageHandlerFactory=debug
+# log4j.logger.MessageStatus=debug
+# log4j.logger.MessageStatusHandler=debug
+# log4j.logger.Server=debug
 log4j.logger.ServerConnection=debug
-log4j.logger.singletonConfig=debug
-log4j.logger.TestMessage=debug
-log4j.logger.TestMessageHandler=debug
+# log4j.logger.singletonConfig=debug
+# log4j.logger.TestMessage=debug
+# log4j.logger.TestMessageHandler=debug
+
 
 # stdout is set to be a ConsoleAppender.
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender

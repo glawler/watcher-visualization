@@ -1,4 +1,4 @@
 logPropertiesFile = "log.properties";
 server = "glory";
 port = "8095";
-serverThreadNum = 4;
+serverThreadNum = 8;

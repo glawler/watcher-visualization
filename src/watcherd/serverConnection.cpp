@@ -68,8 +68,7 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
 
             if (handler->produceReply(request, reply))
             {
-                LOG_DEBUG("Sending reply: " << *reply);
-
+                LOG_DEBUG("Marshalling outbound message"); 
                 outboundDataBuffers.clear(); 
                 dataMarshaller.marshal(reply, outboundDataBuffers);
                 LOG_DEBUG("Sending reply message: " << *reply);
@@ -126,9 +125,10 @@ void ServerConnection::handle_write(const boost::system::error_code& e)
     if (!e)
     {
         // Initiate graceful connection closure.
-        LOG_DEBUG("Connection with client completed; Doing graceful shutdown of ServerConnection"); 
-        boost::system::error_code ignored_ec;
-        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+        // LOG_DEBUG("Connection with client completed; Doing graceful shutdown of ServerConnection"); 
+        // boost::system::error_code ignored_ec;
+        // socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+        start();
     }
     else
     {

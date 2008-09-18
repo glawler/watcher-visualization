@@ -16,6 +16,8 @@ int main(int argc, char **argv)
     boost::asio::io_service ioserv;
     ClientConnection cc(ioserv, "glory", "watcherd"); 
     cc.sendMessage(boost::shared_ptr<TestMessage>(new TestMessage));
+    cc.sendMessage(boost::shared_ptr<TestMessage>(new TestMessage));
+    cc.sendMessage(boost::shared_ptr<TestMessage>(new TestMessage));
     // cc.sendMessage(gpsMessagePtr(new GPSMessage(1.234, 5.678, 90.0)));
     ioserv.run();
 

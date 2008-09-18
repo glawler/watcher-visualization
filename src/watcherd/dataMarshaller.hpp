@@ -80,12 +80,17 @@ namespace watcher
                         boost::archive::polymorphic_text_iarchive archive(archive_stream);
                         archive >> t;
                     }
-                    catch (std::exception& e)
+                    catch (boost::archive::archive_exception& e)
                     {
                         // Unable to decode data.
                         // boost::system::error_code error(boost::asio::error::invalid_argument);
                         // boost::get<0>(handler)(error);
                         LOG_WARN("Exception thrown while serializing the message: " << e.what());
+
+                        // GTL - TODO: only diplay message below if the exception is 'unregistered_class'
+                        if (e.code == boost::archive::archive_exception::unregistered_class) 
+                            LOG_WARN("Did you link this message's object file into this executable?"); 
+
                         TRACE_EXIT_RET("false");
                         return false;
                     }
