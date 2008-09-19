@@ -26,6 +26,7 @@ _$*
 *.elc
 *.ln
 *.swp
+*.log
 core
 
 # some automake/autoconf/libtool things
