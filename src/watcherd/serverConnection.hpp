@@ -11,6 +11,8 @@
 #ifndef WATCHER_SERVER_CONNECTION
 #define WATCHER_SERVER_CONNECTION
 
+#include <list>
+
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/noncopyable.hpp>
@@ -45,7 +47,7 @@ namespace watcher
             void handle_read(const boost::system::error_code& e, std::size_t bytes_transferred);
 
             /// Handle completion of a write operation.
-            void handle_write(const boost::system::error_code& e);
+            void handle_write(const boost::system::error_code& e, MessagePtr reply);
 
             /// Strand to ensure the connection's handlers are not called concurrently.
             boost::asio::io_service::strand strand_;
@@ -54,22 +56,23 @@ namespace watcher
             boost::asio::ip::tcp::socket socket_;
 
             /// Buffer for incoming data.
-            boost::array<char, 8192> incomingBuffer;
+            typedef boost::array<char, 8192> IncomingBuffer;
+            IncomingBuffer incomingBuffer;
 
             /// Buffer for outgoing data
             std::vector<boost::asio::const_buffer> outboundDataBuffers;
 
-            /// The incoming message.
-            boost::shared_ptr<Message> request;
+            // The incoming messages.
+            MessagePtr request;
 
-            /// The reply to be sent back to the client.
-            boost::shared_ptr<Message> reply;
+            /// The replies to be sent back to the client.
+            std::list<MessagePtr> replies;
 
             // Use the utiliity class for arbitrary marshal/unmarhasl
             DataMarshaller dataMarshaller;
     };
 
-    typedef boost::shared_ptr<ServerConnection> serverConnectionPtr;
+    typedef boost::shared_ptr<ServerConnection> ServerConnectionPtr;
 
 } // namespace http
 

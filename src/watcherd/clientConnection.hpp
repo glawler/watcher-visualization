@@ -1,6 +1,7 @@
 #ifndef WATCHERD_CLIENT_CONECTION_HPP
 #define WATCHERD_CLIENT_CONECTION_HPP
 
+#include <list>
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -21,7 +22,9 @@ namespace watcher
                     const std::string &server, 
                     const std::string &service);
 
-            bool sendMessage(const boost::shared_ptr<Message> message);
+            bool sendMessage(const MessagePtr message);
+
+            void close(); 
             
             boost::asio::ip::tcp::socket& getSocket();
 
@@ -29,32 +32,39 @@ namespace watcher
 
             DECLARE_LOGGER();
 
-            void startQuery();
+            void doClose();
+            void doConnect(); 
+            void doWrite(const MessagePtr &message); 
 
-            void handle_resolve(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
-            void handle_connect(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
-            void handle_write_message(const boost::system::error_code& e);
-            void handle_read_response(const boost::system::error_code& e, std::size_t bytes_transferred);
+            bool connected; 
 
-            boost::asio::ip::tcp::resolver theResolver;
+            // void handle_resolve(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+            // void handle_connect(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+
+            void handle_write_message(const boost::system::error_code& e, const MessagePtr messPtr);
+            void handle_read_response(const boost::system::error_code& e, std::size_t bytes_transferred, const MessagePtr messPtr);
+
             boost::asio::ip::tcp::socket theSocket;
+            boost::asio::io_service &ioService;
 
-            boost::array<char, 8192> inBuffer;
-            std::vector<boost::asio::const_buffer> outBuffers;
+            typedef boost::array<char, 8192> IncomingBuffer;
+            IncomingBuffer incomingBuffer;
 
-            boost::shared_ptr<Message> theRequest;
-            boost::shared_ptr<Message> theResponse;
+            typedef boost::asio::const_buffer OutBuffer;
+            typedef std::vector<OutBuffer> OutBuffers;
+            OutBuffers outBuffers;
+
+            // MessagePtr theRequest;
+            MessagePtr theReply;
+
+            std::list<MessagePtr> writeMessages;
             DataMarshaller dataMarshaller;
-
-            boost::asio::deadline_timer connectionTimeoutTimer;
 
             std::string server;
             std::string service;
-
-            bool connected;
     };
 
-    typedef boost::shared_ptr<ClientConnection> clientConnectionPtr;
+    typedef boost::shared_ptr<ClientConnection> ClientConnectionPtr;
 
 } // namespace watcher
 

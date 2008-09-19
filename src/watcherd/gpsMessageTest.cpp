@@ -117,15 +117,6 @@ int main(int argc, char **argv)
         TRACE_EXIT_RET(EXIT_FAILURE);
         return EXIT_FAILURE;
     }
-    if(!client.sendMessage(message))
-    {
-        LOG_ERROR("Error sending 2nd gps message: " << *message);
-        free(serverName);
-        if (logProps)
-            free(logProps);
-        TRACE_EXIT_RET(EXIT_FAILURE);
-        return EXIT_FAILURE;
-    }
 
     // Messages are sent and recv'd async and there is no current method to 
     // wait until the sequence is done. So sleep for awhile. 

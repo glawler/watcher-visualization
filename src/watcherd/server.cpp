@@ -31,7 +31,7 @@ Server::Server(
 {
     TRACE_ENTER();
 
-    new_connection_=serverConnectionPtr(new ServerConnection(io_service_));
+    new_connection_=ServerConnectionPtr(new ServerConnection(io_service_));
 
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::resolver resolver(io_service_);

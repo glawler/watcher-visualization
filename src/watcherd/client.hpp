@@ -39,7 +39,7 @@ namespace watcher
             std::string server;
             std::string service;
 
-            clientConnectionPtr clientConnection;
+            ClientConnectionPtr clientConnection;
 
     };
 } // namespace watcher

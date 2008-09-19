@@ -53,7 +53,7 @@ namespace watcher
             boost::asio::ip::tcp::acceptor acceptor_;
 
             /// The next connection to be accepted.
-            serverConnectionPtr new_connection_;
+            ServerConnectionPtr new_connection_;
     };
 } // namespace watcher
 

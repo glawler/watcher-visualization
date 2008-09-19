@@ -1,6 +1,8 @@
 #ifndef BASE_MESSAGE_H
 #define BASE_MESSAGE_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "logger.h"
 #include "messageTypesAndVersions.h"
 
@@ -42,6 +44,7 @@ namespace watcher
             DECLARE_LOGGER();
     };
 
+    typedef boost::shared_ptr<Message> MessagePtr; 
     std::ostream &operator<<(std::ostream &out, const Message &mess);
 }
 

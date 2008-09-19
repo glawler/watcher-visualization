@@ -39,7 +39,7 @@ namespace watcher
             DECLARE_LOGGER();
     };
 
-    typedef boost::shared_ptr<TestMessage> testMessagePtr; 
+    typedef boost::shared_ptr<TestMessage> TestMessagePtr; 
 
     std::ostream &operator<<(std::ostream &out, const TestMessage &mess);
 }

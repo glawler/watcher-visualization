@@ -26,8 +26,7 @@ ServerConnection::ServerConnection(boost::asio::io_service& io_service) :
 {
     TRACE_ENTER(); 
 
-    request=boost::shared_ptr<Message>(new Message);
-    reply=boost::shared_ptr<Message>(new Message);
+    request=MessagePtr(new Message);
 
     TRACE_EXIT();
 }
@@ -57,8 +56,11 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
     TRACE_ENTER(); 
     if (!e)
     {
+        LOG_DEBUG("Read " << bytes_transferred << " bytes."); 
+
         boost::logic::tribool result;
-        result = dataMarshaller.unmarshal(request, incomingBuffer.begin(), bytes_transferred);
+        size_t bytesUsed;
+        result = dataMarshaller.unmarshal(request, incomingBuffer.begin(), bytes_transferred, bytesUsed);
 
         if (result)
         {
@@ -66,37 +68,51 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
 
             boost::shared_ptr<MessageHandler> handler = MessageHandlerFactory::getMessageHandler(request->type);
 
-            if (handler->produceReply(request, reply))
+            if (!handler)
             {
-                LOG_DEBUG("Marshalling outbound message"); 
-                outboundDataBuffers.clear(); 
-                dataMarshaller.marshal(reply, outboundDataBuffers);
-                LOG_DEBUG("Sending reply message: " << *reply);
-
-                boost::asio::async_write(socket_, outboundDataBuffers, 
-                        strand_.wrap(
-                            boost::bind(
-                                &ServerConnection::handle_write, 
-                                shared_from_this(),
-                                boost::asio::placeholders::error)));
+                LOG_WARN("Received unknown message type - ignoring.")
             }
-            else
+            else 
             {
-                LOG_DEBUG("Not sending reply - doesn't need one"); 
-                // This execution branch causes this connection to disapear.
+                MessagePtr reply;
+                if (handler->produceReply(request, reply))
+                {
+                    // Keep track of this reply in case of write error
+                    // and so we know when to stop sending replays and we can 
+                    // close the socket to the client.
+                    replies.push_back(reply); 
+
+                    LOG_DEBUG("Marshalling outbound message"); 
+                    outboundDataBuffers.clear(); 
+                    dataMarshaller.marshal(reply, outboundDataBuffers);
+                    LOG_DEBUG("Sending reply message: " << *reply);
+                    boost::asio::async_write(socket_, outboundDataBuffers, 
+                            strand_.wrap(
+                                boost::bind(
+                                    &ServerConnection::handle_write, 
+                                    shared_from_this(),
+                                    boost::asio::placeholders::error, 
+                                    reply))); 
+                }
+                else
+                {
+                    LOG_DEBUG("Not sending reply - doesn't need one"); 
+                    // This execution branch causes this connection to disapear.
+                }
             }
         }
         else if (!result)
         {
             LOG_WARN("Did not understand incoming message. Sending back a nack");
-            reply=boost::shared_ptr<MessageStatus>(new MessageStatus(MessageStatus::status_nack));
+            MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
             dataMarshaller.marshal(reply, outboundDataBuffers);
             LOG_DEBUG("Sending NACK as reply: " << *reply);
 
+            replies.push_back(reply);
             boost::asio::async_write(socket_, outboundDataBuffers,
                     strand_.wrap(
                         boost::bind(&ServerConnection::handle_write, shared_from_this(),
-                            boost::asio::placeholders::error)));
+                            boost::asio::placeholders::error, reply)));
         }
         else
         {
@@ -108,6 +124,15 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
                             boost::asio::placeholders::error,
                             boost::asio::placeholders::bytes_transferred)));
         }
+
+        if (bytesUsed != bytes_transferred)
+        {
+            LOG_DEBUG("Looks like we got more than one message in a packet, re-reading with the rest of the buffer"); 
+            unsigned int i=0;
+            for(IncomingBuffer::iterator b=incomingBuffer.begin()+bytesUsed; b != incomingBuffer.end(); b++)
+                incomingBuffer[i++]=*b;
+            handle_read(e, bytes_transferred-bytesUsed);
+        }
     }
 
     // If an error occurs then no new asynchronous operations are started. This
@@ -118,17 +143,38 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
     TRACE_EXIT();
 }
 
-void ServerConnection::handle_write(const boost::system::error_code& e)
+void ServerConnection::handle_write(const boost::system::error_code& e, MessagePtr message)
 {
     TRACE_ENTER(); 
 
     if (!e)
     {
-        // Initiate graceful connection closure.
-        // LOG_DEBUG("Connection with client completed; Doing graceful shutdown of ServerConnection"); 
-        // boost::system::error_code ignored_ec;
-        // socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
-        start();
+        replies.remove(message);
+
+        if (replies.empty())
+        {
+            // Initiate graceful connection closure.
+            // LOG_DEBUG("Connection with client completed; Doing graceful shutdown of ServerConnection"); 
+            // boost::system::error_code ignored_ec;
+            // socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+            LOG_DEBUG("Restarting connection to client"); 
+            start();
+        }
+        else
+        {
+            LOG_DEBUG("Still more replies to send, sending next one."); 
+            LOG_DEBUG("Marshalling outbound message"); 
+            outboundDataBuffers.clear(); 
+            dataMarshaller.marshal(replies.front(), outboundDataBuffers);
+            LOG_DEBUG("Sending reply message: " << *replies.front());
+            boost::asio::async_write(socket_, outboundDataBuffers, 
+                    strand_.wrap(
+                        boost::bind(
+                            &ServerConnection::handle_write, 
+                            shared_from_this(),
+                            boost::asio::placeholders::error, 
+                            replies.front()))); 
+        }
     }
     else
     {
