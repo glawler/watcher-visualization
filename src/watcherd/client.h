@@ -6,7 +6,7 @@
 #include <boost/noncopyable.hpp>
 #include "logger.h"
 
-#include "clientConnection.hpp"
+#include "clientConnection.h"
 #include "message.h"
 
 namespace watcher 

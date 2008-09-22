@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include "connection.hpp" // Must come before boost/serialization headers.
+#include "connection.h" // Must come before boost/serialization headers.
 #include "message.h"
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>

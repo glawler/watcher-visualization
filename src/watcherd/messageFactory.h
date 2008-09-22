@@ -2,8 +2,8 @@
 #define MESSAGE_FACTORY_SDFSDFSDFDGSFLNKSADKJNSD
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include "boost/shared_ptr.hpp"
 #include "messageTypesAndVersions.h"
 #include "message.h"
 

@@ -14,7 +14,7 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/lexical_cast.hpp>
-#include "server.hpp"
+#include "server.h"
 
 
 #if defined(_WIN32)

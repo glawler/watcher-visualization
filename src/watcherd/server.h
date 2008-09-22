@@ -13,8 +13,7 @@
 
 #include <string>
 #include <boost/noncopyable.hpp>
-#include "serverConnection.hpp"
-// #include "request_handler.hpp"
+#include "serverConnection.h"
 #include "logger.h"
 
 namespace watcher 

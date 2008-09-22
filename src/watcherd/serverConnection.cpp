@@ -1,4 +1,4 @@
-#include "serverConnection.hpp"
+#include "serverConnection.h"
 #include <vector>
 #include <boost/bind.hpp>
 #include "messageHandlerFactory.h"
@@ -14,7 +14,7 @@
 #include "message.h"
 #include "messageStatus.h"
 
-#include "dataMarshaller.hpp"
+#include "dataMarshaller.h"
 
 using namespace watcher;
 
@@ -128,9 +128,7 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
         if (bytesUsed != bytes_transferred)
         {
             LOG_DEBUG("Looks like we got more than one message in a packet, re-reading with the rest of the buffer"); 
-            unsigned int i=0;
-            for(IncomingBuffer::iterator b=incomingBuffer.begin()+bytesUsed; b != incomingBuffer.end(); b++)
-                incomingBuffer[i++]=*b;
+            memcpy(incomingBuffer.c_array(), &incomingBuffer[bytesUsed], bytes_transferred-bytesUsed);
             handle_read(e, bytes_transferred-bytesUsed);
         }
     }

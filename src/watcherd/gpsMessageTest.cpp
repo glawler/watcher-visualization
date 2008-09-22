@@ -4,7 +4,7 @@
 
 #include <boost/asio.hpp>
 #include "logger.h"
-#include "client.hpp"
+#include "client.h"
 #include "gpsMessage.h"
 
 using namespace std;

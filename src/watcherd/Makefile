@@ -28,9 +28,9 @@ SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.
 	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
 	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
-	serverConnection.hpp dataMarshaller.hpp server.hpp messageStatus.h \
-	clientConnection.hpp gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
-	testMessageHandler.h messageHandlerFactory.h client.hpp
+	serverConnection.h dataMarshaller.h server.h messageStatus.h \
+	clientConnection.h gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
+	testMessageHandler.h messageHandlerFactory.h client.h
 OBJS=$(SRCS:.cpp=.o) 
 
 MAINS=gpsMessageTest.cpp watcherd.cpp testCC.cpp

@@ -69,7 +69,7 @@ namespace watcher
                         // set boost::error
                         // Not enough data read = inderimnate
                         TRACE_EXIT_RET("indeterminate_value");
-                        bytesUsed=0;    // GTL hopefully we'll be called again with the whole thing.
+                        bytesUsed=bufferSize; // GTL Just give up on this packet.
                         return boost::logic::tribool::indeterminate_value;
                     }
                     inbound_data_.resize(inbound_data_size);

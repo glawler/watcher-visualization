@@ -8,7 +8,7 @@
 #include <boost/array.hpp>
 
 #include "message.h"
-#include "dataMarshaller.hpp"
+#include "dataMarshaller.h"
 
 namespace watcher 
 {

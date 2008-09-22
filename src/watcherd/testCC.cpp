@@ -1,7 +1,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#include "clientConnection.hpp"
+#include "clientConnection.h"
 #include "testMessage.h"
 
 using namespace std;

@@ -9,7 +9,7 @@
 //
 // Modified by Geoff Lawler, SPARTA inc.
 
-#include "server.hpp"
+#include "server.h"
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>

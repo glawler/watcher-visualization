@@ -1,10 +1,10 @@
-#include "clientConnection.hpp"
+#include "clientConnection.h"
 
 #include <vector>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "dataMarshaller.hpp"
+#include "dataMarshaller.h"
 #include "gpsMessage.h"
 #include "message.h"
 
@@ -194,14 +194,11 @@ void ClientConnection::handle_read_response(const boost::system::error_code &e, 
         {
             LOG_WARN("Did not get all the bytes for reponse to message " << messPtr << " giving up on it even though I should try to get the rest of the message"); 
         }
-
-        if (bytesUsed!=bytes_transferred)
+        if (bytesUsed != bytes_transferred)
         {
-            LOG_DEBUG("Hmm. Seemed to get more than one message in this packet - trying to re-read rest of buffer."); 
-            unsigned int i=0;
-            for(IncomingBuffer::iterator b=incomingBuffer.begin()+bytesUsed; b != incomingBuffer.end(); b++, i++)
-                incomingBuffer[i]=*b;
-            handle_read_response(e, bytes_transferred-bytesUsed, messPtr); 
+            LOG_DEBUG("Looks like we got more than one message in this read, rescanning the remainder of the buffer"); 
+            memcpy(incomingBuffer.c_array(), &incomingBuffer[bytesUsed], bytes_transferred-bytesUsed);
+            handle_read_response(e, bytes_transferred-bytesUsed, MessagePtr());
         }
     }
     else
