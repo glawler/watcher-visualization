@@ -38,26 +38,36 @@ namespace watcher
 
             bool connected; 
 
-            // void handle_resolve(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
-            // void handle_connect(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
-
-            void handle_write_message(const boost::system::error_code& e, const MessagePtr messPtr);
-            void handle_read_response(const boost::system::error_code& e, std::size_t bytes_transferred, const MessagePtr messPtr);
-
             boost::asio::ip::tcp::socket theSocket;
             boost::asio::io_service &ioService;
-
-            typedef boost::array<char, 8192> IncomingBuffer;
-            IncomingBuffer incomingBuffer;
+            boost::asio::io_service::strand theStrand;
 
             typedef boost::asio::const_buffer OutBuffer;
             typedef std::vector<OutBuffer> OutBuffers;
             OutBuffers outBuffers;
 
-            // MessagePtr theRequest;
-            MessagePtr theReply;
+            typedef boost::array<char, 8192> IncomingBuffer;
+            typedef struct 
+            {
+                IncomingBuffer incomingBuffer;
+                MessagePtr theReply;
+                MessagePtr theRequest;
+            } TransferData;
 
-            std::list<MessagePtr> writeMessages;
+            typedef boost::shared_ptr<TransferData> TransferDataPtr;
+
+            std::list<boost::shared_ptr<TransferData> > transferData;
+
+            // void handle_resolve(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+            // void handle_connect(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+
+            void handle_write_message(const boost::system::error_code& e, const TransferDataPtr &dataPtr);
+            void handle_read_header(const boost::system::error_code& e, std::size_t bytes_transferred, 
+                    const TransferDataPtr &dataPtr);
+            void handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred, 
+                    const TransferDataPtr &dataPtr);
+
+            // std::list<MessagePtr> writeMessages;
             DataMarshaller dataMarshaller;
 
             std::string server;

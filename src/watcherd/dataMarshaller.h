@@ -36,51 +36,54 @@ namespace watcher
         public:
             DataMarshaller() { }
 
-            // unmarhsal will unmarshal any type that supports the boost::serialize
-            // interface. 
+            //
+            // Unmarshal a header, returning the length of the payload which follows. 
+            //
+            bool unmarshalHeader(const char *buffer, const size_t &bufferSize, size_t &payloadSize)
+            {
+                TRACE_ENTER();
+                payloadSize=0;
+
+                // logger is crashing if given anything other than a string!
+                LOG_DEBUG("Unmarshalling a header of " << boost::lexical_cast<std::string>(bufferSize) << " bytes.");
+                if (bufferSize < header_length)
+                {
+                    // GTL LOG ERROR
+                    // set boost::error
+                    TRACE_EXIT_RET("false");
+                    return false;
+                }
+                std::string inbound_header(buffer, buffer + header_length);
+                std::stringstream is(inbound_header);
+                if (!(is >> std::hex >> payloadSize))
+                {
+                    // Header doesn't seem to be valid. Inform the caller.
+                    LOG_DEBUG("Error reading payloadsize from header: "  << strerror(errno)); 
+                    TRACE_EXIT_RET("false");
+                    return false;
+                }
+                return true;
+            }
+            
+            //
+            // Unmarshal a payload of type T. Buffer shuld contain the payload portion of a message of size
+            // given by unmarshalHeader()
             //
             template<class T>
-            boost::logic::tribool unmarshal(T &t, const char *buffer, const size_t &bufferSize, size_t &bytesUsed)
+                bool unmarshalPayload(T &t, const char *buffer, const size_t &bufferSize)
                 {
                     TRACE_ENTER(); 
                     // logger is crashing if given anything other than a string!
-                    LOG_DEBUG("Unmarshalling a buffer of " << boost::lexical_cast<std::string>(bufferSize) << " bytes.");
-                    if (bufferSize < header_length)
-                    {
-                        // GTL LOG ERROR
-                        // set boost::error
-                        TRACE_EXIT_RET("false");
-                        return false;
-                    }
-                    std::string inbound_header(buffer, buffer + header_length);
-                    std::stringstream is(inbound_header);
-                    std::size_t inbound_data_size = 0;
-                    if (!(is >> std::hex >> inbound_data_size))
-                    {
-                        // Header doesn't seem to be valid. Inform the caller.
-                        bytesUsed=bufferSize; // GTL Just give up on this read...
-                        TRACE_EXIT_RET("false");
-                        return false;
-                    }
-                    LOG_DEBUG("Read header - now reading data of size " << boost::lexical_cast<std::string>(inbound_data_size));
-                    if (inbound_data_size > bufferSize)
-                    {
-                        LOG_ERROR("Packet did not contain entire message."); 
-                        // set boost::error
-                        // Not enough data read = inderimnate
-                        TRACE_EXIT_RET("indeterminate_value");
-                        bytesUsed=bufferSize; // GTL Just give up on this packet.
-                        return boost::logic::tribool::indeterminate_value;
-                    }
-                    inbound_data_.resize(inbound_data_size);
+                    LOG_DEBUG("Unmarshalling a payload of " << boost::lexical_cast<std::string>(bufferSize) << " bytes.");
+
                     // Extract the data structure from the data just received.
                     try
                     {
-                        std::string archive_data(buffer + header_length, inbound_data_size);
-                        LOG_DEBUG("Unmarshalled payload - size: " << boost::lexical_cast<std::string>(archive_data.size()) << " data: " << archive_data);
+                        std::string archive_data(buffer, bufferSize);
                         std::stringstream archive_stream(archive_data);
                         boost::archive::polymorphic_text_iarchive archive(archive_stream);
                         archive >> t;
+                        LOG_DEBUG("Unmarshalled payload - size: " << boost::lexical_cast<std::string>(archive_data.size()) << " data: " << archive_data);
                     }
                     catch (boost::archive::archive_exception& e)
                     {
@@ -94,17 +97,15 @@ namespace watcher
                         {
                             LOG_WARN("Did you link this message's object file into this executable?"); 
                         }
-                        bytesUsed=bufferSize; // GTL Just give up on this read...
                         TRACE_EXIT_RET("false");
                         return false;
                     }
 
-                    bytesUsed=header_length+inbound_data_size;
                     TRACE_EXIT_RET("true");
                     return true;
                 }
 
-                template<class T>
+            template<class T>
                 bool marshal(const T &t, std::vector<boost::asio::const_buffer> &outBuffers)
                 { 
                     TRACE_ENTER();
@@ -137,12 +138,12 @@ namespace watcher
                     return true;
                 }
 
+            // The size of a fixed length header.
+            enum { header_length = 8 };
+
         private:
 
             DECLARE_LOGGER();
-
-            /// The size of a fixed length header.
-            enum { header_length = 8 };
 
             /// Holds an outbound header.
             std::string outbound_header_;
@@ -152,9 +153,6 @@ namespace watcher
 
             // Holds an inbound header.
             char inbound_header_[header_length];
-
-            /// Holds the inbound data.
-            std::vector<char> inbound_data_;
 
     }; // class DataMarshaller
 } // namespace watcher

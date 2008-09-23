@@ -44,7 +44,8 @@ namespace watcher
             DECLARE_LOGGER();
 
             /// Handle completion of a read operation.
-            void handle_read(const boost::system::error_code& e, std::size_t bytes_transferred);
+            void handle_read_header(const boost::system::error_code& e, std::size_t bytes_transferred);
+            void handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred);
 
             /// Handle completion of a write operation.
             void handle_write(const boost::system::error_code& e, MessagePtr reply);
@@ -60,7 +61,9 @@ namespace watcher
             IncomingBuffer incomingBuffer;
 
             /// Buffer for outgoing data
-            std::vector<boost::asio::const_buffer> outboundDataBuffers;
+            typedef std::vector<boost::asio::const_buffer> OutboundDataBuffers;
+            typedef boost::shared_ptr<OutboundDataBuffers> OutboundDataBuffersPtr;
+            OutboundDataBuffers outboundDataBuffers;
 
             // The incoming messages.
             MessagePtr request;

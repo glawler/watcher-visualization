@@ -41,17 +41,19 @@ boost::asio::ip::tcp::socket& ServerConnection::socket()
 void ServerConnection::start()
 {
     TRACE_ENTER(); 
-    socket_.async_read_some(boost::asio::buffer(incomingBuffer),
+    boost::asio::async_read(
+            socket_, 
+            boost::asio::buffer(incomingBuffer, DataMarshaller::header_length),
             strand_.wrap(
                 boost::bind(
-                    &ServerConnection::handle_read, 
+                    &ServerConnection::handle_read_header, 
                     shared_from_this(),
                     boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred)));
     TRACE_EXIT();
 }
 
-void ServerConnection::handle_read(const boost::system::error_code& e, std::size_t bytes_transferred)
+void ServerConnection::handle_read_header(const boost::system::error_code& e, std::size_t bytes_transferred)
 {
     TRACE_ENTER(); 
     if (!e)
@@ -59,10 +61,40 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
         LOG_DEBUG("Read " << bytes_transferred << " bytes."); 
 
         boost::logic::tribool result;
-        size_t bytesUsed;
-        result = dataMarshaller.unmarshal(request, incomingBuffer.begin(), bytes_transferred, bytesUsed);
+        size_t payloadSize;
 
-        if (result)
+        if (!dataMarshaller.unmarshalHeader(incomingBuffer.begin(), bytes_transferred, payloadSize))
+        {
+            LOG_ERROR("Error parsing incoming message header.");
+        }
+        else
+        {
+            LOG_DEBUG("Reading message payload of " << payloadSize << " bytes.");
+            boost::asio::async_read(
+                    socket_, 
+                    boost::asio::buffer(incomingBuffer, payloadSize), 
+                    strand_.wrap(
+                        boost::bind(
+                            &ServerConnection::handle_read_payload,
+                            shared_from_this(),
+                            boost::asio::placeholders::error,
+                            boost::asio::placeholders::bytes_transferred)));
+        }
+    }
+    else
+    {
+        LOG_ERROR("Error reading message header: " << e.message());
+    }
+    TRACE_EXIT();
+}
+
+void ServerConnection::handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred)
+{
+    TRACE_ENTER();
+
+    if (!e)
+    {
+        if (dataMarshaller.unmarshalPayload(request, incomingBuffer.begin(), bytes_transferred))
         {
             LOG_DEBUG("Recvd message: " << *request); 
 
@@ -83,10 +115,10 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
                     replies.push_back(reply); 
 
                     LOG_DEBUG("Marshalling outbound message"); 
-                    outboundDataBuffers.clear(); 
-                    dataMarshaller.marshal(reply, outboundDataBuffers);
+                    OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
+                    dataMarshaller.marshal(reply, *obDataPtr);
                     LOG_DEBUG("Sending reply message: " << *reply);
-                    boost::asio::async_write(socket_, outboundDataBuffers, 
+                    boost::asio::async_write(socket_, *obDataPtr, 
                             strand_.wrap(
                                 boost::bind(
                                     &ServerConnection::handle_write, 
@@ -101,35 +133,19 @@ void ServerConnection::handle_read(const boost::system::error_code& e, std::size
                 }
             }
         }
-        else if (!result)
+        else
         {
             LOG_WARN("Did not understand incoming message. Sending back a nack");
             MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
-            dataMarshaller.marshal(reply, outboundDataBuffers);
+            OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
+            dataMarshaller.marshal(reply, *obDataPtr);
             LOG_DEBUG("Sending NACK as reply: " << *reply);
 
             replies.push_back(reply);
-            boost::asio::async_write(socket_, outboundDataBuffers,
+            boost::asio::async_write(socket_, *obDataPtr,
                     strand_.wrap(
                         boost::bind(&ServerConnection::handle_write, shared_from_this(),
                             boost::asio::placeholders::error, reply)));
-        }
-        else
-        {
-            LOG_WARN("Not enough data received for this message, reading more - hopfully it's there."); 
-            // read more data - not enough sent.
-            socket_.async_read_some(boost::asio::buffer(incomingBuffer),
-                    strand_.wrap(
-                        boost::bind(&ServerConnection::handle_read, shared_from_this(),
-                            boost::asio::placeholders::error,
-                            boost::asio::placeholders::bytes_transferred)));
-        }
-
-        if (bytesUsed != bytes_transferred)
-        {
-            LOG_DEBUG("Looks like we got more than one message in a packet, re-reading with the rest of the buffer"); 
-            memcpy(incomingBuffer.c_array(), &incomingBuffer[bytesUsed], bytes_transferred-bytesUsed);
-            handle_read(e, bytes_transferred-bytesUsed);
         }
     }
 
@@ -162,10 +178,10 @@ void ServerConnection::handle_write(const boost::system::error_code& e, MessageP
         {
             LOG_DEBUG("Still more replies to send, sending next one."); 
             LOG_DEBUG("Marshalling outbound message"); 
-            outboundDataBuffers.clear(); 
-            dataMarshaller.marshal(replies.front(), outboundDataBuffers);
+            OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
+            dataMarshaller.marshal(replies.front(), *obDataPtr);
             LOG_DEBUG("Sending reply message: " << *replies.front());
-            boost::asio::async_write(socket_, outboundDataBuffers, 
+            boost::asio::async_write(socket_, *obDataPtr, 
                     strand_.wrap(
                         boost::bind(
                             &ServerConnection::handle_write, 

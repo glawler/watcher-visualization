@@ -1,5 +1,6 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "clientConnection.h"
 #include "testMessage.h"
@@ -16,13 +17,15 @@ int main(int argc, char **argv)
     {
         log4cxx::PropertyConfigurator::configure("log.properties");                                                                           
 
+        int loopCount=argc > 1 ? boost::lexical_cast<int>(argv[1]) : 2;
+
         asio::io_service ioserv;
 
         ClientConnection c(ioserv, "glory", "watcherd"); 
 
         vector<int> ints;
         string strVal = "from testCC"; 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < loopCount; i++)
         {
             ints.push_back(i);
             ints.push_back(i*2);
