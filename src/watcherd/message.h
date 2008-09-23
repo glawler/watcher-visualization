@@ -21,6 +21,7 @@ namespace watcher
 
             unsigned int version;
             MessageType type;
+            long long int timestamp;    // in Epoch milliseconds. 
 
             Message();
             Message(const MessageType &t, const unsigned int version);

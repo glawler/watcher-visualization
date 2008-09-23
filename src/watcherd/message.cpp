@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include "message.h"
 
 #include <boost/archive/polymorphic_iarchive.hpp>
@@ -11,16 +12,22 @@ INIT_LOGGER(Message, "Message");
 
 BOOST_CLASS_EXPORT_GUID(Message, "Message");
 
-Message::Message() : 
-    version(0), type(UNKNOWN_MESSAGE_TYPE)
+Message::Message() : version(0), type(UNKNOWN_MESSAGE_TYPE)
 {
-
+    TRACE_ENTER();
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    timestamp = (long long int)tp.tv_sec * 1000 + (long long int)tp.tv_usec/1000;
+    TRACE_EXIT(); 
 }
 
 Message::Message(const MessageType &t, const unsigned int v) : 
     version(v), type(t)
 {
     TRACE_ENTER();
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    timestamp = (long long int)tp.tv_sec * 1000 + (long long int)tp.tv_usec/1000;
     TRACE_EXIT();
 }
 
@@ -50,6 +57,7 @@ Message &Message::operator=(const Message &other)
     TRACE_ENTER();
     version=other.version;
     type=other.type;
+    timestamp=other.timestamp;
     TRACE_EXIT();
     return *this;
 }
@@ -58,7 +66,7 @@ Message &Message::operator=(const Message &other)
 std::ostream &Message::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
-    out << " version: " << version << " type: " << type << " "; 
+    out << " version: " << version << " type: " << type << " time: " << timestamp << " "; 
     TRACE_EXIT();
     return out;
 }
@@ -76,6 +84,7 @@ void Message::serialize(boost::archive::polymorphic_iarchive & ar, const unsigne
     TRACE_ENTER();
     ar & version;
     ar & type;
+    ar & timestamp;
     TRACE_EXIT();
 }
 void Message::serialize(boost::archive::polymorphic_oarchive & ar, const unsigned int file_version)
@@ -83,5 +92,6 @@ void Message::serialize(boost::archive::polymorphic_oarchive & ar, const unsigne
     TRACE_ENTER();
     ar & version;
     ar & type;
+    ar & timestamp;
     TRACE_EXIT();
 }
