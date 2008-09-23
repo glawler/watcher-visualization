@@ -102,4 +102,9 @@ syntax: regexp
 ^src/watcherd/gpsMessageTest
 ^src/watcherd/testCC
 
+# SQLLite libs.
+^/bin/sqlite3
+^src/sqlite-3.6.3/*
+^tars/sqlite-amalgamation-3.6.3.tar.gz
+
 
