@@ -26,14 +26,16 @@ LDFLAGS+=-lpthread
 SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp \
 	 serverConnection.cpp dataMarshaller.cpp server.cpp \
 	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
-	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp 
+	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp watcherColors.cpp \
+	 labelMessage.cpp  labelMessageHandler.cpp  
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
 	serverConnection.h dataMarshaller.h server.h messageStatus.h \
 	clientConnection.h gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
-	testMessageHandler.h messageHandlerFactory.h client.h 
+	testMessageHandler.h messageHandlerFactory.h client.h watcherColors.h \
+	labelMessage.h  labelMessageHandler.h 
 OBJS=$(SRCS:.cpp=.o) 
 
-MAINS=gpsMessageTest.cpp watcherd.cpp testCC.cpp
+MAINS=gpsMessageTest.cpp watcherd.cpp testCC.cpp labelMessageTest.cpp
 
 BINS=$(MAINS:.cpp=)
 
@@ -43,6 +45,9 @@ watcherd: $(OBJS) watcherd.o
 	$(CXX) $^ -o watcherd $(LIBS) $(LDFLAGS)
 
 gpsMessageTest: $(OBJS) gpsMessageTest.o
+	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
+
+labelMessageTest: $(OBJS) labelMessageTest.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
 testCC: $(OBJS) testCC.o

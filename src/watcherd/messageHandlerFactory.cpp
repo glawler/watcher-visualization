@@ -2,6 +2,7 @@
 #include "messageStatusHandler.h"
 #include "testMessageHandler.h"
 #include "gpsMessageHandler.h"
+#include "labelMessageHandler.h"
 
 using namespace watcher;
 
@@ -28,6 +29,9 @@ boost::shared_ptr<MessageHandler> MessageHandlerFactory::getMessageHandler(const
             break;
         case GPS_MESSAGE_TYPE: 
             return boost::shared_ptr<GPSMessageHandler>(new GPSMessageHandler);
+            break;
+        case LABEL_MESSAGE_TYPE: 
+            return boost::shared_ptr<LabelMessageHandler>(new LabelMessageHandler);
             break;
     }
 

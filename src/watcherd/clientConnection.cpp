@@ -130,7 +130,7 @@ void ClientConnection::doWrite(const MessagePtr &message)
     {
         outBuffers.clear(); 
         dataMarshaller.marshal(dataPtr->theRequest, outBuffers);
-        LOG_DEBUG("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest<< ")");
+        LOG_INFO("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest<< ")");
         int numBytes=0;
         for(OutBuffers::const_iterator i = outBuffers.begin(); i !=  outBuffers.end(); ++i)
             numBytes+=boost::asio::buffer_size(*i);
@@ -227,7 +227,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
 
                 if (result)
                 {
-                    LOG_DEBUG("Successfully parsed response from server for message " << dataPtr->theRequest 
+                    LOG_INFO("Successfully parsed response from server for message " << dataPtr->theRequest 
                             << ": " << *dataPtr->theReply);
                 }
                 else if (!result)
@@ -246,39 +246,39 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
     TRACE_EXIT(); 
 }
 
-void ClientConnection::handle_read_payload(const boost::system::error_code &e, std::size_t bytes_transferred, const TransferDataPtr &dataPtr)
-{
-    TRACE_ENTER();
-
-    if (!e)
-    {
-        LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it."); 
-
-        bool result = dataMarshaller.unmarshalPayload(dataPtr->theReply, &dataPtr->incomingBuffer[0], bytes_transferred); 
-
-        if (result)
-        {
-            LOG_DEBUG("Successfully parsed response from server for message " << dataPtr->theRequest 
-                    << ": " << *dataPtr->theReply);
-        }
-        else if (!result)
-        {
-            LOG_WARN("Unable to parse incoming server response for message " << dataPtr);
-        }
-        else
-        {
-            LOG_WARN("Did not get all the bytes for reponse to message " << dataPtr->theRequest 
-                    << " giving up on it even though I should try to get the rest of the message"); 
-        }
-
-    }
-    else
-    {
-        LOG_WARN("Error reading response from server for message " << dataPtr->theRequest << ": " << e.message());
-        doClose(); 
-    }
-
-    TRACE_EXIT();
-}
+// void ClientConnection::handle_read_payload(const boost::system::error_code &e, std::size_t bytes_transferred, const TransferDataPtr &dataPtr)
+// {
+//     TRACE_ENTER();
+// 
+//     if (!e)
+//     {
+//         LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it."); 
+// 
+//         bool result = dataMarshaller.unmarshalPayload(dataPtr->theReply, &dataPtr->incomingBuffer[0], bytes_transferred); 
+// 
+//         if (result)
+//         {
+//             LOG_DEBUG("Successfully parsed response from server for message " << dataPtr->theRequest 
+//                     << ": " << *dataPtr->theReply);
+//         }
+//         else if (!result)
+//         {
+//             LOG_WARN("Unable to parse incoming server response for message " << dataPtr);
+//         }
+//         else
+//         {
+//             LOG_WARN("Did not get all the bytes for reponse to message " << dataPtr->theRequest 
+//                     << " giving up on it even though I should try to get the rest of the message"); 
+//         }
+// 
+//     }
+//     else
+//     {
+//         LOG_WARN("Error reading response from server for message " << dataPtr->theRequest << ": " << e.message());
+//         doClose(); 
+//     }
+// 
+//     TRACE_EXIT();
+// }
 
 

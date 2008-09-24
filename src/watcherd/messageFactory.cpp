@@ -4,6 +4,7 @@
 #include "testMessage.h"
 #include "gpsMessage.h"
 #include "messageStatus.h"
+#include "labelMessage.h"
 
 using namespace watcher;
 
@@ -25,6 +26,9 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
             break;
         case GPS_MESSAGE_TYPE:
             return boost::shared_ptr<GPSMessage>(new GPSMessage);
+            break;
+        case LABEL_MESSAGE_TYPE:
+            return boost::shared_ptr<LabelMessage>(new LabelMessage);
             break;
     }
     return boost::shared_ptr<Message>(); // == NULL

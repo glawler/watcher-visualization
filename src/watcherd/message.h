@@ -15,13 +15,15 @@ namespace boost {
 
 namespace watcher 
 {
+    typedef long long int Timestamp;    // in Epoch milliseconds
+
     class Message 
     {
         public:
 
             unsigned int version;
             MessageType type;
-            long long int timestamp;    // in Epoch milliseconds. 
+            Timestamp timestamp;  
 
             Message();
             Message(const MessageType &t, const unsigned int version);

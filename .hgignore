@@ -100,7 +100,11 @@ syntax: regexp
 ^src/watcherd/test/depend
 ^src/watcherd/test/testClientConnection
 ^src/watcherd/gpsMessageTest
+^src/watcherd/labelMessageTest
 ^src/watcherd/testCC
+
+^src/watcherd/test/testLabelMessage
+^src/watcherd/test/colorTest
 
 # SQLLite libs.
 ^/bin/sqlite3

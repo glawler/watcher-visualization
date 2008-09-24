@@ -102,7 +102,7 @@ int main(int argc, char **argv)
     // Now do some actual work.
     // 
     printf("Initializing logging system\n"); 
-    log4cxx::PropertyConfigurator::configure(logProps ? logProps : "log.properties");
+    LOAD_LOG_PROPS(logProps ? logProps : "log.properties");
 
     watcher::Client client(serverName); 
     printf("Connecting to %s and sending message.\n", serverName);

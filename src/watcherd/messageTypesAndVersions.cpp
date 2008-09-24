@@ -20,8 +20,11 @@ ostream &watcher::operator<<(ostream &out, const MessageType &type)
         case GPS_MESSAGE_TYPE: 
             out << static_cast<int>(GPS_MESSAGE_TYPE) << " (gps)";
             break;
-        default: 
-            out << "Error - undefined message type"; 
+        case LABEL_MESSAGE_TYPE:
+            out << static_cast<int>(LABEL_MESSAGE_TYPE) << " (label)";
+
+            // don't put default case so the (smart) compiler can
+            // tell us if we've not put a MessageType here....
     }
     out << "\"";
     return out;
