@@ -22,13 +22,17 @@ colorTestSrc=../watcherColors.cpp
 colorTestInc=../watcherColors.h 
 colorTestObjs=$(colorTestSrc:.cpp=.o) colorTest.o
 
-labelMessageTestSrc=../message.cpp ../labelMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp
-labelMessageTestInc=../message.cpp ../labelMessage.cpp ../watcherColors.h ../messageTypesAndVersions.h
+labelMessageTestSrc=../message.cpp ../labelMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
+labelMessageTestInc=../message.cpp ../labelMessage.cpp ../watcherColors.h ../messageTypesAndVersions.h ../watcherGlobalFunctions.h
 labelMessageTestObjs=$(labelMessageTestSrc:.cpp=.o) testLabelMessage.o
 
-ALL_OBJS=$(colorTestObjs) $(testCCObjs) $(testMessageObjs) $(labelMessageTestObjs)
+edgeMessageTestSrc=../message.cpp ../edgeMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
+edgeMessageTestInc=../message.cpp ../edgeMessage.cpp ../watcherColors.h ../messageTypesAndVersions.h ../watcherGlobalFunctions.h
+edgeMessageTestObjs=$(edgeMessageTestSrc:.cpp=.o) testEdgeMessage.o
 
-BINS=colorTest testLabelMessage
+ALL_OBJS=$(colorTestObjs) $(testCCObjs) $(testMessageObjs) $(labelMessageTestObjs) $(edgeMessageTestObjs)
+
+BINS=colorTest testLabelMessage testEdgeMessage
 
 all: $(BINS)
 
@@ -41,8 +45,14 @@ testCC: $(testCCObjs)
 testLabelMessage: $(labelMessageTestObjs)
 	$(CXX) $^ -o testLabelMessage $(LIBS) $(LDFLAGS)
 
+testEdgeMessage: $(edgeMessageTestObjs)
+	$(CXX) $^ -o testEdgeMessage $(LIBS) $(LDFLAGS)
+
 testTestMessage: 
 	$(CXX) $(CXXFLAGS) $(testMessageSrc) testTestMessage.cpp -o testMessage $(LIBS) $(LDFLAGS)
+
+test: $(BINS)
+	@for b in $(BINS); do ./$$b; done; 
 
 clean: 
 	rm -f $(BINS) $(ALL_OBJS)

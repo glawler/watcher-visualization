@@ -76,18 +76,16 @@ BOOST_AUTO_TEST_CASE( archive_test )
 
     BOOST_CHECK_EQUAL( lmOut, lmIn );
 
-    // ostringstream os2;
-    // archive::polymorphic_binary_oarchive oa2(os2);
-    // oa2 << green;
+    ostringstream os2;
+    archive::polymorphic_binary_oarchive oa2(os2);
+    oa2 << lmOut;
 
-    // istringstream is2(os2.str());
-    // archive::polymorphic_binary_iarchive ia2(is2);
-    // ia2 >> c;
+    istringstream is2(os2.str());
+    archive::polymorphic_binary_iarchive ia2(is2);
+    ia2 >> lmIn;
 
-    // LOG_INFO( "Checking binary archiving..." ); 
-    // BOOST_CHECK_EQUAL( c, green );
-    // BOOST_CHECK_EQUAL( c, Color::green );
-    // BOOST_CHECK_EQUAL( green, Color::green );
+    LOG_INFO( "Checking binary archiving..." ); 
+    BOOST_CHECK_EQUAL( lmOut, lmIn );
 }
 
 BOOST_AUTO_TEST_CASE( output_test )
