@@ -53,33 +53,49 @@ void ClientConnection::doConnect()
 
     LOG_DEBUG("Starting connection sequence to " << server << " running service " << service); 
 
-    while(true)
+    try
     {
-        tcp::resolver resolver(ioService); 
-        tcp::resolver::query query(server, service);
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-        tcp::resolver::iterator end;
-
-        // Try each endpoint until we successfully establish a connection.
-        boost::system::error_code error;
-        do 
+        while(true)
         {
-            theSocket.close();
-            LOG_DEBUG("Attempting connect."); 
-            theSocket.connect(*endpoint_iterator++, error);
-        } while (error && endpoint_iterator != end);
+            tcp::resolver resolver(ioService); 
+            tcp::resolver::query query(server, service);
+            tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+            tcp::resolver::iterator end;
 
-        if (error)
-        {
-            LOG_WARN("Unable to connect to server, trying again in 5 seconds.");
-            boost::asio::deadline_timer t(ioService, boost::posix_time::seconds(5));
-            t.wait(); 
+            // Try each endpoint until we successfully establish a connection.
+            boost::system::error_code error;
+            do 
+            {
+                theSocket.close();
+                LOG_DEBUG("Attempting connect."); 
+                theSocket.connect(*endpoint_iterator++, error);
+            } while (error && endpoint_iterator != end);
+            if (error)
+            {
+                connected=false;
+            }
+            else
+            {
+                connected=true;
+                break;
+            }
         }
+    }
+    catch (const boost::system::system_error &e)
+    {
+        connected=false;
+        if (e.code()==boost::asio::error::service_not_found)
+             LOG_INFO("watcherd service not found. Please add \"watcherd    8095/tcp\" to your /etc/services file.")
         else
-        {
-            connected=true;
-            break;
-        }
+            LOG_ERROR("Caught connection error: " << e.what() << " : " << e.code());
+    }
+    if (!connected)
+    {
+        LOG_WARN("Unable to connect to server, trying again in 5 seconds.");
+        // boost::asio::deadline_timer t(ioService, boost::posix_time::seconds(5));
+        // t.wait(); 
+        sleep(5);       // GTL - don't exit this function until we're connected. doConnect() is synchronus
+        doConnect();
     }
 
     TRACE_EXIT();

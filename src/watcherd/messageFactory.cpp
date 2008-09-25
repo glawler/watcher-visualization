@@ -5,6 +5,7 @@
 #include "gpsMessage.h"
 #include "messageStatus.h"
 #include "labelMessage.h"
+#include "edgeMessage.h"
 
 using namespace watcher;
 
@@ -30,6 +31,12 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
         case LABEL_MESSAGE_TYPE:
             return boost::shared_ptr<LabelMessage>(new LabelMessage);
             break;
+        case EDGE_MESSAGE_TYPE:
+            return boost::shared_ptr<EdgeMessage>(new EdgeMessage);
+            break;
+
+            // GTL - do not put a default or the compiler
+            // won't tell us when we've missed a case.
     }
     return boost::shared_ptr<Message>(); // == NULL
 }

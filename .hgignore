@@ -99,8 +99,10 @@ syntax: regexp
 ^src/watcherd/depend
 ^src/watcherd/test/depend
 ^src/watcherd/test/testClientConnection
+^src/watcherd/test/testEdgeMessage
 ^src/watcherd/gpsMessageTest
 ^src/watcherd/labelMessageTest
+^src/watcherd/edgeMessageTest
 ^src/watcherd/testCC
 
 ^src/watcherd/test/testLabelMessage

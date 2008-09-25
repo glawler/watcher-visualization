@@ -36,43 +36,6 @@ Color::Color() : r(0), g(0), b(0), a(0)
     TRACE_EXIT();
 }
 
-Color::Color(const std::string &color)
-{
-    if (color=="black") *this=Color::black;
-    else if(color=="white") *this=Color::white;
-    else if(color=="violet") *this=Color::violet;
-    else if(color=="indigo") *this=Color::indigo;
-    else if(color=="blue") *this=Color::blue;
-    else if(color=="green") *this=Color::green;
-    else if(color=="yellow") *this=Color::yellow;
-    else if(color=="orange") *this=Color::orange;
-    else if(color=="red") *this=Color::red;
-    else if(color=="darkblue") *this=Color::darkblue;
-    else if(color=="gold") *this=Color::gold;
-    else if(color=="turquoise") *this=Color::turquoise;
-    else if(color=="brown") *this=Color::brown;
-    else if(color=="deeppink") *this=Color::deeppink;
-    else
-    {
-        try
-        {
-            istringstream is(color); 
-            uint32_t vals;
-            is >> hex >> vals;
-            r=vals>>24;
-            g=vals>>16;
-            b=vals>>8;
-            a=vals;
-        }
-        catch (const bad_lexical_cast &e)
-        {
-            LOG_ERROR("Unable to convert " << color << " into a color. Must be standard ROYGBIV or in hex value format: 0xRRGGBBAA"); 
-            LOG_ERROR("(Error: " << e.what() << ")");
-            throw e;
-        }
-    }
-}
-
 Color::Color(unsigned char R, unsigned char G, unsigned char B, unsigned char A) :
     r(R), g(G), b(B), a(A)
 {
@@ -103,6 +66,42 @@ Color::~Color()
     TRACE_EXIT();
 }
 
+bool Color::fromString(const std::string &color)
+{
+    if (color=="black") *this=Color::black;
+    else if(color=="white") *this=Color::white;
+    else if(color=="violet") *this=Color::violet;
+    else if(color=="indigo") *this=Color::indigo;
+    else if(color=="blue") *this=Color::blue;
+    else if(color=="green") *this=Color::green;
+    else if(color=="yellow") *this=Color::yellow;
+    else if(color=="orange") *this=Color::orange;
+    else if(color=="red") *this=Color::red;
+    else if(color=="darkblue") *this=Color::darkblue;
+    else if(color=="gold") *this=Color::gold;
+    else if(color=="turquoise") *this=Color::turquoise;
+    else if(color=="brown") *this=Color::brown;
+    else if(color=="deeppink") *this=Color::deeppink;
+    else
+    {
+        // basic sanity checking, may be a better way to do this.
+        if (color[0]!='0' && color[1]!='x' && color.length()!=10)
+        {
+            TRACE_EXIT_RET("false"); 
+            return false;
+        }
+        istringstream is(color); 
+        uint32_t vals;
+        is >> hex >> vals;
+        r=vals>>24;
+        g=vals>>16;
+        b=vals>>8;
+        a=vals;
+    }
+    TRACE_EXIT_RET("true");
+    return true;
+}
+
 bool Color::operator==(const Color &other) const
 {
     TRACE_ENTER();
@@ -129,7 +128,7 @@ Color &Color::operator=(const Color &other)
 std::ostream &Color::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
-    out << " Color: " << toString(*this); 
+    out << toString(*this); 
     TRACE_EXIT();
     return out;
 }

@@ -2,7 +2,7 @@
 #define WATCHER_COLORS_H
 
 #include <iostream>
-#include <boost/shared_ptr.hpp>
+#include <exception>
 #include "logger.h"
 
 namespace boost {
@@ -61,7 +61,8 @@ namespace watcher
             // color = "black", "white", etc or hex value, i.e. "0xff34ds00"
             // This constructor will throw boost::bad_lexical_cast if the string is 
             // not properly formatted (able to be converted into a uint32_t). 
-            Color(const std::string &color);    
+            // Returns false on badly formatted string.
+            bool fromString(const std::string &color);    
 
             Color(const Color &other);
             ~Color(); 
@@ -84,4 +85,6 @@ namespace watcher
     typedef boost::shared_ptr<Color> ColorPtr;
     std::ostream &operator<<(std::ostream &out, const Color &c);
 }
+
+
 #endif // WATCHER_COLORS_H

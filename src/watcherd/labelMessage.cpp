@@ -6,6 +6,7 @@
 
 #include "labelMessage.h"
 #include "messageTypesAndVersions.h"
+#include "watcherGlobalFunctions.h"     // for address serialization
 
 using namespace std;
 using namespace watcher;
@@ -117,9 +118,11 @@ void LabelMessage::serialize(boost::archive::polymorphic_iarchive & ar, const un
     ar & expiration;
     ar & fontSize;
 
-    string tmp;
-    ar & tmp;
-    address=boost::asio::ip::address::from_string(tmp); 
+    // string tmp;
+    // ar & tmp;
+    // address=boost::asio::ip::address::from_string(tmp); 
+    
+    ar & address;
 
     TRACE_EXIT();
 }
@@ -134,8 +137,9 @@ void LabelMessage::serialize(boost::archive::polymorphic_oarchive & ar, const un
     ar & expiration;
     ar & fontSize;
 
-    string tmp=address.to_string();
-    ar & tmp;
+    // string tmp=address.to_string();
+    // ar & tmp;
+    ar & address;
 
     TRACE_EXIT();
 }

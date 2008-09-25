@@ -22,12 +22,12 @@ void usage(const char *progName)
     fprintf(stderr, "   -h,-H,-?,-help           Show this usage message\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "Optional args:\n");
-    fprintf(stderr, "-n, --node=address          The node to attach the label to. If no node is given, the label will float in space somewhere.\n"); 
-    fprintf(stderr, "-p, --logProps              log.properties file, which controls logging for this program\n");
-    fprintf(stderr, "-z, --fontSize=size         The font size of the label\n");
-    fprintf(stderr, "-f, --foreground=color      The foreground color of the label. Can be ROYGBIV or RGBA format\n");
-    fprintf(stderr, "-f, --background=color      The background color of the label. Can be ROYGBIV or RGBA format\n");
-    fprintf(stderr, "-x, --expiration=seconds    How long in secondt to diplay the label\n");
+    fprintf(stderr, "   -n, --node=address          The node to attach the label to. If no node is given, the label will float in space somewhere.\n"); 
+    fprintf(stderr, "   -p, --logProps              log.properties file, which controls logging for this program\n");
+    fprintf(stderr, "   -z, --fontSize=size         The font size of the label\n");
+    fprintf(stderr, "   -f, --foreground=color      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
+    fprintf(stderr, "   -b, --background=color      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n");
+    fprintf(stderr, "   -x, --expiration=seconds    How long in secondt to diplay the label\n");
 
     exit(1); 
 }
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     asio::ip::address address;
     Color fg=Color::black;
     Color bg=Color::white;
-    uint32_t expiration=10;
+    uint32_t expiration=10000;
 
     while (true) 
     {
@@ -56,13 +56,13 @@ int main(int argc, char **argv)
             {"logProps", required_argument, 0, 'p'},
             {"fontSize", required_argument, 0, 'z'},
             {"foreground", required_argument, 0, 'f'},
-            {"background", required_argument, 0, 'g'},
+            {"background", required_argument, 0, 'b'},
             {"expiration", required_argument, 0, 'x'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "l:s:n:p:z:f:g;x:hH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "l:s:n:p:z:f:b;x:hH?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -73,8 +73,8 @@ int main(int argc, char **argv)
             case 's': server=optarg; break;
             case 'p': logProps=optarg; break;
             case 'z': fontSize=lexical_cast<unsigned int>(optarg); break;
-            case 'f': fg=Color(optarg); break;
-            case 'g': bg=Color(optarg); break;
+            case 'f': { bool val=fg.fromString(optarg); if (!val) { printf("\nBad argument for fg color\n\n"); usage(argv[0]); } break; }
+            case 'g': { bool val=bg.fromString(optarg); if (!val) { printf("\nBad argument for bg color\n\n"); usage(argv[0]); } break; }
             case 'x': expiration=lexical_cast<uint32_t>(optarg); break;
             case 'n': 
                       {

@@ -83,7 +83,14 @@ void ServerConnection::handle_read_header(const boost::system::error_code& e, st
     }
     else
     {
-        LOG_ERROR("Error reading message header: " << e.message());
+        if (e==boost::asio::error::eof)
+        {
+            LOG_INFO("Connection to client closed."); 
+        }
+        else
+        {
+            LOG_ERROR("Error reading socket: " << e.message());
+        }
     }
     TRACE_EXIT();
 }
@@ -96,7 +103,7 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
     {
         if (dataMarshaller.unmarshalPayload(request, incomingBuffer.begin(), bytes_transferred))
         {
-            LOG_DEBUG("Recvd message: " << *request); 
+            LOG_INFO("Recvd message: " << *request); 
 
             boost::shared_ptr<MessageHandler> handler = MessageHandlerFactory::getMessageHandler(request->type);
 
@@ -117,7 +124,7 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
                     LOG_DEBUG("Marshalling outbound message"); 
                     OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
                     dataMarshaller.marshal(reply, *obDataPtr);
-                    LOG_DEBUG("Sending reply message: " << *reply);
+                    LOG_INFO("Sending reply: " << *reply);
                     boost::asio::async_write(socket_, *obDataPtr, 
                             strand_.wrap(
                                 boost::bind(
@@ -128,7 +135,7 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
                 }
                 else
                 {
-                    LOG_DEBUG("Not sending reply - doesn't need one"); 
+                    LOG_INFO("Not sending reply - request doesn't need one"); 
                     // This execution branch causes this connection to disapear.
                 }
             }
@@ -139,7 +146,7 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
             MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
             OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
             dataMarshaller.marshal(reply, *obDataPtr);
-            LOG_DEBUG("Sending NACK as reply: " << *reply);
+            LOG_INFO("Sending NACK as reply: " << *reply);
 
             replies.push_back(reply);
             boost::asio::async_write(socket_, *obDataPtr,
