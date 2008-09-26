@@ -22,12 +22,19 @@ void usage(const char *progName)
     fprintf(stderr, "   -h,-H,-?,-help           Show this usage message\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "Optional args:\n");
-    fprintf(stderr, "   -n, --node=address          The node to attach the label to. If no node is given, the label will float in space somewhere.\n"); 
+    fprintf(stderr, "   If address is specified, the label will attach to the node with that address. If cooridinates are\n");
+    fprintf(stderr, "   specified, the label will float at those coordinates. The node address takes precedence. If neither\n"); 
+    fprintf(stderr, "   option is specified, the label will attach to the local node in the watcher.\n"); 
+    fprintf(stderr, "   -n, --node=address          The node to attach the label to.\n"); 
+    fprintf(stderr, "   -x, --latitude=coord        The latitude to float the node at.\n"); 
+    fprintf(stderr, "   -y, --longitude=coord       The longitude to float the node at.\n"); 
+    fprintf(stderr, "   -z, --altitiude=coord       The altitude to float the node at.\n"); 
+    fprintf(stderr, "\n");
     fprintf(stderr, "   -p, --logProps              log.properties file, which controls logging for this program\n");
-    fprintf(stderr, "   -z, --fontSize=size         The font size of the label\n");
+    fprintf(stderr, "   -t, --fontSize=size         The font size of the label\n");
     fprintf(stderr, "   -f, --foreground=color      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
     fprintf(stderr, "   -b, --background=color      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n");
-    fprintf(stderr, "   -x, --expiration=seconds    How long in secondt to diplay the label\n");
+    fprintf(stderr, "   -e, --expiration=seconds    How long in secondt to diplay the label\n");
 
     exit(1); 
 }
@@ -45,6 +52,7 @@ int main(int argc, char **argv)
     Color fg=Color::black;
     Color bg=Color::white;
     uint32_t expiration=10000;
+    float lat=0.0, lng=0.0, alt=0.0;
 
     while (true) 
     {
@@ -53,16 +61,19 @@ int main(int argc, char **argv)
             {"label", required_argument, 0, 'l'},
             {"server", required_argument, 0, 's'},
             {"node", required_argument, 0, 'n'},
+            {"latitude", required_argument, 0, 'x'},
+            {"longitude", required_argument, 0, 'y'},
+            {"altitiude", required_argument, 0, 'z'},
             {"logProps", required_argument, 0, 'p'},
-            {"fontSize", required_argument, 0, 'z'},
+            {"fontSize", required_argument, 0, 't'},
             {"foreground", required_argument, 0, 'f'},
             {"background", required_argument, 0, 'b'},
-            {"expiration", required_argument, 0, 'x'},
+            {"expiration", required_argument, 0, 'e'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "l:s:n:p:z:f:b;x:hH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "l:s:n:x:y:t:p:z:f:b;e:hH?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -72,10 +83,10 @@ int main(int argc, char **argv)
             case 'l': label=optarg; break;
             case 's': server=optarg; break;
             case 'p': logProps=optarg; break;
-            case 'z': fontSize=lexical_cast<unsigned int>(optarg); break;
+            case 't': fontSize=lexical_cast<unsigned int>(optarg); break;
             case 'f': { bool val=fg.fromString(optarg); if (!val) { printf("\nBad argument for fg color\n\n"); usage(argv[0]); } break; }
             case 'g': { bool val=bg.fromString(optarg); if (!val) { printf("\nBad argument for bg color\n\n"); usage(argv[0]); } break; }
-            case 'x': expiration=lexical_cast<uint32_t>(optarg); break;
+            case 'e': expiration=lexical_cast<uint32_t>(optarg); break;
             case 'n': 
                       {
                           boost::system::error_code e;
@@ -89,6 +100,9 @@ int main(int argc, char **argv)
                           }
                       }
                       break;
+            case 'x': lat=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
+            case 'y': lng=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
+            case 'z': alt=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
             case 'h':
             case 'H':
             case '?':
@@ -120,6 +134,9 @@ int main(int argc, char **argv)
     lm->foreground=fg;
     lm->background=bg;
     lm->expiration=expiration;
+    lm->lat=lat;
+    lm->lng=lng;
+    lm->alt=alt;
 
     if(!client.sendMessage(lm))
     {
