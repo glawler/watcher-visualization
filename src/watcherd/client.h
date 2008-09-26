@@ -4,6 +4,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 #include "logger.h"
 
 #include "clientConnection.h"
@@ -40,8 +41,10 @@ namespace watcher
             std::string service;
 
             ClientConnectionPtr clientConnection;
-
     };
+
+    typedef boost::shared_ptr<Client> ClientPtr;
+
 } // namespace watcher
 
 #endif // WATCHER_CLIENT_HPP
