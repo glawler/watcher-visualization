@@ -55,31 +55,40 @@ void ClientConnection::doConnect()
 
     try
     {
-        while(true)
-        {
-            tcp::resolver resolver(ioService); 
-            tcp::resolver::query query(server, service);
-            tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-            tcp::resolver::iterator end;
+        boost::system::error_code error;
+        tcp::resolver resolver(ioService); 
+        tcp::resolver::query query(server, service);
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query, error);
+        tcp::resolver::iterator end;
 
-            // Try each endpoint until we successfully establish a connection.
-            boost::system::error_code error;
-            do 
-            {
-                theSocket.close();
-                LOG_DEBUG("Attempting connect."); 
-                theSocket.connect(*endpoint_iterator++, error);
-            } while (error && endpoint_iterator != end);
-            if (error)
-            {
-                connected=false;
-            }
-            else
+        if (error)
+        {
+            connected=false;
+            LOG_DEBUG("Error resolving query: " << error.message()); 
+        }
+        else
+        {
+            LOG_DEBUG("Resolved connection query to " << server);
+        }
+
+        // Try each endpoint until we successfully establish a connection.
+        do 
+        {
+            theSocket.close();
+            LOG_DEBUG("Attempting connect."); 
+            theSocket.connect(*endpoint_iterator++, error);
+
+            if (!error)
             {
                 connected=true;
                 break;
             }
-        }
+            else
+            {
+                connected=false;
+                LOG_DEBUG("Connection error: " << error.message());
+            }
+        } while (endpoint_iterator != end);
     }
     catch (const boost::system::system_error &e)
     {
