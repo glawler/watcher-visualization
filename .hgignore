@@ -89,6 +89,9 @@ syntax: regexp
 
 ^etc/nerod.sample.cfg
 
+#
+# watcherd
+# 
 ^src/watcherd/client
 ^src/watcherd/log.properties
 ^src/watcherd/test/archived.txt
@@ -108,7 +111,16 @@ syntax: regexp
 ^src/watcherd/test/testLabelMessage
 ^src/watcherd/test/colorTest
 
+#
+# watcherHierarcyClient
+#
+^src/watcherHierarchyClient/depend
+^src/watcherHierarchyClient/log.properties
+^src/watcherHierarchyClient/watcherHierarchyClient
+
+#
 # SQLLite libs.
+#
 ^/bin/sqlite3
 ^src/sqlite-3.6.3/*
 ^tars/sqlite-amalgamation-3.6.3.tar.gz
