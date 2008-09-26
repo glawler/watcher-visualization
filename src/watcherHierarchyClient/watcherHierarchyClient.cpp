@@ -299,10 +299,50 @@ void sendGraphEdge(void *messageHandlerData, const struct MessageInfo * messageI
     LOG_INFO("Ignoring 3d graph edge message"); 
     TRACE_EXIT();
 }
-void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo *mi, bool add)
+void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo *mi, bool addLabel)
 {
+    //
+    // typedef struct FloatingLabel
+    // {
+    //     int x,y,z;
+    //     unsigned char bgcolor[4],fgcolor[4]; /* background & foreground colors */
+    //     char *text;
+    // 
+    //     int family;
+    //     int priority;
+    //     int tag;                        /* client assigned grouping value.  */
+    //     destime expiration;    /* set to 0 to never expire   (Milliseconds)  */
+    // 
+    //     struct FloatingLabel *next;
+    // } FloatingLabel;
     TRACE_ENTER();
-    LOG_ERROR("Ignoring floating label " << (add ? "add" : "remove") << " message."); 
+
+    detector *st=(detector*)messageHandlerData;
+    unsigned char *payload = static_cast<unsigned char *>(messageInfoRawPayloadGet(mi)); 
+    size_t payloadLen = messageInfoRawPayloadLenGet(mi); 
+
+    FloatingLabel lab;
+    char string[260];
+    unsigned char *pos;
+    lab.text = string;
+
+    LOG_DEBUG("Received hierarchy floating label message of size " << payloadLen << ", unmarshalling it."); 
+
+    communicationsWatcherFloatingLabelUnmarshal(payload, &lab);
+
+    LabelMessagePtr lm(new LabelMessage);
+
+    lm->label=lab.text;
+    lm->fontSize=12;        // not in NodeLabel
+    lm->foreground=Color(lab.fgcolor[0], lab.fgcolor[1], lab.fgcolor[2], lab.fgcolor[3]);
+    lm->background=Color(lab.bgcolor[0], lab.bgcolor[1], lab.bgcolor[2], lab.bgcolor[3]);
+    lm->expiration=lab.expiration;
+    lm->addLabel=addLabel;
+    lm->lat=lab.x;      // GTL - I don't think these are GPS coords, but pixel positions...
+    lm->lng=lab.y;
+    lm->alt=lab.z;
+
+    st->client->sendMessage(lm); 
     TRACE_EXIT();
 }
 void sendFloatinglabelAdd(void *messageHandlerData, const struct MessageInfo *mi)
