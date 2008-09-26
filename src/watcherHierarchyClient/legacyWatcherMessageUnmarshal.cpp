@@ -78,7 +78,7 @@ unsigned char *communicationsWatcherFloatingLabelUnmarshal(unsigned char *hp, Fl
     return hp;
 }
 
-unsigned char *communicationsWatcherEdgeUnmarshal(unsigned char *hp, NodeEdge *edge)
+unsigned char *communicationsWatcherEdgeUnmarshal(unsigned char *hp, NodeEdge *&edge)
 { 
     TRACE_ENTER();
 

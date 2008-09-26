@@ -12,7 +12,9 @@ unsigned char *watcherColorUnMarshal(unsigned char *hp, ManetAddr *node, unsigne
 
 /*
  * Stolen from watcher.cpp 
+ *
+ * edge is malloc'd into, so free() it after use.
  */
-unsigned char *communicationsWatcherEdgeUnmarshal(unsigned char *hp, NodeEdge *edge);
+unsigned char *communicationsWatcherEdgeUnmarshal(unsigned char *hp, NodeEdge *&edge);
 
 #endif // WATCHER_MESSAGE_UNMARHSLASD_H

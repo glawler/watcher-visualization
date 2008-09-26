@@ -9,16 +9,13 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: watcherGPS.cpp,v 1.7 2
 
 #define WATCHERGPSPAYLOADSIZE (4*3+8*1) /* 3 longs: lat lon alt, one longlong: time */
 
-WatcherGPS *watcherGPSUnmarshal(const void *payload, int payloadlen)
+WatcherGPS *watcherGPSUnmarshal(const void *payload, int payloadlen, WatcherGPS *gps)
 {
-	WatcherGPS *gps;
 	unsigned int tmp; // ,tmp2;
 	const unsigned char *hp=(const unsigned char*)payload;
 
 	if (payloadlen < WATCHERGPSPAYLOADSIZE) 
 		return NULL;
-
-	gps=(WatcherGPS*)malloc(sizeof(*gps));
 
 	UNMARSHALLONG(hp,tmp);
 	gps->lat=(tmp / 5965230.0) - 180.0;

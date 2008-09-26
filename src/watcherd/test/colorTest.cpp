@@ -46,6 +46,7 @@ BOOST_AUTO_TEST_CASE( ctors_test )
 
     val = c2.fromString("green");
     BOOST_CHECK_EQUAL( val, true ); 
+    BOOST_CHECK_EQUAL( c2, Color::green );
 }
 
 BOOST_AUTO_TEST_CASE( archive_test )
