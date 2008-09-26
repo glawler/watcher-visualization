@@ -287,10 +287,36 @@ void sendWatcherColor(void *messageHandlerData, const struct MessageInfo *mi)
     TRACE_EXIT();
 }
 
-void sendGraph(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
-void sendGraphEdge(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
-void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
-void sendFloatingLabelRemove(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
+void sendGraph(void *messageHandlerData, const struct MessageInfo * messageInfo) 
+{
+    TRACE_ENTER();
+    LOG_INFO("Ignoring 3d graph message"); 
+    TRACE_EXIT();
+}
+void sendGraphEdge(void *messageHandlerData, const struct MessageInfo * messageInfo) 
+{
+    TRACE_ENTER();
+    LOG_INFO("Ignoring 3d graph edge message"); 
+    TRACE_EXIT();
+}
+void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo *mi, bool add)
+{
+    TRACE_ENTER();
+    LOG_ERROR("Ignoring floating label " << (add ? "add" : "remove") << " message."); 
+    TRACE_EXIT();
+}
+void sendFloatinglabelAdd(void *messageHandlerData, const struct MessageInfo *mi)
+{
+    TRACE_ENTER();
+    sendFloatinglabel(messageHandlerData, mi, true); 
+    TRACE_EXIT();
+}
+void sendFloatingLabelRemove(void *messageHandlerData, const struct MessageInfo *mi)
+{
+    TRACE_ENTER();
+    sendFloatinglabel(messageHandlerData, mi, false); 
+    TRACE_EXIT();
+}
 
 static detector *detectorInit(ManetAddr us, const string &serverName, const char *readlog, const char *writelog, 
         CommunicationsMessageDirection direction, unsigned int position, CommunicationsMessageAccess mode)
@@ -325,7 +351,7 @@ static detector *detectorInit(ManetAddr us, const string &serverName, const char
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_GPS, &sendGPS },
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_GRAPH, &sendGraph },
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_GRAPH_EDGE, &sendGraphEdge },
-        { IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL, &sendFloatinglabel },
+        { IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL, &sendFloatinglabelAdd },
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL_REMOVE, &sendFloatingLabelRemove }
     };
 
