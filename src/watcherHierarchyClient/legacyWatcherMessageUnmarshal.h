@@ -8,7 +8,7 @@
  */
 unsigned char *communicationsWatcherLabelUnmarshal(unsigned char *hp, NodeLabel *lab);
 unsigned char *communicationsWatcherFloatingLabelUnmarshal(unsigned char *hp, FloatingLabel *lab);
-unsigned char *watcherColorUnMarshal(unsigned char *hp, ManetAddr *node, unsigned char *color);
+unsigned char *watcherColorUnMarshal(unsigned char *hp, uint32_t *nodeAddr, unsigned char *color);
 
 /*
  * Stolen from watcher.cpp 

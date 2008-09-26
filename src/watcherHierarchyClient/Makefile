@@ -33,6 +33,7 @@ OBJS=watcherHierarchyClient.o \
 	$(WATCHDIR)/labelMessage.o \
 	$(WATCHDIR)/edgeMessage.o \
 	$(WATCHDIR)/gpsMessage.o \
+	$(WATCHDIR)/colorMessage.o \
 	$(WATCHDIR)/messageStatus.o 
 
 watcherHierarchyClient: $(OBJS)

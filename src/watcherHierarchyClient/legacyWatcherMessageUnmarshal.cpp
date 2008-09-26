@@ -30,14 +30,14 @@ unsigned char *communicationsWatcherLabelUnmarshal(unsigned char *hp, NodeLabel 
 
 /* Unmarshal a color message
  *  */
-unsigned char *watcherColorUnMarshal(unsigned char *hp, ManetAddr *node, unsigned char *color)
+unsigned char *watcherColorUnMarshal(unsigned char *hp, uint32_t *nodeAddr, unsigned char *color)
 {
     TRACE_ENTER();
 
     int colorflag;
     int i;
 
-    UNMARSHALLONG(hp,*node);
+    UNMARSHALLONG(hp,*nodeAddr);
 
     UNMARSHALBYTE(hp,colorflag);
     if (colorflag)

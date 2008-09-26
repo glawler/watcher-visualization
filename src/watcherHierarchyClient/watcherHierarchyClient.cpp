@@ -16,6 +16,7 @@
 #include "labelMessage.h"
 #include "edgeMessage.h"
 #include "gpsMessage.h"
+#include "colorMessage.h"
 #include "client.h"
 #include "logger.h"
 
@@ -271,10 +272,17 @@ void sendWatcherColor(void *messageHandlerData, const struct MessageInfo *mi)
     unsigned char *payload = static_cast<unsigned char *>(messageInfoRawPayloadGet(mi)); 
     size_t payloadLen = messageInfoRawPayloadLenGet(mi); 
 
-    LOG_DEBUG("Received GPS message of size " << payloadLen << ", unmarshalling it."); 
+    LOG_DEBUG("Received Color message of size " << payloadLen << ", unmarshalling it."); 
 
-    WatcherGPS wGPS;
-    watcherGPSUnmarshal(payload, payloadLen, &wGPS);
+    unsigned char color[4];
+    uint32_t nodeAddr;
+    watcherColorUnMarshal(payload, &nodeAddr, color);
+
+    ColorMessagePtr cm(new ColorMessage); 
+    cm->nodeAddr=boost::asio::ip::address_v4(nodeAddr);
+    cm->color=Color(color[0], color[1], color[2], color[3]);
+
+    st->client->sendMessage(cm);
 
     TRACE_EXIT();
 }
