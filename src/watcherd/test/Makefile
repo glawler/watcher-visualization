@@ -23,11 +23,12 @@ colorTestInc=../watcherColors.h
 colorTestObjs=$(colorTestSrc:.cpp=.o) colorTest.o
 
 labelMessageTestSrc=../message.cpp ../labelMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
-labelMessageTestInc=../message.cpp ../labelMessage.cpp ../watcherColors.h ../messageTypesAndVersions.h ../watcherGlobalFunctions.h
+labelMessageTestInc=$(labelMessageTestSrc:.cpp=.h)
 labelMessageTestObjs=$(labelMessageTestSrc:.cpp=.o) testLabelMessage.o
 
-edgeMessageTestSrc=../message.cpp ../edgeMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
-edgeMessageTestInc=../message.cpp ../edgeMessage.cpp ../watcherColors.h ../messageTypesAndVersions.h ../watcherGlobalFunctions.h
+edgeMessageTestSrc=../message.cpp ../edgeMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp \
+				   ../labelMessage.cpp
+edgeMessageTestInc=$(edgeMessageTestSrc:.cpp=.h)
 edgeMessageTestObjs=$(edgeMessageTestSrc:.cpp=.o) testEdgeMessage.o
 
 ALL_OBJS=$(colorTestObjs) $(testCCObjs) $(testMessageObjs) $(labelMessageTestObjs) $(edgeMessageTestObjs)

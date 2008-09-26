@@ -21,7 +21,8 @@ LabelMessage::LabelMessage(const string &label_, int fontSize_)   :
     address(),
     foreground(Color::black),
     background(Color::white),
-    expiration(0)
+    expiration(0),
+    addLabel(true)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -34,7 +35,8 @@ LabelMessage::LabelMessage(const string &label_, const boost::asio::ip::address 
     address(address_),
     foreground(Color::black),
     background(Color::white),
-    expiration(0)
+    expiration(0),
+    addLabel(true)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -54,7 +56,8 @@ bool LabelMessage::operator==(const LabelMessage &other) const
     bool retVal = 
         Message::operator==(other) && 
         label==other.label && 
-        address==other.address;
+        address==other.address && 
+        addLabel==other.addLabel;
 
     // These are not distinguishing features
     //  foreground==other.foreground,
@@ -77,7 +80,7 @@ LabelMessage &LabelMessage::operator=(const LabelMessage &other)
     foreground=other.foreground;
     background=other.background;
     expiration=other.expiration;
-    fontSize=other.fontSize;
+    addLabel=other.addLabel;
 
     TRACE_EXIT();
     return *this;
@@ -95,6 +98,7 @@ std::ostream &LabelMessage::toStream(std::ostream &out) const
     out << " fg: (" << foreground << ")"; 
     out << " bg: (" << background << ")"; 
     out << " exp: " << expiration;
+    out << " add: " << (addLabel ? "true" : "false"); 
 
     TRACE_EXIT();
     return out;
@@ -117,12 +121,8 @@ void LabelMessage::serialize(boost::archive::polymorphic_iarchive & ar, const un
     ar & background;
     ar & expiration;
     ar & fontSize;
-
-    // string tmp;
-    // ar & tmp;
-    // address=boost::asio::ip::address::from_string(tmp); 
-    
     ar & address;
+    ar & addLabel;
 
     TRACE_EXIT();
 }
@@ -136,10 +136,8 @@ void LabelMessage::serialize(boost::archive::polymorphic_oarchive & ar, const un
     ar & background;
     ar & expiration;
     ar & fontSize;
-
-    // string tmp=address.to_string();
-    // ar & tmp;
     ar & address;
+    ar & addLabel;
 
     TRACE_EXIT();
 }

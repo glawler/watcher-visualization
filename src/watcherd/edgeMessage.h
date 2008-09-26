@@ -6,6 +6,7 @@
 
 #include "logger.h"
 #include "message.h"
+#include "labelMessage.h"
 #include "watcherColors.h"
 
 // Forward decls;
@@ -29,16 +30,16 @@ namespace watcher
     {
         public:
             // The data
-            std::string label;
-            int fontSize;
             boost::asio::ip::address node1;
             boost::asio::ip::address node2;
             watcher::Color edgeColor;
-            watcher::Color labelColorForeground;
-            watcher::Color labelColorBackground;
             unsigned int expiration;
             unsigned int width;
             GUILayer layer;
+            bool addEdge;   // if true, add an edge, else remove existing edge;
+            LabelMessagePtr middleLabel;
+            LabelMessagePtr node1Label;
+            LabelMessagePtr node2Label;
 
             EdgeMessage();
             EdgeMessage(
@@ -48,13 +49,13 @@ namespace watcher
                     const Color &c_=Color::blue,            // color of edge
                     const unsigned int &width=15,           // width of the edge 
                     unsigned int expiration_=0,             // expiration time in milliseconds, 0=never expire
-                    const std::string &label_="",           // edge's label
-                    const Color &labelfg_=Color::black,     // color of label's foreground
-                    const Color &labelbg_=Color::white,     // color of label's foreground
-                    const unsigned int fontSize_=10);       // edge's label's font size
-
+                    const bool &addEdge=true);              // If true, add an edge, else remove exising edge with same props as this one.
 
             EdgeMessage(const EdgeMessage &other);
+
+            void setMiddleLabel(const LabelMessagePtr &label); 
+            void setNode1Label(const LabelMessagePtr &label); 
+            void setNode2Label(const LabelMessagePtr &label); 
 
             bool operator==(const EdgeMessage &other) const;
             EdgeMessage &operator=(const EdgeMessage &other);

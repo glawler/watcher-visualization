@@ -27,6 +27,7 @@ namespace watcher
             watcher::Color foreground;
             watcher::Color background;
             unsigned int expiration;
+            bool addLabel;              // add or remove the label depending on true or false here.
 
             // Attach a label to this node.
             LabelMessage(const std::string &label="", const int fontSize=10); 

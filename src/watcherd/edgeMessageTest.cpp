@@ -31,12 +31,14 @@ void usage(const char *progName)
     fprintf(stderr, "   -w, --width=width           The width of the edge in some arbitrary, unknown unit\n"); 
     fprintf(stderr, "   -y, --layer=layer           Which layer the edge is on in the GUI.\n"); 
     fprintf(stderr, "\n");
-    fprintf(stderr, "   -l, --label=label           The text to put in the label\n");
-    fprintf(stderr, "   -f, --labelfg=color         The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
-    fprintf(stderr, "   -b, --labelbg=color         The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
-    fprintf(stderr, "   -z, --fontSize=size         The font size of the label\n");
+    fprintf(stderr, "                               This program only supports creating a middle label, although the message supports\n");
+    fprintf(stderr, "                               labels on node1 and node2 as well. May add that later\n"); 
+    fprintf(stderr, "   -l, --label=label           The text to put in the middle label\n");
+    fprintf(stderr, "   -f, --labelfg=color         The foreground color of the middle label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
+    fprintf(stderr, "   -b, --labelbg=color         The background color of the middle label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
+    fprintf(stderr, "   -z, --fontSize=size         The font size of the middle label\n");
     fprintf(stderr, "\n");
-    fprintf(stderr, "   -x, --expiration=seconds    How long in secondt to diplay the edge\n");
+    fprintf(stderr, "   -x, --expiration=seconds    How long in seconds to diplay the edge\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "   -p, --logProps              log.properties file, which controls logging for this program\n");
 
@@ -60,10 +62,7 @@ int main(int argc, char **argv)
     unsigned int width=15;
     GUILayer layer=NODE_LAYER;
 
-    string label;
-    Color labelfg=Color::black;
-    Color labelbg=Color::white;
-    unsigned int fontSize=10;
+    LabelMessagePtr lm(new LabelMessage); 
 
     uint32_t expiration=10000;
 
@@ -130,10 +129,10 @@ int main(int argc, char **argv)
             case 'w': width=lexical_cast<unsigned int>(optarg); break;
             case 'y': layer=static_cast<GUILayer>(lexical_cast<unsigned int>(optarg)); break;
 
-            case 'l': label=optarg; break;
-            case 'f': { bool val=labelfg.fromString(optarg); if (!val) { printf("\nBad argument for label foreground color\n\n"); usage(argv[0]); } break; }
-            case 'b': { bool val=labelbg.fromString(optarg); if (!val) { printf("\nBad argument for label background color\n\n"); usage(argv[0]); } break; }
-            case 'z': fontSize=lexical_cast<unsigned int>(optarg); break;
+            case 'l': lm->label=optarg; break;
+            case 'f': { bool val=lm->foreground.fromString(optarg); if (!val) { printf("\nBad argument for label foreground color\n\n"); usage(argv[0]); } break; }
+            case 'b': { bool val=lm->background.fromString(optarg); if (!val) { printf("\nBad argument for label background color\n\n"); usage(argv[0]); } break; }
+            case 'z': lm->fontSize=lexical_cast<unsigned int>(optarg); break;
 
             case 'x': expiration=lexical_cast<uint32_t>(optarg); break;
             case 'p': logProps=optarg; break;
@@ -159,16 +158,13 @@ int main(int argc, char **argv)
     LOG_INFO("Connecting to " << server << " and sending message."); 
     
     EdgeMessagePtr em = EdgeMessagePtr(new EdgeMessage);
-    em->label=label;
-    em->fontSize=fontSize;
     em->node1=head;
     em->node2=tail;
     em->edgeColor=edgeColor;
-    em->labelColorForeground=labelfg;
-    em->labelColorBackground=labelbg;
     em->expiration=expiration;
     em->width=width;
     em->layer=layer;
+    em->setMiddleLabel(lm); 
 
     if(!client.sendMessage(em))
     {

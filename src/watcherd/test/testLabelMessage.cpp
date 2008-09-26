@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_CASE( ctor_test )
     lm1.foreground=Color::black;
     lm1.background=Color::white;
     lm1.expiration=10;
+    lm1.addLabel=true;
 
     LOG_INFO("Testing operator=()..."); 
     LabelMessage lm2;
@@ -56,6 +57,7 @@ BOOST_AUTO_TEST_CASE( archive_test )
     lmOut.foreground=Color::black;
     lmOut.background=Color::white;
     lmOut.expiration=10;
+    lmOut.addLabel=false;
 
     LOG_INFO("Serializing: " << lmOut); 
     ostringstream os1;

@@ -3,6 +3,7 @@
 #include <boost/archive/polymorphic_iarchive.hpp>
 #include <boost/archive/polymorphic_oarchive.hpp>
 #include <boost/serialization/string.hpp>       // for serializing addresses.
+#include <boost/serialization/shared_ptr.hpp>   // for serializing LabelMessagePtrs
 #include <boost/serialization/export.hpp>
 
 #include "edgeMessage.h"
@@ -23,21 +24,18 @@ EdgeMessage::EdgeMessage(
         const Color &c_,
         const unsigned int &width_,
         unsigned int expiration_, 
-        const string &label_, 
-        const Color &labelfg_, 
-        const Color &labelbg_, 
-        const unsigned int fontSize_) :
+        const bool &addEdge_) : 
     Message(EDGE_MESSAGE_TYPE, EDGE_MESSAGE_VERSION),
-    label(label_), 
-    fontSize(fontSize_),
     node1(node1_),
     node2(node2_),
     edgeColor(c_),
-    labelColorForeground(labelfg_),
-    labelColorBackground(labelbg_),
     expiration(expiration_),
     width(width_),
-    layer(layer_)
+    layer(layer_),
+    addEdge(addEdge_),
+    middleLabel(),
+    node1Label(),
+    node2Label()
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -45,16 +43,16 @@ EdgeMessage::EdgeMessage(
 
 EdgeMessage::EdgeMessage() : 
     Message(EDGE_MESSAGE_TYPE, EDGE_MESSAGE_VERSION),
-    label(), 
-    fontSize(10),
     node1(),
     node2(),
     edgeColor(),
-    labelColorForeground(),
-    labelColorBackground(),
     expiration(0), 
     width(15),
-    layer()
+    layer(),
+    addEdge(true),
+    middleLabel(),
+    node1Label(),
+    node2Label()
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -67,13 +65,33 @@ EdgeMessage::EdgeMessage(const EdgeMessage &other)
     TRACE_EXIT();
 }
 
+void EdgeMessage::setMiddleLabel(const LabelMessagePtr &label)
+{
+    TRACE_ENTER();
+    middleLabel=label;
+    TRACE_EXIT();
+}
+void EdgeMessage::setNode1Label(const LabelMessagePtr &label) 
+{
+    TRACE_ENTER();
+    node1Label=label;
+    node1Label->address=node1;
+    TRACE_EXIT();
+}
+void EdgeMessage::setNode2Label(const LabelMessagePtr &label)
+{
+    TRACE_ENTER();
+    node2Label=label;
+    node2Label->address=node2;
+    TRACE_EXIT();
+}
+
 bool EdgeMessage::operator==(const EdgeMessage &other) const
 {
     TRACE_ENTER();
     
     bool retVal = 
         Message::operator==(other) && 
-        label==other.label && 
         node1==other.node1 && 
         node2==other.node2 && 
         layer==other.layer;
@@ -89,16 +107,16 @@ EdgeMessage &EdgeMessage::operator=(const EdgeMessage &other)
     TRACE_ENTER();
 
     Message::operator=(other);
-    label=other.label;
-    fontSize=other.fontSize;
     node1=other.node1;
     node2=other.node2;
     edgeColor=other.edgeColor;
-    labelColorForeground=other.labelColorForeground;
-    labelColorBackground=other.labelColorBackground;
     expiration=other.expiration;
     width=other.width;
     layer=other.layer;
+    addEdge=other.addEdge;
+    middleLabel=other.middleLabel;
+    node1Label=other.node1Label;
+    node2Label=other.node2Label;
 
     TRACE_EXIT();
     return *this;
@@ -110,16 +128,26 @@ std::ostream &EdgeMessage::toStream(std::ostream &out) const
     TRACE_ENTER();
 
     Message::toStream(out);
-    out << " label: " << label;
-    out << " fontSize: " << fontSize;
     out << " node1: " << node1;
     out << " node2: " << node2;
     out << " edgeColor: " << edgeColor;
-    out << " labelfg: " << labelColorForeground; 
-    out << " labelbg: " << labelColorBackground;
     out << " expiration: " << expiration;
     out << " width: " << width;
     out << " layer: " << layer;
+    out << " add: " << (addEdge ? "true" : "false"); 
+
+    // shared_ptr doesn't have ?: overloaded
+    out << " node1Label: ";
+    if (node1Label) out << *node1Label;
+    else out << " NULL "; 
+
+    out << " middleLabel: ";
+    if (middleLabel) out << *middleLabel;
+    else out << " NULL "; 
+
+    out << " node2Label: ";
+    if (node2Label) out << *node2Label;
+    else out << " NULL "; 
 
     TRACE_EXIT();
     return out;
@@ -138,16 +166,16 @@ void EdgeMessage::serialize(boost::archive::polymorphic_iarchive & ar, const uns
     TRACE_ENTER();
 
     ar & boost::serialization::base_object<Message>(*this);
-    ar & label;
-    ar & fontSize;
     ar & node1;
     ar & node2;
     ar & edgeColor;
-    ar & labelColorForeground;
-    ar & labelColorBackground;
     ar & expiration;
     ar & width;
     ar & layer;
+    ar & addEdge;
+    ar & node1Label;
+    ar & middleLabel;
+    ar & node2Label;
 
     TRACE_EXIT();
 }
@@ -157,16 +185,16 @@ void EdgeMessage::serialize(boost::archive::polymorphic_oarchive & ar, const uns
     TRACE_ENTER();
 
     ar & boost::serialization::base_object<Message>(*this);
-    ar & label;
-    ar & fontSize;
     ar & node1;
     ar & node2;
     ar & edgeColor;
-    ar & labelColorForeground;
-    ar & labelColorBackground;
     ar & expiration;
     ar & width;
     ar & layer;
+    ar & addEdge;
+    ar & node1Label;
+    ar & middleLabel;
+    ar & node2Label;
 
     TRACE_EXIT();
 }
