@@ -4,6 +4,7 @@
 #include "gpsMessageHandler.h"
 #include "labelMessageHandler.h"
 #include "edgeMessageHandler.h"
+#include "colorMessageHandler.h"
 
 using namespace watcher;
 
@@ -36,6 +37,9 @@ boost::shared_ptr<MessageHandler> MessageHandlerFactory::getMessageHandler(const
             break;
         case EDGE_MESSAGE_TYPE: 
             return boost::shared_ptr<EdgeMessageHandler>(new EdgeMessageHandler);
+            break;
+        case COLOR_MESSAGE_TYPE: 
+            return boost::shared_ptr<ColorMessageHandler>(new ColorMessageHandler);
             break;
 
             // GTL - don't put default case

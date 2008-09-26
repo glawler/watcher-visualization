@@ -26,6 +26,9 @@ ostream &watcher::operator<<(ostream &out, const MessageType &type)
         case EDGE_MESSAGE_TYPE:
             out << static_cast<int>(EDGE_MESSAGE_TYPE) << " (edge)";
             break;
+        case COLOR_MESSAGE_TYPE:
+            out << static_cast<int>(COLOR_MESSAGE_TYPE) << " (color)";
+            break;
 
             // don't put default case so the (smart) compiler can
             // tell us if we've not put a MessageType here....

@@ -6,6 +6,7 @@
 #include "messageStatus.h"
 #include "labelMessage.h"
 #include "edgeMessage.h"
+#include "colorMessage.h"
 
 using namespace watcher;
 
@@ -33,6 +34,9 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
             break;
         case EDGE_MESSAGE_TYPE:
             return boost::shared_ptr<EdgeMessage>(new EdgeMessage);
+            break;
+        case COLOR_MESSAGE_TYPE:
+            return boost::shared_ptr<ColorMessage>(new ColorMessage);
             break;
 
             // GTL - do not put a default or the compiler

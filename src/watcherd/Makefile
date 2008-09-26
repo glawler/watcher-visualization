@@ -20,6 +20,13 @@ LDFLAGS+=-lboost_thread-gcc41-mt
 LDFLAGS+=-lboost_serialization-gcc41-mt
 LDFLAGS+=-lpthread
 
+# GTL - experimental automatic use of multiprocessor systems to speed up make
+# May break things, don't know.
+PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
+ifneq (${PROCCOUNT}, 0)
+	MAKEFLAGS+=-j $(PROCCOUNT)
+endif
+
 #
 # SRCS and HDRS come in pairs, MAINS contain main() and do not have an associated header.
 #
@@ -27,15 +34,17 @@ SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.
 	 serverConnection.cpp dataMarshaller.cpp server.cpp \
 	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
 	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp watcherColors.cpp \
-	 labelMessage.cpp  labelMessageHandler.cpp  watcherGlobalFunctions.cpp edgeMessage.cpp edgeMessageHandler.cpp
+	 labelMessage.cpp  labelMessageHandler.cpp  watcherGlobalFunctions.cpp edgeMessage.cpp edgeMessageHandler.cpp \
+	 colorMessage.cpp colorMessageHandler.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
 	serverConnection.h dataMarshaller.h server.h messageStatus.h \
 	clientConnection.h gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
 	testMessageHandler.h messageHandlerFactory.h client.h watcherColors.h \
-	labelMessage.h  labelMessageHandler.h watcherGlobalFunctions.h edgeMessage.h edgeMessageHandler.h
+	labelMessage.h  labelMessageHandler.h watcherGlobalFunctions.h edgeMessage.h edgeMessageHandler.h \
+	colorMessage.h colorMessageHandler.h
 OBJS=$(SRCS:.cpp=.o) 
 
-MAINS=gpsMessageTest.cpp watcherd.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp
+MAINS=gpsMessageTest.cpp watcherd.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp
 
 BINS=$(MAINS:.cpp=)
 
@@ -51,6 +60,9 @@ labelMessageTest: $(OBJS) labelMessageTest.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
 edgeMessageTest: $(OBJS) edgeMessageTest.o
+	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
+
+colorMessageTest: $(OBJS) colorMessageTest.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
 testCC: $(OBJS) testCC.o

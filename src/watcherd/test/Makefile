@@ -10,6 +10,13 @@ CXXFLAGS+=-I.. -I/usr/local/include/boost-1_36 -I../../../include
 CXXFLAGS+=-O0 -ggdb -Wall
 CXXFLAGS+=-DBOOST_TEST_DYN_LINK
 
+# GTL - experimental automatic use of multiprocessor systems to speed up make
+# May break things, don't know.
+PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
+ifneq (${PROCCOUNT}, 0)
+	MAKEFLAGS+=-j $(PROCCOUNT)
+endif
+
 testMessageSrc=../messageTypesAndVersions.cpp ../testMessage.cpp ../message.cpp ../messageFactory.cpp ../messageStatus.cpp
 testMessageInc=$(testMessageSrc:.cpp=.h)
 testMessageObjs=$(testMessageSrc:.cpp=.o) testTestMessage.o
@@ -31,9 +38,13 @@ edgeMessageTestSrc=../message.cpp ../edgeMessage.cpp ../watcherColors.cpp ../mes
 edgeMessageTestInc=$(edgeMessageTestSrc:.cpp=.h)
 edgeMessageTestObjs=$(edgeMessageTestSrc:.cpp=.o) testEdgeMessage.o
 
-ALL_OBJS=$(colorTestObjs) $(testCCObjs) $(testMessageObjs) $(labelMessageTestObjs) $(edgeMessageTestObjs)
+colorMessageTestSrc=../message.cpp ../colorMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
+colorMessageTestInc=$(colorMessageTestSrc:.cpp=.h)
+colorMessageTestObjs=$(colorMessageTestSrc:.cpp=.o) testColorMessage.o
 
-BINS=colorTest testLabelMessage testEdgeMessage
+ALL_OBJS=$(colorTestObjs) $(testCCObjs) $(testMessageObjs) $(labelMessageTestObjs) $(edgeMessageTestObjs) $(colorMessageTestObjs)
+
+BINS=colorTest testLabelMessage testEdgeMessage testColorMessage
 
 all: $(BINS)
 
@@ -48,6 +59,9 @@ testLabelMessage: $(labelMessageTestObjs)
 
 testEdgeMessage: $(edgeMessageTestObjs)
 	$(CXX) $^ -o testEdgeMessage $(LIBS) $(LDFLAGS)
+
+testColorMessage: $(colorMessageTestObjs)
+	$(CXX) $^ -o testColorMessage $(LIBS) $(LDFLAGS)
 
 testTestMessage: 
 	$(CXX) $(CXXFLAGS) $(testMessageSrc) testTestMessage.cpp -o testMessage $(LIBS) $(LDFLAGS)

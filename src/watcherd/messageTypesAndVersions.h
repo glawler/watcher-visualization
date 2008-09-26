@@ -15,7 +15,8 @@ namespace watcher
         TEST_MESSAGE_TYPE         = 2,
         GPS_MESSAGE_TYPE          = 3,
         LABEL_MESSAGE_TYPE        = 4,
-        EDGE_MESSAGE_TYPE         = 5
+        EDGE_MESSAGE_TYPE         = 5,
+        COLOR_MESSAGE_TYPE        = 6
 
     } MessageType;
 
@@ -31,6 +32,7 @@ namespace watcher
     const unsigned int GPS_MESSAGE_VERSION       = 1;
     const unsigned int LABEL_MESSAGE_VERSION     = 1;
     const unsigned int EDGE_MESSAGE_VERSION      = 1;
+    const unsigned int COLOR_MESSAGE_VERSION     = 1;
 
     //
     // GUI bits in the watcher have a concept of a layer which can be turned on or off.
