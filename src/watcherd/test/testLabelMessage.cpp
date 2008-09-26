@@ -43,6 +43,13 @@ BOOST_AUTO_TEST_CASE( ctor_test )
     LOG_DEBUG("lm1 :" << lm1); 
     LOG_DEBUG("lm3 :" << lm3); 
     BOOST_CHECK_EQUAL(lm1,lm3); 
+
+    LabelMessage withGPS("This label is floating in space!", 0.123, 0.123, 0.123);
+    LabelMessage copy(withGPS);
+    LOG_DEBUG("gps :" << withGPS); 
+    LOG_DEBUG("cpy :" << copy); 
+    BOOST_CHECK_EQUAL(withGPS, copy); 
+    
 }
 
 BOOST_AUTO_TEST_CASE( archive_test )
@@ -57,7 +64,10 @@ BOOST_AUTO_TEST_CASE( archive_test )
     lmOut.foreground=Color::black;
     lmOut.background=Color::white;
     lmOut.expiration=10;
-    lmOut.addLabel=false;
+    lmOut.addLabel=false;       // Normally you would not mix address, and (lat,lng, alt), but 
+    lmOut.lat=1.23456789;       // for testing it's ok. 
+    lmOut.lng=1.23456789;
+    lmOut.alt=1.23456789;
 
     LOG_INFO("Serializing: " << lmOut); 
     ostringstream os1;

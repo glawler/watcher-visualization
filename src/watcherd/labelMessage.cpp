@@ -18,11 +18,14 @@ LabelMessage::LabelMessage(const string &label_, int fontSize_)   :
     Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
     label(label_),
     fontSize(fontSize_),
-    address(),
     foreground(Color::black),
     background(Color::white),
     expiration(0),
-    addLabel(true)
+    addLabel(true),
+    address(),
+    lat(0),
+    lng(0),
+    alt(0)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -32,11 +35,31 @@ LabelMessage::LabelMessage(const string &label_, const boost::asio::ip::address 
     Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
     label(label_),
     fontSize(fontSize_),
-    address(address_),
     foreground(Color::black),
     background(Color::white),
     expiration(0),
-    addLabel(true)
+    addLabel(true),
+    address(address_),
+    lat(0),
+    lng(0),
+    alt(0)
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+LabelMessage::LabelMessage(const std::string &label_, const float &lat_, const float &lng_, const float &alt_, const int fontSize_) : 
+    Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
+    label(label_),
+    fontSize(fontSize_),
+    foreground(Color::black),
+    background(Color::white),
+    expiration(0),
+    addLabel(true),
+    address(),
+    lat(lat_),
+    lng(lng_),
+    alt(alt_)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -56,8 +79,17 @@ bool LabelMessage::operator==(const LabelMessage &other) const
     bool retVal = 
         Message::operator==(other) && 
         label==other.label && 
-        address==other.address && 
         addLabel==other.addLabel;
+
+    // Compare either address or space coords but not both. Address takes precidence.
+    if (address.to_v4().to_ulong()==0)
+        retVal = 
+            retVal && 
+            lat==other.lat && 
+            lng==other.lng &&
+            alt==other.alt;
+    else
+        retVal = retVal && address==other.address;
 
     // These are not distinguishing features
     //  foreground==other.foreground,
@@ -76,11 +108,14 @@ LabelMessage &LabelMessage::operator=(const LabelMessage &other)
     Message::operator=(other);
     label=other.label; 
     fontSize=other.fontSize;
-    address=other.address;
     foreground=other.foreground;
     background=other.background;
     expiration=other.expiration;
     addLabel=other.addLabel;
+    address=other.address;
+    lat=other.lat;
+    lng=other.lng;
+    alt=other.alt;
 
     TRACE_EXIT();
     return *this;
@@ -93,12 +128,19 @@ std::ostream &LabelMessage::toStream(std::ostream &out) const
 
     Message::toStream(out);
     out << " label: " << label;
+    if (address.to_v4().to_ulong()==0)
+        out << " (floating) ";
+    else
+        out << " (attached) "; 
     out << " font size: " << fontSize; 
     out << " address: " << address << (address.is_v4() ? " (v4)" : " (v6)"); 
     out << " fg: (" << foreground << ")"; 
     out << " bg: (" << background << ")"; 
     out << " exp: " << expiration;
     out << " add: " << (addLabel ? "true" : "false"); 
+    out << " lat: " << lat; 
+    out << " lng: " << lng; 
+    out << " alt: " << alt; 
 
     TRACE_EXIT();
     return out;
@@ -123,6 +165,9 @@ void LabelMessage::serialize(boost::archive::polymorphic_iarchive & ar, const un
     ar & fontSize;
     ar & address;
     ar & addLabel;
+    ar & lat;
+    ar & lng;
+    ar & alt;
 
     TRACE_EXIT();
 }
@@ -138,6 +183,9 @@ void LabelMessage::serialize(boost::archive::polymorphic_oarchive & ar, const un
     ar & fontSize;
     ar & address;
     ar & addLabel;
+    ar & lat;
+    ar & lng;
+    ar & alt;
 
     TRACE_EXIT();
 }

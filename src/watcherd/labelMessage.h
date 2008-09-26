@@ -23,17 +23,25 @@ namespace watcher
             // The data
             std::string label;
             int fontSize;
-            boost::asio::ip::address address;
             watcher::Color foreground;
             watcher::Color background;
             unsigned int expiration;
             bool addLabel;              // add or remove the label depending on true or false here.
+
+            // A label can be attached to a node or just hanging in space.
+            // If address is defined it will be attached to a node, if
+            // lat, lng, alt are defined is will hang in space. 
+            boost::asio::ip::address address;
+            float lat, lng, alt; 
 
             // Attach a label to this node.
             LabelMessage(const std::string &label="", const int fontSize=10); 
 
             // Attach a label to an arbitrary node.
             LabelMessage(const std::string &label, const boost::asio::ip::address &address, const int fontSize=10);
+
+            // Float a label in space
+            LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const int fontSize=10);
 
             LabelMessage(const LabelMessage &other);
 
