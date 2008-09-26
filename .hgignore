@@ -94,22 +94,24 @@ syntax: regexp
 # 
 ^src/watcherd/client
 ^src/watcherd/log.properties
-^src/watcherd/test/archived.txt
-^src/watcherd/test/archived.dat
-^src/watcherd/test/testMessage
 ^src/watcherd/watcherd.cfg
 ^src/watcherd/watcherd
 ^src/watcherd/depend
 ^src/watcherd/test/depend
 ^src/watcherd/test/testClientConnection
-^src/watcherd/test/testEdgeMessage
 ^src/watcherd/gpsMessageTest
 ^src/watcherd/labelMessageTest
+^src/watcherd/colorMessageTest
 ^src/watcherd/edgeMessageTest
 ^src/watcherd/testCC
 
+^src/watcherd/test/testEdgeMessage
 ^src/watcherd/test/testLabelMessage
 ^src/watcherd/test/colorTest
+^src/watcherd/test/testColorMessage
+^src/watcherd/test/archived.txt
+^src/watcherd/test/archived.dat
+^src/watcherd/test/testMessage
 
 #
 # watcherHierarcyClient

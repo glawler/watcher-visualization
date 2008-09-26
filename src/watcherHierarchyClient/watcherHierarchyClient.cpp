@@ -12,8 +12,10 @@
 #include "demolib.h"
 
 #include "legacyWatcherMessageUnmarshal.h"
+#include "watcherGPS.h"
 #include "labelMessage.h"
 #include "edgeMessage.h"
+#include "gpsMessage.h"
 #include "client.h"
 #include "logger.h"
 
@@ -237,32 +239,48 @@ void sendEdgeAdd(void *messageHandlerData, const struct MessageInfo * messageInf
     TRACE_EXIT();
 }
 
-void sendGPS(void *messageHandlerData, const struct MessageInfo * messageInfo) 
+void sendGPS(void *messageHandlerData, const struct MessageInfo *mi) 
 {
-//     TRACE_ENTER();
-// 
-//     detector *st=(detector*)messageHandlerData;
-//     unsigned char *payload = static_cast<unsigned char *>(messageInfoRawPayloadGet(mi)); 
-//     size_t payloadLen = messageInfoRawPayloadLenGet(mi); 
-// 
-//     LOG_DEBUG("Received GPS message of size " << payloadLen << ", unmarshalling it."); 
-// 
-//     WatcherGPS wGPS;
-//     watcherGPSUnmarshal(const void *payload, int payloadlen, &wPGS);
-// 
-//     GPSMessagePtr gpsMessage=(new GPSMessage);
-//     gpsMessage->lat=wGPS.lat;
-//     gpsMessage->lng=wGPS.lon;
-//     gpsMessage->alt=wGPS.alt;
-// 
-//     st->client->sendMessage(gpsMessage);
-// 
-//     TRACE_EXIT();
+    TRACE_ENTER();
+
+    detector *st=(detector*)messageHandlerData;
+    unsigned char *payload = static_cast<unsigned char *>(messageInfoRawPayloadGet(mi)); 
+    size_t payloadLen = messageInfoRawPayloadLenGet(mi); 
+
+    LOG_DEBUG("Received GPS message of size " << payloadLen << ", unmarshalling it."); 
+
+    WatcherGPS wGPS;
+    watcherGPSUnmarshal(payload, payloadLen, &wGPS);
+
+    GPSMessagePtr gpsMessage(new GPSMessage);
+    gpsMessage->lat=wGPS.lat;
+    gpsMessage->lng=wGPS.lon;
+    gpsMessage->alt=wGPS.alt;
+
+    st->client->sendMessage(gpsMessage);
+
+    TRACE_EXIT();
+}
+
+// GTL - I dont' really know what sending a color message is suppoed to do.
+void sendWatcherColor(void *messageHandlerData, const struct MessageInfo *mi) 
+{
+    TRACE_ENTER();
+
+    detector *st=(detector*)messageHandlerData;
+    unsigned char *payload = static_cast<unsigned char *>(messageInfoRawPayloadGet(mi)); 
+    size_t payloadLen = messageInfoRawPayloadLenGet(mi); 
+
+    LOG_DEBUG("Received GPS message of size " << payloadLen << ", unmarshalling it."); 
+
+    WatcherGPS wGPS;
+    watcherGPSUnmarshal(payload, payloadLen, &wGPS);
+
+    TRACE_EXIT();
 }
 
 void sendGraph(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
 void sendGraphEdge(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
-void sendWatcherColor(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
 void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
 void sendFloatingLabelRemove(void *messageHandlerData, const struct MessageInfo * messageInfo) {} 
 

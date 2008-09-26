@@ -10,7 +10,10 @@
 extern "C" {
 #endif
 
-#include "des.h"
+// GTL - took destime declaration from --> #include "des.h"
+// as I did't want to pull in everything else, when all that was needed
+// was destime.
+typedef long long int destime;
 
 typedef struct WatcherGPS
 {
@@ -18,7 +21,7 @@ typedef struct WatcherGPS
 	destime time;
 } WatcherGPS;
 
-WatcherGPS *watcherGPSUnmarshal(const void *payload, int payloadlen);
+WatcherGPS *watcherGPSUnmarshal(const void *payload, int payloadlen, WatcherGPS *);
 int watcherGPSMarshal(void *payload, int payloadlen, const WatcherGPS *gps);
 
 #ifdef __cplusplus

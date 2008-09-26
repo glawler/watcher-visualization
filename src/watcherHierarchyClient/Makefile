@@ -10,7 +10,17 @@ LIBS+=-lidsCommunications -lxml2 -llog4cxx -llogger
 LIBS+=-lboost_serialization-gcc41-mt
 LIBS+=-lboost_system-gcc41-mt
 
-OBJS=watcherHierarchyClient.o demolib.o \
+# GTL - experimental automatic use of multiprocessor systems to speed up make
+# May break things, don't know.
+PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
+ifneq (${PROCCOUNT}, 0)
+	MAKEFLAGS+=-j $(PROCCOUNT)
+endif
+
+OBJS=watcherHierarchyClient.o \
+	demolib.o \
+	legacyWatcherMessageUnmarshal.o \
+	watcherGPS.o \
 	$(WATCHDIR)/labelMessage.o \
 	$(WATCHDIR)/message.o \
 	$(WATCHDIR)/labelMessage.o \
@@ -22,8 +32,8 @@ OBJS=watcherHierarchyClient.o demolib.o \
 	$(WATCHDIR)/dataMarshaller.o \
 	$(WATCHDIR)/labelMessage.o \
 	$(WATCHDIR)/edgeMessage.o \
-	$(WATCHDIR)/messageStatus.o \
-	legacyWatcherMessageUnmarshal.o
+	$(WATCHDIR)/gpsMessage.o \
+	$(WATCHDIR)/messageStatus.o 
 
 watcherHierarchyClient: $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
