@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     string server;
     string logProps("log.properties");
     unsigned int fontSize=10;
-    asio::ip::address address;
+    asio::ip::address address(boost::asio::ip::address::from_string("127.0.0.1"));  // loclahost
     Color fg=Color::black;
     Color bg=Color::white;
     uint32_t expiration=10000;
