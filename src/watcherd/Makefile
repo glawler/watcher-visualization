@@ -35,13 +35,13 @@ SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.
 	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
 	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp watcherColors.cpp \
 	 labelMessage.cpp  labelMessageHandler.cpp  watcherGlobalFunctions.cpp edgeMessage.cpp edgeMessageHandler.cpp \
-	 colorMessage.cpp colorMessageHandler.cpp
+	 colorMessage.cpp colorMessageHandler.cpp watcherd.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
 	serverConnection.h dataMarshaller.h server.h messageStatus.h \
 	clientConnection.h gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
 	testMessageHandler.h messageHandlerFactory.h client.h watcherColors.h \
 	labelMessage.h  labelMessageHandler.h watcherGlobalFunctions.h edgeMessage.h edgeMessageHandler.h \
-	colorMessage.h colorMessageHandler.h
+	colorMessage.h colorMessageHandler.h watcherd.h
 OBJS=$(SRCS:.cpp=.o) 
 
 MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp
