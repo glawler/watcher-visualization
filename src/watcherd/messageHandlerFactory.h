@@ -14,7 +14,8 @@ namespace watcher
 
             // static function that returns a pointer to a MessageHandler class based on the 
             // message type you want to handle. 
-            static boost::shared_ptr<MessageHandler> getMessageHandler(const MessageType &type);
+            typedef boost::shared_ptr<MessageHandler> MessageHandlerPtr
+            static MessageHandlerPtr getMessageHandler(const MessageType &type);
 
             DECLARE_LOGGER(); 
 

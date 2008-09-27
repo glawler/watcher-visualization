@@ -18,7 +18,7 @@ ColorMessageHandler::~ColorMessageHandler()
     TRACE_EXIT();
 }
 
-bool ColorMessageHandler::produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply)
+bool ColorMessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
@@ -29,7 +29,7 @@ bool ColorMessageHandler::produceReply(const boost::shared_ptr<Message> &request
     return true;
 }
 
-bool ColorMessageHandler::produceRequest(boost::shared_ptr<Message> &request)
+bool ColorMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

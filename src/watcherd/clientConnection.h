@@ -55,8 +55,7 @@ namespace watcher
             } TransferData;
 
             typedef boost::shared_ptr<TransferData> TransferDataPtr;
-
-            std::list<boost::shared_ptr<TransferData> > transferData;
+            std::list<TransferDataPtr> transferData;
 
             // void handle_resolve(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
             // void handle_connect(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);

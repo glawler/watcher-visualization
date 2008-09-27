@@ -28,7 +28,7 @@ namespace watcher
             // to send messages. Default service is "watcherd" - a watcherd running somewhere.
             explicit Client(const std::string& server, const std::string& service="watcherd");
 
-            bool sendMessage(const boost::shared_ptr<Message> message);
+            bool sendMessage(const MessagePtr message);
 
         protected:
         private:

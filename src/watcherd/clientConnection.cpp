@@ -117,7 +117,7 @@ tcp::socket& ClientConnection::getSocket()
     return theSocket;
 }
 
-bool ClientConnection::sendMessage(const boost::shared_ptr<Message> message)
+bool ClientConnection::sendMessage(const MessagePtr message)
 {
     TRACE_ENTER();
 

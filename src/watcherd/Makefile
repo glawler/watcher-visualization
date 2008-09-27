@@ -44,14 +44,14 @@ HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h test
 	colorMessage.h colorMessageHandler.h
 OBJS=$(SRCS:.cpp=.o) 
 
-MAINS=gpsMessageTest.cpp watcherd.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp
+MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp
 
-BINS=$(MAINS:.cpp=)
+BINS=$(MAINS:.cpp=) watcherd
 
 all: depend tags $(BINS) watcherd.cfg log.properties 
 
-watcherd: $(OBJS) watcherd.o
-	$(CXX) $^ -o watcherd $(LIBS) $(LDFLAGS)
+watcherd: $(OBJS) watcherdMain.o
+	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
 gpsMessageTest: $(OBJS) gpsMessageTest.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)

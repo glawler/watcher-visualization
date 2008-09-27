@@ -11,8 +11,8 @@ namespace watcher
             EdgeMessageHandler();
             ~EdgeMessageHandler();
 
-            bool produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply);
-            bool produceRequest(boost::shared_ptr<Message> &request);
+            bool produceReply(const MessagePtr &request, MessagePtr &reply);
+            bool produceRequest(MessagePtr &request);
 
             DECLARE_LOGGER(); 
 

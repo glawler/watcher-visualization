@@ -18,7 +18,7 @@ LabelMessageHandler::~LabelMessageHandler()
     TRACE_EXIT();
 }
 
-bool LabelMessageHandler::produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply)
+bool LabelMessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
@@ -29,7 +29,7 @@ bool LabelMessageHandler::produceReply(const boost::shared_ptr<Message> &request
     return true;
 }
 
-bool LabelMessageHandler::produceRequest(boost::shared_ptr<Message> &request)
+bool LabelMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

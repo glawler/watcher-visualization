@@ -18,7 +18,7 @@ EdgeMessageHandler::~EdgeMessageHandler()
     TRACE_EXIT();
 }
 
-bool EdgeMessageHandler::produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply)
+bool EdgeMessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
@@ -29,7 +29,7 @@ bool EdgeMessageHandler::produceReply(const boost::shared_ptr<Message> &request,
     return true;
 }
 
-bool EdgeMessageHandler::produceRequest(boost::shared_ptr<Message> &request)
+bool EdgeMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

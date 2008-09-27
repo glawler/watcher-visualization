@@ -17,7 +17,7 @@ MessageStatusHandler::~MessageStatusHandler()
     TRACE_EXIT();
 }
 
-bool MessageStatusHandler::produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply)
+bool MessageStatusHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
@@ -25,7 +25,7 @@ bool MessageStatusHandler::produceReply(const boost::shared_ptr<Message> &reques
     return false;
 }
 
-bool MessageStatusHandler::produceRequest(boost::shared_ptr<Message> &request)
+bool MessageStatusHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

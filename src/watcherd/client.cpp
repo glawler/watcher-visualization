@@ -16,7 +16,7 @@ Client::Client(
     TRACE_EXIT();
 }
 
-bool Client::sendMessage(const boost::shared_ptr<Message> request)
+bool Client::sendMessage(const MessagePtr request)
 {
     TRACE_ENTER(); 
 

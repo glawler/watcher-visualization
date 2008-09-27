@@ -22,12 +22,9 @@ INIT_LOGGER(watcher::Server, "Server");
 Server::Server(
         const std::string& address, 
         const std::string& port, 
-        // boost::shared_ptr<request_handler> &handler,
         std::size_t thread_pool_size) :
     thread_pool_size_(thread_pool_size),
     acceptor_(io_service_)
-    // new_connection_(new Server(io_service_, request_handler_)),
-    // request_handler_(boost::shared_ptr<request_handler>(new request_handler))
 {
     TRACE_ENTER();
 
@@ -60,8 +57,7 @@ void Server::run()
     std::vector<boost::shared_ptr<boost::thread> > threads;
     for (std::size_t i = 0; i < thread_pool_size_; ++i)
     {
-        boost::shared_ptr<boost::thread> thread(
-                new boost::thread(boost::bind( &boost::asio::io_service::run, &io_service_)));
+        boost::shared_ptr<boost::thread> thread(new boost::thread(boost::bind( &boost::asio::io_service::run, &io_service_)));
         threads.push_back(thread);
     }
 

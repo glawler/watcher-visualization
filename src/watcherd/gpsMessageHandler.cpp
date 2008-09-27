@@ -18,7 +18,7 @@ GPSMessageHandler::~GPSMessageHandler()
     TRACE_EXIT();
 }
 
-bool GPSMessageHandler::produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply)
+bool GPSMessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
@@ -29,7 +29,7 @@ bool GPSMessageHandler::produceReply(const boost::shared_ptr<Message> &request, 
     return true;
 }
 
-bool GPSMessageHandler::produceRequest(boost::shared_ptr<Message> &request)
+bool GPSMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

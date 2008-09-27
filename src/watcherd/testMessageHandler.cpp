@@ -18,7 +18,7 @@ TestMessageHandler::~TestMessageHandler()
     TRACE_EXIT();
 }
 
-bool TestMessageHandler::produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply)
+bool TestMessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
     
@@ -30,7 +30,7 @@ bool TestMessageHandler::produceReply(const boost::shared_ptr<Message> &request,
     return true;
 }
 
-bool TestMessageHandler::produceRequest(boost::shared_ptr<Message> &request)
+bool TestMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

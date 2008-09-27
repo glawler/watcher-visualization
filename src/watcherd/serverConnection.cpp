@@ -105,7 +105,7 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
         {
             LOG_INFO("Recvd message: " << *request); 
 
-            boost::shared_ptr<MessageHandler> handler = MessageHandlerFactory::getMessageHandler(request->type);
+            MessageHandlerPtr handler = MessageHandlerFactory::getMessageHandler(request->type);
 
             if (!handler)
             {

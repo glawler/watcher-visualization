@@ -22,10 +22,10 @@ namespace watcher
             // 'request' is a copy of the message that was sent and produced the reply.
             // Returns true if the message should be sent, i.e. this request needs a reply.
             // false, otherwise.
-            virtual bool produceReply(const boost::shared_ptr<Message> &request, boost::shared_ptr<Message> &reply) = 0;
+            virtual bool produceReply(const MessagePtr &request, MessagePtr &reply) = 0;
 
             // Generate a message to send.
-            virtual bool produceRequest(boost::shared_ptr<Message> &request) = 0;
+            virtual bool produceRequest(MessagePtr &request) = 0;
 
         private:
 
