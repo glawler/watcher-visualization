@@ -103,7 +103,9 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
     {
         if (dataMarshaller.unmarshalPayload(request, incomingBuffer.begin(), bytes_transferred))
         {
-            LOG_INFO("Recvd message: " << *request); 
+            boost::asio::ip::address nodeAddr(socket_.remote_endpoint().address()); 
+
+            LOG_INFO("Recvd message from " << nodeAddr <<  " :" << *request); 
 
             MessageHandlerPtr handler = MessageHandlerFactory::getMessageHandler(request->type);
 
