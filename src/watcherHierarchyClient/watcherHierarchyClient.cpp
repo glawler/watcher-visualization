@@ -42,73 +42,7 @@ typedef struct detector
 {
     CommunicationsStatePtr cs;
     ClientPtr client;
-    int rootflag;
 } detector;
-
-/* This is called by the API when a message arrives
- * It is defined using the API function messageHandlerSet(), which also takes
- * the type of message as an argument.
- *
- * It is expected that a detector will have a separate function for each message
- * type that it can handle.  However if a detector wishes to use the same one, the
- * message type can be determined using messageInfoTypeGet().
- *
- * In this case, the void 'data' pointer is used to point to the detector state 
- * structure, so it can access the accumulated messages.
- *
- */
-static void detectorMessageArrive(void *data,const struct MessageInfo *mi)
-{
-//     detector *st=(detector *)data;
-//     CommunicationsNeighbor *neigh;
-//     int accepted=0;
-//     // xmlDocPtr incoming=NULL;
-//     unsigned char buff[1024];
-//     unsigned char *p;
-// 
-//     neigh=communicationsNeighborSearch(st->cs,messageInfoOriginatorGet(mi));
-//     incoming=messageInfoPayloadGet(mi);
-// 
-//     accepted=((neigh) && (neigh->type&COMMUNICATIONSNEIGHBOR_CHILD));	/* if the msg is from a child */
-//     // accepted|=strcmp((char*)(p=xmlGetProp(xmlDocGetRootElement(incoming), (unsigned char*)"type")),"leaf")==0;			/* or it is a leaf report */
-//     // xmlFree(p);
-// 
-//     if (accepted)
-//     {
-//         printf("got a message from %d  type= 0x%x len= %d  accepted: %d payload:\n",
-//                 messageInfoOriginatorGet(mi) & 0xFF,
-//                 messageInfoTypeGet(mi),
-//                 messageInfoRawPayloadLenGet(mi),
-//                 accepted
-//               );
-//         fwrite(messageInfoRawPayloadGet(mi),1,messageInfoRawPayloadLenGet(mi),stdout);
-//         detectorParse(stdout,incoming);
-// 
-//         if (st->accumulated==NULL)	/* do we need to make a new report?   */
-//         {
-//             // GTL NO XML st->accumulated = xmlNewDoc((unsigned char*)"1.0");
-//             // GTL NO XML st->accumulated->children=xmlNewDocNode(st->accumulated,NULL,(unsigned char*)"report",NULL);
-//             // GTL NO XML sprintf((char*)buff,"%d.%d.%d.%d",PRINTADDR(communicationsNodeAddress(st->cs)));
-//             // GTL NO XML xmlSetProp(st->accumulated->children,(unsigned char*)"origin",buff);
-//             // GTL NO XML xmlSetProp(st->accumulated->children,(unsigned char*)"type",(unsigned char*)"accumulated");
-//         }
-// 
-//         /* we then add the received report as a child of our accumulated report.   */
-// 
-//         childAdd(st->accumulated->children,incoming->children);    /* copy all the children of incoming to child node  */
-//     }
-//     else
-//     {
-//         printf("refused a message from from %d  len= %d  payload:\n",
-//                 messageInfoOriginatorGet(mi) & 0xFF,
-//                 messageInfoRawPayloadLenGet(mi)
-//               );
-//     }
-// 
-// 
-//     /* free incoming report and message */
-//     // GTL NO XML xmlFreeDoc(incoming);
-}
 
 /* This is called by the API when this node's position in the hierarchy changes
  * It is defined using the API function idsPositionRegister().
@@ -117,10 +51,17 @@ static void myDetectorPositionUpdate(void *data, IDSPositionType position, IDSPo
 {
     detector *st=(detector*)data;
 
-    if (position==COORDINATOR_ROOT)
-        st->rootflag=status==IDSPOSITION_ACTIVE;
-
-    detectorPositionUpdate(data, position, status);
+    switch(position)
+    {
+        case COORDINATOR_ROOT: 
+            LOG_DEBUG("Position change: root " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+                break;
+        case COORDINATOR_REGIONAL: 
+            LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+                break;
+        case COORDINATOR_NEIGHBORHOOD:
+            LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+    }
 }
 
 void sendLabel(void *messageHandlerData, const struct MessageInfo *mi, bool addLabel) 
@@ -404,8 +345,8 @@ static detector *detectorInit(ManetAddr us, const string &serverName, const char
         return NULL;
 
     idsPositionRegister(st->cs, COORDINATOR_ROOT,IDSPOSITION_ACTIVE,myDetectorPositionUpdate,st);
-    idsPositionRegister(st->cs, COORDINATOR_REGIONAL,IDSPOSITION_ACTIVE,detectorPositionUpdate,st);
-    idsPositionRegister(st->cs, COORDINATOR_NEIGHBORHOOD,IDSPOSITION_ACTIVE,detectorPositionUpdate,st);
+    idsPositionRegister(st->cs, COORDINATOR_REGIONAL,IDSPOSITION_ACTIVE,myDetectorPositionUpdate,st);
+    idsPositionRegister(st->cs, COORDINATOR_NEIGHBORHOOD,IDSPOSITION_ACTIVE,myDetectorPositionUpdate,st);
 
     communicationsNeighborRegister(st->cs,detectorNeighborUpdate,st);
 
