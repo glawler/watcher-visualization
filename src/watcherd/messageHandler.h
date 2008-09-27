@@ -32,6 +32,8 @@ namespace watcher
             DECLARE_LOGGER();
     };
 
+    typedef boost::shared_ptr<MessageHandler> MessageHandlerPtr;
+
 } // namespace 
 
 #endif // MESSSAGE_HADNERLS_H
