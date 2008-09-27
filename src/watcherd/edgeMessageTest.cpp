@@ -21,26 +21,26 @@ void usage(const char *progName)
     fprintf(stderr, "Usage: %s [args] [optional args]\n", basename(progName)); 
     fprintf(stderr, "Args:\n");
     fprintf(stderr, "   -s, --server=server      The name/address of the watcherd server\n");
-    fprintf(stderr, "   -h, --head=address       The node to attach the head of the edge to.\n"); 
-    fprintf(stderr, "   -t, --tail=address       The node to attach the tail of the edge to.\n"); 
+    fprintf(stderr, "   -t, --tail=address       The node to attach the tail of the edge to. If no head is given, the local node is used.\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "   -H,-?,-help              Show this usage message\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "Optional args:\n");
-    fprintf(stderr, "   -c, --color=color           The color of the edge. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
-    fprintf(stderr, "   -w, --width=width           The width of the edge in some arbitrary, unknown unit\n"); 
-    fprintf(stderr, "   -y, --layer=layer           Which layer the edge is on in the GUI.\n"); 
+    fprintf(stderr, "   -h, --head=address       The node to attach the head of the edge to.\n"); 
+    fprintf(stderr, "   -c, --color=color        The color of the edge. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
+    fprintf(stderr, "   -w, --width=width        The width of the edge in some arbitrary, unknown unit\n"); 
+    fprintf(stderr, "   -y, --layer=layer        Which layer the edge is on in the GUI.\n"); 
     fprintf(stderr, "\n");
-    fprintf(stderr, "                               This program only supports creating a middle label, although the message supports\n");
-    fprintf(stderr, "                               labels on node1 and node2 as well. May add that later\n"); 
-    fprintf(stderr, "   -l, --label=label           The text to put in the middle label\n");
-    fprintf(stderr, "   -f, --labelfg=color         The foreground color of the middle label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
-    fprintf(stderr, "   -b, --labelbg=color         The background color of the middle label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
-    fprintf(stderr, "   -z, --fontSize=size         The font size of the middle label\n");
+    fprintf(stderr, "                            This program only supports creating a middle label, although the message supports\n");
+    fprintf(stderr, "                            labels on node1 and node2 as well. May add that later\n"); 
+    fprintf(stderr, "   -l, --label=label        The text to put in the middle label\n");
+    fprintf(stderr, "   -f, --labelfg=color      The foreground color of the middle label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
+    fprintf(stderr, "   -b, --labelbg=color      The background color of the middle label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
+    fprintf(stderr, "   -z, --fontSize=size      The font size of the middle label\n");
     fprintf(stderr, "\n");
-    fprintf(stderr, "   -x, --expiration=seconds    How long in seconds to diplay the edge\n");
+    fprintf(stderr, "   -x, --expiration=seconds How long in seconds to diplay the edge\n");
     fprintf(stderr, "\n");
-    fprintf(stderr, "   -p, --logProps              log.properties file, which controls logging for this program\n");
+    fprintf(stderr, "   -p, --logProps           log.properties file, which controls logging for this program\n");
 
     TRACE_EXIT_RET("Calling exit(1)"); 
     exit(1); 
@@ -53,10 +53,10 @@ int main(int argc, char **argv)
     int c;
     string server;
 
-    asio::ip::address head;
+    asio::ip::address head(boost::asio::ip::address::from_string("127.0.0.1")); 
     asio::ip::address tail;
 
-    bool headSet=false, tailSet=false;
+    bool tailSet=false;
 
     Color edgeColor=Color::red;
     unsigned int width=15;
@@ -110,7 +110,6 @@ int main(int argc, char **argv)
                                 fprintf(stderr, "\nI did not understand the \"head\" argument: %s. It should be a host address.\n\n", optarg);
                                 usage(argv[0]);
                           }
-                          headSet=true;
                       }
                       break;
             case 't': 
@@ -144,9 +143,9 @@ int main(int argc, char **argv)
         }
     }
 
-    if (server=="" || !headSet || !tailSet)
+    if (server=="" || !tailSet)
     {
-        printf("\nRequired arguments are: server, head, and tail\n\n");
+        printf("\nRequired arguments are: server and tail\n\n");
         usage(argv[0]);
     }
 
