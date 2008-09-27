@@ -301,20 +301,6 @@ void sendGraphEdge(void *messageHandlerData, const struct MessageInfo * messageI
 }
 void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo *mi, bool addLabel)
 {
-    //
-    // typedef struct FloatingLabel
-    // {
-    //     int x,y,z;
-    //     unsigned char bgcolor[4],fgcolor[4]; /* background & foreground colors */
-    //     char *text;
-    // 
-    //     int family;
-    //     int priority;
-    //     int tag;                        /* client assigned grouping value.  */
-    //     destime expiration;    /* set to 0 to never expire   (Milliseconds)  */
-    // 
-    //     struct FloatingLabel *next;
-    // } FloatingLabel;
     TRACE_ENTER();
 
     detector *st=(detector*)messageHandlerData;
@@ -356,6 +342,52 @@ void sendFloatingLabelRemove(void *messageHandlerData, const struct MessageInfo 
     TRACE_ENTER();
     sendFloatinglabel(messageHandlerData, mi, false); 
     TRACE_EXIT();
+}
+
+/* This is called by the API when a neighbor node arrives or departs
+ * It is defined using communicationsNeighborRegister().
+ *
+ * the CommunicationsNeighbor * arg is READ ONLY!
+ */
+void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
+{
+    TRACE_ENTER();
+
+    detector *st=(detector*)data;
+
+    EdgeMessagePtr em(new EdgeMessage);
+
+    em->node1=boost::asio::ip::address::from_string("127.0.0.1");  // use this node as head
+    em->node2=boost::asio::ip::address_v4(cn->addr);
+    em->edgeColor=Color::red;       // GTL may want to put this in a configuration file somewhere.
+    em->expiration=0;
+    em->layer=HIERARCHY_LAYER;
+
+	switch(cn->state)
+	{
+		case COMMUNICATIONSNEIGHBOR_ARRIVING:
+            LOG_INFO("New neighbor " << em->node2 << " arriving. Dist: " << cn->distance << " type: " << cn->type << ((cn->distance==1)?"onehopArrive":""));
+            em->addEdge=true;
+		break;
+		case COMMUNICATIONSNEIGHBOR_UPDATING:
+            LOG_INFO("Neighbor " << em->node2 << " update. Dist: " << cn->distance << " type: " << cn->type << 
+				( ((cn->distance==1) & (!(cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP))) ? "onehopArrive" : (((cn->distance>1) && (cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP)) ? "onehopDepart" : "")) );
+            em->addEdge=false;
+		break;
+		case COMMUNICATIONSNEIGHBOR_DEPARTING:
+			LOG_INFO("Neighbor " << em->node2 << " departing.  Dist: " << cn->distance << " type: " << cn->type << ((cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP) ? "onehopDepart" : ""));
+            em->addEdge=false;
+		break;
+		default:
+			LOG_ERROR("Bad neighbor update code!"); 
+            TRACE_EXIT_RET("error"); 
+            return;
+		break;
+	}
+
+    st->client->sendMessage(em); 
+
+    TRACE_EXIT(); 
 }
 
 static detector *detectorInit(ManetAddr us, const string &serverName, const char *readlog, const char *writelog, 

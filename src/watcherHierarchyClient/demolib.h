@@ -17,7 +17,6 @@ extern "C" {
 
 void detectorMessageStatus(const struct MessageInfo *mi, void *messageStatusHandlerData,MessageStatus status);
 void detectorPositionUpdate(void *data, IDSPositionType position, IDSPositionStatus status);
-void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn);
 CommunicationsStatePtr detectorCommsInit(ManetAddr us, 
                                          const char *readlog, 
                                          const char *writelog, 

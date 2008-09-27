@@ -65,31 +65,6 @@ void detectorPositionUpdate(void *data, IDSPositionType position, IDSPositionSta
 	}
 }
 
-/* This is called by the API when a neighbor node arrives or departs
- * It is defined using communicationsNeighborRegister().
- *
- * the CommunicationsNeighbor * arg is READ ONLY!
- */
-void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
-{
-	switch(cn->state)
-	{
-		case COMMUNICATIONSNEIGHBOR_ARRIVING:
-			printf("node %d.%d.%d.%d arriving.  distance= %d type= 0x%x  %s\n",PRINTADDR(cn->addr),cn->distance,cn->type,(cn->distance==1)?"onehopArrive":"");
-		break;
-		case COMMUNICATIONSNEIGHBOR_UPDATING:
-			printf("node %d.%d.%d.%d update.  distance= %d type= 0x%x %s\n",PRINTADDR(cn->addr),cn->distance,cn->type,
-				((cn->distance==1)&(!(cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP)))?"onehopArrive":(((cn->distance>1)&&(cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP))?"onehopDepart":""));
-		break;
-		case COMMUNICATIONSNEIGHBOR_DEPARTING:
-			printf("node %d.%d.%d.%d departing.  distance= %d type= 0x%x %s\n",PRINTADDR(cn->addr),cn->distance,cn->type,(cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP)?"onehopDepart":"");
-		break;
-		default:
-			printf("Bad neighbor update code!\n");
-		break;
-	}
-}
-
 /* Initialize idsCommunications API.
  *   us - connect to the daemon at this address (0 means local host)
  *   readlog - if non-NULL, read events from that log instead of connecting 
