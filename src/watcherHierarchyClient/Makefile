@@ -32,9 +32,19 @@ OBJS=watcherHierarchyClient.o \
 	$(WATCHDIR)/dataMarshaller.o \
 	$(WATCHDIR)/labelMessage.o \
 	$(WATCHDIR)/edgeMessage.o \
+	$(WATCHDIR)/testMessage.o \
 	$(WATCHDIR)/gpsMessage.o \
 	$(WATCHDIR)/colorMessage.o \
-	$(WATCHDIR)/messageStatus.o 
+	$(WATCHDIR)/messageStatus.o \
+	$(WATCHDIR)/colorMessageHandler.o \
+	$(WATCHDIR)/gpsMessageHandler.o \
+	$(WATCHDIR)/messageHandler.o \
+	$(WATCHDIR)/testMessageHandler.o \
+	$(WATCHDIR)/edgeMessageHandler.o \
+	$(WATCHDIR)/labelMessageHandler.o \
+	$(WATCHDIR)/messageStatusHandler.o \
+	$(WATCHDIR)/messageHandlerFactory.o \
+	$(WATCHDIR)/messageFactory.o
 
 watcherHierarchyClient: $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)

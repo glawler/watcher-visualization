@@ -18,7 +18,7 @@ LabelMessageHandler::~LabelMessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand LabelMessageHandler::produceRequest(MessagePtr &request)
+MessageHandler::ConnectionCommand LabelMessageHandler::produceRequest(MessagePtr request)
 {
     TRACE_ENTER();
     

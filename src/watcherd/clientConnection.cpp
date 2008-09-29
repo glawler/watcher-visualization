@@ -283,6 +283,12 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                             case MessageHandler::closeConnection:
                                 {
                                     LOG_DEBUG("Handler told us to close the connection."); 
+                                    close();
+                                    break;
+                                }
+                            case MessageHandler::stayConnected:
+                                {
+                                    LOG_DEBUG("Handler told us to just stay connected."); 
                                     break;
                                 }
                         }

@@ -3,6 +3,7 @@
 #include "messageHandler.h"
 #include "messageStatus.h"
 
+using namespace std; 
 using namespace watcher;
 using namespace boost;
 
@@ -20,7 +21,7 @@ MessageHandler::~MessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand MessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
+MessageHandler::ConnectionCommand MessageHandler::produceReply(const MessagePtr request, MessagePtr reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
@@ -31,11 +32,11 @@ MessageHandler::ConnectionCommand MessageHandler::produceReply(const MessagePtr 
     return writeMessage;
 }
 
-MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr &request, const MessagePtr &reply)
+MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr request, const MessagePtr reply)
 {
     TRACE_ENTER();
 
-    LOG_INFO("Recv'd " << *reply << " as reply to " << *request);
+    LOG_INFO("Recv'd :" << "\n\t" << *reply << endl << "In reply to: " << "\n\t" << *request);
 
     if (reply->type != MESSAGE_STATUS_TYPE)
     {
@@ -44,16 +45,15 @@ MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr &
         return closeConnection;
     }
 
-    MessageStatusPtr mess=MessageStatusPtr(boost::polymorphic_downcast<MessageStatus*>(reply.get()));
+    MessageStatus *mess=boost::polymorphic_downcast<MessageStatus*>(reply.get());
     
-    if(mess->status!=MessageStatus::status_ack || 
-       mess->status!=MessageStatus::status_ok) 
+    if(mess->status!=MessageStatus::status_ack && mess->status!=MessageStatus::status_ok) 
     {
-        LOG_WARN("Recv'd non ack reply to request");
+        LOG_WARN("Recv'd non ack reply to request: " << MessageStatus::statusToString(mess->status)); 
     }
     else
     {
-        LOG_INFO("Recv'd aak to request, all is well."); 
+        LOG_INFO("Recv'd ack to request, all is well."); 
     }
 
     TRACE_EXIT_RET("closeConnection");

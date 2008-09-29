@@ -19,7 +19,7 @@ ColorMessageHandler::~ColorMessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand ColorMessageHandler::produceRequest(MessagePtr &request)
+MessageHandler::ConnectionCommand ColorMessageHandler::produceRequest(MessagePtr request)
 {
     TRACE_ENTER();
     

@@ -11,9 +11,8 @@ namespace watcher
             MessageStatusHandler();
             ~MessageStatusHandler();
 
-            ConnectionCommand produceRequest(MessagePtr &request);
-            ConnectionCommand produceReply(const MessagePtr &request, MessagePtr &reply);
-            ConnectionCommand handleReply(const MessagePtr &request, MessagePtr &reply);
+            ConnectionCommand produceRequest(MessagePtr request);
+            ConnectionCommand produceReply(const MessagePtr request, MessagePtr reply);
 
             DECLARE_LOGGER(); 
 

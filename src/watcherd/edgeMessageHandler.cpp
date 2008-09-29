@@ -18,7 +18,7 @@ EdgeMessageHandler::~EdgeMessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand EdgeMessageHandler::produceRequest(MessagePtr &request)
+MessageHandler::ConnectionCommand EdgeMessageHandler::produceRequest(MessagePtr request)
 {
     TRACE_ENTER();
     

@@ -17,7 +17,7 @@ MessageStatusHandler::~MessageStatusHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand MessageStatusHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
+MessageHandler::ConnectionCommand MessageStatusHandler::produceReply(const MessagePtr request, MessagePtr reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Not producing reply for status message: " << *request);
@@ -25,7 +25,7 @@ MessageHandler::ConnectionCommand MessageStatusHandler::produceReply(const Messa
     return closeConnection;
 }
 
-MessageHandler::ConnectionCommand MessageStatusHandler::produceRequest(MessagePtr &request)
+MessageHandler::ConnectionCommand MessageStatusHandler::produceRequest(MessagePtr request)
 {
     TRACE_ENTER();
     

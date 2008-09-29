@@ -152,6 +152,11 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
                             // This execution branch causes this connection to disapear.
                             break;
                         }
+                    case MessageHandler::stayConnected:
+                        {
+                            LOG_INFO("We are supposed to stay connected.\n"); 
+                            break;
+                        }
                 }
             }
         }
