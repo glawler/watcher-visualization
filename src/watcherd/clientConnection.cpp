@@ -9,6 +9,8 @@
 #include "dataMarshaller.h"
 #include "gpsMessage.h"
 #include "message.h"
+#include "messageHandler.h"
+#include "messageHandlerFactory.h"
 
 using namespace std;
 using namespace watcher;
@@ -239,7 +241,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             //         asio::buffer(dataPtr->incomingBuffer, payloadSize), 
             //         theStrand.wrap(boost::bind(&ClientConnection::handle_read_payload, 
             //                 this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
-            
+
             if (payloadSize != asio::read(theSocket, asio::buffer(dataPtr->incomingBuffer, payloadSize)))
             {
                 LOG_ERROR("Unable to read " << payloadSize << " bytes from server. Giving up on message.")
@@ -254,6 +256,38 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                 {
                     LOG_INFO("Successfully parsed response from server for message " << dataPtr->theRequest 
                             << ": " << *dataPtr->theReply);
+
+                    MessageHandlerPtr handler = MessageHandlerFactory::getMessageHandler(dataPtr->theReply->type);
+
+                    if (!handler)
+                    {
+                        LOG_WARN("Received unknown message type - ignoring.")
+                    }
+                    else 
+                    {
+                        MessagePtr reply;
+                        MessageHandler::ConnectionCommand cmd = handler->handleReply(dataPtr->theRequest, dataPtr->theReply);
+
+                        switch(cmd)
+                        {
+                            case MessageHandler::writeMessage:
+                                {
+                                    LOG_DEBUG("Handler told us to write the message"); 
+                                    break;
+                                }
+                            case MessageHandler::readMessage:
+                                {
+                                    LOG_DEBUG("Handler told us to read a message"); 
+                                    break;
+                                }
+                            case MessageHandler::closeConnection:
+                                {
+                                    LOG_DEBUG("Handler told us to close the connection."); 
+                                    break;
+                                }
+                        }
+
+                    }
                 }
                 else if (!result)
                 {

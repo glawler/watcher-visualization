@@ -1,6 +1,7 @@
 #include "colorMessageHandler.h"
 #include "messageFactory.h"
 #include "messageStatus.h"
+#include <boost/cast.hpp>
 
 using namespace watcher;
 
@@ -18,24 +19,13 @@ ColorMessageHandler::~ColorMessageHandler()
     TRACE_EXIT();
 }
 
-bool ColorMessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
-{
-    TRACE_ENTER();
-    LOG_DEBUG("Producing reply for message: " << *request);
-    reply=MessageStatusPtr(new MessageStatus(MessageStatus::status_ack));
-    LOG_DEBUG("Produced reply: " << *reply);
-
-    TRACE_EXIT_RET("true"); 
-    return true;
-}
-
-bool ColorMessageHandler::produceRequest(MessagePtr &request)
+MessageHandler::ConnectionCommand ColorMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     
     request=MessageFactory::makeMessage(COLOR_MESSAGE_TYPE); 
 
-    TRACE_EXIT_RET("true"); 
-    return true;
+    TRACE_EXIT_RET("writeMessage"); 
+    return writeMessage;
 }
 

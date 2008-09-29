@@ -17,22 +17,22 @@ MessageStatusHandler::~MessageStatusHandler()
     TRACE_EXIT();
 }
 
-bool MessageStatusHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
+MessageHandler::ConnectionCommand MessageStatusHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
-    LOG_DEBUG("Producing reply for message: " << *request);
-    TRACE_EXIT_RET("false"); 
-    return false;
+    LOG_DEBUG("Not producing reply for status message: " << *request);
+    TRACE_EXIT_RET("closeConnection");
+    return closeConnection;
 }
 
-bool MessageStatusHandler::produceRequest(MessagePtr &request)
+MessageHandler::ConnectionCommand MessageStatusHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     
     request=MessageFactory::makeMessage(MESSAGE_STATUS_TYPE);
     LOG_DEBUG("Produced request: " << *request);
 
-    TRACE_EXIT_RET("false"); 
-    return false;
+    TRACE_EXIT_RET("writeMessage"); 
+    return writeMessage;
 }
 

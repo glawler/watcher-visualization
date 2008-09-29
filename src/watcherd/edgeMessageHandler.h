@@ -11,8 +11,7 @@ namespace watcher
             EdgeMessageHandler();
             ~EdgeMessageHandler();
 
-            bool produceReply(const MessagePtr &request, MessagePtr &reply);
-            bool produceRequest(MessagePtr &request);
+            ConnectionCommand produceRequest(MessagePtr &request);
 
             DECLARE_LOGGER(); 
 

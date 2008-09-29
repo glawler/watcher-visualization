@@ -116,29 +116,42 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
             else 
             {
                 MessagePtr reply;
-                if (handler->produceReply(request, reply))
-                {
-                    // Keep track of this reply in case of write error
-                    // and so we know when to stop sending replays and we can 
-                    // close the socket to the client.
-                    replies.push_back(reply); 
+                MessageHandler::ConnectionCommand cmd =handler->produceReply(request, reply);
 
-                    LOG_DEBUG("Marshalling outbound message"); 
-                    OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                    dataMarshaller.marshal(reply, *obDataPtr);
-                    LOG_INFO("Sending reply: " << *reply);
-                    boost::asio::async_write(socket_, *obDataPtr, 
-                            strand_.wrap(
-                                boost::bind(
-                                    &ServerConnection::handle_write, 
-                                    shared_from_this(),
-                                    boost::asio::placeholders::error, 
-                                    reply))); 
-                }
-                else
+                switch(cmd)
                 {
-                    LOG_INFO("Not sending reply - request doesn't need one"); 
-                    // This execution branch causes this connection to disapear.
+                    case MessageHandler::writeMessage:
+                        {
+                            // Keep track of this reply in case of write error
+                            // and so we know when to stop sending replays and we can 
+                            // close the socket to the client.
+                            replies.push_back(reply); 
+
+                            LOG_DEBUG("Marshalling outbound message"); 
+                            OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
+                            dataMarshaller.marshal(reply, *obDataPtr);
+                            LOG_INFO("Sending reply: " << *reply);
+                            boost::asio::async_write(socket_, *obDataPtr, 
+                                    strand_.wrap(
+                                        boost::bind(
+                                            &ServerConnection::handle_write, 
+                                            shared_from_this(),
+                                            boost::asio::placeholders::error, 
+                                            reply))); 
+                            break;
+                        }
+                    case MessageHandler::readMessage:
+                        {
+                            LOG_DEBUG("Readig another message via the connection");
+                            start();
+                            break;
+                        }
+                    case MessageHandler::closeConnection:
+                        {
+                            LOG_INFO("Not sending reply - request doesn't need one"); 
+                            // This execution branch causes this connection to disapear.
+                            break;
+                        }
                 }
             }
         }

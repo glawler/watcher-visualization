@@ -18,24 +18,13 @@ LabelMessageHandler::~LabelMessageHandler()
     TRACE_EXIT();
 }
 
-bool LabelMessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
-{
-    TRACE_ENTER();
-    LOG_DEBUG("Producing reply for message: " << *request);
-    reply=MessageStatusPtr(new MessageStatus(MessageStatus::status_ack));
-    LOG_DEBUG("Produced reply: " << *reply);
-
-    TRACE_EXIT_RET("true"); 
-    return true;
-}
-
-bool LabelMessageHandler::produceRequest(MessagePtr &request)
+MessageHandler::ConnectionCommand LabelMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     
     request=MessageFactory::makeMessage(LABEL_MESSAGE_TYPE); 
 
-    TRACE_EXIT_RET("true"); 
-    return true;
+    TRACE_EXIT_RET("writeMessage"); 
+    return writeMessage;
 }
 

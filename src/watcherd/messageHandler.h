@@ -18,14 +18,23 @@ namespace watcher
             MessageHandler();
             virtual ~MessageHandler(); 
 
-            // Handle a request and produce a reply.
-            // 'request' is a copy of the message that was sent and produced the reply.
-            // Returns true if the message should be sent, i.e. this request needs a reply.
-            // false, otherwise.
-            virtual bool produceReply(const MessagePtr &request, MessagePtr &reply) = 0;
+            typedef enum 
+            {
+                readMessage,
+                writeMessage,
+                closeConnection
+            } ConnectionCommand;
 
-            // Generate a message to send.
-            virtual bool produceRequest(MessagePtr &request) = 0;
+            // Handle a request and produce a reply.
+            // Default is to produce a MessageStatus with status of status_ack
+            virtual ConnectionCommand produceReply(const MessagePtr &request, MessagePtr &reply);
+
+            // Handle a reply to a request. Default is to check for a MessageStatus with status of 
+            // status_ok or status_ack.
+            virtual ConnectionCommand handleReply(const MessagePtr &request, const MessagePtr &reply);
+
+            // Generate a message to send, pure virtual. 
+            virtual ConnectionCommand produceRequest(MessagePtr &request) = 0;
 
         private:
 
