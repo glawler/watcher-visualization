@@ -18,7 +18,7 @@ TestMessageHandler::~TestMessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand TestMessageHandler::produceRequest(MessagePtr request)
+MessageHandler::ConnectionCommand TestMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

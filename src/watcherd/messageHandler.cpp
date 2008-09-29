@@ -21,7 +21,7 @@ MessageHandler::~MessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand MessageHandler::produceReply(const MessagePtr request, MessagePtr reply)
+MessageHandler::ConnectionCommand MessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
 {
     TRACE_ENTER();
     LOG_DEBUG("Producing reply for message: " << *request);
@@ -32,7 +32,7 @@ MessageHandler::ConnectionCommand MessageHandler::produceReply(const MessagePtr 
     return writeMessage;
 }
 
-MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr request, const MessagePtr reply)
+MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr &request, const MessagePtr &reply)
 {
     TRACE_ENTER();
 
@@ -45,7 +45,7 @@ MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr r
         return closeConnection;
     }
 
-    MessageStatus *mess=boost::polymorphic_downcast<MessageStatus*>(reply.get());
+    MessageStatusPtr mess=boost::dynamic_pointer_cast<MessageStatus>(reply);
     
     if(mess->status!=MessageStatus::status_ack && mess->status!=MessageStatus::status_ok) 
     {
@@ -56,7 +56,7 @@ MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr r
         LOG_INFO("Recv'd ack to request, all is well."); 
     }
 
-    TRACE_EXIT_RET("closeConnection");
-    return closeConnection;
+    TRACE_EXIT_RET("stayConnected");
+    return stayConnected;
 }
 

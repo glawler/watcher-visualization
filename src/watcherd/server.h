@@ -54,6 +54,9 @@ namespace watcher
             /// The next connection to be accepted.
             ServerConnectionPtr new_connection_;
     };
+
+    typedef boost::shared_ptr<Server> ServerPtr;
+
 } // namespace watcher
 
 #endif // HTTP_SERVER3_SERVER_HPP

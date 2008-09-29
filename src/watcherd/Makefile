@@ -35,16 +35,16 @@ SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.
 	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
 	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp watcherColors.cpp \
 	 labelMessage.cpp  labelMessageHandler.cpp  watcherGlobalFunctions.cpp edgeMessage.cpp edgeMessageHandler.cpp \
-	 colorMessage.cpp colorMessageHandler.cpp watcherd.cpp
+	 colorMessage.cpp colorMessageHandler.cpp watcherd.cpp dataRequestMessage.cpp dataRequestMessageHandler.cpp
 HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
 	serverConnection.h dataMarshaller.h server.h messageStatus.h \
 	clientConnection.h gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
 	testMessageHandler.h messageHandlerFactory.h client.h watcherColors.h \
 	labelMessage.h  labelMessageHandler.h watcherGlobalFunctions.h edgeMessage.h edgeMessageHandler.h \
-	colorMessage.h colorMessageHandler.h watcherd.h
-OBJS=$(SRCS:.cpp=.o) 
+	colorMessage.h colorMessageHandler.h watcherd.h dataRequestMessage.h dataRequestMessageHandler.h
+OBJS=$(SRCS:.cpp=.o)
 
-MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp
+MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp dataRequestMessageTest.cpp
 
 BINS=$(MAINS:.cpp=) watcherd
 
@@ -65,6 +65,9 @@ edgeMessageTest: $(OBJS) edgeMessageTest.o
 colorMessageTest: $(OBJS) colorMessageTest.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
+dataRequestMessageTest: $(OBJS) dataRequestMessageTest.o
+	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
+
 testCC: $(OBJS) testCC.o
 	$(CXX) $^ -o testCC $(LIBS) $(LDFLAGS)
 
@@ -83,7 +86,7 @@ depend: $(SRCS) $(HDRS) $(MAINS)
 	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
 
 clean: 
-	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o)
+	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o) watcherdMain.o
 
 tags: $(SRCS) $(HDRS)
 	ctags -R . ../../include

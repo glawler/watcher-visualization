@@ -28,14 +28,14 @@ namespace watcher
 
             // Handle a request and produce a reply.
             // Default is to produce a MessageStatus with status of status_ack
-            virtual ConnectionCommand produceReply(const MessagePtr request, MessagePtr reply);
+            virtual ConnectionCommand produceReply(const MessagePtr &request, MessagePtr &reply);
 
             // Handle a reply to a request. Default is to check for a MessageStatus with status of 
             // status_ok or status_ack.
-            virtual ConnectionCommand handleReply(const MessagePtr request, const MessagePtr reply);
+            virtual ConnectionCommand handleReply(const MessagePtr &request, const MessagePtr &reply);
 
             // Generate a message to send, pure virtual. 
-            virtual ConnectionCommand produceRequest(MessagePtr request) = 0;
+            virtual ConnectionCommand produceRequest(MessagePtr &request) = 0;
 
         private:
 

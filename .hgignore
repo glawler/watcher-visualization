@@ -112,6 +112,7 @@ syntax: regexp
 ^src/watcherd/test/archived.txt
 ^src/watcherd/test/archived.dat
 ^src/watcherd/test/testMessage
+^src/watcherd/dataRequestMessageTest
 
 #
 # watcherHierarcyClient

@@ -5,6 +5,7 @@
 #include "labelMessageHandler.h"
 #include "edgeMessageHandler.h"
 #include "colorMessageHandler.h"
+#include "dataRequestMessageHandler.h"
 
 using namespace watcher;
 
@@ -40,6 +41,9 @@ boost::shared_ptr<MessageHandler> MessageHandlerFactory::getMessageHandler(const
             break;
         case COLOR_MESSAGE_TYPE: 
             return boost::shared_ptr<ColorMessageHandler>(new ColorMessageHandler);
+            break;
+        case DATA_REQUEST_MESSAGE_TYPE: 
+            return boost::shared_ptr<DataRequestMessageHandler>(new DataRequestMessageHandler);
             break;
 
             // GTL - don't put default case

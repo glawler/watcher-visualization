@@ -7,6 +7,7 @@
 #include "labelMessage.h"
 #include "edgeMessage.h"
 #include "colorMessage.h"
+#include "dataRequestMessage.h"
 
 using namespace watcher;
 
@@ -38,7 +39,11 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
         case COLOR_MESSAGE_TYPE:
             return boost::shared_ptr<ColorMessage>(new ColorMessage);
             break;
+        case DATA_REQUEST_MESSAGE_TYPE:
+            return boost::shared_ptr<DataRequestMessage>(new DataRequestMessage);
+            break;
 
+            
             // GTL - do not put a default or the compiler
             // won't tell us when we've missed a case.
     }

@@ -3,6 +3,10 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <boost/thread.hpp>
+
+#include "server.h"
+#include "libconfig.h++"
 #include "logger.h"
 
 namespace watcher
@@ -11,17 +15,23 @@ namespace watcher
     {
         public:
 
+            Watcherd();
+            ~Watcherd(); 
+
+            void run(const std::string &address, const std::string &port, const int &threadNum);
+            void stop(); 
 
         protected:
-
 
         private:
 
             DECLARE_LOGGER();
+
+            ServerPtr serverConnection;
+            boost::thread connectionThread;
+            libconfig::Config &config;
     };
 
-    typedef boost::shared_ptr<Watcherd> WatcherdPtr;
-    WatcherdPtr getWatcherd(); 
 }
 
 #endif // WATCHERD_H

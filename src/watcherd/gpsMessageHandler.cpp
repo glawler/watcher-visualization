@@ -18,7 +18,7 @@ GPSMessageHandler::~GPSMessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand GPSMessageHandler::produceRequest(MessagePtr request)
+MessageHandler::ConnectionCommand GPSMessageHandler::produceRequest(MessagePtr &request)
 {
     TRACE_ENTER();
     

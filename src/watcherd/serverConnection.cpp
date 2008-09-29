@@ -116,7 +116,7 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
             else 
             {
                 MessagePtr reply;
-                MessageHandler::ConnectionCommand cmd =handler->produceReply(request, reply);
+                MessageHandler::ConnectionCommand cmd = handler->produceReply(request, reply);
 
                 switch(cmd)
                 {
