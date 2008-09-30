@@ -1,15 +1,5 @@
-//
-// server.hpp
-// ~~~~~~~~~~
-//
-// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-
-#ifndef HTTP_SERVER3_SERVER_HPP
-#define HTTP_SERVER3_SERVER_HPP
+#ifndef WATCHER_SERVER_H
+#define WATCHER_SERVER_H
 
 #include <string>
 #include <boost/noncopyable.hpp>
@@ -22,12 +12,10 @@ namespace watcher
     class Server : private boost::noncopyable
     {
         public:
-            /// Construct the Server to listen on the specified TCP address and port, and
-            /// serve up files from the given directory.
+            // Construct the Server to listen on the specified TCP address and port.
             explicit Server(
                     const std::string& address, 
                     const std::string& port,
-                    // boost::shared_ptr<request_handler> &handler,
                     std::size_t thread_pool_size);
 
             /// Run the Server's io_service loop.
@@ -59,4 +47,4 @@ namespace watcher
 
 } // namespace watcher
 
-#endif // HTTP_SERVER3_SERVER_HPP
+#endif // WATCHER_SERVER_H
