@@ -124,6 +124,7 @@
     <addaction name="menuManet" />
     <addaction name="actionFullscreen" />
     <addaction name="actionNormalscreen" />
+    <addaction name="action3DNodes" />
    </widget>
    <widget class="QMenu" name="menuGoodwin" >
     <property name="title" >
@@ -404,6 +405,9 @@
    <property name="checkable" >
     <bool>false</bool>
    </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>&amp;Fullscreen</string>
    </property>
@@ -411,6 +415,17 @@
   <action name="actionNormalscreen" >
    <property name="text" >
     <string>Normalscreen</string>
+   </property>
+  </action>
+  <action name="action3DNodes" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;3D Nodes</string>
    </property>
   </action>
  </widget>
@@ -1125,6 +1140,38 @@
     <hint type="destinationlabel" >
      <x>454</x>
      <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action3DNodes</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleThreeDView(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>threeDViewToggled(bool)</signal>
+   <receiver>action3DNodes</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

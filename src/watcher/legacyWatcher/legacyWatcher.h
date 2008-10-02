@@ -93,6 +93,9 @@ namespace legacyWatcher
     void layerToggle(const Layer layer, const bool turnOn); 
     unsigned int getDisplayLayerBitmap(void);
 
+    void toggleThreeDView(bool isOn);
+    void toggleMonochrome(bool isOn); 
+
 }; // namespace legacyWatcher
 
 #endif

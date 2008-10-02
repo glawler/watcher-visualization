@@ -18,6 +18,8 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: graphics.cpp,v 1.54 20
 
 #ifdef GRAPHICS
 
+extern NodeDisplayStatus globalDispStat; // allocated in legacyWatcher.o
+
 /*
  * Get the distance from "n" to "(x, y)" in screen coordinates given
  * the transform matrices and the view port.
@@ -370,18 +372,36 @@ manetNode *closestNode(manet *m, int x, int y, unsigned int r, unsigned int *dis
     return ret;
 } /* closestNode */
 
+void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+{
+    glPushMatrix();
+
+    glTranslatef(x, y, z);
+
+    if (globalDispStat.threeDView)
+    {
+        // glutSolidSphere(radius, 10, 10);
+        glutWireSphere(radius, 10, 10);
+    }
+    else
+    {
+        GLUquadric* q=NULL;
+        q=gluNewQuadric();
+        gluDisk(q,radius-1,radius,36,1);
+        gluDeleteQuadric(q);
+    }
+    glPopMatrix();
+}
+
 void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 {
-	GLUquadric* q=NULL;
-	
-	glPushMatrix();
-
-	glTranslatef(x, y, z);
-	q=gluNewQuadric();
-	gluDisk(q,radius-1,radius,36,1);
-	gluDeleteQuadric(q);
-
-	glPopMatrix();
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    GLUquadric* q=NULL;
+    q=gluNewQuadric();
+    gluDisk(q,radius-1,radius,36,1);
+    gluDeleteQuadric(q);
+    glPopMatrix();
 }
 
 void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
@@ -492,40 +512,60 @@ GLfloat drawTextWidth(char *text)
     return glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)text);
 }
 
+// Draw Arrow is only called when drawing the hierarchy, not the MANET view, so don't
+// need to have a 3d view case.
 void drawArrow(GLdouble x1, GLdouble y1, GLdouble x2,GLdouble y2, GLdouble width)
 {
-	double a;
+    double a;
 
-	glBegin(GL_LINES);
-	glVertex3f(x1,y1,0);
-	glVertex3f(x2,y2,0);
+    glBegin(GL_LINES);
+    glVertex3f(x1,y1,0);
+    glVertex3f(x2,y2,0);
 
-	a=atan2(x1-x2,y1-y2);
+    a=atan2(x1-x2,y1-y2);
 
-	glVertex3f(x2+sin(a-0.5)*width,y2+cos(a-0.5)*width,0);
-	glVertex3f(x2,y2,0);
-	glVertex3f(x2,y2,0);
-	glVertex3f(x2+sin(a+0.5)*width,y2+cos(a+0.5)*width,0);
+    glVertex3f(x2+sin(a-0.5)*width,y2+cos(a-0.5)*width,0);
+    glVertex3f(x2,y2,0);
+    glVertex3f(x2,y2,0);
+    glVertex3f(x2+sin(a+0.5)*width,y2+cos(a+0.5)*width,0);
 
-	glEnd();
+    glEnd();
 }
 
 void drawHeavyArrow(GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2, GLdouble y2,GLdouble z2, GLdouble width)
 {
-	double a=atan2(x1-x2,y1-y2);
-	double cm = sin(a)*width;  // cos(a-M_PI_2)*width
-	double cp = -cm;           // cos(a+M_PI_2)*width
-	double sm = -cos(a)*width; // sin(a-M_PI_2)*width
-	double sp = -sm;           // cos(a+M_PI_2)*width
+    double a=atan2(x1-x2,y1-y2);
+    double cm = sin(a)*width;  // cos(a-M_PI_2)*width
+    double cp = -cm;           // cos(a+M_PI_2)*width
+    double sm = -cos(a)*width; // sin(a-M_PI_2)*width
+    double sp = -sm;           // cos(a+M_PI_2)*width
 
-	glBegin(GL_POLYGON);
+    if (!globalDispStat.threeDView)
+    {
+        glBegin(GL_POLYGON);
 
-	glVertex3f(x1+sm,y1+cm,z1);
-	glVertex3f(x1+sp,y1+cp,z1);
-	glVertex3f(x2+sp,y2+cp,z2);
-	glVertex3f(x1+sm,y1+cm,z1);
+        glVertex3f(x1+sm,y1+cm,z1);
+        glVertex3f(x1+sp,y1+cp,z1);
+        glVertex3f(x2+sp,y2+cp,z2);
+        glVertex3f(x1+sm,y1+cm,z1);
 
-	glEnd();
+        glEnd();
+    }
+    else
+    {
+        glPushMatrix();
+        GLUquadric *q=gluNewQuadric();
+        glTranslatef(x1,y1,z1);
+
+        // gluCylinder draws "out the z axis", so rotate view 90 on the y axis and angle-between-the-nodes on the x axis
+        // before drawing the cylinder
+        glRotated(90.0, 0.0, 1.0, 0.0);                             // y rotate
+        glRotated(atan2(y1-y2,x2-x1)*(180/M_PI), 1.0, 0.0, 0.0);    // x rotate, y1-y2,x2-x1 was trail and error wrt the quadrants
+        gluCylinder(q, width, 0, sqrt(pow(x1-x2,2)+pow(y1-y2,2)), 10, 10); 
+
+        gluDeleteQuadric(q);
+        glPopMatrix(); 
+    }
 }
 
 
@@ -770,75 +810,75 @@ static void nodeDrawCircFn(
         NodeDisplayStatus const *dispStat, 
         void (*circFn)(GLdouble, GLdouble, GLdouble, GLdouble))
 {
-	const GLfloat root[]={0.0,1.0,0.0,1.0};
-	const GLfloat black[]={0.0,0.0,0.0,1.0};
-	const GLfloat leaf[]={1.0,0.0,0.0,1.0};
-	const GLfloat aradius[]={1.0,0.0,0.0,0.5};
-	static const GLfloat nodelabel[]={0.0,0.0,1.0,0.6};
-	int i,j;
-	char buff[1024];
-	GLfloat tmp[4];
+    const GLfloat root[]={0.0,1.0,0.0,1.0};
+    const GLfloat black[]={0.0,0.0,0.0,1.0};
+    const GLfloat leaf[]={1.0,0.0,0.0,1.0};
+    const GLfloat aradius[]={1.0,0.0,0.0,0.25};
+    static const GLfloat nodelabel[]={0.0,0.0,1.0,0.6};
+    int i,j;
+    char buff[1024];
+    GLfloat tmp[4];
 
-	if (us->color)
-		for(i=0;i<4;i++)
-			tmp[i]=us->color[i]/255.0;
+    if (us->color)
+        for(i=0;i<4;i++)
+            tmp[i]=us->color[i]/255.0;
 
-	if (dispStat->monochromeMode)
-	{
-		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
-	}
-	else
-	{
-		if (us->color)
-		{
-			glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tmp);
-		}
-		else
-		{
-			if ((us->rootflag) && (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_HIERARCHY)))
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,root);
-			else
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,leaf);
-		}
-	}
-
-	circFn(us->x,us->y,us->z,4);
-
-	if (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_HIERARCHY))
+    if (dispStat->monochromeMode)
     {
-		for(j=0;j<us->level;j++)
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    }
+    else
+    {
+        if (us->color)
         {
-			drawCircle(us->x, us->y, us->z, HIERARCHY_RADIUS(j));
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tmp);
+        }
+        else
+        {
+            if ((us->rootflag) && (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_HIERARCHY)))
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,root);
+            else
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,leaf);
         }
     }
 
-	if (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS))
-	{
-		if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
-		{
-			if (us->color)
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tmp);
-			else
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, aradius);
-		}
-		drawCircle(us->x,us->y,us->z,us->aradius);
-	}
+    circFn(us->x,us->y,us->z,4);
 
-	if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
-		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, nodelabel);
-	sprintf(buff,"%d",us->addr & 0xFF);
-	drawText(us->x,us->y+6,us->z,dispStat->scaleText[dispType], buff);
-	nodeDrawLabel(us, dispType, dispStat, us->x, us->y, us->z);
-	nodeLabelTimeout(us);
+    if (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_HIERARCHY))
+    {
+        for(j=0;j<us->level;j++)
+        {
+            drawSphere(us->x, us->y, us->z, HIERARCHY_RADIUS(j));
+        }
+    }
+
+    if (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS))
+    {
+        if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
+        {
+            if (us->color)
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tmp);
+            else
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, aradius);
+        }
+        drawSphere(us->x,us->y,us->z,us->aradius);
+    }
+
+    if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, nodelabel);
+    sprintf(buff,"%d",us->addr & 0xFF);
+    drawText(us->x,us->y+6,us->z,dispStat->scaleText[dispType], buff);
+    nodeDrawLabel(us, dispType, dispStat, us->x, us->y, us->z);
+    nodeLabelTimeout(us);
+
 } /* nodeDrawCircFn */
-
 
 void nodeDraw(
         manetNode *us, 
         NodeDisplayType dispType,
         NodeDisplayStatus const *dispStat)
 {
-    nodeDrawCircFn(us, dispType, dispStat, drawCircle);
+    nodeDrawCircFn(us, dispType, dispStat, drawSphere);
 }
 
 void nodeDrawFrowny(
@@ -858,7 +898,7 @@ void drawNodes(
 
 	dispStat.minPriority=COMMUNICATIONS_LABEL_PRIORITY_INFO;
 	dispStat.familyBitmap=COMMUNICATIONS_LABEL_FAMILY_ALL & ~(1 << COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS);
-	dispStat.monochromeMode=0;
+	dispStat.monochromeMode=globalDispStat.monochromeMode;
 	dispStat.scaleText[dispType]=0.08;
         dispStat.scaleLine[dispType]=1.0;
 
@@ -1103,7 +1143,7 @@ static int drawHierarchyrecurse(
         drawText(xcoord[m->nlist[nodeidx[i]].index]-6,levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING-5,0,dispStat->scaleText[NODE_DISPLAY_HIERARCHY], buff);
 
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neighborcolors[(levels[nodeidx[i]])%NBR_COLOR_NUM(neighborcolors)]);
-        drawCircle(xcoord[m->nlist[nodeidx[i]].index],levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING,0,10);
+        drawSphere(xcoord[m->nlist[nodeidx[i]].index],levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING,0,10);
 
         if (m->nlist[nodeidx[i]].clusterhead)
         {
@@ -1135,10 +1175,10 @@ void manetDraw(manet *m)
     static const GLfloat arena[]={0.0,1.0,1.0,1.0};
     static const GLfloat hierarchy[]={0.0,0.0,1.0,0.5};
     static const GLfloat physical[]={1.0,0.0,0.0,1.0};
-    static const NodeDisplayStatus dispstat =
-    {
-        COMMUNICATIONS_LABEL_PRIORITY_INFO, 0xFFFFFFFF, { 0.08, 0.08 }, { 1.0, 1.0 } , 0
-    };
+    // static const NodeDisplayStatus dispstat =
+    // {
+    //     COMMUNICATIONS_LABEL_PRIORITY_INFO, 0xFFFFFFFF, { 0.08, 0.08 }, { 1.0, 1.0 } , 0, 0
+    // };
 
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, arena);
     glBegin(GL_LINE_STRIP);
@@ -1199,7 +1239,8 @@ void manetDraw(manet *m)
     }
 #endif
 
-    drawHierarchy(m, &dispstat);
+    // drawHierarchy(m, &dispstat);
+    drawHierarchy(m, &globalDispStat);
 
     /* Physical links are on plane Z=0  */
 #if 1

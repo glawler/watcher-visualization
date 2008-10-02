@@ -461,3 +461,19 @@ void manetGLView::toggleNormPaths(bool isOn)
     updateGL();
     TRACE_EXIT();
 }
+void manetGLView::toggleMonochrome(bool isOn)
+{
+    TRACE_ENTER();
+    legacyWatcher::toggleMonochrome(isOn);
+    emit monochromeToggled(isOn); 
+    updateGL();
+    TRACE_EXIT();
+}
+void manetGLView::toggleThreeDView(bool isOn)
+{
+    TRACE_ENTER();
+    legacyWatcher::toggleThreeDView(isOn);
+    emit threeDViewToggled(isOn); 
+    updateGL();
+    TRACE_EXIT();
+}

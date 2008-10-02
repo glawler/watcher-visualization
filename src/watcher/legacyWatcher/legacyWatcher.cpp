@@ -100,7 +100,7 @@ static manet *globalManet;
 static int *globalGraphHierarchy;
 static float *globalGraphManet = NULL;
 static float globalGraphScaleManet;
-static NodeDisplayStatus globalDispStat;
+NodeDisplayStatus globalDispStat; // referenced in graphics.cpp, so don't make static
 static destime globalLastMetricsTick;
 static int globalWatcherMovementEnableFlag = 0;
 static void *globalWatcherMovementState;
@@ -177,6 +177,16 @@ void legacyWatcher::layerToggle(const Layer layer, const bool turnOn)
 unsigned int legacyWatcher::getDisplayLayerBitmap(void) 
 {
     return globalDispStat.familyBitmap;
+}
+
+void legacyWatcher::toggleMonochrome(bool isOn)
+{
+   globalDispStat.monochromeMode=isOn?1:0;
+}
+
+void legacyWatcher::toggleThreeDView(bool isOn)
+{
+   globalDispStat.threeDView=isOn?1:0;
 }
 
 // UNUSED NOW static void labelsClear(manet *m);
@@ -2409,6 +2419,7 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
     globalDispStat.scaleLine[NODE_DISPLAY_MANET] = 1.0;
     globalDispStat.scaleLine[NODE_DISPLAY_HIERARCHY] = 1.0;
     globalDispStat.monochromeMode = 0;
+    globalDispStat.threeDView = 1;
 
     globalReplay.speed = 4;
     int shiftSet = 0;   /* flag to indicate if the user specified an initial display location */
@@ -2562,6 +2573,7 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
     }
 
     globalDispStat.monochromeMode = configSearchInt(conf, "watcher_monochrome");
+    globalDispStat.threeDView = configSearchInt(conf, "watcher_threeDView");
     GPSScale = configSetDouble(conf, "watcher_gpsscale", 80000);
 
     goodwinfilename = argc > 1 ? argv[1] : NULL;
