@@ -1,5 +1,6 @@
 #include <iostream>
 #include <QTimer>
+#include <string>
 
 #include "ui_watcher.h"
 
@@ -16,9 +17,10 @@ int main(int argc, char *argv[])
 {
     TRACE_ENTER();
 
+    string configFilename;
     Config &config=singletonConfig::instance();
     singletonConfig::lock();
-    if (false==initConfig(config, argc, argv))
+    if (false==initConfig(config, argc, argv, configFilename))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;
         cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
@@ -32,7 +34,7 @@ int main(int argc, char *argv[])
         cerr << "Unable to find logproperties setting in the configuration file, using default: " << logConf << endl;
     }
 
-    PropertyConfigurator::configureAndWatch(logConf);
+    LOAD_LOG_PROPS(logConf); 
 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
     LOG_INFO("Although the legacgy watcher code does not use it, so it is not overly valuable");
