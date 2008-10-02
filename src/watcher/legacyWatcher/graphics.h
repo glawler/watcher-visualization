@@ -50,7 +50,7 @@ int xyAtZForModelProjViewXY(
 int xyAtZForScreenXY(int x, int y, GLdouble z, GLdouble *x_ret, GLdouble *y_ret);
 void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius);
 
-void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text);
+void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth=2.0);
 GLfloat drawTextHeight(char *text);
 GLfloat drawTextWidth(char *text);
 

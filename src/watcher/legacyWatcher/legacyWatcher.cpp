@@ -1351,7 +1351,7 @@ void legacyWatcher::drawManet(void)
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
     else
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-    drawText(-400, -360, 0, globalDispStat.scaleText[NODE_DISPLAY_MANET], buff);
+    drawText(-400, -360, 0, globalDispStat.scaleText[NODE_DISPLAY_MANET], buff, 1.0);
 
     if (globalShowPositionFlag)
     {
@@ -1361,7 +1361,7 @@ void legacyWatcher::drawManet(void)
                 globalManetAdj.scaleX,
                 globalDispStat.familyBitmap,
                 (long)( curtime / 1000), (long)((curtime - begintime)) / 1000);
-        drawText(-200, -360, 0, globalDispStat.scaleText[NODE_DISPLAY_MANET], buff);
+        drawText(-200, -360, 0, globalDispStat.scaleText[NODE_DISPLAY_MANET], buff, 1.0);
     }
 
     {
@@ -1454,7 +1454,7 @@ void legacyWatcher::drawManet(void)
     }
 
     glPushMatrix();
-    glTranslatef(0.0, 0.0, + 0.6);
+    glTranslatef(0.0, 0.0, + 0.8);
     watcherGraphDraw(&userGraph, NODE_DISPLAY_MANET, &globalDispStat, m->curtime);
     floatingLabelDraw(&floatingLabelList, NODE_DISPLAY_MANET, &globalDispStat, m->curtime);
     glPopMatrix();

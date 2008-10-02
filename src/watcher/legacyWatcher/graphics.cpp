@@ -380,7 +380,9 @@ void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 
     if (globalDispStat.threeDView)
     {
+        glPushAttrib(GL_NORMALIZE);
         glutWireSphere(radius, 10, 10);
+        glPopAttrib();
     }
     else
     {
@@ -400,7 +402,9 @@ void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 
     if (globalDispStat.threeDView)
     {
+        glPushAttrib(GL_NORMALIZE);
         glutSolidSphere(radius, 10, 10);
+        glPopAttrib();
     }
     else
     {
@@ -479,12 +483,12 @@ void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
     return;
 } /* drawFrownyCircle */
 
-void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text)
+void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth)
 {
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
     // glEnable(GL_LINE_SMOOTH);
-    glLineWidth(2.0);
+    glLineWidth(lineWidth); 
 
     int i;
     GLfloat lineheight=- glutStrokeWidth(GLUT_STROKE_ROMAN,'W') * scale;   // TOJ: need scale arg here?  
