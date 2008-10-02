@@ -98,6 +98,8 @@
     <addaction name="actionCorrelatorPaths" />
     <addaction name="actionWormholeAlerts" />
     <addaction name="actionUndefined" />
+    <addaction name="actionClearAllLabels" />
+    <addaction name="actionClearAllEdges" />
    </widget>
    <widget class="QMenu" name="menuView" >
     <property name="title" >
@@ -417,6 +419,16 @@
   <action name="actionNormalscreen" >
    <property name="text" >
     <string>Normal Screen</string>
+   </property>
+  </action>
+  <action name="actionClearAllLabels" >
+   <property name="text" >
+    <string>Clear &amp;All Labels</string>
+   </property>
+  </action>
+  <action name="actionClearAllEdges" >
+   <property name="text" >
+    <string>Clear All &amp;Edges</string>
    </property>
   </action>
  </widget>
@@ -1147,6 +1159,38 @@
     <hint type="destinationlabel" >
      <x>382</x>
      <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClearAllEdges</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>clearAllEdges()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClearAllLabels</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>clearAllLabels()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
     </hint>
    </hints>
   </connection>

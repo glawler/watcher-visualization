@@ -48,6 +48,9 @@ class manetGLView : public QGLWidget
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);
 
+        void clearAllLabels();
+        void clearAllEdges();
+
     signals:
         void positionReset();
 
@@ -69,6 +72,8 @@ class manetGLView : public QGLWidget
         void normPathsToggled(bool isOn);
         void monochromeToggled(bool isOn);
         void threeDViewToggled(bool isOn); 
+        void labelsCleared();
+        void edgesCleared(); 
 
     protected:
         void initializeGL();

@@ -479,3 +479,16 @@ void manetGLView::toggleThreeDView(bool isOn)
     updateGL();
     TRACE_EXIT();
 }
+void manetGLView::clearAllEdges()
+{
+    TRACE_ENTER();
+    legacyWatcher::clearAllEdges();
+    TRACE_EXIT();
+}
+void manetGLView::clearAllLabels()
+{
+    TRACE_ENTER();
+    legacyWatcher::clearAllLabels();
+    emit labelsCleared();
+    TRACE_EXIT();
+}

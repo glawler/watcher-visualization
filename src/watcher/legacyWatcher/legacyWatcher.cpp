@@ -1510,18 +1510,24 @@ void legacyWatcher::drawHierarchy(void)
 /* walk the arrays of label pointers, and remove all of them
 */
 
-// UNUSED NOW static void labelsClear(manet *m)
-// UNUSED NOW {
-// UNUSED NOW     int nod;
-// UNUSED NOW     manetNode *us;
-// UNUSED NOW 
-// UNUSED NOW     for(nod = 0; nod < m->numnodes; nod++)
-// UNUSED NOW     {
-// UNUSED NOW         us = &(m->nlist[nod]);
-// UNUSED NOW         nodeLabelRemoveAll(us);
-// UNUSED NOW         us->cluster->needupdate = 1;
-// UNUSED NOW     }
-// UNUSED NOW }
+void legacyWatcher::clearAllLabels()
+{
+    int nod;
+    manetNode *us;
+    manet *m=globalManet;
+
+    for(nod = 0; nod < m->numnodes; nod++)
+    {
+        us = &(m->nlist[nod]);
+        nodeLabelRemoveAll(us);
+        us->cluster->needupdate = 1;
+    }
+}
+
+void legacyWatcher::clearAllEdges()
+{
+    watcherGraphEdgeNuke(&userGraph);
+}
 
 /* This is called in either goodwin or live mode, to init our
  * data structures

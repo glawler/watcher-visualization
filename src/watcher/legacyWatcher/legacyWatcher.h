@@ -96,6 +96,10 @@ namespace legacyWatcher
     void toggleThreeDView(bool isOn);
     void toggleMonochrome(bool isOn); 
 
+    void clearAllLabels();
+    void clearAllEdges();
+
+
 }; // namespace legacyWatcher
 
 #endif
