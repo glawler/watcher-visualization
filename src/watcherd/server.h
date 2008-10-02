@@ -16,7 +16,8 @@ namespace watcher
             explicit Server(
                     const std::string& address, 
                     const std::string& port,
-                    std::size_t thread_pool_size);
+                    std::size_t thread_pool_size,
+                    MessageHandlerPtr messageHandler);
 
             /// Run the Server's io_service loop.
             void run();
@@ -41,6 +42,8 @@ namespace watcher
 
             /// The next connection to be accepted.
             ServerConnectionPtr new_connection_;
+
+            MessageHandlerPtr messageHandler;
     };
 
     typedef boost::shared_ptr<Server> ServerPtr;

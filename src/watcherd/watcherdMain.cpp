@@ -85,17 +85,15 @@ int main(int argc, char* argv[])
            config.getRoot().add("serverThreadNum", libconfig::Setting::TypeInt)=static_cast<int>(numThreads);
     }
 
-    Watcherd theWatcherDaemon;
+    boost::shared_ptr<Watcherd> theWatcherDaemon(new Watcherd);
     try
     {
-        theWatcherDaemon.run(address, port, (int)numThreads);
+        theWatcherDaemon->run(address, port, (int)numThreads);
     }
     catch (std::exception &e)
     {
         LOG_FATAL("Caught exception in main(): " << e.what());
         std::cerr << "exception: " << e.what() << "\n";
-
-        theWatcherDaemon.stop(); // This may be a bad idea. 
     }
 
     // Save any configuration changes made during the run.

@@ -77,7 +77,7 @@ int main(int argc, char **argv)
     string server;
     DataRequestMessage::MessageTypeList messages;
     const unsigned int layers=0;
-    DataRequestMessage::WatcherTime startTime=0;
+    watcher::Timestamp startTime=0;
     int timeFactor=1;
 
     string logProps("log.properties");
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
             case 'p': logProps=optarg; break;
             case 'm': printf("\nMessage argument is not currently supported\n"); break;
             case 'l': printf("\nLayer argument is not currently supported\n"); break;
-            case 't': startTime=lexical_cast<DataRequestMessage::WatcherTime>(optarg); break;
+            case 't': startTime=lexical_cast<watcher::Timestamp>(optarg); break;
             case 'f': timeFactor=lexical_cast<int>(optarg); break;
             case 'h':
             case 'H':
@@ -134,7 +134,13 @@ int main(int argc, char **argv)
     
     DataRequestMessagePtr drm(new DataRequestMessage);
 
-    drm->dataTypesRequested=messages; 
+    // drm->dataTypesRequested=messages; 
+    drm->dataTypesRequested.push_back(MESSAGE_STATUS_TYPE); 
+    drm->dataTypesRequested.push_back(TEST_MESSAGE_TYPE); 
+    drm->dataTypesRequested.push_back(GPS_MESSAGE_TYPE); 
+    drm->dataTypesRequested.push_back(LABEL_MESSAGE_TYPE); 
+    drm->dataTypesRequested.push_back(EDGE_MESSAGE_TYPE); 
+    drm->requestAllMessages(); 
     drm->startingAt=startTime;
     drm->timeFactor=timeFactor;
     drm->layers=layers;

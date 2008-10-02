@@ -23,7 +23,7 @@ DataRequestMessage::DataRequestMessage() :
 }
 DataRequestMessage::DataRequestMessage(
         const MessageTypeList &types, 
-        const WatcherTime &startAt_,
+        const Timestamp &startAt_,
         const float &factor_,
         const unsigned int layers_) : 
     Message(DATA_REQUEST_MESSAGE_TYPE, DATA_REQUEST_MESSAGE_VERSION),
@@ -47,6 +47,32 @@ DataRequestMessage::~DataRequestMessage()
 {
     TRACE_ENTER();
     TRACE_EXIT();
+}
+
+void DataRequestMessage::requestAllMessages()
+{
+    MessageType types[] = {  
+        MESSAGE_STATUS_TYPE,
+        TEST_MESSAGE_TYPE,
+        GPS_MESSAGE_TYPE, 
+        LABEL_MESSAGE_TYPE, 
+        EDGE_MESSAGE_TYPE,
+        COLOR_MESSAGE_TYPE,
+        DATA_REQUEST_MESSAGE_TYPE
+    };
+
+    GUILayer theLayers[] = { 
+        HIERARCHY_LAYER,
+        ROUTING_LAYER,
+        NODE_LAYER,
+        FLOATING_LAYER,
+    };
+
+   for(unsigned int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
+       dataTypesRequested.push_back(types[i]);
+
+   for(unsigned int i = 0; i < sizeof(theLayers)/sizeof(theLayers[0]); i++)
+        layers |= theLayers[i];
 }
 
 bool DataRequestMessage::operator==(const DataRequestMessage &other) const

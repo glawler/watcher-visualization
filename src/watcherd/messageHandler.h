@@ -37,6 +37,9 @@ namespace watcher
             // Generate a message to send, pure virtual. 
             virtual ConnectionCommand produceRequest(MessagePtr &request) = 0;
 
+            // Notification of message arrival. Default does nothing, but log the message. 
+            virtual void handleMessageArrive(const MessagePtr message); 
+
         private:
 
             DECLARE_LOGGER();

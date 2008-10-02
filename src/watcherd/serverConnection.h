@@ -32,7 +32,7 @@ namespace watcher
     {
         public:
             /// Construct a connection with the given io_service.
-            explicit ServerConnection(boost::asio::io_service& io_service);
+            explicit ServerConnection(boost::asio::io_service& io_service, MessageHandlerPtr messageHandler_);
 
             /// Get the socket associated with the connection.
             boost::asio::ip::tcp::socket& socket();
@@ -73,6 +73,8 @@ namespace watcher
 
             // Use the utiliity class for arbitrary marshal/unmarhasl
             DataMarshaller dataMarshaller;
+
+            MessageHandlerPtr messageHandler;
     };
 
     typedef boost::shared_ptr<ServerConnection> ServerConnectionPtr;

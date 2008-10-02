@@ -60,3 +60,10 @@ MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr &
     return stayConnected;
 }
 
+void MessageHandler::handleMessageArrive(const MessagePtr message)
+{
+    TRACE_ENTER();
+    LOG_INFO("Recv'd message: " << message); 
+    TRACE_EXIT();
+}
+

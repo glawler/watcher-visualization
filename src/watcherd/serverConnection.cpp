@@ -20,9 +20,10 @@ using namespace watcher;
 
 INIT_LOGGER(ServerConnection, "ServerConnection");
 
-ServerConnection::ServerConnection(boost::asio::io_service& io_service) :
+ServerConnection::ServerConnection(boost::asio::io_service& io_service, MessageHandlerPtr messageHandler_) :
     strand_(io_service),
-    socket_(io_service)
+    socket_(io_service),
+    messageHandler(messageHandler_)
 {
     TRACE_ENTER(); 
 
@@ -107,57 +108,56 @@ void ServerConnection::handle_read_payload(const boost::system::error_code& e, s
 
             LOG_INFO("Recvd message from " << nodeAddr <<  " :" << *request); 
 
-            MessageHandlerPtr handler = MessageHandlerFactory::getMessageHandler(request->type);
+            MessageHandlerPtr handler;
+            if (!messageHandler)
+                handler = MessageHandlerFactory::getMessageHandler(request->type);
+            else
+                handler=messageHandler;
 
-            if (!handler)
+            handler->handleMessageArrive(request);
+
+            MessagePtr reply;
+            MessageHandler::ConnectionCommand cmd = handler->produceReply(request, reply);
+
+            switch(cmd)
             {
-                LOG_WARN("Received unknown message type - ignoring.")
-            }
-            else 
-            {
-                MessagePtr reply;
-                MessageHandler::ConnectionCommand cmd = handler->produceReply(request, reply);
+                case MessageHandler::writeMessage:
+                    {
+                        // Keep track of this reply in case of write error
+                        // and so we know when to stop sending replays and we can 
+                        // close the socket to the client.
+                        replies.push_back(reply); 
 
-                switch(cmd)
-                {
-                    case MessageHandler::writeMessage:
-                        {
-                            // Keep track of this reply in case of write error
-                            // and so we know when to stop sending replays and we can 
-                            // close the socket to the client.
-                            replies.push_back(reply); 
-
-                            LOG_DEBUG("Marshalling outbound message"); 
-                            OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                            dataMarshaller.marshal(reply, *obDataPtr);
-                            LOG_INFO("Sending reply: " << *reply);
-                            boost::asio::async_write(socket_, *obDataPtr, 
-                                    strand_.wrap(
-                                        boost::bind(
-                                            &ServerConnection::handle_write, 
-                                            shared_from_this(),
-                                            boost::asio::placeholders::error, 
-                                            reply))); 
-                            break;
-                        }
-                    case MessageHandler::readMessage:
-                        {
-                            LOG_DEBUG("Readig another message via the connection");
-                            start();
-                            break;
-                        }
-                    case MessageHandler::closeConnection:
-                        {
-                            LOG_INFO("Not sending reply - request doesn't need one"); 
-                            // This execution branch causes this connection to disapear.
-                            break;
-                        }
-                    case MessageHandler::stayConnected:
-                        {
-                            LOG_INFO("We are supposed to stay connected.\n"); 
-                            break;
-                        }
-                }
+                        LOG_DEBUG("Marshalling outbound message"); 
+                        OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
+                        dataMarshaller.marshal(reply, *obDataPtr);
+                        LOG_INFO("Sending reply: " << *reply);
+                        boost::asio::async_write(socket_, *obDataPtr, 
+                                strand_.wrap(
+                                    boost::bind(
+                                        &ServerConnection::handle_write, 
+                                        shared_from_this(),
+                                        boost::asio::placeholders::error, 
+                                        reply))); 
+                        break;
+                    }
+                case MessageHandler::readMessage:
+                    {
+                        LOG_DEBUG("Readig another message via the connection");
+                        start();
+                        break;
+                    }
+                case MessageHandler::closeConnection:
+                    {
+                        LOG_INFO("Not sending reply - request doesn't need one"); 
+                        // This execution branch causes this connection to disapear.
+                        break;
+                    }
+                case MessageHandler::stayConnected:
+                    {
+                        LOG_INFO("We are supposed to stay connected.\n"); 
+                        break;
+                    }
             }
         }
         else

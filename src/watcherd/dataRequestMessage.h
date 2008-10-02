@@ -25,8 +25,7 @@ namespace watcher
             MessageTypeList dataTypesRequested;
 
             // Data Requests starting at this time period in Epoch milliseconds.
-            typedef unsigned long long WatcherTime;
-            WatcherTime startingAt;
+            Timestamp startingAt;
 
             // How quickly do you want the Messages fed to you?
             // 1=real time, 2=twice as fast, .5=half as fast, etc.
@@ -45,13 +44,15 @@ namespace watcher
 
             DataRequestMessage(
                     const MessageTypeList &types,
-                    const WatcherTime &startAt_=0, 
+                    const Timestamp &startAt_=0, 
                     const float &factor_=1,
                     const unsigned int layers_=0); 
 
             DataRequestMessage(const DataRequestMessage &other);
 
             virtual ~DataRequestMessage();
+
+            void requestAllMessages();  // Get all known messages. 
 
             bool operator==(const DataRequestMessage &other) const;
             DataRequestMessage &operator=(const DataRequestMessage &other);
