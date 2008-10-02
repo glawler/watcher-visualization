@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
     string configFilename;
     Config &config=singletonConfig::instance();
     singletonConfig::lock();
-    if (false==initConfig(config, argc, argv, configFilename))
+    if (false==initConfig(config, argc, argv, configFilename, 'f'))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;
-        cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
+        cerr << "Usage: " << basename(argv[0]) << " [-f|--configFile] configfile" << endl;
         return 1;
     }
     singletonConfig::unlock();
@@ -53,6 +53,10 @@ int main(int argc, char *argv[])
     ui.manetGLViewWindow->runLegacyWatcherMain(argc, argv);
 
     window->show();
+
+    // Save any configuration changes made during the run.
+    singletonConfig::lock();
+    config.writeFile(configFilename.c_str());
 
     TRACE_EXIT();
 

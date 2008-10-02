@@ -372,7 +372,7 @@ manetNode *closestNode(manet *m, int x, int y, unsigned int r, unsigned int *dis
     return ret;
 } /* closestNode */
 
-void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 {
     glPushMatrix();
 
@@ -380,8 +380,27 @@ void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 
     if (globalDispStat.threeDView)
     {
-        // glutSolidSphere(radius, 10, 10);
         glutWireSphere(radius, 10, 10);
+    }
+    else
+    {
+        GLUquadric* q=NULL;
+        q=gluNewQuadric();
+        gluDisk(q,radius-1,radius,36,1);
+        gluDeleteQuadric(q);
+    }
+    glPopMatrix();
+}
+
+void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+{
+    glPushMatrix();
+
+    glTranslated(x, y, z);
+
+    if (globalDispStat.threeDView)
+    {
+        glutSolidSphere(radius, 10, 10);
     }
     else
     {
@@ -462,27 +481,33 @@ void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
 
 void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text)
 {
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable(GL_BLEND);
+    // glEnable(GL_LINE_SMOOTH);
+    glLineWidth(2.0);
 
-	int i;
+    int i;
     GLfloat lineheight=- glutStrokeWidth(GLUT_STROKE_ROMAN,'W') * scale;   // TOJ: need scale arg here?  
 
-	glPushMatrix();
-	glTranslatef(x,y,z);
-	glScaled(scale,scale,scale);
-	for (i = 0; text[i]; i++)
-		switch(text[i])
-		{
-			case '\n':
-				glPopMatrix();
-				glTranslatef(0.0,lineheight,0.0);
-				glPushMatrix();
-				glScaled(scale,scale,scale);
-			break;
-			default:
+    glPushMatrix();
+    glTranslatef(x,y,z);
+    glScaled(scale,scale,scale);
+    for (i = 0; text[i]; i++)
+        switch(text[i])
+        {
+            case '\n':
+                glPopMatrix();
+                glTranslatef(0.0,lineheight,0.0);
+                glPushMatrix();
+                glScaled(scale,scale,scale);
+                break;
+            default:
                 glutStrokeCharacter(GLUT_STROKE_ROMAN, text[i]);
-			break;
-		}
-	glPopMatrix();
+                break;
+        }
+    glPopMatrix();
+
+    glLineWidth(1.0);
 }
 
 GLfloat drawTextHeight(char *text)
@@ -810,11 +835,12 @@ static void nodeDrawCircFn(
         NodeDisplayStatus const *dispStat, 
         void (*circFn)(GLdouble, GLdouble, GLdouble, GLdouble))
 {
+    const GLfloat antennaAlpha=0.5;
     const GLfloat root[]={0.0,1.0,0.0,1.0};
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     const GLfloat leaf[]={1.0,0.0,0.0,1.0};
-    const GLfloat aradius[]={1.0,0.0,0.0,0.25};
-    static const GLfloat nodelabel[]={0.0,0.0,1.0,0.6};
+    const GLfloat aradius[]={1.0,0.0,0.0,0.15};
+    static const GLfloat nodelabel[]={0.0,0.0,1.0,antennaAlpha};
     int i,j;
     char buff[1024];
     GLfloat tmp[4];
@@ -857,11 +883,18 @@ static void nodeDrawCircFn(
         if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
         {
             if (us->color)
+            {
+                GLfloat tmp[4];
+                tmp[0]=us->color[0]/255.0;
+                tmp[1]=us->color[1]/255.0;
+                tmp[2]=us->color[2]/255.0;
+                tmp[3]=antennaAlpha; 
                 glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tmp);
+            }
             else
                 glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, aradius);
         }
-        drawSphere(us->x,us->y,us->z,us->aradius);
+        drawWireframeSphere(us->x,us->y,us->z,us->aradius);
     }
 
     if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
@@ -893,19 +926,19 @@ void drawNodes(
         NodeDisplayType dispType,
         manet *m)
 {
-	int i;
-	NodeDisplayStatus dispStat;
+    int i;
+    NodeDisplayStatus dispStat;
 
-	dispStat.minPriority=COMMUNICATIONS_LABEL_PRIORITY_INFO;
-	dispStat.familyBitmap=COMMUNICATIONS_LABEL_FAMILY_ALL & ~(1 << COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS);
-	dispStat.monochromeMode=globalDispStat.monochromeMode;
-	dispStat.scaleText[dispType]=0.08;
-        dispStat.scaleLine[dispType]=1.0;
+    dispStat.minPriority=COMMUNICATIONS_LABEL_PRIORITY_INFO;
+    dispStat.familyBitmap=COMMUNICATIONS_LABEL_FAMILY_ALL & ~(1 << COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS);
+    dispStat.monochromeMode=globalDispStat.monochromeMode;
+    dispStat.scaleText[dispType]=0.08;
+    dispStat.scaleLine[dispType]=1.0;
 
-	for(i=0;i<m->numnodes;i++)
-	{
-		nodeDraw(&(m->nlist[i]), dispType, &dispStat);
-	}
+    for(i=0;i<m->numnodes;i++)
+    {
+        nodeDraw(&(m->nlist[i]), dispType, &dispStat);
+    }
 }
 
 
@@ -1002,7 +1035,7 @@ void drawHierarchy(manet *m,NodeDisplayStatus const *dispStat)
             width = levelwidth;
         }
 		sprintf(buff,"%d",levelhistogram[i]);
-		drawText(-20,i*HIERARCHY_LEVEL_SPACING-5,0,dispStat->scaleText[NODE_DISPLAY_HIERARCHY], buff);
+		drawText(-20, i*HIERARCHY_LEVEL_SPACING-5, 0, dispStat->scaleText[NODE_DISPLAY_HIERARCHY], buff);
 	}
 
 	drawHierarchyrecurse(m,0,width,NODE_BROADCAST,maxlevel,xcoord,0,levels,dispStat);
@@ -1139,11 +1172,11 @@ static int drawHierarchyrecurse(
             strcat(buff,b2);
         }
 
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neighborcolorsDark[(levels[nodeidx[i]])%NBR_COLOR_NUM(neighborcolorsDark)]);
-        drawText(xcoord[m->nlist[nodeidx[i]].index]-6,levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING-5,0,dispStat->scaleText[NODE_DISPLAY_HIERARCHY], buff);
-
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neighborcolors[(levels[nodeidx[i]])%NBR_COLOR_NUM(neighborcolors)]);
-        drawSphere(xcoord[m->nlist[nodeidx[i]].index],levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING,0,10);
+        drawCircle(xcoord[m->nlist[nodeidx[i]].index], levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING, 0, 12);
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neighborcolorsDark[(levels[nodeidx[i]])%NBR_COLOR_NUM(neighborcolorsDark)]);
+        drawText(xcoord[m->nlist[nodeidx[i]].index]-6, levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING-5, 0, dispStat->scaleText[NODE_DISPLAY_HIERARCHY], buff);
 
         if (m->nlist[nodeidx[i]].clusterhead)
         {

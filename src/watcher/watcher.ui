@@ -108,23 +108,16 @@
       <bool>false</bool>
      </property>
      <property name="title" >
-      <string>&amp;Hierarchy</string>
+      <string>&amp;Mode</string>
      </property>
-     <addaction name="actionHierarchyFullColor" />
-     <addaction name="actionHierarchyMonochrome" />
-    </widget>
-    <widget class="QMenu" name="menuManet" >
-     <property name="title" >
-      <string>&amp;Manet</string>
-     </property>
-     <addaction name="actionManetFullColor" />
-     <addaction name="actionManetMonochrome" />
+     <addaction name="actionViewManet" />
+     <addaction name="actionViewHierarchy" />
     </widget>
     <addaction name="menuHierarchy" />
-    <addaction name="menuManet" />
     <addaction name="actionFullscreen" />
     <addaction name="actionNormalscreen" />
     <addaction name="action3DNodes" />
+    <addaction name="actionMonochrome" />
    </widget>
    <widget class="QMenu" name="menuGoodwin" >
     <property name="title" >
@@ -381,26 +374,6 @@
     <string>&amp;Undefined</string>
    </property>
   </action>
-  <action name="actionHierarchyFullColor" >
-   <property name="text" >
-    <string>Full Color</string>
-   </property>
-  </action>
-  <action name="actionHierarchyMonochrome" >
-   <property name="text" >
-    <string>Monochrome</string>
-   </property>
-  </action>
-  <action name="actionManetFullColor" >
-   <property name="text" >
-    <string>Full Color</string>
-   </property>
-  </action>
-  <action name="actionManetMonochrome" >
-   <property name="text" >
-    <string>Monochrome</string>
-   </property>
-  </action>
   <action name="actionFullscreen" >
    <property name="checkable" >
     <bool>false</bool>
@@ -409,12 +382,7 @@
     <bool>false</bool>
    </property>
    <property name="text" >
-    <string>&amp;Fullscreen</string>
-   </property>
-  </action>
-  <action name="actionNormalscreen" >
-   <property name="text" >
-    <string>Normalscreen</string>
+    <string>&amp;Full Screen</string>
    </property>
   </action>
   <action name="action3DNodes" >
@@ -426,6 +394,29 @@
    </property>
    <property name="text" >
     <string>&amp;3D Nodes</string>
+   </property>
+  </action>
+  <action name="actionViewManet" >
+   <property name="text" >
+    <string>&amp;Manet</string>
+   </property>
+  </action>
+  <action name="actionViewHierarchy" >
+   <property name="text" >
+    <string>&amp;Hierarchy</string>
+   </property>
+  </action>
+  <action name="actionMonochrome" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Monochrome</string>
+   </property>
+  </action>
+  <action name="actionNormalscreen" >
+   <property name="text" >
+    <string>Normal Screen</string>
    </property>
   </action>
  </widget>
@@ -452,70 +443,6 @@
     <hint type="destinationlabel" >
      <x>454</x>
      <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionHierarchyFullColor</sender>
-   <signal>activated()</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>hierarchyView()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionManetFullColor</sender>
-   <signal>activated()</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>manetView()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionFullscreen</sender>
-   <signal>activated()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>showFullScreen()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>298</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionNormalscreen</sender>
-   <signal>activated()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>showNormal()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -587,7 +514,7 @@
    <sender>actionContinue</sender>
    <signal>toggled(bool)</signal>
    <receiver>manetGLViewWindow</receiver>
-   <slot>contine()</slot>
+   <slot>continue(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>-1</x>
@@ -652,38 +579,6 @@
    <signal>toggled(bool)</signal>
    <receiver>manetGLViewWindow</receiver>
    <slot>forward()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionHierarchyMonochrome</sender>
-   <signal>activated()</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>hierarchyMonochrome()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionManetMonochrome</sender>
-   <signal>activated()</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>manetMonocrhome()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>-1</x>
@@ -1172,6 +1067,86 @@
     <hint type="destinationlabel" >
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionMonochrome</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleMonochrome(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionViewHierarchy</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>hierarchyView()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionViewManet</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>manetView()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFullscreen</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showFullScreen()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNormalscreen</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>

@@ -30,25 +30,27 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
 
     // "main()" may have set different watcher layers, so we need to 
     // tell anyone who is interested that the layer are set or not.
-    unsigned int bitmap = legacyWatcher::getDisplayLayerBitmap();
-    emit bandwidthToggled(bitmap & legacyWatcher::Bandwidth);
-    emit undefinedToggled(bitmap & legacyWatcher::Undefined);
-    emit neighborsToggled(bitmap & legacyWatcher::Neighbors);
-    emit hierarchyToggled(bitmap & legacyWatcher::Hierarchy);
-    emit routingToggled(bitmap & legacyWatcher::Routing);
-    emit routingOnehopToggled(bitmap & legacyWatcher::RoutingOnehop);
-    emit antennaRadiusToggled(bitmap & legacyWatcher::AntennaRadius);
-    emit sanityCheckToggled(bitmap & legacyWatcher::SanityCheck);
-    emit anomPathsToggled(bitmap & legacyWatcher::AnomPaths);
-    emit correlationToggled(bitmap & legacyWatcher::Correlation);
-    emit alertToggled(bitmap & legacyWatcher::Alert);
-    emit correlation3HopToggled(bitmap & legacyWatcher::Correlation3Hop);
-    emit wormholeRoutingToggled(bitmap & legacyWatcher::WormholeRouting);
-    emit wormholeRoutingOnehopToggled(bitmap & legacyWatcher::WormholeRoutingOnehop);
-    emit floatingGraphToggled(bitmap & legacyWatcher::FloatingGraph);
-    emit normPathsToggled(bitmap & legacyWatcher::NormPaths);
+    NodeDisplayStatus &ds = legacyWatcher::getDisplayStatus();
+    emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
+    emit undefinedToggled(ds.familyBitmap & legacyWatcher::Undefined);
+    emit neighborsToggled(ds.familyBitmap & legacyWatcher::Neighbors);
+    emit hierarchyToggled(ds.familyBitmap & legacyWatcher::Hierarchy);
+    emit routingToggled(ds.familyBitmap & legacyWatcher::Routing);
+    emit routingOnehopToggled(ds.familyBitmap & legacyWatcher::RoutingOnehop);
+    emit antennaRadiusToggled(ds.familyBitmap & legacyWatcher::AntennaRadius);
+    emit sanityCheckToggled(ds.familyBitmap & legacyWatcher::SanityCheck);
+    emit anomPathsToggled(ds.familyBitmap & legacyWatcher::AnomPaths);
+    emit correlationToggled(ds.familyBitmap & legacyWatcher::Correlation);
+    emit alertToggled(ds.familyBitmap & legacyWatcher::Alert);
+    emit correlation3HopToggled(ds.familyBitmap & legacyWatcher::Correlation3Hop);
+    emit wormholeRoutingToggled(ds.familyBitmap & legacyWatcher::WormholeRouting);
+    emit wormholeRoutingOnehopToggled(ds.familyBitmap & legacyWatcher::WormholeRoutingOnehop);
+    emit floatingGraphToggled(ds.familyBitmap & legacyWatcher::FloatingGraph);
+    emit normPathsToggled(ds.familyBitmap & legacyWatcher::NormPaths);
+    emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
 
-    emit bandwidthToggled(bitmap & legacyWatcher::Bandwidth);
+    emit threeDViewToggled(ds.threeDView); 
+    emit monochromeToggled(ds.monochromeMode); 
 
     QTimer *timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(checkIO()));
@@ -215,8 +217,8 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
     {
         if (nativeKey == 'B' || nativeKey == 'b')
         {
-            int bitmap = legacyWatcher::getDisplayLayerBitmap();
-            emit bandwidthToggled(bitmap & legacyWatcher::Bandwidth);
+            NodeDisplayStatus &ds=legacyWatcher::getDisplayStatus();
+            emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
         }
 
         updateGL();

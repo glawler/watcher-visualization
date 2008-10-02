@@ -49,6 +49,9 @@
 #include "mobility.h"
 #include "watcher.h"
 
+#include "libconfig.h++"
+#include "singletonConfig.h"
+
 #include "legacyWatcher.h"
 using namespace legacyWatcher;
 
@@ -174,14 +177,14 @@ void legacyWatcher::layerToggle(const Layer layer, const bool turnOn)
         globalDispStat.familyBitmap ^= layer;
 }
 
-unsigned int legacyWatcher::getDisplayLayerBitmap(void) 
+NodeDisplayStatus &legacyWatcher::getDisplayStatus(void) 
 {
-    return globalDispStat.familyBitmap;
+    return globalDispStat;
 }
 
 void legacyWatcher::toggleMonochrome(bool isOn)
 {
-   globalDispStat.monochromeMode=isOn?1:0;
+    globalDispStat.monochromeMode=isOn?1:0;
 }
 
 void legacyWatcher::toggleThreeDView(bool isOn)

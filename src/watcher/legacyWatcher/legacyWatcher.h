@@ -91,7 +91,7 @@ namespace legacyWatcher
     } Layer;
 
     void layerToggle(const Layer layer, const bool turnOn); 
-    unsigned int getDisplayLayerBitmap(void);
+    NodeDisplayStatus &getDisplayStatus(void);
 
     void toggleThreeDView(bool isOn);
     void toggleMonochrome(bool isOn); 
