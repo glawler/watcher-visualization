@@ -519,5 +519,10 @@ void manetGLView::goodwinContinue()
     legacyWatcher::continueGoodwin();
     TRACE_EXIT();
 }
-
+void manetGLView::goodwinSetSpeed(int x)
+{
+    TRACE_ENTER();
+    legacyWatcher::setGoodwinPlaybackSpeed(x);
+    TRACE_EXIT();
+}
 

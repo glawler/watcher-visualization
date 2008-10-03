@@ -2454,7 +2454,9 @@ void legacyWatcher::startGoodwin()
 }
 void legacyWatcher::setGoodwinPlaybackSpeed(int val)
 {
-    globalReplay.speed = val&0x0FFFF;
+    // val varies 0 - 8.
+    long speed=0x10000000|(1<<val);     // format for speed gotten from watcher.cpp
+    globalReplay.speed = speed&0x0FFFF;
     if (globalReplay.runFlag)			/* If speed is changed, reset starttime, so we don't jump  */
     {
         globalReplay.runstartfile = curtime;

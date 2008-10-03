@@ -55,6 +55,7 @@ class manetGLView : public QGLWidget
         void goodwinStop();
         void goodwinPause();
         void goodwinContinue();
+        void goodwinSetSpeed(int speed);
 
     signals:
         void positionReset();

@@ -46,16 +46,19 @@
          </size>
         </property>
         <property name="maximum" >
-         <number>16</number>
+         <number>7</number>
         </property>
         <property name="pageStep" >
          <number>1</number>
         </property>
         <property name="value" >
-         <number>8</number>
+         <number>3</number>
         </property>
         <property name="sliderPosition" >
-         <number>8</number>
+         <number>3</number>
+        </property>
+        <property name="tracking" >
+         <bool>false</bool>
         </property>
         <property name="orientation" >
          <enum>Qt::Horizontal</enum>
@@ -72,7 +75,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="speedLabel" >
+       <widget class="SpeedLabel" name="speedLabel" >
         <property name="text" >
          <string>1x</string>
         </property>
@@ -479,6 +482,11 @@
    <extends>QWidget</extends>
    <header location="global" >manetglview.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SpeedLabel</class>
+   <extends>QLabel</extends>
+   <header location="global" >speedlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -1264,6 +1272,38 @@
     <hint type="destinationlabel" >
      <x>47</x>
      <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>speedSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>speedLabel</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>229</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>294</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>speedSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>goodwinSetSpeed(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>229</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
     </hint>
    </hints>
   </connection>

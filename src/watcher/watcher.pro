@@ -27,12 +27,15 @@ win32 {
 }
 
 # Input
-HEADERS += manetglview.h singletonConfig.h
+HEADERS += manetglview.h  \
+         singletonConfig.h \
+         speedlabel.h
 FORMS += watcher.ui
 SOURCES += \
     manetglview.cpp \
     main.cpp \
     singletonConfig.cpp \
+    speedlabel.cpp \
     legacyWatcher/des.cpp \
     legacyWatcher/metric.c \
     legacyWatcher/rng.cc \
