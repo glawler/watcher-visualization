@@ -99,6 +99,13 @@ namespace legacyWatcher
     void clearAllLabels();
     void clearAllEdges();
 
+    bool runningGoodwin(); // return true if running from a playback file. Must be called after legacyWatcherMain()
+    void setGoodwinPlaybackSpeed(int val);
+    void pauseGoodwin();
+    void continueGoodwin();
+    void startGoodwin();
+    void stopGoodwin();
+
 
 }; // namespace legacyWatcher
 

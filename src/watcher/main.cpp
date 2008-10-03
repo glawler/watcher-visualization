@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
 
     ui.menuLayers->setTearOffEnabled(true);
     ui.menuView->setTearOffEnabled(true);
-    ui.menuGoodwin->setTearOffEnabled(true);
 
     QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
 

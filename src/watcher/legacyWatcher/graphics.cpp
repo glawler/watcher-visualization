@@ -743,7 +743,7 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
             GLfloat x=nodex+6;
             GLfloat y=nodey-6;
             GLfloat z=nodez+0.3+(0.3*(us->index & 0xFF));
-            static const GLfloat gray[]={0.6,0.6,0.6,1.0};
+            // static const GLfloat gray[]={0.6,0.6,0.6,1.0};
             static const GLfloat black[]={0.0,0.0,0.0,1.0};
             GLfloat border_width = 
                 2.0*(dispStat->scaleText[dispType] > TEXT_SCALE ?
@@ -753,7 +753,7 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
             h+=border_width2;
             w+=border_width2;
 
-            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, gray);
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
             glBegin(GL_TRIANGLE_FAN);
             glVertex3f(nodex,nodey,nodez);
             glVertex3f(x+w*0.03,y,z);
@@ -778,20 +778,20 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
                 if ((dispStat) && (!(dispStat->familyBitmap & (1<<l->family))))
                     continue;
 
-		if (dispStat->monochromeMode)
-		{
-			bgcolor[0]=1.0;
-			bgcolor[1]=1.0;
-			bgcolor[2]=1.0;
-			bgcolor[3]=1.0;
-		}
-		else
-		{
-			bgcolor[0]=l->bgcolor[0]/255.0;
-			bgcolor[1]=l->bgcolor[1]/255.0;
-			bgcolor[2]=l->bgcolor[2]/255.0;
-			bgcolor[3]=l->bgcolor[3]/255.0;
-		}
+                if (dispStat->monochromeMode)
+                {
+                    bgcolor[0]=1.0;
+                    bgcolor[1]=1.0;
+                    bgcolor[2]=1.0;
+                    bgcolor[3]=1.0;
+                }
+                else
+                {
+                    bgcolor[0]=l->bgcolor[0]/255.0;
+                    bgcolor[1]=l->bgcolor[1]/255.0;
+                    bgcolor[2]=l->bgcolor[2]/255.0;
+                    bgcolor[3]=l->bgcolor[3]/255.0;
+                }
 
                 glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgcolor);
                 glBegin(GL_POLYGON);
@@ -801,20 +801,20 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
                 glVertex3f(x  ,y-localh-0.5,z+0.1);
                 glEnd();
 
-		if (dispStat->monochromeMode)
-		{
-			fgcolor[0]=0.0;
-			fgcolor[1]=0.0;
-			fgcolor[2]=0.0;
-			fgcolor[3]=1.0;
-		}
-		else
-		{
-			fgcolor[0]=l->fgcolor[0]/255.0;
-			fgcolor[1]=l->fgcolor[1]/255.0;
-			fgcolor[2]=l->fgcolor[2]/255.0;
-			fgcolor[3]=l->fgcolor[3]/255.0;
-		}
+                if (dispStat->monochromeMode)
+                {
+                    fgcolor[0]=0.0;
+                    fgcolor[1]=0.0;
+                    fgcolor[2]=0.0;
+                    fgcolor[3]=1.0;
+                }
+                else
+                {
+                    fgcolor[0]=l->fgcolor[0]/255.0;
+                    fgcolor[1]=l->fgcolor[1]/255.0;
+                    fgcolor[2]=l->fgcolor[2]/255.0;
+                    fgcolor[3]=l->fgcolor[3]/255.0;
+                }
 
                 glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, fgcolor);
                 y-=drawTextHeight("X")*dispStat->scaleText[dispType];
@@ -1218,7 +1218,8 @@ void manetDraw(manet *m)
     // };
 
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, arena);
-    glBegin(GL_LINE_STRIP);
+    // glBegin(GL_LINE_STRIP);
+    glBegin(GL_QUADS);
     glVertex3f(0,0,0);
     glVertex3f(m->mobility->maxx,0,0);
     glVertex3f(m->mobility->maxx,m->mobility->maxy,0);

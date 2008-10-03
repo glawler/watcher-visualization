@@ -116,6 +116,7 @@ static manetNode *globalSelectedNode = 0;
 static double globalSelectedNodeDeltaX;
 static double globalSelectedNodeDeltaY;
 
+static char *globalgoodwinfilename;
 static CommunicationsLogStatePtr globalGoodwin;
 
 static struct
@@ -2408,12 +2409,66 @@ static void hierarchyWindowInit()
     return;
 } 
 
+static void loadGoodwinFile()
+{
+    if (globalGoodwin)
+        communicationsLogClose(globalGoodwin);
+
+    if (globalgoodwinfilename)
+    {
+        int goodwinfd;
+        printf("Opening goodwin file %s\n", globalgoodwinfilename); 
+        goodwinfd = open(globalgoodwinfilename, O_RDONLY);
+        if (goodwinfd < 0)
+        {
+            fprintf(stderr, "could not open goodwin file!\n");
+            exit(1);
+        }
+        globalGoodwin = communicationsLogLoad(goodwinfd);
+    }
+    else
+        globalGoodwin = NULL;
+}
+
+void legacyWatcher::pauseGoodwin()
+{
+    globalReplay.runFlag=0;
+    globalReplay.runstartfile = curtime;
+    globalReplay.runstartwall = getMilliTime();
+}
+void legacyWatcher::continueGoodwin()
+{
+    globalReplay.runFlag=1;
+    globalReplay.runstartfile = curtime;
+    globalReplay.runstartwall = getMilliTime();
+}
+void legacyWatcher::stopGoodwin()
+{
+    pauseGoodwin();
+}
+void legacyWatcher::startGoodwin()
+{
+    // GTL - This doesn't work, don't use this until it works.
+    loadGoodwinFile();
+    continueGoodwin(); 
+}
+void legacyWatcher::setGoodwinPlaybackSpeed(int val)
+{
+    globalReplay.speed = val&0x0FFFF;
+    if (globalReplay.runFlag)			/* If speed is changed, reset starttime, so we don't jump  */
+    {
+        globalReplay.runstartfile = curtime;
+        globalReplay.runstartwall = getMilliTime();
+    }
+}
+bool legacyWatcher::runningGoodwin()
+{
+    return globalGoodwin!=NULL;
+}
 
 int legacyWatcher::legacyWatcherMain(int argc, char **argv)
 {
     Config *conf;
-    char *goodwinfilename;
-    int goodwinfd;
     int i, ch;
     destime starttime = 0;
     int relativestart = 0;
@@ -2585,20 +2640,8 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
     globalDispStat.threeDView = configSearchInt(conf, "watcher_threeDView");
     GPSScale = configSetDouble(conf, "watcher_gpsscale", 80000);
 
-    goodwinfilename = argc > 1 ? argv[1] : NULL;
-    if (goodwinfilename)
-    {
-        printf("Opening goodwin file %s\n", goodwinfilename); 
-        goodwinfd = open(goodwinfilename, O_RDONLY);
-        if (goodwinfd < 0)
-        {
-            fprintf(stderr, "could not open goodwin file!\n");
-            exit(1);
-        }
-        globalGoodwin = communicationsLogLoad(goodwinfd);
-    }
-    else
-        globalGoodwin = NULL;
+    globalgoodwinfilename = argc > 1 ? strdup(argv[1]) : NULL;
+    loadGoodwinFile(); 
 
     /* In playback mode, do we load a config file, or a goodwin file?
      *   I think we want to load both, to allow a config file to specify a locations file in the

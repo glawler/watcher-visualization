@@ -49,6 +49,9 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     emit normPathsToggled(ds.familyBitmap & legacyWatcher::NormPaths);
     emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
 
+    // causes goodinw control buttons to show/not show.
+    emit runningGoodwin(legacyWatcher::runningGoodwin()); 
+
     emit threeDViewToggled(ds.threeDView); 
     emit monochromeToggled(ds.monochromeMode); 
 
@@ -97,7 +100,7 @@ void manetGLView::checkIO()
     else
         update=legacyWatcher::checkIOLive(0);
     
-    if (update)
+    // if (update)
         updateGL();
 
     TRACE_EXIT();
@@ -492,3 +495,29 @@ void manetGLView::clearAllLabels()
     emit labelsCleared();
     TRACE_EXIT();
 }
+void manetGLView::goodwinStart()
+{
+    TRACE_ENTER();
+    legacyWatcher::startGoodwin();  // will reload goodwin file and start from time 0
+    TRACE_EXIT();
+}
+void manetGLView::goodwinStop()
+{
+    TRACE_ENTER();
+    legacyWatcher::stopGoodwin();
+    TRACE_EXIT();
+}
+void manetGLView::goodwinPause()
+{
+    TRACE_ENTER();
+    legacyWatcher::pauseGoodwin();
+    TRACE_EXIT();
+}
+void manetGLView::goodwinContinue()
+{
+    TRACE_ENTER();
+    legacyWatcher::continueGoodwin();
+    TRACE_EXIT();
+}
+
+

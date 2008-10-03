@@ -51,6 +51,11 @@ class manetGLView : public QGLWidget
         void clearAllLabels();
         void clearAllEdges();
 
+        void goodwinStart();
+        void goodwinStop();
+        void goodwinPause();
+        void goodwinContinue();
+
     signals:
         void positionReset();
 
@@ -72,8 +77,16 @@ class manetGLView : public QGLWidget
         void normPathsToggled(bool isOn);
         void monochromeToggled(bool isOn);
         void threeDViewToggled(bool isOn); 
+
         void labelsCleared();
         void edgesCleared(); 
+
+        void startedGoodwin();
+        void stoppedGoodwin();
+        void pausedGoodwin(); 
+        void continuedGoodwin();
+
+        void runningGoodwin(bool usingGoodwin);
 
     protected:
         void initializeGL();
