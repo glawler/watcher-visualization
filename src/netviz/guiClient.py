@@ -43,7 +43,7 @@ class GuiClient:
         self.height = 500
         self.minBarWidth = 3
         self.maxBarWidth = 50
-        self.barSep = 2
+        self.barSep = 5
         self.barWidth = self.minBarWidth
         self.defaultBorder = 40
         self.bottomBuffer = 60
@@ -278,7 +278,8 @@ class GuiClient:
 
             # draw tick and node id for ever 10th node
             id_space=20
-            if nodeIDIndex == 1 or  nodeIDIndex % 10 ==0:
+            # if nodeIDIndex == 1 or  nodeIDIndex % 10 ==0:
+            if nodeIDIndex:
                 str_id = '%s' % nodeID
                 self.canvas.create_line(start_x+(self.barWidth/2), start_y+self.buf, start_x+(self.barWidth/2), start_y+10,  fill="white")
                 # self.canvas.create_text(start_x+2, start_y+20, text=str_id, fill="white")
