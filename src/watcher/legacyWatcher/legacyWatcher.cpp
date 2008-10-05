@@ -2658,16 +2658,34 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
     globalDispStat.monochromeMode = configSearchInt(conf, "watcher_monochrome");
     globalDispStat.threeDView = configSearchInt(conf, "watcher_threeDView");
     globalDispStat.backgroundImage = configSearchInt(conf, "watcher_backgroundimage");
-    
-    const char *bgImageFilename = configSearchStr(conf, "watcher_backgroundimage_file"); 
-    if (!bgImageFilename)
-        bgImageFilename="background.ppm";
 
-    if (!globalBGImage.loadPPMFile(bgImageFilename))
-    {
-        printf("Unable to load background image in watcher from file: %s\n", bgImageFilename); 
-        exit(1); 
-    }
+        const char *bgImageFilename = configSearchStr(conf, "watcher_backgroundimage_file"); 
+        if (!bgImageFilename)
+        {
+            printf("watcher_backgroundimage_file entry not found in configuration file, using the default: background.ppm\n"); 
+            if (!globalBGImage.loadPPMFile("background.ppm"))
+            {
+                printf("Unable to load background image in watcher from file: %s\n", bgImageFilename); 
+                exit(1); 
+            }
+        }
+        else
+        {
+            char fullpath[PATH_MAX];
+            if (0 == configGetPathname(conf, bgImageFilename, fullpath, sizeof(fullpath)))
+            {
+                if (!globalBGImage.loadPPMFile(fullpath))
+                {
+                    printf("Unable to load background image in watcher from file: %s\n", fullpath); 
+                    exit(1); 
+                }
+            }
+            else
+            {
+                fprintf(stderr,"background image: configGetPathname(%s) failed!\n", bgImageFilename);
+                exit(1); 
+            }
+        }
 
     GPSScale = configSetDouble(conf, "watcher_gpsscale", 80000);
 
