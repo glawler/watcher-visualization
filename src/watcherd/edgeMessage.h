@@ -40,6 +40,7 @@ namespace watcher
             LabelMessagePtr middleLabel;
             LabelMessagePtr node1Label;
             LabelMessagePtr node2Label;
+            bool bidirectional;
 
             EdgeMessage();
             EdgeMessage(
@@ -48,6 +49,7 @@ namespace watcher
                     const GUILayer &layer_,                 // Which GUI layer the edge is on
                     const Color &c_=Color::blue,            // color of edge
                     const unsigned int &width=15,           // width of the edge 
+                    const bool bidirectional_=false,        // Is this edge bidirectional?
                     unsigned int expiration_=0,             // expiration time in milliseconds, 0=never expire
                     const bool &addEdge=true);              // If true, add an edge, else remove exising edge with same props as this one.
 

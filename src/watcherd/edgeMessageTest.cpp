@@ -30,6 +30,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -c, --color=color        The color of the edge. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
     fprintf(stderr, "   -w, --width=width        The width of the edge in some arbitrary, unknown unit\n"); 
     fprintf(stderr, "   -y, --layer=layer        Which layer the edge is on in the GUI.\n"); 
+    fprintf(stderr, "   -d, --bidirectional=bool Is this edge bidirectional or unidirectional. Use 'true' for true, anything else for false.\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "                            This program only supports creating a middle label, although the message supports\n");
     fprintf(stderr, "                            labels on node1 and node2 as well. May add that later\n"); 
@@ -61,6 +62,7 @@ int main(int argc, char **argv)
     Color edgeColor=Color::red;
     unsigned int width=15;
     GUILayer layer=NODE_LAYER;
+    bool bidirectional=false;
 
     LabelMessagePtr lm(new LabelMessage); 
 
@@ -81,6 +83,7 @@ int main(int argc, char **argv)
             {"color", required_argument, 0, 'c'},
             {"width", required_argument, 0, 'w'},
             {"layer", required_argument, 0, 'y'},
+            {"bidirectional", required_argument, 0, 'd'},
 
             {"label", required_argument, 0, 'l'},
             {"labelfg", required_argument, 0, 'f'},
@@ -93,7 +96,7 @@ int main(int argc, char **argv)
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "s:h:t:c:w:y:l:f:b:z:x:p:H?", long_options, &option_index);
+        c = getopt_long(argc, argv, "s:h:t:c:w:y:d:l:f:b:z:x:p:H?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -127,7 +130,12 @@ int main(int argc, char **argv)
             case 'c': { bool val=edgeColor.fromString(optarg); if (!val) { printf("\nBad argument for edge color\n\n"); usage(argv[0]); } break; }
             case 'w': width=lexical_cast<unsigned int>(optarg); break;
             case 'y': layer=static_cast<GUILayer>(lexical_cast<unsigned int>(optarg)); break;
-
+            case 'd': 
+                      {
+                          if (strstr(optarg, "true") || strstr(optarg, "TRUE")) bidirectional=true;
+                          else bidirectional=false;
+                      }
+                      break;
             case 'l': lm->label=optarg; break;
             case 'f': { bool val=lm->foreground.fromString(optarg); if (!val) { printf("\nBad argument for label foreground color\n\n"); usage(argv[0]); } break; }
             case 'b': { bool val=lm->background.fromString(optarg); if (!val) { printf("\nBad argument for label background color\n\n"); usage(argv[0]); } break; }
@@ -164,6 +172,7 @@ int main(int argc, char **argv)
     em->width=width;
     em->layer=layer;
     em->setMiddleLabel(lm); 
+    em->bidirectional=bidirectional;
 
     if(!client.sendMessage(em))
     {

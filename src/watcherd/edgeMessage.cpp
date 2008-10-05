@@ -23,6 +23,7 @@ EdgeMessage::EdgeMessage(
         const GUILayer &layer_,                 
         const Color &c_,
         const unsigned int &width_,
+        const bool bidirectional_,
         unsigned int expiration_, 
         const bool &addEdge_) : 
     Message(EDGE_MESSAGE_TYPE, EDGE_MESSAGE_VERSION),
@@ -35,7 +36,8 @@ EdgeMessage::EdgeMessage(
     addEdge(addEdge_),
     middleLabel(),
     node1Label(),
-    node2Label()
+    node2Label(),
+    bidirectional(bidirectional_)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -52,7 +54,8 @@ EdgeMessage::EdgeMessage() :
     addEdge(true),
     middleLabel(),
     node1Label(),
-    node2Label()
+    node2Label(),
+    bidirectional(false)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -94,6 +97,7 @@ bool EdgeMessage::operator==(const EdgeMessage &other) const
         Message::operator==(other) && 
         node1==other.node1 && 
         node2==other.node2 && 
+        bidirectional==other.bidirectional &&
         layer==other.layer;
 
     // Other member variables are not distinguishing features
@@ -117,6 +121,7 @@ EdgeMessage &EdgeMessage::operator=(const EdgeMessage &other)
     middleLabel=other.middleLabel;
     node1Label=other.node1Label;
     node2Label=other.node2Label;
+    bidirectional=other.bidirectional;
 
     TRACE_EXIT();
     return *this;
@@ -133,6 +138,7 @@ std::ostream &EdgeMessage::toStream(std::ostream &out) const
     out << " edgeColor: " << edgeColor;
     out << " expiration: " << expiration;
     out << " width: " << width;
+    out << " dir: " << (bidirectional ? "bidirectional" : "unidirectional");
     out << " layer: " << layer;
     out << " add: " << (addEdge ? "true" : "false"); 
 
@@ -176,6 +182,7 @@ void EdgeMessage::serialize(boost::archive::polymorphic_iarchive & ar, const uns
     ar & node1Label;
     ar & middleLabel;
     ar & node2Label;
+    ar & bidirectional;
 
     TRACE_EXIT();
 }
@@ -195,6 +202,7 @@ void EdgeMessage::serialize(boost::archive::polymorphic_oarchive & ar, const uns
     ar & node1Label;
     ar & middleLabel;
     ar & node2Label;
+    ar & bidirectional;
 
     TRACE_EXIT();
 }
