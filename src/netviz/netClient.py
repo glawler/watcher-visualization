@@ -80,7 +80,7 @@ while 1:
     rec_rate, trans_rate = get_dev_diff(device,netInfo_last, netInfo_current, elasped_time )
 
     netstat.sendData(hostname, node_id,  n, rec_rate, trans_rate)
-    print 'Sending data: host:', hostname, ' id:', node_id, ' n:', n, ' rec_rate:', rec_rate, ' trans_rate:', trans_rate
+    # print 'Sending data: host:', hostname, ' id:', node_id, ' n:', n, ' rec_rate:', rec_rate, ' trans_rate:', trans_rate
     time.sleep(sleep_time)
     n = n+1
     time_last = time_current
