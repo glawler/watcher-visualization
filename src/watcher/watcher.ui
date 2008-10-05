@@ -178,6 +178,7 @@
     <addaction name="actionNormalscreen" />
     <addaction name="action3DNodes" />
     <addaction name="actionMonochrome" />
+    <addaction name="actionBackgroundImage" />
    </widget>
    <addaction name="menuLayers" />
    <addaction name="menuView" />
@@ -473,6 +474,17 @@
   <action name="actionClearAllEdges" >
    <property name="text" >
     <string>Clear All &amp;Edges</string>
+   </property>
+  </action>
+  <action name="actionBackgroundImage" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Background Image</string>
    </property>
   </action>
  </widget>
@@ -1304,6 +1316,38 @@
     <hint type="destinationlabel" >
      <x>382</x>
      <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBackgroundImage</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleBackgroundImage(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>backgroundImageToggled(bool)</signal>
+   <receiver>actionBackgroundImage</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

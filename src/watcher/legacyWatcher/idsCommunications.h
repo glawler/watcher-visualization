@@ -1143,6 +1143,7 @@ typedef struct
     float scaleLine[2];
     int monochromeMode;
     int threeDView;
+    int backgroundImage;
 } NodeDisplayStatus;
 
 /* change the label of a node displayed by the watcher.

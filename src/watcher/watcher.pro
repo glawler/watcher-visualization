@@ -12,6 +12,12 @@ CONFIG += qt x11
 OBJECTS_DIR = ./objs
 DEFINES += GRAPHICS MODULE_MOBILITY
 
+# log4cxx issues warnings without this. 
+QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing
+QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing
+QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing
+QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing
+
 LIBS += -L../../lib 
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -L/usr/local/lib -lidmef 
@@ -29,7 +35,9 @@ win32 {
 # Input
 HEADERS += manetglview.h  \
          singletonConfig.h \
-         speedlabel.h
+         speedlabel.h \
+         legacyWatcher/backgroundImage.h
+
 FORMS += watcher.ui
 SOURCES += \
     manetglview.cpp \
@@ -49,4 +57,5 @@ SOURCES += \
     legacyWatcher/watcherGraph.cpp \
     legacyWatcher/mobility.cpp \
     legacyWatcher/watcherGPS.cpp \
-    legacyWatcher/graphics.cpp
+    legacyWatcher/graphics.cpp \
+    legacyWatcher/backgroundImage.cpp

@@ -45,6 +45,7 @@
 #include "marshal.h"
 #include "watcherGraph.h"
 #include "floatinglabel.h"
+#include "backgroundImage.h"
 
 #include "mobility.h"
 #include "watcher.h"
@@ -111,6 +112,7 @@ static NodeEdge *userGraph = NULL;
 static FloatingLabel *floatingLabelList = NULL;
 static destime curtime = 0, begintime = 0;
 static manetNode *globalSelectedNode = 0;
+static watcher::BackgroundImage globalBGImage;
 // UNUSED NOW static int globalSelectedNodeScreenX;
 // UNUSED NOW static int globalSelectedNodeScreenY;
 static double globalSelectedNodeDeltaX;
@@ -191,6 +193,11 @@ void legacyWatcher::toggleMonochrome(bool isOn)
 void legacyWatcher::toggleThreeDView(bool isOn)
 {
    globalDispStat.threeDView=isOn?1:0;
+}
+
+void legacyWatcher::toggleBackgroundImage(bool isOn)
+{
+   globalDispStat.backgroundImage=isOn?1:0;
 }
 
 // UNUSED NOW static void labelsClear(manet *m);
@@ -1295,8 +1302,6 @@ static void crossProduct(double *c, double a[3], double b[3])
     c[2] /= len;
 }
 
-
-
 // static void drawManet(void)
 void legacyWatcher::drawManet(void)
 {
@@ -1433,8 +1438,12 @@ void legacyWatcher::drawManet(void)
         phy = manetGetPhysicalGraph(m);
         if (!globalDispStat.monochromeMode)
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, physical);
-        glColor4f(1.0, 0.0, 0.0, 0.5);
-        drawGraph(m, phy, globalDispStat.scaleText[NODE_DISPLAY_MANET], 1);
+
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+            glColor4f(1.0, 0.0, 0.0, 0.5);
+            drawGraph(m, phy, globalDispStat.scaleText[NODE_DISPLAY_MANET], 1);
+        glPopAttrib();
+    
         free(phy);
     }
 #endif
@@ -1459,6 +1468,12 @@ void legacyWatcher::drawManet(void)
     watcherGraphDraw(&userGraph, NODE_DISPLAY_MANET, &globalDispStat, m->curtime);
     floatingLabelDraw(&floatingLabelList, NODE_DISPLAY_MANET, &globalDispStat, m->curtime);
     glPopMatrix();
+
+    if (globalDispStat.backgroundImage)
+    {
+        struct mobilityManetState *m=globalManet->mobility;
+        globalBGImage.drawImage(0, m->maxx, 0, m->maxy, -30); 
+    }
 
     glFlush();
 }
@@ -1989,7 +2004,7 @@ void gotMessageGraphEdge(void *data, const struct MessageInfo *mi)
         a = manetGetNodeNum(us->manet, edge.a);
         b = manetGetNodeNum(us->manet, edge.b);
 
-        fprintf(stderr, "got an edge, %d.%d.%d.%d (%d)  to %d.%d.%d.%d (%d)  length %f\n", PRINTADDR(edge.a), a, PRINTADDR(edge.b), b, edge.value);
+        // fprintf(stderr, "got an edge, %d.%d.%d.%d (%d)  to %d.%d.%d.%d (%d)  length %f\n", PRINTADDR(edge.a), a, PRINTADDR(edge.b), b, edge.value);
 
         if ((a >= 0) && (b >= 0))
             globalGraphManet[a + b * us->manet->numnodes] = edge.value * globalGraphScaleManet;
@@ -2382,6 +2397,7 @@ void legacyWatcher::initWatcherGL()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+    // glEnable(GL_LINE_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_LIGHTING);
@@ -2486,6 +2502,7 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
     globalDispStat.scaleLine[NODE_DISPLAY_HIERARCHY] = 1.0;
     globalDispStat.monochromeMode = 0;
     globalDispStat.threeDView = 1;
+    globalDispStat.backgroundImage = 1;
 
     globalReplay.speed = 4;
     int shiftSet = 0;   /* flag to indicate if the user specified an initial display location */
@@ -2640,6 +2657,18 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
 
     globalDispStat.monochromeMode = configSearchInt(conf, "watcher_monochrome");
     globalDispStat.threeDView = configSearchInt(conf, "watcher_threeDView");
+    globalDispStat.backgroundImage = configSearchInt(conf, "watcher_backgroundimage");
+    
+    const char *bgImageFilename = configSearchStr(conf, "watcher_backgroundimage_file"); 
+    if (!bgImageFilename)
+        bgImageFilename="background.ppm";
+
+    if (!globalBGImage.loadPPMFile(bgImageFilename))
+    {
+        printf("Unable to load background image in watcher from file: %s\n", bgImageFilename); 
+        exit(1); 
+    }
+
     GPSScale = configSetDouble(conf, "watcher_gpsscale", 80000);
 
     globalgoodwinfilename = argc > 1 ? strdup(argv[1]) : NULL;

@@ -95,6 +95,7 @@ namespace legacyWatcher
 
     void toggleThreeDView(bool isOn);
     void toggleMonochrome(bool isOn); 
+    void toggleBackgroundImage(bool isOn); 
 
     void clearAllLabels();
     void clearAllEdges();

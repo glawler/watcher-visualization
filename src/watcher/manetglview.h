@@ -20,7 +20,6 @@ class manetGLView : public QGLWidget
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
-        DECLARE_LOGGER();
 
     public slots:
         void resetPosition();
@@ -47,6 +46,7 @@ class manetGLView : public QGLWidget
         void toggleNormPaths(bool isOn);
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);
+        void toggleBackgroundImage(bool isOn);
 
         void clearAllLabels();
         void clearAllEdges();
@@ -78,6 +78,7 @@ class manetGLView : public QGLWidget
         void normPathsToggled(bool isOn);
         void monochromeToggled(bool isOn);
         void threeDViewToggled(bool isOn); 
+        void backgroundImageToggled(bool isOn); 
 
         void labelsCleared();
         void edgesCleared(); 
@@ -90,6 +91,8 @@ class manetGLView : public QGLWidget
         void runningGoodwin(bool usingGoodwin);
 
     protected:
+        DECLARE_LOGGER();
+
         void initializeGL();
         void paintGL();
         void resizeGL(int width, int height);

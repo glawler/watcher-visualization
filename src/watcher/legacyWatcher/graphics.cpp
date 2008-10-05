@@ -9,6 +9,8 @@
 #include "mobility.h"
 #include "graphics.h"
 
+#include "../manetglview.h"
+
 /*  Copyright (C) 2005  McAfee Inc. 
  *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO
  *  All rights reserved.
@@ -485,9 +487,6 @@ void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
 
 void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth)
 {
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    // glEnable(GL_LINE_SMOOTH);
     glLineWidth(lineWidth); 
 
     int i;
@@ -1283,9 +1282,11 @@ void manetDraw(manet *m)
     /* Physical links are on plane Z=0  */
 #if 1
     phy=manetGetPhysicalGraph(m);
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, physical);
-    glColor4f(1.0,0.0,0.0,0.5);
-    drawGraph(m,phy,0.0, 0);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, physical);
+        glColor4f(1.0,0.0,0.0,0.5);
+        drawGraph(m,phy,0.0, 0);
+     glPopAttrib();
     free(phy);
 #endif
 

@@ -54,6 +54,7 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
 
     emit threeDViewToggled(ds.threeDView); 
     emit monochromeToggled(ds.monochromeMode); 
+    emit backgroundImageToggled(ds.monochromeMode); 
 
     QTimer *timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(checkIO()));
@@ -118,15 +119,16 @@ void manetGLView::paintGL()
     //  glRotated(zRot / 16.0, 0.0, 0.0, 1.0);
     //  glCallList(object);
 
-    qglColor(Qt::blue);
-    renderText(-0.2, 0.2, 0.2, "Hello World");
-
     if (currentView==legacyWatcher::ManetView)
         legacyWatcher::drawManet();
     else if(currentView==legacyWatcher::HierarchyView)
         legacyWatcher::drawHierarchy();
     else
         fprintf(stderr, "Error: I have an impossible watcher view!");
+
+    qglColor(Qt::blue);
+    renderText(-0.2, 0.2, 0.2, "Hello World");
+
 
     // char *text = 
     //     "Keyboard Shortcuts:\n"
@@ -479,6 +481,14 @@ void manetGLView::toggleThreeDView(bool isOn)
     TRACE_ENTER();
     legacyWatcher::toggleThreeDView(isOn);
     emit threeDViewToggled(isOn); 
+    updateGL();
+    TRACE_EXIT();
+}
+void manetGLView::toggleBackgroundImage(bool isOn)
+{
+    TRACE_ENTER();
+    legacyWatcher::toggleBackgroundImage(isOn);
+    emit backgroundImageToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
