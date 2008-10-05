@@ -87,6 +87,9 @@ syntax: regexp
 ^bin/apu-1-config
 ^build-1/*
 
+# ignore Pyro files.
+^src/Pyro-3.8.1/*
+
 ^etc/nerod.sample.cfg
 
 #
