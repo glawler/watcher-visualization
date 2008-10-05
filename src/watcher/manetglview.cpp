@@ -54,7 +54,7 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
 
     emit threeDViewToggled(ds.threeDView); 
     emit monochromeToggled(ds.monochromeMode); 
-    emit backgroundImageToggled(ds.monochromeMode); 
+    emit backgroundImageToggled(ds.backgroundImage); 
 
     QTimer *timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(checkIO()));
@@ -126,8 +126,8 @@ void manetGLView::paintGL()
     else
         fprintf(stderr, "Error: I have an impossible watcher view!");
 
-    qglColor(Qt::blue);
-    renderText(-0.2, 0.2, 0.2, "Hello World");
+    // qglColor(Qt::blue);
+    // renderText(-0.2, 0.2, 0.2, "Hello World");
 
 
     // char *text = 
