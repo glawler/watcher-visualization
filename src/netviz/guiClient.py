@@ -46,7 +46,7 @@ class GuiClient:
         self.barSep = 2
         self.barWidth = self.minBarWidth
         self.defaultBorder = 40
-        self.bottomBuffer = 30
+        self.bottomBuffer = 60
         self.sleep_time = .1
         self.netData = {}
         self.run=True
@@ -227,6 +227,10 @@ class GuiClient:
          
         num_bars = len(self.netData)
 
+        # build index of node ids [101, 123, 124, 145], etc
+        # Useful if nodeIDs are not in sequential order
+        nodeIdIndex=[self.netData[key][0] for key in self.netData]
+
         #start_x = self.BotLeftX  
         start_y = self.BotLeftY
         for key in self.netData:
@@ -238,7 +242,9 @@ class GuiClient:
             # data[3] is  number of samples
             # data[4] is the current R_rate
             # data[5] is the current T_rate
+
             nodeID = data[0];   # data[0] is node_id
+            nodeIDIndex=nodeIdIndex.index(nodeID)+1
 
             if self.dataView.get():
                 cur_rate = data[5]; # data[5] is the current T_rate
@@ -252,7 +258,7 @@ class GuiClient:
             if self.debug:
                 print data
             # computer in order, assumes we areviewing all nodes
-            start_x = self.BotLeftX + ((self.barWidth + self.barSep)*(nodeID - 1))
+            start_x = self.BotLeftX + ((self.barWidth + self.barSep)*(nodeIDIndex - 1))
             end_x = start_x + self.barWidth
 
             # calculate and draw current rate
@@ -271,17 +277,22 @@ class GuiClient:
             # draw node ID
 
             # draw tick and node id for ever 10th node
-            if nodeID == 1 or  nodeID % 10 ==0:
+            id_space=20
+            if nodeIDIndex == 1 or  nodeIDIndex % 10 ==0:
                 str_id = '%s' % nodeID
                 self.canvas.create_line(start_x+(self.barWidth/2), start_y+self.buf, start_x+(self.barWidth/2), start_y+10,  fill="white")
-                self.canvas.create_text(start_x+2, start_y+20, text=str_id, fill="white")
+                # self.canvas.create_text(start_x+2, start_y+20, text=str_id, fill="white")
+                for c in str_id: 
+                    self.canvas.create_text(start_x+2, start_y+id_space, text=c, fill="white")
+                    id_space=id_space+15
                 
             #start_x = end_x + self.barSep
             
         # draw bottom barchart line
         lineEnd = self.BotLeftX + ((self.barWidth + self.barSep)*num_bars) 
         self.canvas.create_line(self.BotLeftX-5,self.BotLeftY+self.buf,lineEnd  ,self.BotLeftY+self.buf,  fill="white")
-        self.canvas.create_text( lineEnd + 50, self.BotLeftY+ 20,  text="Node Ids", fill="white")
+        self.canvas.create_text( lineEnd + 50, self.BotLeftY,  text="Node Ids", fill="white")
+
         # draw side barlchart line 
         self.canvas.create_line(self.BotLeftX-5,self.BotLeftY+self.buf, self.BotLeftX-5, self.defaultBorder,  fill="white")
         self.canvas.create_text(self.BotLeftX-15, self.defaultBorder-10 , text="kb/s", fill="white")
