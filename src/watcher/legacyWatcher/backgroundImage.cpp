@@ -186,12 +186,11 @@ void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloa
     glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE, black);
 
     // Draw blank black background, larger than the image
-    GLfloat bgSize=1000;
     glBegin(GL_QUADS);
-        glVertex3f(-bgSize, -bgSize, -1.0);
-        glVertex3f(-bgSize, bgSize, -1.0);
-        glVertex3f(bgSize, bgSize, -1.0);
-        glVertex3f(bgSize, -bgSize, -1.0);
+        glVertex3f(-maxx*2, -maxy*2, -1.0);
+        glVertex3f(-maxx*2, maxy*2, -1.0);
+        glVertex3f(maxx*2, maxy*2, -1.0);
+        glVertex3f(maxx*2, -maxy*2, -1.0);
 
         glTexCoord2f(0,1); glVertex2f(minx,miny);       // This may seem backwards, but it works.
         glTexCoord2f(0,0); glVertex2f(minx,maxy);       // This may seem backwards, but it works.
