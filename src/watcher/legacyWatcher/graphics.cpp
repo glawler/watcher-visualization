@@ -383,6 +383,7 @@ void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
     if (globalDispStat.threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
+        glNormal3f(0.0, 0.0, 1.0);
         glutWireSphere(radius, 10, 10);
         glPopAttrib();
     }
@@ -405,6 +406,7 @@ void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
     if (globalDispStat.threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
+        glNormal3f(0.0, 0.0, 1.0);
         glutSolidSphere(radius, 10, 10);
         glPopAttrib();
     }
@@ -572,6 +574,7 @@ void drawHeavyArrow(GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2, GLdouble
     {
         glBegin(GL_POLYGON);
 
+        glNormal3f(0.0, 0.0, 1.0);
         glVertex3f(x1+sm,y1+cm,z1);
         glVertex3f(x1+sp,y1+cp,z1);
         glVertex3f(x2+sp,y2+cp,z2);

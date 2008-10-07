@@ -2393,20 +2393,28 @@ static void update(manet *m)
 
 void legacyWatcher::initWatcherGL()
 {
-    GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     // glEnable(GL_LINE_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glShadeModel(GL_SMOOTH);
+
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, white);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, white);
 
     glClearColor(1.0, 1.0, 1.0, 0.0);
+
+    GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };    // Ambient light is not full strength, but white
+    glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
+    // glLightfv(GL_LIGHT1, GL_SPECULAR, ambLight);
+
+    GLfloat diffLight[]= { 1.0f, 1.0f, 1.0f, 1.0f };    // diffuse light is full strength
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight);
+
+    GLfloat posLight[]= { 200.0f, 200.0f, 200.0f, 1.0f }; // light is over right shoulder
+    glLightfv(GL_LIGHT1, GL_POSITION, posLight);
+
+    glEnable(GL_LIGHT1);
 }
 
 static void manetWindowInit(void)
