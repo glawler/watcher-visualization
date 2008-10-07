@@ -2862,6 +2862,11 @@ void packetSend(manetNode *, packet *, int)
 //     }
 // }
 
+void legacyWatcher::doIdle()
+{
+
+}
+
 static void watcherDrawNodes(NodeDisplayType dispType, manet *m)
 {
     int i, j;

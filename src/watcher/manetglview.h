@@ -28,6 +28,9 @@ class manetGLView : public QGLWidget
         void manetView();
         void hierarchyView();
 
+        // timeout callback for watcher to do "idle" work.
+        void watcherIdle();
+
         void toggleBandwidth(bool isOn);
         void toggleUndefined(bool isOn);
         void toggleNeighbors(bool isOn);

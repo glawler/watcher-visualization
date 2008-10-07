@@ -107,6 +107,9 @@ namespace legacyWatcher
     void startGoodwin();
     void stopGoodwin();
 
+    // This will be called periodically. 
+    // legacyWatcher can use this to do animation, etc. 
+    void doIdle();
 
 }; // namespace legacyWatcher
 

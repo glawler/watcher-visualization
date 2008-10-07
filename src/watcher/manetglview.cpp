@@ -56,9 +56,13 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     emit monochromeToggled(ds.monochromeMode); 
     emit backgroundImageToggled(ds.backgroundImage); 
 
-    QTimer *timer = new QTimer(this);
-    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(checkIO()));
-    timer->start(100);
+    QTimer *checkIOTimer = new QTimer(this);
+    QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
+    checkIOTimer->start(100);
+
+    QTimer *watcherIdleTimer = new QTimer(this);
+    QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
+    watcherIdleTimer->start(100); 
 
     TRACE_EXIT();
 }
@@ -106,6 +110,14 @@ void manetGLView::checkIO()
 
     TRACE_EXIT();
 }
+
+void manetGLView::watcherIdle()
+{
+    // Fake the glut idle() callback for the legacyWatcher.
+    // legacyWatcher can use this timeout for animation, etc. 
+    legacyWatcher::doIdle();
+}
+
 
 void manetGLView::paintGL()
 {
