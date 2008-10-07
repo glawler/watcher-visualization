@@ -117,6 +117,7 @@ static watcher::BackgroundImage globalBGImage;
 // UNUSED NOW static int globalSelectedNodeScreenY;
 static double globalSelectedNodeDeltaX;
 static double globalSelectedNodeDeltaY;
+// GTL not yet. static void scaleNodesZAxis(const float scaleVal); 
 
 static char *globalgoodwinfilename;
 static CommunicationsLogStatePtr globalGoodwin;
@@ -192,7 +193,15 @@ void legacyWatcher::toggleMonochrome(bool isOn)
 
 void legacyWatcher::toggleThreeDView(bool isOn)
 {
-   globalDispStat.threeDView=isOn?1:0;
+    // GTL start of support to raise non-leaf nodes off the Z axis. 
+    // Doesn't yet work as edges are only drawn in an x-y plain.
+    // float hiearchyZScale=2.0;
+    // if (isOn)
+    //     scaleNodesZAxis(hiearchyZScale);
+    // else
+    //     scaleNodesZAxis(1/hiearchyZScale); 
+
+    globalDispStat.threeDView=isOn?1:0;
 }
 
 void legacyWatcher::toggleBackgroundImage(bool isOn)
@@ -2841,6 +2850,17 @@ void packetSend(manetNode *, packet *, int)
     abort();
 }
 
+// GTL - start of support to raise non-leaf nodes off the z axis. 
+//
+// static void scaleNodesZAxis(const float scaleVal)
+// {
+//     manet *m=globalManet;
+//     for(int i = 0; i < m->numnodes; i++)
+//     {
+//         manetNode *us=&(m->nlist[i]); 
+//         us->z *= scaleVal*us->level;
+//     }
+// }
 
 static void watcherDrawNodes(NodeDisplayType dispType, manet *m)
 {

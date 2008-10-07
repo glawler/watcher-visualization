@@ -564,37 +564,50 @@ void drawArrow(GLdouble x1, GLdouble y1, GLdouble x2,GLdouble y2, GLdouble width
 
 void drawHeavyArrow(GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2, GLdouble y2,GLdouble z2, GLdouble width)
 {
-    double a=atan2(x1-x2,y1-y2);
-    double cm = sin(a)*width;  // cos(a-M_PI_2)*width
-    double cp = -cm;           // cos(a+M_PI_2)*width
-    double sm = -cos(a)*width; // sin(a-M_PI_2)*width
-    double sp = -sm;           // cos(a+M_PI_2)*width
+    double ax=atan2(x1-x2,y1-y2);
+    double cmx = sin(ax)*width;  // cos(a-M_PI_2)*width
+    double cpx = -cmx;           // cos(a+M_PI_2)*width
+    double smx = -cos(ax)*width; // sin(a-M_PI_2)*width
+    double spx = -smx;           // cos(a+M_PI_2)*width
+
+    // double ay=atan2(x1-x2,y1-y2);
+    // double cmy = sin(ay)*width;  // cos(a-M_PI_2)*width
+    // double cpy = -cmy;           // cos(a+M_PI_2)*width
+    // double smy = -cos(ay)*width; // sin(a-M_PI_2)*width
+    // double spy = -smy;           // cos(a+M_PI_2)*width
 
     if (!globalDispStat.threeDView)
     {
         glBegin(GL_POLYGON);
 
         glNormal3f(0.0, 0.0, 1.0);
-        glVertex3f(x1+sm,y1+cm,z1);
-        glVertex3f(x1+sp,y1+cp,z1);
-        glVertex3f(x2+sp,y2+cp,z2);
-        glVertex3f(x1+sm,y1+cm,z1);
+        glVertex3f(x1+smx,y1+cmx,z1);
+        glVertex3f(x1+spx,y1+cpx,z1);
+        glVertex3f(x2+spx,y2+cpx,z2);
+        glVertex3f(x1+smx,y1+cmx,z1);
 
         glEnd();
     }
     else
     {
         glPushMatrix();
-        GLUquadric *q=gluNewQuadric();
         glTranslatef(x1,y1,z1);
 
         // gluCylinder draws "out the z axis", so rotate view 90 on the y axis and angle-between-the-nodes on the x axis
         // before drawing the cylinder
+        
         glRotated(90.0, 0.0, 1.0, 0.0);                             // y rotate
         glRotated(atan2(y1-y2,x2-x1)*(180/M_PI), 1.0, 0.0, 0.0);    // x rotate, y1-y2,x2-x1 was trail and error wrt the quadrants
-        gluCylinder(q, width, 0, sqrt(pow(x1-x2,2)+pow(y1-y2,2)), 10, 10); 
 
+        // glRotated(atan2(z1-z2,y2-y1)*(180/M_PI), 0.0, 1.0, 0.0);    // y rotate, y1-y2,x2-x1 was trail and error wrt the quadrants
+        // glRotated(atan2(x1-x2,z2-z1)*(180/M_PI), 0.0, 0.0, 1.0);    // z rotate, y1-y2,x2-x1 was trail and error wrt the quadrants
+        // float distance=sqrt(pow(x1-x2,2)+pow(y1-y2,2)+pow(z1-z2,2));
+        float distance=sqrt(pow(x1-x2,2)+pow(y1-y2,2)+pow(z1-z2,2));
+
+        GLUquadric *q=gluNewQuadric();
+        gluCylinder(q, width, 0, distance, 10, 10); 
         gluDeleteQuadric(q);
+
         glPopMatrix(); 
     }
 }
