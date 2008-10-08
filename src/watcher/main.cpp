@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     if (false==initConfig(config, argc, argv, configFilename, 'f'))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;
-        cerr << "Usage: " << basename(argv[0]) << " [-f|--configFile] configfile" << endl;
+        cerr << "Usage: " << basename(argv[0]) << " [-f|--configFile] configfile [standard watcher arguments]" << endl;
         return 1;
     }
     singletonConfig::unlock();
