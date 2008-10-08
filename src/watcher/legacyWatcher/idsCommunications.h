@@ -1077,6 +1077,26 @@ void communicationsStatusRegister(CommunicationsStatePtr cs,
 #define COMMUNICATIONS_LABEL_FAMILY_RESERVED_30		30
 #define COMMUNICATIONS_LABEL_FAMILY_RESERVED_31		31
 
+typedef enum { WATCHER_PROPERTY_SHAPE=0, WATCHER_PROPERTY_COLOR, WATCHER_PROPERTY_EFFECT } WatcherProperty; 
+typedef enum { WATCHER_SHAPE_CIRCLE=0, WATCHER_SHAPE_SQUARE, WATCHER_SHAPE_TRIANGLE,
+               WATCHER_SHAPE_TORUS, WATCHER_SHAPE_TEAPOT } WatcherShape;
+typedef enum { WATCHER_EFFECT_SPIN=0, WATCHER_EFFECT_SPARKLE, WATCHER_EFFECT_FLASH } WatcherEffect; 
+typedef struct 
+{
+    // enum item { node, label, edge };         // only node for now
+
+    unsigned int identifier;    // For nodes, this is the node's ManetAddr.
+
+    WatcherProperty property;  
+
+    union {
+        unsigned char color[4];     // If property is color, fill this out.
+        WatcherShape shape;         // If propery is shape, fil this out.
+        WatcherEffect effect;       // etc. 
+    } data; 
+    
+} WatcherPropertyInfo;
+
 typedef struct NodeLabel
 {
     unsigned char bgcolor[4],fgcolor[4]; /* background & foreground colors */
@@ -1167,6 +1187,9 @@ void communicationsWatcherLabelRemove(CommunicationsStatePtr cs,
 void communicationsWatcherColor(CommunicationsStatePtr cs, 
                                 ManetAddr node, 
                                 unsigned char *color);
+/* To modify a watcher property.
+ */
+void communicationsWatcherProperty(CommunicationsStatePtr cs, ManetAddr node, WatcherPropertyInfo *prop);
 
 /* To add an edge to a graph displayed by the watcher
  */

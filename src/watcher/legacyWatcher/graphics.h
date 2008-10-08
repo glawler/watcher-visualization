@@ -6,6 +6,7 @@
 #endif
 
 #include "des.h"
+#include "watcherPropertyData.h"
 
 /*  Copyright (C) 2005  McAfee Inc. 
  *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO
@@ -58,8 +59,8 @@ void drawArrow(GLdouble x1, GLdouble y1, GLdouble x2,GLdouble y2, GLdouble width
 void drawHeavyArrow(GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2, GLdouble y2, GLdouble z2,GLdouble width);
 int drawWrap(points p[], int N);
 
-void nodeDraw(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus const *dispStat);
-void nodeDrawFrowny(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus const *dispStat);
+void nodeDraw(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus const *dispStat, WatcherPropertyData *);
+void nodeDrawFrowny(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus const *dispStat, WatcherPropertyData *);
 void drawNeighbors(manet *m);
 void drawGraph(manet *m, int *graph,GLdouble scale, int drawlens);
 void drawNodes(NodeDisplayType dispType, manet *m);

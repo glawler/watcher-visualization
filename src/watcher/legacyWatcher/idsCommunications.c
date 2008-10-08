@@ -1719,6 +1719,27 @@ void communicationsWatcherLabelRemove(CommunicationsStatePtr cs, int bitmap, Nod
         messageInfoSend(mi);
 }
 
+void communicationsWatcherProperty(CommunicationsStatePtr cs, ManetAddr node, WatcherPropertyInfo *prop)
+{
+	CommunicationsDestination dst;
+	unsigned char *msg = (unsigned char *)malloc(1024);   /*  "sufficient"  */
+	unsigned char *pos=msg;
+	MessageInfoPtr mi;
+
+	dst.addr=NODE_LOCAL;
+	dst.type=COMMUNICATIONSDESTINATION_DIRECT;
+	dst.ttl=255;
+
+	if ((node==NODE_LOCAL) || (node==0))
+		node=cs->localid;
+
+	pos=communicationsWatcherPropertyMarshal(pos, prop);
+
+	mi=messageInfoCreate(cs,IDSCOMMUNICATIONS_MESSAGE_WATCHER_PROPERTY,dst,NULL,NULL);
+        messageInfoRawPayloadSet(mi,msg,pos-msg);
+        messageInfoSend(mi);
+}
+
 void communicationsWatcherColor(CommunicationsStatePtr cs, ManetAddr node, unsigned char *color)
 {
 	CommunicationsDestination dst;

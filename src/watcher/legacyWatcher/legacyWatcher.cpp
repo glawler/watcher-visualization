@@ -46,6 +46,7 @@
 #include "watcherGraph.h"
 #include "floatinglabel.h"
 #include "backgroundImage.h"
+#include "watcherPropertyData.h"
 
 #include "mobility.h"
 #include "watcher.h"
@@ -80,6 +81,7 @@ static void detectorPositionUpdate(void *data, IDSPositionType pos, IDSPositionS
 static void watcherDrawNodes(NodeDisplayType dispType, manet *m);
 long long int getMilliTime(void);
 void gotMessageLabel(void *data, const struct MessageInfo *mi);
+void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi);
 void gotMessageLabelRemove(void *data, const struct MessageInfo *mi);
 void gotMessageColor(void *data, const struct MessageInfo *mi);
 void gotMessageEdge(void *data, const struct MessageInfo *mi);
@@ -172,6 +174,8 @@ GlobalManetAdj globalHierarchyAdjInit = { 0.0, 0.0, 0.0, 1.9, 1.5, 0.0, 0.0, 0.0
 
 int globalShowPositionFlag = 0;
 int globalExitAtEofFlag = 0;
+
+WatcherPropertiesList GlobalWatcherPropertiesList;
 
 void legacyWatcher::layerToggle(const Layer layer, const bool turnOn)
 {
@@ -1599,6 +1603,7 @@ void nodeOpenSucceed(manetNode *us)
     messageHandlerSet(us->cluster->cs, COMMUNICATIONS_MESSAGE_INBOUND, COMMUNICATIONS_MESSAGE_AFTERALL, COMMUNICATIONS_MESSAGE_READONLY, IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL_REMOVE, gotMessageFloatingLabelRemove, us);
     messageHandlerSet(us->cluster->cs, COMMUNICATIONS_MESSAGE_INBOUND, COMMUNICATIONS_MESSAGE_AFTERALL, COMMUNICATIONS_MESSAGE_READONLY, IDSCOMMUNICATIONS_MESSAGE_WATCHER_LABEL, gotMessageLabel, us);
     messageHandlerSet(us->cluster->cs, COMMUNICATIONS_MESSAGE_INBOUND, COMMUNICATIONS_MESSAGE_AFTERALL, COMMUNICATIONS_MESSAGE_READONLY, IDSCOMMUNICATIONS_MESSAGE_WATCHER_LABEL_REMOVE, gotMessageLabelRemove, us);
+    messageHandlerSet(us->cluster->cs, COMMUNICATIONS_MESSAGE_INBOUND, COMMUNICATIONS_MESSAGE_AFTERALL, COMMUNICATIONS_MESSAGE_READONLY, IDSCOMMUNICATIONS_MESSAGE_WATCHER_PROPERTY, gotMessageWatcherProperty, us);
     messageHandlerSet(us->cluster->cs, COMMUNICATIONS_MESSAGE_INBOUND, COMMUNICATIONS_MESSAGE_AFTERALL, COMMUNICATIONS_MESSAGE_READONLY, IDSCOMMUNICATIONS_MESSAGE_WATCHER_COLOR, gotMessageColor, us);
     messageHandlerSet(us->cluster->cs, COMMUNICATIONS_MESSAGE_INBOUND, COMMUNICATIONS_MESSAGE_AFTERALL, COMMUNICATIONS_MESSAGE_READONLY, IDSCOMMUNICATIONS_MESSAGE_WATCHER_EDGE, gotMessageEdge, us);
     messageHandlerSet(us->cluster->cs, COMMUNICATIONS_MESSAGE_INBOUND, COMMUNICATIONS_MESSAGE_AFTERALL, COMMUNICATIONS_MESSAGE_READONLY, IDSCOMMUNICATIONS_MESSAGE_WATCHER_EDGE_REMOVE, gotMessageEdgeRemove, us);
@@ -1838,6 +1843,61 @@ void gotMessageLabelRemove(void *data, const struct MessageInfo *mi)
     us->cluster->needupdate = 1;
 }
 
+void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
+{
+    manetNode *us = (manetNode*)data;
+
+    WatcherPropertyInfo messageProp;
+    unsigned char *pos=(unsigned char *)messageInfoRawPayloadGet(mi);
+    pos = communicationsWatcherPropertyUnmarshal(pos, &messageProp);
+
+    LOG_DEBUG("Got WatcherProperty message for node index " << index); 
+
+    // If a color message, use existing color field in maneNode and return.
+    if (messageProp.property==WATCHER_PROPERTY_COLOR) // just copy the color over onto the manetNode's color field.
+    {
+        int index=manetGetNodeNum(us->manet, messageProp.identifier);
+        if (index==-1)
+        {
+            LOG_WARN("Got watcher property color message, but am unable to find the node with address: " << messageProp.identifier); 
+            return;
+        }
+
+        nodeColor(&(us->manet->nlist[index]), us->manet->nlist[index].cluster->color);
+        for (int i=0;i<4;i++)
+            us->manet->nlist[index].cluster->color[i]=messageProp.data.color[i];
+        us->cluster->needupdate = 1;
+        return;
+    }
+
+    // Not a color: stuff the property into the watcher properties list.
+    WatcherPropertyData *propp;
+    WatcherPropertiesList::iterator propIndex=GlobalWatcherPropertiesList.begin();
+    for( ; propIndex!=GlobalWatcherPropertiesList.end();propIndex++)
+        if((*propIndex)->identifier==messageProp.identifier) 
+            break;
+
+    if (propIndex==GlobalWatcherPropertiesList.end())
+    {
+        LOG_DEBUG("Creating new properties for node " << (0x000000FF & messageProp.identifier) ); 
+        propp=new WatcherPropertyData;                  // I don't know when this data gets deleted.  
+                                                        // Is there a watcher cleanup function anywhere?
+        GlobalWatcherPropertiesList.push_back(propp); 
+    }
+    else
+    {
+        LOG_DEBUG("Modifing existing properties for node " << messageProp.identifier); 
+        propp=*propIndex;
+    }
+
+    // WatcherPropertyData does not map directly onto WatcherPropertyInfo, so we must translate between them
+    propp->identifier=messageProp.identifier;
+    propp->property=messageProp.property;
+    propp->shape=messageProp.property==WATCHER_PROPERTY_SHAPE ? messageProp.data.shape : WATCHER_SHAPE_CIRCLE; // default is circle
+    propp->sparkle=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPARKLE ? 1 : 0;
+    propp->spin=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPIN ? 1 : 0;
+    propp->flash=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_FLASH ? 1 : 0;
+}
 
 void gotMessageEdge(void *data, const struct MessageInfo *mi)
 {
@@ -2909,10 +2969,19 @@ static void watcherDrawNodes(NodeDisplayType dispType, manet *m)
         NodeDisplayStatus const *ds;
         double ndx;
         double ndy;
-        void (*nodeDrawFn)(manetNode *, NodeDisplayType, NodeDisplayStatus const *) = (!((m->nlist[i].cluster->cs) && (communicationsLinkup(m->nlist[i].cluster->cs)))) ? nodeDrawFrowny : nodeDraw;
+        void (*nodeDrawFn)(
+                manetNode *, 
+                NodeDisplayType, 
+                NodeDisplayStatus const *,
+                WatcherPropertyData *) = (!((m->nlist[i].cluster->cs) && (communicationsLinkup(m->nlist[i].cluster->cs)))) ? nodeDrawFrowny : nodeDraw;
         NodeDisplayStatus everythingStat = globalDispStat;
         everythingStat.familyBitmap = 0xFFFFFFFF;
         everythingStat.minPriority = 0;
+
+        WatcherPropertyData *propertyData=findWatcherPropertyData(m->nlist[i].addr, GlobalWatcherPropertiesList); 
+
+        // if(propertyData)
+        //     LOG_DEBUG("Using properties for node " << m->nlist[i].addr; 
 
         if(&(m->nlist[i]) == globalSelectedNode)
         {
@@ -2958,7 +3027,7 @@ static void watcherDrawNodes(NodeDisplayType dispType, manet *m)
                 m->nlist[i].color = (unsigned char*)&globalNeighborColors[1];
             m->nlist[i].x += ndx;
             m->nlist[i].y += ndy;
-            nodeDrawFn(&(m->nlist[i]), dispType, ds);
+            nodeDrawFn(&(m->nlist[i]), dispType, ds, propertyData);
             m->nlist[i].y -= ndy;
             m->nlist[i].x -= ndx;
             m->nlist[i].color = NULL;
@@ -2967,7 +3036,7 @@ static void watcherDrawNodes(NodeDisplayType dispType, manet *m)
         {
             m->nlist[i].x += ndx;
             m->nlist[i].y += ndy;
-            nodeDrawFn(&(m->nlist[i]), dispType, ds);
+            nodeDrawFn(&(m->nlist[i]), dispType, ds, propertyData);
             m->nlist[i].y -= ndy;
             m->nlist[i].x -= ndx;
         }

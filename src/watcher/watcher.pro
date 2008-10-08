@@ -36,7 +36,8 @@ win32 {
 HEADERS += manetglview.h  \
          singletonConfig.h \
          speedlabel.h \
-         legacyWatcher/backgroundImage.h
+         legacyWatcher/backgroundImage.h \
+         legacyWatcher/watcherPropertyData.h
 
 FORMS += watcher.ui
 SOURCES += \
@@ -58,4 +59,6 @@ SOURCES += \
     legacyWatcher/mobility.cpp \
     legacyWatcher/watcherGPS.cpp \
     legacyWatcher/graphics.cpp \
-    legacyWatcher/backgroundImage.cpp
+    legacyWatcher/apisupport.c \
+    legacyWatcher/backgroundImage.cpp \
+    legacyWatcher/watcherPropertyData.cpp

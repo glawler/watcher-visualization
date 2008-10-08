@@ -373,6 +373,9 @@ typedef struct CommunicationsState
 unsigned char *communicationsWatcherLabelMarshal(unsigned char *hp, const NodeLabel *lab);
 unsigned char *communicationsWatcherLabelUnmarshal(unsigned char *hp, NodeLabel *lab);
 
+unsigned char *communicationsWatcherPropertyMarshal(unsigned char *hp, WatcherPropertyInfo *props);
+unsigned char *communicationsWatcherPropertyUnmarshal(unsigned char *hp, WatcherPropertyInfo *props);
+
 unsigned char *communicationsWatcherFloatingLabelMarshal(unsigned char *hp, const FloatingLabel *lab);
 unsigned char *communicationsWatcherFloatingLabelUnmarshal(unsigned char *hp, FloatingLabel *lab);
 

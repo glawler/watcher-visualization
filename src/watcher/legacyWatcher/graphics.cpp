@@ -21,6 +21,7 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: graphics.cpp,v 1.54 20
 #ifdef GRAPHICS
 
 extern NodeDisplayStatus globalDispStat; // allocated in legacyWatcher.o
+extern WatcherPropertiesList GlobalWatcherPropertiesList; // allocated in legacyWatcher.o
 
 /*
  * Get the distance from "n" to "(x, y)" in screen coordinates given
@@ -397,37 +398,95 @@ void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
     glPopMatrix();
 }
 
-void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 {
     glPushMatrix();
 
     glTranslated(x, y, z);
 
+    GLfloat offset=2.0*radius*sin(M_PI_4);  // by law of sines
+
+    // fprintf(stdout, "Drawing triangle with \"radius\" : %f. x/y offset is %f\n", radius, offset); 
+
     if (globalDispStat.threeDView)
     {
+        glTranslated(0, -offset, 0);        // Cone draws base at z=0, so move it "down" offset units. 
+        glRotatef(-90.0, 1.0, 0.0, 0.0);    // Draw the cone pointing "up" the y axis. 
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
-        glutSolidSphere(radius, 10, 10);
+        glutSolidCone(offset, offset+radius, 10, 10); 
         glPopAttrib();
     }
     else
     {
-        GLUquadric* q=NULL;
-        q=gluNewQuadric();
-        gluDisk(q,radius-1,radius,36,1);
-        gluDeleteQuadric(q);
+        glPushAttrib(GL_LINE_WIDTH);
+        glLineWidth(2.0); 
+        glBegin(GL_LINE_LOOP); 
+            glVertex2f(-offset, -offset);
+            glVertex2f( offset, -offset); 
+            glVertex2f(0, radius); 
+        glEnd();
+        glPopAttrib();
     }
     glPopMatrix();
 }
 
-void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 {
     glPushMatrix();
-    glTranslatef(x, y, z);
-    GLUquadric* q=NULL;
-    q=gluNewQuadric();
-    gluDisk(q,radius-1,radius,36,1);
-    gluDeleteQuadric(q);
+    glTranslated(x, y, z);
+
+    GLfloat widthScaled=radius; 
+
+    if (globalDispStat.threeDView)
+    {
+        glPushAttrib(GL_NORMALIZE);
+        glNormal3f(0.0, 0.0, 1.0);
+        glutSolidCube(widthScaled*2); 
+        glPopAttrib();
+    }
+    else
+    {
+        GLfloat offset=widthScaled;
+        glLineWidth(2.0); 
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(-offset, -offset);
+            glVertex2f( offset, -offset);
+            glVertex2f( offset,  offset);
+            glVertex2f(-offset,  offset); 
+        glEnd();
+        glLineWidth(1.0); 
+    }
+    glPopMatrix();
+}
+
+void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+{
+    glPushMatrix();
+    glTranslated(x, y, z);
+
+    GLfloat widthScaled=radius; 
+
+    if (globalDispStat.threeDView)
+    {
+        glPushAttrib(GL_NORMALIZE);
+        glNormal3f(0.0, 0.0, 1.0);
+        glutSolidTeapot(widthScaled*2); 
+        glPopAttrib();
+    }
+    else
+    {
+        // A flat teapot is just a square
+        GLfloat offset=widthScaled;
+        glLineWidth(2.0); 
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(-offset, -offset);
+            glVertex2f( offset, -offset);
+            glVertex2f( offset,  offset);
+            glVertex2f(-offset,  offset); 
+        glEnd();
+        glLineWidth(1.0); 
+    }
     glPopMatrix();
 }
 
@@ -439,10 +498,66 @@ void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 
 	glTranslatef(x, y, z);
 	q=gluNewQuadric();
-	gluDisk(q,0,radius,36,1);
+	gluDisk(q,radius-1,radius,36,1);
 	gluDeleteQuadric(q);
 
 	glPopMatrix();
+}
+
+
+void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+{
+    GLfloat inner=radius-1;
+    GLfloat outer=radius;
+
+    if (globalDispStat.threeDView)
+    {
+        glPushMatrix();
+        glTranslated(x, y, z);
+        glPushAttrib(GL_NORMALIZE);
+        glNormal3f(0.0, 0.0, 1.0);
+        glutSolidTorus(inner, outer, 10, 10);  
+        glPopAttrib();
+        glPopMatrix();
+    }
+    else
+    {
+        GLUquadric* q=NULL;
+        glPushMatrix();
+        glTranslatef(x, y, z);
+        q=gluNewQuadric();
+        gluDisk(q,inner, outer,36,1);
+        gluDeleteQuadric(q);
+        glPopMatrix();
+    }
+}
+
+void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+{
+
+    if (globalDispStat.threeDView)
+    {
+        glPushMatrix();
+        glTranslated(x, y, z);
+        glPushAttrib(GL_NORMALIZE);
+        glNormal3f(0.0, 0.0, 1.0);
+        glutSolidSphere(radius, 10, 10);
+        glPopAttrib();
+        glPopMatrix();
+    }
+    else
+        drawDisk(x,y,z,radius); 
+}
+
+void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+{
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    GLUquadric* q=NULL;
+    q=gluNewQuadric();
+    gluDisk(q,radius-1,radius,36,1);
+    gluDeleteQuadric(q);
+    glPopMatrix();
 }
 
 
@@ -489,12 +604,14 @@ void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
 
 void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth)
 {
-    glLineWidth(lineWidth); 
-
     int i;
     GLfloat lineheight=- glutStrokeWidth(GLUT_STROKE_ROMAN,'W') * scale;   // TOJ: need scale arg here?  
 
     glPushMatrix();
+
+    glPushAttrib(GL_LINE_WIDTH);
+    glLineWidth(lineWidth); 
+
     glTranslatef(x,y,z);
     glScaled(scale,scale,scale);
     for (i = 0; text[i]; i++)
@@ -510,9 +627,9 @@ void drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, G
                 glutStrokeCharacter(GLUT_STROKE_ROMAN, text[i]);
                 break;
         }
+    glPopAttrib(); 
     glPopMatrix();
 
-    glLineWidth(1.0);
 }
 
 GLfloat drawTextHeight(char *text)
@@ -848,11 +965,11 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
     }
 }
 
-static void nodeDrawCircFn(
+static void nodeDrawFn(
         manetNode *us, 
         NodeDisplayType dispType,
         NodeDisplayStatus const *dispStat, 
-        void (*circFn)(GLdouble, GLdouble, GLdouble, GLdouble))
+        void (*drawFn)(GLdouble, GLdouble, GLdouble, GLdouble))
 {
     const GLfloat antennaAlpha=0.5;
     const GLfloat root[]={0.0,1.0,0.0,1.0};
@@ -887,13 +1004,13 @@ static void nodeDrawCircFn(
         }
     }
 
-    circFn(us->x,us->y,us->z,4);
+    drawFn(us->x,us->y,us->z,4);
 
     if (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_HIERARCHY))
     {
         for(j=0;j<us->level;j++)
         {
-            drawSphere(us->x, us->y, us->z, HIERARCHY_RADIUS(j));
+            drawFn(us->x, us->y, us->z, HIERARCHY_RADIUS(j));
         }
     }
 
@@ -923,22 +1040,46 @@ static void nodeDrawCircFn(
     nodeDrawLabel(us, dispType, dispStat, us->x, us->y, us->z);
     nodeLabelTimeout(us);
 
-} /* nodeDrawCircFn */
+} /* nodeDrawFn */
 
 void nodeDraw(
         manetNode *us, 
         NodeDisplayType dispType,
-        NodeDisplayStatus const *dispStat)
+        NodeDisplayStatus const *dispStat,
+        WatcherPropertyData *prop)
 {
-    nodeDrawCircFn(us, dispType, dispStat, drawSphere);
+    if (!prop)       // default is to draw a circle
+        nodeDrawFn(us, dispType, dispStat, drawSphere);
+    else
+    {
+        switch(prop->shape)
+        {
+            case WATCHER_SHAPE_CIRCLE:
+                nodeDrawFn(us, dispType, dispStat, drawSphere);
+                break;
+            case WATCHER_SHAPE_SQUARE:
+                nodeDrawFn(us, dispType, dispStat, drawCube);
+                break;
+            case WATCHER_SHAPE_TRIANGLE:
+                nodeDrawFn(us, dispType, dispStat, drawPyramid);
+                break;
+            case WATCHER_SHAPE_TORUS:
+                nodeDrawFn(us, dispType, dispStat, drawTorus);
+                break;
+            case WATCHER_SHAPE_TEAPOT:
+                nodeDrawFn(us, dispType, dispStat, drawTeapot);
+                break;
+        }
+    }
 }
 
 void nodeDrawFrowny(
         manetNode *us, 
         NodeDisplayType dispType,
-        NodeDisplayStatus const *dispStat)
+        NodeDisplayStatus const *dispStat, 
+        WatcherPropertyData * /* prop */)
 {
-    nodeDrawCircFn(us, dispType, dispStat, drawFrownyCircle);
+    nodeDrawFn(us, dispType, dispStat, drawFrownyCircle);
 }
 
 void drawNodes(
@@ -954,9 +1095,12 @@ void drawNodes(
     dispStat.scaleText[dispType]=0.08;
     dispStat.scaleLine[dispType]=1.0;
 
+    
+
     for(i=0;i<m->numnodes;i++)
     {
-        nodeDraw(&(m->nlist[i]), dispType, &dispStat);
+        WatcherPropertyData *propData=findWatcherPropertyData(i, GlobalWatcherPropertiesList);
+        nodeDraw(&(m->nlist[i]), dispType, &dispStat, propData);
     }
 }
 

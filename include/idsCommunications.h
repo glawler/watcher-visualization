@@ -29,11 +29,9 @@
  * using libxml2.
  */
 
-/* GTL -- Removing XML dependency from idsCommunications interface ***********************
- * #include <libxml/xmlmemory.h>
- * #include <libxml/parser.h>
- * #include <libxml/tree.h>
- ****************************************************************************************/
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 /* A message type is currently unsigned int.  Some message type values
  * are defined in idsCommunicationsMessages.h, but they are opaque
@@ -425,8 +423,6 @@ int messageHandlerSet(
  *
  *    Reusing MessageInfo structs is not recomended.
  *
- * GTL - NOTE NO XML IN THIS HEADER.
- *
  * XML messages can be processed using libxml with messageInfoPayloadSet() and
  * messageInfoPayloadGet().  Other messages can be processed with 
  * messageInfoRawPayloadSet() and messageInfoRawPayloadGet(), which handle
@@ -502,9 +498,7 @@ MessageInfoPtr messageInfoCreate(
  *  The xmlDoc pointed to by payload will be marshaled into a 
  *  API-malloced buffer.  The API does not claim ownership of it.
  */
-/*************** GTL no XML in this header. 
- * void messageInfoPayloadSet(MessageInfoPtr messageInfo, const xmlDoc *payload);
- *********************/
+void messageInfoPayloadSet(MessageInfoPtr messageInfo, const xmlDoc *payload);
 
 /* If one does not wish to use XML, this call will take a void pointer and
  * length, and specify it as payload.
@@ -569,9 +563,7 @@ CommunicationsDestination messageInfoDestinationGet(
  * The xmlDocPtr returned by this points to a copy, which the caller
  * must free, using xmlFreeDoc().
  */
-/**** GTL NO XML IN THIS HEADER ***********
- * xmlDocPtr messageInfoPayloadGet(const struct MessageInfo *messageInfo);
- */
+xmlDocPtr messageInfoPayloadGet(const struct MessageInfo *messageInfo);
 
 /* If one is not using XML, this will return a pointer to an API owned
  * block of memory containing the payload, which is valid until the 
@@ -1085,6 +1077,26 @@ void communicationsStatusRegister(CommunicationsStatePtr cs,
 #define COMMUNICATIONS_LABEL_FAMILY_RESERVED_30		30
 #define COMMUNICATIONS_LABEL_FAMILY_RESERVED_31		31
 
+typedef enum { WATCHER_PROPERTY_SHAPE=0, WATCHER_PROPERTY_COLOR, WATCHER_PROPERTY_EFFECT } WatcherProperty; 
+typedef enum { WATCHER_SHAPE_CIRCLE=0, WATCHER_SHAPE_SQUARE, WATCHER_SHAPE_TRIANGLE,
+               WATCHER_SHAPE_TORUS, WATCHER_SHAPE_TEAPOT } WatcherShape;
+typedef enum { WATCHER_EFFECT_SPIN=0, WATCHER_EFFECT_SPARKLE, WATCHER_EFFECT_FLASH } WatcherEffect; 
+typedef struct 
+{
+    // enum item { node, label, edge };         // only node for now
+
+    unsigned int identifier;    // For nodes, this is the node's ManetAddr.
+
+    WatcherProperty property;  
+
+    union {
+        unsigned char color[4];     // If property is color, fill this out.
+        WatcherShape shape;         // If propery is shape, fil this out.
+        WatcherEffect effect;       // etc. 
+    } data; 
+    
+} WatcherPropertyInfo;
+
 typedef struct NodeLabel
 {
     unsigned char bgcolor[4],fgcolor[4]; /* background & foreground colors */
@@ -1151,6 +1163,7 @@ typedef struct
     float scaleLine[2];
     int monochromeMode;
     int threeDView;
+    int backgroundImage;
 } NodeDisplayStatus;
 
 /* change the label of a node displayed by the watcher.
@@ -1174,6 +1187,9 @@ void communicationsWatcherLabelRemove(CommunicationsStatePtr cs,
 void communicationsWatcherColor(CommunicationsStatePtr cs, 
                                 ManetAddr node, 
                                 unsigned char *color);
+/* To modify a watcher property.
+ */
+void communicationsWatcherProperty(CommunicationsStatePtr cs, ManetAddr node, WatcherPropertyInfo *prop);
 
 /* To add an edge to a graph displayed by the watcher
  */

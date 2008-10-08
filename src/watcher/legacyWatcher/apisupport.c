@@ -1497,6 +1497,44 @@ unsigned char *communicationsWatcherLabelUnmarshal(unsigned char *hp, NodeLabel 
 	return hp;
 }
 
+unsigned char *communicationsWatcherPropertyMarshal(unsigned char *hp, WatcherPropertyInfo *props)
+{
+    int i;
+    MARSHALLONG(hp, props->identifier);
+    MARSHALLONG(hp, props->property);
+    switch(props->property)
+    {
+        case WATCHER_PROPERTY_SHAPE:
+            MARSHALLONG(hp, props->data.shape);
+            break;
+        case WATCHER_PROPERTY_COLOR:
+            for(i=0;i<4;i++) 
+                MARSHALBYTE(hp,props->data.color[i]);
+        case WATCHER_PROPERTY_EFFECT:
+            MARSHALLONG(hp, props->data.effect);
+    }
+    return hp;
+}
+
+unsigned char *communicationsWatcherPropertyUnmarshal(unsigned char *hp, WatcherPropertyInfo *props)
+{
+    int i;
+    UNMARSHALLONG(hp, props->identifier); 
+    UNMARSHALLONG(hp, props->property);
+    switch(props->property)
+    {
+        case WATCHER_PROPERTY_SHAPE:
+            UNMARSHALLONG(hp, props->data.shape);
+            break;
+        case WATCHER_PROPERTY_COLOR:
+            for(i=0;i<4;i++) 
+                UNMARSHALBYTE(hp,props->data.color[i]);
+        case WATCHER_PROPERTY_EFFECT:
+            UNMARSHALLONG(hp, props->data.effect);
+    }
+    return hp;
+}
+
 /* Marshal a color message
  */
 unsigned char *watcherColorMarshal(unsigned char *hp, ManetAddr node, const unsigned char *color)
