@@ -1881,22 +1881,30 @@ void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
     {
         LOG_DEBUG("Creating new properties for node " << (0x000000FF & messageProp.identifier) ); 
         propp=new WatcherPropertyData;                  // I don't know when this data gets deleted.  
-                                                        // Is there a watcher cleanup function anywhere?
+        // Is there a watcher cleanup function anywhere?
         GlobalWatcherPropertiesList.push_back(propp); 
+
+        propp->identifier=messageProp.identifier;
+        propp->property=messageProp.property;
+        propp->shape=messageProp.property==WATCHER_PROPERTY_SHAPE ? messageProp.data.shape : WATCHER_SHAPE_CIRCLE; // default is circle
+        propp->sparkle=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPARKLE ? 1 : 0;
+        propp->spin=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPIN ? 1 : 0;
+        propp->flash=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_FLASH ? 1 : 0;
+        propp->size=messageProp.property==WATCHER_PROPERTY_SIZE ? messageProp.data.size : 0;
     }
     else
     {
         LOG_DEBUG("Modifing existing properties for node " << messageProp.identifier); 
         propp=*propIndex;
-    }
 
-    // WatcherPropertyData does not map directly onto WatcherPropertyInfo, so we must translate between them
-    propp->identifier=messageProp.identifier;
-    propp->property=messageProp.property;
-    propp->shape=messageProp.property==WATCHER_PROPERTY_SHAPE ? messageProp.data.shape : WATCHER_SHAPE_CIRCLE; // default is circle
-    propp->sparkle=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPARKLE ? 1 : 0;
-    propp->spin=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPIN ? 1 : 0;
-    propp->flash=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_FLASH ? 1 : 0;
+        propp->identifier=messageProp.identifier;
+        propp->property=messageProp.property;
+        propp->shape=messageProp.property==WATCHER_PROPERTY_SHAPE ? messageProp.data.shape : propp->shape;
+        propp->sparkle=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPARKLE ? 1 : propp->sparkle; 
+        propp->spin=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPIN ? 1 : propp->spin;
+        propp->flash=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_FLASH ? 1 : propp->flash;
+        propp->size=messageProp.property==WATCHER_PROPERTY_SIZE ? messageProp.data.size : propp->size;
+    }
 }
 
 void gotMessageEdge(void *data, const struct MessageInfo *mi)

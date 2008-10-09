@@ -1500,6 +1500,7 @@ unsigned char *communicationsWatcherLabelUnmarshal(unsigned char *hp, NodeLabel 
 unsigned char *communicationsWatcherPropertyMarshal(unsigned char *hp, WatcherPropertyInfo *props)
 {
     int i;
+    float f;
     MARSHALLONG(hp, props->identifier);
     MARSHALLONG(hp, props->property);
     switch(props->property)
@@ -1510,8 +1511,14 @@ unsigned char *communicationsWatcherPropertyMarshal(unsigned char *hp, WatcherPr
         case WATCHER_PROPERTY_COLOR:
             for(i=0;i<4;i++) 
                 MARSHALBYTE(hp,props->data.color[i]);
+            break;
         case WATCHER_PROPERTY_EFFECT:
             MARSHALLONG(hp, props->data.effect);
+            break;
+        case WATCHER_PROPERTY_SIZE:
+            f=props->data.size*1000000;
+            MARSHALLONG(hp, (long)f); 
+            break;
     }
     return hp;
 }
@@ -1519,6 +1526,7 @@ unsigned char *communicationsWatcherPropertyMarshal(unsigned char *hp, WatcherPr
 unsigned char *communicationsWatcherPropertyUnmarshal(unsigned char *hp, WatcherPropertyInfo *props)
 {
     int i;
+    long l;
     UNMARSHALLONG(hp, props->identifier); 
     UNMARSHALLONG(hp, props->property);
     switch(props->property)
@@ -1529,8 +1537,14 @@ unsigned char *communicationsWatcherPropertyUnmarshal(unsigned char *hp, Watcher
         case WATCHER_PROPERTY_COLOR:
             for(i=0;i<4;i++) 
                 UNMARSHALBYTE(hp,props->data.color[i]);
+            break;
         case WATCHER_PROPERTY_EFFECT:
             UNMARSHALLONG(hp, props->data.effect);
+            break;
+        case WATCHER_PROPERTY_SIZE:
+            UNMARSHALLONG(hp, l);
+            props->data.size=l/1000000;
+            break;
     }
     return hp;
 }

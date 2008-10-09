@@ -1077,7 +1077,7 @@ void communicationsStatusRegister(CommunicationsStatePtr cs,
 #define COMMUNICATIONS_LABEL_FAMILY_RESERVED_30		30
 #define COMMUNICATIONS_LABEL_FAMILY_RESERVED_31		31
 
-typedef enum { WATCHER_PROPERTY_SHAPE=0, WATCHER_PROPERTY_COLOR, WATCHER_PROPERTY_EFFECT } WatcherProperty; 
+typedef enum { WATCHER_PROPERTY_SHAPE=0, WATCHER_PROPERTY_COLOR, WATCHER_PROPERTY_EFFECT, WATCHER_PROPERTY_SIZE } WatcherProperty; 
 typedef enum { WATCHER_SHAPE_CIRCLE=0, WATCHER_SHAPE_SQUARE, WATCHER_SHAPE_TRIANGLE,
                WATCHER_SHAPE_TORUS, WATCHER_SHAPE_TEAPOT } WatcherShape;
 typedef enum { WATCHER_EFFECT_SPIN=0, WATCHER_EFFECT_SPARKLE, WATCHER_EFFECT_FLASH } WatcherEffect; 
@@ -1093,6 +1093,7 @@ typedef struct
         unsigned char color[4];     // If property is color, fill this out.
         WatcherShape shape;         // If propery is shape, fil this out.
         WatcherEffect effect;       // etc. 
+        float size;
     } data; 
     
 } WatcherPropertyInfo;

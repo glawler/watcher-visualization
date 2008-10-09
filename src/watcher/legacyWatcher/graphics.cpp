@@ -155,7 +155,7 @@ void invert4x4(GLdouble dst[16], GLdouble const src[16])
     // check
     {
 #  define MULV(i,j) ((src[((i)*4)]*tmp[(j)]) + (src[((i)*4)+1]*tmp[(j)+4]) + \
-                (src[((i)*4)+2]*tmp[(j)+8]) + (src[((i)*4)+3]*tmp[(j)+12]))
+        (src[((i)*4)+2]*tmp[(j)+8]) + (src[((i)*4)+3]*tmp[(j)+12]))
         GLdouble foo[16] =
         {
             MULV(0,0), MULV(0,1), MULV(0,2), MULV(0,3), 
@@ -167,29 +167,29 @@ void invert4x4(GLdouble dst[16], GLdouble const src[16])
                 "%s: --------------------------------------------\n",
                 __func__);
         fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf     "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf     "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                "%6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
                 __func__, src[0], src[4], src[8], src[12],
-                          tmp[0], tmp[4], tmp[8], tmp[12],
-                          foo[0], foo[4], foo[8], foo[12]);
+                tmp[0], tmp[4], tmp[8], tmp[12],
+                foo[0], foo[4], foo[8], foo[12]);
         fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf  X  "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf  =  "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                "%6.2lf %6.2lf %6.2lf %6.2lf  =  "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
                 __func__, src[1], src[5], src[9], src[13],
-                          tmp[1], tmp[5], tmp[9], tmp[13],
-                          foo[1], foo[5], foo[9], foo[13]);
+                tmp[1], tmp[5], tmp[9], tmp[13],
+                foo[1], foo[5], foo[9], foo[13]);
         fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf     "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf     "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                "%6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
                 __func__, src[2], src[6], src[10], src[14],
-                          tmp[2], tmp[6], tmp[10], tmp[14],
-                          foo[2], foo[6], foo[10], foo[14]);
+                tmp[2], tmp[6], tmp[10], tmp[14],
+                foo[2], foo[6], foo[10], foo[14]);
         fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf     "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf     "
-                            "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                "%6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
                 __func__, src[3], src[7], src[11], src[15],
-                          tmp[3], tmp[7], tmp[11], tmp[15],
-                          foo[3], foo[7], foo[11], foo[15]);
+                tmp[3], tmp[7], tmp[11], tmp[15],
+                foo[3], foo[7], foo[11], foo[15]);
         fprintf(stderr,
                 "%s: --------------------------------------------\n",
                 __func__);
@@ -375,7 +375,7 @@ manetNode *closestNode(manet *m, int x, int y, unsigned int r, unsigned int *dis
     return ret;
 } /* closestNode */
 
-void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
     glPushMatrix();
 
@@ -398,11 +398,14 @@ void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
     glPopMatrix();
 }
 
-void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
     glPushMatrix();
 
     glTranslated(x, y, z);
+
+    if (prop && prop->size)
+        glScalef(prop->size, prop->size, prop->size);
 
     GLfloat offset=2.0*radius*sin(M_PI_4);  // by law of sines
 
@@ -421,19 +424,22 @@ void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
         glPushAttrib(GL_LINE_WIDTH);
         glLineWidth(2.0); 
         glBegin(GL_LINE_LOOP); 
-            glVertex2f(-offset, -offset);
-            glVertex2f( offset, -offset); 
-            glVertex2f(0, radius); 
+        glVertex2f(-offset, -offset);
+        glVertex2f( offset, -offset); 
+        glVertex2f(0, radius); 
         glEnd();
         glPopAttrib();
     }
     glPopMatrix();
 }
 
-void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
     glPushMatrix();
     glTranslated(x, y, z);
+
+    if (prop && prop->size)
+        glScalef(prop->size, prop->size, prop->size);
 
     GLfloat widthScaled=radius; 
 
@@ -449,20 +455,23 @@ void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
         GLfloat offset=widthScaled;
         glLineWidth(2.0); 
         glBegin(GL_LINE_LOOP);
-            glVertex2f(-offset, -offset);
-            glVertex2f( offset, -offset);
-            glVertex2f( offset,  offset);
-            glVertex2f(-offset,  offset); 
+        glVertex2f(-offset, -offset);
+        glVertex2f( offset, -offset);
+        glVertex2f( offset,  offset);
+        glVertex2f(-offset,  offset); 
         glEnd();
         glLineWidth(1.0); 
     }
     glPopMatrix();
 }
 
-void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
     glPushMatrix();
     glTranslated(x, y, z);
+
+    if (prop && prop->size)
+        glScalef(prop->size, prop->size, prop->size);
 
     GLfloat widthScaled=radius; 
 
@@ -479,32 +488,34 @@ void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
         GLfloat offset=widthScaled;
         glLineWidth(2.0); 
         glBegin(GL_LINE_LOOP);
-            glVertex2f(-offset, -offset);
-            glVertex2f( offset, -offset);
-            glVertex2f( offset,  offset);
-            glVertex2f(-offset,  offset); 
+        glVertex2f(-offset, -offset);
+        glVertex2f( offset, -offset);
+        glVertex2f( offset,  offset);
+        glVertex2f(-offset,  offset); 
         glEnd();
         glLineWidth(1.0); 
     }
     glPopMatrix();
 }
 
-void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
-	GLUquadric* q=NULL;
-	
-	glPushMatrix();
+    GLUquadric* q=NULL;
 
-	glTranslatef(x, y, z);
-	q=gluNewQuadric();
-	gluDisk(q,radius-1,radius,36,1);
-	gluDeleteQuadric(q);
+    glPushMatrix();
 
-	glPopMatrix();
+    glTranslatef(x, y, z);
+    if (prop && prop->size)
+        glScalef(prop->size, prop->size, prop->size);
+    q=gluNewQuadric();
+    gluDisk(q,radius-1,radius,36,1);
+    gluDeleteQuadric(q);
+
+    glPopMatrix();
 }
 
 
-void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
     GLfloat inner=radius-1;
     GLfloat outer=radius;
@@ -513,6 +524,8 @@ void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
     {
         glPushMatrix();
         glTranslated(x, y, z);
+        if (prop && prop->size)
+            glScalef(prop->size, prop->size, prop->size);
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
         glutSolidTorus(inner, outer, 10, 10);  
@@ -524,6 +537,8 @@ void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
         GLUquadric* q=NULL;
         glPushMatrix();
         glTranslatef(x, y, z);
+        if (prop && prop->size)
+            glScalef(prop->size, prop->size, prop->size);
         q=gluNewQuadric();
         gluDisk(q,inner, outer,36,1);
         gluDeleteQuadric(q);
@@ -531,13 +546,15 @@ void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
     }
 }
 
-void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
 
     if (globalDispStat.threeDView)
     {
         glPushMatrix();
         glTranslated(x, y, z);
+        if (prop && prop->size)
+            glScalef(prop->size, prop->size, prop->size);
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
         glutSolidSphere(radius, 10, 10);
@@ -545,13 +562,15 @@ void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
         glPopMatrix();
     }
     else
-        drawDisk(x,y,z,radius); 
+        drawDisk(x,y,z,radius, prop); 
 }
 
-void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
 {
     glPushMatrix();
     glTranslatef(x, y, z);
+    if (prop && prop->size)
+        glScalef(prop->size, prop->size, prop->size);
     GLUquadric* q=NULL;
     q=gluNewQuadric();
     gluDisk(q,radius-1,radius,36,1);
@@ -563,12 +582,12 @@ void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 /*
  * Ignores "radius"
  */
-void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
+void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble, WatcherPropertyData *prop)
 {
     static GLfloat const dead[]={1.0,0.0,0.0,1.0};
 
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, dead);
-    drawCircle(x, y, z, 7);
+    drawCircle(x, y, z, 7, prop);
     glBegin(GL_LINES);
     glVertex3f(x-4.0,y+3.0,z);
     glVertex3f(x-2.0,y+1.0,z);
@@ -968,7 +987,8 @@ static void nodeDrawFn(
         manetNode *us, 
         NodeDisplayType dispType,
         NodeDisplayStatus const *dispStat, 
-        void (*drawFn)(GLdouble, GLdouble, GLdouble, GLdouble))
+        void (*drawFn)(GLdouble, GLdouble, GLdouble, GLdouble, WatcherPropertyData *prop),
+        WatcherPropertyData *prop)
 {
     const GLfloat antennaAlpha=0.5;
     const GLfloat root[]={0.0,1.0,0.0,1.0};
@@ -1003,13 +1023,13 @@ static void nodeDrawFn(
         }
     }
 
-    drawFn(us->x,us->y,us->z,4);
+    drawFn(us->x,us->y,us->z,4, prop);
 
     if (dispStat->familyBitmap & (1<<COMMUNICATIONS_LABEL_FAMILY_HIERARCHY))
     {
         for(j=0;j<us->level;j++)
         {
-            drawFn(us->x, us->y, us->z, HIERARCHY_RADIUS(j));
+            drawFn(us->x, us->y, us->z, HIERARCHY_RADIUS(j), prop);
         }
     }
 
@@ -1029,7 +1049,7 @@ static void nodeDrawFn(
             else
                 glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, aradius);
         }
-        drawWireframeSphere(us->x,us->y,us->z,us->aradius);
+        drawWireframeSphere(us->x,us->y,us->z,us->aradius, prop);
     }
 
     if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
@@ -1048,25 +1068,25 @@ void nodeDraw(
         WatcherPropertyData *prop)
 {
     if (!prop)       // default is to draw a circle
-        nodeDrawFn(us, dispType, dispStat, drawSphere);
+        nodeDrawFn(us, dispType, dispStat, drawSphere, prop);
     else
     {
         switch(prop->shape)
         {
             case WATCHER_SHAPE_CIRCLE:
-                nodeDrawFn(us, dispType, dispStat, drawSphere);
+                nodeDrawFn(us, dispType, dispStat, drawSphere, prop);
                 break;
             case WATCHER_SHAPE_SQUARE:
-                nodeDrawFn(us, dispType, dispStat, drawCube);
+                nodeDrawFn(us, dispType, dispStat, drawCube, prop);
                 break;
             case WATCHER_SHAPE_TRIANGLE:
-                nodeDrawFn(us, dispType, dispStat, drawPyramid);
+                nodeDrawFn(us, dispType, dispStat, drawPyramid, prop);
                 break;
             case WATCHER_SHAPE_TORUS:
-                nodeDrawFn(us, dispType, dispStat, drawTorus);
+                nodeDrawFn(us, dispType, dispStat, drawTorus, prop);
                 break;
             case WATCHER_SHAPE_TEAPOT:
-                nodeDrawFn(us, dispType, dispStat, drawTeapot);
+                nodeDrawFn(us, dispType, dispStat, drawTeapot, prop);
                 break;
         }
     }
@@ -1076,9 +1096,9 @@ void nodeDrawFrowny(
         manetNode *us, 
         NodeDisplayType dispType,
         NodeDisplayStatus const *dispStat, 
-        WatcherPropertyData * /* prop */)
+        WatcherPropertyData *prop)
 {
-    nodeDrawFn(us, dispType, dispStat, drawFrownyCircle);
+    nodeDrawFn(us, dispType, dispStat, drawFrownyCircle, prop);
 }
 
 void drawNodes(
@@ -1335,7 +1355,7 @@ static int drawHierarchyrecurse(
         }
 
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neighborcolors[(levels[nodeidx[i]])%NBR_COLOR_NUM(neighborcolors)]);
-        drawCircle(xcoord[m->nlist[nodeidx[i]].index], levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING, 0, 12);
+        drawCircle(xcoord[m->nlist[nodeidx[i]].index], levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING, 0, 12, NULL);
 
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neighborcolorsDark[(levels[nodeidx[i]])%NBR_COLOR_NUM(neighborcolorsDark)]);
         drawText(xcoord[m->nlist[nodeidx[i]].index]-6, levels[nodeidx[i]]*HIERARCHY_LEVEL_SPACING-5, 0, dispStat->scaleText[NODE_DISPLAY_HIERARCHY], buff);
