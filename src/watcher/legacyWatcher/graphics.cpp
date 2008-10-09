@@ -410,11 +410,10 @@ void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
 
     if (globalDispStat.threeDView)
     {
-        glTranslated(0, -offset, 0);        // Cone draws base at z=0, so move it "down" offset units. 
-        glRotatef(-90.0, 1.0, 0.0, 0.0);    // Draw the cone pointing "up" the y axis. 
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
-        glutSolidCone(offset, offset+radius, 10, 10); 
+        glScalef(9,9,9); 
+        glutSolidTetrahedron(); 
         glPopAttrib();
     }
     else
