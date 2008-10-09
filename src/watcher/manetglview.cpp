@@ -62,7 +62,7 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
 
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-    watcherIdleTimer->start(100); 
+    watcherIdleTimer->start(33); // Let's shoot for 30 frames a second.
 
     TRACE_EXIT();
 }
@@ -113,9 +113,14 @@ void manetGLView::checkIO()
 
 void manetGLView::watcherIdle()
 {
+    TRACE_ENTER();
+
     // Fake the glut idle() callback for the legacyWatcher.
     // legacyWatcher can use this timeout for animation, etc. 
-    legacyWatcher::doIdle();
+    if( legacyWatcher::doIdle())
+        updateGL();
+
+    TRACE_EXIT();
 }
 
 

@@ -375,6 +375,27 @@ manetNode *closestNode(manet *m, int x, int y, unsigned int r, unsigned int *dis
     return ret;
 } /* closestNode */
 
+// Should be called after a glTranslate()
+void handleSpin(int threeD, WatcherPropertyData *prop)
+{
+    if (prop && prop->spin)
+    {
+        if (threeD)
+        {
+            glRotatef(prop->spinRotation_x, 1.0f, 0.0f, 0.0f);
+            glRotatef(prop->spinRotation_y, 0.0f, 1.0f, 0.0f);
+        }
+        glRotatef(prop->spinRotation_z, 0.0f, 0.0f, 1.0f);
+    }
+}
+
+// Should be called after a glTranslate()
+void handleSize(WatcherPropertyData *prop)
+{
+    if (prop && prop->size)
+        glScalef(prop->size, prop->size, prop->size);
+}
+
 void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData * /*prop*/)
 {
     glPushMatrix();
@@ -404,8 +425,8 @@ void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPr
 
     glTranslated(x, y, z);
 
-    if (prop && prop->size)
-        glScalef(prop->size, prop->size, prop->size);
+    handleSize(prop);
+    handleSpin(globalDispStat.threeDView, prop);
 
     // fprintf(stdout, "Drawing triangle with \"radius\" : %f. x/y offset is %f\n", radius, offset); 
 
@@ -454,9 +475,11 @@ void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPr
     }
     else
     {
+        GLfloat offset=2.0*radius*sin(M_PI_4);  // by law of sines
+
         glPushAttrib(GL_LINE_WIDTH);
         glLineWidth(2.0); 
-        GLfloat offset=2.0*radius*sin(M_PI_4);  // by law of sines
+        glNormal3f( 0.0f, 0.0f, 1.0f); 
         glBegin(GL_LINE_LOOP); 
         {
             glVertex2f(-offset, -offset);
@@ -474,8 +497,8 @@ void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherProper
     glPushMatrix();
     glTranslated(x, y, z);
 
-    if (prop && prop->size)
-        glScalef(prop->size, prop->size, prop->size);
+    handleSize(prop);
+    handleSpin(globalDispStat.threeDView, prop);
 
     GLfloat widthScaled=radius; 
 
@@ -483,7 +506,49 @@ void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherProper
     {
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
-        glutSolidCube(widthScaled*2); 
+        // I had this "easy" call to glutDrawSolidCube, but the shadows did not look as good as when I set the 
+        // normal myself.
+        //  glutSolidCube(widthScaled*2); 
+        glScalef(9,9,9);        // Eyeballing it. - this 9 should be in a header somewhere.
+        glBegin(GL_QUADS);
+        // Front Face
+        glNormal3f( 0.0f, 0.0f, 1.0f);                  // Normal Pointing Towards Viewer
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);  // Point 1 (Front)
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);  // Point 2 (Front)
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);  // Point 3 (Front)
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);  // Point 4 (Front)
+        // Back Face
+        glNormal3f( 0.0f, 0.0f,-1.0f);                  // Normal Pointing Away From Viewer
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);  // Point 1 (Back)
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);  // Point 2 (Back)
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);  // Point 3 (Back)
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);  // Point 4 (Back)
+        // Top Face
+        glNormal3f( 0.0f, 1.0f, 0.0f);                  // Normal Pointing Up
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);  // Point 1 (Top)
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);  // Point 2 (Top)
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  1.0f,  1.0f);  // Point 3 (Top)
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);  // Point 4 (Top)
+        // Bottom Face
+        glNormal3f( 0.0f,-1.0f, 0.0f);                  // Normal Pointing Down
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);  // Point 1 (Bottom)
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f, -1.0f, -1.0f);  // Point 2 (Bottom)
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);  // Point 3 (Bottom)
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);  // Point 4 (Bottom)
+        // Right face
+        glNormal3f( 1.0f, 0.0f, 0.0f);                  // Normal Pointing Right
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);  // Point 1 (Right)
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);  // Point 2 (Right)
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);  // Point 3 (Right)
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);  // Point 4 (Right)
+        // Left Face
+        glNormal3f(-1.0f, 0.0f, 0.0f);                  // Normal Pointing Left
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);  // Point 1 (Left)
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);  // Point 2 (Left)
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);  // Point 3 (Left)
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);  // Point 4 (Left)
+        glEnd();                                // Done Drawing Quads
+
         glPopAttrib();
     }
     else
@@ -506,8 +571,8 @@ void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherProp
     glPushMatrix();
     glTranslated(x, y, z);
 
-    if (prop && prop->size)
-        glScalef(prop->size, prop->size, prop->size);
+    handleSize(prop);
+    handleSpin(globalDispStat.threeDView, prop);
 
     GLfloat widthScaled=radius; 
 
@@ -541,8 +606,10 @@ void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPrope
     glPushMatrix();
 
     glTranslatef(x, y, z);
-    if (prop && prop->size)
-        glScalef(prop->size, prop->size, prop->size);
+
+    handleSize(prop);
+    handleSpin(globalDispStat.threeDView, prop);
+
     q=gluNewQuadric();
     gluDisk(q,radius-1,radius,36,1);
     gluDeleteQuadric(q);
@@ -560,8 +627,9 @@ void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPrope
     {
         glPushMatrix();
         glTranslated(x, y, z);
-        if (prop && prop->size)
-            glScalef(prop->size, prop->size, prop->size);
+        handleSize(prop);
+        handleSpin(globalDispStat.threeDView, prop);
+
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
         glutSolidTorus(inner, outer, 10, 10);  
@@ -573,8 +641,8 @@ void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPrope
         GLUquadric* q=NULL;
         glPushMatrix();
         glTranslatef(x, y, z);
-        if (prop && prop->size)
-            glScalef(prop->size, prop->size, prop->size);
+        handleSize(prop);
+        handleSpin(globalDispStat.threeDView, prop);
         q=gluNewQuadric();
         gluDisk(q,inner, outer,36,1);
         gluDeleteQuadric(q);
@@ -589,8 +657,8 @@ void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPro
     {
         glPushMatrix();
         glTranslated(x, y, z);
-        if (prop && prop->size)
-            glScalef(prop->size, prop->size, prop->size);
+        handleSize(prop);
+        handleSpin(globalDispStat.threeDView, prop);
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
         glutSolidSphere(radius, 10, 10);
@@ -605,8 +673,8 @@ void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPro
 {
     glPushMatrix();
     glTranslatef(x, y, z);
-    if (prop && prop->size)
-        glScalef(prop->size, prop->size, prop->size);
+    handleSize(prop);
+    handleSpin(globalDispStat.threeDView, prop);
     GLUquadric* q=NULL;
     q=gluNewQuadric();
     gluDisk(q,radius-1,radius,36,1);

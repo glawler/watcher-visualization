@@ -1885,25 +1885,52 @@ void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
         GlobalWatcherPropertiesList.push_back(propp); 
 
         propp->identifier=messageProp.identifier;
-        propp->property=messageProp.property;
         propp->shape=messageProp.property==WATCHER_PROPERTY_SHAPE ? messageProp.data.shape : WATCHER_SHAPE_CIRCLE; // default is circle
         propp->sparkle=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPARKLE ? 1 : 0;
         propp->spin=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPIN ? 1 : 0;
         propp->flash=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_FLASH ? 1 : 0;
         propp->size=messageProp.property==WATCHER_PROPERTY_SIZE ? messageProp.data.size : 0;
+
+        propp->nextSpinUpdate=0;    
+        propp->spinRotation_x=0;
+        propp->spinRotation_y=0;
+        propp->spinRotation_z=0;
     }
     else
     {
         LOG_DEBUG("Modifing existing properties for node " << messageProp.identifier); 
         propp=*propIndex;
 
-        propp->identifier=messageProp.identifier;
-        propp->property=messageProp.property;
-        propp->shape=messageProp.property==WATCHER_PROPERTY_SHAPE ? messageProp.data.shape : propp->shape;
-        propp->sparkle=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPARKLE ? 1 : propp->sparkle; 
-        propp->spin=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPIN ? 1 : propp->spin;
-        propp->flash=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_FLASH ? 1 : propp->flash;
-        propp->size=messageProp.property==WATCHER_PROPERTY_SIZE ? messageProp.data.size : propp->size;
+        // If the property is in the incoming message, set it. If it's an effect, inverse the current state (off->on, on->off)
+        switch (messageProp.property)
+        {
+            case WATCHER_PROPERTY_SHAPE: 
+                propp->shape=messageProp.data.shape; 
+                break;
+            case WATCHER_PROPERTY_SIZE: 
+                propp->size=messageProp.data.size; 
+                break;
+            case WATCHER_PROPERTY_EFFECT:
+                switch (messageProp.data.effect)
+                {
+                    case WATCHER_EFFECT_SPARKLE: 
+                        propp->sparkle=propp->sparkle?0:1;
+                        break;
+                    case WATCHER_EFFECT_SPIN: 
+                        propp->spin=propp->spin?0:1;
+                        if (!propp->spin) 
+                        {
+                            propp->spinRotation_x=0;
+                            propp->spinRotation_y=0;
+                            propp->spinRotation_z=0;
+                        }
+                        break;
+                    case WATCHER_EFFECT_FLASH: 
+                        propp->spin=propp->flash?0:1;
+                        break;
+                }
+                break;
+        }
     }
 }
 
@@ -2930,9 +2957,29 @@ void packetSend(manetNode *, packet *, int)
 //     }
 // }
 
-void legacyWatcher::doIdle()
+int legacyWatcher::doIdle()
 {
+    int refresh=0;
 
+    // Update all spin animations if needed.
+    WatcherPropertiesList::iterator pp;
+    destime curtime=globalGoodwin ? globalManet->curtime : getMilliTime(); 
+    for (pp=GlobalWatcherPropertiesList.begin(); pp!=GlobalWatcherPropertiesList.end(); pp++)
+    {
+        if ((*pp)->spin && curtime > (*pp)->nextSpinUpdate)  // Are we spinning and do we need to update the rotation? 
+        {
+            // UPdate all rotations - even if we're in non 3d mode.
+            (*pp)->spinRotation_x+=WatcherPropertyData::spinIncrement;
+            (*pp)->spinRotation_y+=WatcherPropertyData::spinIncrement;
+            (*pp)->spinRotation_z+=WatcherPropertyData::spinIncrement;
+            (*pp)->nextSpinUpdate=curtime+WatcherPropertyData::spinTimeout;
+
+            // LOG_DEBUG("Updated spin rotation for node " << (*pp)->identifier); 
+            refresh=1;
+        }
+    }
+
+    return refresh;
 }
 
 static void watcherDrawNodes(NodeDisplayType dispType, manet *m)

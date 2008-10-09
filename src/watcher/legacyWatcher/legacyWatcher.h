@@ -109,7 +109,7 @@ namespace legacyWatcher
 
     // This will be called periodically. 
     // legacyWatcher can use this to do animation, etc. 
-    void doIdle();
+    int doIdle();
 
 }; // namespace legacyWatcher
 
