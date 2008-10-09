@@ -375,7 +375,7 @@ manetNode *closestNode(manet *m, int x, int y, unsigned int r, unsigned int *dis
     return ret;
 } /* closestNode */
 
-void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData *prop)
+void drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPropertyData * /*prop*/)
 {
     glPushMatrix();
 
@@ -407,26 +407,62 @@ void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPr
     if (prop && prop->size)
         glScalef(prop->size, prop->size, prop->size);
 
-    GLfloat offset=2.0*radius*sin(M_PI_4);  // by law of sines
-
     // fprintf(stdout, "Drawing triangle with \"radius\" : %f. x/y offset is %f\n", radius, offset); 
 
     if (globalDispStat.threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
-        glNormal3f(0.0, 0.0, 1.0);
-        glScalef(9,9,9); 
-        glutSolidTetrahedron(); 
+        glScalef(9,9,9);        // Eyeballing it.
+
+        glBegin(GL_TRIANGLES);
+        {
+            // Front
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f( 0.0f, 1.0f, 0.0f);
+            glVertex3f(-1.0f,-1.0f, 1.0f);
+            glVertex3f( 1.0f,-1.0f, 1.0f);
+            // Right
+            glNormal3f( 1.0f, 0.0f, 0.0f);
+            glVertex3f( 0.0f, 1.0f, 0.0f);
+            glVertex3f( 1.0f,-1.0f, 1.0f);
+            glVertex3f( 1.0f,-1.0f,-1.0f);
+            // Back
+            glNormal3f( 0.0f, 0.0f,-1.0f);
+            glVertex3f( 0.0f, 1.0f, 0.0f);
+            glVertex3f( 1.0f,-1.0f,-1.0f);
+            glVertex3f(-1.0f,-1.0f,-1.0f);
+            // Left
+            glNormal3f(-1.0f, 0.0f, 0.0f);
+            glVertex3f( 0.0f, 1.0f, 0.0f);
+            glVertex3f(-1.0f,-1.0f,-1.0f);
+            glVertex3f(-1.0f,-1.0f, 1.0f);
+        }
+        glEnd();
+
+        glBegin(GL_QUADS);
+        {
+            // Bottom
+            glNormal3f( 0.0f,-1.0f, 0.0f);
+            glVertex3f(-1.0f,-1.0f, 1.0f);
+            glVertex3f( 1.0f,-1.0f, 1.0f);
+            glVertex3f( 1.0f,-1.0f,-1.0f);
+            glVertex3f(-1.0f,-1.0f,-1.0f);
+        }
+        glEnd();
+
         glPopAttrib();
     }
     else
     {
         glPushAttrib(GL_LINE_WIDTH);
         glLineWidth(2.0); 
+        GLfloat offset=2.0*radius*sin(M_PI_4);  // by law of sines
         glBegin(GL_LINE_LOOP); 
-        glVertex2f(-offset, -offset);
-        glVertex2f( offset, -offset); 
-        glVertex2f(0, radius); 
+        {
+            glVertex2f(-offset, -offset);
+            glVertex2f( offset, -offset); 
+            glVertex2f(0, radius); 
+        }
         glEnd();
         glPopAttrib();
     }
