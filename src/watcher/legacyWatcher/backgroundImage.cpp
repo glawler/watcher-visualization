@@ -9,37 +9,6 @@
 
 using namespace watcher;
 
-#define TEX_INTERNAL GL_RGBA4
-#define TEX_FORMAT   GL_RGBA
-#define TEX_TYPE     GL_UNSIGNED_SHORT_4_4_4_4
-
-// here's a few hardcoded RGBA color values
-#define R 0xf30f
-#define W 0xffff
-#define X 0x0000
-#define G 0x5c6c
-#define B 0x111f
-
-// hardcoded image
-unsigned short mushroom_texture [(16 * 16)] = {
-    X,X,X,B,B,B,B,B,B,B,B,B,B,X,X,X,
-    X,X,B,B,W,W,W,W,W,W,W,W,B,B,X,X,
-    X,X,B,W,W,W,W,W,W,W,W,W,W,B,X,X,
-    X,B,B,W,W,W,R,W,W,R,W,W,W,B,B,X,
-    B,B,B,B,W,W,R,W,W,R,W,W,B,B,B,B,
-    B,W,W,B,B,B,B,B,B,B,B,B,B,W,W,B,
-    B,W,W,W,W,W,G,G,G,G,W,W,W,W,W,B,
-    B,G,G,W,W,G,G,G,G,G,G,W,W,G,G,B,
-    B,G,G,G,W,G,G,G,G,G,G,W,G,G,G,B,
-    B,G,G,G,W,G,G,G,G,G,G,W,G,G,G,B,
-    B,B,G,G,W,W,G,G,G,G,W,W,G,G,B,B,
-    X,B,G,W,W,W,W,W,W,W,W,W,W,G,B,X,
-    X,B,B,W,G,G,W,W,W,W,G,G,W,B,B,X,
-    X,X,B,B,G,G,G,W,W,G,G,G,B,B,X,X,
-    X,X,X,B,B,B,G,W,W,G,B,B,B,X,X,X,
-    X,X,X,X,X,B,B,B,B,B,B,X,X,X,X,X,
-};
-
 INIT_LOGGER(BackgroundImage, "BackgroundImage"); 
 
 BackgroundImage::BackgroundImage() :
