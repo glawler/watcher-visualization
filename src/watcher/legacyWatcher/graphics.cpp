@@ -509,7 +509,7 @@ void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherProper
         // I had this "easy" call to glutDrawSolidCube, but the shadows did not look as good as when I set the 
         // normal myself.
         //  glutSolidCube(widthScaled*2); 
-        glScalef(9,9,9);        // Eyeballing it. - this 9 should be in a header somewhere.
+        glScalef(9/2,9/2,9/2);        // Eyeballing it. - this 9 should be in a header somewhere.
         glBegin(GL_QUADS);
         // Front Face
         glNormal3f( 0.0f, 0.0f, 1.0f);                  // Normal Pointing Towards Viewer
@@ -1104,9 +1104,18 @@ static void nodeDrawFn(
     char buff[1024];
     GLfloat tmp[4];
 
+    // normal color
     if (us->color)
         for(i=0;i<4;i++)
             tmp[i]=us->color[i]/255.0;
+
+    // flashing color
+    if (prop && prop->flash && prop->isFlashed)
+    {
+        for(i=0;i<3;i++)
+            tmp[i]=1-(us->color[i]/255.0);
+    }
+
 
     if (dispStat->monochromeMode)
     {

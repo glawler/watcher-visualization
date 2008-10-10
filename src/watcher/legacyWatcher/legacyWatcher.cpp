@@ -1895,6 +1895,9 @@ void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
         propp->spinRotation_x=0;
         propp->spinRotation_y=0;
         propp->spinRotation_z=0;
+
+        propp->nextFlashUpdate=0;    
+        propp->isFlashed=0;
     }
     else
     {
@@ -1904,6 +1907,9 @@ void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
         // If the property is in the incoming message, set it. If it's an effect, inverse the current state (off->on, on->off)
         switch (messageProp.property)
         {
+            case WATCHER_PROPERTY_COLOR:
+                // handled above. Will not get here. 
+                break;
             case WATCHER_PROPERTY_SHAPE: 
                 propp->shape=messageProp.data.shape; 
                 break;
@@ -1926,7 +1932,8 @@ void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
                         }
                         break;
                     case WATCHER_EFFECT_FLASH: 
-                        propp->spin=propp->flash?0:1;
+                        propp->flash=propp->flash?0:1;
+                        propp->isFlashed=0;
                         break;
                 }
                 break;
@@ -2977,6 +2984,13 @@ int legacyWatcher::doIdle()
             // LOG_DEBUG("Updated spin rotation for node " << (*pp)->identifier); 
             refresh=1;
         }
+        if ((*pp)->flash && curtime > (*pp)->nextFlashUpdate)  // Are we flashing and do we need to invert the color?
+        {
+            (*pp)->isFlashed=(*pp)->isFlashed?0:1;
+            (*pp)->nextFlashUpdate=curtime+WatcherPropertyData::flashInterval;
+            refresh=1;
+        }
+
     }
 
     return refresh;
