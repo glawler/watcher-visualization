@@ -273,8 +273,9 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     TRACE_ENTER();
     
     // GTL - Currently does not work!
-    legacyWatcher::jumpToX(event->x());
-    legacyWatcher::jumpToY(event->y());
+    // legacyWatcher::jumpToX(event->x());
+    // legacyWatcher::jumpToY(event->y());
+    legacyWatcher::mouseSelect(event->x(), event->y());
     updateGL();
 
     TRACE_EXIT();

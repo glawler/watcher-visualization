@@ -1879,25 +1879,7 @@ void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
 
     if (propIndex==GlobalWatcherPropertiesList.end())
     {
-        LOG_DEBUG("Creating new properties for node " << (0x000000FF & messageProp.identifier) ); 
-        propp=new WatcherPropertyData;                  // I don't know when this data gets deleted.  
-        // Is there a watcher cleanup function anywhere?
-        GlobalWatcherPropertiesList.push_back(propp); 
-
-        propp->identifier=messageProp.identifier;
-        propp->shape=messageProp.property==WATCHER_PROPERTY_SHAPE ? messageProp.data.shape : WATCHER_SHAPE_CIRCLE; // default is circle
-        propp->sparkle=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPARKLE ? 1 : 0;
-        propp->spin=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_SPIN ? 1 : 0;
-        propp->flash=messageProp.property==WATCHER_PROPERTY_EFFECT && messageProp.data.effect==WATCHER_EFFECT_FLASH ? 1 : 0;
-        propp->size=messageProp.property==WATCHER_PROPERTY_SIZE ? messageProp.data.size : 0;
-
-        propp->nextSpinUpdate=0;    
-        propp->spinRotation_x=0;
-        propp->spinRotation_y=0;
-        propp->spinRotation_z=0;
-
-        propp->nextFlashUpdate=0;    
-        propp->isFlashed=0;
+        LOG_ERROR("Got property message for node we know nothing about. Address:  " << (0x000000FF & messageProp.identifier) ); 
     }
     else
     {
@@ -2508,8 +2490,10 @@ void legacyWatcher::initWatcherGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     // glEnable(GL_LINE_SMOOTH);
+    // glEnable(GL_CULL_FACE); 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glShadeModel(GL_SMOOTH);
+
 
     glEnable(GL_LIGHTING);
 
@@ -2845,6 +2829,29 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
         for(i = 0; i < globalManet->numnodes; i++)
             mobilityInit(&globalManet->nlist[i]);
 
+    // Create properties for all known nodes. 
+    for (i=0;i<globalManet->numnodes;i++)
+    {
+        LOG_DEBUG("Creating new properties for node " << (0x000000FF & (globalManet->nlist[i].addr>>8)) << "." << (0x000000FF & globalManet->nlist[i].addr));
+        WatcherPropertyData *propp=new WatcherPropertyData;  // I don't know when this data gets deleted.  Is there a watcher cleanup function that gets called as shutdown?
+        GlobalWatcherPropertiesList.push_back(propp); 
+
+        propp->identifier=globalManet->nlist[i].addr;  // indexed by node address.
+        propp->shape= WATCHER_SHAPE_CIRCLE; 
+        propp->sparkle=0;
+        propp->spin=0;
+        propp->flash=0;
+        propp->size=1.0;
+
+        propp->nextSpinUpdate=0;    
+        propp->spinRotation_x=0;
+        propp->spinRotation_y=0;
+        propp->spinRotation_z=0;
+
+        propp->nextFlashUpdate=0;    
+        propp->isFlashed=0;
+    }
+
     firstStep(globalManet, 0);
 
     globalGraphManet = (float*)calloc(globalManet->numnodes * globalManet->numnodes * sizeof(globalGraphManet[0]), 1);
@@ -2994,6 +3001,19 @@ int legacyWatcher::doIdle()
     }
 
     return refresh;
+}
+
+int legacyWatcher::mouseSelect(const int x, const int y)
+{
+    unsigned int dist_ret;
+    manetNode *node = closestNode(globalManet, x, y, 10, &dist_ret);
+    if (node)
+    {
+        WatcherPropertyData *propertyData=findWatcherPropertyData(node->addr, GlobalWatcherPropertiesList);
+        if (propertyData) 
+            propertyData->flash=!propertyData->flash;
+    }
+    return 1;
 }
 
 static void watcherDrawNodes(NodeDisplayType dispType, manet *m)

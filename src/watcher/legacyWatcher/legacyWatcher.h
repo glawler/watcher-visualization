@@ -109,7 +109,12 @@ namespace legacyWatcher
 
     // This will be called periodically. 
     // legacyWatcher can use this to do animation, etc. 
+    // Returns non zero if the window should be refreshed.
     int doIdle();
+
+    // Called on mouse double-click with the screen coords. 
+    // The legacy watcher should 
+    int mouseSelect(const int x, const int y);
 
 }; // namespace legacyWatcher
 

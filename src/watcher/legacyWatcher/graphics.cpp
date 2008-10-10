@@ -1095,9 +1095,9 @@ static void nodeDrawFn(
         WatcherPropertyData *prop)
 {
     const GLfloat antennaAlpha=0.5;
-    const GLfloat root[]={0.0,1.0,0.0,1.0};
+    GLfloat root[]={0.0,1.0,0.0,1.0};
     const GLfloat black[]={0.0,0.0,0.0,1.0};
-    const GLfloat leaf[]={1.0,0.0,0.0,1.0};
+    GLfloat leaf[]={1.0,0.0,0.0,1.0};
     const GLfloat aradius[]={1.0,0.0,0.0,0.15};
     static const GLfloat nodelabel[]={0.0,0.0,1.0,antennaAlpha};
     int i,j;
@@ -1106,14 +1106,22 @@ static void nodeDrawFn(
 
     // normal color
     if (us->color)
-        for(i=0;i<4;i++)
+        for (i=0;i<4;i++)
             tmp[i]=us->color[i]/255.0;
 
     // flashing color
     if (prop && prop->flash && prop->isFlashed)
     {
-        for(i=0;i<3;i++)
-            tmp[i]=1-(us->color[i]/255.0);
+        if (us->color)
+            for (i=0;i<3;i++)
+                tmp[i]=1-(us->color[i]/255.0);
+        else
+        {
+            for (i=0;i<3;i++)
+                leaf[i]=1-leaf[i];
+            for (i=0;i<3;i++)
+                root[i]=1-root[i];
+        }
     }
 
 
