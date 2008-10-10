@@ -275,7 +275,12 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     // GTL - Currently does not work!
     // legacyWatcher::jumpToX(event->x());
     // legacyWatcher::jumpToY(event->y());
-    legacyWatcher::mouseSelect(event->x(), event->y());
+    char buf[512];
+    memset(buf, 0, sizeof(buf)); 
+    if(legacyWatcher::getNodeStatus(event->x(),event->y(), buf, sizeof(buf)))
+    {
+        QMessageBox::information(this, tr("Watcher"), QString(buf));
+    }
     updateGL();
 
     TRACE_EXIT();

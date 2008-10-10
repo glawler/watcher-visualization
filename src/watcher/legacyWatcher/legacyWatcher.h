@@ -113,8 +113,9 @@ namespace legacyWatcher
     int doIdle();
 
     // Called on mouse double-click with the screen coords. 
-    // The legacy watcher should 
-    int mouseSelect(const int x, const int y);
+    // The legacy watcher should find the node closest to x, y and get status.
+    // Caller shuld allocate space for a string and pass it in
+    int getNodeStatus(const int x, const int y, char *nodeStatusBuf, size_t bufSize);
 
 }; // namespace legacyWatcher
 

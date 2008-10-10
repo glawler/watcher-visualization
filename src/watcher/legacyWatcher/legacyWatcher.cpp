@@ -3003,7 +3003,7 @@ int legacyWatcher::doIdle()
     return refresh;
 }
 
-int legacyWatcher::mouseSelect(const int x, const int y)
+int legacyWatcher::getNodeStatus(const int x, const int y, char *nodeStatusBuf, size_t bufSize)
 {
     unsigned int dist_ret;
     manetNode *node = closestNode(globalManet, x, y, 10, &dist_ret);
@@ -3012,8 +3012,11 @@ int legacyWatcher::mouseSelect(const int x, const int y)
         WatcherPropertyData *propertyData=findWatcherPropertyData(node->addr, GlobalWatcherPropertiesList);
         if (propertyData) 
             propertyData->flash=!propertyData->flash;
+
+        snprintf(nodeStatusBuf, bufSize, "Node address: %d.%d.%d.%d\nGPS Coords: %f, %f, %f", PRINTADDR(node->addr), node->x, node->y, node->z); 
+        return 1; 
     }
-    return 1;
+    return 0;
 }
 
 static void watcherDrawNodes(NodeDisplayType dispType, manet *m)
