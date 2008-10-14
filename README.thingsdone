@@ -117,3 +117,6 @@ connection classes understand this format and can transfer it.
 log4cxx segfaults sometimes, so I had to wrap the calls to it in a try/catch block. Which 
 is annoying. 
 
+Installed qwt.5.1.1 - a QT widget set for doing 2D graphs. - Will use for showing node driven stats
+like CPU usage and bandwidth utilization.
+
