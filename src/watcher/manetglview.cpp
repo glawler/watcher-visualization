@@ -339,6 +339,14 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
     TRACE_EXIT();
 }
 
+void manetGLView::wheelEvent(QWheelEvent *event)
+{
+    if(event->delta()>0)
+        legacyWatcher::zoomIn();
+    else
+        legacyWatcher::zoomOut();
+}
+
 void manetGLView::setLegacyWatcherView(const legacyWatcher::WatcherView &view)
 {
     TRACE_ENTER();
