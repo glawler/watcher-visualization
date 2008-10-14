@@ -132,9 +132,11 @@ syntax: regexp
 ^tars/sqlite-amalgamation-3.6.3.tar.gz
 
 #
-# QWT build files
+# QWT  files
 #
 ^src/qwt-5.1.1/*
 ^doc/qwt/*
+^include/qwt/*
+^lib/libqwt.*
 
 
