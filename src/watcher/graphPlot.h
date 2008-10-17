@@ -54,13 +54,19 @@ namespace watcher
             typedef std::map<unsigned int, QwtArray<double> > PlotData;
             PlotData plotData;
 
-            typedef std::map<unsigned int, boost::shared_ptr<GraphCurve> > PlotCurves;
+            // typedef std::map<unsigned int, boost::shared_ptr<GraphCurve> > PlotCurves;
+            typedef std::map<unsigned int, GraphCurve*> PlotCurves;
             PlotCurves plotCurves;
 
             void timerEvent(QTimerEvent * /*event*/);
 
         private:
             DECLARE_LOGGER();
+
+        private slots:
+
+            void showCurve(QwtPlotItem *, bool on);
+
     };
 }
 

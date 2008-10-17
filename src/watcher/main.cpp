@@ -53,10 +53,10 @@ int main(int argc, char *argv[])
 
     WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
     QObject::connect(ui.actionGraphBandwidth, SIGNAL(toggled(bool)), sgc, SLOT(showDialogGraph(bool)));
-    QObject::connect(sgc, SIGNAL(showDialog(true)), ui.actionGraphBandwidth, SLOT(toggled(bool)));
+    QObject::connect(sgc, SIGNAL(showDialog(bool)), ui.actionGraphBandwidth, SLOT(toggled(bool)));
 
     QObject::connect(ui.actionGraphCPUUsage, SIGNAL(toggled(bool)), sgc, SLOT(showDialogCPUUsage(bool)));
-    QObject::connect(sgc, SIGNAL(showDialog(true)), ui.actionGraphCPUUsage, SLOT(toggled(bool)));
+    QObject::connect(sgc, SIGNAL(showDialog(bool)), ui.actionGraphCPUUsage, SLOT(toggled(bool)));
 
     ui.manetGLViewWindow->runLegacyWatcherMain(argc, argv);
 

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'WatcherScrollingGraphDialogGUI.ui'
 **
-** Created: Fri Oct 17 15:19:42 2008
+** Created: Fri Oct 17 17:53:48 2008
 **      by: Qt User Interface Compiler version 4.3.5
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
