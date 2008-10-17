@@ -12,7 +12,7 @@ manetGLView::manetGLView(QWidget *parent) : QGLWidget(parent), currentView(legac
     TRACE_ENTER();
 
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
-    
+
     TRACE_EXIT();
 }
 
@@ -352,6 +352,7 @@ void manetGLView::setLegacyWatcherView(const legacyWatcher::WatcherView &view)
     TRACE_ENTER();
     legacyWatcher::setActiveView(view);
     currentView=view;
+    TRACE_EXIT();
 }
 
 void manetGLView::manetView()
@@ -359,7 +360,7 @@ void manetGLView::manetView()
     TRACE_ENTER();
     setLegacyWatcherView(legacyWatcher::ManetView);
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 
 void manetGLView::hierarchyView()
@@ -367,7 +368,7 @@ void manetGLView::hierarchyView()
     TRACE_ENTER();
     setLegacyWatcherView(legacyWatcher::HierarchyView);
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 
 void manetGLView::toggleBandwidth(bool isOn)
@@ -376,7 +377,7 @@ void manetGLView::toggleBandwidth(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Bandwidth, isOn);
     emit bandwidthToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 
 void manetGLView::toggleUndefined(bool isOn)
@@ -385,7 +386,7 @@ void manetGLView::toggleUndefined(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Undefined, isOn);
     emit undefinedToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleNeighbors(bool isOn)
 {
@@ -393,7 +394,7 @@ void manetGLView::toggleNeighbors(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Neighbors, isOn);
     emit neighborsToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleHierarchy(bool isOn)
 {
@@ -401,7 +402,7 @@ void manetGLView::toggleHierarchy(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Hierarchy, isOn);
     emit hierarchyToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleRouting(bool isOn)
 {
@@ -409,7 +410,7 @@ void manetGLView::toggleRouting(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Routing, isOn);
     emit routingToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleRoutingOnehop(bool isOn)
 {
@@ -417,7 +418,7 @@ void manetGLView::toggleRoutingOnehop(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::RoutingOnehop, isOn);
     emit routingOnehopToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleAntennaRadius(bool isOn)
 {
@@ -425,7 +426,7 @@ void manetGLView::toggleAntennaRadius(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::AntennaRadius, isOn);
     emit antennaRadiusToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleSanityCheck(bool isOn)
 {
@@ -433,7 +434,7 @@ void manetGLView::toggleSanityCheck(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::SanityCheck, isOn);
     emit sanityCheckToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleAnomPaths(bool isOn)
 {
@@ -441,7 +442,7 @@ void manetGLView::toggleAnomPaths(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::AnomPaths, isOn);
     emit anomPathsToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleCorrelation(bool isOn)
 {
@@ -449,7 +450,7 @@ void manetGLView::toggleCorrelation(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Correlation, isOn);
     emit correlationToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleAlert(bool isOn)
 {
@@ -457,7 +458,7 @@ void manetGLView::toggleAlert(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Alert, isOn);
     emit alertToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleCorrelation3Hop(bool isOn)
 {
@@ -465,7 +466,7 @@ void manetGLView::toggleCorrelation3Hop(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::Correlation3Hop, isOn);
     emit correlation3HopToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleWormholeRouting(bool isOn)
 {
@@ -473,7 +474,7 @@ void manetGLView::toggleWormholeRouting(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::WormholeRouting, isOn);
     emit wormholeRoutingToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleWormholeRoutingOnehop(bool isOn)
 {
@@ -481,7 +482,7 @@ void manetGLView::toggleWormholeRoutingOnehop(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::WormholeRoutingOnehop, isOn);
     emit wormholeRoutingOnehopToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleFloatingGraph(bool isOn)
 {
@@ -489,7 +490,7 @@ void manetGLView::toggleFloatingGraph(bool isOn)
     legacyWatcher::layerToggle(legacyWatcher::FloatingGraph, isOn);
     emit floatingGraphToggled(isOn); 
     updateGL();
-    TRACE_ENTER();
+    TRACE_EXIT();
 }
 void manetGLView::toggleNormPaths(bool isOn)
 {

@@ -53,6 +53,7 @@
 
 #include "libconfig.h++"
 #include "singletonConfig.h"
+#include "watcherScrollingGraphControl.h"
 
 #include "legacyWatcher.h"
 using namespace legacyWatcher;
@@ -2063,10 +2064,11 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
 void gotMessageGraph(void *data, const struct MessageInfo *mi)
 {
     manetNode *us = (manetNode*)data;
-
     unsigned char *payload = (unsigned char*)messageInfoRawPayloadGet(mi);
 
-    graphUnmarshal(globalGraphManet, us->manet->numnodes, payload);
+    // graphUnmarshal(globalGraphManet, us->manet->numnodes, payload);
+    watcher::WatcherScrollingGraphControl *graphData=watcher::WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
+    graphData->unmarshalWatcherGraphMessage(us->addr, payload); 
 }
 
 void gotMessageGraphEdge(void *data, const struct MessageInfo *mi)

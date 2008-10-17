@@ -1342,10 +1342,13 @@ typedef struct CommunicationsGraphEdge
     float value;
 } CommunicationsGraphEdge;
 
-void graphMarshal(const float *graph, int numnodes, unsigned char **buffer, int *len);
-void graphUnmarshal(float *graph, int numnodes, const unsigned char *buffer);
+/*
+ * Send 'numPoints' of datapoints for a graph named 'graphname' for this node.
+ */
+void graphMarshal(const char *graphName, const float *floatData, int numPoints, unsigned char **buffer, int *len);
+// void graphUnmarshal(float *graph, int numnodes, const unsigned char *buffer);
 
-void graphSend(CommunicationsStatePtr cs, float *graph, int numnodes);
+void graphSend(CommunicationsStatePtr cs, const char *graphName, const float *dataPts, int numDataPts);
 void graphSendEdge(CommunicationsStatePtr cs,
                    CommunicationsGraphEdge *graph, 
                    int numnodes);

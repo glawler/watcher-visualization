@@ -3,6 +3,8 @@
 #include <string>
 
 #include "ui_watcher.h"
+#include "watcherMainWindow.h"
+#include "watcherScrollingGraphControl.h"
 
 #include "logger.h"
 #include "libconfig.h++"
@@ -37,10 +39,10 @@ int main(int argc, char *argv[])
     LOAD_LOG_PROPS(logConf); 
 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
-    LOG_INFO("Although the legacgy watcher code does not use it, so it is not overly valuable");
+    LOG_INFO("Although the legacy watcher code does not use it, so it is not overly valuable");
 
     QApplication app(argc, argv);
-    QMainWindow *window = new QMainWindow;
+    WatcherMainWindow *window = new WatcherMainWindow;
     Ui::MainWindow ui;
     ui.setupUi(window);
 
@@ -48,6 +50,13 @@ int main(int argc, char *argv[])
     ui.menuView->setTearOffEnabled(true);
 
     QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
+
+    WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
+    QObject::connect(ui.actionGraphBandwidth, SIGNAL(toggled(bool)), sgc, SLOT(showDialogGraph(bool)));
+    QObject::connect(sgc, SIGNAL(showDialog(true)), ui.actionGraphBandwidth, SLOT(toggled(bool)));
+
+    QObject::connect(ui.actionGraphCPUUsage, SIGNAL(toggled(bool)), sgc, SLOT(showDialogCPUUsage(bool)));
+    QObject::connect(sgc, SIGNAL(showDialog(true)), ui.actionGraphCPUUsage, SLOT(toggled(bool)));
 
     ui.manetGLViewWindow->runLegacyWatcherMain(argc, argv);
 

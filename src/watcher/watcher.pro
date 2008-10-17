@@ -5,8 +5,8 @@
 TEMPLATE = app
 TARGET = watcher
 DEPENDPATH += .
-INCLUDEPATH += . ./legacyWatcher ../../include ../util
-INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include
+INCLUDEPATH += . ./legacyWatcher ../../include ../util ../../include/qwt
+INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include 
 QT += opengl 
 CONFIG += qt x11
 OBJECTS_DIR = ./objs
@@ -27,6 +27,7 @@ LIBS += -llog4cxx
 LIBS += -llogger
 LIBS += -lwatcherutils
 LIBS += -xml2
+LIBS += -lqwt
 
 win32 {
     error("No support for windows in watcher")
@@ -36,15 +37,23 @@ win32 {
 HEADERS += manetglview.h  \
          singletonConfig.h \
          speedlabel.h \
+         watcherScrollingGraphControl.h \
+         watcherMainWindow.h \
+         graphPlot.h \
          legacyWatcher/backgroundImage.h \
          legacyWatcher/watcherPropertyData.h
 
-FORMS += watcher.ui
+FORMS += watcher.ui \
+        WatcherScrollingGraphDialogGUI.ui 
+
 SOURCES += \
     manetglview.cpp \
     main.cpp \
     singletonConfig.cpp \
     speedlabel.cpp \
+    watcherScrollingGraphControl.cpp \
+    watcherMainWindow.cpp \
+    graphPlot.cpp \
     legacyWatcher/des.cpp \
     legacyWatcher/metric.c \
     legacyWatcher/rng.cc \
