@@ -120,3 +120,38 @@ is annoying.
 Installed qwt.5.1.1 - a QT widget set for doing 2D graphs. - Will use for showing node driven stats
 like CPU usage and bandwidth utilization.
 
+
+---- INSTALLING on COKE 10/09/08 -----------
+These should be the same steps needed to install on any Fedora 8 machine.
+
+1) Install QT 4:
+    > sudo yum install qt4.i386 qt4-x11.i386 PyQt4.i386 PyQt4-devel.i386 qt4-devel.i386 qt4-sqlite.i386 qt4-doc.i386
+2) INstall boost libraries
+    ****DO NOT DO STEP 2 IF ONLY BUILING THE new old watcher GUI******
+    (Version greater than 1.36 is needed for new watcher network infrastructure - not for new old watcher GUI - but might
+    as well install the "correct" version anyway.)
+    > yum update boost.i386
+    Check the version that would be installed, if less than 1.36 do the following:
+    - Download the latest version of boost greater than or equal to 1.36 from
+    http://www.boost.org/users/download/
+    Then: 
+    > cd src
+    > tar jxvf ~/Desktop/boost_1_36_0.tar.bz2 # or whatever version you have
+    > cd boost_1_36_0
+    > ./configure
+    > make 
+    > sudo make install
+3) Build and install libconfig into local directory
+    Libconfig is a library used to parse and write configuration files. Only lightly used int he new old watcher, 
+    but used none the less.
+    > cd src
+    > tar zxvf ../tars/libconfig-1.3.1.tar.gz 
+    > cd libconfig-1.3.1/
+    > ./configure --prefix=$HOME/src/watche
+    > make 
+    (if you have a multiprocessor machine use -j4 or -j8 to speed compliation.)
+    > make install      # don't need to be root, as you're installing in local directory.
+4) Install log4cxx - the logging library used by the watcher and all components. 
+    
+
+

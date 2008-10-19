@@ -50,35 +50,85 @@ log4cxx
 This lib requires that two others be installed. Here's 
 how I did it:
 
+# ( When I installed on coke I got errors during 'make check' - I ignored them. )
+
 # install APR (Apache run-time)
 cd /home/glawler/src/watcher
 cd src
 tar zxvf ../tars/apr-1.3.3.tar.gz
 cd apr-1.3.3
-./configure --prefix=/home/glawler/src/watcher
+./configure --prefix=$HOME/src/watcher
 make 
 make check
 make install
 
 # install apr-utils
-cd /home/glawler/src/watcher
+cd $HOME/src/watcher
 cd src
 tar zxvf ../tars/apr-util-1.3.4.tar.gz
 cd apr-util-1.3.4
-./configure --prefix=/home/glawler/src/watcher --with-apr=/home/glawler/src/watcher
+./configure --prefix=$HOME/src/watcher --with-apr=$HOME/src/watcher
 make 
 make check
 make install
 
 # install log4cxx
-cd /home/glawler/src/watcher
+cd $HOME/src/watcher
 cd src
 tar zxvf ../tars/apache-log4cxx-0.10.0.tar.gz
 cd apache-log4cxx-0.10.0
-./configure --prefix=/home/glawler/src/watcher --with-apr=/home/glawler/src/watcher --with-apr-utils=/home/glawler/src/watcher
+./configure --prefix=$HOME/src/watcher --with-apr=$HOME/src/watcher --with-apr-util=$HOME/src/watcher --disable-doxygen
 make 
 make check
 make install
+
+Qwt - the 2d graphing library for use with QT
+---------------------------------------------
+cd src
+tar jxvf ../tars/qwt-5.1.1.tar.bz2 
+cd qwt-5.1.1/
+# edit qwtconfig.pri setting the INSTALLBASE to your watcher repo dir. (Don't use $HOME - use full pathname).
+qmake-qt4
+make 
+make install
+
+Make the logger library (a small wrapper for log4cxx)
+----------------------------------------------------
+cd src/logger
+make 
+
+Make the util library
+---------------------
+cd src/util
+make
+
+
+Finally make the watcher
+------------------------
+cd src/watcher
+qmake-qt4
+make
+
+Run the watcher
+-------------------------
+# Copy sample configuration into working directory
+cd src/watcher
+cp ../../etc/watcher.cfg.sample watcher.cfg
+cp ../../etc/watcher.log.properties.sample watcher.log.properties
+# Tell the system where to find the libraries...
+export LD_CONFIG_PATH=$HOME/watcher/lib
+
+
+./watcher -f watcher.cfg live.conf
+
+
+
+Post library installation.
+------------------------------------------------
+Pull the repository again. I patched a header file in log4cxx, and the making and installing
+of that library overwroter the file. So go to the top level again and to 'hg pull -u', that will
+overwrite the file with the one from the repo and all will be well.
+
 
 
 
