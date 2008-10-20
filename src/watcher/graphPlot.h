@@ -51,14 +51,17 @@ namespace watcher
             QwtArray<double> timeData;
             const int timeDataSize;
 
-            typedef std::map<unsigned int, QwtArray<double> > PlotData;
-            PlotData plotData;
+            typedef struct
+            {
+                QwtArray<double> data;
+                boost::shared_ptr<GraphCurve> curve;
+                bool pointSet;     
+            } CurveData;
 
-            // typedef std::map<unsigned int, boost::shared_ptr<GraphCurve> > PlotCurves;
-            typedef std::map<unsigned int, GraphCurve*> PlotCurves;
-            PlotCurves plotCurves;
+            typedef std::map<unsigned int, boost::shared_ptr<CurveData> > GraphData;
+            GraphData graphData;
 
-            void timerEvent(QTimerEvent * /*event*/);
+            void timerEvent(QTimerEvent *event);    
 
         private:
             DECLARE_LOGGER();

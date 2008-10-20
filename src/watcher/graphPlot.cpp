@@ -73,31 +73,6 @@ GraphPlot::GraphPlot(QWidget *parent, const QString &title_) :
     setAxisTitle(QwtPlot::yLeft, title); 
     // setAxisScale(QwtPlot::yLeft, 0, 100);
 
-    {
-        static QVector<double> tmpData;
-        tmpData.push_back(1.2);
-        tmpData.push_back(2.3);
-        tmpData.push_back(3.4);
-        tmpData.push_back(4.5);
-        tmpData.push_back(5.6);
-        tmpData.push_back(6.7);
-
-        GraphCurve *c=new GraphCurve("bogus"); 
-        c->setColor(Qt::blue);
-        c->attach(this);
-        c->setData(timeData, tmpData); 
-
-        QwtSymbol sym;
-        sym.setStyle(QwtSymbol::Cross);
-        sym.setPen(QColor(Qt::black));
-        sym.setSize(5);
-        c->setSymbol(sym);
-        c->setPen(QColor(Qt::darkGreen));
-        c->setStyle(QwtPlotCurve::Lines);
-        c->setCurveAttribute(QwtPlotCurve::Fitted);
-
-    }
-
     LOG_DEBUG("Starting 1 second timer for graph plot " << title.toStdString()); 
     (void)startTimer(1000); // 1 second
 
@@ -109,19 +84,20 @@ GraphPlot::GraphPlot(QWidget *parent, const QString &title_) :
 void GraphPlot::addDataPoint(unsigned int curveId, float dataPoint)
 {
     TRACE_ENTER();
-    PlotData::iterator data=plotData.find(curveId);
+    GraphData::iterator data=graphData.find(curveId);
 
     // Create a new curve, if we've never seen this curveId before.
-    if (data==plotData.end())
+    if (data==graphData.end())
     {
-        string curveTitle=boost::lexical_cast<string>((unsigned int)(0xFF & curveId));
-        // boost::shared_ptr<GraphCurve> curve(new GraphCurve(curveTitle.c_str())); 
-        GraphCurve *curve=new GraphCurve(curveTitle.c_str());
-        plotCurves[curveId]=curve;
+        boost::shared_ptr<CurveData> data(new CurveData);
+        graphData[curveId]=data;
 
-        curve->setColor(Qt::red);
+        string curveTitle=boost::lexical_cast<string>((unsigned int)(0xFF & curveId));
+        data->curve=boost::shared_ptr<GraphCurve>(new GraphCurve(curveTitle.c_str()));
+
+        data->curve->setColor(Qt::red);
         // curve->setZ(curve->z()-plotCurves.size()-1);
-        curve->attach(this);
+        data->curve->attach(this);
 
         showCurve(curveId, true); 
 
@@ -129,11 +105,12 @@ void GraphPlot::addDataPoint(unsigned int curveId, float dataPoint)
     }
 
     LOG_DEBUG("Pushing back data point " << dataPoint << " for curve id " << (0xFF & curveId));
-    plotData[curveId].push_back(dataPoint);
+    graphData[curveId]->data.push_front(dataPoint);
+    graphData[curveId]->pointSet=true; 
 
     // we only want timeDataSize data points, so trim front if longer than that.
-    if (plotData[curveId].size()>timeDataSize)
-        plotData[curveId].pop_front();      
+    if (graphData[curveId]->data.size()>timeDataSize)
+        graphData[curveId]->data.pop_back();      
 
     TRACE_EXIT();
 }
@@ -146,8 +123,22 @@ void GraphPlot::timerEvent(QTimerEvent * /*event*/)
 
     setAxisScale(QwtPlot::xBottom, timeData[timeDataSize-1], timeData[0]);
 
-    for (PlotCurves::iterator c=plotCurves.begin(); c!=plotCurves.end(); c++)
-        c->second->setData(timeData, plotData[c->first]);
+    for (GraphData::iterator d=graphData.begin(); d!=graphData.end(); d++)
+    {
+        if (!d->second->pointSet)           // Didn't hear from the node for last second, set data to zero.
+        {
+            LOG_DEBUG("Didn't hear from node " << (0xFF & d->first) << " setting this second's data to 0"); 
+
+            d->second->data.push_front(0);
+
+            if (d->second->data.size()>timeDataSize)
+                d->second->data.pop_back();      
+        }
+        else
+            d->second->pointSet=false;  // reset for next go around.
+
+        d->second->curve->setData(timeData, d->second->data);
+    }
 
     replot(); 
     TRACE_EXIT();
@@ -172,15 +163,16 @@ void GraphPlot::showCurve(unsigned int curveId, bool on)
 {
     TRACE_ENTER();
 
-    if (plotCurves.end()==plotCurves.find(curveId))
+    if (graphData.end()==graphData.find(curveId))
     {
         LOG_DEBUG("User wants to show curve for a node we've never seen");
         // GTL - throw up a notification box here? 
         TRACE_EXIT();
     }
 
-    showCurve(plotCurves[curveId], on);     
+    showCurve(graphData[curveId]->curve.get(), on);     
     replot();
+
     TRACE_EXIT();
 }
 
