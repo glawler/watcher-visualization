@@ -62,7 +62,7 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
     {
         // boost::shared_ptr<QDialog> theDialog(new QDialog);
         // boost::shared_ptr<GraphPlot> thePlot(new GraphPlot(theDialog.get(), label.c_str()));
-        
+
         QDialog *theDialog=new QDialog(this);
         theDialog->resize(474, 353);
 
@@ -74,44 +74,6 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
 
         QVBoxLayout *layout = new QVBoxLayout(theDialog);
         layout->addWidget(thePlot);
-
-
-        // GUI stuff stolen from desginer-qt4 generated code.
-        // {
-        //     // QDialog  *d=theDialog.get();
-        //     // QwtPlot *qwtPlot=thePlot.get();
-        //     QDialog  *d=theDialog;
-        //     QwtPlot *qwtPlot=thePlot;
-        //     QGridLayout *gridLayout;
-        //     QSpacerItem *spacerItem;
-        //     QDialogButtonBox *buttonBox;
-
-        //     d->resize(474, 353);
-        //     QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
-        //     sizePolicy.setHorizontalStretch(0);
-        //     sizePolicy.setVerticalStretch(0);
-        //     sizePolicy.setHeightForWidth(d->sizePolicy().hasHeightForWidth());
-        //     d->setSizePolicy(sizePolicy);
-        //     d->setAutoFillBackground(false);
-        //     gridLayout = new QGridLayout(d);
-        //     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        //     // qwtPlot = new QwtPlot(d);
-        //     qwtPlot->setObjectName(QString::fromUtf8("qwtPlot"));
-        //     qwtPlot->setProperty("thisIsABool", QVariant(false));
-        //     gridLayout->addWidget(qwtPlot, 0, 0, 1, 2);
-        //     spacerItem = new QSpacerItem(157, 29, QSizePolicy::Expanding, QSizePolicy::Minimum);
-        //     gridLayout->addItem(spacerItem, 1, 0, 1, 1);
-        //     buttonBox = new QDialogButtonBox(d);
-        //     buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
-        //     QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        //     sizePolicy1.setHorizontalStretch(0);
-        //     sizePolicy1.setVerticalStretch(0);
-        //     sizePolicy1.setHeightForWidth(buttonBox->sizePolicy().hasHeightForWidth());
-        //     buttonBox->setSizePolicy(sizePolicy1);
-        //     buttonBox->setOrientation(Qt::Horizontal);
-        //     buttonBox->setStandardButtons(QDialogButtonBox::Close|QDialogButtonBox::NoButton|QDialogButtonBox::Save);
-        //     gridLayout->addWidget(buttonBox, 1, 1, 1, 1);
-        // }
     }
 
     for (unsigned int i=0; i < numOfPoints; i++)
