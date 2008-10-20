@@ -1,3 +1,38 @@
+Here are instructions on building and running the "new old watcher"
+------------------------------------------------------------------
+The new old watcher requires q few libraries exist on the system, i.e. be 
+installed in system directories: QT 4.3 (or greater), boost 1.36 (or greater), 
+and libidmef (the McAfee version from the idmanet/unstable repository.
+
+The boost 1.36 requirement is only for building the new watcher network
+infrastructure - not the new old watcher GUI, so if you're not building that
+(and you shouldn't be yet), then the default OS distribution is probably fine. 
+If you want to build the 1.36 version, I've put the tar file in ./tars.
+
+libidmef is probably installed on your build system anyway, assuming it is 
+the same system used to build/run the old old watcher. 
+
+Install QT:
+----------------------------------------------------------------
+Assuming a Fedora based system:
+
+> yum install qt4.i386 qt4-x11.i386 PyQt4.i386 PyQt4-devel.i386 qt4-devel.i386 qt4-sqlite.i386 qt4-doc.i386
+
+You probably don't need all of these, but it doesn't hurt to have them.
+
+Install boost:
+---------------------------------------------------------------
+A version probably already exists on your machine as lots of things use it.
+But just in case:
+
+> yum install boost.i386
+
+Install 3rd party libs locally. 
+---------------------------------------------------------------
+I've installed all the following locally. You can if you want, or
+you can install globally. Installing locally usually just involves
+changing the --prefix argument to ./configure.
+
 libconfig 
 -----------------------------------------------------
 libconfig gives a C and C++ interface to writing and 
@@ -26,25 +61,6 @@ cd src/watcher/legacyWatcher
 make libidsCommunications.a
 cp libidsCommunications.a ../../../lib
 
-# log4cpp has been replaced by Apache's log4cxx
-#
-# liblog4cpp
-# ----------------------------------------------------
-# Similar to libconfig. log4cpp is a c++ clone of the 
-# java logging package. Does all kinds of fancy logging.
-# 
-# It's been installed in the top level of the source
-# tree, but if you need to rebuild it:
-# (make sure to replace the --prefix with the location of 
-# your source tree)
-# 
-# cd src
-# tar zxvf ../tars/log4cpp-1.0.tar.gz
-# cd log4cpp-1.0
-# ./configure --prefix=/home/glawler/src/watcher
-# make 
-# make install
-
 log4cxx
 ----------------------------------------------------
 This lib requires that two others be installed. Here's 
@@ -59,7 +75,7 @@ tar zxvf ../tars/apr-1.3.3.tar.gz
 cd apr-1.3.3
 ./configure --prefix=$HOME/src/watcher
 make 
-make check
+make check      # This may fail - I just ignored it.
 make install
 
 # install apr-utils
@@ -69,7 +85,7 @@ tar zxvf ../tars/apr-util-1.3.4.tar.gz
 cd apr-util-1.3.4
 ./configure --prefix=$HOME/src/watcher --with-apr=$HOME/src/watcher
 make 
-make check
+make check      # This may fail - I just ignored it.
 make install
 
 # install log4cxx
@@ -119,9 +135,7 @@ cp ../../etc/watcher.log.properties.sample watcher.log.properties
 export LD_CONFIG_PATH=$HOME/watcher/lib
 
 
-./watcher -f watcher.cfg live.conf
-
-
+./watcher -f watcher.cfg [normal watcher args] live.conf
 
 Post library installation.
 ------------------------------------------------
