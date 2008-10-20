@@ -43,8 +43,7 @@ HEADERS += manetglview.h  \
          legacyWatcher/backgroundImage.h \
          legacyWatcher/watcherPropertyData.h
 
-FORMS += watcher.ui \
-        WatcherScrollingGraphDialogGUI.ui 
+FORMS += watcher.ui 
 
 SOURCES += \
     manetglview.cpp \
