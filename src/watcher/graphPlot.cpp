@@ -36,7 +36,7 @@ void GraphCurve::setColor(const QColor &color)
     QColor c = color;
     c.setAlpha(150);
     setPen(c);
-    setBrush(c);
+    // setBrush(c); // Don't fill below curve.
     TRACE_EXIT();
 }
 
@@ -198,14 +198,17 @@ void GraphPlot::addCurve(unsigned int curveId)
 {
     TRACE_ENTER();
     boost::shared_ptr<CurveData> data(new CurveData);
-    for (unsigned int i=0; i<timeDataSize; i++)
+    for (int i=0; i<timeDataSize; i++)
         data->data.push_back(0);
     graphData[curveId]=data;
 
     string curveTitle=boost::lexical_cast<string>((unsigned int)(0xFF & curveId));
     data->curve=boost::shared_ptr<GraphCurve>(new GraphCurve(curveTitle.c_str()));
 
-    data->curve->setColor(Qt::red);
+    // data->curve->setColor(Qt::red);
+    data->curve->setColor(QColor::fromHsv(qrand() % 256, 255, 190)); 
+    data->curve->setStyle(QwtPlotCurve::Lines);
+    // data->curve->setCurveAttribute(QwtPlotCurve::Fitted);
     data->curve->attach(this);
 
     LOG_DEBUG("Created new curve " << (0xFF & curveId)); 
