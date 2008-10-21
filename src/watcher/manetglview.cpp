@@ -3,9 +3,13 @@
 #include <math.h>
 
 #include "manetglview.h"
+#include "watcherScrollingGraphControl.h"
 #include "legacyWatcher/legacyWatcher.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
+
+using namespace watcher;
+using namespace std;
 
 manetGLView::manetGLView(QWidget *parent) : QGLWidget(parent), currentView(legacyWatcher::ManetView)
 {
@@ -275,13 +279,21 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     // GTL - Currently does not work!
     // legacyWatcher::jumpToX(event->x());
     // legacyWatcher::jumpToY(event->y());
-    char buf[512];
-    memset(buf, 0, sizeof(buf)); 
-    if(legacyWatcher::getNodeStatus(event->x(),event->y(), buf, sizeof(buf)))
+    //
+    // char buf[512];
+    // memset(buf, 0, sizeof(buf)); 
+    // if(legacyWatcher::getNodeStatus(event->x(),event->y(), buf, sizeof(buf)))
+    // {
+    //     QMessageBox::information(this, tr("Watcher"), QString(buf));
+    // }
+    // updateGL();
+
+    unsigned int nodeId=legacyWatcher::getNodeIdAtCoords(event->x(), event->y());
+    if(nodeId)
     {
-        QMessageBox::information(this, tr("Watcher"), QString(buf));
+        WatcherScrollingGraphControl *gc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl(); 
+        gc->toggleNodeDataInGraphs(nodeId);
     }
-    updateGL();
 
     TRACE_EXIT();
 }

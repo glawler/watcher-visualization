@@ -5,7 +5,7 @@
 #include <vector>
 #include <QWidget>
 
-#include <boost/shared_ptr.hpp>
+// #include <boost/shared_ptr.hpp>  Qt doesn't like shared_ptrs, apparently.
 
 #include "logger.h"
 
@@ -39,6 +39,9 @@ namespace watcher
                 void showDialogGraph(bool show);
                 void showDialogCPUUsage(bool show);
 
+                void showNodeDataInGraphs(unsigned int nodeId, bool show);
+                void toggleNodeDataInGraphs(unsigned int nodeId);
+
             signals:
 
                 void showDialog(bool show);
@@ -51,6 +54,9 @@ namespace watcher
             WatcherScrollingGraphControl(const WatcherScrollingGraphControl &);
             WatcherScrollingGraphControl &operator=(const WatcherScrollingGraphControl &);
 
+            // add a new dialog to this control, with graph labeled/indexed by 'label'
+            void createDialog(const std::string &label);
+
         private:
 
             // Oor own private idaho^Wlogger
@@ -61,7 +67,7 @@ namespace watcher
             GraphPlotMap graphPlotMap;
 
             // typedef std::map<std::string, boost::shared_ptr<QDialog> > GraphDialogMap;
-            typedef std::map<std::string, QDialog *> GraphDialogMap;
+            typedef std::map<std::string, QDialog*> GraphDialogMap;
             GraphDialogMap graphDialogMap;
     };
 

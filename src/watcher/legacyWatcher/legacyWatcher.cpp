@@ -3005,6 +3005,20 @@ int legacyWatcher::doIdle()
     return refresh;
 }
 
+unsigned int legacyWatcher::getNodeIdAtCoords(const int x, const int y)
+{
+    TRACE_ENTER();
+    unsigned int dist_ret;
+    unsigned int retVal;
+    manetNode *node = closestNode(globalManet, x, y, 10, &dist_ret);
+    if (node)
+        retVal=node->addr;
+    else 
+        retVal=0;
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
 int legacyWatcher::getNodeStatus(const int x, const int y, char *nodeStatusBuf, size_t bufSize)
 {
     unsigned int dist_ret;

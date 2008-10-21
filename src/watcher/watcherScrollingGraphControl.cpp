@@ -7,7 +7,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "watcherScrollingGraphControl.h"
-#include "ui_WatcherScrollingGraphDialogGUI.h"
 #include "graphPlot.h"
 #include "marshal.h"
 
@@ -34,12 +33,10 @@ WatcherScrollingGraphControl::WatcherScrollingGraphControl()
 WatcherScrollingGraphControl::~WatcherScrollingGraphControl()
 {
     TRACE_ENTER();
-    // No dynamically allocated data here.
-    for (GraphPlotMap::iterator g=graphPlotMap.begin(); g!=graphPlotMap.end(); g++)
-        delete g->second;
+    for (GraphPlotMap::iterator p=graphPlotMap.begin(); p!=graphPlotMap.end(); p++)
+        delete p->second;
     for (GraphDialogMap::iterator d=graphDialogMap.begin(); d!=graphDialogMap.end(); d++)
         delete d->second;
-
     TRACE_EXIT();
 }
 
@@ -59,22 +56,7 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
 
     GraphPlotMap::iterator gp=graphPlotMap.find(label);
     if (gp==graphPlotMap.end())
-    {
-        // boost::shared_ptr<QDialog> theDialog(new QDialog);
-        // boost::shared_ptr<GraphPlot> thePlot(new GraphPlot(theDialog.get(), label.c_str()));
-
-        QDialog *theDialog=new QDialog(this);
-        theDialog->resize(474, 353);
-
-        GraphPlot * thePlot=new GraphPlot(theDialog, label.c_str());
-        thePlot->setMargin(5);
-
-        graphDialogMap[label]=theDialog;
-        graphPlotMap[label]=thePlot;
-
-        QVBoxLayout *layout = new QVBoxLayout(theDialog);
-        layout->addWidget(thePlot);
-    }
+        createDialog(label);
 
     for (unsigned int i=0; i < numOfPoints; i++)
     {
@@ -98,6 +80,25 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
     TRACE_EXIT();
 }
 
+void WatcherScrollingGraphControl::createDialog(const std::string &label)
+{
+    TRACE_ENTER();
+    // boost::shared_ptr<QDialog> theDialog(new QDialog);
+    QDialog *theDialog=(new QDialog);
+    theDialog->resize(474, 353);
+
+    // boost::shared_ptr<GraphPlot> thePlot(new GraphPlot(theDialog.get(), label.c_str()));
+    GraphPlot *thePlot=new GraphPlot(theDialog, label.c_str());
+    thePlot->setMargin(5);
+
+    graphDialogMap[label]=theDialog;
+    graphPlotMap[label]=thePlot;
+
+    QVBoxLayout *layout = new QVBoxLayout(theDialog);
+    layout->addWidget(thePlot);
+    TRACE_EXIT();
+}
+
 void WatcherScrollingGraphControl::showDialogGraph(bool show)
 {
     TRACE_ENTER();
@@ -108,23 +109,19 @@ void WatcherScrollingGraphControl::showDialogGraph(bool show)
     GraphPlotMap::const_iterator gp=graphPlotMap.find(graphName);
     if (gp==graphPlotMap.end())
     {
-        LOG_DEBUG("User wants to show bandwidth graph - but we don't have any testnode bandwidth data\n"); 
-        QMessageBox::information(this, tr("We are dataless"), QString("There is not yet any bandwidth data to show"));
-        TRACE_EXIT();
-        return;
+        LOG_DEBUG("User wants to show bandwidth graph - but we don't have any testnode bandwidth data. Creating empty dialog and graph.\n"); 
+        // QMessageBox::information(this, tr("We are dataless"), QString("There is not yet any bandwidth data to show"));
+        createDialog(graphName);
+    }
+    if (show)
+    {
+        graphDialogMap[graphName]->show();
+        emit showDialog(show);
     }
     else
     {
-        if (show)
-        {
-            graphDialogMap[graphName]->show();
-            emit showDialog(show);
-        }
-        else
-        {
-            graphDialogMap[graphName]->hide();
-            emit showDialog(show);
-        }
+        graphDialogMap[graphName]->hide();
+        emit showDialog(show);
     }
 
     TRACE_EXIT();
@@ -135,5 +132,21 @@ void WatcherScrollingGraphControl::showDialogCPUUsage(bool /*show*/)
 {
     TRACE_ENTER();
     QMessageBox::information(this, tr("Not implemented"), QString("The CPU usage graph is not yet implemented")); 
+    TRACE_EXIT();
+}
+
+void WatcherScrollingGraphControl::showNodeDataInGraphs(unsigned int nodeId, bool show)
+{
+    TRACE_ENTER();
+    for (GraphPlotMap::iterator g=graphPlotMap.begin(); g!=graphPlotMap.end(); g++)
+        g->second->curveAndLegendVisible(nodeId, show);
+    TRACE_EXIT();
+}
+
+void WatcherScrollingGraphControl::toggleNodeDataInGraphs(unsigned int nodeId)
+{
+    TRACE_ENTER();
+    for (GraphPlotMap::iterator g=graphPlotMap.begin(); g!=graphPlotMap.end(); g++)
+        g->second->toggleCurveAndLegendVisible(nodeId);
     TRACE_EXIT();
 }

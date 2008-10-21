@@ -117,6 +117,9 @@ namespace legacyWatcher
     // Caller shuld allocate space for a string and pass it in
     int getNodeStatus(const int x, const int y, char *nodeStatusBuf, size_t bufSize);
 
+    // Return the unique id for the node that is at the given coords.
+    unsigned int getNodeIdAtCoords(const int x, const int y);
+
 }; // namespace legacyWatcher
 
 #endif

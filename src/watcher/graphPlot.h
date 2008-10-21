@@ -44,7 +44,11 @@ namespace watcher
             void addDataPoint(unsigned int curveId, float dataPoint);
 
         public slots:
+            // showCurve() will call addCurve() if the curve does not yet exist. 
             void showCurve(unsigned int curveId, bool on);
+
+            void toggleCurveAndLegendVisible(unsigned int curveId);
+            void curveAndLegendVisible(unsigned int curveId, bool visible);
 
         protected:
             QString title;
@@ -65,6 +69,8 @@ namespace watcher
 
         private:
             DECLARE_LOGGER();
+
+            void addCurve(unsigned int curveId);
 
         private slots:
 

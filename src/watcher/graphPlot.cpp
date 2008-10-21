@@ -88,21 +88,7 @@ void GraphPlot::addDataPoint(unsigned int curveId, float dataPoint)
 
     // Create a new curve, if we've never seen this curveId before.
     if (data==graphData.end())
-    {
-        boost::shared_ptr<CurveData> data(new CurveData);
-        graphData[curveId]=data;
-
-        string curveTitle=boost::lexical_cast<string>((unsigned int)(0xFF & curveId));
-        data->curve=boost::shared_ptr<GraphCurve>(new GraphCurve(curveTitle.c_str()));
-
-        data->curve->setColor(Qt::red);
-        // curve->setZ(curve->z()-plotCurves.size()-1);
-        data->curve->attach(this);
-
-        showCurve(curveId, true); 
-
-        LOG_DEBUG("Created new curve " << (0xFF & curveId)); 
-    }
+        addCurve(curveId);
 
     LOG_DEBUG("Pushing back data point " << dataPoint << " for curve id " << (0xFF & curveId));
     graphData[curveId]->data.push_front(dataPoint);
@@ -165,14 +151,64 @@ void GraphPlot::showCurve(unsigned int curveId, bool on)
 
     if (graphData.end()==graphData.find(curveId))
     {
-        LOG_DEBUG("User wants to show curve for a node we've never seen");
-        // GTL - throw up a notification box here? 
-        TRACE_EXIT();
+        LOG_DEBUG("User wants to show curve for a node we've never seen, adding empty curve with id " << (0xFF & curveId));
+        addCurve(curveId);
     }
 
     showCurve(graphData[curveId]->curve.get(), on);     
     replot();
 
+    TRACE_EXIT();
+}
+
+void GraphPlot::toggleCurveAndLegendVisible(unsigned int curveId)
+{
+    TRACE_ENTER();
+    if (graphData.end()==graphData.find(curveId))
+    {
+        LOG_DEBUG("User wants to toggle visibility for a  curve we've never seen, adding empty curve with id " << (0xFF & curveId));
+        addCurve(curveId);
+    }
+
+    curveAndLegendVisible(curveId, !graphData[curveId]->curve->isVisible());
+
+    TRACE_EXIT();
+}
+
+void GraphPlot::curveAndLegendVisible(unsigned int curveId, bool visible)
+{
+    TRACE_ENTER();
+
+    if (graphData.end()==graphData.find(curveId))
+    {
+        LOG_DEBUG("User wants to set/unset visibility for a  curve we've never seen, adding empty curve with id " << (0xFF & curveId));
+        addCurve(curveId);
+    }
+
+    showCurve(graphData[curveId]->curve.get(), visible);
+
+    QWidget *w = legend()->find(graphData[curveId]->curve.get());
+    if ( w && w->inherits("QwtLegendItem") )
+        ((QwtLegendItem *)w)->setVisible(visible);
+
+    TRACE_EXIT();
+}
+
+void GraphPlot::addCurve(unsigned int curveId)
+{
+    TRACE_ENTER();
+    boost::shared_ptr<CurveData> data(new CurveData);
+    for (unsigned int i=0; i<timeDataSize; i++)
+        data->data.push_back(0);
+    graphData[curveId]=data;
+
+    string curveTitle=boost::lexical_cast<string>((unsigned int)(0xFF & curveId));
+    data->curve=boost::shared_ptr<GraphCurve>(new GraphCurve(curveTitle.c_str()));
+
+    data->curve->setColor(Qt::red);
+    data->curve->attach(this);
+
+    LOG_DEBUG("Created new curve " << (0xFF & curveId)); 
     TRACE_EXIT();
 }
 
