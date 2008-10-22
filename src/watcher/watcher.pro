@@ -10,7 +10,7 @@ INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml
 QT += opengl 
 CONFIG += qt x11
 OBJECTS_DIR = ./objs
-DEFINES += GRAPHICS MODULE_MOBILITY
+DEFINES += GRAPHICS MODULE_MOBILITY ggdb
 
 # log4cxx issues warnings without this. 
 QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing
@@ -40,9 +40,10 @@ HEADERS += manetglview.h  \
          watcherScrollingGraphControl.h \
          watcherMainWindow.h \
          graphPlot.h \
+         watcherGraphDialog.h \
          legacyWatcher/backgroundImage.h \
          legacyWatcher/skybox.h \
-         legacyWatcher/watcherPropertyData.h
+         legacyWatcher/watcherPropertyData.h 
 
 FORMS += watcher.ui 
 
@@ -54,6 +55,7 @@ SOURCES += \
     watcherScrollingGraphControl.cpp \
     watcherMainWindow.cpp \
     graphPlot.cpp \
+    watcherGraphDialog.cpp \
     legacyWatcher/des.cpp \
     legacyWatcher/metric.c \
     legacyWatcher/rng.cc \

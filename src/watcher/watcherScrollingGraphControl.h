@@ -5,8 +5,7 @@
 #include <vector>
 #include <QWidget>
 
-// #include <boost/shared_ptr.hpp>  Qt doesn't like shared_ptrs, apparently.
-
+#include "watcherGraphDialog.h"
 #include "logger.h"
 
 namespace watcher
@@ -36,15 +35,21 @@ namespace watcher
 
             public slots:
 
-                void showDialogGraph(bool show);
-                void showDialogCPUUsage(bool show);
+                void showBandwidthGraphDialog(bool show);
+                void showCPUUsageDialog(bool show);
+                void showGraphDialog(QString graphName, bool show);
 
                 void showNodeDataInGraphs(unsigned int nodeId, bool show);
                 void toggleNodeDataInGraphs(unsigned int nodeId);
 
             signals:
 
-                void showDialog(bool show);
+                void bandwidthDialogShowed(bool show);
+                void cpuUsageDialogShowed(bool show);
+                void graphDialogShowed(QString graphName, bool show);
+
+                void nodeDataInGraphsShowed(unsigned int nodeId, bool show);
+                void nodeDataInGraphsToggled(unsigned int nodeId); 
 
         protected:
 
@@ -67,7 +72,7 @@ namespace watcher
             GraphPlotMap graphPlotMap;
 
             // typedef std::map<std::string, boost::shared_ptr<QDialog> > GraphDialogMap;
-            typedef std::map<std::string, QDialog*> GraphDialogMap;
+            typedef std::map<std::string, QWatcherGraphDialog*> GraphDialogMap;
             GraphDialogMap graphDialogMap;
     };
 

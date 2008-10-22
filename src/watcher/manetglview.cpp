@@ -291,12 +291,30 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     unsigned int nodeId=legacyWatcher::getNodeIdAtCoords(event->x(), event->y());
     if(nodeId)
     {
-        WatcherScrollingGraphControl *gc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl(); 
-        gc->toggleNodeDataInGraphs(nodeId);
+        emit nodeDataInGraphsToggled(nodeId);
     }
 
     TRACE_EXIT();
 }
+
+void manetGLView::showNodeSelectedForGraph(unsigned int, bool)
+{
+    TRACE_ENTER();
+    // GTL - doesn't do anything now. But could mark the node as being displayed in the 
+    // graph dialogs somehow. Add a little "G" or a little graph representation
+    // above the node? 
+    TRACE_EXIT();
+}
+
+void manetGLView::toggleNodeSelectedForGraph(unsigned int)
+{
+    TRACE_ENTER();
+    // GTL - doesn't do anything now. But could mark the node as being displayed in the 
+    // graph dialogs somehow. Add a little "G" or a little graph representation
+    // above the node? 
+    TRACE_EXIT();
+}
+
 void manetGLView::mousePressEvent(QMouseEvent *event)
 {
     TRACE_ENTER();

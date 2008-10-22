@@ -60,6 +60,9 @@ class manetGLView : public QGLWidget
         void goodwinContinue();
         void goodwinSetSpeed(int speed);
 
+        void toggleNodeSelectedForGraph(unsigned int nodeId);
+        void showNodeSelectedForGraph(unsigned int nodeId, bool);
+
     signals:
         void positionReset();
 
@@ -92,6 +95,9 @@ class manetGLView : public QGLWidget
         void continuedGoodwin();
 
         void runningGoodwin(bool usingGoodwin);
+
+        void nodeDataInGraphsToggled(unsigned int nodeId); 
+        void nodeDataInGraphsShowed(unsigned int, bool); 
 
     protected:
         DECLARE_LOGGER();

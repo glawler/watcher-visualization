@@ -33,10 +33,10 @@ WatcherScrollingGraphControl::WatcherScrollingGraphControl()
 WatcherScrollingGraphControl::~WatcherScrollingGraphControl()
 {
     TRACE_ENTER();
-    for (GraphPlotMap::iterator p=graphPlotMap.begin(); p!=graphPlotMap.end(); p++)
-        delete p->second;
-    for (GraphDialogMap::iterator d=graphDialogMap.begin(); d!=graphDialogMap.end(); d++)
-        delete d->second;
+    // for (GraphDialogMap::iterator g=graphDialogMap.begin(); g!=graphDialogMap.end();g++)
+    //     delete g->second;
+    // for (GraphPlotMap::iterator p=graphPlotMap.begin(); p!=graphPlotMap.end(); p++)
+    //     delete p->second;
     TRACE_EXIT();
 }
 
@@ -83,11 +83,9 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
 void WatcherScrollingGraphControl::createDialog(const std::string &label)
 {
     TRACE_ENTER();
-    // boost::shared_ptr<QDialog> theDialog(new QDialog);
-    QDialog *theDialog=(new QDialog);
+    QWatcherGraphDialog *theDialog=new QWatcherGraphDialog(label.c_str());
     theDialog->resize(474, 353);
 
-    // boost::shared_ptr<GraphPlot> thePlot(new GraphPlot(theDialog.get(), label.c_str()));
     GraphPlot *thePlot=new GraphPlot(theDialog, label.c_str());
     thePlot->setMargin(5);
 
@@ -96,10 +94,13 @@ void WatcherScrollingGraphControl::createDialog(const std::string &label)
 
     QVBoxLayout *layout = new QVBoxLayout(theDialog);
     layout->addWidget(thePlot);
+
+    connect(theDialog, SIGNAL(dialogVisible(bool)), this, SLOT(showBandwidthGraphDialog(bool))); 
+
     TRACE_EXIT();
 }
 
-void WatcherScrollingGraphControl::showDialogGraph(bool show)
+void WatcherScrollingGraphControl::showBandwidthGraphDialog(bool show)
 {
     TRACE_ENTER();
 
@@ -110,36 +111,42 @@ void WatcherScrollingGraphControl::showDialogGraph(bool show)
     if (gp==graphPlotMap.end())
     {
         LOG_DEBUG("User wants to show bandwidth graph - but we don't have any testnode bandwidth data. Creating empty dialog and graph.\n"); 
-        // QMessageBox::information(this, tr("We are dataless"), QString("There is not yet any bandwidth data to show"));
         createDialog(graphName);
     }
+
     if (show)
-    {
         graphDialogMap[graphName]->show();
-        emit showDialog(show);
-    }
     else
-    {
         graphDialogMap[graphName]->hide();
-        emit showDialog(show);
-    }
+
+    emit bandwidthDialogShowed(show);
 
     TRACE_EXIT();
 }
 
-
-void WatcherScrollingGraphControl::showDialogCPUUsage(bool /*show*/)
+void WatcherScrollingGraphControl::showCPUUsageDialog(bool show)
 {
     TRACE_ENTER();
     QMessageBox::information(this, tr("Not implemented"), QString("The CPU usage graph is not yet implemented")); 
+    emit cpuUsageDialogShowed(show);
     TRACE_EXIT();
 }
 
+void WatcherScrollingGraphControl::showGraphDialog(QString graphName, bool show)
+{
+    TRACE_ENTER();
+    QMessageBox::information(this, tr("Not implemented"), QString("The generic show usage graph is not yet implemented")); 
+    emit graphDialogShowed(graphName, show);
+    TRACE_EXIT();
+}
 void WatcherScrollingGraphControl::showNodeDataInGraphs(unsigned int nodeId, bool show)
 {
     TRACE_ENTER();
     for (GraphPlotMap::iterator g=graphPlotMap.begin(); g!=graphPlotMap.end(); g++)
+    {
         g->second->curveAndLegendVisible(nodeId, show);
+        emit nodeDataInGraphsShowed(nodeId, show);
+    }
     TRACE_EXIT();
 }
 
@@ -147,6 +154,9 @@ void WatcherScrollingGraphControl::toggleNodeDataInGraphs(unsigned int nodeId)
 {
     TRACE_ENTER();
     for (GraphPlotMap::iterator g=graphPlotMap.begin(); g!=graphPlotMap.end(); g++)
+    {
         g->second->toggleCurveAndLegendVisible(nodeId);
+        emit nodeDataInGraphsToggled(nodeId);
+    }
     TRACE_EXIT();
 }

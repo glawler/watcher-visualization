@@ -5,13 +5,16 @@ log4j.rootLogger=debug, flog, stdout
 
 # Set levels per module
 # log4j.logger.global=trace
-# log4j.logger.Watcherd=trace
-log4j.logger.TestbedGraphData=trace
+# log4j.logger.manetGLView=trace
+# log4j.logger.TimeScaleDraw=trace
+#log4j.logger.GraphCurve=trace
+#log4j.logger.GraphPlot=trace
+log4j.logger.singletonConfig=trace
+# log4j.logger.Skybox=trace
+#log4j.logger.BackgroundImage=trace
+log4j.logger.QWatcherGraphDialog=trace
 log4j.logger.WatcherMainWindow=trace
-log4j.logger.WatcherScrollingGraph=trace
-log4j.logger.TimeScaleDraw=trace
-log4j.logger.GraphCurve=trace
-log4j.logger.GraphPlot=trace
+log4j.logger.WatcherScrollingGraphControl=trace
 
 # stdout is set to be a ConsoleAppender.
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender

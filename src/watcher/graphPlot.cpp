@@ -168,6 +168,7 @@ void GraphPlot::toggleCurveAndLegendVisible(unsigned int curveId)
     {
         LOG_DEBUG("User wants to toggle visibility for a  curve we've never seen, adding empty curve with id " << (0xFF & curveId));
         addCurve(curveId);
+        graphData[curveId]->curve->setVisible(false); 
     }
 
     curveAndLegendVisible(curveId, !graphData[curveId]->curve->isVisible());
@@ -190,6 +191,8 @@ void GraphPlot::curveAndLegendVisible(unsigned int curveId, bool visible)
     QWidget *w = legend()->find(graphData[curveId]->curve.get());
     if ( w && w->inherits("QwtLegendItem") )
         ((QwtLegendItem *)w)->setVisible(visible);
+
+    emit curveAndLegendToggled(visible);
 
     TRACE_EXIT();
 }

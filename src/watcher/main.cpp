@@ -51,12 +51,34 @@ int main(int argc, char *argv[])
 
     QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
 
-    WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
-    QObject::connect(ui.actionGraphBandwidth, SIGNAL(toggled(bool)), sgc, SLOT(showDialogGraph(bool)));
-    QObject::connect(sgc, SIGNAL(showDialog(bool)), ui.actionGraphBandwidth, SLOT(toggled(bool)));
 
-    QObject::connect(ui.actionGraphCPUUsage, SIGNAL(toggled(bool)), sgc, SLOT(showDialogCPUUsage(bool)));
-    QObject::connect(sgc, SIGNAL(showDialog(bool)), ui.actionGraphCPUUsage, SLOT(toggled(bool)));
+    // 
+    // Connect the scrolling graph dialog controller to other bits.
+    //
+    {
+        WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
+
+        QObject::connect(ui.actionGraphBandwidth, SIGNAL(toggled(bool)), sgc, SLOT(showBandwidthGraphDialog(bool)));
+        QObject::connect(sgc, SIGNAL(bandwidthDialogShowed(bool)), ui.actionGraphBandwidth, SLOT(setChecked(bool)));
+
+        QObject::connect(ui.actionGraphCPUUsage, SIGNAL(toggled(bool)), sgc, SLOT(showCPUUsageDialog(bool)));
+        QObject::connect(sgc, SIGNAL(cpuUsageDialogShowed(bool)), ui.actionGraphCPUUsage, SLOT(setChecked(bool)));
+
+        // Support for generic graph-name-based dialogs is not yet supported by the main GUI window
+        // Need to figure out how to do dynamic menus (or somesuch). 
+        // QObject::connect(ui.actionGraphCPUUsage, SIGNAL(toggled(bool)), sgc, SLOT(showCPUUsageDialog(bool)));
+        // QObject::connect(sgc, SIGNAL(cpuUsageDialogShowed(bool)), ui.actionGraphCPUUsage, SLOT(toggled(bool)));
+
+        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsToggled(unsigned int)), 
+                          sgc, SLOT(toggleNodeDataInGraphs(unsigned int)));
+        QObject::connect(sgc, SIGNAL(nodeDataInGraphsToggled(unsigned int)), 
+                          ui.manetGLViewWindow, SLOT(toggleNodeSelectedForGraph(unsigned int)));
+
+        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), 
+                          sgc, SLOT(showNodeDataInGraphs(unsigned int, bool)));
+        QObject::connect(sgc, SIGNAL(nodeDataInGraphsShow(unsigned int, bool)), 
+                          ui.manetGLViewWindow, SLOT(showNodeSelectedForGraph(unsigned int, bool)));
+    }
 
     ui.manetGLViewWindow->runLegacyWatcherMain(argc, argv);
 

@@ -50,6 +50,10 @@ namespace watcher
             void toggleCurveAndLegendVisible(unsigned int curveId);
             void curveAndLegendVisible(unsigned int curveId, bool visible);
 
+        signals:
+
+            void curveAndLegendToggled(bool on);
+
         protected:
             QString title;
             QwtArray<double> timeData;
