@@ -46,6 +46,7 @@
 #include "watcherGraph.h"
 #include "floatinglabel.h"
 #include "backgroundImage.h"
+#include "skybox.h"
 #include "watcherPropertyData.h"
 
 #include "mobility.h"
@@ -1302,7 +1303,6 @@ static GLenum Args(int , char **)
     return GL_TRUE;
 }
 
-
 static void crossProduct(double *c, double a[3], double b[3])
 {  
     double len;
@@ -1335,6 +1335,10 @@ void legacyWatcher::drawManet(void)
     manet *m = globalManet;
     int *phy;
     char buff[128];
+
+    watcher::Skybox *sb=watcher::Skybox::getSkybox();
+    if (sb)
+        sb->drawSkybox(globalManetAdj.angleX, globalManetAdj.angleY, globalManetAdj.angleZ);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
