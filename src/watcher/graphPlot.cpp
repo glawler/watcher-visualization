@@ -205,10 +205,8 @@ void GraphPlot::addCurve(unsigned int curveId)
     string curveTitle=boost::lexical_cast<string>((unsigned int)(0xFF & curveId));
     data->curve=boost::shared_ptr<GraphCurve>(new GraphCurve(curveTitle.c_str()));
 
-    // data->curve->setColor(Qt::red);
     data->curve->setColor(QColor::fromHsv(qrand() % 256, 255, 190)); 
     data->curve->setStyle(QwtPlotCurve::Lines);
-    // data->curve->setCurveAttribute(QwtPlotCurve::Fitted);
     data->curve->attach(this);
 
     LOG_DEBUG("Created new curve " << (0xFF & curveId)); 
