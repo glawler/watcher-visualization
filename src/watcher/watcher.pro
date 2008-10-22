@@ -41,6 +41,7 @@ HEADERS += manetglview.h  \
          watcherMainWindow.h \
          graphPlot.h \
          legacyWatcher/backgroundImage.h \
+         legacyWatcher/skybox.h \
          legacyWatcher/watcherPropertyData.h
 
 FORMS += watcher.ui 
@@ -69,4 +70,5 @@ SOURCES += \
     legacyWatcher/graphics.cpp \
     legacyWatcher/apisupport.c \
     legacyWatcher/backgroundImage.cpp \
+    legacyWatcher/skybox.cpp \
     legacyWatcher/watcherPropertyData.cpp
