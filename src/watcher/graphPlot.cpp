@@ -195,7 +195,10 @@ void GraphPlot::curveAndLegendVisible(unsigned int curveId, bool visible)
 
     QWidget *w = legend()->find(graphData[curveId]->curve.get());
     if ( w && w->inherits("QwtLegendItem") )
+    {
         ((QwtLegendItem *)w)->setVisible(visible);
+        ((QwtLegendItem *)w)->setChecked(visible);
+    }
 
     emit curveAndLegendToggled(visible);
 

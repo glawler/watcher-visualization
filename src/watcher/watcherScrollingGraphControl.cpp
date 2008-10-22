@@ -46,6 +46,7 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
 
     char labelBuf[260];     // meh. 
     unsigned int numOfPoints;
+    bool newPlot=false;
 
     UNMARSHALSTRINGSHORT(payload, labelBuf);
     string label(labelBuf);
@@ -56,7 +57,10 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
 
     GraphPlotMap::iterator gp=graphPlotMap.find(label);
     if (gp==graphPlotMap.end())
+    {
         createDialog(label);
+        newPlot=true;
+    }
 
     for (unsigned int i=0; i < numOfPoints; i++)
     {
@@ -77,6 +81,9 @@ void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned i
         }
     }
 
+    if (newPlot)
+        graphPlotMap[label]->curveAndLegendVisible(nodeAddress, false);  // new plots are invisible until clicked in the GUI
+
     TRACE_EXIT();
 }
 
@@ -84,16 +91,12 @@ void WatcherScrollingGraphControl::createDialog(const std::string &label)
 {
     TRACE_ENTER();
     QWatcherGraphDialog *theDialog=new QWatcherGraphDialog(label.c_str());
-    theDialog->resize(474, 353);
-
     GraphPlot *thePlot=new GraphPlot(theDialog, label.c_str());
-    thePlot->setMargin(5);
+
+    theDialog->createDialog(thePlot); 
 
     graphDialogMap[label]=theDialog;
     graphPlotMap[label]=thePlot;
-
-    QVBoxLayout *layout = new QVBoxLayout(theDialog);
-    layout->addWidget(thePlot);
 
     connect(theDialog, SIGNAL(dialogVisible(bool)), this, SLOT(showBandwidthGraphDialog(bool))); 
 
