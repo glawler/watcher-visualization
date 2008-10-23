@@ -98,15 +98,17 @@ void WatcherScrollingGraphControl::createDialog(const std::string &label)
     graphDialogMap[label]=theDialog;
     graphPlotMap[label]=thePlot;
 
-    connect(theDialog, SIGNAL(dialogVisible(bool)), this, SLOT(showBandwidthGraphDialog(bool))); 
+    connect(theDialog, SIGNAL(dialogVisible(QString, bool)), this, SLOT(showGraphDialog(QString, bool))); 
 
     TRACE_EXIT();
 }
 
-void WatcherScrollingGraphControl::showGraphDialog(const std::string &graphName, const bool show)
+void WatcherScrollingGraphControl::showGraphDialog(QString label, const bool show)
 {
     TRACE_ENTER();
     LOG_DEBUG("show dialog graph -> " << (show?"true":"false")); 
+
+    string graphName(label.toStdString());
 
     GraphPlotMap::const_iterator gp=graphPlotMap.find(graphName);
     if (gp==graphPlotMap.end())
@@ -120,6 +122,12 @@ void WatcherScrollingGraphControl::showGraphDialog(const std::string &graphName,
     else
         graphDialogMap[graphName]->hide();
 
+    // special cases for hardcoded graphs.
+    // Need to get rid of these at some point.
+    if (graphName=="Bandwidth")
+        emit bandwidthDialogShowed(show);
+    if (graphName=="Load Average")
+        emit loadAverageDialogShowed(show);
 
     TRACE_EXIT();
 }
@@ -128,15 +136,13 @@ void WatcherScrollingGraphControl::showBandwidthGraphDialog(bool show)
 {
     TRACE_ENTER();
     showGraphDialog("Bandwidth", show); 
-    emit bandwidthDialogShowed(show);
     TRACE_EXIT();
 }
 
-void WatcherScrollingGraphControl::showLoadAverageDialog(bool show)
+void WatcherScrollingGraphControl::showLoadAverageGraphDialog(bool show)
 {
     TRACE_ENTER();
     showGraphDialog("Load Average", show); 
-    emit loadAverageDialogShowed(show);
     TRACE_EXIT();
 }
 

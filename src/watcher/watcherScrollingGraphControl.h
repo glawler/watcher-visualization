@@ -2,7 +2,6 @@
 #define GRAPH_DATA_WATHCER_FOOBAR_OH_YEAH_ITS_NOW_ACTULLAY_CALLED_WATCHERSCROLLINGRAPHCONTROL_H
 
 #include <map>
-#include <vector>
 #include <QWidget>
 
 #include "watcherGraphDialog.h"
@@ -36,12 +35,11 @@ namespace watcher
             public slots:
 
                 // General case of show dialog.
-                void showGraphDialog(const std::string &graphName, bool show);
+                void showGraphDialog(QString graphName, bool show);
 
                 // Specific case of showDialog, just calls the general case with the appropriate string.
                 void showBandwidthGraphDialog(bool show);
-                void showLoadAverageDialog(bool show);
-
+                void showLoadAverageGraphDialog(bool show);
 
                 void showNodeDataInGraphs(unsigned int nodeId, bool show);
                 void toggleNodeDataInGraphs(unsigned int nodeId);

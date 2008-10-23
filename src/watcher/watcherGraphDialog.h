@@ -20,7 +20,7 @@ namespace watcher
 
             signals:
 
-            void dialogVisible(bool isVisible);
+            void dialogVisible(QString label, bool isVisible);
 
         protected:
         private:

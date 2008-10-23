@@ -17,7 +17,7 @@ void QWatcherGraphDialog::done(int)
     TRACE_ENTER();
     // Just hide it. We still want it around so the embedded GraphPlot can keep track of incoming data.  
     hide(); 
-    emit dialogVisible(false); 
+    emit dialogVisible(label, false); 
     TRACE_EXIT();
 }
 
