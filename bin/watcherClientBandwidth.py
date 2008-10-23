@@ -41,7 +41,7 @@ def doLoop(iface):
             retCode=subprocess.call(['watchergraphtest', '-g', 'Bandwidth', '-d', str(bw)])
         except OSError:
             print 'Caught exception when trying to run watchergraphtest, is it in your $PATH?'
-            print 'If not, type \'export $PATH=$PATH:/path/to/dir/with/watchergraphtest/in/it\' in this shell'
+            print 'If not, type \'export PATH=$PATH:/path/to/dir/with/watchergraphtest/in/it\' in this shell'
             sys.exit(1)
         prevBytesTx=currBytesTx
 
