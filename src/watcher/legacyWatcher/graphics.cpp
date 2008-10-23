@@ -1176,7 +1176,7 @@ static void nodeDrawFn(
     if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, nodelabel);
     sprintf(buff,"%d",us->addr & 0xFF);
-    drawText(us->x,us->y+6,us->z,dispStat->scaleText[dispType], buff);
+    drawText(us->x,us->y+6,us->z+5,dispStat->scaleText[dispType], buff);
     nodeDrawLabel(us, dispType, dispStat, us->x, us->y, us->z);
     nodeLabelTimeout(us);
 
@@ -1584,7 +1584,7 @@ void manetDraw(manet *m)
     phy=manetGetPhysicalGraph(m);
     glPushAttrib(GL_ALL_ATTRIB_BITS);
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, physical);
-        glColor4f(1.0,0.0,0.0,0.5);
+        // glColor4f(1.0,0.0,0.0,0.5);
         drawGraph(m,phy,0.0, 0);
      glPopAttrib();
     free(phy);
@@ -1647,7 +1647,7 @@ void graphicsMakeBitmap(manet *m)
 	glBindTexture(GL_TEXTURE_2D,texname);
 	glBegin(GL_QUADS);
 
-	glColor4f(1.0,1.0,1.0,1.0);
+	// glColor4f(1.0,1.0,1.0,1.0);
 	glTexCoord2f(0.0,1.0);
 	glVertex3f(0.0,0.0,0.0);
 
@@ -1661,7 +1661,7 @@ void graphicsMakeBitmap(manet *m)
 	glVertex3f(0.0,height,0.0);
 
 #if 0
-	glColor4f(1.0,1.0,1.0,1.0);
+	// glColor4f(1.0,1.0,1.0,1.0);
 	glTexCoord2f(0.0,fs->texheit);
 	glVertex3f(0.0,0.0,0.0);
 

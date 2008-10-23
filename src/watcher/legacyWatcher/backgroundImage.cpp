@@ -5,6 +5,7 @@
 #include <errno.h>
 
 #include "backgroundImage.h"
+#include "bitmap.h"
 #include "mobility.h"
 
 using namespace watcher;
@@ -14,7 +15,9 @@ INIT_LOGGER(BackgroundImage, "BackgroundImage");
 BackgroundImage::BackgroundImage() :
     imageData(NULL),
     width(0),
-    height(0)
+    height(0),
+    imageFormat(GL_BITMAP),
+    imageType(GL_UNSIGNED_BYTE)
 {
     TRACE_ENTER();
 
@@ -40,6 +43,39 @@ BackgroundImage::~BackgroundImage()
     imageData=NULL; 
 
     TRACE_EXIT();
+}
+
+bool BackgroundImage::loadBMPFile(const char *filename)
+{
+    TRACE_ENTER();
+    BITMAPINFO *bmpInfo;
+
+    if (imageData)
+        free(imageData);
+
+    imageData=LoadDIBitmap(filename, &bmpInfo);
+
+    if (!imageData)
+    {
+        LOG_ERROR("Error loading BMP image file " << filename);
+        return false;
+    }
+
+    width=bmpInfo->bmiHeader.biWidth;
+    height=bmpInfo->bmiHeader.biHeight;
+
+    imageFormat=GL_BGR_EXT;
+    imageType=GL_UNSIGNED_BYTE;
+
+    LOG_DEBUG("Successfully loaded BMP image data:");
+    LOG_DEBUG("     w=" << width << " h=" << height);
+    LOG_DEBUG("     size=" << bmpInfo->bmiHeader.biSizeImage << " depth=" << bmpInfo->bmiHeader.biBitCount);
+    LOG_DEBUG("     pixels/meter: x=" << bmpInfo->bmiHeader.biXPelsPerMeter << " y=" << bmpInfo->bmiHeader.biYPelsPerMeter); 
+
+    free(bmpInfo);
+
+    TRACE_EXIT();
+    return true;
 }
 
 bool BackgroundImage::loadPPMFile(const char *filename)
@@ -108,6 +144,9 @@ bool BackgroundImage::loadPPMFile(const char *filename)
     width = w;
     height = h;
 
+    imageFormat=GL_RGB;
+    imageType=GL_UNSIGNED_BYTE;
+
     TRACE_EXIT_RET((imageData!=NULL?"true":"false"));
     return imageData!=NULL;
 }
@@ -116,18 +155,27 @@ void BackgroundImage::setupTexture()
 {
     TRACE_ENTER();
 
+    // if ppm
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColor);
-
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+    // glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColor);
+    // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, imageFormat, imageType, imageData);
+    
+    // else BMP
+    // glPixelStorei(GL_UNPACK_ALIGNMENT,4);
+    // static GLuint textureInt=1;
+    // glBindTexture(GL_TEXTURE_2D, textureInt); 
+    // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    // glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    // gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_BGR_EXT, GL_UNSIGNED_BYTE, imageData);
+    
+    free(imageData);
+    imageData=NULL;
 
     TRACE_EXIT();
 }
@@ -136,9 +184,6 @@ void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloa
 {
     TRACE_ENTER();
 
-    glPushMatrix();
-    glTranslatef(minx, miny, z);
-
     static int texSetup=0;
     if (!texSetup) 
     {
@@ -146,13 +191,16 @@ void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloa
         texSetup=1;
     }
 
+    glPushMatrix();
+    glTranslatef(minx, miny, z);
+
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-    glColor4f(1.0,1.0,1.0,0.0);
+    // glColor4f(1.0,1.0,1.0,0.0);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_LIGHTING);
-	static const GLfloat black[]={0.0,0.0,0.0,1.0};
-    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE, black);
+	// static const GLfloat blendColor[]={1.0,1.0,1.0,1.0};
+    // glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE, blendColor);
 
     // Draw blank black background, larger than the image
     glBegin(GL_QUADS);
@@ -161,10 +209,14 @@ void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloa
         glVertex3f(maxx*2, maxy*2, -1.0);
         glVertex3f(maxx*2, -maxy*2, -1.0);
 
-        glTexCoord2f(0,1); glVertex2f(minx,miny);       // This may seem backwards, but it works.
-        glTexCoord2f(0,0); glVertex2f(minx,maxy);       // This may seem backwards, but it works.
-        glTexCoord2f(1,0); glVertex2f(maxx,maxy);       // This may seem backwards, but it works.
-        glTexCoord2f(1,1); glVertex2f(maxx,miny);       // This may seem backwards, but it works.
+        // glTexCoord2f(0,1); glVertex2f(minx,miny);       // This may seem backwards, but it works.
+        // glTexCoord2f(0,0); glVertex2f(minx,maxy);       // This may seem backwards, but it works.
+        // glTexCoord2f(1,0); glVertex2f(maxx,maxy);       // This may seem backwards, but it works.
+        // glTexCoord2f(1,1); glVertex2f(maxx,miny);       // This may seem backwards, but it works.
+        glTexCoord2f(0,0); glVertex2f(minx,miny);       // This may seem backwards, but it works.
+        glTexCoord2f(1,0); glVertex2f(maxx,miny);       // This may seem backwards, but it works.
+        glTexCoord2f(1,1); glVertex2f(maxx,maxy);       // This may seem backwards, but it works.
+        glTexCoord2f(0,1); glVertex2f(minx,maxy);       // This may seem backwards, but it works.
     glEnd();
     glDisable(GL_TEXTURE_2D); 
     glDisable(GL_LIGHTING);

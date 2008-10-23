@@ -40,6 +40,7 @@ HEADERS += manetglview.h  \
          watcherScrollingGraphControl.h \
          watcherMainWindow.h \
          graphPlot.h \
+         bitmap.h \
          watcherGraphDialog.h \
          legacyWatcher/backgroundImage.h \
          legacyWatcher/skybox.h \
@@ -55,6 +56,7 @@ SOURCES += \
     watcherScrollingGraphControl.cpp \
     watcherMainWindow.cpp \
     graphPlot.cpp \
+    bitmap.cpp \
     watcherGraphDialog.cpp \
     legacyWatcher/des.cpp \
     legacyWatcher/metric.c \

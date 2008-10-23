@@ -16,6 +16,9 @@ namespace watcher
             // Or bad image format.
             bool loadPPMFile(const char *filename);
 
+            // Loads a BMP/DIB file, returns false on error
+            bool loadBMPFile(const char *filename);
+
             void drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloat maxy, GLfloat z);
 
         protected:
@@ -30,6 +33,9 @@ namespace watcher
 
             GLfloat envColor[4];
             GLfloat borderColor[4];
+
+            GLenum imageFormat;
+            GLenum imageType;
 
             DECLARE_LOGGER();
     };

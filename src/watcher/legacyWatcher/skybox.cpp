@@ -55,7 +55,7 @@ void Skybox::drawSkybox(GLfloat camX, GLfloat camY, GLfloat camZ)
 
     // Render the front quad
     // glBindTexture(GL_TEXTURE_2D, _skybox[0]);
-    glColor4fv(skyColor);
+    // glColor4fv(skyColor);
     glBegin(GL_QUADS);
     glNormal3f( 0.0f, 0.0f, 1.0f); 
     glVertex3f(  width, -width, -width );
@@ -102,7 +102,7 @@ void Skybox::drawSkybox(GLfloat camX, GLfloat camY, GLfloat camZ)
 
     // Render the bottom quad
     // glBindTexture(GL_TEXTURE_2D, _skybox[5]);
-    glColor4fv(groundColor);
+    // glColor4fv(groundColor);
     glBegin(GL_QUADS);
     glVertex3f( -width, -width, -width );
     glVertex3f( -width, -width,  width );
