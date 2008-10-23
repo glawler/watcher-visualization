@@ -37,7 +37,12 @@ def doLoop(iface):
         currBytesTx=getBytesTx(iface)
         bw=(currBytesTx-prevBytesTx)/8.0
         print 'Sending ', str(bw), 'bytes transfered to the watcher'
-        retCode=subprocess.call(['watchergraphtest', '-g', 'Bandwidth', '-d', str(bw)])
+        try:
+            retCode=subprocess.call(['watchergraphtest', '-g', 'Bandwidth', '-d', str(bw)])
+        except OSError:
+            print 'Caught exception when trying to run watchergraphtest, is it in your $PATH?'
+            print 'If not, type \'export $PATH=$PATH:/path/to/dir/with/watchergraphtest/in/it\' in this shell'
+            sys.exit(1)
         prevBytesTx=currBytesTx
 
 if __name__ == "__main__":
