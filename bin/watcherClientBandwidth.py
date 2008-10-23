@@ -22,7 +22,6 @@ def getBytesTx(iface):
     sys.exit(1)
 
 def listIfaces():
-    ifaces=[]
     print 'Interfaces on this machine are:'
     with open('/proc/net/dev') as f:
         for line in f:
