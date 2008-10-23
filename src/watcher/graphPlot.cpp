@@ -40,15 +40,18 @@ void GraphCurve::setColor(const QColor &color)
     TRACE_EXIT();
 }
 
-GraphPlot::GraphPlot(QWidget *parent, const QString &title_) : 
-    QwtPlot(parent), title(title_), timeDataSize(60)
+GraphPlot::GraphPlot(QWidget *parent, const QString &title_) : QwtPlot(parent), title(title_), timeDataSize(60)
 {
     TRACE_ENTER();
     timeData.reserve(timeDataSize); 
+    zeroData.reserve(timeDataSize);
 
     // Initialize time data to 1, 2, ... sizeof(timeData)-1
     for (int i=timeDataSize; i>0; i--)
+    {
         timeData.push_back(i);
+        zeroData.push_back(0.0);
+    }
 
     setTitle(title);
 
@@ -123,7 +126,12 @@ void GraphPlot::timerEvent(QTimerEvent * /*event*/)
         else
             d->second->pointSet=false;  // reset for next go around.
 
-        d->second->curve->setData(timeData, d->second->data);
+        // If the curve is not visible, don't let it affect the scaling of the y-axis, by
+        // setting it's data to zeroData
+        if (d->second->curve->isVisible())
+            d->second->curve->setData(timeData, d->second->data);
+        else
+            d->second->curve->setData(timeData, zeroData); 
     }
 
     replot(); 

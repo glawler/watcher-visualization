@@ -57,6 +57,7 @@ namespace watcher
         protected:
             QString title;
             QwtArray<double> timeData;
+            QwtArray<double> zeroData;
             const int timeDataSize;
 
             typedef struct
