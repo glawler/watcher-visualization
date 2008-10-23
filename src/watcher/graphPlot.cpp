@@ -220,6 +220,8 @@ void GraphPlot::addCurve(unsigned int curveId)
     data->curve->setStyle(QwtPlotCurve::Lines);
     data->curve->attach(this);
 
+    curveAndLegendVisible(curveId, false);
+
     LOG_DEBUG("Created new curve " << (0xFF & curveId)); 
     TRACE_EXIT();
 }
