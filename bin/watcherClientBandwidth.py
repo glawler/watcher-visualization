@@ -17,7 +17,19 @@ def getBytesTx(iface):
             if iface in line:
                 data=line.replace(':', ' ').split()
                 return int(data[1])
-    return 0
+    print 'Error: did not find interface', iface, ' in list of network devices'
+    listIfaces()
+    sys.exit(1)
+
+def listIfaces():
+    ifaces=[]
+    print 'Interfaces on this machine are:'
+    with open('/proc/net/dev') as f:
+        for line in f:
+            found=re.search('(\w*):\d*', line)
+            if found:
+                print found.group(1)
+
 
 def doLoop(iface):
     prevBytesTx=getBytesTx(iface)
@@ -30,6 +42,11 @@ def doLoop(iface):
         prevBytesTx=currBytesTx
 
 if __name__ == "__main__":
-    doLoop('eth1')
+    import sys
+    if len(sys.argv)!=2:
+        print 'Usage:', sys.argv[0], ' network_interface'
+        listIfaces()
+        sys.exit(1)
+    doLoop(sys.argv[1])
 
 
