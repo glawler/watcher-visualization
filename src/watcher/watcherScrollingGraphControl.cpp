@@ -120,7 +120,6 @@ void WatcherScrollingGraphControl::showGraphDialog(const std::string &graphName,
     else
         graphDialogMap[graphName]->hide();
 
-    emit bandwidthDialogShowed(show);
 
     TRACE_EXIT();
 }
@@ -129,6 +128,7 @@ void WatcherScrollingGraphControl::showBandwidthGraphDialog(bool show)
 {
     TRACE_ENTER();
     showGraphDialog("Bandwidth", show); 
+    emit bandwidthDialogShowed(show);
     TRACE_EXIT();
 }
 
@@ -136,6 +136,7 @@ void WatcherScrollingGraphControl::showLoadAverageDialog(bool show)
 {
     TRACE_ENTER();
     showGraphDialog("Load Average", show); 
+    emit loadAverageDialogShowed(show);
     TRACE_EXIT();
 }
 

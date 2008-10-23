@@ -49,7 +49,7 @@ namespace watcher
             signals:
 
                 void bandwidthDialogShowed(bool show);
-                void cpuUsageDialogShowed(bool show);
+                void loadAverageDialogShowed(bool show);
                 void graphDialogShowed(QString graphName, bool show);
 
                 void nodeDataInGraphsShowed(unsigned int nodeId, bool show);
