@@ -103,17 +103,15 @@ void WatcherScrollingGraphControl::createDialog(const std::string &label)
     TRACE_EXIT();
 }
 
-void WatcherScrollingGraphControl::showBandwidthGraphDialog(bool show)
+void WatcherScrollingGraphControl::showGraphDialog(const std::string &graphName, const bool show)
 {
     TRACE_ENTER();
-
     LOG_DEBUG("show dialog graph -> " << (show?"true":"false")); 
 
-    const char *graphName="Bandwidth"; 
     GraphPlotMap::const_iterator gp=graphPlotMap.find(graphName);
     if (gp==graphPlotMap.end())
     {
-        LOG_DEBUG("User wants to show bandwidth graph - but we don't have any testnode bandwidth data. Creating empty dialog and graph.\n"); 
+        LOG_DEBUG("User wants to show " << graphName << " graph - but we don't have any testnode data for that graph. Creating empty dialog and graph.\n"); 
         createDialog(graphName);
     }
 
@@ -127,21 +125,20 @@ void WatcherScrollingGraphControl::showBandwidthGraphDialog(bool show)
     TRACE_EXIT();
 }
 
-void WatcherScrollingGraphControl::showCPUUsageDialog(bool show)
+void WatcherScrollingGraphControl::showBandwidthGraphDialog(bool show)
 {
     TRACE_ENTER();
-    QMessageBox::information(this, tr("Not implemented"), QString("The CPU usage graph is not yet implemented")); 
-    emit cpuUsageDialogShowed(show);
+    showGraphDialog("Bandwidth", show); 
     TRACE_EXIT();
 }
 
-void WatcherScrollingGraphControl::showGraphDialog(QString graphName, bool show)
+void WatcherScrollingGraphControl::showLoadAverageDialog(bool show)
 {
     TRACE_ENTER();
-    QMessageBox::information(this, tr("Not implemented"), QString("The generic show usage graph is not yet implemented")); 
-    emit graphDialogShowed(graphName, show);
+    showGraphDialog("Load Average", show); 
     TRACE_EXIT();
 }
+
 void WatcherScrollingGraphControl::showNodeDataInGraphs(unsigned int nodeId, bool show)
 {
     TRACE_ENTER();

@@ -61,13 +61,13 @@ int main(int argc, char *argv[])
         QObject::connect(ui.actionGraphBandwidth, SIGNAL(toggled(bool)), sgc, SLOT(showBandwidthGraphDialog(bool)));
         QObject::connect(sgc, SIGNAL(bandwidthDialogShowed(bool)), ui.actionGraphBandwidth, SLOT(setChecked(bool)));
 
-        QObject::connect(ui.actionGraphCPUUsage, SIGNAL(toggled(bool)), sgc, SLOT(showCPUUsageDialog(bool)));
-        QObject::connect(sgc, SIGNAL(cpuUsageDialogShowed(bool)), ui.actionGraphCPUUsage, SLOT(setChecked(bool)));
+        QObject::connect(ui.actionGraphLoadAverage, SIGNAL(toggled(bool)), sgc, SLOT(showLoadAverageDialog(bool)));
+        QObject::connect(sgc, SIGNAL(cpuUsageDialogShowed(bool)), ui.actionGraphLoadAverage, SLOT(setChecked(bool)));
 
         // Support for generic graph-name-based dialogs is not yet supported by the main GUI window
         // Need to figure out how to do dynamic menus (or somesuch). 
-        // QObject::connect(ui.actionGraphCPUUsage, SIGNAL(toggled(bool)), sgc, SLOT(showCPUUsageDialog(bool)));
-        // QObject::connect(sgc, SIGNAL(cpuUsageDialogShowed(bool)), ui.actionGraphCPUUsage, SLOT(toggled(bool)));
+        // QObject::connect(ui.actionGraphLoadAverage, SIGNAL(toggled(bool)), sgc, SLOT(showLoadAverageDialog(bool)));
+        // QObject::connect(sgc, SIGNAL(cpuUsageDialogShowed(bool)), ui.actionGraphLoadAverage, SLOT(toggled(bool)));
 
         QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsToggled(unsigned int)), 
                           sgc, SLOT(toggleNodeDataInGraphs(unsigned int)));

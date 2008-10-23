@@ -187,7 +187,7 @@
     <property name="title" >
      <string>&amp;Graphs</string>
     </property>
-    <addaction name="actionGraphCPUUsage" />
+    <addaction name="actionGraphLoadAverage" />
     <addaction name="actionGraphBandwidth" />
    </widget>
    <addaction name="menuLayers" />
@@ -498,15 +498,15 @@
     <string>&amp;Background Image</string>
    </property>
   </action>
-  <action name="actionGraphCPUUsage" >
+  <action name="actionGraphLoadAverage" >
    <property name="checkable" >
     <bool>true</bool>
    </property>
    <property name="enabled" >
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text" >
-    <string>CPU Usage</string>
+    <string>Load Average</string>
    </property>
   </action>
   <action name="actionGraphBandwidth" >

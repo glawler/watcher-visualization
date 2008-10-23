@@ -35,9 +35,13 @@ namespace watcher
 
             public slots:
 
+                // General case of show dialog.
+                void showGraphDialog(const std::string &graphName, bool show);
+
+                // Specific case of showDialog, just calls the general case with the appropriate string.
                 void showBandwidthGraphDialog(bool show);
-                void showCPUUsageDialog(bool show);
-                void showGraphDialog(QString graphName, bool show);
+                void showLoadAverageDialog(bool show);
+
 
                 void showNodeDataInGraphs(unsigned int nodeId, bool show);
                 void toggleNodeDataInGraphs(unsigned int nodeId);
