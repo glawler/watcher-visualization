@@ -1319,7 +1319,6 @@ static void crossProduct(double *c, double a[3], double b[3])
 // static void drawManet(void)
 void legacyWatcher::drawManet(void)
 {
-    // static const GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
     static const GLfloat blue[] = { 0.2f, 0.2f, 1.0f, 1.0f };
     static const GLfloat blue2[] = { 0.8f, 0.8f, 1.0f, 1.0f };
     static const GLfloat black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -1345,6 +1344,7 @@ void legacyWatcher::drawManet(void)
 
     // glPushMatrix();
     // glTranslatef(0.0, 0.0, -50.0);
+    // static const GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
     // glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
     // glPopMatrix();
 
@@ -1353,6 +1353,7 @@ void legacyWatcher::drawManet(void)
         sb->drawSkybox(globalManetAdj.angleX, globalManetAdj.angleY, globalManetAdj.angleZ);
 
     glPushMatrix();
+
     struct tm tm;
     time_t curtime_secs = curtime / 1000;
     if (localtime_r(&curtime_secs, &tm))
@@ -1375,6 +1376,7 @@ void legacyWatcher::drawManet(void)
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
     else
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
+
     drawText(-400, -360, 0, globalDispStat.scaleText[NODE_DISPLAY_MANET], buff, 1.0);
 
     if (globalShowPositionFlag)
@@ -2499,7 +2501,6 @@ void legacyWatcher::setBackgroundColor(float r, float g, float b, float a)
 
 void legacyWatcher::initWatcherGL()
 {
-
     // glEnable(GL_DEPTH_TEST);
     // glEnable(GL_BLEND);
     // // glEnable(GL_LINE_SMOOTH);
@@ -2508,7 +2509,6 @@ void legacyWatcher::initWatcherGL()
     // glShadeModel(GL_SMOOTH);
 
     // glEnable(GL_LIGHTING);
-
 
     // // GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };    // Ambient light is not full strength, but white
     // // glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
@@ -2535,6 +2535,11 @@ void legacyWatcher::initWatcherGL()
     // Set the shading model
     glShadeModel(GL_SMOOTH); 
 
+    // Uncomment these if you want to use glColor(c) instead of 
+    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, c);
+    // glEnable(GL_COLOR_MATERIAL);
+    // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
     // Spec is LIGHT0
     GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
     GLfloat posSpecLight[]= { 1000.0f, 1000.0f, 1000.0f, 1.0f };
@@ -2543,22 +2548,20 @@ void legacyWatcher::initWatcherGL()
     glEnable(GL_LIGHT0); 
 
     // Amb is LIGHT1
-    // GLfloat ambLight[] = { 0.5, 0.5, 0.5, 1.0 };
-    // glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
-    // glEnable(GL_LIGHT1);
-    //
+    GLfloat ambLight[] = { 0.5, 0.5, 0.5, 1.0 };
+    glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
+    glEnable(GL_LIGHT1);
+    
     // or use the ambient light model
     // GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
     // glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
     
     // Diffuse is LIGHT2
-    // GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
-    // glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
-    // GLfloat posDiffLight[]= { 100.0, 0.0f, 100.0f, 1.0f };
-    // glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
-    // glEnable(GL_LIGHT2);
-
-
+    GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
+    GLfloat posDiffLight[]= { 1000.0, 1000.0f, 1000.0f, 1.0f };
+    glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
+    glEnable(GL_LIGHT2);
 }
 
 static void manetWindowInit(void)
