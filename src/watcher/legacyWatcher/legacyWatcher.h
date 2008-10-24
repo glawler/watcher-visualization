@@ -120,6 +120,9 @@ namespace legacyWatcher
     // Return the unique id for the node that is at the given coords.
     unsigned int getNodeIdAtCoords(const int x, const int y);
 
+    // args must between 1.0 and 0.0.
+    void setBackgroundColor(float r, float g, float b, float a); 
+
 }; // namespace legacyWatcher
 
 #endif

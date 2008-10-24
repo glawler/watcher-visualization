@@ -1319,7 +1319,7 @@ static void crossProduct(double *c, double a[3], double b[3])
 // static void drawManet(void)
 void legacyWatcher::drawManet(void)
 {
-    static const GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
+    // static const GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
     static const GLfloat blue[] = { 0.2f, 0.2f, 1.0f, 1.0f };
     static const GLfloat blue2[] = { 0.8f, 0.8f, 1.0f, 1.0f };
     static const GLfloat black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -1336,10 +1336,6 @@ void legacyWatcher::drawManet(void)
     int *phy;
     char buff[128];
 
-    watcher::Skybox *sb=watcher::Skybox::getSkybox();
-    if (sb)
-        sb->drawSkybox(globalManetAdj.angleX, globalManetAdj.angleY, globalManetAdj.angleZ);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
@@ -1347,10 +1343,14 @@ void legacyWatcher::drawManet(void)
 
     glTranslatef(0.0, 0.0, -20.0);
 
-    glPushMatrix();
-    glTranslatef(0.0, 0.0, -50.0);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-    glPopMatrix();
+    // glPushMatrix();
+    // glTranslatef(0.0, 0.0, -50.0);
+    // glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+    // glPopMatrix();
+
+    watcher::Skybox *sb=watcher::Skybox::getSkybox();
+    if (sb)
+        sb->drawSkybox(globalManetAdj.angleX, globalManetAdj.angleY, globalManetAdj.angleZ);
 
     glPushMatrix();
     struct tm tm;
@@ -2490,32 +2490,75 @@ static void update(manet *m)
     }
 }
 
+void legacyWatcher::setBackgroundColor(float r, float g, float b, float a)
+{
+    // Set the default clear color
+    // Seems to control the background "diffuse" color.
+    glClearColor(r,g,b,a);
+}
+
 void legacyWatcher::initWatcherGL()
 {
 
+    // glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_BLEND);
+    // // glEnable(GL_LINE_SMOOTH);
+    // // glEnable(GL_CULL_FACE); 
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glShadeModel(GL_SMOOTH);
+
+    // glEnable(GL_LIGHTING);
+
+
+    // // GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };    // Ambient light is not full strength, but white
+    // // glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
+    // // glLightfv(GL_LIGHT1, GL_SPECULAR, ambLight);
+
+    // // GLfloat diffLight[]= { 1.0f, 1.0f, 1.0f, 1.0f };    // diffuse light is full strength
+    // // glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight);
+
+    // // GLfloat posLight[]= { 200.0f, 200.0f, 200.0f, 1.0f }; // light is over right shoulder
+    // // glLightfv(GL_LIGHT1, GL_POSITION, posLight);
+
+    // // glEnable(GL_LIGHT1);
+
+    // enable lighting
+    glEnable(GL_LIGHTING); 
+
+    // enable objects behind one another
     glEnable(GL_DEPTH_TEST);
+
+    // Allow colors to bleed through by alpha (orange edges when nieghor and one hop routing draw the same link).
     glEnable(GL_BLEND);
-    // glEnable(GL_LINE_SMOOTH);
-    // glEnable(GL_CULL_FACE); 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glShadeModel(GL_SMOOTH);
+
+    // Set the shading model
+    glShadeModel(GL_SMOOTH); 
+
+    // Spec is LIGHT0
+    GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
+    GLfloat posSpecLight[]= { 1000.0f, 1000.0f, 1000.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
+    glEnable(GL_LIGHT0); 
+
+    // Amb is LIGHT1
+    // GLfloat ambLight[] = { 0.5, 0.5, 0.5, 1.0 };
+    // glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
+    // glEnable(GL_LIGHT1);
+    //
+    // or use the ambient light model
+    // GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    // glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+    
+    // Diffuse is LIGHT2
+    // GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
+    // glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
+    // GLfloat posDiffLight[]= { 100.0, 0.0f, 100.0f, 1.0f };
+    // glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
+    // glEnable(GL_LIGHT2);
 
 
-    glEnable(GL_LIGHTING);
-
-    glClearColor(1.0, 1.0, 1.0, 0.0);
-
-    GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };    // Ambient light is not full strength, but white
-    glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
-    // glLightfv(GL_LIGHT1, GL_SPECULAR, ambLight);
-
-    GLfloat diffLight[]= { 1.0f, 1.0f, 1.0f, 1.0f };    // diffuse light is full strength
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight);
-
-    GLfloat posLight[]= { 200.0f, 200.0f, 200.0f, 1.0f }; // light is over right shoulder
-    glLightfv(GL_LIGHT1, GL_POSITION, posLight);
-
-    glEnable(GL_LIGHT1);
 }
 
 static void manetWindowInit(void)

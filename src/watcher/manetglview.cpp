@@ -246,14 +246,25 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
             NodeDisplayStatus &ds=legacyWatcher::getDisplayStatus();
             emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
         }
-
         updateGL();
     }
+    if (nativeKey=='C')
+    {
+        LOG_DEBUG("Got cap C in keyPressEvent - spawning color chooser for background color"); 
+        QRgb rgb=0xffffffff;
+        bool ok=false;
+        rgb=QColorDialog::getRgba(rgb, &ok);
+        if (ok)
+        {
+            legacyWatcher::setBackgroundColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
+        }
+    }
+
     // legacyWatcher::Key() does not handle arrow keys
     else if (qtKey==Qt::Key_Left || 
-             qtKey==Qt::Key_Up   || 
-             qtKey==Qt::Key_Right|| 
-             qtKey==Qt::Key_Down)
+            qtKey==Qt::Key_Up   || 
+            qtKey==Qt::Key_Right|| 
+            qtKey==Qt::Key_Down)
     {
         if (qtKey==Qt::Key_Left)
             legacyWatcher::shiftCenterRight();
