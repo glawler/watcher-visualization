@@ -28,6 +28,8 @@ bool watcher::initConfig(
             {0, 0, 0, 0}
         };
 
+        opterr=0; // Don't print message just because we see an option we don't understand.
+
         char args[] = { configFileChar, ':', '\n' };
         c = getopt_long(argc, argv, args, long_options, &option_index);
 
@@ -54,10 +56,7 @@ bool watcher::initConfig(
                 cerr << "Unable to read file " << optarg << " given as configuration file on the command line." << endl;
             }
         }
-        else
-        {
-            printf("?? getopt returned character code 0%o ??\n", c);
-        }
+        // else - ignore things we don't understand
     }
     return false;
 }

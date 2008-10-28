@@ -6,7 +6,9 @@
 #endif
 
 #include "des.h"
+
 #include "watcherPropertyData.h"
+using namespace watcher; 
 
 /*  Copyright (C) 2005  McAfee Inc. 
  *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO

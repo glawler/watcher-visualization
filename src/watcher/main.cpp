@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
     if (!config.lookupValue("logProperties", logConf))
     {
         cerr << "Unable to find logproperties setting in the configuration file, using default: " << logConf << endl;
+        config.getRoot().add("logProperties", Setting::TypeString)=logConf;
     }
 
     LOAD_LOG_PROPS(logConf); 

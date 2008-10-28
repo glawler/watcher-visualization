@@ -1320,7 +1320,7 @@ static void crossProduct(double *c, double a[3], double b[3])
 void legacyWatcher::drawManet(void)
 {
     static const GLfloat blue[] = { 0.2f, 0.2f, 1.0f, 1.0f };
-    static const GLfloat blue2[] = { 0.8f, 0.8f, 1.0f, 1.0f };
+    // static const GLfloat blue2[] = { 0.8f, 0.8f, 1.0f, 1.0f };
     static const GLfloat black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 #if 0
     static const GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -2855,20 +2855,8 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
         WatcherPropertyData *propp=new WatcherPropertyData;  // I don't know when this data gets deleted.  Is there a watcher cleanup function that gets called as shutdown?
         GlobalWatcherPropertiesList.push_back(propp); 
 
-        propp->identifier=globalManet->nlist[i].addr;  // indexed by node address.
-        propp->shape= WATCHER_SHAPE_CIRCLE; 
-        propp->sparkle=0;
-        propp->spin=0;
-        propp->flash=0;
-        propp->size=1.0;
-
-        propp->nextSpinUpdate=0;    
-        propp->spinRotation_x=0;
-        propp->spinRotation_y=0;
-        propp->spinRotation_z=0;
-
-        propp->nextFlashUpdate=0;    
-        propp->isFlashed=0;
+        propp->identifier=globalManet->nlist[i].addr;           // indexed by node address.
+        watcher::loadWatcherPropertyData(propp);      // loadProperties() uses identifier to load properties from the watcher.cfg file. 
     }
 
     firstStep(globalManet, 0);
