@@ -1175,8 +1175,9 @@ static void nodeDrawFn(
 
     if (!dispStat->monochromeMode)            /* in mono-mode, just leave the material black...   */
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, nodelabel);
-    sprintf(buff,"%d",us->addr & 0xFF);
+    sprintf(buff,"%d.%d",(us->addr>>8)&0xFF, us->addr & 0xFF);
     drawText(us->x,us->y+6,us->z+5,dispStat->scaleText[dispType], buff);
+
     nodeDrawLabel(us, dispType, dispStat, us->x, us->y, us->z);
     nodeLabelTimeout(us);
 
