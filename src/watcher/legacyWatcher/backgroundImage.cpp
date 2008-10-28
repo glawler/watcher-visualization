@@ -185,20 +185,6 @@ void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloa
 {
     TRACE_ENTER();
 
-    // glPushMatrix();
-    // glTranslatef(minx, miny, z);
-    // glPushAttrib(GL_ALL_ATTRIB_BITS);
-    // float c[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, c);
-    // glBegin(GL_QUADS);
-    //     glVertex3f(-maxx*2, -maxy*2, -1.0);
-    //     glVertex3f(-maxx*2, maxy*2, -1.0);
-    //     glVertex3f(maxx*2, maxy*2, -1.0);
-    //     glVertex3f(maxx*2, -maxy*2, -1.0);
-    // glEnd();
-    // glPopAttrib();
-    // glPopMatrix();
-
     static int texSetup=0;
     if (!texSetup) 
     {
@@ -207,20 +193,16 @@ void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloa
     }
 
     glPushMatrix();
-    glTranslatef(minx, miny, z);
+    glTranslatef(0, 0, z);
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glEnable(GL_TEXTURE_2D); 
     glDisable(GL_LIGHTING);
     glDisable(GL_BLEND); 
     glBegin(GL_QUADS);
-        // glTexCoord2f(0,1); glVertex2f(minx,miny);       // This may seem backwards, but it works.
-        // glTexCoord2f(0,0); glVertex2f(minx,maxy);       // This may seem backwards, but it works.
-        // glTexCoord2f(1,0); glVertex2f(maxx,maxy);       // This may seem backwards, but it works.
-        // glTexCoord2f(1,1); glVertex2f(maxx,miny);       // This may seem backwards, but it works.
-        glTexCoord2f(0,0); glVertex2f(minx,miny);       // This may seem backwards, but it works.
-        glTexCoord2f(1,0); glVertex2f(maxx,miny);       // This may seem backwards, but it works.
-        glTexCoord2f(1,1); glVertex2f(maxx,maxy);       // This may seem backwards, but it works.
-        glTexCoord2f(0,1); glVertex2f(minx,maxy);       // This may seem backwards, but it works.
+        glTexCoord2f(0,0); glVertex2f(minx,miny);
+        glTexCoord2f(1,0); glVertex2f(maxx,miny);
+        glTexCoord2f(1,1); glVertex2f(maxx,maxy);
+        glTexCoord2f(0,1); glVertex2f(minx,maxy);
     glEnd();
     glPopAttrib();
     glPopMatrix();

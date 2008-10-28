@@ -1348,9 +1348,9 @@ void legacyWatcher::drawManet(void)
     // glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
     // glPopMatrix();
 
-    watcher::Skybox *sb=watcher::Skybox::getSkybox();
-    if (sb)
-        sb->drawSkybox(globalManetAdj.angleX, globalManetAdj.angleY, globalManetAdj.angleZ);
+    // watcher::Skybox *sb=watcher::Skybox::getSkybox();
+    // if (sb)
+    //     sb->drawSkybox(globalManetAdj.angleX, globalManetAdj.angleY, globalManetAdj.angleZ);
 
     glPushMatrix();
 
@@ -1390,55 +1390,6 @@ void legacyWatcher::drawManet(void)
         drawText(-200, -360, 0, globalDispStat.scaleText[NODE_DISPLAY_MANET], buff, 1.0);
     }
 
-    {
-        static destime lasttick = 0;
-        double stepangle, cx = m->numnodes / 2.0;
-        double a[3], b[3], c[3];
-        int x, y;
-
-        if (lasttick == 0)
-            lasttick = getMilliTime();
-        stepangle = (5.0 / 1000.0) * (getMilliTime() - lasttick);
-
-        if ((globalGraphManet != NULL) && (globalDispStat.familyBitmap & (1 << COMMUNICATIONS_LABEL_FAMILY_FLOATINGGRAPH)))
-        {
-            glTranslatef(+300.0, -300.0, 0.0);
-            glRotatef(stepangle, 0.0, 1.0, 0.0);
-            glRotatef(-90.0, 1.0, 0.0, 0.0);
-
-            glScaled(10.0, 10.0, 10.0);
-            for(y = 0; y < (m->numnodes - 1); y++)
-            {
-                glBegin(GL_TRIANGLE_STRIP);
-                glVertex3f(0.0 - cx, y - cx, globalGraphManet[0 + y * m->numnodes]);
-                glVertex3f(0.0 - cx, y + 1 - cx, globalGraphManet[0 + (y + 1) * m->numnodes]);
-                for(x = 0; x < (m->numnodes - 1); x++)
-                {
-                    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ((y & 1) ^ (x&1)) ? blue : blue2);
-                    a[0] = 1.0;
-                    a[1] = 0.0;
-                    a[2] = globalGraphManet[(x + 1) + y * m->numnodes] - globalGraphManet[(x + 0) + y * m->numnodes];
-                    b[0] = 1.0;
-                    b[1] = -1.0;
-                    b[2] = globalGraphManet[(x + 1) + y * m->numnodes] - globalGraphManet[(x + 0) + (y + 1) * m->numnodes];
-                    crossProduct(c, a, b);
-                    glVertex3f(x + 1 - cx, y - cx, globalGraphManet[(x + 1) + y * m->numnodes]);
-                    glNormal3d(c[0], c[1], c[2]);
-
-                    a[0] = 0.0;
-                    a[1] = 1.0;
-                    a[2] = globalGraphManet[(x + 1) + (y + 1) * m->numnodes] - globalGraphManet[(x + 1) + (y + 0) * m->numnodes];
-                    b[0] = 1.0;
-                    b[1] = 0.0;
-                    b[2] = globalGraphManet[(x + 1) + (y + 1) * m->numnodes] - globalGraphManet[(x + 0) + (y + 1) * m->numnodes];
-                    crossProduct(c, a, b);
-                    glVertex3f(x + 1 - cx, y + 1 - cx, globalGraphManet[(x + 1) + (y + 1) * m->numnodes]);
-                }
-                glEnd();
-            }
-        }
-    }
-
     glPopMatrix();
 
     glScalef(globalManetAdj.scaleX, globalManetAdj.scaleY, globalManetAdj.scaleZ);
@@ -1446,7 +1397,6 @@ void legacyWatcher::drawManet(void)
     glRotatef(globalManetAdj.angleY, 0.0, 1.0, 0.0);
     glRotatef(globalManetAdj.angleZ, 0.0, 0.0, 1.0);
     glTranslatef(globalManetAdj.shiftX, globalManetAdj.shiftY, globalManetAdj.shiftZ);
-
 
     /* This is cut-and-pasted from manetDraw(), for now
     */
@@ -1492,7 +1442,7 @@ void legacyWatcher::drawManet(void)
     if (globalDispStat.backgroundImage)
     {
         struct mobilityManetState *m=globalManet->mobility;
-        globalBGImage.drawImage(0, m->maxx, 0, m->maxy, -30); 
+        globalBGImage.drawImage(-(m->maxx/3), m->maxx+(m->maxx/3), -(m->maxy/3), m->maxy+(m->maxy/3), -25); 
     }
 
     glFlush();
