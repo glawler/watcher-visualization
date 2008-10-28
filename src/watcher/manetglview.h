@@ -45,7 +45,6 @@ class manetGLView : public QGLWidget
         void toggleCorrelation3Hop(bool isOn);
         void toggleWormholeRouting(bool isOn);
         void toggleWormholeRoutingOnehop(bool isOn);
-        void toggleFloatingGraph(bool isOn);
         void toggleNormPaths(bool isOn);
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);
@@ -80,7 +79,6 @@ class manetGLView : public QGLWidget
         void correlation3HopToggled(bool isOn);
         void wormholeRoutingToggled(bool isOn);
         void wormholeRoutingOnehopToggled(bool isOn);
-        void floatingGraphToggled(bool isOn);
         void normPathsToggled(bool isOn);
         void monochromeToggled(bool isOn);
         void threeDViewToggled(bool isOn); 

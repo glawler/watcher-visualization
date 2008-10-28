@@ -149,7 +149,6 @@
     <addaction name="actionNeighbors" />
     <addaction name="actionHierarchy" />
     <addaction name="menuRouting" />
-    <addaction name="actionFloatingGraph" />
     <addaction name="actionAnomPaths" />
     <addaction name="actionNormalPaths" />
     <addaction name="actionCorrelators" />
@@ -374,14 +373,6 @@
    </property>
    <property name="text" >
     <string>Wormhole Routing Oneho&amp;p</string>
-   </property>
-  </action>
-  <action name="actionFloatingGraph" >
-   <property name="checkable" >
-    <bool>true</bool>
-   </property>
-   <property name="text" >
-    <string>&amp;Floating Graph</string>
    </property>
   </action>
   <action name="actionAnomPaths" >
@@ -646,22 +637,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionFloatingGraph</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>toggleFloatingGraph(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionNeighbors</sender>
    <signal>toggled(bool)</signal>
    <receiver>manetGLViewWindow</receiver>
@@ -857,22 +832,6 @@
    <sender>manetGLViewWindow</sender>
    <signal>correlationToggled(bool)</signal>
    <receiver>actionCorrelators</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>floatingGraphToggled(bool)</signal>
-   <receiver>actionFloatingGraph</receiver>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel" >

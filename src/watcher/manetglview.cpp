@@ -49,7 +49,6 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     emit correlation3HopToggled(ds.familyBitmap & legacyWatcher::Correlation3Hop);
     emit wormholeRoutingToggled(ds.familyBitmap & legacyWatcher::WormholeRouting);
     emit wormholeRoutingOnehopToggled(ds.familyBitmap & legacyWatcher::WormholeRoutingOnehop);
-    emit floatingGraphToggled(ds.familyBitmap & legacyWatcher::FloatingGraph);
     emit normPathsToggled(ds.familyBitmap & legacyWatcher::NormPaths);
     emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
 
@@ -522,14 +521,6 @@ void manetGLView::toggleWormholeRoutingOnehop(bool isOn)
     TRACE_ENTER();
     legacyWatcher::layerToggle(legacyWatcher::WormholeRoutingOnehop, isOn);
     emit wormholeRoutingOnehopToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleFloatingGraph(bool isOn)
-{
-    TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::FloatingGraph, isOn);
-    emit floatingGraphToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
