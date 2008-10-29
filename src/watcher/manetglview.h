@@ -98,6 +98,9 @@ class manetGLView : public QGLWidget
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
 
+        // Emitted when view->backgroun image should be enabled/disabled.
+        void enableBackgroundImage(bool);
+
     protected:
         DECLARE_LOGGER();
 

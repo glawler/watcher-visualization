@@ -32,10 +32,11 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
 {
     TRACE_ENTER();
 
+    // legacy watcher think's it's main() is getting called. 
     legacyWatcher::legacyWatcherMain(argc, argv);
 
     // "main()" may have set different watcher layers, so we need to 
-    // tell anyone who is interested that the layer are set or not.
+    // grab the current values to toggle the GUI and set teh config.
     NodeDisplayStatus &ds = legacyWatcher::getDisplayStatus();
 
     // causes goodinw control buttons to show/not show.
@@ -84,6 +85,7 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
             legacyWatcher::layerToggle(layerVals[i].layer, boolVal);
         else
             layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
+        boolVal=false;
     }
      
     prop="nodes3d";
@@ -139,6 +141,8 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
         LOG_INFO("watcherBackgroundImageFile entry not found (or it equals \"none\") in configuration file, disabling background image functionality");
         if (strVal.empty())
             root.add(prop, libconfig::Setting::TypeString)="none";
+        toggleBackgroundImage(false);
+        emit enableBackgroundImage(false);
     }
     else
     {

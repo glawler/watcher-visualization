@@ -150,7 +150,6 @@
     <addaction name="actionHierarchy" />
     <addaction name="menuRouting" />
     <addaction name="actionAnomPaths" />
-    <addaction name="actionNormalPaths" />
     <addaction name="actionCorrelators" />
     <addaction name="actionCorrelatorPaths" />
     <addaction name="actionWormholeAlerts" />
@@ -653,22 +652,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionNormalPaths</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>toggleNormPaths(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionRoutingOneHop</sender>
    <signal>toggled(bool)</signal>
    <receiver>manetGLViewWindow</receiver>
@@ -864,22 +847,6 @@
    <sender>manetGLViewWindow</sender>
    <signal>neighborsToggled(bool)</signal>
    <receiver>actionNeighbors</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>454</x>
-     <y>295</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>normPathsToggled(bool)</signal>
-   <receiver>actionNormalPaths</receiver>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
@@ -1329,6 +1296,22 @@
    <signal>backgroundImageToggled(bool)</signal>
    <receiver>actionBackgroundImage</receiver>
    <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>enableBackgroundImage(bool)</signal>
+   <receiver>actionBackgroundImage</receiver>
+   <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>382</x>
