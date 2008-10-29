@@ -3,6 +3,7 @@
 
 #include "idsCommunications.h"  // for COMMUNICATIONS_LABEL_FAMILY_BANDWIDTH and the like
                                 // for globalDispStat
+#include "backgroundImage.h"                                
 
 namespace legacyWatcher
 {
@@ -122,6 +123,9 @@ namespace legacyWatcher
 
     // args must between 1.0 and 0.0.
     void setBackgroundColor(float r, float g, float b, float a); 
+
+    // Access to the background image. 
+    watcher::BackgroundImage &getBackgroundImage(void);
 
 }; // namespace legacyWatcher
 

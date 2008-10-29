@@ -1,1 +1,770 @@
 logProperties = "watcher.log.properties";
+watcherProperties : 
+{
+  node_192_168_2_101 : 
+  {
+    label = "101";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_102 : 
+  {
+    label = "102";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_103 : 
+  {
+    label = "103";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_104 : 
+  {
+    label = "104";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_105 : 
+  {
+    label = "105";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_106 : 
+  {
+    label = "106";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_107 : 
+  {
+    label = "107";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_108 : 
+  {
+    label = "108";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_109 : 
+  {
+    label = "109";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_110 : 
+  {
+    label = "110";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_111 : 
+  {
+    label = "111";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_112 : 
+  {
+    label = "112";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_113 : 
+  {
+    label = "113";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_114 : 
+  {
+    label = "114";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_115 : 
+  {
+    label = "115";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_116 : 
+  {
+    label = "116";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_117 : 
+  {
+    label = "117";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_119 : 
+  {
+    label = "119";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_120 : 
+  {
+    label = "120";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_121 : 
+  {
+    label = "121";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_122 : 
+  {
+    label = "122";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_123 : 
+  {
+    label = "123";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_124 : 
+  {
+    label = "124";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_125 : 
+  {
+    label = "125";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_126 : 
+  {
+    label = "126";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_127 : 
+  {
+    label = "127";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_128 : 
+  {
+    label = "128";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_129 : 
+  {
+    label = "129";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_130 : 
+  {
+    label = "130";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_131 : 
+  {
+    label = "131";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_133 : 
+  {
+    label = "133";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_134 : 
+  {
+    label = "134";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_135 : 
+  {
+    label = "135";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_136 : 
+  {
+    label = "136";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_137 : 
+  {
+    label = "137";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_138 : 
+  {
+    label = "138";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_139 : 
+  {
+    label = "139";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_140 : 
+  {
+    label = "140";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_141 : 
+  {
+    label = "141";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_142 : 
+  {
+    label = "142";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_143 : 
+  {
+    label = "143";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_144 : 
+  {
+    label = "144";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_145 : 
+  {
+    label = "145";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_147 : 
+  {
+    label = "147";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_2_148 : 
+  {
+    label = "148";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_1 : 
+  {
+    label = "1";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_2 : 
+  {
+    label = "2";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_3 : 
+  {
+    label = "3";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_4 : 
+  {
+    label = "4";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_5 : 
+  {
+    label = "5";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_6 : 
+  {
+    label = "6";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_7 : 
+  {
+    label = "7";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_8 : 
+  {
+    label = "8";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_9 : 
+  {
+    label = "9";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_10 : 
+  {
+    label = "10";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_11 : 
+  {
+    label = "11";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_157_12 : 
+  {
+    label = "12";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_13 : 
+  {
+    label = "13";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_14 : 
+  {
+    label = "14";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_15 : 
+  {
+    label = "15";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_16 : 
+  {
+    label = "16";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_17 : 
+  {
+    label = "17";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_18 : 
+  {
+    label = "18";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_19 : 
+  {
+    label = "19";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_20 : 
+  {
+    label = "20";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_21 : 
+  {
+    label = "21";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_22 : 
+  {
+    label = "22";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_23 : 
+  {
+    label = "23";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_158_24 : 
+  {
+    label = "24";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_25 : 
+  {
+    label = "25";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_26 : 
+  {
+    label = "26";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_27 : 
+  {
+    label = "27";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_28 : 
+  {
+    label = "28";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_29 : 
+  {
+    label = "29";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_30 : 
+  {
+    label = "30";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_31 : 
+  {
+    label = "31";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_32 : 
+  {
+    label = "32";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_33 : 
+  {
+    label = "33";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_34 : 
+  {
+    label = "34";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_35 : 
+  {
+    label = "35";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_159_36 : 
+  {
+    label = "36";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_37 : 
+  {
+    label = "37";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_38 : 
+  {
+    label = "38";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_39 : 
+  {
+    label = "39";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_40 : 
+  {
+    label = "40";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_41 : 
+  {
+    label = "41";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_42 : 
+  {
+    label = "42";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_43 : 
+  {
+    label = "43";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_44 : 
+  {
+    label = "44";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_45 : 
+  {
+    label = "45";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_46 : 
+  {
+    label = "46";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_47 : 
+  {
+    label = "47";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+  node_192_168_160_48 : 
+  {
+    label = "48";
+    shape = 0;
+    spin = false;
+    flash = false;
+    size = 1.0;
+  };
+};
+layers : 
+{
+  bandwidth = false;
+  undefined = false;
+  neighbors = true;
+  hierarchy = false;
+  routing = false;
+  routingOneHop = true;
+  antennaRadius = false;
+  sanityCheck = false;
+  anomPaths = false;
+  correlation = false;
+  alert = false;
+  correlation3Hop = false;
+  wormholeRouting = false;
+  wormholeRoutingOnehop = false;
+  normPaths = false;
+};
+nodes3d = true;
+monochrome = false;
+backgroundImage = true;
+watcherBackgroundImageFile = "/mnt/scratch/hd/ALC_20050908.bmp";

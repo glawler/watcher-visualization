@@ -10,6 +10,7 @@
 INIT_LOGGER(manetGLView, "manetGLView");
 
 using namespace watcher;
+using namespace legacyWatcher;
 using namespace std;
 
 manetGLView::manetGLView(QWidget *parent) : QGLWidget(parent), currentView(legacyWatcher::ManetView)
@@ -106,8 +107,6 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     else
         root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
 
-    sc.unlock();
-
     // Give the GUI the current toggle state of the display.
     emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
     emit undefinedToggled(ds.familyBitmap & legacyWatcher::Undefined);
@@ -128,6 +127,47 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     emit threeDViewToggled(ds.threeDView);
     emit monochromeToggled(ds.monochromeMode);
     emit backgroundImageToggled(ds.backgroundImage);
+
+    //
+    // Load background image
+    //
+ 
+    prop="watcherBackgroundImageFile"; 
+    string strVal;
+    if (!root.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
+    {
+        LOG_INFO("watcherBackgroundImageFile entry not found (or it equals \"none\") in configuration file, disabling background image functionality");
+        if (strVal.empty())
+            root.add(prop, libconfig::Setting::TypeString)="none";
+    }
+    else
+    {
+        BackgroundImage &bgImage=legacyWatcher::getBackgroundImage();
+        char *ext=rindex(strVal.data(), '.')+sizeof(char);
+        if (!ext)
+        {
+            LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
+            exit(1);
+        }
+        else if (0==strncasecmp(ext, "bmp", 3))
+        {
+            if (!bgImage.loadBMPFile(strVal.data()))
+            {
+                LOG_ERROR("Unable to load background BMP image in watcher from file: " << strVal); 
+                exit(1); 
+            }
+        }
+        else if (0==strncmp("ppm", ext, 3))
+        {
+            if (!bgImage.loadPPMFile(strVal.data()))
+            {
+                LOG_ERROR("Unable to load background PPM image in watcher from file: " << strVal); 
+                exit(1); 
+            }
+        }
+    }
+
+    sc.unlock();
 
     // 
     // Set up timer callbacks.

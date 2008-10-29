@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     string configFilename;
     singletonConfig &sc=singletonConfig::instance();
     sc.lock();
-    Config &config=sc.getConfig();
+    libconfig::Config &config=sc.getConfig();
     if (false==initConfig(config, argc, argv, configFilename, 'f'))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;

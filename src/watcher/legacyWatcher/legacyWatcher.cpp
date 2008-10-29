@@ -116,7 +116,9 @@ static NodeEdge *userGraph = NULL;
 static FloatingLabel *floatingLabelList = NULL;
 static destime curtime = 0, begintime = 0;
 static manetNode *globalSelectedNode = 0;
-static watcher::BackgroundImage globalBGImage;
+
+watcher::BackgroundImage globalBGImage; 
+
 // UNUSED NOW static int globalSelectedNodeScreenX;
 // UNUSED NOW static int globalSelectedNodeScreenY;
 static double globalSelectedNodeDeltaX;
@@ -190,6 +192,11 @@ void legacyWatcher::layerToggle(const Layer layer, const bool turnOn)
 NodeDisplayStatus &legacyWatcher::getDisplayStatus(void) 
 {
     return globalDispStat;
+}
+
+watcher::BackgroundImage &legacyWatcher::getBackgroundImage(void) 
+{
+    return globalBGImage;
 }
 
 void legacyWatcher::toggleMonochrome(bool isOn)
@@ -2759,55 +2766,6 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
     {
         fprintf(stderr, "could not open config file %s!\n", argc > 0 ? argv[0] : "");
         exit(1);
-    }
-
-    globalDispStat.monochromeMode = configSearchInt(conf, "watcher_monochrome");
-    globalDispStat.threeDView = configSearchInt(conf, "watcher_threeDView");
-    globalDispStat.backgroundImage = configSearchInt(conf, "watcher_backgroundimage");
-
-    const char *bgImageFilename = configSearchStr(conf, "watcher_backgroundimage_file"); 
-    if (!bgImageFilename)
-    {
-        printf("watcher_backgroundimage_file entry not found in configuration file, using the default: background.ppm\n"); 
-        if (!globalBGImage.loadPPMFile("background.ppm"))
-        {
-            printf("Unable to load background image in watcher from file: %s\n", bgImageFilename); 
-            exit(1); 
-        }
-    }
-    else
-    {
-        char fullpath[PATH_MAX];
-        if (0 == configGetPathname(conf, bgImageFilename, fullpath, sizeof(fullpath)))
-        {
-            char *ext=rindex(fullpath, '.')+sizeof(char);
-            if (0==strncasecmp(ext, "bmp", 3))
-            {
-                if (!globalBGImage.loadBMPFile(fullpath))
-                {
-                    LOG_ERROR("Unable to load background BMP image in watcher from file: " << fullpath); 
-                    exit(1); 
-                }
-            }
-            else if (0==strncmp("ppm", ext, 3))
-            {
-                if (!globalBGImage.loadPPMFile(fullpath))
-                {
-                    LOG_ERROR("Unable to load background PPM image in watcher from file: " << fullpath); 
-                    exit(1); 
-                }
-            }
-            else
-            {
-                LOG_ERROR("I have no idea what kind of file the background image " << fullpath << " is. I only support BMP and PPM"); 
-                exit(1);
-            }
-        }
-        else
-        {
-            fprintf(stderr,"background image: configGetPathname(%s) failed!\n", bgImageFilename);
-            exit(1); 
-        }
     }
 
     GPSScale = configSetDouble(conf, "watcher_gpsscale", 80000);
