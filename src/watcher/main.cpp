@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
         QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), 
                           sgc, SLOT(showNodeDataInGraphs(unsigned int, bool)));
-        QObject::connect(sgc, SIGNAL(nodeDataInGraphsShow(unsigned int, bool)), 
+        QObject::connect(sgc, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), 
                           ui.manetGLViewWindow, SLOT(showNodeSelectedForGraph(unsigned int, bool)));
     }
 
