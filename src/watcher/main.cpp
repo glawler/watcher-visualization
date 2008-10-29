@@ -20,15 +20,17 @@ int main(int argc, char *argv[])
     TRACE_ENTER();
 
     string configFilename;
-    Config &config=singletonConfig::instance();
-    singletonConfig::lock();
+    singletonConfig &sc=singletonConfig::instance();
+    sc.lock();
+    Config &config=sc.getConfig();
     if (false==initConfig(config, argc, argv, configFilename, 'f'))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;
         cerr << "Usage: " << basename(argv[0]) << " [-f|--configFile] configfile [standard watcher arguments]" << endl;
         return 1;
     }
-    singletonConfig::unlock();
+    sc.setConfigFile(configFilename);
+    sc.unlock();
 
     string logConf("watcher.log.properties");
     if (!config.lookupValue("logProperties", logConf))
@@ -50,7 +52,8 @@ int main(int argc, char *argv[])
     ui.menuLayers->setTearOffEnabled(true);
     ui.menuView->setTearOffEnabled(true);
 
-    QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(closeAllWindows()));
+    QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
+    QObject::connect(&app, SIGNAL(aboutToQuit()), ui.manetGLViewWindow, SLOT(saveConfiguration()));
 
     // 
     // Connect the scrolling graph dialog controller to other bits.
@@ -82,11 +85,6 @@ int main(int argc, char *argv[])
 
     window->show();
 
-    // Save any configuration changes made during the run.
-    singletonConfig::lock();
-    config.writeFile(configFilename.c_str());
-
     TRACE_EXIT();
-
     return app.exec();
 }

@@ -20,7 +20,6 @@ class manetGLView : public QGLWidget
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
-
     public slots:
         void resetPosition();
         void fitToWindow();
@@ -62,6 +61,8 @@ class manetGLView : public QGLWidget
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
 
+        void saveConfiguration();
+
     signals:
         void positionReset();
 
@@ -101,7 +102,7 @@ class manetGLView : public QGLWidget
         DECLARE_LOGGER();
 
         // Overload the close so we can save the configuration.
-        void closeEvent(QCloseEvent *event);
+        // void closeEvent(QCloseEvent *event);
 
         void initializeGL();
         void paintGL();

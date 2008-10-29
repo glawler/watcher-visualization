@@ -8,12 +8,31 @@ pthread_mutex_t singletonConfig::accessMutex=PTHREAD_MUTEX_INITIALIZER;
 INIT_LOGGER(singletonConfig, "singletonConfig");
 
 // static
-Config &singletonConfig::instance()
+singletonConfig &singletonConfig::instance()
 {
     TRACE_ENTER();
-    static Config theInstance;
+    static singletonConfig theOneAndOnlyConfigObjectYouBetcha;
     TRACE_EXIT();
-    return theInstance;
+    return theOneAndOnlyConfigObjectYouBetcha;
+}
+
+singletonConfig::singletonConfig()
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+singletonConfig::~singletonConfig()
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+libconfig::Config &singletonConfig::getConfig()
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+    return cfg;
 }
 
 void singletonConfig::lock()
@@ -30,3 +49,15 @@ void singletonConfig::unlock()
     TRACE_EXIT();
 }
 
+void singletonConfig::setConfigFile(const std::string &filename_)
+{
+    TRACE_ENTER();
+    filename=filename_;
+    TRACE_EXIT();
+}
+void singletonConfig::saveConfig()
+{
+    TRACE_ENTER();
+    cfg.writeFile(filename.data());
+    TRACE_EXIT();
+}

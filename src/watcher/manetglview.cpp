@@ -43,8 +43,9 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     //
     // Check configuration for GUI settings.
     //
-    singletonConfig::lock();
-    libconfig::Config &cfg=singletonConfig::instance();
+    singletonConfig &sc=singletonConfig::instance();
+    sc.lock();
+    libconfig::Config &cfg=sc.getConfig();
     libconfig::Setting &root=cfg.getRoot();
 
     string prop="layers";
@@ -104,7 +105,8 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
         ds.backgroundImage=boolVal;
     else
         root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
-    singletonConfig::unlock();
+
+    sc.unlock();
 
     // Give the GUI the current toggle state of the display.
     emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
@@ -671,13 +673,15 @@ void manetGLView::goodwinSetSpeed(int x)
     TRACE_EXIT();
 }
 
-void manetGLView::closeEvent(QCloseEvent *event)
+void manetGLView::saveConfiguration()
 {
     TRACE_ENTER();
     LOG_DEBUG("Got close event, saving modified configuration"); 
 
-    singletonConfig::lock();
-    libconfig::Config &cfg=singletonConfig::instance();
+
+    singletonConfig &sc=singletonConfig::instance();
+    sc.lock();
+    libconfig::Config &cfg=sc.getConfig();
     libconfig::Setting &root=cfg.getRoot();
     NodeDisplayStatus &ds = legacyWatcher::getDisplayStatus();
 
@@ -695,9 +699,36 @@ void manetGLView::closeEvent(QCloseEvent *event)
     for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
         root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
      
-    singletonConfig::unlock();
+    string prop="layers";
+    libconfig::Setting &layers=cfg.lookup(prop);
 
-    QGLWidget::closeEvent(event);
+    struct 
+    {
+        const char *prop;
+        legacyWatcher::Layer layer;
+    } layerVals[] =
+    {
+        { "bandwidth", legacyWatcher::Bandwidth },
+        { "undefined", legacyWatcher::Undefined },
+        { "neighbors", legacyWatcher::Neighbors },
+        { "hierarchy", legacyWatcher::Hierarchy },
+        { "routing", legacyWatcher::Routing },
+        { "routingOneHop", legacyWatcher::RoutingOnehop },
+        { "antennaRadius", legacyWatcher::AntennaRadius },
+        { "sanityCheck", legacyWatcher::SanityCheck },
+        { "anomPaths", legacyWatcher::AnomPaths }, 
+        { "correlation", legacyWatcher::Correlation },
+        { "alert", legacyWatcher::Alert }, 
+        { "correlation3Hop", legacyWatcher::Correlation3Hop },
+        { "wormholeRouting", legacyWatcher::WormholeRouting },
+        { "wormholeRoutingOnehop", legacyWatcher::WormholeRoutingOnehop },
+        { "normPaths", legacyWatcher::NormPaths }
+    };
+    for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
+            layers[layerVals[i].prop]=ds.familyBitmap & layerVals[i].layer ? true : false;
+
+    sc.saveConfig();
+    sc.unlock();
 
     TRACE_EXIT();
 }

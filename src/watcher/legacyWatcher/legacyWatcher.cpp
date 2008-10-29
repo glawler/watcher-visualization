@@ -1303,18 +1303,19 @@ static GLenum Args(int , char **)
     return GL_TRUE;
 }
 
-static void crossProduct(double *c, double a[3], double b[3])
-{  
-    double len;
-    c[0] = (a[1] * b[2]) - (b[1] * a[2]);
-    c[1] = (a[2] * b[0]) - (b[2] * a[0]);
-    c[2] = (a[0] * b[1]) - (b[0] * a[1]);
-
-    len = sqrt((c[0] * c[0]) + (c[1] * c[1]) + (c[2] * c[2]));
-    c[0] /= len;
-    c[1] /= len;
-    c[2] /= len;
-}
+// GTL - not used.
+// static void crossProduct(double *c, double a[3], double b[3])
+// {  
+//     double len;
+//     c[0] = (a[1] * b[2]) - (b[1] * a[2]);
+//     c[1] = (a[2] * b[0]) - (b[2] * a[0]);
+//     c[2] = (a[0] * b[1]) - (b[0] * a[1]);
+// 
+//     len = sqrt((c[0] * c[0]) + (c[1] * c[1]) + (c[2] * c[2]));
+//     c[0] /= len;
+//     c[1] /= len;
+//     c[2] /= len;
+// }
 
 // static void drawManet(void)
 void legacyWatcher::drawManet(void)
