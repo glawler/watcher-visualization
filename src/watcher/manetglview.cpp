@@ -5,6 +5,7 @@
 #include "manetglview.h"
 #include "watcherScrollingGraphControl.h"
 #include "legacyWatcher/legacyWatcher.h"
+#include "singletonConfig.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -35,6 +36,77 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     // "main()" may have set different watcher layers, so we need to 
     // tell anyone who is interested that the layer are set or not.
     NodeDisplayStatus &ds = legacyWatcher::getDisplayStatus();
+
+    // causes goodinw control buttons to show/not show.
+    emit runningGoodwin(legacyWatcher::runningGoodwin()); 
+
+    //
+    // Check configuration for GUI settings.
+    //
+    singletonConfig::lock();
+    libconfig::Config &cfg=singletonConfig::instance();
+    libconfig::Setting &root=cfg.getRoot();
+
+    string prop="layers";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &layers=cfg.lookup(prop);
+
+    struct 
+    {
+        const char *prop;
+        legacyWatcher::Layer layer;
+    } layerVals[] =
+    {
+        { "bandwidth", legacyWatcher::Bandwidth },
+        { "undefined", legacyWatcher::Undefined },
+        { "neighbors", legacyWatcher::Neighbors },
+        { "hierarchy", legacyWatcher::Hierarchy },
+        { "routing", legacyWatcher::Routing },
+        { "routingOneHop", legacyWatcher::RoutingOnehop },
+        { "antennaRadius", legacyWatcher::AntennaRadius },
+        { "sanityCheck", legacyWatcher::SanityCheck },
+        { "anomPaths", legacyWatcher::AnomPaths }, 
+        { "correlation", legacyWatcher::Correlation },
+        { "alert", legacyWatcher::Alert }, 
+        { "correlation3Hop", legacyWatcher::Correlation3Hop },
+        { "wormholeRouting", legacyWatcher::WormholeRouting },
+        { "wormholeRoutingOnehop", legacyWatcher::WormholeRoutingOnehop },
+        { "normPaths", legacyWatcher::NormPaths }
+    };
+    bool boolVal=false;
+    for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
+    {
+        LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
+        if (layers.lookupValue(layerVals[i].prop, boolVal))
+            legacyWatcher::layerToggle(layerVals[i].layer, boolVal);
+        else
+            layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
+    }
+     
+    prop="nodes3d";
+    boolVal=ds.threeDView;
+    if (root.lookupValue(prop, boolVal))
+        ds.threeDView=(boolVal?1:0);
+    else
+        root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+
+    prop="monochrome";
+    boolVal=false;
+    if (root.lookupValue(prop, boolVal))
+        ds.monochromeMode=(boolVal?1:0);
+    else
+        root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+
+    prop="backgroundImage";
+    boolVal=true;
+    if (root.lookupValue(prop, boolVal))
+        ds.backgroundImage=boolVal;
+    else
+        root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+    singletonConfig::unlock();
+
+    // Give the GUI the current toggle state of the display.
     emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
     emit undefinedToggled(ds.familyBitmap & legacyWatcher::Undefined);
     emit neighborsToggled(ds.familyBitmap & legacyWatcher::Neighbors);
@@ -50,15 +122,14 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     emit wormholeRoutingToggled(ds.familyBitmap & legacyWatcher::WormholeRouting);
     emit wormholeRoutingOnehopToggled(ds.familyBitmap & legacyWatcher::WormholeRoutingOnehop);
     emit normPathsToggled(ds.familyBitmap & legacyWatcher::NormPaths);
-    emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
 
-    // causes goodinw control buttons to show/not show.
-    emit runningGoodwin(legacyWatcher::runningGoodwin()); 
+    emit threeDViewToggled(ds.threeDView);
+    emit monochromeToggled(ds.monochromeMode);
+    emit backgroundImageToggled(ds.backgroundImage);
 
-    emit threeDViewToggled(ds.threeDView); 
-    emit monochromeToggled(ds.monochromeMode); 
-    emit backgroundImageToggled(ds.backgroundImage); 
-
+    // 
+    // Set up timer callbacks.
+    //
     QTimer *checkIOTimer = new QTimer(this);
     QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
     checkIOTimer->start(100);
@@ -597,6 +668,37 @@ void manetGLView::goodwinSetSpeed(int x)
 {
     TRACE_ENTER();
     legacyWatcher::setGoodwinPlaybackSpeed(x);
+    TRACE_EXIT();
+}
+
+void manetGLView::closeEvent(QCloseEvent *event)
+{
+    TRACE_ENTER();
+    LOG_DEBUG("Got close event, saving modified configuration"); 
+
+    singletonConfig::lock();
+    libconfig::Config &cfg=singletonConfig::instance();
+    libconfig::Setting &root=cfg.getRoot();
+    NodeDisplayStatus &ds = legacyWatcher::getDisplayStatus();
+
+    struct 
+    {
+        const char *prop;
+        bool boolVal;
+    } boolConfigs[] =
+    {
+        { "nodes3d",        ds.threeDView },
+        { "monochrome",     ds.monochromeMode }, 
+        { "backgroundImage", ds.backgroundImage }
+    };
+
+    for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
+        root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
+     
+    singletonConfig::unlock();
+
+    QGLWidget::closeEvent(event);
+
     TRACE_EXIT();
 }
 

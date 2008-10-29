@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     }
     singletonConfig::unlock();
 
-    string logConf("log.properties");
+    string logConf("watcher.log.properties");
     if (!config.lookupValue("logProperties", logConf))
     {
         cerr << "Unable to find logproperties setting in the configuration file, using default: " << logConf << endl;
@@ -50,8 +50,7 @@ int main(int argc, char *argv[])
     ui.menuLayers->setTearOffEnabled(true);
     ui.menuView->setTearOffEnabled(true);
 
-    QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
-
+    QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(closeAllWindows()));
 
     // 
     // Connect the scrolling graph dialog controller to other bits.

@@ -64,6 +64,7 @@ void watcher::loadWatcherPropertyData(WatcherPropertyData *propp)
     //     };
     // };
     //
+    singletonConfig::lock();
     Config &cfg=singletonConfig::instance();
 
     // Assumes identifier is an inet address - which it might not be. 
@@ -142,5 +143,6 @@ void watcher::loadWatcherPropertyData(WatcherPropertyData *propp)
     else
         nodeProps.add(prop, Setting::TypeFloat)=floatVal;
 
+    singletonConfig::unlock();
     TRACE_EXIT();
 }
