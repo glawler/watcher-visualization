@@ -53,41 +53,45 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     string prop="layers";
     if (!root.exists(prop))
         root.add(prop, libconfig::Setting::TypeGroup);
-    libconfig::Setting &layers=cfg.lookup(prop);
 
-    struct 
-    {
-        const char *prop;
-        legacyWatcher::Layer layer;
-    } layerVals[] =
-    {
-        { "bandwidth", legacyWatcher::Bandwidth },
-        { "undefined", legacyWatcher::Undefined },
-        { "neighbors", legacyWatcher::Neighbors },
-        { "hierarchy", legacyWatcher::Hierarchy },
-        { "routing", legacyWatcher::Routing },
-        { "routingOneHop", legacyWatcher::RoutingOnehop },
-        { "antennaRadius", legacyWatcher::AntennaRadius },
-        { "sanityCheck", legacyWatcher::SanityCheck },
-        { "anomPaths", legacyWatcher::AnomPaths }, 
-        { "correlation", legacyWatcher::Correlation },
-        { "alert", legacyWatcher::Alert }, 
-        { "correlation3Hop", legacyWatcher::Correlation3Hop },
-        { "wormholeRouting", legacyWatcher::WormholeRouting },
-        { "wormholeRoutingOnehop", legacyWatcher::WormholeRoutingOnehop },
-        { "normPaths", legacyWatcher::NormPaths }
-    };
     bool boolVal=false;
-    for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
+    if (!ds.familyBitmap)  // If the command line set the bitmap (!0), leave it alone.
     {
-        LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
-        if (layers.lookupValue(layerVals[i].prop, boolVal))
-            legacyWatcher::layerToggle(layerVals[i].layer, boolVal);
-        else
-            layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
-        boolVal=false;
+        libconfig::Setting &layers=cfg.lookup(prop);
+
+        struct 
+        {
+            const char *prop;
+            legacyWatcher::Layer layer;
+        } layerVals[] =
+        {
+            { "bandwidth", legacyWatcher::Bandwidth },
+            { "undefined", legacyWatcher::Undefined },
+            { "neighbors", legacyWatcher::Neighbors },
+            { "hierarchy", legacyWatcher::Hierarchy },
+            { "routing", legacyWatcher::Routing },
+            { "routingOneHop", legacyWatcher::RoutingOnehop },
+            { "antennaRadius", legacyWatcher::AntennaRadius },
+            { "sanityCheck", legacyWatcher::SanityCheck },
+            { "anomPaths", legacyWatcher::AnomPaths }, 
+            { "correlation", legacyWatcher::Correlation },
+            { "alert", legacyWatcher::Alert }, 
+            { "correlation3Hop", legacyWatcher::Correlation3Hop },
+            { "wormholeRouting", legacyWatcher::WormholeRouting },
+            { "wormholeRoutingOnehop", legacyWatcher::WormholeRoutingOnehop },
+            { "normPaths", legacyWatcher::NormPaths }
+        };
+        for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
+        {
+            LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
+            if (layers.lookupValue(layerVals[i].prop, boolVal))
+                legacyWatcher::layerToggle(layerVals[i].layer, boolVal);
+            else
+                layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
+            boolVal=false;
+        }
     }
-     
+
     prop="nodes3d";
     boolVal=ds.threeDView;
     if (root.lookupValue(prop, boolVal))

@@ -186,7 +186,7 @@ void legacyWatcher::layerToggle(const Layer layer, const bool turnOn)
     if (turnOn)
         globalDispStat.familyBitmap |= layer;
     else 
-        globalDispStat.familyBitmap ^= layer;
+        globalDispStat.familyBitmap &= ~layer;
 }
 
 NodeDisplayStatus &legacyWatcher::getDisplayStatus(void) 
@@ -2608,7 +2608,8 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
     int winx = 0, winy = 0, winwidth = 500, winheight = 500, winpos = 0;
 
     globalDispStat.minPriority = COMMUNICATIONS_LABEL_PRIORITY_INFO;
-    globalDispStat.familyBitmap = COMMUNICATIONS_LABEL_FAMILY_ALL;
+    // globalDispStat.familyBitmap = COMMUNICATIONS_LABEL_FAMILY_ALL;
+    globalDispStat.familyBitmap = 0;
     globalDispStat.scaleText[NODE_DISPLAY_MANET] = 0.08;
     globalDispStat.scaleText[NODE_DISPLAY_HIERARCHY] = 0.08;
     globalDispStat.scaleLine[NODE_DISPLAY_MANET] = 1.0;
