@@ -75,6 +75,8 @@ bool BackgroundImage::loadBMPFile(const char *filename)
 
     free(bmpInfo);
 
+    setupTexture();
+
     TRACE_EXIT();
     return true;
 }
@@ -148,6 +150,8 @@ bool BackgroundImage::loadPPMFile(const char *filename)
     imageFormat=GL_RGB;
     imageType=GL_UNSIGNED_BYTE;
 
+    setupTexture();
+
     TRACE_EXIT_RET((imageData!=NULL?"true":"false"));
     return imageData!=NULL;
 }
@@ -184,13 +188,6 @@ void BackgroundImage::setupTexture()
 void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloat maxy, GLfloat z)
 {
     TRACE_ENTER();
-
-    static int texSetup=0;
-    if (!texSetup) 
-    {
-        setupTexture();
-        texSetup=1;
-    }
 
     glPushMatrix();
     glTranslatef(0, 0, z);
