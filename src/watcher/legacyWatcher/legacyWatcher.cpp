@@ -2816,7 +2816,7 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
         GlobalWatcherPropertiesList.push_back(propp); 
 
         propp->identifier=globalManet->nlist[i].addr;           // indexed by node address.
-        watcher::loadWatcherPropertyData(propp);      // loadProperties() uses identifier to load properties from the watcher.cfg file. 
+        watcher::loadWatcherPropertyData(propp, i+1);      // loadProperties() uses identifier to load properties from the watcher.cfg file. 
     }
 
     firstStep(globalManet, 0);

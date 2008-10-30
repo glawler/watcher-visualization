@@ -50,7 +50,7 @@ WatcherPropertyData *watcher::findWatcherPropertyData(unsigned int index, Watche
     return NULL;
 }
 
-void watcher::loadWatcherPropertyData(WatcherPropertyData *propp)
+void watcher::loadWatcherPropertyData(WatcherPropertyData *propp, int nodeId)
 {
     TRACE_ENTER();
 
@@ -104,7 +104,7 @@ void watcher::loadWatcherPropertyData(WatcherPropertyData *propp)
         snprintf(propp->guiLabel, sizeof(propp->guiLabel), "%s", strVal.c_str());
     else
     {
-        snprintf(propp->guiLabel, sizeof(propp->guiLabel), "%d", propp->identifier&0xFF);
+        snprintf(propp->guiLabel, sizeof(propp->guiLabel), "%d", nodeId);
         strVal=propp->guiLabel;
 
         LOG_DEBUG("label not found for this node, set to default: " << strVal);

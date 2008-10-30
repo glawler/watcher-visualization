@@ -66,7 +66,8 @@ namespace watcher
     typedef std::vector<WatcherPropertyData*> WatcherPropertiesList;
     WatcherPropertyData *findWatcherPropertyData(unsigned int index, WatcherPropertiesList &theList);
 
-    void loadWatcherPropertyData(WatcherPropertyData *); // Read props in from a cfg file, if we have one.
+    // Read props in from a cfg file, if we have one. nodeId is default node labelm if not given in the cfg file.
+    void loadWatcherPropertyData(WatcherPropertyData *, int nodeId); 
 
 }
 
