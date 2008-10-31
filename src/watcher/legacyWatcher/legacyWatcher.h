@@ -127,6 +127,21 @@ namespace legacyWatcher
     // Access to the background image. 
     watcher::BackgroundImage &getBackgroundImage(void);
 
+    typedef struct GlobalManetAdj
+    {
+        float angleX;
+        float angleY;
+        float angleZ;
+        float scaleX;
+        float scaleY;
+        float scaleZ;
+        float shiftX;
+        float shiftY;
+        float shiftZ;
+    }; 
+
+    GlobalManetAdj &getManetAdj();
+
 }; // namespace legacyWatcher
 
 #endif

@@ -184,26 +184,31 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
         root.add(prop, libconfig::Setting::TypeGroup);
     libconfig::Setting &vp=cfg.lookup(prop); 
 
-    const char *viewPoints[]={"angle","scale","shift"};
+    struct 
+    {
+        const char *type;
+        float *data[3];
+    } viewPoints[] =
+    {
+        { "angle", { &ma.angleX, &ma.angleY, &ma.angleZ }},
+        { "scale", { &ma.scaleX, &ma.scaleY, &ma.scaleZ }},
+        { "shift", { &ma.shiftX, &ma.shiftY, &ma.shiftZ }}
+    };
     for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++)
     {
-        if (!vp.exists(viewPoints[i]))
+        if (!vp.exists(viewPoints[i].type))
         {
-            vp.add(viewPoints[i], libconfig::Setting::TypeArray);
-            for (int j=0; j<3; j++)
-                vp[viewPoints[i]].add(libconfig::Setting::TypeFloat);
+            vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
+            for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
+                vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
+        }
+        else
+        {
+            libconfig::Setting &s=vp[viewPoints[i].type];
+            for (size_t j=0; j<s.getLength(); j++)
+                *viewPoints[i].data[j]=s[j];
         }
     }
-
-    ma.angleX=vp["angle"][0];
-    ma.angleY=vp["angle"][1];
-    ma.angleZ=vp["angle"][2];
-    ma.scaleX=vp["scale"][0];
-    ma.scaleY=vp["scale"][1];
-    ma.scaleZ=vp["scale"][2];
-    ma.shiftX=vp["shift"][0];
-    ma.shiftY=vp["shift"][1];
-    ma.shiftZ=vp["shift"][2];
 
     LOG_INFO("Set viewpoint - angle: " << ma.angleX << ", " << ma.angleY << ", " << ma.angleZ);
     LOG_INFO("Set viewpoint - scale: " << ma.scaleX << ", " << ma.scaleY << ", " << ma.scaleZ);

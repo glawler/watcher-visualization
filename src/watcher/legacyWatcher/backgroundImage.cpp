@@ -168,7 +168,7 @@ void BackgroundImage::setupTexture()
     // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     // glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColor);
     // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-    
+
     // else BMP
     glPixelStorei(GL_UNPACK_ALIGNMENT,4);
     static GLuint textureInt=1;
@@ -176,7 +176,7 @@ void BackgroundImage::setupTexture()
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-    
+
     gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, imageFormat, imageType, imageData);
 
     free(imageData);
