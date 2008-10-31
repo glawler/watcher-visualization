@@ -158,19 +158,6 @@ static unsigned char globalNeighborColors[][4] =
     {   0,   0,   0, 255 },
 };
 
-struct GlobalManetAdj
-{
-    float angleX;
-    float angleY;
-    float angleZ;
-    float scaleX;
-    float scaleY;
-    float scaleZ;
-    float shiftX;
-    float shiftY;
-    float shiftZ;
-}; 
-
 GlobalManetAdj globalManetAdj;
 GlobalManetAdj globalHierarchyAdj;
 GlobalManetAdj globalManetAdjInit =     { 0.0, 0.0, 0.0, .035, .035, .1, 0.0, 0.0, 0.0 }; 
@@ -2200,6 +2187,11 @@ static void detectorPositionUpdate(void *data, IDSPositionType pos, IDSPositionS
 int legacyWatcher::isRunningInPlaybackMode()
 {
     return globalGoodwin == NULL ? false : true;
+}
+
+GlobalManetAdj &legacyWatcher::getManetAdj()
+{
+    return globalManetAdj;
 }
 
 #define GETMAXFD(mfd, nfd) do { (mfd) = ((nfd) > (mfd)) ? (nfd) : (mfd); } while(0)
