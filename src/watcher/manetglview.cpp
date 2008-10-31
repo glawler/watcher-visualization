@@ -175,6 +175,40 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
         }
     }
 
+    //
+    // Load viewpoint
+    //
+    GlobalManetAdj &ma=legacyWatcher::getManetAdj();
+    prop="viewPoint";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &vp=cfg.lookup(prop); 
+
+    const char *viewPoints[]={"angle","scale","shift"};
+    for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++)
+    {
+        if (!vp.exists(viewPoints[i]))
+        {
+            vp.add(viewPoints[i], libconfig::Setting::TypeArray);
+            for (int j=0; j<3; j++)
+                vp[viewPoints[i]].add(libconfig::Setting::TypeFloat);
+        }
+    }
+
+    ma.angleX=vp["angle"][0];
+    ma.angleY=vp["angle"][1];
+    ma.angleZ=vp["angle"][2];
+    ma.scaleX=vp["scale"][0];
+    ma.scaleY=vp["scale"][1];
+    ma.scaleZ=vp["scale"][2];
+    ma.shiftX=vp["shift"][0];
+    ma.shiftY=vp["shift"][1];
+    ma.shiftZ=vp["shift"][2];
+
+    LOG_INFO("Set viewpoint - angle: " << ma.angleX << ", " << ma.angleY << ", " << ma.angleZ);
+    LOG_INFO("Set viewpoint - scale: " << ma.scaleX << ", " << ma.scaleY << ", " << ma.scaleZ);
+    LOG_INFO("Set viewpoint - shift: " << ma.shiftX << ", " << ma.shiftY << ", " << ma.shiftZ);
+
     sc.unlock();
 
     // 
@@ -726,7 +760,6 @@ void manetGLView::saveConfiguration()
     TRACE_ENTER();
     LOG_DEBUG("Got close event, saving modified configuration"); 
 
-
     singletonConfig &sc=singletonConfig::instance();
     sc.lock();
     libconfig::Config &cfg=sc.getConfig();
@@ -774,6 +807,17 @@ void manetGLView::saveConfiguration()
     };
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
             layers[layerVals[i].prop]=ds.familyBitmap & layerVals[i].layer ? true : false;
+
+    GlobalManetAdj &ma=legacyWatcher::getManetAdj();
+    root["viewPoint"]["angle"][0]=ma.angleX;
+    root["viewPoint"]["angle"][1]=ma.angleY;
+    root["viewPoint"]["angle"][2]=ma.angleZ;
+    root["viewPoint"]["scale"][0]=ma.scaleX;
+    root["viewPoint"]["scale"][1]=ma.scaleY;
+    root["viewPoint"]["scale"][2]=ma.scaleZ;
+    root["viewPoint"]["shift"][0]=ma.shiftX;
+    root["viewPoint"]["shift"][1]=ma.shiftY;
+    root["viewPoint"]["shift"][2]=ma.shiftZ;
 
     sc.saveConfig();
     sc.unlock();
