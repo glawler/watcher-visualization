@@ -117,8 +117,6 @@ static FloatingLabel *floatingLabelList = NULL;
 static destime curtime = 0, begintime = 0;
 static manetNode *globalSelectedNode = 0;
 
-watcher::BackgroundImage globalBGImage; 
-
 // UNUSED NOW static int globalSelectedNodeScreenX;
 // UNUSED NOW static int globalSelectedNodeScreenY;
 static double globalSelectedNodeDeltaX;
@@ -179,11 +177,6 @@ void legacyWatcher::layerToggle(const Layer layer, const bool turnOn)
 NodeDisplayStatus &legacyWatcher::getDisplayStatus(void) 
 {
     return globalDispStat;
-}
-
-watcher::BackgroundImage &legacyWatcher::getBackgroundImage(void) 
-{
-    return globalBGImage;
 }
 
 void legacyWatcher::toggleMonochrome(bool isOn)
@@ -763,6 +756,28 @@ void legacyWatcher::jumpToXY(int x, int y)
 {
     jumpToX(x);
     jumpToY(y);
+}
+
+void legacyWatcher::shiftBackgroundCenterLeft(double dx)
+{
+    if (globalActiveView==legacyWatcher::ManetView)
+    {
+        GLfloat minx, maxx, miny, maxy, z;
+        BackgroundImage &bg=BackgroundImage::getInstance();
+        bg.getDrawingCoords(minx, maxx, miny, maxy, z);
+        bg.setDrawingCoords(minx+dx, maxx+dx, miny, maxy, z);
+    } 
+}
+
+void legacyWatcher::shiftBackgroundCenterUp(double dy)
+{
+    if (globalActiveView==legacyWatcher::ManetView)
+    {
+        GLfloat minx, maxx, miny, maxy, z;
+        BackgroundImage &bg=BackgroundImage::getInstance();
+        bg.getDrawingCoords(minx, maxx, miny, maxy, z);
+        bg.setDrawingCoords(minx, maxx, miny+dy, maxy+dy, z);
+    } 
 }
 
 void legacyWatcher::shiftCenterRight()
@@ -1434,11 +1449,7 @@ void legacyWatcher::drawManet(void)
     floatingLabelDraw(&floatingLabelList, NODE_DISPLAY_MANET, &globalDispStat, m->curtime);
     glPopMatrix();
 
-    if (globalDispStat.backgroundImage)
-    {
-        struct mobilityManetState *m=globalManet->mobility;
-        globalBGImage.drawImage(-(m->maxx/3), m->maxx+(m->maxx/3), -(m->maxy/3), m->maxy+(m->maxy/3), -25); 
-    }
+    BackgroundImage::getInstance().drawImage(); 
 
     glFlush();
 }
@@ -2809,6 +2820,12 @@ int legacyWatcher::legacyWatcherMain(int argc, char **argv)
 
         propp->identifier=globalManet->nlist[i].addr;           // indexed by node address.
         watcher::loadWatcherPropertyData(propp, i+1);      // loadProperties() uses identifier to load properties from the watcher.cfg file. 
+    }
+    // set default background image size (with a little padding WRT to the "playing field"
+    {
+        struct mobilityManetState *m=globalManet->mobility;
+        BackgroundImage &bg=BackgroundImage::getInstance();
+        bg.setDrawingCoords(-(m->maxx/3), m->maxx+(m->maxx/3), -(m->maxy/3), m->maxy+(m->maxy/3), -25);
     }
 
     firstStep(globalManet, 0);

@@ -12,10 +12,23 @@ using namespace watcher;
 
 INIT_LOGGER(BackgroundImage, "BackgroundImage"); 
 
+BackgroundImage &BackgroundImage::getInstance()
+{
+    TRACE_ENTER();
+    static BackgroundImage theoneandonlybgimageinstanceyoubetcha;
+    TRACE_EXIT();
+    return theoneandonlybgimageinstanceyoubetcha;
+}
+
 BackgroundImage::BackgroundImage() :
     imageData(NULL),
-    width(0),
-    height(0),
+    minx(0.0),
+    miny(0.0),
+    maxx(350.0),    // pulled outta thin air
+    maxy(400.0),    // pulled outta thin air
+    z(0.0),
+    imageWidth(0),
+    imageHeight(0),
     imageFormat(GL_BITMAP),
     imageType(GL_UNSIGNED_BYTE)
 {
@@ -61,15 +74,15 @@ bool BackgroundImage::loadBMPFile(const char *filename)
         return false;
     }
 
-    width=bmpInfo->bmiHeader.biWidth;
-    height=bmpInfo->bmiHeader.biHeight;
+    imageWidth=bmpInfo->bmiHeader.biWidth;
+    imageHeight=bmpInfo->bmiHeader.biHeight;
 
     // imageFormat=GL_BGR_EXT;
     imageFormat=GL_RGB;
     imageType=GL_UNSIGNED_BYTE;
 
     LOG_DEBUG("Successfully loaded BMP image data:");
-    LOG_DEBUG("     w=" << width << " h=" << height);
+    LOG_DEBUG("     w=" << imageWidth << " h=" << imageHeight);
     LOG_DEBUG("     size=" << bmpInfo->bmiHeader.biSizeImage << " depth=" << bmpInfo->bmiHeader.biBitCount);
     LOG_DEBUG("     pixels/meter: x=" << bmpInfo->bmiHeader.biXPelsPerMeter << " y=" << bmpInfo->bmiHeader.biYPelsPerMeter); 
 
@@ -111,7 +124,7 @@ bool BackgroundImage::loadPPMFile(const char *filename)
         return false;
     }
 
-    /* grab the three elements in the header (width, height, maxval). */
+    /* grab the three elements in the header (imageWidth, imageHeight, maxval). */
     i = 0;
     while(i < 3) {
         if (NULL==fgets(head, 70, fp))
@@ -144,8 +157,8 @@ bool BackgroundImage::loadPPMFile(const char *filename)
         return false;
     }
 
-    width = w;
-    height = h;
+    imageWidth = w;
+    imageHeight = h;
 
     imageFormat=GL_RGB;
     imageType=GL_UNSIGNED_BYTE;
@@ -177,7 +190,7 @@ void BackgroundImage::setupTexture()
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, imageFormat, imageType, imageData);
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imageWidth, imageHeight, imageFormat, imageType, imageData);
 
     free(imageData);
     imageData=NULL;
@@ -185,7 +198,7 @@ void BackgroundImage::setupTexture()
     TRACE_EXIT();
 }
 
-void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloat maxy, GLfloat z)
+void BackgroundImage::drawImage()
 {
     TRACE_ENTER();
 
@@ -207,4 +220,23 @@ void BackgroundImage::drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloa
     TRACE_EXIT();
 }
 
-
+void BackgroundImage::setDrawingCoords(GLfloat minx_, GLfloat maxx_, GLfloat miny_, GLfloat maxy_, GLfloat z_)
+{
+    TRACE_ENTER();
+    minx=minx_;
+    maxx=maxx_;
+    miny=miny_;
+    maxy=maxy_;
+    z=z_;
+    TRACE_EXIT();
+}
+void BackgroundImage::getDrawingCoords(GLfloat &minx_, GLfloat &maxx_, GLfloat &miny_, GLfloat &maxy_, GLfloat &z_)
+{
+    TRACE_ENTER();
+    minx_=minx;
+    maxx_=maxx;
+    miny_=miny;
+    maxy_=maxy;
+    z_=z;
+    TRACE_EXIT();
+}

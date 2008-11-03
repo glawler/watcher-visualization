@@ -6,6 +6,7 @@
 #include "watcherScrollingGraphControl.h"
 #include "legacyWatcher/legacyWatcher.h"
 #include "singletonConfig.h"
+#include "backgroundImage.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -106,12 +107,6 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     else
         root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
 
-    prop="backgroundImage";
-    boolVal=true;
-    if (root.lookupValue(prop, boolVal))
-        ds.backgroundImage=boolVal;
-    else
-        root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
 
     // Give the GUI the current toggle state of the display.
     emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
@@ -135,29 +130,34 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     emit backgroundImageToggled(ds.backgroundImage);
 
     //
-    // Load background image
+    // Load background image settings
     //
- 
-    prop="watcherBackgroundImageFile"; 
+    prop="backgroundImage";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &s=cfg.lookup(prop);
+
+    prop="imageFile"; 
     string strVal;
-    if (!root.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
+    if (!s.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
     {
-        LOG_INFO("watcherBackgroundImageFile entry not found (or it equals \"none\") in configuration file, disabling background image functionality");
+        LOG_INFO("watcherBackground:imageFile entry not found (or it equals \"none\") in configuration file, "
+                "disabling background image functionality");
         if (strVal.empty())
-            root.add(prop, libconfig::Setting::TypeString)="none";
+            s.add(prop, libconfig::Setting::TypeString)="none";
         toggleBackgroundImage(false);
         emit enableBackgroundImage(false);
     }
     else
     {
-        BackgroundImage &bgImage=legacyWatcher::getBackgroundImage();
-        char *ext=rindex(strVal.data(), '.')+sizeof(char);
+        BackgroundImage &bgImage=BackgroundImage::getInstance(); 
+        char *ext=rindex(strVal.data(), '.');
         if (!ext)
         {
             LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
             exit(1);
         }
-        else if (0==strncasecmp(ext, "bmp", 3))
+        else if (0==strncasecmp(ext+sizeof(char), "bmp", 3))
         {
             if (!bgImage.loadBMPFile(strVal.data()))
             {
@@ -165,7 +165,7 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
                 exit(1); 
             }
         }
-        else if (0==strncmp("ppm", ext, 3))
+        else if (0==strncmp("ppm", ext+sizeof(char), 3))
         {
             if (!bgImage.loadPPMFile(strVal.data()))
             {
@@ -173,6 +173,22 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
                 exit(1); 
             }
         }
+    }
+    // bg image location and size.
+    prop="coordinates";
+    float floatVals[5]={0.0, 0.0, 0.0, 0.0, 0.0};
+    if (!s.exists(prop))
+    {
+        s.add(prop, libconfig::Setting::TypeArray);
+        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
+            s[prop].add(libconfig::Setting::TypeFloat)=floatVals[i];
+    }
+    else
+    {
+        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
+            floatVals[i]=s[prop][i];
+        BackgroundImage &bg=BackgroundImage::getInstance();
+        bg.setDrawingCoords(floatVals[0], floatVals[1], floatVals[2], floatVals[3], floatVals[4]); 
     }
 
     //
@@ -205,7 +221,7 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
         else
         {
             libconfig::Setting &s=vp[viewPoints[i].type];
-            for (size_t j=0; j<s.getLength(); j++)
+            for (int j=0; j<s.getLength(); j++)
                 *viewPoints[i].data[j]=s[j];
         }
     }
@@ -524,8 +540,18 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
     }
     else if ((buttons & Qt::LeftButton) && !(buttons & Qt::RightButton))
     {
-        legacyWatcher::shiftCenterLeft(dx);
-        legacyWatcher::shiftCenterUp(dy);
+        Qt::KeyboardModifiers mods=event->modifiers();
+
+        if (mods & Qt::ShiftModifier)
+        {
+            legacyWatcher::shiftBackgroundCenterLeft(dx);
+            legacyWatcher::shiftBackgroundCenterUp(-dy);
+        }
+        else
+        {
+            legacyWatcher::shiftCenterLeft(dx);
+            legacyWatcher::shiftCenterUp(dy);
+        }
         updateGL();
     } 
     else if (!(buttons & Qt::LeftButton) && (buttons & Qt::RightButton))
@@ -778,13 +804,12 @@ void manetGLView::saveConfiguration()
     } boolConfigs[] =
     {
         { "nodes3d",        ds.threeDView },
-        { "monochrome",     ds.monochromeMode }, 
-        { "backgroundImage", ds.backgroundImage }
+        { "monochrome",     ds.monochromeMode } 
     };
 
     for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
         root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
-     
+
     string prop="layers";
     libconfig::Setting &layers=cfg.lookup(prop);
 
@@ -811,7 +836,7 @@ void manetGLView::saveConfiguration()
         { "normPaths", legacyWatcher::NormPaths }
     };
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
-            layers[layerVals[i].prop]=ds.familyBitmap & layerVals[i].layer ? true : false;
+        layers[layerVals[i].prop]=ds.familyBitmap & layerVals[i].layer ? true : false;
 
     GlobalManetAdj &ma=legacyWatcher::getManetAdj();
     root["viewPoint"]["angle"][0]=ma.angleX;
@@ -823,6 +848,15 @@ void manetGLView::saveConfiguration()
     root["viewPoint"]["shift"][0]=ma.shiftX;
     root["viewPoint"]["shift"][1]=ma.shiftY;
     root["viewPoint"]["shift"][2]=ma.shiftZ;
+
+    BackgroundImage &bg=BackgroundImage::getInstance();
+    float floatVals[5];
+    bg.getDrawingCoords(floatVals[0], floatVals[1], floatVals[2], floatVals[3], floatVals[4]); 
+    root["backgroundImage"]["coordinates"][0]=floatVals[0];
+    root["backgroundImage"]["coordinates"][1]=floatVals[1];
+    root["backgroundImage"]["coordinates"][2]=floatVals[2];
+    root["backgroundImage"]["coordinates"][3]=floatVals[3];
+    root["backgroundImage"]["coordinates"][4]=floatVals[4];
 
     sc.saveConfig();
     sc.unlock();

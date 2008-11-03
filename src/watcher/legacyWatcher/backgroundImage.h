@@ -9,8 +9,8 @@ namespace watcher
     class BackgroundImage
     {
         public:
-            BackgroundImage();
-            virtual ~BackgroundImage(); 
+            // is a singleton
+            static BackgroundImage &getInstance(); 
 
             // returns false if unable to load image.
             // Or bad image format.
@@ -19,7 +19,12 @@ namespace watcher
             // Loads a BMP/DIB file, returns false on error
             bool loadBMPFile(const char *filename);
 
-            void drawImage(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloat maxy, GLfloat z);
+            //
+            void setDrawingCoords(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloat maxy, GLfloat z);
+            void getDrawingCoords(GLfloat &minx, GLfloat &maxx, GLfloat &miny, GLfloat &maxy, GLfloat &z);
+
+            // Draw the background using opengl and the set coords.
+            void drawImage(); 
 
         protected:
 
@@ -28,8 +33,9 @@ namespace watcher
             void setupTexture();
 
             GLubyte *imageData;
-            int width;
-            int height;
+            GLfloat minx, miny, maxx, maxy, z;
+
+            int imageWidth, imageHeight;
 
             GLfloat envColor[4];
             GLfloat borderColor[4];
@@ -38,6 +44,9 @@ namespace watcher
             GLenum imageType;
 
             DECLARE_LOGGER();
+
+            BackgroundImage();
+            virtual ~BackgroundImage(); 
     };
 }
 
