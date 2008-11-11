@@ -30,6 +30,8 @@ namespace watcher
 
         private:
 
+            bool imageLoaded;
+
             void setupTexture();
 
             GLubyte *imageData;
@@ -42,8 +44,6 @@ namespace watcher
 
             GLenum imageFormat;
             GLenum imageType;
-
-            GLuint textureId;
 
             DECLARE_LOGGER();
 

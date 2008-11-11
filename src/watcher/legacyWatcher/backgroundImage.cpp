@@ -21,6 +21,7 @@ BackgroundImage &BackgroundImage::getInstance()
 }
 
 BackgroundImage::BackgroundImage() :
+    imageLoaded(false),
     imageData(NULL),
     minx(0.0),
     miny(0.0),
@@ -30,8 +31,7 @@ BackgroundImage::BackgroundImage() :
     imageWidth(0),
     imageHeight(0),
     imageFormat(GL_BITMAP),
-    imageType(GL_UNSIGNED_BYTE),
-    textureId(0)
+    imageType(GL_UNSIGNED_BYTE)
 {
     TRACE_ENTER();
 
@@ -185,17 +185,18 @@ void BackgroundImage::setupTexture()
 
     // else BMP
     glPixelStorei(GL_UNPACK_ALIGNMENT,4);
-    glGenTextures(1, &textureId);  
-    glBindTexture(GL_TEXTURE_2D, textureId); 
+    static GLuint textureInt=1;
+    glBindTexture(GL_TEXTURE_2D, textureInt); 
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imageWidth, imageHeight, imageFormat, imageType, imageData);
-
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imageWidth, imageHeight, imageFormat, imageType, imageData);
+
     free(imageData);
     imageData=NULL;
+
+    imageLoaded=true;
 
     TRACE_EXIT();
 }
@@ -204,13 +205,18 @@ void BackgroundImage::drawImage()
 {
     TRACE_ENTER();
 
+    if (!imageLoaded)
+    {
+        TRACE_EXIT();
+        return;
+    }
+
     glPushMatrix();
     glTranslatef(0, 0, z);
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glEnable(GL_TEXTURE_2D); 
     glDisable(GL_LIGHTING);
     glDisable(GL_BLEND); 
-    glBindTexture(GL_TEXTURE_2D, textureId); 
     glBegin(GL_QUADS);
         glTexCoord2f(0,0); glVertex2f(minx,miny);
         glTexCoord2f(1,0); glVertex2f(maxx,miny);
