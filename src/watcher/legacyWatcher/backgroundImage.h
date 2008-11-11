@@ -20,8 +20,8 @@ namespace watcher
             bool loadBMPFile(const char *filename);
 
             //
-            void setDrawingCoords(GLfloat minx, GLfloat maxx, GLfloat miny, GLfloat maxy, GLfloat z);
-            void getDrawingCoords(GLfloat &minx, GLfloat &maxx, GLfloat &miny, GLfloat &maxy, GLfloat &z);
+            void setDrawingCoords(GLfloat xcoord, GLfloat width, GLfloat ycoord, GLfloat height, GLfloat z);
+            void getDrawingCoords(GLfloat &xcoord, GLfloat &width, GLfloat &ycoord, GLfloat &height, GLfloat &z);
 
             // Draw the background using opengl and the set coords.
             void drawImage(); 
@@ -35,7 +35,7 @@ namespace watcher
             void setupTexture();
 
             GLubyte *imageData;
-            GLfloat minx, miny, maxx, maxy, z;
+            GLfloat minx, miny, xoffset, yoffset, z;
 
             int imageWidth, imageHeight;
 

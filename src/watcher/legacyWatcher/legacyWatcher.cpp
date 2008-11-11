@@ -388,8 +388,8 @@ static int visibleDrawBoxAtZ(
     // the width greater than 80 until it reaches a maximum
     // width of 50. These values were determined via rectal
     // extraction but the results seems pleasing to the eye.
-    int borderX = viewport[2] < 80 ? 0 : viewport[2] < 580 ? (viewport[2] - 80) / 20 : 50;
-    int borderY = viewport[3] < 80 ? 0 : viewport[3] < 580 ? (viewport[3] - 80) / 20 : 50;
+    int borderX = viewport[2] < 80 ? 0 : viewport[2] < 580 ? (viewport[2] - 80) / 20 : 70;
+    int borderY = viewport[3] < 80 ? 0 : viewport[3] < 580 ? (viewport[3] - 80) / 20 : 70;
     XYWorldZToWorldXWorldY xyz[4] =
     {
         // corners ll, lr, ul, ur
@@ -762,10 +762,10 @@ void legacyWatcher::shiftBackgroundCenterLeft(double dx)
 {
     if (globalActiveView==legacyWatcher::ManetView)
     {
-        GLfloat minx, maxx, miny, maxy, z;
+        GLfloat x, y, w, h, z;
         BackgroundImage &bg=BackgroundImage::getInstance();
-        bg.getDrawingCoords(minx, maxx, miny, maxy, z);
-        bg.setDrawingCoords(minx+dx, maxx+dx, miny, maxy, z);
+        bg.getDrawingCoords(x, w, y, h, z);
+        bg.setDrawingCoords(x+dx, w, y, h, z);
     } 
 }
 
@@ -773,10 +773,10 @@ void legacyWatcher::shiftBackgroundCenterUp(double dy)
 {
     if (globalActiveView==legacyWatcher::ManetView)
     {
-        GLfloat minx, maxx, miny, maxy, z;
+        GLfloat x, y, w, h, z;
         BackgroundImage &bg=BackgroundImage::getInstance();
-        bg.getDrawingCoords(minx, maxx, miny, maxy, z);
-        bg.setDrawingCoords(minx, maxx, miny+dy, maxy+dy, z);
+        bg.getDrawingCoords(x, w, y, h, z);
+        bg.setDrawingCoords(x, w, y+dy, h, z);
     } 
 }
 

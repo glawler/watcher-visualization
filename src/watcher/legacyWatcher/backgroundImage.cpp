@@ -25,8 +25,8 @@ BackgroundImage::BackgroundImage() :
     imageData(NULL),
     minx(0.0),
     miny(0.0),
-    maxx(350.0),    // pulled outta thin air
-    maxy(400.0),    // pulled outta thin air
+    xoffset(350.0),    // pulled outta thin air
+    yoffset(400.0),    // pulled outta thin air
     z(0.0),
     imageWidth(0),
     imageHeight(0),
@@ -77,6 +77,10 @@ bool BackgroundImage::loadBMPFile(const char *filename)
 
     imageWidth=bmpInfo->bmiHeader.biWidth;
     imageHeight=bmpInfo->bmiHeader.biHeight;
+
+    // default to using image w and h
+    xoffset=imageWidth;
+    yoffset=imageHeight;
 
     // imageFormat=GL_BGR_EXT;
     imageFormat=GL_RGB;
@@ -161,6 +165,10 @@ bool BackgroundImage::loadPPMFile(const char *filename)
     imageWidth = w;
     imageHeight = h;
 
+    // default to using image w and h
+    xoffset=imageWidth;
+    yoffset=imageHeight;
+
     imageFormat=GL_RGB;
     imageType=GL_UNSIGNED_BYTE;
 
@@ -218,10 +226,10 @@ void BackgroundImage::drawImage()
     glDisable(GL_LIGHTING);
     glDisable(GL_BLEND); 
     glBegin(GL_QUADS);
-        glTexCoord2f(0,0); glVertex2f(minx,miny);
-        glTexCoord2f(1,0); glVertex2f(maxx,miny);
-        glTexCoord2f(1,1); glVertex2f(maxx,maxy);
-        glTexCoord2f(0,1); glVertex2f(minx,maxy);
+        glTexCoord2f(0,0); glVertex2f(minx        ,miny);
+        glTexCoord2f(1,0); glVertex2f(minx+xoffset,miny);
+        glTexCoord2f(1,1); glVertex2f(minx+xoffset,miny+yoffset);
+        glTexCoord2f(0,1); glVertex2f(minx        ,miny+yoffset);
     glEnd();
     glPopAttrib();
     glPopMatrix();
@@ -229,23 +237,23 @@ void BackgroundImage::drawImage()
     TRACE_EXIT();
 }
 
-void BackgroundImage::setDrawingCoords(GLfloat minx_, GLfloat maxx_, GLfloat miny_, GLfloat maxy_, GLfloat z_)
+void BackgroundImage::setDrawingCoords(GLfloat minx_, GLfloat width_, GLfloat miny_, GLfloat height_, GLfloat z_)
 {
     TRACE_ENTER();
     minx=minx_;
-    maxx=maxx_;
+    xoffset=width_==0?imageWidth:width_;  // if not set, use image width as offset
     miny=miny_;
-    maxy=maxy_;
+    yoffset=height_==0?miny+imageHeight:height_; // If not set, use image height as offset.
     z=z_;
     TRACE_EXIT();
 }
-void BackgroundImage::getDrawingCoords(GLfloat &minx_, GLfloat &maxx_, GLfloat &miny_, GLfloat &maxy_, GLfloat &z_)
+void BackgroundImage::getDrawingCoords(GLfloat &minx_, GLfloat &width_, GLfloat &miny_, GLfloat &height_, GLfloat &z_)
 {
     TRACE_ENTER();
     minx_=minx;
-    maxx_=maxx;
+    width_=xoffset;
     miny_=miny;
-    maxy_=maxy;
+    height_=yoffset;
     z_=z;
     TRACE_EXIT();
 }

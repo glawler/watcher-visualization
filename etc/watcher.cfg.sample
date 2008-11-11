@@ -37,10 +37,11 @@ layers :
 #   'imageFile' is the full path to the image file to be used. BMP and PPM supported. 
 #
 #   'coordinates' is a 5 tuple that describes both locatation and size of the image. The 
-#           items are (in order): min x value, max x value, min y value, max y value, z value
+#           items are (in order): x value, image width, y value, image height, z value
 #           For example, 0.0, 400.0, 0.0, 600.0, -20 would have an image starting at 0,0 and going 
 #           400 to the right and 600 up. -100, 100, -200, 200, -10 would have the image centered
-#           on the origin with a width of 200 and a height of 400. 
+#           on the origin with a width of 100 and a height of 200. 
+#           (If the width and the height are 0.0, then the width and height of the image itself is used.)
 #
 backgroundImage : 
 {
