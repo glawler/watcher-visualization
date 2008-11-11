@@ -30,7 +30,8 @@ BackgroundImage::BackgroundImage() :
     imageWidth(0),
     imageHeight(0),
     imageFormat(GL_BITMAP),
-    imageType(GL_UNSIGNED_BYTE)
+    imageType(GL_UNSIGNED_BYTE),
+    textureId(0)
 {
     TRACE_ENTER();
 
@@ -184,13 +185,14 @@ void BackgroundImage::setupTexture()
 
     // else BMP
     glPixelStorei(GL_UNPACK_ALIGNMENT,4);
-    static GLuint textureInt=1;
-    glBindTexture(GL_TEXTURE_2D, textureInt); 
+    glGenTextures(1, &textureId);  
+    glBindTexture(GL_TEXTURE_2D, textureId); 
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 
     gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imageWidth, imageHeight, imageFormat, imageType, imageData);
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 
     free(imageData);
     imageData=NULL;
@@ -208,6 +210,7 @@ void BackgroundImage::drawImage()
     glEnable(GL_TEXTURE_2D); 
     glDisable(GL_LIGHTING);
     glDisable(GL_BLEND); 
+    glBindTexture(GL_TEXTURE_2D, textureId); 
     glBegin(GL_QUADS);
         glTexCoord2f(0,0); glVertex2f(minx,miny);
         glTexCoord2f(1,0); glVertex2f(maxx,miny);

@@ -9,8 +9,8 @@ namespace watcher
     class Skybox
     {
         public:
-            static Skybox *getSkybox();
-
+            static Skybox &getSkybox();
+            bool loadSkyboxFiles();
             void drawSkybox(GLfloat camX, GLfloat camy, GLfloat camz); 
 
         protected:
@@ -22,6 +22,10 @@ namespace watcher
             Skybox &operator=(const Skybox &); 
 
             GLfloat width;
+
+            unsigned int *textureIds; // array of textures ids.
+
+            bool loadBMPFile(const unsigned int textureId, const char *filename);
 
             DECLARE_LOGGER();
     }; 

@@ -46,7 +46,6 @@
 #include "watcherGraph.h"
 #include "floatinglabel.h"
 #include "backgroundImage.h"
-#include "skybox.h"
 #include "watcherPropertyData.h"
 
 #include "mobility.h"
@@ -1357,10 +1356,6 @@ void legacyWatcher::drawManet(void)
     // static const GLfloat light_pos[] = { 0.0, 0.0, 0.0, 1.0 };
     // glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
     // glPopMatrix();
-
-    // watcher::Skybox *sb=watcher::Skybox::getSkybox();
-    // if (sb)
-    //     sb->drawSkybox(globalManetAdj.angleX, globalManetAdj.angleY, globalManetAdj.angleZ);
 
     glPushMatrix();
 

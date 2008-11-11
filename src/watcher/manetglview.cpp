@@ -7,6 +7,7 @@
 #include "legacyWatcher/legacyWatcher.h"
 #include "singletonConfig.h"
 #include "backgroundImage.h"
+#include "skybox.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -230,6 +231,13 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     LOG_INFO("Set viewpoint - scale: " << ma.scaleX << ", " << ma.scaleY << ", " << ma.scaleZ);
     LOG_INFO("Set viewpoint - shift: " << ma.shiftX << ", " << ma.shiftY << ", " << ma.shiftZ);
 
+    // load skybox images.
+    if (!Skybox::getSkybox().loadSkyboxFiles())
+    {
+        LOG_ERROR("Error loading skybox images");
+        exit (1);
+    }
+
     sc.unlock();
 
     // 
@@ -307,86 +315,47 @@ void manetGLView::paintGL()
 {
     TRACE_ENTER();
 
-    //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //  glLoadIdentity();
-    //  glTranslated(0.0, 0.0, -10.0);
-    //  glRotated(xRot / 16.0, 1.0, 0.0, 0.0);
-    //  glRotated(yRot / 16.0, 0.0, 1.0, 0.0);
-    //  glRotated(zRot / 16.0, 0.0, 0.0, 1.0);
-    //  glCallList(object);
-
+    glPushMatrix();
     if (currentView==legacyWatcher::ManetView)
         legacyWatcher::drawManet();
     else if(currentView==legacyWatcher::HierarchyView)
         legacyWatcher::drawHierarchy();
     else
         fprintf(stderr, "Error: I have an impossible watcher view!");
-
-    // qglColor(Qt::blue);
-    // renderText(-0.2, 0.2, 0.2, "Hello World");
-
-
-    // char *text = 
-    //     "Keyboard Shortcuts:\n"
-    //     "-------------------\n"
-    //     "esc: exit\n"
-    //     "n: closer\n"
-    //     "m: further\n"
-    //     "q: zoom out\n"
-    //     "w: zoom in\n"
-    //     "a: text zoom out\n"
-    //     "s: text zoom in\n"
-    //     "ctrl a: arrow zoom out\n"
-    //     "ctrl s: arrow zoom in\n"
-    //     "x: compress z scale\n"
-    //     "z: expand z scale\n"
-    //     "e: tilt up\n"
-    //     "r: tilt down\n"
-    //     "d: rotate left\n"
-    //     "f: rotate right\n"
-    //     "c: spin clockwise\n"
-    //     "v: spin counterclockwise\n"
-    //     "b: bandwidth toggle\n"
-    //     "ctrl r: reset viewpoint\n"
-    //     "\' \' (space): start/stop\n"
-    //                     "t: step on second\n";
-
-    // int side = width() > height() ? height() : width(); 
-    // glViewport((width() - side) / 2, (height() - side) / 2, side, side);
-
-    // glMatrixMode(GL_PROJECTION);
-    // glLoadIdentity();
-    // glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0);
-    // glMatrixMode(GL_MODELVIEW);
-
-    // QPainter painter;
-    // painter.begin(this);
-    // painter.save();
-    // QFontMetrics metrics = QFontMetrics(font());
-    // // int border = qMax(4, metrics.leading());
-    // // QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignLeft | Qt::TextWordWrap, text);
-    // painter.setRenderHint(QPainter::TextAntialiasing);
-    // painter.setPen(Qt::black);
-    // // painter.fillRect(QRect(0, 0, width(), rect.height() + 2*border), QColor(0, 0, 0, 64));
-    // // painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignLeft | Qt::TextWordWrap, text);
-    // painter.drawText(width()/2, height()/2, QString("Hello"));
-    // painter.restore(); 
-    // painter.end();
+    glPopMatrix(); 
     
+
+    // Reset and transform the matrix.
+    glMatrixMode(GL_MODELVIEW); 
+    glLoadIdentity();
+    GlobalManetAdj &ma=legacyWatcher::getManetAdj();
+    gluLookAt(
+            ma.shiftX, ma.shiftY, ma.shiftZ,
+            // ma.angleX, ma.angleY, ma.angleZ,
+            0,0,0,
+            0, 1, 0);
+    // Draw grid
+    static const GLfloat blue[] = { 0.2f, 0.2f, 1.0f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
+    for(float i = -500; i <= 500; i += 5)
+    {
+        glBegin(GL_LINES);
+        glVertex3f(-500, 0, i);
+        glVertex3f(500, 0, i);
+        glVertex3f(i, 0,-500);
+        glVertex3f(i, 0, 500);
+        glEnd();
+    }
+
+    printf("x: %f, y:%f, z:%f\n", ma.shiftX, ma.shiftY, ma.shiftZ); 
+    Skybox::getSkybox().drawSkybox(0, 0, 0);
+
     TRACE_EXIT();
 }
 
 void manetGLView::resizeGL(int width, int height)
 {
     TRACE_ENTER();
-
-//     int side = qMin(width, height);
-//     glViewport((width - side) / 2, (height - side) / 2, side, side);
-// 
-//     glMatrixMode(GL_PROJECTION);
-//     glLoadIdentity();
-//     glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0);
-//     glMatrixMode(GL_MODELVIEW);
 
     if (currentView==legacyWatcher::ManetView)
         legacyWatcher::ReshapeManet(width, height);

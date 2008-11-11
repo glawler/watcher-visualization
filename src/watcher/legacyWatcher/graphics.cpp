@@ -20,6 +20,20 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: graphics.cpp,v 1.54 20
 
 #ifdef GRAPHICS
 
+typedef struct GlobalManetAdj
+{
+    float angleX;
+    float angleY;
+    float angleZ;
+    float scaleX;
+    float scaleY;
+    float scaleZ;
+    float shiftX;
+    float shiftY;
+    float shiftZ;
+}; 
+
+extern GlobalManetAdj globalManetAdj; // allocated in legacyWatcher.o
 extern NodeDisplayStatus globalDispStat; // allocated in legacyWatcher.o
 extern WatcherPropertiesList GlobalWatcherPropertiesList; // allocated in legacyWatcher.o
 
@@ -663,6 +677,7 @@ void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, WatcherPro
         glNormal3f(0.0, 0.0, 1.0);
         glutSolidSphere(radius, 10, 10);
         glPopAttrib();
+        glDisable(GL_TEXTURE_2D); 
         glPopMatrix();
     }
     else
@@ -993,10 +1008,18 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
         }
         if(h > 0.0) // if there is text for the label
         {
+            // GTL - start of label billboarding - is off somewhere.
+            glPushMatrix();
+            glTranslatef (nodex,nodey,nodez);
+            // Rotate to face the camera (billboard the label)
+            glRotatef (globalManetAdj.angleX, -1, 0, 0);
+            glRotatef (globalManetAdj.angleY, 0, -1, 0);
+            glRotatef (globalManetAdj.angleZ, 0, 0, -1);
+
             GLfloat fgcolor[4],bgcolor[4];
-            GLfloat x=nodex+6;
-            GLfloat y=nodey-6;
-            GLfloat z=nodez+0.3+(0.3*(us->index & 0xFF));
+            GLfloat x=6;
+            GLfloat y=6;
+            GLfloat z=0.3+(0.3*(us->index & 0xFF));
             // static const GLfloat gray[]={0.6,0.6,0.6,1.0};
             static const GLfloat black[]={0.0,0.0,0.0,1.0};
             GLfloat border_width = 
@@ -1009,23 +1032,24 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
 
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
             glBegin(GL_TRIANGLE_FAN);
-            glVertex3f(nodex,nodey,nodez);
+            glVertex3f(0,0,0);
             glVertex3f(x+w*0.03,y,z);
             glVertex3f(x,y,z);
             glVertex3f(x,y,z);
-            glVertex3f(x,y-h*0.03,z);
+            glVertex3f(x,y+h*0.03,z);
             glEnd();
+
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
             glBegin(GL_LINE_LOOP);
             glVertex3f(x,y,z+0.2);
             glVertex3f(x+w,y,z+0.2);
-            glVertex3f(x+w,y-h,z+0.2);
-            glVertex3f(x,y-h,z+0.2);
+            glVertex3f(x+w,y+h,z+0.2);
+            glVertex3f(x,y+h,z+0.2);
             glEnd();
 
             for(l=us->labelList;l;l=l->next)
             {
-                GLfloat localh=drawTextHeight(l->text)* dispStat->scaleText[dispType];
+                GLfloat localh=drawTextHeight(l->text) * dispStat->scaleText[dispType];
 
                 if (l->priority>dispStat->minPriority)
                     continue;
@@ -1051,8 +1075,8 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
                 glBegin(GL_POLYGON);
                 glVertex3f(x  ,y,z+0.1);
                 glVertex3f(x+w,y,z+0.1);
-                glVertex3f(x+w,y-localh-0.5,z+0.1);
-                glVertex3f(x  ,y-localh-0.5,z+0.1);
+                glVertex3f(x+w,y+localh+0.5,z+0.1);
+                glVertex3f(x  ,y+localh+0.5,z+0.1);
                 glEnd();
 
                 if (dispStat->monochromeMode)
@@ -1071,11 +1095,11 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
                 }
 
                 glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, fgcolor);
-                y-=drawTextHeight("X")*dispStat->scaleText[dispType];
+                y+=drawTextHeight("X")*dispStat->scaleText[dispType];
                 drawText(x+border_width,y-border_width,z+0.2, dispStat->scaleText[dispType], l->text);
-                y-=localh-drawTextHeight("X")* dispStat->scaleText[dispType];
+                y+=localh+drawTextHeight("X")* dispStat->scaleText[dispType];
             }
-            /* Fill in gap at the bottom of the label...  */
+            /* Fill in gap at the top of the label...  */
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgcolor);
             glBegin(GL_POLYGON);
             glVertex3f(x  ,y,z+0.1);
@@ -1083,6 +1107,9 @@ void nodeDrawLabel(manetNode *us, NodeDisplayType dispType, NodeDisplayStatus co
             glVertex3f(x+w,y-border_width2,z+0.1);
             glVertex3f(x  ,y-border_width2,z+0.1);
             glEnd();
+
+            // billboarding pop
+            glPopMatrix(); 
         }
     }
 }

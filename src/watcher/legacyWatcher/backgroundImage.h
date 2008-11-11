@@ -43,6 +43,8 @@ namespace watcher
             GLenum imageFormat;
             GLenum imageType;
 
+            GLuint textureId;
+
             DECLARE_LOGGER();
 
             BackgroundImage();
