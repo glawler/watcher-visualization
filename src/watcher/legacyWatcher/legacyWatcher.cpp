@@ -520,6 +520,16 @@ static void scaleAndShiftToSeeOnManet(
             {
                 manetAdj->scaleY = manetAdj->scaleX;
             }
+
+            BackgroundImage &bgImage=BackgroundImage::getInstance(); 
+            if (bgImage.centerImage())
+            {
+                GLfloat x,y,z,w,h;
+                bgImage.getDrawingCoords(x,w,y,h,z);
+                bgImage.setDrawingCoords(manetAdj->shiftX, w, manetAdj->shiftY, h, z); 
+                bgImage.centerImage(false); 
+            }
+
             //if(now > tick)
             {
                 fprintf(stderr, "********************************************************************\n");
@@ -600,9 +610,8 @@ static void scaleAndShiftToCenter(manet *m, ScaleAndShiftUpdate onChangeOrAlways
         {
             double r = 0;
             if(includeAntenna)
-            {
                 r = m->nlist[i].aradius;
-            }
+
             if(includeHierarchy)
             {
                 double hr = HIERARCHY_RADIUS(m->nlist[i].level);
@@ -616,27 +625,13 @@ static void scaleAndShiftToCenter(manet *m, ScaleAndShiftUpdate onChangeOrAlways
                 double nodeXMax = m->nlist[i].x + r;
                 double nodeYMin = m->nlist[i].y - r;
                 double nodeYMax = m->nlist[i].y + r;
-                if(nodeXMin < xMin)
-                {
-                    xMin = nodeXMin;
-                }
-                if(nodeXMax > xMax)
-                {
-                    xMax = nodeXMax;
-                }
-                if(nodeYMin < yMin)
-                {
-                    yMin = nodeYMin;
-                }
-                if(nodeYMax > yMax)
-                {
-                    yMax = nodeYMax;
-                }
+                if(nodeXMin < xMin) xMin = nodeXMin;
+                if(nodeXMax > xMax) xMax = nodeXMax;
+                if(nodeYMin < yMin) yMin = nodeYMin;
+                if(nodeYMax > yMax) yMax = nodeYMax;
             }
             if(m->nlist[i].z < zMin)
-            {
                 zMin = m->nlist[i].z;
-            }
         }
         scaleAndShiftToSeeOnManet(xMin, yMin, xMax, yMax, zMin, onChangeOrAlways);
     }
@@ -718,9 +713,7 @@ static void getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
             { xmid, ymid, z, 0, 0 },
             { xmid + dx, ymid - dy, z, 0, 0 },
         };
-        if(xyAtZForModelProjViewXY(
-                    xyz, sizeof(xyz) / sizeof(xyz[0]),
-                    modelmatrix, projmatrix, viewport) ==  0)
+        if(xyAtZForModelProjViewXY( xyz, sizeof(xyz) / sizeof(xyz[0]), modelmatrix, projmatrix, viewport) ==  0)
         {
             x_ret = xyz[0].worldX_ret - xyz[1].worldX_ret;
             y_ret = xyz[1].worldY_ret - xyz[2].worldY_ret;
@@ -1211,6 +1204,7 @@ int legacyWatcher::Key(unsigned char key)
                 scaleAndShiftToCenter(globalManet, ScaleAndShiftUpdateAlways);
             }
             handled=1;
+            globalAutoCenterNodesFlag = 0; 
             break;
 
         case ' ':

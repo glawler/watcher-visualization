@@ -22,6 +22,7 @@ BackgroundImage &BackgroundImage::getInstance()
 
 BackgroundImage::BackgroundImage() :
     imageLoaded(false),
+    imageCenter(false),
     imageData(NULL),
     minx(0.0),
     miny(0.0),
@@ -257,3 +258,18 @@ void BackgroundImage::getDrawingCoords(GLfloat &minx_, GLfloat &width_, GLfloat 
     z_=z;
     TRACE_EXIT();
 }
+
+void BackgroundImage::centerImage(bool val)
+{
+    TRACE_ENTER();
+    imageCenter=val;
+    TRACE_EXIT();
+}
+
+bool BackgroundImage::centerImage() const
+{
+    TRACE_ENTER();
+    TRACE_EXIT_RET( (imageCenter?"true":"false") );
+    return imageCenter;
+}
+

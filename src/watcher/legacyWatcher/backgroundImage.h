@@ -26,11 +26,17 @@ namespace watcher
             // Draw the background using opengl and the set coords.
             void drawImage(); 
 
+            // if true, center the image next time it is drawn. 
+            // (Hacky - only used when executing the self-centering code in the watcher)
+            void centerImage(bool); 
+            bool centerImage() const; 
+
         protected:
 
         private:
 
             bool imageLoaded;
+            bool imageCenter;
 
             void setupTexture();
 

@@ -462,24 +462,46 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
 {
     TRACE_ENTER();
     
-    // GTL - Currently does not work!
-    // legacyWatcher::jumpToX(event->x());
-    // legacyWatcher::jumpToY(event->y());
-    //
-    // char buf[512];
-    // memset(buf, 0, sizeof(buf)); 
-    // if(legacyWatcher::getNodeStatus(event->x(),event->y(), buf, sizeof(buf)))
-    // {
-    //     QMessageBox::information(this, tr("Watcher"), QString(buf));
-    // }
-    // updateGL();
-
-    unsigned int nodeId=legacyWatcher::getNodeIdAtCoords(event->x(), event->y());
-    if(nodeId)
+    // Check for shift click and move bg image if shifted
+    Qt::KeyboardModifiers mods=event->modifiers();
+    if (mods & Qt::ShiftModifier)
     {
-        emit nodeDataInGraphsToggled(nodeId);
-    }
+        // This should work - but doesn't.
+        //
+        // GLdouble modelmatrix[16];
+        // GLdouble projmatrix[16];
+        // GLint viewport[4];
 
+        // glGetDoublev(GL_MODELVIEW_MATRIX, modelmatrix);
+        // glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
+        // glGetIntegerv(GL_VIEWPORT, viewport);
+
+        // GLfloat winx=event->x(), winy=event->y(), winz=0.0;
+        // winy=viewport[3]-winy;
+
+        // BackgroundImage &bg=BackgroundImage::getInstance();
+        // GLfloat x,y,w,h,z;
+        // bg.getDrawingCoords(x, w, y, h, z);
+
+        // GLdouble objx, objy, objz;
+        // if (gluUnProject(winx, winy, winz, modelmatrix, projmatrix, viewport, &objx, &objy, &objz)==GL_TRUE)
+        // {
+        //     GlobalManetAdj &ma=legacyWatcher::getManetAdj();
+        //     bg.setDrawingCoords(x+objx, w, y+objy, h, z);
+        // }
+
+        // hack - let the centering code center the BG image.
+        BackgroundImage &bg=BackgroundImage::getInstance();
+        bg.centerImage(true); 
+    }
+    else
+    {
+        unsigned int nodeId=legacyWatcher::getNodeIdAtCoords(event->x(), event->y());
+        if(nodeId)
+        {
+            emit nodeDataInGraphsToggled(nodeId);
+        }
+    }
     TRACE_EXIT();
 }
 
@@ -529,6 +551,7 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
     int dy = event->y() - lastPos.y();
 
     Qt::MouseButtons buttons = event->buttons();
+    Qt::KeyboardModifiers mods=event->modifiers();
 
     if ((buttons & Qt::LeftButton) && (buttons & Qt::RightButton))
     {
@@ -540,8 +563,6 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
     }
     else if ((buttons & Qt::LeftButton) && !(buttons & Qt::RightButton))
     {
-        Qt::KeyboardModifiers mods=event->modifiers();
-
         if (mods & Qt::ShiftModifier)
         {
             legacyWatcher::shiftBackgroundCenterLeft(dx);
