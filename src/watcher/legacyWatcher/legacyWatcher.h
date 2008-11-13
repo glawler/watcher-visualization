@@ -126,7 +126,7 @@ namespace legacyWatcher
     // args must between 1.0 and 0.0.
     void setBackgroundColor(float r, float g, float b, float a); 
 
-    typedef struct GlobalManetAdj
+    struct GlobalManetAdj
     {
         float angleX;
         float angleY;

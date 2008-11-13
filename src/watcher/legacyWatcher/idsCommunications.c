@@ -1733,6 +1733,9 @@ void communicationsWatcherProperty(CommunicationsStatePtr cs, ManetAddr node, Wa
 	if ((node==NODE_LOCAL) || (node==0))
 		node=cs->localid;
 
+	if ((prop->identifier==NODE_LOCAL) || (prop->identifier==0))
+		prop->identifier=cs->localid;
+
 	pos=communicationsWatcherPropertyMarshal(pos, prop);
 
 	mi=messageInfoCreate(cs,IDSCOMMUNICATIONS_MESSAGE_WATCHER_PROPERTY,dst,NULL,NULL);
@@ -2013,46 +2016,50 @@ int communicationsTagHash(char *str)
 	return h;
 }
 
-/* Marshal an n by n array of ints into a buffer, for transmission.
- * 
+/* 
  * buffer is a pointer to a char* to put a pointer to the malloced buffer into
  * the length of the buffer will be put into *len
  */
-void graphMarshal(const float *graph, int numnodes, unsigned char **buffer, int *len)
+void graphMarshal(const char *graphName, const float *floatData, int numPoints, unsigned char **buffer, int *len)
 {
-	int i,j,dat;
-	unsigned char *buff,*pos;
-	int bufferlen=numnodes*numnodes*2;
+    int i;
+    unsigned char *buff,*pos;
 
-	buff=(unsigned char *)malloc(bufferlen);
-	pos=buff;
+    buff=(unsigned char *)malloc(1024); // "sufficent"
+    pos=buff;
 
-	for(i=0;i<numnodes;i++)
-		for(j=0;j<numnodes;j++)
-		{
-			dat=graph[i+(j*numnodes)]*100.0;
-			MARSHALSHORT(pos, dat);
-		}
-		
-	*buffer=buff;
-	*len=bufferlen;
+    MARSHALSTRINGSHORT(pos, graphName);
+
+    MARSHALLONG(pos, numPoints);
+    for(i=0;i<numPoints;i++)
+    {
+        char floatBuf[64];
+        snprintf(floatBuf, sizeof(floatBuf), "%f", floatData[i]); 
+        // fprintf(stderr, "Marshalled float: %f, as string: %s\n", floatData[i], floatBuf);
+        MARSHALSTRINGSHORT(pos, floatBuf);
+    }
+
+    *buffer=buff;
+    *len=pos-buff; // This is bad.
 }
 
-void graphUnmarshal(float *graph, int numnodes, const unsigned char *buffer)
-{
-	int i,j;
-	const unsigned char *pos = buffer;
-	int dat;
+// void graphUnmarshal(float *graph, int numnodes, const unsigned char *buffer)
+// {
+//     assert(0);  // unmarshalling done in watcher for now. 
+// 
+// 	int i,j;
+// 	const unsigned char *pos = buffer;
+// 	int dat;
+// 
+// 	for(i=0;i<numnodes;i++)
+// 		for(j=0;j<numnodes;j++)
+// 		{
+// 			UNMARSHALSHORT(pos,dat);
+// 			graph[i+(j*numnodes)]=dat/100.0;
+// 		}
+// }
 
-	for(i=0;i<numnodes;i++)
-		for(j=0;j<numnodes;j++)
-		{
-			UNMARSHALSHORT(pos,dat);
-			graph[i+(j*numnodes)]=dat/100.0;
-		}
-}
-
-void graphSend(CommunicationsStatePtr cs, float *graph, int numnodes)
+void graphSend(CommunicationsStatePtr cs, const char *graphName, const float *dataPts, int numDataPts)
 {
 	unsigned char *payload;
 	int payloadlen;
@@ -2063,7 +2070,7 @@ void graphSend(CommunicationsStatePtr cs, float *graph, int numnodes)
 	dst.type=COMMUNICATIONSDESTINATION_DIRECT;
 	dst.ttl=255;
 
-	graphMarshal(graph, numnodes, &payload, &payloadlen);
+	graphMarshal(graphName, dataPts, numDataPts, &payload, &payloadlen);
 
 	mi=messageInfoCreate(cs,IDSCOMMUNICATIONS_MESSAGE_WATCHER_GRAPH,dst,NULL,NULL);
         messageInfoRawPayloadSet(mi,payload,payloadlen);

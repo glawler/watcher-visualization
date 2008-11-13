@@ -95,30 +95,37 @@ PROTECTION_INCLUDES=
 ###################################
 # uncomment this block for application level message signing support
 # (see signing.txt)
-# PROTECTIONLIB=../protection/libnnpprotection.a
-# PROTECTION_INCLUDES=-I../protection
-# LIVEOBJ += ../protection/libnnpprotection.a
-# LIBOBJS += transDuo.o
-# LIBOBJS += transformNull.o
-# LIBOBJS += transformSign.o
-# LIBOBJS += untransformNull.o
-# LIBOBJS += untransformSign.o
-# BINS+=demosigningaggregator
-# BINS+=demosigningdetector
-# BINS+=demoverifiedalertreader
+#PROTECTIONLIB=../protection/libnnpprotection.a
+#PROTECTION_INCLUDES=-I../protection
+#LIVEOBJ += ../protection/libnnpprotection.a
+#LIBOBJS += transDuo.o
+##LIBOBJS += transformNull.o
+#LIBOBJS += transformSign.o
+#LIBOBJS += untransformNull.o
+#LIBOBJS += untransformSign.o
+#BINS+=demosigningaggregator
+#BINS+=demosigningdetector
+#BINS+=demoverifiedalertreader
 ###################################
 
 ###################################
 # uncomment this block for userland packet encryption in the daemon
-# LIVEOBJ+=packetProtection.o
-# LIVEOBJ+=../protection/libnnpprotection.a
-# PROTECTIONLIB=../protection/libnnpprotection.a
-# PROTECTION_INCLUDES+=-I../protection
-# COMPFLAGS+=-DUSE_PACKETPROTECTION
-# COMPFLAGS+=-DNNP
-# BINS+=testPacketProtection
-# PACKETPROTECTIONOBJ=packetProtection.o
+LIVEOBJ+=packetProtection.o
+LIVEOBJ+=../protection/libnnpprotection.a
+PROTECTIONLIB=../protection/libnnpprotection.a
+PROTECTION_INCLUDES+=-I../protection
+COMPFLAGS+=-DUSE_PACKETPROTECTION
+COMPFLAGS+=-DNNP
+BINS+=testPacketProtection
+PACKETPROTECTIONOBJ=packetProtection.o
 ###################################
+
+# GTL - experimental automatic use of multiprocessor systems to speed up make
+# May break things, don't know.
+PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
+ifneq (${PROCCOUNT}, 0)
+    MAKEFLAGS+=-j $(PROCCOUNT)
+endif
 
 INCLUDES += $(PROTECTION_INCLUDES)
 
@@ -223,6 +230,8 @@ BINS+=goodwincreate
 BINS+=goodwinmerge 
 BINS+=goodwintest 
 BINS+=labeltest 
+BINS+=watcherpropertytest
+BINS+=watchergraphtest
 BINS+=pgraphwatcher 
 BINS+=positionweight 
 BINS+=routingdetector
@@ -238,9 +247,7 @@ BINS+=infrasniff
 CXXFLAGS += $(COMPFLAGS)
 CFLAGS += $(COMPFLAGS)
 
-# GTL - We onl;y care about building the watcher here. 
-# all: $(BINS)
-all: watcher
+all: $(BINS)
 
 amroute:	$(SIMOBJ) $(AMROUTEOBJ)
 		$(CXX) -o amroute $(SIMOBJ) $(AMROUTEOBJ) $(LDFLAGS)
@@ -375,6 +382,12 @@ positionweight: positionweight.o libidsCommunications.a
 labeltest: labeltest.o libidsCommunications.a
 	$(CXX) -o labeltest labeltest.o -L . -lidsCommunications $(LDFLAGS)
 
+watcherpropertytest: watcherpropertytest.o libidsCommunications.a
+	$(CXX) -o watcherpropertytest watcherpropertytest.o -L . -lidsCommunications $(LDFLAGS)
+
+watchergraphtest: watchergraphtest.o libidsCommunications.a
+	$(CXX) -o watchergraphtest watchergraphtest.o -L . -lidsCommunications $(LDFLAGS)
+
 floatinglabeltest: floatinglabeltest.o libidsCommunications.a
 	$(CXX) -o floatinglabeltest floatinglabeltest.o -L . -lidsCommunications $(LDFLAGS)
 
@@ -406,7 +419,7 @@ testPacketProtection: ${BASEOBJ}
 
 clean:
 	rm -f $(BINS) *.o *.uto *.core core testhello libidsCommunications.a depend;
-#	$(MAKE) -C ../protection clean; 
+	$(MAKE) -C ../protection clean; 
 
 install: $(BINS)
 	cp -f $(BINS) $(HOME)/bin

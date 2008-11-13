@@ -86,7 +86,7 @@ packet *packetMallocInt(manetNode *us, int len, char *, int )
  * Call this only after a packetMalloc.
  * the pointer may be changed
  */
-packet *packetRemalloc(manetNode *, int len, packet *oldp)
+packet *packetRemalloc(manetNode *, int len,packet *oldp)
 {
 	packet *newp;
 
@@ -121,7 +121,7 @@ void packetDumpDebug(void)
 ** This is actually just a reference count operation
 ** Thus, a duplicated packet may not be modified.
 */
-packet *packetDupInt(packet *p, char *, int )
+packet *packetDupInt(packet *p, char *, int)
 {
 #ifdef DEBUG_PACKET
 	if (fil!=NULL)
@@ -140,7 +140,7 @@ packet *packetDupInt(packet *p, char *, int )
 ** A copy may be modified.  Things like subtracting one from the TTL on repeat
 ** count as a modification.
 */
-packet *packetCopyInt(packet const *o, int payloaddelta, char *, int )
+packet *packetCopyInt(packet const *o, int payloaddelta, char *, int)
 {
 	packet *p;
 
@@ -423,7 +423,7 @@ eventnode *packetEnqueue(manetNode *us,packet *p,int delay)
 	en=eventnodeMalloc();
 
 	en->type=EVENT_PACKET;
-	en->data.pkt=packetDup(p);
+	en->data.pkt=(packet*)packetDup(p);
 	en->callback=NULL;
 	en->xmittime=us->manet->curtime;
 	en->rectime=en->xmittime+delay;         /* XXX  Propigation time  should be modeled, or configurable.  But not here: see packetReReceive */

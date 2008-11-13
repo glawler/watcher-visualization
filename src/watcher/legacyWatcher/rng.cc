@@ -849,7 +849,7 @@ RNG::RNG (const char *s)
 { 
 	if (strlen (s) > 99) {
 		strncpy (name_, s, 99);
-		name_[100] = 0;
+		name_[99] = 0;
 	}
 	else 
 		strcpy (name_, s);

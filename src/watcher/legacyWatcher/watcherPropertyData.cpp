@@ -7,6 +7,8 @@
 #include <netinet/in.h>     // for inet_ntoa
 #include <arpa/inet.h>      // for inet_ntoa
 
+#include <string.h> // for memset()
+
 using namespace std;
 using namespace watcher;
 using namespace libconfig;

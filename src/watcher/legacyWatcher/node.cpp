@@ -36,7 +36,7 @@ void nodePacketInsert(manetNode *us, packet *p)
         if (us->packetlist[us->packetlistpos])
                 packetFree(us->packetlist[us->packetlistpos]);
 
-        us->packetlist[us->packetlistpos]=packetDup(p);
+        us->packetlist[us->packetlistpos]=(packet*)packetDup(p);
 
         us->packetlistpos=(us->packetlistpos+1) % NODE_PACKETLIST;
         if (us->packetlistpos>us->packetlistlen)

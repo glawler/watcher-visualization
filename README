@@ -12,6 +12,9 @@ If you want to build the 1.36 version, I've put the tar file in ./tars.
 libidmef is probably installed on your build system anyway, assuming it is 
 the same system used to build/run the old old watcher. 
 
+Yum installed libs: libpcap-devel, freeglut-devel, qt, boost
+built: libidmef (SPARTA version)
+
 Install QT:
 ----------------------------------------------------------------
 Assuming a Fedora based system:
@@ -61,6 +64,14 @@ cd src/watcher/legacyWatcher
 make libidsCommunications.a
 cp libidsCommunications.a ../../../lib
 
+binaries for controlling watcher from the testnodes (optional)
+---------------------------------------------------
+cd src/watcher/legacyWatcher
+for f in floatinglabeltest routingdetector watcherpropertytest watchergraphtest edgetest labeltest; do
+	make $f;
+	cp $f ../../../bin;
+done;
+
 log4cxx
 ----------------------------------------------------
 This lib requires that two others be installed. Here's 
@@ -95,6 +106,7 @@ tar zxvf ../tars/apache-log4cxx-0.10.0.tar.gz
 cd apache-log4cxx-0.10.0
 ./configure --prefix=$HOME/src/watcher --with-apr=$HOME/src/watcher --with-apr-util=$HOME/src/watcher --disable-doxygen
 make 
+(on Fedora 9 I had to add
 make check
 make install
 
@@ -107,6 +119,7 @@ cd qwt-5.1.1/
 qmake-qt4
 make 
 make install
+(you may need to sudo make install, as qwt copies its qt-designer support objects to the qt system directory)
 
 Make the logger library (a small wrapper for log4cxx)
 ----------------------------------------------------
@@ -134,14 +147,15 @@ cp ../../etc/watcher.log.properties.sample watcher.log.properties
 # Tell the system where to find the libraries...
 export LD_CONFIG_PATH=$HOME/watcher/lib
 
-
 ./watcher -f watcher.cfg [normal watcher args] live.conf
 
 Post library installation.
 ------------------------------------------------
 Pull the repository again. I patched a header file in log4cxx, and the making and installing
 of that library overwroter the file. So go to the top level again and to 'hg pull -u', that will
-overwrite the file with the one from the repo and all will be well.
+overwrite the file with the one from the repo and all will be well. Or just revert it:
+
+hg revert include/log4cxx/helpers/objectptr.h
 
 
 
