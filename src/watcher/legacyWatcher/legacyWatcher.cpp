@@ -158,7 +158,7 @@ static unsigned char globalNeighborColors[][4] =
 
 GlobalManetAdj globalManetAdj;
 GlobalManetAdj globalHierarchyAdj;
-GlobalManetAdj globalManetAdjInit =     { 0.0, 0.0, 0.0, .035, .035, .1, 0.0, 0.0, 0.0 }; 
+GlobalManetAdj globalManetAdjInit =     { 0.0, 0.0, 0.0, .035, .035, .03, 0.0, 0.0, 0.0 }; 
 GlobalManetAdj globalHierarchyAdjInit = { 0.0, 0.0, 0.0, 1.9, 1.5, 0.0, 0.0, 0.0, 0.0 };
 
 int globalShowPositionFlag = 0;
@@ -921,9 +921,9 @@ void legacyWatcher::compressDistance()
     if (globalActiveView==legacyWatcher::ManetView)
     {
         globalManetAdj.scaleZ -= 0.1;
-        if (globalManetAdj.scaleZ < 0.1)
+        if (globalManetAdj.scaleZ < 0.02)
         {
-            globalManetAdj.scaleZ = 0.1;
+            globalManetAdj.scaleZ = 0.02;
         }
         if(globalAutoCenterNodesFlag && globalManet)
         {
@@ -933,9 +933,9 @@ void legacyWatcher::compressDistance()
     else
     {
         globalHierarchyAdj.scaleZ -= 0.1;
-        if (globalHierarchyAdj.scaleZ < 0.1)
+        if (globalHierarchyAdj.scaleZ < 0.02)
         {
-            globalHierarchyAdj.scaleZ = 0.1;
+            globalHierarchyAdj.scaleZ = 0.02;
         }
     }
 } // compressDistance
