@@ -191,6 +191,29 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
         bg.setDrawingCoords(floatVals[0], floatVals[1], floatVals[2], floatVals[3], floatVals[4]); 
     }
 
+    // Load GPS data format setting
+    prop="gpsDataFormat";
+    strVal="";
+    if (!root.lookupValue(prop, strVal))
+    {
+        root.add(prop, libconfig::Setting::TypeString);
+        root[prop]="lat-long-alt-WGS84"; // Default
+    }
+
+    if (strVal == "UTM") 
+        legacyWatcher::setGPSDataFormat(legacyWatcher::GPS_DATA_FORMAT_UTM);
+    else if(strVal == "lat-long-alt-WGS84")
+        legacyWatcher::setGPSDataFormat(legacyWatcher::GPS_DATA_FORMAT_DEG_WGS84);
+    else
+    {
+        if (strVal.empty())
+            LOG_INFO("There is no gpsDataFormat argument in the cfg file, setting to default: lat-long-alt-WGS84")
+        else
+            LOG_WARN("I don't understand the gpsDataFormat argument in the cfg file, \"" << strVal << "\", setting to default: lat-long-alt-WGS84")
+
+        legacyWatcher::setGPSDataFormat(legacyWatcher::GPS_DATA_FORMAT_DEG_WGS84);
+    }
+
     //
     // Load viewpoint
     //
@@ -877,6 +900,18 @@ void manetGLView::saveConfiguration()
     root["backgroundImage"]["coordinates"][2]=floatVals[2];
     root["backgroundImage"]["coordinates"][3]=floatVals[3];
     root["backgroundImage"]["coordinates"][4]=floatVals[4];
+
+    GPSDataFormat format=legacyWatcher::getGPSDataFormat();
+    switch(format)
+    {
+        case GPS_DATA_FORMAT_UTM: 
+            root["gpsDataFormat"]="UTM"; 
+            break;
+        case GPS_DATA_FORMAT_DEG_WGS84: 
+            root["gpsDataFormat"]="lat-long-alt-WGS84";
+            break;
+        // Don't put default case
+    }
 
     sc.saveConfig();
     sc.unlock();

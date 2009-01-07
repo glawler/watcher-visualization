@@ -100,6 +100,10 @@ namespace legacyWatcher
     void toggleMonochrome(bool isOn); 
     void toggleBackgroundImage(bool isOn); 
 
+    typedef enum GPSDataFormat { GPS_DATA_FORMAT_UTM, GPS_DATA_FORMAT_DEG_WGS84 }; 
+    void setGPSDataFormat(const GPSDataFormat &format);
+    GPSDataFormat getGPSDataFormat();
+
     void clearAllLabels();
     void clearAllEdges();
 

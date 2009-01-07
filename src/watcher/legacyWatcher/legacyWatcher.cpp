@@ -126,6 +126,8 @@ static double globalSelectedNodeDeltaY;
 static char *globalgoodwinfilename;
 static CommunicationsLogStatePtr globalGoodwin;
 
+GPSDataFormat globalGPSDataFormat; 
+
 static struct
 {
     int step;     /* distance to go...  */
@@ -182,6 +184,16 @@ NodeDisplayStatus &legacyWatcher::getDisplayStatus(void)
 void legacyWatcher::toggleMonochrome(bool isOn)
 {
     globalDispStat.monochromeMode=isOn?1:0;
+}
+
+void legacyWatcher::setGPSDataFormat(const GPSDataFormat &format)
+{
+    globalGPSDataFormat=format;
+}
+
+GPSDataFormat legacyWatcher::getGPSDataFormat()
+{
+    return globalGPSDataFormat;
 }
 
 void legacyWatcher::toggleThreeDView(bool isOn)
@@ -1977,9 +1989,28 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
         return;
     }
 
-    us->x = location->lon * GPSScale;
-    us->y = location->lat * GPSScale;
-    us->z = location->alt - 20;
+    if (globalGPSDataFormat == GPS_DATA_FORMAT_UTM)
+    {
+        if (location->lon < 91 && location->lon > 0) 
+            LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
+
+        us->x=location->lon-500000;
+        us->y=location->lat;    
+        us->z=location->alt;
+
+        LOG_DEBUG("node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);
+        LOG_DEBUG("given locations: lon=" << location->lon << " lat=" << location->lat << " alt=" << location->alt);
+    }
+    else // default to lat/long/alt WGS84
+    {
+        if (location->lon > 180)
+            LOG_WARN("Received GPS data that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
+
+        us->x = location->lon * GPSScale;
+        us->y = location->lat * GPSScale;
+        us->z = location->alt - 20;
+    }
+
     globalGpsValidFlag[us->index] = 1;
 
     tim = location->time;      /* GPS time in milliseconds (idsCommunication's canonical unit)  */
