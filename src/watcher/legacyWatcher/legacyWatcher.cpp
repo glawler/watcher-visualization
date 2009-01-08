@@ -1991,11 +1991,27 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
 
     if (globalGPSDataFormat == GPS_DATA_FORMAT_UTM)
     {
+        //
+        // There is no UTM zone information in the UTM GPS packet, so we assume all data is in a single
+        // zone. Because of this, no attempt is made to place the nodes in the correct positions on the 
+        // planet surface. We just use the "lat" "long" data as pure x and y coords in a plane, offset
+        // by the first coord we get. (Nodes are all centered around 0,0 where, 0,0 is defined 
+        // by the first coord we receive. 
+        //
         if (location->lon < 91 && location->lon > 0) 
             LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
 
-        us->x=location->lon-500000;
-        us->y=location->lat;    
+        static double utmXOffset=0.0, utmYOffset=0.0;
+        if (utmXOffset==0.0)
+        {
+            utmXOffset=location->lon;
+            utmYOffset=location->lat;
+
+            LOG_INFO("Got first UTM coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" << utmXOffset << " y=" << utmYOffset);
+        }
+
+        us->x=location->lon-utmXOffset;
+        us->y=location->lat-utmYOffset;    
         us->z=location->alt;
 
         LOG_DEBUG("node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);
