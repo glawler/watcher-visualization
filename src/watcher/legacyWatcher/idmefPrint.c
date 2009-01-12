@@ -105,309 +105,309 @@ void idmefPrint(FILE *fil, xmlDocPtr messagedoc)
 	fprintf(fil, "message->version=\'%s\'\n", message->version);
 
 	for(i = 0; i < message->nalerts; i++) {
-		fprintf(fil, "message->alerts[%d]->messageid=\'%s\'\n", i, message->alerts[i]->messageid);
+		fprintf(fil, "message->alerts[%zd]->messageid=\'%s\'\n", i, message->alerts[i]->messageid);
 	
 		if(message->alerts[i]->analyzer) {
-			fprintf(fil, "message->alerts[%d]->analyzer->analyzerid=\'%s\'\n", i, message->alerts[i]->analyzer->analyzerid);
-			fprintf(fil, "message->alerts[%d]->analyzer->manufacturer=\'%s\'\n", i, message->alerts[i]->analyzer->manufacturer);
-			fprintf(fil, "message->alerts[%d]->analyzer->model=\'%s\'\n", i, message->alerts[i]->analyzer->model);
-			fprintf(fil, "message->alerts[%d]->analyzer->version=\'%s\'\n", i, message->alerts[i]->analyzer->version);
-			fprintf(fil, "message->alerts[%d]->analyzer->cls=\'%s\'\n", i, message->alerts[i]->analyzer->cls);
-			fprintf(fil, "message->alerts[%d]->analyzer->ostype=\'%s\'\n", i, message->alerts[i]->analyzer->ostype);
-			fprintf(fil, "message->alerts[%d]->analyzer->osversion=\'%s\'\n", i, message->alerts[i]->analyzer->osversion);
+			fprintf(fil, "message->alerts[%zd]->analyzer->analyzerid=\'%s\'\n", i, message->alerts[i]->analyzer->analyzerid);
+			fprintf(fil, "message->alerts[%zd]->analyzer->manufacturer=\'%s\'\n", i, message->alerts[i]->analyzer->manufacturer);
+			fprintf(fil, "message->alerts[%zd]->analyzer->model=\'%s\'\n", i, message->alerts[i]->analyzer->model);
+			fprintf(fil, "message->alerts[%zd]->analyzer->version=\'%s\'\n", i, message->alerts[i]->analyzer->version);
+			fprintf(fil, "message->alerts[%zd]->analyzer->cls=\'%s\'\n", i, message->alerts[i]->analyzer->cls);
+			fprintf(fil, "message->alerts[%zd]->analyzer->ostype=\'%s\'\n", i, message->alerts[i]->analyzer->ostype);
+			fprintf(fil, "message->alerts[%zd]->analyzer->osversion=\'%s\'\n", i, message->alerts[i]->analyzer->osversion);
 		
 			if(message->alerts[i]->analyzer->node) {
-				fprintf(fil, "message->alerts[%d]->analyzer->node->ident=\'%s\'\n", i, message->alerts[i]->analyzer->node->ident);
-				fprintf(fil, "message->alerts[%d]->analyzer->node->category=\'%s\'(%d)\n", i, node_category_as_string(message->alerts[i]->analyzer->node->category), message->alerts[i]->analyzer->node->category);
-				fprintf(fil, "message->alerts[%d]->analyzer->node->location=\'%s\'\n", i, message->alerts[i]->analyzer->node->location);
-				fprintf(fil, "message->alerts[%d]->analyzer->node->name=\'%s\'\n", i, message->alerts[i]->analyzer->node->name);
+				fprintf(fil, "message->alerts[%zd]->analyzer->node->ident=\'%s\'\n", i, message->alerts[i]->analyzer->node->ident);
+				fprintf(fil, "message->alerts[%zd]->analyzer->node->category=\'%s\'(%d)\n", i, node_category_as_string(message->alerts[i]->analyzer->node->category), message->alerts[i]->analyzer->node->category);
+				fprintf(fil, "message->alerts[%zd]->analyzer->node->location=\'%s\'\n", i, message->alerts[i]->analyzer->node->location);
+				fprintf(fil, "message->alerts[%zd]->analyzer->node->name=\'%s\'\n", i, message->alerts[i]->analyzer->node->name);
 				for(j = 0; j < message->alerts[i]->analyzer->node->naddresses; j++) {
-					fprintf(fil, "message->alerts[%d]->analyzer->node->addresses[%d]->ident=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->ident);
-					fprintf(fil, "message->alerts[%d]->analyzer->node->addresses[%d]->category=\'%s\'(%d)\n", i, j, address_category_as_string (message->alerts[i]->analyzer->node->addresses[j]->category), message->alerts[i]->analyzer->node->addresses[j]->category);
-					fprintf(fil, "message->alerts[%d]->analyzer->node->addresses[%d]->vlan_name=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->vlan_name);
+					fprintf(fil, "message->alerts[%zd]->analyzer->node->addresses[%zd]->ident=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->ident);
+					fprintf(fil, "message->alerts[%zd]->analyzer->node->addresses[%zd]->category=\'%s\'(%d)\n", i, j, address_category_as_string (message->alerts[i]->analyzer->node->addresses[j]->category), message->alerts[i]->analyzer->node->addresses[j]->category);
+					fprintf(fil, "message->alerts[%zd]->analyzer->node->addresses[%zd]->vlan_name=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->vlan_name);
                     if (message->alerts[i]->analyzer->node->addresses[j]->vlan_num)
-                        fprintf(fil, "message->alerts[%d]->analyzer->node->addresses[%d]->vlan_num=\'%d\'\n", i, j, *message->alerts[i]->analyzer->node->addresses[j]->vlan_num);
-					fprintf(fil, "message->alerts[%d]->analyzer->node->addresses[%d]->address=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->address);
-					fprintf(fil, "message->alerts[%d]->analyzer->node->addresses[%d]->netmask=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->netmask);
+                        fprintf(fil, "message->alerts[%zd]->analyzer->node->addresses[%zd]->vlan_num=\'%d\'\n", i, j, *message->alerts[i]->analyzer->node->addresses[j]->vlan_num);
+					fprintf(fil, "message->alerts[%zd]->analyzer->node->addresses[%zd]->address=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->address);
+					fprintf(fil, "message->alerts[%zd]->analyzer->node->addresses[%zd]->netmask=\'%s\'\n", i, j, message->alerts[i]->analyzer->node->addresses[j]->netmask);
 				}
 			}
 	
 			if(message->alerts[i]->analyzer->process) {
-				fprintf(fil, "message->alerts[%d]->analyzer->process->ident=\'%s\'\n", i, message->alerts[i]->analyzer->process->ident); fprintf(stdout, "message->alerts[%d]->analyzer->process->name=\'%s\'\n", i, message->alerts[i]->analyzer->process->name);
+				fprintf(fil, "message->alerts[%zd]->analyzer->process->ident=\'%s\'\n", i, message->alerts[i]->analyzer->process->ident); fprintf(stdout, "message->alerts[%zd]->analyzer->process->name=\'%s\'\n", i, message->alerts[i]->analyzer->process->name);
                 if (message->alerts[i]->analyzer->process->pid)
-                    fprintf(fil, "message->alerts[%d]->analyzer->process->pid=\'%d\'\n", i, *message->alerts[i]->analyzer->process->pid);
-				fprintf(fil, "message->alerts[%d]->analyzer->process->path=\'%s\'\n", i, message->alerts[i]->analyzer->process->path);
+                    fprintf(fil, "message->alerts[%zd]->analyzer->process->pid=\'%d\'\n", i, *message->alerts[i]->analyzer->process->pid);
+				fprintf(fil, "message->alerts[%zd]->analyzer->process->path=\'%s\'\n", i, message->alerts[i]->analyzer->process->path);
 				for(j = 0; j < message->alerts[i]->analyzer->process->narg; j++) {
-					fprintf(fil, "message->alerts[%d]->analyzer->process->arg[%d]=\'%s\'\n", i, j, message->alerts[i]->analyzer->process->arg[j]);
+					fprintf(fil, "message->alerts[%zd]->analyzer->process->arg[%zd]=\'%s\'\n", i, j, message->alerts[i]->analyzer->process->arg[j]);
 				}
 				for(j = 0; j < message->alerts[i]->analyzer->process->nenv; j++) {
-					fprintf(fil, "message->alerts[%d]->analyzer->process->env[%d]=\'%s\'\n", i, j, message->alerts[i]->analyzer->process->env[j]);
+					fprintf(fil, "message->alerts[%zd]->analyzer->process->env[%zd]=\'%s\'\n", i, j, message->alerts[i]->analyzer->process->env[j]);
 				}
 			}
 		}
 	
 		if(message->alerts[i]->createtime) {
-			fprintf(fil, "message->alerts[%d]->createtime->ntpstamp=\'%s\'\n", i, message->alerts[i]->createtime->ntpstamp);
-			fprintf(fil, "message->alerts[%d]->createtime->string=\'%s\'\n", i, message->alerts[i]->createtime->string);
-			fprintf(fil, "message->alerts[%d]->createtime->tv=\'%ld, %ld\'\n", i, message->alerts[i]->createtime->tv.tv_sec, message->alerts[i]->createtime->tv.tv_usec);
+			fprintf(fil, "message->alerts[%zd]->createtime->ntpstamp=\'%s\'\n", i, message->alerts[i]->createtime->ntpstamp);
+			fprintf(fil, "message->alerts[%zd]->createtime->string=\'%s\'\n", i, message->alerts[i]->createtime->string);
+			fprintf(fil, "message->alerts[%zd]->createtime->tv=\'%ld, %ld\'\n", i, message->alerts[i]->createtime->tv.tv_sec, message->alerts[i]->createtime->tv.tv_usec);
 		}
 	
 		if(message->alerts[i]->detecttime) {
-			fprintf(fil, "message->alerts[%d]->detecttime->ntpstamp=\'%s\'\n", i, message->alerts[i]->detecttime->ntpstamp);
-			fprintf(fil, "message->alerts[%d]->detecttime->string=\'%s\'\n", i, message->alerts[i]->detecttime->string);
-			fprintf(fil, "message->alerts[%d]->detecttime->tv=\'%ld, %ld\'\n", i, message->alerts[i]->detecttime->tv.tv_sec, message->alerts[i]->detecttime->tv.tv_usec);
+			fprintf(fil, "message->alerts[%zd]->detecttime->ntpstamp=\'%s\'\n", i, message->alerts[i]->detecttime->ntpstamp);
+			fprintf(fil, "message->alerts[%zd]->detecttime->string=\'%s\'\n", i, message->alerts[i]->detecttime->string);
+			fprintf(fil, "message->alerts[%zd]->detecttime->tv=\'%ld, %ld\'\n", i, message->alerts[i]->detecttime->tv.tv_sec, message->alerts[i]->detecttime->tv.tv_usec);
 		}
 
 		if(message->alerts[i]->analyzertime) {
-			fprintf(fil, "message->alerts[%d]->analyzertime->ntpstamp=\'%s\'\n", i, message->alerts[i]->analyzertime->ntpstamp);
-			fprintf(fil, "message->alerts[%d]->analyzertime->string=\'%s\'\n", i, message->alerts[i]->analyzertime->string);
-			fprintf(fil, "message->alerts[%d]->analyzertime->tv=\'%ld, %ld\'\n", i, message->alerts[i]->analyzertime->tv.tv_sec, message->alerts[i]->analyzertime->tv.tv_usec);
+			fprintf(fil, "message->alerts[%zd]->analyzertime->ntpstamp=\'%s\'\n", i, message->alerts[i]->analyzertime->ntpstamp);
+			fprintf(fil, "message->alerts[%zd]->analyzertime->string=\'%s\'\n", i, message->alerts[i]->analyzertime->string);
+			fprintf(fil, "message->alerts[%zd]->analyzertime->tv=\'%ld, %ld\'\n", i, message->alerts[i]->analyzertime->tv.tv_sec, message->alerts[i]->analyzertime->tv.tv_usec);
 		}
 
 		for(j = 0; j < message->alerts[i]->nsources; j++) {
-			fprintf(fil, "message->alerts[%d]->sources[%d]->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->ident);
-			fprintf(fil, "message->alerts[%d]->sources[%d]->spoofed=\'%s\'(%d)\n", i, j, spoofed_as_string(message->alerts[i]->sources[j]->spoofed),
-			message->alerts[i]->sources[j]->spoofed); fprintf(fil, "message->alerts[%d]->sources[%d]->interface=\'%s\'\n", i, j, message->alerts[i]->sources[j]->interface);
+			fprintf(fil, "message->alerts[%zd]->sources[%zd]->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->ident);
+			fprintf(fil, "message->alerts[%zd]->sources[%zd]->spoofed=\'%s\'(%d)\n", i, j, spoofed_as_string(message->alerts[i]->sources[j]->spoofed),
+			message->alerts[i]->sources[j]->spoofed); fprintf(fil, "message->alerts[%zd]->sources[%zd]->interface=\'%s\'\n", i, j, message->alerts[i]->sources[j]->interface);
 
 			if(message->alerts[i]->sources[j]->node) {
-				fprintf(fil, "message->alerts[%d]->sources[%d]->node->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->node->ident);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->node->category=\'%s\'(%d)\n", i, j, node_category_as_string (message->alerts[i]->sources[j]->node->category), message->alerts[i]->sources[j]->node->category);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->node->location=\'%s\'\n", i, j, message->alerts[i]->sources[j]->node->location);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->node->name=\'%s\'\n", i, j, message->alerts[i]->sources[j]->node->name);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->node->ident);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->category=\'%s\'(%d)\n", i, j, node_category_as_string (message->alerts[i]->sources[j]->node->category), message->alerts[i]->sources[j]->node->category);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->location=\'%s\'\n", i, j, message->alerts[i]->sources[j]->node->location);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->name=\'%s\'\n", i, j, message->alerts[i]->sources[j]->node->name);
 
 				for(k = 0; k < message->alerts[i]->sources[j]->node->naddresses; k++) {
-					fprintf(fil, "message->alerts[%d]->sources[%d]->node->addresses[%d]->ident=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->ident);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->node->addresses[%d]->category=\'%s\'(%d)\n", i, j, k, address_category_as_string (message->alerts[i]->sources[j]->node->addresses[k]->category), message->alerts[i]->sources[j]->node->addresses[k]->category);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->node->addresses[%d]->vlan_name=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->vlan_name);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->addresses[%zd]->ident=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->ident);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->addresses[%zd]->category=\'%s\'(%d)\n", i, j, k, address_category_as_string (message->alerts[i]->sources[j]->node->addresses[k]->category), message->alerts[i]->sources[j]->node->addresses[k]->category);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->addresses[%zd]->vlan_name=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->vlan_name);
                     if (message->alerts[i]->sources[j]->node->addresses[k]->vlan_num)
-                        fprintf(fil, "message->alerts[%d]->sources[%d]->node->addresses[%d]->vlan_num=\'%d\'\n", i, j, k, *message->alerts[i]->sources[j]->node->addresses[k]->vlan_num);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->node->addresses[%d]->address=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->address);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->node->addresses[%d]->netmask=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->netmask);
+                        fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->addresses[%zd]->vlan_num=\'%d\'\n", i, j, k, *message->alerts[i]->sources[j]->node->addresses[k]->vlan_num);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->addresses[%zd]->address=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->address);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->node->addresses[%zd]->netmask=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->node->addresses[k]->netmask);
 				}
 			}
 
 			if(message->alerts[i]->sources[j]->user) {
-				fprintf(fil, "message->alerts[%d]->sources[%d]->user->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->user->ident);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->user->category=\'%s\'(%d)\n", i, j, user_category_as_string (message->alerts[i]->sources[j]->user->category), message->alerts[i]->sources[j]->user->category);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->user->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->user->ident);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->user->category=\'%s\'(%d)\n", i, j, user_category_as_string (message->alerts[i]->sources[j]->user->category), message->alerts[i]->sources[j]->user->category);
 				for(k = 0; k < message->alerts[i]->sources[j]->user->nuserids; k++) {
-					fprintf(fil, "message->alerts[%d]->sources[%d]->user->userids[%d]->ident=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->user->userids[k]->ident);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->user->userids[%d]->type=\'%s\'(%d)\n", i, j, k, userid_type_as_string (message->alerts[i]->sources[j]->user->userids[k]->type), message->alerts[i]->sources[j]->user->userids[k]->type);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->user->userids[%d]->name=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->user->userids[k]->name);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->user->userids[%zd]->ident=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->user->userids[k]->ident);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->user->userids[%zd]->type=\'%s\'(%d)\n", i, j, k, userid_type_as_string (message->alerts[i]->sources[j]->user->userids[k]->type), message->alerts[i]->sources[j]->user->userids[k]->type);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->user->userids[%zd]->name=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->user->userids[k]->name);
                     if (message->alerts[i]->sources[j]->user->userids[k]->number)
-                        fprintf(fil, "message->alerts[%d]->sources[%d]->user->userids[%d]->number=\'%d\'\n", i, j, k, *message->alerts[i]->sources[j]->user->userids[k]->number);
+                        fprintf(fil, "message->alerts[%zd]->sources[%zd]->user->userids[%zd]->number=\'%d\'\n", i, j, k, *message->alerts[i]->sources[j]->user->userids[k]->number);
 				}
 			}
 
 			if(message->alerts[i]->sources[j]->process) {
-				fprintf(fil, "message->alerts[%d]->sources[%d]->process->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->process->ident);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->process->name=\'%s\'\n", i, j, message->alerts[i]->sources[j]->process->name);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->process->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->process->ident);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->process->name=\'%s\'\n", i, j, message->alerts[i]->sources[j]->process->name);
                 if (message->alerts[i]->sources[j]->process->pid)
-                    fprintf(fil, "message->alerts[%d]->sources[%d]->process->pid=\'%d\'\n", i, j, *message->alerts[i]->sources[j]->process->pid);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->process->path=\'%s\'\n", i, j, message->alerts[i]->sources[j]->process->path);
+                    fprintf(fil, "message->alerts[%zd]->sources[%zd]->process->pid=\'%d\'\n", i, j, *message->alerts[i]->sources[j]->process->pid);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->process->path=\'%s\'\n", i, j, message->alerts[i]->sources[j]->process->path);
 				for(k = 0; k < message->alerts[i]->sources[j]->process->narg; k++) {
-					fprintf(fil, "message->alerts[%d]->sources[%d]->process->arg[%d]=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->process->arg[k]);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->process->arg[%zd]=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->process->arg[k]);
 				}
 				for(k = 0; k < message->alerts[i]->sources[j]->process->nenv; k++) {
-					fprintf(fil, "message->alerts[%d]->sources[%d]->process->env[%d]=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->process->env[k]);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->process->env[%zd]=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->process->env[k]);
 				}
 			}
 
 			if(message->alerts[i]->sources[j]->service) {
-				fprintf(fil, "message->alerts[%d]->sources[%d]->service->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->ident);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->service->name=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->name);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->ident=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->ident);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->name=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->name);
                 if (message->alerts[i]->sources[j]->service->port)
-                    fprintf(fil, "message->alerts[%d]->sources[%d]->service->port=\'%d\'\n", i, j, *message->alerts[i]->sources[j]->service->port);
-				fprintf(fil, "message->alerts[%d]->sources[%d]->service->portlist=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->portlist);
+                    fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->port=\'%d\'\n", i, j, *message->alerts[i]->sources[j]->service->port);
+				fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->portlist=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->portlist);
                 if (message->alerts[i]->sources[j]->service->protocol)
-                    fprintf(fil, "message->alerts[%d]->sources[%d]->service->protocol=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->protocol);
+                    fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->protocol=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->protocol);
 
 				if(message->alerts[i]->sources[j]->service->webservice) {
-					fprintf(fil, "message->alerts[%d]->sources[%d]->service->webservice->url=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->webservice->url);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->service->webservice->cgi=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->webservice->cgi);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->service->webservice->http_method=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->webservice->http_method);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->webservice->url=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->webservice->url);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->webservice->cgi=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->webservice->cgi);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->webservice->http_method=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->webservice->http_method);
 					for(k = 0; k < message->alerts[i]->sources[j]->service->webservice->narg; k++) {
-						fprintf(fil, "message->alerts[%d]->sources[%d]->service->webservice->arg[%d]=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->service->webservice->arg[k]);
+						fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->webservice->arg[%zd]=\'%s\'\n", i, j, k, message->alerts[i]->sources[j]->service->webservice->arg[k]);
 					}
 				}
 				if(message->alerts[i]->sources[j]->service->snmpservice) {
-					fprintf(fil, "message->alerts[%d]->sources[%d]->service->snmpservice->oid=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->snmpservice->oid);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->service->snmpservice->community=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->snmpservice->community);
-					fprintf(fil, "message->alerts[%d]->sources[%d]->service->snmpservice->command=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->snmpservice->command);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->snmpservice->oid=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->snmpservice->oid);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->snmpservice->community=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->snmpservice->community);
+					fprintf(fil, "message->alerts[%zd]->sources[%zd]->service->snmpservice->command=\'%s\'\n", i, j, message->alerts[i]->sources[j]->service->snmpservice->command);
 				}
 			}
 		}
 	
 		for(j = 0; j < message->alerts[i]->ntargets; j++) {
-			fprintf(fil, "message->alerts[%d]->targets[%d]->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->ident);
-			fprintf(fil, "message->alerts[%d]->targets[%d]->decoy=\'%s\'(%d)\n", i, j, spoofed_as_string(message->alerts[i]->targets[j]->decoy), message->alerts[i]->targets[j]->decoy);
-			fprintf(fil, "message->alerts[%d]->targets[%d]->interface=\'%s\'\n", i, j, message->alerts[i]->targets[j]->interface);
+			fprintf(fil, "message->alerts[%zd]->targets[%zd]->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->ident);
+			fprintf(fil, "message->alerts[%zd]->targets[%zd]->decoy=\'%s\'(%d)\n", i, j, spoofed_as_string(message->alerts[i]->targets[j]->decoy), message->alerts[i]->targets[j]->decoy);
+			fprintf(fil, "message->alerts[%zd]->targets[%zd]->interface=\'%s\'\n", i, j, message->alerts[i]->targets[j]->interface);
 
 			if(message->alerts[i]->targets[j]->node) {
-				fprintf(fil, "message->alerts[%d]->targets[%d]->node->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->node->ident);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->node->category=\'%s\'(%d)\n", i, j, node_category_as_string (message->alerts[i]->targets[j]->node->category), message->alerts[i]->targets[j]->node->category);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->node->location=\'%s\'\n", i, j, message->alerts[i]->targets[j]->node->location);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->node->name=\'%s\'\n", i, j, message->alerts[i]->targets[j]->node->name);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->node->ident);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->category=\'%s\'(%d)\n", i, j, node_category_as_string (message->alerts[i]->targets[j]->node->category), message->alerts[i]->targets[j]->node->category);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->location=\'%s\'\n", i, j, message->alerts[i]->targets[j]->node->location);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->name=\'%s\'\n", i, j, message->alerts[i]->targets[j]->node->name);
 
 				for(k = 0; k < message->alerts[i]->targets[j]->node->naddresses; k++) {
-					fprintf(fil, "message->alerts[%d]->targets[%d]->node->addresses[%d]->ident=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->ident);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->node->addresses[%d]->category=\'%s\'(%d)\n", i, j, k, address_category_as_string (message->alerts[i]->targets[j]->node->addresses[k]->category), message->alerts[i]->targets[j]->node->addresses[k]->category);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->node->addresses[%d]->vlan_name=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->vlan_name);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->addresses[%zd]->ident=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->ident);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->addresses[%zd]->category=\'%s\'(%d)\n", i, j, k, address_category_as_string (message->alerts[i]->targets[j]->node->addresses[k]->category), message->alerts[i]->targets[j]->node->addresses[k]->category);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->addresses[%zd]->vlan_name=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->vlan_name);
                     if (message->alerts[i]->targets[j]->node->addresses[k]->vlan_num)
-                        fprintf(fil, "message->alerts[%d]->targets[%d]->node->addresses[%d]->vlan_num=\'%d\'\n", i, j, k, *message->alerts[i]->targets[j]->node->addresses[k]->vlan_num);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->node->addresses[%d]->address=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->address);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->node->addresses[%d]->netmask=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->netmask);
+                        fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->addresses[%zd]->vlan_num=\'%d\'\n", i, j, k, *message->alerts[i]->targets[j]->node->addresses[k]->vlan_num);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->addresses[%zd]->address=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->address);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->node->addresses[%zd]->netmask=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->node->addresses[k]->netmask);
 				}
 			}
 
 			if(message->alerts[i]->targets[j]->user) {
-				fprintf(fil, "message->alerts[%d]->targets[%d]->user->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->user->ident);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->user->category=\'%s\'(%d)\n", i, j, user_category_as_string (message->alerts[i]->targets[j]->user->category), message->alerts[i]->targets[j]->user->category);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->user->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->user->ident);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->user->category=\'%s\'(%d)\n", i, j, user_category_as_string (message->alerts[i]->targets[j]->user->category), message->alerts[i]->targets[j]->user->category);
 				for(k = 0; k < message->alerts[i]->targets[j]->user->nuserids; k++) {
-					fprintf(fil, "message->alerts[%d]->targets[%d]->user->userids[%d]->ident=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->user->userids[k]->ident);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->user->userids[%d]->type=\'%s\'(%d)\n", i, j, k, userid_type_as_string (message->alerts[i]->targets[j]->user->userids[k]->type), message->alerts[i]->targets[j]->user->userids[k]->type);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->user->userids[%d]->name=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->user->userids[k]->name);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->user->userids[%zd]->ident=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->user->userids[k]->ident);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->user->userids[%zd]->type=\'%s\'(%d)\n", i, j, k, userid_type_as_string (message->alerts[i]->targets[j]->user->userids[k]->type), message->alerts[i]->targets[j]->user->userids[k]->type);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->user->userids[%zd]->name=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->user->userids[k]->name);
                     if (message->alerts[i]->targets[j]->user->userids[k]->number)
-                        fprintf(fil, "message->alerts[%d]->targets[%d]->user->userids[%d]->number=\'%d\'\n", i, j, k, *message->alerts[i]->targets[j]->user->userids[k]->number);
+                        fprintf(fil, "message->alerts[%zd]->targets[%zd]->user->userids[%zd]->number=\'%d\'\n", i, j, k, *message->alerts[i]->targets[j]->user->userids[k]->number);
 				}
 			}
 
 			if(message->alerts[i]->targets[j]->process) {
-				fprintf(fil, "message->alerts[%d]->targets[%d]->process->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->process->ident);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->process->name=\'%s\'\n", i, j, message->alerts[i]->targets[j]->process->name);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->process->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->process->ident);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->process->name=\'%s\'\n", i, j, message->alerts[i]->targets[j]->process->name);
                 if (message->alerts[i]->targets[j]->process->pid)
-                    fprintf(fil, "message->alerts[%d]->targets[%d]->process->pid=\'%d\'\n", i, j, *message->alerts[i]->targets[j]->process->pid);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->process->path=\'%s\'\n", i, j, message->alerts[i]->targets[j]->process->path);
+                    fprintf(fil, "message->alerts[%zd]->targets[%zd]->process->pid=\'%d\'\n", i, j, *message->alerts[i]->targets[j]->process->pid);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->process->path=\'%s\'\n", i, j, message->alerts[i]->targets[j]->process->path);
 				for(k = 0; k < message->alerts[i]->targets[j]->process->narg; k++) {
-					fprintf(fil, "message->alerts[%d]->targets[%d]->process->arg[%d]=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->process->arg[k]);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->process->arg[%zd]=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->process->arg[k]);
 				}
 				for(k = 0; k < message->alerts[i]->targets[j]->process->nenv; k++) {
-					fprintf(fil, "message->alerts[%d]->targets[%d]->process->env[%d]=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->process->env[k]);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->process->env[%zd]=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->process->env[k]);
 				}
 			}
 
 			if(message->alerts[i]->targets[j]->service) {
-				fprintf(fil, "message->alerts[%d]->targets[%d]->service->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->ident);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->service->name=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->name);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->ident=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->ident);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->name=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->name);
                 if (message->alerts[i]->targets[j]->service->port)
-                    fprintf(fil, "message->alerts[%d]->targets[%d]->service->port=\'%d\'\n", i, j, *message->alerts[i]->targets[j]->service->port);
-				fprintf(fil, "message->alerts[%d]->targets[%d]->service->portlist=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->portlist);
+                    fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->port=\'%d\'\n", i, j, *message->alerts[i]->targets[j]->service->port);
+				fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->portlist=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->portlist);
                 if (message->alerts[i]->targets[j]->service->protocol)
-                    fprintf(fil, "message->alerts[%d]->targets[%d]->service->protocol=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->protocol);
+                    fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->protocol=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->protocol);
 
 				if(message->alerts[i]->targets[j]->service->webservice) {
-					fprintf(fil, "message->alerts[%d]->targets[%d]->service->webservice->url=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->webservice->url);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->service->webservice->cgi=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->webservice->cgi);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->service->webservice->http_method=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->webservice->http_method);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->webservice->url=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->webservice->url);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->webservice->cgi=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->webservice->cgi);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->webservice->http_method=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->webservice->http_method);
 					for(k = 0; k < message->alerts[i]->targets[j]->service->webservice->narg; k++) {
-						fprintf(fil, "message->alerts[%d]->targets[%d]->service->webservice->arg[%d]=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->service->webservice->arg[k]);
+						fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->webservice->arg[%zd]=\'%s\'\n", i, j, k, message->alerts[i]->targets[j]->service->webservice->arg[k]);
 					}
 				}
 				if(message->alerts[i]->targets[j]->service->snmpservice) {
-					fprintf(fil, "message->alerts[%d]->targets[%d]->service->snmpservice->oid=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->snmpservice->oid);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->service->snmpservice->community=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->snmpservice->community);
-					fprintf(fil, "message->alerts[%d]->targets[%d]->service->snmpservice->command=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->snmpservice->command);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->snmpservice->oid=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->snmpservice->oid);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->snmpservice->community=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->snmpservice->community);
+					fprintf(fil, "message->alerts[%zd]->targets[%zd]->service->snmpservice->command=\'%s\'\n", i, j, message->alerts[i]->targets[j]->service->snmpservice->command);
 				}
 			}
 		}
 	
         if (message->alerts[i]->classification) {
-            fprintf(fil, "message->alerts[%d]->classification->ident=\'%s\'\n", i, message->alerts[i]->classification->ident);
-            fprintf(fil, "message->alerts[%d]->classification->text=\'%s\'\n", i, message->alerts[i]->classification->text);
+            fprintf(fil, "message->alerts[%zd]->classification->ident=\'%s\'\n", i, message->alerts[i]->classification->ident);
+            fprintf(fil, "message->alerts[%zd]->classification->text=\'%s\'\n", i, message->alerts[i]->classification->text);
             for(j = 0; j < message->alerts[i]->classification->nreferences; j++) {
-                fprintf(fil, "message->alerts[%d]->classification->references[%d]->origin=\'%s\'(%d)\n", i, j, reference_origin_as_string (message->alerts[i]->classification->references[j]->origin), message->alerts[i]->classification->references[j]->origin);
-                fprintf(fil, "message->alerts[%d]->classification->references[%d]->name=\'%s\'\n", i, j, message->alerts[i]->classification->references[j]->name);
-                fprintf(fil, "message->alerts[%d]->classification->references[%d]->url=\'%s\'\n", i, j, message->alerts[i]->classification->references[j]->url);
+                fprintf(fil, "message->alerts[%zd]->classification->references[%zd]->origin=\'%s\'(%d)\n", i, j, reference_origin_as_string (message->alerts[i]->classification->references[j]->origin), message->alerts[i]->classification->references[j]->origin);
+                fprintf(fil, "message->alerts[%zd]->classification->references[%zd]->name=\'%s\'\n", i, j, message->alerts[i]->classification->references[j]->name);
+                fprintf(fil, "message->alerts[%zd]->classification->references[%zd]->url=\'%s\'\n", i, j, message->alerts[i]->classification->references[j]->url);
             }
         }
 	
 		for(j = 0; j < message->alerts[i]->nadditionaldatas; j++) {
-			fprintf(fil, "message->alerts[%d]->additionaldatas[%d]->type=\'%s\'(%d)\n", i, j, additionaldata_type_as_string (message->alerts[i]->additionaldatas[j]->type), message->alerts[i]->additionaldatas[j]->type);
-			fprintf(fil, "message->alerts[%d]->additionaldatas[%d]->meaning=\'%s\'\n", i, j, message->alerts[i]->additionaldatas[j]->meaning);
-            fprintf(fil, "message->alerts[%d]->additionaldatas[%d]->data=", i, j);
+			fprintf(fil, "message->alerts[%zd]->additionaldatas[%zd]->type=\'%s\'(%d)\n", i, j, additionaldata_type_as_string (message->alerts[i]->additionaldatas[j]->type), message->alerts[i]->additionaldatas[j]->type);
+			fprintf(fil, "message->alerts[%zd]->additionaldatas[%zd]->meaning=\'%s\'\n", i, j, message->alerts[i]->additionaldatas[j]->meaning);
+            fprintf(fil, "message->alerts[%zd]->additionaldatas[%zd]->data=", i, j);
             print_additionaldata_content(fil,message->alerts[i]->additionaldatas[j]);
             fprintf(fil, "\n");
 		}
 		if(message->alerts[i]->correlationalert) {	
-			fprintf(fil, "message->alerts[%d]->correlationalert->name=\'%s\'\n", i, message->alerts[i]->correlationalert->name);
+			fprintf(fil, "message->alerts[%zd]->correlationalert->name=\'%s\'\n", i, message->alerts[i]->correlationalert->name);
 		
 			for(j = 0; j < message->alerts[i]->correlationalert->nalertidents; j++) {
-				fprintf(fil, "message->alerts[%d]->correlationalert->alertidents[%d]->data=\'%s\'\n", i, j, message->alerts[i]->correlationalert->alertidents[j]->data);
-				fprintf(fil, "message->alerts[%d]->correlationalert->alertidents[%d]->analyzerid=\'%s\'\n", i, j, message->alerts[i]->correlationalert->alertidents[j]->analyzerid);
+				fprintf(fil, "message->alerts[%zd]->correlationalert->alertidents[%zd]->data=\'%s\'\n", i, j, message->alerts[i]->correlationalert->alertidents[j]->data);
+				fprintf(fil, "message->alerts[%zd]->correlationalert->alertidents[%zd]->analyzerid=\'%s\'\n", i, j, message->alerts[i]->correlationalert->alertidents[j]->analyzerid);
 			}
 		}
 
 		if(message->alerts[i]->toolalert) {	
-			fprintf(fil, "message->alerts[%d]->toolalert->name=\'%s\'\n", i, message->alerts[i]->toolalert->name);
-			fprintf(fil, "message->alerts[%d]->toolalert->command=\'%s\'\n", i, message->alerts[i]->toolalert->command);
+			fprintf(fil, "message->alerts[%zd]->toolalert->name=\'%s\'\n", i, message->alerts[i]->toolalert->name);
+			fprintf(fil, "message->alerts[%zd]->toolalert->command=\'%s\'\n", i, message->alerts[i]->toolalert->command);
 			
 			for(j = 0; j < message->alerts[i]->toolalert->nalertidents; j++) {
-				fprintf(fil, "message->alerts[%d]->toolalert->alertidents[%d]->data=\'%s\'\n", i, j, message->alerts[i]->toolalert->alertidents[j]->data);
-				fprintf(fil, "message->alerts[%d]->toolalert->alertidents[%d]->analyzerid=\'%s\'\n", i, j, message->alerts[i]->toolalert->alertidents[j]->analyzerid);
+				fprintf(fil, "message->alerts[%zd]->toolalert->alertidents[%zd]->data=\'%s\'\n", i, j, message->alerts[i]->toolalert->alertidents[j]->data);
+				fprintf(fil, "message->alerts[%zd]->toolalert->alertidents[%zd]->analyzerid=\'%s\'\n", i, j, message->alerts[i]->toolalert->alertidents[j]->analyzerid);
 			}
 		}
 
 		if(message->alerts[i]->overflowalert) {
-			fprintf(fil, "message->alerts[%d]->overflowalert->program=\'%s\'\n", i, message->alerts[i]->overflowalert->program);
+			fprintf(fil, "message->alerts[%zd]->overflowalert->program=\'%s\'\n", i, message->alerts[i]->overflowalert->program);
             if (message->alerts[i]->overflowalert->size)
-                fprintf(fil, "message->alerts[%d]->overflowalert->size=\'%d\'\n", i, *message->alerts[i]->overflowalert->size);
-			fprintf(fil, "message->alerts[%d]->overflowalert->buffer=\'%s\'\n", i, message->alerts[i]->overflowalert->buffer);
+                fprintf(fil, "message->alerts[%zd]->overflowalert->size=\'%d\'\n", i, *message->alerts[i]->overflowalert->size);
+			fprintf(fil, "message->alerts[%zd]->overflowalert->buffer=\'%s\'\n", i, message->alerts[i]->overflowalert->buffer);
 		}
 	}
 
 	for(i = 0; i < message->nheartbeats; i++) {
-		fprintf(fil, "message->heartbeats[%d]->messageid=\'%s\'\n", i, message->heartbeats[i]->messageid);
+		fprintf(fil, "message->heartbeats[%zd]->messageid=\'%s\'\n", i, message->heartbeats[i]->messageid);
 	
 		if(message->heartbeats[i]->analyzer) {
-			fprintf(fil, "message->heartbeats[%d]->analyzer->analyzerid=\'%s\'\n", i, message->heartbeats[i]->analyzer->analyzerid);
+			fprintf(fil, "message->heartbeats[%zd]->analyzer->analyzerid=\'%s\'\n", i, message->heartbeats[i]->analyzer->analyzerid);
 		
 			if(message->heartbeats[i]->analyzer->node) {
-				fprintf(fil, "message->heartbeats[%d]->analyzer->node->ident=\'%s\'\n", i, message->heartbeats[i]->analyzer->node->ident);
-				fprintf(fil, "message->heartbeats[%d]->analyzer->node->category=\'%s\'(%d)\n", i, node_category_as_string(message->heartbeats[i]->analyzer->node->category), message->heartbeats[i]->analyzer->node->category);
-				fprintf(fil, "message->heartbeats[%d]->analyzer->node->location=\'%s\'\n", i, message->heartbeats[i]->analyzer->node->location);
-				fprintf(fil, "message->heartbeats[%d]->analyzer->node->name=\'%s\'\n", i, message->heartbeats[i]->analyzer->node->name);
+				fprintf(fil, "message->heartbeats[%zd]->analyzer->node->ident=\'%s\'\n", i, message->heartbeats[i]->analyzer->node->ident);
+				fprintf(fil, "message->heartbeats[%zd]->analyzer->node->category=\'%s\'(%d)\n", i, node_category_as_string(message->heartbeats[i]->analyzer->node->category), message->heartbeats[i]->analyzer->node->category);
+				fprintf(fil, "message->heartbeats[%zd]->analyzer->node->location=\'%s\'\n", i, message->heartbeats[i]->analyzer->node->location);
+				fprintf(fil, "message->heartbeats[%zd]->analyzer->node->name=\'%s\'\n", i, message->heartbeats[i]->analyzer->node->name);
 			
 				for(j = 0; j < message->heartbeats[i]->analyzer->node->naddresses; j++) {
-					fprintf(fil, "message->heartbeats[%d]->analyzer->node->addresses[%d]->ident=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->ident);
-					fprintf(fil, "message->heartbeats[%d]->analyzer->node->addresses[%d]->category=\'%s\'(%d)\n", i, j, address_category_as_string (message->heartbeats[i]->analyzer->node->addresses[j]->category), message->heartbeats[i]->analyzer->node->addresses[j]->category);
-					fprintf(fil, "message->heartbeats[%d]->analyzer->node->addresses[%d]->vlan_name=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->vlan_name);
+					fprintf(fil, "message->heartbeats[%zd]->analyzer->node->addresses[%zd]->ident=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->ident);
+					fprintf(fil, "message->heartbeats[%zd]->analyzer->node->addresses[%zd]->category=\'%s\'(%d)\n", i, j, address_category_as_string (message->heartbeats[i]->analyzer->node->addresses[j]->category), message->heartbeats[i]->analyzer->node->addresses[j]->category);
+					fprintf(fil, "message->heartbeats[%zd]->analyzer->node->addresses[%zd]->vlan_name=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->vlan_name);
                     if (message->heartbeats[i]->analyzer->node->addresses[j]->vlan_num)
-                        fprintf(fil, "message->heartbeats[%d]->analyzer->node->addresses[%d]->vlan_num=\'%d\'\n", i, j, *message->heartbeats[i]->analyzer->node->addresses[j]->vlan_num);
-					fprintf(fil, "message->heartbeats[%d]->analyzer->node->addresses[%d]->address=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->address);
-					fprintf(fil, "message->heartbeats[%d]->analyzer->node->addresses[%d]->netmask=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->netmask);
+                        fprintf(fil, "message->heartbeats[%zd]->analyzer->node->addresses[%zd]->vlan_num=\'%d\'\n", i, j, *message->heartbeats[i]->analyzer->node->addresses[j]->vlan_num);
+					fprintf(fil, "message->heartbeats[%zd]->analyzer->node->addresses[%zd]->address=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->address);
+					fprintf(fil, "message->heartbeats[%zd]->analyzer->node->addresses[%zd]->netmask=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->node->addresses[j]->netmask);
 				}
 			}
 			
 			if(message->heartbeats[i]->analyzer->process) {
-				fprintf(fil, "message->heartbeats[%d]->analyzer->process->ident=\'%s\'\n", i, message->heartbeats[i]->analyzer->process->ident);
-				fprintf(fil, "message->heartbeats[%d]->analyzer->process->name=\'%s\'\n", i, message->heartbeats[i]->analyzer->process->name);
+				fprintf(fil, "message->heartbeats[%zd]->analyzer->process->ident=\'%s\'\n", i, message->heartbeats[i]->analyzer->process->ident);
+				fprintf(fil, "message->heartbeats[%zd]->analyzer->process->name=\'%s\'\n", i, message->heartbeats[i]->analyzer->process->name);
                 if (message->heartbeats[i]->analyzer->process->pid)
-                    fprintf(fil, "message->heartbeats[%d]->analyzer->process->pid=\'%d\'\n", i, *message->heartbeats[i]->analyzer->process->pid);
-				fprintf(fil, "message->heartbeats[%d]->analyzer->process->path=\'%s\'\n", i, message->heartbeats[i]->analyzer->process->path);
+                    fprintf(fil, "message->heartbeats[%zd]->analyzer->process->pid=\'%d\'\n", i, *message->heartbeats[i]->analyzer->process->pid);
+				fprintf(fil, "message->heartbeats[%zd]->analyzer->process->path=\'%s\'\n", i, message->heartbeats[i]->analyzer->process->path);
 				for(j = 0; j < message->heartbeats[i]->analyzer->process->narg; j++) {
-					fprintf(fil, "message->heartbeats[%d]->analyzer->process->arg[%d]=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->process->arg[j]);
+					fprintf(fil, "message->heartbeats[%zd]->analyzer->process->arg[%zd]=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->process->arg[j]);
 				}
 				for(j = 0; j < message->heartbeats[i]->analyzer->process->nenv; j++) {
-					fprintf(fil, "message->heartbeats[%d]->analyzer->process->env[%d]=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->process->env[j]);
+					fprintf(fil, "message->heartbeats[%zd]->analyzer->process->env[%zd]=\'%s\'\n", i, j, message->heartbeats[i]->analyzer->process->env[j]);
 				}
 			}
 		}
 	
 		if(message->heartbeats[i]->createtime) {
-			fprintf(fil, "message->heartbeats[%d]->createtime->ntpstamp=\'%s\'\n", i, message->heartbeats[i]->createtime->ntpstamp);
-			fprintf(fil, "message->heartbeats[%d]->createtime->string=\'%s\'\n", i, message->heartbeats[i]->createtime->string);
-			fprintf(fil, "message->heartbeats[%d]->createtime->tv=\'%ld, %ld\'\n", i, message->heartbeats[i]->createtime->tv.tv_sec, message->heartbeats[i]->createtime->tv.tv_usec);
+			fprintf(fil, "message->heartbeats[%zd]->createtime->ntpstamp=\'%s\'\n", i, message->heartbeats[i]->createtime->ntpstamp);
+			fprintf(fil, "message->heartbeats[%zd]->createtime->string=\'%s\'\n", i, message->heartbeats[i]->createtime->string);
+			fprintf(fil, "message->heartbeats[%zd]->createtime->tv=\'%ld, %ld\'\n", i, message->heartbeats[i]->createtime->tv.tv_sec, message->heartbeats[i]->createtime->tv.tv_usec);
 		}
 	
 		if(message->heartbeats[i]->analyzertime) {
-			fprintf(fil, "message->heartbeats[%d]->analyzertime->ntpstamp=\'%s\'\n", i, message->heartbeats[i]->analyzertime->ntpstamp);
-			fprintf(fil, "message->heartbeats[%d]->analyzertime->string=\'%s\'\n", i, message->heartbeats[i]->analyzertime->string);
-			fprintf(fil, "message->heartbeats[%d]->analyzertime->tv=\'%ld, %ld\'\n", i, message->heartbeats[i]->analyzertime->tv.tv_sec, message->heartbeats[i]->analyzertime->tv.tv_usec);
+			fprintf(fil, "message->heartbeats[%zd]->analyzertime->ntpstamp=\'%s\'\n", i, message->heartbeats[i]->analyzertime->ntpstamp);
+			fprintf(fil, "message->heartbeats[%zd]->analyzertime->string=\'%s\'\n", i, message->heartbeats[i]->analyzertime->string);
+			fprintf(fil, "message->heartbeats[%zd]->analyzertime->tv=\'%ld, %ld\'\n", i, message->heartbeats[i]->analyzertime->tv.tv_sec, message->heartbeats[i]->analyzertime->tv.tv_usec);
 		}
 	
 		for(j = 0; j < message->heartbeats[i]->nadditionaldatas; j++) {
-			fprintf(fil, "message->heartbeats[%d]->additionaldatas[%d]->type=\'%s\'(%d)\n", i, j, additionaldata_type_as_string (message->heartbeats[i]->additionaldatas[j]->type), message->heartbeats[i]->additionaldatas[j]->type);
-			fprintf(fil, "message->heartbeats[%d]->additionaldatas[%d]->meaning=\'%s\'\n", i, j, message->heartbeats[i]->additionaldatas[j]->meaning);
-			fprintf(fil, "message->heartbeats[%d]->additionaldatas[%d]->data=", i, j);
+			fprintf(fil, "message->heartbeats[%zd]->additionaldatas[%zd]->type=\'%s\'(%d)\n", i, j, additionaldata_type_as_string (message->heartbeats[i]->additionaldatas[j]->type), message->heartbeats[i]->additionaldatas[j]->type);
+			fprintf(fil, "message->heartbeats[%zd]->additionaldatas[%zd]->meaning=\'%s\'\n", i, j, message->heartbeats[i]->additionaldatas[j]->meaning);
+			fprintf(fil, "message->heartbeats[%zd]->additionaldatas[%zd]->data=", i, j);
             print_additionaldata_content(fil,message->heartbeats[i]->additionaldatas[j]);
             fprintf(fil, "\n");
 		}
