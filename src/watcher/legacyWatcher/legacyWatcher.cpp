@@ -126,7 +126,7 @@ static double globalSelectedNodeDeltaY;
 static char *globalgoodwinfilename;
 static CommunicationsLogStatePtr globalGoodwin;
 
-GPSDataFormat globalGPSDataFormat; 
+GPSDataFormat globalGPSDataFormat=legacyWatcher::GPS_DATA_FORMAT_DEG_WGS84;
 
 static struct
 {
@@ -2002,8 +2002,10 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
             LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
 
         static double utmXOffset=0.0, utmYOffset=0.0;
-        if (utmXOffset==0.0)
+        static bool utmOffInit=false;
+        if (utmOffInit==false)
         {
+            utmOffInit=true;
             utmXOffset=location->lon;
             utmYOffset=location->lat;
 
@@ -2014,8 +2016,8 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
         us->y=location->lat-utmYOffset;    
         us->z=location->alt;
 
-        LOG_DEBUG("node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);
-        LOG_DEBUG("given locations: lon=" << location->lon << " lat=" << location->lat << " alt=" << location->alt);
+        LOG_DEBUG("UTM given locations: lon=" << location->lon << " lat=" << location->lat << " alt=" << location->alt);
+        LOG_DEBUG("UTM node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);
     }
     else // default to lat/long/alt WGS84
     {
@@ -2025,6 +2027,25 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
         us->x = location->lon * GPSScale;
         us->y = location->lat * GPSScale;
         us->z = location->alt - 20;
+
+        static double xOff=0.0, yOff=0.0;
+        static bool xOffInit=false;
+        if (xOffInit==false)
+        {
+            xOffInit=true;
+            xOff=us->x;
+            yOff=us->y;
+
+            LOG_INFO("Got first Lat/Long coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" 
+                    << xOff << " y=" << yOff);
+        }
+
+        us->x-=xOff;
+        us->y-=yOff;
+
+        LOG_DEBUG("Got GPS: long:" << location->lon << " lat:" << location->lat << " alt:" << location->alt); 
+        LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
+
     }
 
     globalGpsValidFlag[us->index] = 1;
