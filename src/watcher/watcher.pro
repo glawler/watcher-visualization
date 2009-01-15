@@ -13,8 +13,8 @@ OBJECTS_DIR = ./objs
 DEFINES += GRAPHICS MODULE_MOBILITY ggdb
 
 # log4cxx issues warnings without this. 
-QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing
-QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing
+QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing -O0
+QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0
 QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing
 QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing
 
