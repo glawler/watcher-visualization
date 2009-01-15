@@ -45,10 +45,20 @@ WatcherPropertyData::~WatcherPropertyData()
 
 WatcherPropertyData *watcher::findWatcherPropertyData(unsigned int index, WatcherPropertiesList &theList)
 {
+    // TRACE_ENTER();
     WatcherPropertiesList::iterator i;
     for (i=theList.begin(); i!=theList.end(); i++)
+    {
+        // LOG_DEBUG("Comparing " << index << " to " << (*i)->identifier); 
         if ( (*i)->identifier==index)
+        {
+            // TRACE_EXIT_RET("found property data");
             return *i;
+        }
+    }
+    // TRACE_EXIT_RET(0);
+
+    // exit(1);
     return NULL;
 }
 
@@ -85,28 +95,51 @@ void watcher::loadWatcherPropertyData(WatcherPropertyData *propp, int nodeId)
         if (idAsAddr[i]=='.')                            
             idAsAddr[i]='_';                             
 
+    LOG_DEBUG("Looking up props for node under id: \"" << idAsAddr << "\""); 
+
     string prop("watcherProperties");
     Setting &root=cfg.getRoot();
-    if (!cfg.exists(prop))
-        root.add(prop, Setting::TypeGroup);
 
-    Setting &wp=cfg.lookup(prop);
+    // libconfig doesn't like this 
+    // nested data for some reason. Until I figure out why, don't use nested 
+    // groups. 
+    //     if (!root.exists(prop))
+    //         root.add(prop, Setting::TypeGroup);
+    //     else
+    // 	LOG_DEBUG("Found existing watcherProperties in configuration"); 
+    // 
+    //     Setting &wp=cfg.lookup(prop); 
+    // 
+    //     prop=idAsAddr;
+    //     if (!wp.exists(prop))
+    //         wp.add(prop, Setting::TypeGroup);
+    //     else
+    //     	LOG_DEBUG("Did not find existing props for node \"" << prop << "\""); 
+    
+    //    Setting &nodeProps=wp[prop];
 
-    prop=idAsAddr;
-    if (!wp.exists(prop))
-        wp.add(prop, Setting::TypeGroup);
+	if (!root.exists(idAsAddr)) 
+	{
+		LOG_DEBUG("Did not find node props in config file, creating new entry"); 
+		root.add(idAsAddr, Setting::TypeGroup);
+	}
 
-    Setting &nodeProps=wp[prop];
+    Setting &nodeProps=cfg.lookup(idAsAddr); 
 
     // ------- Label ----------------
     // Default label is last octets of the identifier
     string strVal;
     prop="label";
     if (nodeProps.lookupValue(prop, strVal))
+    {
         snprintf(propp->guiLabel, sizeof(propp->guiLabel), "%s", strVal.c_str());
+        LOG_DEBUG("Using existing label from cfg file: " << propp->guiLabel);
+    }
     else
     {
-        snprintf(propp->guiLabel, sizeof(propp->guiLabel), "%d", nodeId);
+        // snprintf(propp->guiLabel, sizeof(propp->guiLabel), "%s", defLabel.c_str()); 
+	unsigned int tmp=ntohl(tmpAddr.s_addr); 	
+        snprintf(propp->guiLabel, sizeof(propp->guiLabel), "%d.%d", (tmp >> 8 & 0xFF), (tmp & 0xFF));
         strVal=propp->guiLabel;
 
         LOG_DEBUG("label not found for this node, set to default: " << strVal);
@@ -118,7 +151,10 @@ void watcher::loadWatcherPropertyData(WatcherPropertyData *propp, int nodeId)
     prop="shape";
     int intVal=WATCHER_SHAPE_CIRCLE;
     if (nodeProps.lookupValue(prop, intVal))
+    {
+        LOG_DEBUG("Setting shape from cfg file to: " << intVal); 
         propp->shape=static_cast<WatcherShape>(intVal);
+    }
     else
         nodeProps.add(prop, Setting::TypeInt)=intVal;
 
