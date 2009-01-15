@@ -1534,7 +1534,19 @@ void nodeOpenSucceed(manetNode *us)
 {
     int i;
 
+    // Look for and replace control-addr based watherproperty with MANET-addr based one. 
+    // HACK and not a good one.
+    fprintf(stderr, "-----------node open success. old us->addr %d.%d.%d.%d\n", PRINTADDR(us->addr));
+    WatcherPropertiesList::iterator propIndex=GlobalWatcherPropertiesList.begin();
+    for( ; propIndex!=GlobalWatcherPropertiesList.end();propIndex++)
+        if((*propIndex)->identifier==us->addr) 
+        {
+            LOG_DEBUG("Replacing control network address watcher property identifier for this node with a MANET addr based one"); 
+            (*propIndex)->identifier=communicationsNodeAddress(us->cluster->cs);
+        }
+
     us->addr = communicationsNodeAddress(us->cluster->cs);
+
 #ifdef DEBUG_WATCHER
     fprintf(stderr, "nodeOpenSucceed: addr is now %d\n", us->addr & 0xFF);
 #endif
@@ -1681,7 +1693,7 @@ void nodeGotPacket(manetNode *, packet *)
 
 void status(void *messageStatusHandlerData, MessageStatus stat)
 {
-    int msgnum = (int)messageStatusHandlerData;
+    int msgnum = *((int*)messageStatusHandlerData);
     switch(stat)
     {
         case MESSAGE_SUCCESSFUL:
@@ -1848,7 +1860,7 @@ void gotMessageWatcherProperty(void *data, const struct MessageInfo *mi)
 
     if (propIndex==GlobalWatcherPropertiesList.end())
     {
-        LOG_ERROR("Got property message for node we know nothing about. Address:  " << (0x000000FF & messageProp.identifier) ); 
+        LOG_ERROR("Got property message for node we know nothing about. Got: " << PRINTADDRCPP(messageProp.identifier)); 
     }
     else
     {
@@ -2052,7 +2064,7 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
 
     tim = location->time;      /* GPS time in milliseconds (idsCommunication's canonical unit)  */
 
-    //	fprintf(stderr, "node %d at %f %f %f\n", us->index, lat[us->index], lon[us->index], alt[us->index]);
+    LOG_DEBUG("got GPS Info: " << us->index << "long:" << us->x << " lat:" << us->y << " alt:" << us->z); 
 
     if(globalAutoCenterNodesFlag)
     {
