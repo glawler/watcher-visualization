@@ -1178,7 +1178,7 @@ static void nodeDrawFn(
 
     if (!prop)     
     {
-        sprintf(buff,"???");
+        sprintf(buff,"%d.%d",(us->addr>>8)&0xFF, us->addr & 0xFF);
         drawText(us->x,us->y+6,us->z+5,dispStat->scaleText[dispType], buff);
     }
     else
