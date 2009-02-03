@@ -1455,7 +1455,10 @@ void legacyWatcher::drawManet(void)
     floatingLabelDraw(&floatingLabelList, NODE_DISPLAY_MANET, &globalDispStat, m->curtime);
     glPopMatrix();
 
-    BackgroundImage::getInstance().drawImage(); 
+    if (globalDispStat.backgroundImage)
+    {
+        BackgroundImage::getInstance().drawImage(); 
+    }
 
     glFlush();
 }

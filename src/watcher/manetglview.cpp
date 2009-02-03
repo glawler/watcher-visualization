@@ -781,6 +781,7 @@ void manetGLView::toggleBackgroundImage(bool isOn)
 {
     TRACE_ENTER();
     legacyWatcher::toggleBackgroundImage(isOn);
+    LOG_DEBUG("Turning background image " << (isOn==true?"on":"off")); 
     emit backgroundImageToggled(isOn); 
     updateGL();
     TRACE_EXIT();
