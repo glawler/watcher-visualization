@@ -2576,16 +2576,16 @@ void legacyWatcher::initWatcherGL()
     // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     // Spec is LIGHT0
-    GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
-    GLfloat posSpecLight[]= { 1000.0f, 1000.0f, 1000.0f, 1.0f };
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
-    glEnable(GL_LIGHT0); 
+    // GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
+    // GLfloat posSpecLight[]= { 500.0f, 1000.0f, 2500.0f, 1.0f };
+    // glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    // glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
+    // glEnable(GL_LIGHT0); 
 
     // Amb is LIGHT1
-    GLfloat ambLight[] = { 0.5, 0.5, 0.5, 1.0 };
-    glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
-    glEnable(GL_LIGHT1);
+    // GLfloat ambLight[] = { 0.5, 0.5, 0.5, 1.0 };
+    // glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
+    // glEnable(GL_LIGHT1);
     
     // or use the ambient light model
     // GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -2594,7 +2594,7 @@ void legacyWatcher::initWatcherGL()
     // Diffuse is LIGHT2
     GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
     glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
-    GLfloat posDiffLight[]= { 1000.0, 1000.0f, 1000.0f, 1.0f };
+    GLfloat posDiffLight[]= { 500.0, 500.0f, 100.0f, 1.0f };
     glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
     glEnable(GL_LIGHT2);
 }
