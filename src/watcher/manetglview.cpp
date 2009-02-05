@@ -260,6 +260,29 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     LOG_INFO("Set viewpoint - scale: " << ma.scaleX << ", " << ma.scaleY << ", " << ma.scaleZ);
     LOG_INFO("Set viewpoint - shift: " << ma.shiftX << ", " << ma.shiftY << ", " << ma.shiftZ);
 
+    // background color
+    prop="backgroundColor";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &bgColSet=cfg.lookup(prop);
+
+    struct 
+    {
+        const char *name;
+        float val;
+    } bgColors[] = 
+    {
+        { "r", 0.0 }, 
+        { "g", 0.0 }, 
+        { "b", 0.0 }, 
+        { "a", 255.0 }
+    };
+    for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
+        if (!bgColSet.lookupValue(bgColors[i].name, bgColors[i].val))
+            bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
+
+    legacyWatcher::setBackgroundColor(bgColors[0].val, bgColors[1].val,bgColors[2].val,bgColors[3].val);
+
     sc.unlock();
 
     // 
@@ -909,6 +932,12 @@ void manetGLView::saveConfiguration()
     root["backgroundImage"]["coordinates"][2]=floatVals[2];
     root["backgroundImage"]["coordinates"][3]=floatVals[3];
     root["backgroundImage"]["coordinates"][4]=floatVals[4];
+
+    legacyWatcher::getBackgroundColor(floatVals[0], floatVals[1], floatVals[2], floatVals[3]);
+    root["backgroundColor"]["r"]=floatVals[0];
+    root["backgroundColor"]["g"]=floatVals[1];
+    root["backgroundColor"]["b"]=floatVals[2];
+    root["backgroundColor"]["a"]=floatVals[3];
 
     GPSDataFormat format=legacyWatcher::getGPSDataFormat();
     switch(format)

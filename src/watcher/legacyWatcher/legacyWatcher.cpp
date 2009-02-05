@@ -2537,6 +2537,16 @@ void legacyWatcher::setBackgroundColor(float r, float g, float b, float a)
     glClearColor(r,g,b,a);
 }
 
+void legacyWatcher::getBackgroundColor(float &r, float &g, float &b, float &a)
+{
+    GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
+    r=cols[0];
+    g=cols[1];
+    b=cols[2];
+    a=cols[3];
+}
+
 void legacyWatcher::initWatcherGL()
 {
     // glEnable(GL_DEPTH_TEST);
