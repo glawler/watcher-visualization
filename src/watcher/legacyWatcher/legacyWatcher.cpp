@@ -1455,7 +1455,10 @@ void legacyWatcher::drawManet(void)
     floatingLabelDraw(&floatingLabelList, NODE_DISPLAY_MANET, &globalDispStat, m->curtime);
     glPopMatrix();
 
-    BackgroundImage::getInstance().drawImage(); 
+    if (globalDispStat.backgroundImage)
+    {
+        BackgroundImage::getInstance().drawImage(); 
+    }
 
     glFlush();
 }
@@ -2532,6 +2535,16 @@ void legacyWatcher::setBackgroundColor(float r, float g, float b, float a)
     // Set the default clear color
     // Seems to control the background "diffuse" color.
     glClearColor(r,g,b,a);
+}
+
+void legacyWatcher::getBackgroundColor(float &r, float &g, float &b, float &a)
+{
+    GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
+    r=cols[0];
+    g=cols[1];
+    b=cols[2];
+    a=cols[3];
 }
 
 void legacyWatcher::initWatcherGL()
