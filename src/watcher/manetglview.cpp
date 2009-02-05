@@ -107,6 +107,13 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     else
         root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
 
+    prop="displayBackgroundImage";
+    boolVal=ds.backgroundImage;
+    if (root.lookupValue(prop, boolVal))
+        ds.backgroundImage=(boolVal?1:0);
+    else
+        root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+
 
     // Give the GUI the current toggle state of the display.
     emit bandwidthToggled(ds.familyBitmap & legacyWatcher::Bandwidth);
@@ -848,7 +855,8 @@ void manetGLView::saveConfiguration()
     } boolConfigs[] =
     {
         { "nodes3d",        ds.threeDView },
-        { "monochrome",     ds.monochromeMode } 
+        { "monochrome",     ds.monochromeMode },
+        { "displayBackgroundImage", ds.backgroundImage }
     };
 
     for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
