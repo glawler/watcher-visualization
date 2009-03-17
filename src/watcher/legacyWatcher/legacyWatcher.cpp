@@ -2330,8 +2330,13 @@ int legacyWatcher::checkIOGoodwin(int)
             while(m->curtime < starttime + globalReplay.step)
             {
                 long nevents;
-                if (((nevents = communicationsLogStep(globalGoodwin, 1, &m->curtime)) < 0) && (globalExitAtEofFlag))
-                    exit(0);
+                nevents = communicationsLogStep(globalGoodwin, 1, &m->curtime);
+                if (nevents < 0)
+                    if (globalExitAtEofFlag)
+                        exit(0);        // Shut it down - shut it all down!
+                    else    
+                        return 1;       // Just return. GUI still refreshes, but no more new data/events happen.
+
                 if (nevents > 0 && globalDoMetricsFlag)
                 {
                     nodeMobilityCountEdges(&m->nlist[0], 0);
