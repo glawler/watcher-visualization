@@ -146,3 +146,13 @@ syntax: regexp
 ^doc/man/*
 ^doc/html/*
 
+#
+# libidmef
+# 
+^src/libidmef-0.7.3-beta-McAfee20050325/*
+^bin/libidmef-config
+^include/libidmef/*
+^lib/libidmef*
+^share/idmef-message.dtd
+^share/idmef-messages/*
+

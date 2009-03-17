@@ -9,11 +9,9 @@ infrastructure - not the new old watcher GUI, so if you're not building that
 (and you shouldn't be yet), then the default OS distribution is probably fine. 
 If you want to build the 1.36 version, I've put the tar file in ./tars.
 
-libidmef is probably installed on your build system anyway, assuming it is 
-the same system used to build/run the old old watcher. 
-
 Yum installed libs: libpcap-devel, freeglut-devel, qt, boost
 built: libidmef (SPARTA version)
+
 
 Install QT:
 ----------------------------------------------------------------
@@ -29,6 +27,16 @@ A version probably already exists on your machine as lots of things use it.
 But just in case:
 
 > yum install boost.i386
+
+Install libidmef (SPARTA version):
+----------------------------------------------------------------
+cd [watcher repo dir]
+cd src
+tar zxvf ../tars/libidmef-0.7.3-beta-McAfee20050325.tar.gz
+cd libidmef-0.7.3-beta-McAfee20050325
+./configure --prefix=[watcher repo dir]
+make
+make install
 
 Install 3rd party libs locally. 
 ---------------------------------------------------------------
