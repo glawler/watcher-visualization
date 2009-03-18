@@ -1,24 +1,36 @@
+# melkins - compilation for Fedora 10
+F10=0
 
 TOPDIR=../..
 
+ifneq (${F10}, 1)
 LIBS+=-L/usr/local/lib 
+endif
 LIBS+=-L$(TOPDIR)/lib
 
+ifneq (${F10}, 1)
 CXXFLAGS+=-I/usr/local/include/boost-1_36
+endif
 CXXFLAGS+=-I$(TOPDIR)/include 
 CXXFLAGS+=-I$(TOPDIR)/src/util
 CXXFLAGS+=-I.
 CXXFLAGS+=-O0 -ggdb
 CXXFLAGS+=-Wall
+CXXFLAGS+=-pthread
 
 LDFLAGS+=-lconfig++
 LDFLAGS+=-llogger
 LDFLAGS+=-llog4cxx
 LDFLAGS+=-lwatcherutils
+ifeq (${F10}, 1)
+LDFLAGS+=-lboost_system-mt
+LDFLAGS+=-lboost_thread-mt
+LDFLAGS+=-lboost_serialization-mt
+else
 LDFLAGS+=-lboost_system-gcc41-mt
 LDFLAGS+=-lboost_thread-gcc41-mt
 LDFLAGS+=-lboost_serialization-gcc41-mt
-LDFLAGS+=-lpthread
+endif
 
 # GTL - experimental automatic use of multiprocessor systems to speed up make
 # May break things, don't know.
