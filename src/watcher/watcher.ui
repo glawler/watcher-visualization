@@ -607,7 +607,7 @@
    <sender>actionCorrelatorPaths</sender>
    <signal>toggled(bool)</signal>
    <receiver>manetGLViewWindow</receiver>
-   <slot>toggleCorrelation(bool)</slot>
+   <slot>toggleCorrelation3Hop(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>-1</x>
