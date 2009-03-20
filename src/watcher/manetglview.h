@@ -34,17 +34,22 @@ class manetGLView : public QGLWidget
         void toggleUndefined(bool isOn);
         void toggleNeighbors(bool isOn);
         void toggleHierarchy(bool isOn);
-        void toggleRouting(bool isOn);
-        void toggleRoutingOnehop(bool isOn);
         void toggleAntennaRadius(bool isOn);
         void toggleSanityCheck(bool isOn);
-        void toggleAnomPaths(bool isOn);
-        void toggleCorrelation(bool isOn);
-        void toggleAlert(bool isOn);
-        void toggleCorrelation3Hop(bool isOn);
-        void toggleWormholeRouting(bool isOn);
-        void toggleWormholeRoutingOnehop(bool isOn);
-        void toggleNormPaths(bool isOn);
+
+        // Telcordia Zodiac specific layers. 
+        void toggleBase(bool isOn);
+        void toggleGroupA(bool isOn);
+        void toggleGroupB(bool isOn);
+        void toggleGroupD(bool isOn);
+        void toggleGroupE(bool isOn);
+        void toggleMission(bool isOn);
+        void toggleGroupAChildren(bool isOn);
+        void toggleGroupBChildren(bool isOn);
+        void toggleGroupDChildren(bool isOn);
+        void toggleGroupEChildren(bool isOn);
+        void toggleMissionChildren(bool isOn);
+
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);
         void toggleBackgroundImage(bool isOn);
@@ -70,17 +75,22 @@ class manetGLView : public QGLWidget
         void undefinedToggled(bool isOn);
         void neighborsToggled(bool isOn);
         void hierarchyToggled(bool isOn);
-        void routingToggled(bool isOn);
-        void routingOnehopToggled(bool isOn);
         void antennaRadiusToggled(bool isOn);
         void sanityCheckToggled(bool isOn);
-        void anomPathsToggled(bool isOn);
-        void correlationToggled(bool isOn);
-        void alertToggled(bool isOn);
-        void correlation3HopToggled(bool isOn);
-        void wormholeRoutingToggled(bool isOn);
-        void wormholeRoutingOnehopToggled(bool isOn);
-        void normPathsToggled(bool isOn);
+
+        // Zodiac layer SIGNALS
+        void baseToggled(bool isOn);
+        void groupAToggled(bool isOn);
+        void groupBToggled(bool isOn);
+        void groupDToggled(bool isOn);
+        void groupEToggled(bool isOn);
+        void missionToggled(bool isOn);
+        void groupAChildrenToggled(bool isOn);
+        void groupBChildrenToggled(bool isOn);
+        void groupDChildrenToggled(bool isOn);
+        void groupEChildrenToggled(bool isOn);
+        void missionChildrenToggled(bool isOn);
+
         void monochromeToggled(bool isOn);
         void threeDViewToggled(bool isOn); 
         void backgroundImageToggled(bool isOn); 

@@ -67,20 +67,24 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
         } layerVals[] =
         {
             { "bandwidth", legacyWatcher::Bandwidth },
-            { "undefined", legacyWatcher::Undefined },
-            { "neighbors", legacyWatcher::Neighbors },
-            { "hierarchy", legacyWatcher::Hierarchy },
-            { "routing", legacyWatcher::Routing },
-            { "routingOneHop", legacyWatcher::RoutingOnehop },
             { "antennaRadius", legacyWatcher::AntennaRadius },
             { "sanityCheck", legacyWatcher::SanityCheck },
-            { "anomPaths", legacyWatcher::AnomPaths }, 
-            { "correlation", legacyWatcher::Correlation },
-            { "alert", legacyWatcher::Alert }, 
-            { "correlation3Hop", legacyWatcher::Correlation3Hop },
-            { "wormholeRouting", legacyWatcher::WormholeRouting },
-            { "wormholeRoutingOnehop", legacyWatcher::WormholeRoutingOnehop },
-            { "normPaths", legacyWatcher::NormPaths }
+            { "neighbors", legacyWatcher::Neighbors },
+            { "hierarchy", legacyWatcher::Hierarchy },
+
+            { "Base", legacyWatcher::Base },
+            { "GroupA", legacyWatcher::GroupA },
+            { "GroupB", legacyWatcher::GroupB },
+            { "GroupD", legacyWatcher::GroupD },
+            { "GroupE", legacyWatcher::GroupE }, 
+            { "Mission", legacyWatcher::Mission },
+            { "GroupAChildren", legacyWatcher::GroupAChildren }, 
+            { "GroupBChildren", legacyWatcher::GroupBChildren },
+            { "GroupDChildren", legacyWatcher::GroupDChildren },
+            { "GroupEChildren", legacyWatcher::GroupEChildren },
+            { "MissionChildren", legacyWatcher::MissionChildren },
+
+            { "undefined", legacyWatcher::Undefined }
         };
         for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
         {
@@ -120,17 +124,20 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     emit undefinedToggled(ds.familyBitmap & legacyWatcher::Undefined);
     emit neighborsToggled(ds.familyBitmap & legacyWatcher::Neighbors);
     emit hierarchyToggled(ds.familyBitmap & legacyWatcher::Hierarchy);
-    emit routingToggled(ds.familyBitmap & legacyWatcher::Routing);
-    emit routingOnehopToggled(ds.familyBitmap & legacyWatcher::RoutingOnehop);
-    emit antennaRadiusToggled(ds.familyBitmap & legacyWatcher::AntennaRadius);
     emit sanityCheckToggled(ds.familyBitmap & legacyWatcher::SanityCheck);
-    emit anomPathsToggled(ds.familyBitmap & legacyWatcher::AnomPaths);
-    emit correlationToggled(ds.familyBitmap & legacyWatcher::Correlation);
-    emit alertToggled(ds.familyBitmap & legacyWatcher::Alert);
-    emit correlation3HopToggled(ds.familyBitmap & legacyWatcher::Correlation3Hop);
-    emit wormholeRoutingToggled(ds.familyBitmap & legacyWatcher::WormholeRouting);
-    emit wormholeRoutingOnehopToggled(ds.familyBitmap & legacyWatcher::WormholeRoutingOnehop);
-    emit normPathsToggled(ds.familyBitmap & legacyWatcher::NormPaths);
+    emit antennaRadiusToggled(ds.familyBitmap & legacyWatcher::AntennaRadius);
+
+    emit baseToggled(ds.familyBitmap & legacyWatcher::Base);
+    emit groupAToggled(ds.familyBitmap & legacyWatcher::GroupA);
+    emit groupBToggled(ds.familyBitmap & legacyWatcher::GroupB);
+    emit groupDToggled(ds.familyBitmap & legacyWatcher::GroupD);
+    emit groupEToggled(ds.familyBitmap & legacyWatcher::GroupE);
+    emit missionToggled(ds.familyBitmap & legacyWatcher::Mission);
+    emit groupAChildrenToggled(ds.familyBitmap & legacyWatcher::GroupAChildren);
+    emit groupBChildrenToggled(ds.familyBitmap & legacyWatcher::GroupBChildren);
+    emit groupDChildrenToggled(ds.familyBitmap & legacyWatcher::GroupDChildren);
+    emit groupEChildrenToggled(ds.familyBitmap & legacyWatcher::GroupEChildren);
+    emit missionChildrenToggled(ds.familyBitmap & legacyWatcher::MissionChildren);
 
     emit threeDViewToggled(ds.threeDView);
     emit monochromeToggled(ds.monochromeMode);
@@ -703,22 +710,6 @@ void manetGLView::toggleHierarchy(bool isOn)
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleRouting(bool isOn)
-{
-    TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::Routing, isOn);
-    emit routingToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleRoutingOnehop(bool isOn)
-{
-    TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::RoutingOnehop, isOn);
-    emit routingOnehopToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
 void manetGLView::toggleAntennaRadius(bool isOn)
 {
     TRACE_ENTER();
@@ -735,62 +726,102 @@ void manetGLView::toggleSanityCheck(bool isOn)
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleAnomPaths(bool isOn)
+//
+// ZODIAC LAYERS START
+//
+void manetGLView::toggleBase(bool isOn)
 {
     TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::AnomPaths, isOn);
-    emit anomPathsToggled(isOn); 
+    legacyWatcher::layerToggle(legacyWatcher::Base, isOn);
+    emit baseToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleCorrelation(bool isOn)
+void manetGLView::toggleGroupA(bool isOn)
 {
     TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::Correlation, isOn);
-    emit correlationToggled(isOn); 
+    legacyWatcher::layerToggle(legacyWatcher::GroupA, isOn);
+    emit groupAToggled(isOn); 
+    LOG_INFO("Group A Toggled" << (isOn?" on":" off")); 
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleAlert(bool isOn)
+void manetGLView::toggleGroupB(bool isOn)
 {
     TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::Alert, isOn);
-    emit alertToggled(isOn); 
+    legacyWatcher::layerToggle(legacyWatcher::GroupB, isOn);
+    LOG_INFO("Group B Toggled" << (isOn?" on":" off")); 
+    emit groupBToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleCorrelation3Hop(bool isOn)
+void manetGLView::toggleGroupD(bool isOn)
 {
     TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::Correlation3Hop, isOn);
-    emit correlation3HopToggled(isOn); 
+    legacyWatcher::layerToggle(legacyWatcher::GroupD, isOn);
+    emit groupDToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleWormholeRouting(bool isOn)
+void manetGLView::toggleGroupE(bool isOn)
 {
     TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::WormholeRouting, isOn);
-    emit wormholeRoutingToggled(isOn); 
+    legacyWatcher::layerToggle(legacyWatcher::GroupE, isOn);
+    emit groupEToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleWormholeRoutingOnehop(bool isOn)
+void manetGLView::toggleMission(bool isOn)
 {
     TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::WormholeRoutingOnehop, isOn);
-    emit wormholeRoutingOnehopToggled(isOn); 
+    legacyWatcher::layerToggle(legacyWatcher::Mission, isOn);
+    emit missionToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
-void manetGLView::toggleNormPaths(bool isOn)
+void manetGLView::toggleGroupAChildren(bool isOn)
 {
     TRACE_ENTER();
-    legacyWatcher::layerToggle(legacyWatcher::NormPaths, isOn);
-    emit normPathsToggled(isOn); 
+    legacyWatcher::layerToggle(legacyWatcher::GroupAChildren, isOn);
+    emit groupAChildrenToggled(isOn); 
     updateGL();
     TRACE_EXIT();
 }
+void manetGLView::toggleGroupBChildren(bool isOn)
+{
+    TRACE_ENTER();
+    legacyWatcher::layerToggle(legacyWatcher::GroupBChildren, isOn);
+    emit groupBChildrenToggled(isOn); 
+    updateGL();
+    TRACE_EXIT();
+}
+void manetGLView::toggleGroupDChildren(bool isOn)
+{
+    TRACE_ENTER();
+    legacyWatcher::layerToggle(legacyWatcher::GroupDChildren, isOn);
+    emit groupDChildrenToggled(isOn); 
+    updateGL();
+    TRACE_EXIT();
+}
+void manetGLView::toggleGroupEChildren(bool isOn)
+{
+    TRACE_ENTER();
+    legacyWatcher::layerToggle(legacyWatcher::GroupEChildren, isOn);
+    emit groupEChildrenToggled(isOn); 
+    updateGL();
+    TRACE_EXIT();
+}
+void manetGLView::toggleMissionChildren(bool isOn)
+{
+    TRACE_ENTER();
+    legacyWatcher::layerToggle(legacyWatcher::MissionChildren, isOn);
+    emit missionChildrenToggled(isOn); 
+    updateGL();
+    TRACE_EXIT();
+}
+//
+// ZODIAC LAYERS STOP
+//
 void manetGLView::toggleMonochrome(bool isOn)
 {
     TRACE_ENTER();
@@ -895,20 +926,24 @@ void manetGLView::saveConfiguration()
     } layerVals[] =
     {
         { "bandwidth", legacyWatcher::Bandwidth },
-        { "undefined", legacyWatcher::Undefined },
-        { "neighbors", legacyWatcher::Neighbors },
-        { "hierarchy", legacyWatcher::Hierarchy },
-        { "routing", legacyWatcher::Routing },
-        { "routingOneHop", legacyWatcher::RoutingOnehop },
         { "antennaRadius", legacyWatcher::AntennaRadius },
         { "sanityCheck", legacyWatcher::SanityCheck },
-        { "anomPaths", legacyWatcher::AnomPaths }, 
-        { "correlation", legacyWatcher::Correlation },
-        { "alert", legacyWatcher::Alert }, 
-        { "correlation3Hop", legacyWatcher::Correlation3Hop },
-        { "wormholeRouting", legacyWatcher::WormholeRouting },
-        { "wormholeRoutingOnehop", legacyWatcher::WormholeRoutingOnehop },
-        { "normPaths", legacyWatcher::NormPaths }
+        { "neighbors", legacyWatcher::Neighbors },
+        { "hierarchy", legacyWatcher::Hierarchy },
+
+        { "Base", legacyWatcher::Base },
+        { "GroupA", legacyWatcher::GroupA },
+        { "GroupB", legacyWatcher::GroupB },
+        { "GroupD", legacyWatcher::GroupD },
+        { "GroupE", legacyWatcher::GroupE }, 
+        { "Mission", legacyWatcher::Mission },
+        { "GroupAChildren", legacyWatcher::GroupAChildren }, 
+        { "GroupBChildren", legacyWatcher::GroupBChildren },
+        { "GroupDChildren", legacyWatcher::GroupDChildren },
+        { "GroupEChildren", legacyWatcher::GroupEChildren },
+        { "MissionChildren", legacyWatcher::MissionChildren },
+
+        { "undefined", legacyWatcher::Undefined }
     };
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
         layers[layerVals[i].prop]=ds.familyBitmap & layerVals[i].layer ? true : false;
