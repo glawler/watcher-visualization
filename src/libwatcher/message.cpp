@@ -1,5 +1,5 @@
 #include <sys/time.h>
-#include <libwatcher/message.h>
+#include "message.h"
 
 #include <boost/archive/polymorphic_iarchive.hpp>
 #include <boost/archive/polymorphic_oarchive.hpp>

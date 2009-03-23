@@ -7,6 +7,7 @@ ifneq (${F10}, 1)
 LIBS+=-L/usr/local/lib 
 endif
 LIBS+=-L$(TOPDIR)/lib
+LIBS+=-L../libwatcher
 
 ifneq (${F10}, 1)
 CXXFLAGS+=-I/usr/local/include/boost-1_36
@@ -19,6 +20,7 @@ CXXFLAGS+=-O0 -ggdb
 CXXFLAGS+=-Wall
 CXXFLAGS+=-pthread
 
+LDFLAGS+=-lwatcher
 LDFLAGS+=-lconfig++
 LDFLAGS+=-llogger
 LDFLAGS+=-llog4cxx
