@@ -6,9 +6,6 @@
 
 namespace watcher {
     namespace watchapi {
-
-        INIT_LOGGER(SpeedMessage, "WatcherMessage.SpeedMessage");
-
         /**
          * Set the playback speed of the event stream.
          * A negative value indicates reverse direction.
@@ -19,6 +16,7 @@ namespace watcher {
             TRACE_ENTER();
             TRACE_EXIT();
         }
+       
+        INIT_LOGGER(SpeedMessage, "WatcherMessage.SpeedMessage");
     }
 }
-#endif

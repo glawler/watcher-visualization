@@ -5,6 +5,8 @@
 #ifndef WATCHER_MESSAGE_H
 #define WATCHER_MESSAGE_H
 
+#include "logger.h"
+
 namespace watcher {
     /** Namespace containing messages for the watcherd api */
     namespace watchapi {

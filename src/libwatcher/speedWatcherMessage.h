@@ -32,4 +32,6 @@ namespace watcher {
             ar & speed;
             TRACE_EXIT();
         }
+    }
+}
 #endif
