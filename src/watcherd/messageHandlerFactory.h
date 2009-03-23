@@ -3,7 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include "messageTypesAndVersions.h"
+#include <libwatcher/messageTypesAndVersions.h>
 #include "messageHandler.h"
 
 namespace watcher 
@@ -14,7 +14,7 @@ namespace watcher
 
             // static function that returns a pointer to a MessageHandler class based on the 
             // message type you want to handle. 
-            static MessageHandlerPtr getMessageHandler(const MessageType &type);
+            static MessageHandlerPtr getMessageHandler(const event::MessageType &type);
 
             DECLARE_LOGGER(); 
 

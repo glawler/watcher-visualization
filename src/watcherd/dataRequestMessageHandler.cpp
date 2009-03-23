@@ -1,8 +1,9 @@
 #include "dataRequestMessageHandler.h"
 #include "messageFactory.h"
-#include "messageStatus.h"
+#include <libwatcher/messageStatus.h>
 
 using namespace watcher;
+using namespace watcher::event;
 
 INIT_LOGGER(DataRequestMessageHandler, "DataRequestMessageHandler");
 

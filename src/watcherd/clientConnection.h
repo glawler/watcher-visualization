@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 
-#include "message.h"
+#include <libwatcher/message.h>
 #include "dataMarshaller.h"
 
 namespace watcher 
@@ -22,7 +22,7 @@ namespace watcher
                     const std::string &server, 
                     const std::string &service);
 
-            bool sendMessage(const MessagePtr message);
+            bool sendMessage(const event::MessagePtr message);
 
             void close(); 
             
@@ -34,7 +34,7 @@ namespace watcher
 
             void doClose();
             void doConnect(); 
-            void doWrite(const MessagePtr &message); 
+            void doWrite(const event::MessagePtr &message); 
 
             bool connected; 
 
@@ -50,8 +50,8 @@ namespace watcher
             typedef struct 
             {
                 IncomingBuffer incomingBuffer;
-                MessagePtr theReply;
-                MessagePtr theRequest;
+                event::MessagePtr theReply;
+                event::MessagePtr theRequest;
             } TransferData;
 
             typedef boost::shared_ptr<TransferData> TransferDataPtr;

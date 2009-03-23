@@ -4,8 +4,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "messageTypesAndVersions.h"
-#include "message.h"
+#include <libwatcher/messageTypesAndVersions.h>
+#include <libwatcher/message.h>
 
 namespace watcher
 {
@@ -13,7 +13,7 @@ namespace watcher
     {
         public:
 
-            static boost::shared_ptr<Message> makeMessage(const MessageType &type);
+            static boost::shared_ptr<event::Message> makeMessage(const event::MessageType &type);
 
         protected:
         private:

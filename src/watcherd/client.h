@@ -8,7 +8,7 @@
 #include "logger.h"
 
 #include "clientConnection.h"
-#include "message.h"
+#include <libwatcher/message.h>
 
 namespace watcher 
 {
@@ -28,7 +28,7 @@ namespace watcher
             // to send messages. Default service is "watcherd" - a watcherd running somewhere.
             explicit Client(const std::string& server, const std::string& service="watcherd");
 
-            bool sendMessage(const MessagePtr message);
+            bool sendMessage(const event::MessagePtr message);
 
         protected:
         private:

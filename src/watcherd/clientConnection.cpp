@@ -7,13 +7,13 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "dataMarshaller.h"
-#include "gpsMessage.h"
-#include "message.h"
+#include <libwatcher/gpsMessage.h>
 #include "messageHandler.h"
 #include "messageHandlerFactory.h"
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost;
 using namespace boost::asio::ip;
 

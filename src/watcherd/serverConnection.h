@@ -21,7 +21,7 @@
 #include "messageHandlerFactory.h"
 
 #include "dataMarshaller.h"
-#include "message.h"
+#include <libwatcher/message.h>
 
 namespace watcher 
 {
@@ -48,7 +48,7 @@ namespace watcher
             void handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred);
 
             /// Handle completion of a write operation.
-            void handle_write(const boost::system::error_code& e, MessagePtr reply);
+            void handle_write(const boost::system::error_code& e, event::MessagePtr reply);
 
             /// Strand to ensure the connection's handlers are not called concurrently.
             boost::asio::io_service::strand strand_;
@@ -66,10 +66,10 @@ namespace watcher
             OutboundDataBuffers outboundDataBuffers;
 
             // The incoming messages.
-            MessagePtr request;
+            event::MessagePtr request;
 
             /// The replies to be sent back to the client.
-            std::list<MessagePtr> replies;
+            std::list<event::MessagePtr> replies;
 
             // Use the utiliity class for arbitrary marshal/unmarhasl
             DataMarshaller dataMarshaller;

@@ -7,7 +7,7 @@
 #include <boost/thread.hpp>
 
 #include "messageHandler.h"
-#include "dataRequestMessage.h"
+#include <libwatcher/dataRequestMessage.h>
 #include "server.h"
 #include "libconfig.h++"
 #include "logger.h"
@@ -26,10 +26,10 @@ namespace watcher
 
             void run(const std::string &address, const std::string &port, const int &threadNum);
 
-            void handleMessageArrive(const MessagePtr message); 
-            ConnectionCommand produceReply(const MessagePtr &request, MessagePtr &reply);
-            ConnectionCommand handleReply(const MessagePtr &request, const MessagePtr &reply);
-            ConnectionCommand produceRequest(MessagePtr &request);
+            void handleMessageArrive(const event::MessagePtr message); 
+            ConnectionCommand produceReply(const event::MessagePtr &request, event::MessagePtr &reply);
+            ConnectionCommand handleReply(const event::MessagePtr &request, const event::MessagePtr &reply);
+            ConnectionCommand produceRequest(event::MessagePtr &request);
 
         protected:
 
@@ -42,7 +42,7 @@ namespace watcher
             libconfig::Config &config;
 
             // List of clients subscribed to messages.
-            typedef std::list<DataRequestMessagePtr> MessageRequesters;
+            typedef std::list<event::DataRequestMessagePtr> MessageRequesters;
             MessageRequesters messageRequesters;
     };
 

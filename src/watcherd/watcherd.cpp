@@ -4,6 +4,7 @@
 #include "singletonConfig.h"
 
 using namespace watcher;
+using namespace watcher::event;
 using namespace std;
 using namespace boost;
 

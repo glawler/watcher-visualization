@@ -10,7 +10,7 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/asio.hpp>
 
-#include "message.h"
+#include <libwatcher/message.h>
 
 #include <boost/serialization/export.hpp>
 #include <boost/archive/polymorphic_text_iarchive.hpp>

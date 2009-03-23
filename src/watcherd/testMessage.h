@@ -3,8 +3,7 @@
 
 #include <string>
 
-#include "logger.h"
-#include "message.h"
+#include <libwatcher/message.h>
 
 namespace boost {
     namespace archive {

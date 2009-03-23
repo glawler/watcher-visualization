@@ -5,10 +5,11 @@
 #include <boost/asio.hpp>
 #include "logger.h"
 #include "client.h"
-#include "gpsMessage.h"
+#include <libwatcher/gpsMessage.h>
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 
 void usage(const char *progName)
 {

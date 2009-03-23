@@ -1,9 +1,10 @@
 #include "colorMessageHandler.h"
 #include "messageFactory.h"
-#include "messageStatus.h"
+#include <libwatcher/messageStatus.h>
 #include <boost/cast.hpp>
 
 using namespace watcher;
+using namespace watcher::event;
 
 INIT_LOGGER(ColorMessageHandler, "ColorMessageHandler");
 

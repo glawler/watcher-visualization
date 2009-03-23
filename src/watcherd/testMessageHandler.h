@@ -11,7 +11,7 @@ namespace watcher
             TestMessageHandler();
             ~TestMessageHandler();
 
-            ConnectionCommand produceRequest(MessagePtr &request);
+            ConnectionCommand produceRequest(event::MessagePtr &request);
 
             DECLARE_LOGGER(); 
 

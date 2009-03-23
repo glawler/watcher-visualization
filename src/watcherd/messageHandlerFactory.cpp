@@ -8,6 +8,7 @@
 #include "dataRequestMessageHandler.h"
 
 using namespace watcher;
+using namespace watcher::event;
 
 INIT_LOGGER(MessageHandlerFactory, "MessageHandlerFactory");
 

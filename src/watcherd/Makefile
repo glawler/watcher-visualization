@@ -1,5 +1,5 @@
 # melkins - compilation for Fedora 10
-F10=0
+F10=1
 
 TOPDIR=../..
 
@@ -13,6 +13,7 @@ CXXFLAGS+=-I/usr/local/include/boost-1_36
 endif
 CXXFLAGS+=-I$(TOPDIR)/include 
 CXXFLAGS+=-I$(TOPDIR)/src/util
+CXXFLAGS+=-I..
 CXXFLAGS+=-I.
 CXXFLAGS+=-O0 -ggdb
 CXXFLAGS+=-Wall
@@ -34,33 +35,33 @@ endif
 
 # GTL - experimental automatic use of multiprocessor systems to speed up make
 # May break things, don't know.
-PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
-ifneq (${PROCCOUNT}, 0)
-	MAKEFLAGS+=-j $(PROCCOUNT)
-endif
+#PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
+#ifneq (${PROCCOUNT}, 0)
+#	MAKEFLAGS+=-j $(PROCCOUNT)
+#endif
 
 #
 # SRCS and HDRS come in pairs, MAINS contain main() and do not have an associated header.
 #
-SRCS=message.cpp messageFactory.cpp messageTypesAndVersions.cpp singletonConfig.cpp testMessage.cpp \
+SRCS=messageFactory.cpp singletonConfig.cpp \
 	 serverConnection.cpp dataMarshaller.cpp server.cpp \
-	 messageStatus.cpp clientConnection.cpp gpsMessage.cpp messageHandler.cpp messageStatusHandler.cpp \
-	 gpsMessageHandler.cpp testMessageHandler.cpp messageHandlerFactory.cpp client.cpp watcherColors.cpp \
-	 labelMessage.cpp  labelMessageHandler.cpp  watcherGlobalFunctions.cpp edgeMessage.cpp edgeMessageHandler.cpp \
-	 colorMessage.cpp colorMessageHandler.cpp watcherd.cpp dataRequestMessage.cpp dataRequestMessageHandler.cpp
-HDRS=messageFactory.h message.h messageTypesAndVersions.h singletonConfig.h testMessage.h \
-	serverConnection.h dataMarshaller.h server.h messageStatus.h \
-	clientConnection.h gpsMessage.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
-	testMessageHandler.h messageHandlerFactory.h client.h watcherColors.h \
-	labelMessage.h  labelMessageHandler.h watcherGlobalFunctions.h edgeMessage.h edgeMessageHandler.h \
-	colorMessage.h colorMessageHandler.h watcherd.h dataRequestMessage.h dataRequestMessageHandler.h
+	 clientConnection.cpp messageHandler.cpp messageStatusHandler.cpp \
+	 gpsMessageHandler.cpp messageHandlerFactory.cpp client.cpp \
+	 labelMessageHandler.cpp  edgeMessageHandler.cpp \
+	 colorMessageHandler.cpp watcherd.cpp dataRequestMessageHandler.cpp
+HDRS=messageFactory.h singletonConfig.h \
+	serverConnection.h dataMarshaller.h server.h \
+	clientConnection.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
+	messageHandlerFactory.h client.h \
+	labelMessageHandler.h edgeMessageHandler.h \
+	colorMessageHandler.h watcherd.h dataRequestMessage.h dataRequestMessageHandler.h
 OBJS=$(SRCS:.cpp=.o)
 
 MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp dataRequestMessageTest.cpp
 
 BINS=$(MAINS:.cpp=) watcherd
 
-all: depend tags $(BINS) watcherd.cfg log.properties 
+all: $(BINS) watcherd.cfg log.properties 
 
 watcherd: $(OBJS) watcherdMain.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
@@ -106,7 +107,7 @@ tags: $(SRCS) $(HDRS)
 # Use the shell to set DEPEND so we don't get spurrious warnings when
 # the "depend" file does not exist
 #
-DEPEND=$(shell if [ -r depend ] ; then echo -n 1; else echo -n 0; fi;)
+#DEPEND=$(shell if [ -r depend ] ; then echo -n 1; else echo -n 0; fi;)
 ifeq (${DEPEND}, 1)
 	include depend
 endif

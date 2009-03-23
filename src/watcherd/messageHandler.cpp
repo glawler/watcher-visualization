@@ -1,10 +1,11 @@
 #include <boost/cast.hpp>
 
 #include "messageHandler.h"
-#include "messageStatus.h"
+#include <libwatcher/messageStatus.h>
 
 using namespace std; 
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost;
 
 INIT_LOGGER(MessageHandler, "MessageHandler");

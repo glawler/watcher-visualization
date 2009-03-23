@@ -2,6 +2,7 @@
 #include "messageFactory.h"
 
 using namespace watcher;
+using namespace watcher::event;
 
 INIT_LOGGER(MessageStatusHandler, "MessageStatusHandler");
 

@@ -1,15 +1,16 @@
 #include "messageFactory.h"
 
-#include "message.h"
-#include "testMessage.h"
-#include "gpsMessage.h"
-#include "messageStatus.h"
-#include "labelMessage.h"
-#include "edgeMessage.h"
-#include "colorMessage.h"
-#include "dataRequestMessage.h"
+#include <libwatcher/message.h>
+#include <libwatcher/labelMessage.h>
+#include <libwatcher/edgeMessage.h>
+#include <libwatcher/colorMessage.h>
+#include <libwatcher/gpsMessage.h>
+#include <libwatcher/messageStatus.h>
+#include <libwatcher/dataRequestMessage.h>
+//#include "testMessage.h"
 
 using namespace watcher;
+using namespace watcher::event;
 
 INIT_LOGGER(MessageFactory, "MessageFactory");
 
@@ -24,9 +25,10 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
         case MESSAGE_STATUS_TYPE:
             return boost::shared_ptr<MessageStatus>(new MessageStatus);
             break;
+            /*
         case TEST_MESSAGE_TYPE:
             return boost::shared_ptr<TestMessage>(new TestMessage);
-            break;
+            break; */
         case GPS_MESSAGE_TYPE:
             return boost::shared_ptr<GPSMessage>(new GPSMessage);
             break;
