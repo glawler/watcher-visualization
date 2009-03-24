@@ -55,14 +55,13 @@ int main(int argc, char* argv[])
         config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
     }
 
-    PropertyConfigurator::configureAndWatch(logConf);
+    LOAD_LOG_PROPS(logConf);
 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
 
     string address("glory");
     string port("8095");
     size_t numThreads;
-
 
     if (!config.lookupValue("server", address))
     {
@@ -97,6 +96,7 @@ int main(int argc, char* argv[])
     }
 
     // Save any configuration changes made during the run.
+    LOG_INFO("Saving last known configuration to " << configFilename); 
     SingletonConfig::lock();
     config.writeFile(configFilename.c_str());
 
