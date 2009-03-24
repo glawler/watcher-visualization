@@ -37,10 +37,10 @@ endif
 
 # GTL - experimental automatic use of multiprocessor systems to speed up make
 # May break things, don't know.
-#PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
-#ifneq (${PROCCOUNT}, 0)
-#	MAKEFLAGS+=-j $(PROCCOUNT)
-#endif
+PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
+ifneq (${PROCCOUNT}, 0)
+	MAKEFLAGS+=-j $(PROCCOUNT)
+endif
 
 #
 # SRCS and HDRS come in pairs, MAINS contain main() and do not have an associated header.
