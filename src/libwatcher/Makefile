@@ -1,3 +1,10 @@
+# GTL - experimental automatic use of multiprocessor systems to speed up make 
+# May break things, don't know. 
+PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor) 
+ifneq (${PROCCOUNT}, 0) 
+	MAKEFLAGS+=-j $(PROCCOUNT) 
+endif 
+
 CPPFLAGS += -Wall -g -O0 -ggdb -Weffc++
 CPPFLAGS += -I../../include
 
@@ -12,8 +19,24 @@ SRCS += edgeMessage.cpp labelMessage.cpp watcherColors.cpp colorMessage.cpp \
 
 OBJS=${SRCS:.cpp=.o}
 
+
+all: libwatcher.a
+
+.PHONY : clean
+
 libwatcher.a: ${OBJS}
 	ar cr $@ ${OBJS}
 
 clean:
-	rm -f libwatcher.a ${OBJS}
+	$(RM) -f libwatcher.a ${OBJS} depend
+
+DEPENDSOURCES:=${shell find . -name \*.cpp -o -name \*.c -o -name \*.h -o -name \*.hpp}
+depend: 
+	@echo Building dependencies...
+	@$(RM) depend
+	@$(CXX) -MM $(CPPFLAGS) $(CFLAGS) ${DEPENDSOURCES} 2>/dev/null > $@; 
+	@for f in ${OBJS}  ; do echo "$$f: Makefile" >> $@; done
+
+# no errors if "depend" doesn't exist
+-include depend
+
