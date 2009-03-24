@@ -3,7 +3,7 @@ CPPFLAGS += -I../../include
 
 # watcherd API
 SRCS=seekWatcherMessage.cpp speedWatcherMessage.cpp startWatcherMessage.cpp \
-	stopWatcherMessage.cpp
+	stopWatcherMessage.cpp nodeStatusMessage.cpp
 
 # feeder API
 SRCS += edgeMessage.cpp labelMessage.cpp watcherColors.cpp colorMessage.cpp \
