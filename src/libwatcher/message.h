@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
 
 #include "logger.h"
 #include "messageTypesAndVersions.h"
@@ -34,18 +35,18 @@ namespace watcher {
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
             protected:
+            private:
                 friend class boost::serialization::access;
                 template <typename Archive>
-                    void serialize(Archive & ar, const unsigned int file_version)
-                    {
-                        TRACE_ENTER();
-                        ar & version;
-                        ar & type;
-                        ar & timestamp;
-                        TRACE_EXIT();
-                    }
+                void serialize(Archive & ar, const unsigned int file_version)
+                {
+                    TRACE_ENTER();
+                    ar & version;
+                    ar & type;
+                    ar & timestamp;
+                    TRACE_EXIT();
+                }
 
-            private:
                 DECLARE_LOGGER();
         };
 

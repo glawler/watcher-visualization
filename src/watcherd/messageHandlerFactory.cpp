@@ -28,9 +28,11 @@ boost::shared_ptr<MessageHandler> MessageHandlerFactory::getMessageHandler(const
         case MESSAGE_STATUS_TYPE: 
             return boost::shared_ptr<MessageStatusHandler>(new MessageStatusHandler);
             break;
+            /*
         case TEST_MESSAGE_TYPE: 
             return boost::shared_ptr<TestMessageHandler>(new TestMessageHandler);
             break;
+            */
         case GPS_MESSAGE_TYPE: 
             return boost::shared_ptr<GPSMessageHandler>(new GPSMessageHandler);
             break;

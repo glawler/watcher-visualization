@@ -24,9 +24,10 @@ namespace watcher {
                     end         //< offset is relative to end of stream
                 };
                 SeekMessage(float offset, whence);
-                template <typename Archive> void serialize(Archive& ar, const unsigned int version);
 
             private:
+                friend class boost::serialization::access;
+                template <typename Archive> void serialize(Archive& ar, const unsigned int version);
                 DECLARE_LOGGER();
                 float offset;   //< offset into stream in seconds
                 whence rel;     //< specifies how offset is interpreted

@@ -1,7 +1,6 @@
 #ifndef STATUS_MESSAGE_H
 #define STATUS_MESSAGE_H
 
-#include <boost/serialization/base_object.hpp>
 #include "message.h"
 
 namespace watcher {
@@ -33,17 +32,18 @@ namespace watcher {
 
                 static const char *statusToString(const Status &stat);
 
-                template <typename Archive>
-                    void serialize(Archive & ar, const unsigned int file_version)
-                    {
-                        TRACE_ENTER();
-                        ar & boost::serialization::base_object<Message>(*this);
-                        ar & status;
-                        TRACE_EXIT();
-                    }
-
             protected:
             private:
+                friend class boost::serialization::access;
+                template <typename Archive>
+                void serialize(Archive & ar, const unsigned int file_version)
+                {
+                    TRACE_ENTER();
+                    ar & boost::serialization::base_object<Message>(*this);
+                    ar & status;
+                    TRACE_EXIT();
+                }
+
                 DECLARE_LOGGER();
 
         };

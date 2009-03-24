@@ -1,7 +1,7 @@
 #ifndef MESSAGETYPES_AND_VERSIONS_H
 #define MESSAGETYPES_AND_VERSIONS_H
 
-#include <iostream>
+#include <ostream>
 
 namespace watcher {
     namespace event {
@@ -21,7 +21,7 @@ namespace watcher {
 
         } MessageType;
 
-        std::ostream &operator<<(std::ostream &out, const MessageType &type);
+        std::ostream& operator<< (std::ostream &out, const MessageType &type);
 
         //
         // version numbers are on a per message format basis
@@ -47,7 +47,7 @@ namespace watcher {
             FLOATING_LAYER          = 1L << 3
         } GUILayer;
 
-        std::ostream &operator<<(std::ostream &out, const GUILayer &layer);
+        std::ostream&operator<< (std::ostream &out, const GUILayer &layer);
     }
 }
 

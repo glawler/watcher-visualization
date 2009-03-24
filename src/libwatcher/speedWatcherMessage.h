@@ -17,12 +17,13 @@ namespace watcher {
          */
         class SpeedMessage : public WatcherMessage {
             private:
+                friend class boost::serialization::access;
+                template <typename Archive> void serialize(Archive & ar, const unsigned int version);
                 DECLARE_LOGGER();
                 float speed;    //< playback speed.  negative value indicates reverse direction
 
             public:
                 SpeedMessage(float speed);
-                template <typename Archive> void serialize(Archive & ar, const unsigned int version);
         };
 
         template <typename Archive>

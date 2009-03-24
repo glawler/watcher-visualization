@@ -7,7 +7,8 @@ SRCS=seekWatcherMessage.cpp speedWatcherMessage.cpp startWatcherMessage.cpp \
 
 # feeder API
 SRCS += edgeMessage.cpp labelMessage.cpp watcherColors.cpp colorMessage.cpp \
-	gpsMessage.cpp messageStatus.cpp dataRequestMessage.cpp message.cpp
+	gpsMessage.cpp messageStatus.cpp dataRequestMessage.cpp message.cpp \
+	messageTypesAndVersions.cpp testMessage.cpp
 
 OBJS=${SRCS:.cpp=.o}
 

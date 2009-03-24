@@ -2,7 +2,6 @@
 #define DATA_REQUEST_MESSAGE_H
 
 #include <list>
-#include <boost/serialization/base_object.hpp>
 #include "message.h"
 
 namespace watcher {
@@ -52,6 +51,9 @@ namespace watcher {
                 virtual std::ostream &toStream(std::ostream &out) const;
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            protected:
+            private:
+                friend class boost::serialization::access;
                 template <typename Archive>
                 void serialize(Archive & ar, const unsigned int file_version)
                 {
@@ -64,16 +66,11 @@ namespace watcher {
                     TRACE_EXIT();
                 }
 
-
-            protected:
-            private:
                 DECLARE_LOGGER();
-
         };
 
         typedef boost::shared_ptr<DataRequestMessage> DataRequestMessagePtr;
         std::ostream &operator<<(std::ostream &out, const DataRequestMessage &mess);
-
     }
 }
 #endif // DATA_REQUEST_MESSAGE_H

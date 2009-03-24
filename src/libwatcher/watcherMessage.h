@@ -6,6 +6,8 @@
 #define WATCHER_MESSAGE_H
 
 #include "logger.h"
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
 
 namespace watcher {
     /** Namespace containing messages for the watcherd api */
@@ -17,6 +19,9 @@ namespace watcher {
          * @date 2009-03-20
          */
         class WatcherMessage {
+                friend class boost::serialization::access;
+                template <typename Archive>
+                void serialiaze(Archive& ar, unsigned int version) {};
             protected:
                 //don't allow for direct contruction
                 WatcherMessage() {};

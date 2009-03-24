@@ -2,7 +2,6 @@
 #define WATCHER_GPS__MESSAGE_DATA_H
 
 #include <string>
-#include <boost/serialization/base_object.hpp>
 
 #include "message.h"
 
@@ -24,6 +23,8 @@ namespace watcher {
                 virtual std::ostream &toStream(std::ostream &out) const;
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            private:
+                friend class boost::serialization::access;
                 template <typename Archive>
                 void serialize(Archive & ar, const unsigned int file_version)
                 {
@@ -34,7 +35,6 @@ namespace watcher {
                     ar & alt;
                     TRACE_EXIT();
                 }
-            private:
                 DECLARE_LOGGER();
         };
 

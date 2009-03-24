@@ -3,10 +3,11 @@
 #include <boost/lexical_cast.hpp>
 
 #include "clientConnection.h"
-#include "testMessage.h"
+#include <libwatcher/testMessage.h>
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost;
 
 int main(int argc, char **argv)

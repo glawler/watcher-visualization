@@ -7,11 +7,12 @@
 #include <boost/lexical_cast.hpp>
 #include "logger.h"
 #include "client.h"
-#include "edgeMessage.h"
-#include "messageTypesAndVersions.h"    // for GUILayer
+#include <libwatcher/edgeMessage.h>
+#include <libwatcher/messageTypesAndVersions.h>    // for GUILayer
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost;
 
 void usage(const char *progName)

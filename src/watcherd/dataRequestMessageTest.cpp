@@ -7,11 +7,12 @@
 #include <boost/lexical_cast.hpp>
 #include "logger.h"
 #include "client.h"
-#include "dataRequestMessage.h"
-#include "messageTypesAndVersions.h"
+#include <libwatcher/dataRequestMessage.h>
+#include <libwatcher/messageTypesAndVersions.h>
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost;
 
 void printCurrentlySupported(ostream &out)
@@ -77,7 +78,7 @@ int main(int argc, char **argv)
     string server;
     DataRequestMessage::MessageTypeList messages;
     const unsigned int layers=0;
-    watcher::Timestamp startTime=0;
+    watcher::event::Timestamp startTime=0;
     int timeFactor=1;
 
     string logProps("log.properties");
@@ -107,7 +108,7 @@ int main(int argc, char **argv)
             case 'p': logProps=optarg; break;
             case 'm': printf("\nMessage argument is not currently supported\n"); break;
             case 'l': printf("\nLayer argument is not currently supported\n"); break;
-            case 't': startTime=lexical_cast<watcher::Timestamp>(optarg); break;
+            case 't': startTime=lexical_cast<watcher::event::Timestamp>(optarg); break;
             case 'f': timeFactor=lexical_cast<int>(optarg); break;
             case 'h':
             case 'H':

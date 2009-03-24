@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <exception>
 #include "logger.h"
+#include <boost/serialization/access.hpp>
 
 namespace watcher
 {
@@ -13,7 +14,6 @@ namespace watcher
     //
         class Color {
             public:
-
                 //
                 // A few default colors. Plenty more at: 
                 // http://htmlhelp.com/cgi-bin/color.cgi
@@ -67,6 +67,9 @@ namespace watcher
                 std::ostream &toStream(std::ostream &out) const;
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            protected:
+            private:
+                friend class boost::serialization::access;
                 template <typename Archive>
                 void serialize(Archive & ar, const unsigned int file_version)
                 {
@@ -77,8 +80,6 @@ namespace watcher
                     ar & a;
                     TRACE_EXIT();
                 }
-            protected:
-            private:
                 DECLARE_LOGGER();
         };
 

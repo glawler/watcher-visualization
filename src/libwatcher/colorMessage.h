@@ -3,7 +3,6 @@
 
 #include <string>
 #include <boost/asio.hpp>
-#include <boost/serialization/base_object.hpp>
 
 #include "message.h"
 #include "watcherColors.h"
@@ -32,6 +31,8 @@ namespace watcher {
                 virtual std::ostream &toStream(std::ostream &out) const;
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            private:
+                friend class boost::serialization::access;
                 template <typename Archive>
                 void serialize(Archive& ar, const unsigned int file_version)
                 {
@@ -44,7 +45,6 @@ namespace watcher {
                     TRACE_EXIT();
                 }
 
-            private:
                 DECLARE_LOGGER();
         };
 

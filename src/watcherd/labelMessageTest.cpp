@@ -7,10 +7,11 @@
 #include <boost/lexical_cast.hpp>
 #include "logger.h"
 #include "client.h"
-#include "labelMessage.h"
+#include <libwatcher/labelMessage.h>
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost;
 
 void usage(const char *progName)

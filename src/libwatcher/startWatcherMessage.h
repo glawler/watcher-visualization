@@ -16,10 +16,9 @@ namespace watcher {
          * @date 2009-03-20
          */
         class StartMessage : public WatcherMessage {
-            public:
-                template <typename Archive> void serialize(Archive & ar, const unsigned int version);
-            private:
-                DECLARE_LOGGER();
+            template <typename Archive> void serialize(Archive & ar, const unsigned int version);
+            friend class boost::serialization::access;
+            DECLARE_LOGGER();
         };
 
         template <typename Archive> void StartMessage::serialize(Archive & ar, const unsigned int version)
