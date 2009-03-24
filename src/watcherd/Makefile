@@ -65,6 +65,8 @@ BINS=$(MAINS:.cpp=) watcherd
 
 all: $(BINS) watcherd.cfg log.properties 
 
+.phony: clean
+
 watcherd: $(OBJS) watcherdMain.o
 	$(CXX) $^ -o $@ $(LIBS) $(LDFLAGS)
 
@@ -94,23 +96,18 @@ log.properties:
 	@ echo Creating log.properties from sample configuration in ../../etc/watcher.log.properties.sample
 	cp ../../etc/watcher.log.properties.sample ./log.properties
 
-depend: $(SRCS) $(HDRS) $(MAINS)
-	@echo makedepend
-	@$(RM) depend
-	@makedepend -f- $^ > $@ 2>/dev/null;
-	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
-
 clean: 
-	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o) watcherdMain.o
+	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o) watcherdMain.o depend
 
 tags: $(SRCS) $(HDRS)
 	ctags -R . ../../include
 
-# Use the shell to set DEPEND so we don't get spurrious warnings when
-# the "depend" file does not exist
-#
-#DEPEND=$(shell if [ -r depend ] ; then echo -n 1; else echo -n 0; fi;)
-ifeq (${DEPEND}, 1)
-	include depend
-endif
+DEPENDSOURCES:=${shell find . -name \*.cpp -o -name \*.c -o -name \*.h -o -name \*.hpp}
+depend: 
+	@echo Building dependencies...
+	@$(RM) depend
+	@$(CXX) -MM $(CPPFLAGS) $(CFLAGS) ${DEPENDSOURCES} 2>/dev/null > $@;
+	@for f in ${OBJS} ; do echo "$$f: Makefile" >> $@; done
+
+-include depend
 
