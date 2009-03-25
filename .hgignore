@@ -28,6 +28,7 @@ _$*
 *.swp
 *.log
 core
+depend
 
 # some automake/autoconf/libtool things
 stamp-h1

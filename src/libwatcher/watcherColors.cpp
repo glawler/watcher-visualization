@@ -44,7 +44,7 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        Color::Color(const uint32_t &color)  
+        Color::Color(const uint32_t &color) : r(0), g(0), b(0), a(0)
         {
             TRACE_ENTER();
             r=color>>24;
@@ -54,10 +54,9 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        Color::Color(const Color &other)
+        Color::Color(const Color &other) : r(other.r), g(other.g), b(other.b), a(other.a)
         {
             TRACE_ENTER();
-            (*this)=other;
             TRACE_EXIT();
         }
 

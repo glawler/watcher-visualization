@@ -19,10 +19,13 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        GPSMessage::GPSMessage(const GPSMessage &other)
+        GPSMessage::GPSMessage(const GPSMessage &other) :
+            Message(other.type, other.version),
+            lat(other.lat),
+            lng(other.lng),
+            alt(other.alt)
         {
             TRACE_ENTER();
-            (*this)=other;
             TRACE_EXIT();
         }
 

@@ -11,7 +11,10 @@ namespace watcher {
         INIT_LOGGER(TestMessage, "Message.TestMessage");
         BOOST_CLASS_EXPORT_GUID(TestMessage, "TestMessage");
 
-        TestMessage::TestMessage() : Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION)
+        TestMessage::TestMessage() : 
+            Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION), 
+            stringData(),
+            intsData()
         {
             TRACE_ENTER();
             stringData="Hello world";
@@ -33,10 +36,12 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        TestMessage::TestMessage(const TestMessage &other)
+        TestMessage::TestMessage(const TestMessage &other) :
+            Message(other.type, other.version), 
+            stringData(other.stringData),
+            intsData(other.intsData)
         {
             TRACE_ENTER();
-            (*this)=other;
             TRACE_EXIT();
         }
 

@@ -63,10 +63,21 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        EdgeMessage::EdgeMessage(const EdgeMessage &other)
+        EdgeMessage::EdgeMessage(const EdgeMessage &other) :
+            Message(other.type, other.version),
+            node1(other.node1),
+            node2(other.node2),
+            edgeColor(other.edgeColor),
+            expiration(other.expiration), 
+            width(other.width),
+            layer(other.layer),
+            addEdge(other.addEdge),
+            middleLabel(other.middleLabel),
+            node1Label(other.node1Label),
+            node2Label(other.node2Label),
+            bidirectional(other.bidirectional)
         {
             TRACE_ENTER();
-            this->operator=(other); 
             TRACE_EXIT();
         }
 

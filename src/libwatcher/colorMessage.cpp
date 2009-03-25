@@ -38,7 +38,12 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        ColorMessage::ColorMessage(const ColorMessage &other)
+        ColorMessage::ColorMessage(const ColorMessage &other) : 
+            Message(other.type, other.version),
+            color(other.color), 
+            nodeAddr(other.nodeAddr),
+            flashPeriod(other.flashPeriod),
+            expiration(other.expiration)
         {
             TRACE_ENTER();
             (*this)=other;

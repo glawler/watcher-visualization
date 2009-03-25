@@ -64,10 +64,20 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        LabelMessage::LabelMessage(const LabelMessage &other)
+        LabelMessage::LabelMessage(const LabelMessage &other) : 
+            Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
+            label(other.label),
+            fontSize(other.fontSize),
+            foreground(other.foreground),
+            background(other.background),
+            expiration(other.expiration),
+            addLabel(other.addLabel),
+            address(other.address),
+            lat(other.lat),
+            lng(other.lng),
+            alt(other.alt)
         {
             TRACE_ENTER();
-            this->operator=(other); 
             TRACE_EXIT();
         }
 

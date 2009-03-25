@@ -18,14 +18,15 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        MessageStatus::MessageStatus(const MessageStatus &other)
+        MessageStatus::MessageStatus(const MessageStatus &other) :
+            Message(other.type, other.version),
+            status(other.status)
         {
             TRACE_ENTER();
-            (*this)=other;
             TRACE_EXIT();
         }
 
-        MessageStatus::~MessageStatus()
+        MessageStatus::~MessageStatus()  
         {
             TRACE_ENTER();
             TRACE_EXIT();

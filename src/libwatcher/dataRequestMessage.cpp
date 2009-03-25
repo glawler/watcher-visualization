@@ -12,6 +12,7 @@ namespace watcher {
 
         DataRequestMessage::DataRequestMessage() : 
             Message(DATA_REQUEST_MESSAGE_TYPE, DATA_REQUEST_MESSAGE_VERSION),
+            dataTypesRequested(),
             startingAt(0),
             timeFactor(1),
             layers(0)
@@ -34,10 +35,14 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        DataRequestMessage::DataRequestMessage(const DataRequestMessage &other)
+        DataRequestMessage::DataRequestMessage(const DataRequestMessage &other) :
+            Message(other.type, other.version),
+            dataTypesRequested(other.dataTypesRequested),
+            startingAt(other.startingAt),
+            timeFactor(other.timeFactor),
+            layers(other.layers)
         {
             TRACE_ENTER();
-            (*this)=other;
             TRACE_EXIT();
         }
 

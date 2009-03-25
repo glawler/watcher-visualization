@@ -13,7 +13,7 @@ namespace watcher {
 
         BOOST_CLASS_EXPORT_GUID(Message, "Message");
 
-        Message::Message() : version(0), type(UNKNOWN_MESSAGE_TYPE)
+        Message::Message() : version(0), type(UNKNOWN_MESSAGE_TYPE), timestamp(0)
         {
             TRACE_ENTER();
             struct timeval tp;
@@ -23,7 +23,7 @@ namespace watcher {
         }
 
         Message::Message(const MessageType &t, const unsigned int v) : 
-            version(v), type(t)
+            version(v), type(t), timestamp(0)
         {
             TRACE_ENTER();
             struct timeval tp;
@@ -32,10 +32,10 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        Message::Message(const Message &other)
+        Message::Message(const Message &other) :
+            version(other.version), type(other.type), timestamp(other.timestamp)
         {
             TRACE_ENTER();
-            (*this)=other;
             TRACE_EXIT();
         }
 
