@@ -20,13 +20,13 @@ namespace watcher
         class NodeStatusMessage : public WatcherMessage 
         {
             public:
-               enum statusEvent 
-               {
-                   connect,
-                   disconnnect
-               };
+                enum statusEvent 
+                {
+                    connect,
+                    disconnnect
+                };
 
-               // NodeStatusMessage(const statusEvent &event); 
+                NodeStatusMessage(const statusEvent &event); 
 
                 template <typename Archive> void serialize(Archive & ar, const unsigned int version);
 
@@ -34,15 +34,14 @@ namespace watcher
                 DECLARE_LOGGER();
 
                 statusEvent event;    // What happened
-                // typedef boost::asio::ip::address nodeIdentifier;
-                // nodeIdentifier nodeId;
+                NodeIdentifier nodeId;
         };
 
         template <typename Archive> void NodeStatusMessage::serialize(Archive & ar, const unsigned int version)
         {
             TRACE_ENTER();
             ar & event;
-            // ar & nodeId;
+            ar & nodeId;
             TRACE_EXIT();
         }
     }
