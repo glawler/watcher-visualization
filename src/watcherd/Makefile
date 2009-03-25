@@ -50,13 +50,15 @@ SRCS=messageFactory.cpp singletonConfig.cpp \
 	 clientConnection.cpp messageHandler.cpp messageStatusHandler.cpp \
 	 gpsMessageHandler.cpp messageHandlerFactory.cpp client.cpp \
 	 labelMessageHandler.cpp  edgeMessageHandler.cpp \
-	 colorMessageHandler.cpp watcherd.cpp dataRequestMessageHandler.cpp
+	 colorMessageHandler.cpp watcherd.cpp dataRequestMessageHandler.cpp \
+	 watcherdClientConnection.cpp
 HDRS=messageFactory.h singletonConfig.h \
 	serverConnection.h dataMarshaller.h server.h \
 	clientConnection.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
 	messageHandlerFactory.h client.h \
 	labelMessageHandler.h edgeMessageHandler.h \
-	colorMessageHandler.h watcherd.h dataRequestMessageHandler.h
+	colorMessageHandler.h watcherd.h dataRequestMessageHandler.h \
+	watcherdClientConnection.h
 OBJS=$(SRCS:.cpp=.o)
 
 MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp dataRequestMessageTest.cpp
