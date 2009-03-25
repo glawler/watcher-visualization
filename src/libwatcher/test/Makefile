@@ -19,46 +19,18 @@ ifneq (${PROCCOUNT}, 0)
 	MAKEFLAGS+=-j $(PROCCOUNT)
 endif
 
-testMessageSrc=../messageTypesAndVersions.cpp ../testMessage.cpp ../message.cpp $(WATCHERD_DIR)/messageFactory.cpp ../messageStatus.cpp
-testMessageInc=$(testMessageSrc:.cpp=.h)
-testMessageObjs=$(testMessageSrc:.cpp=.o) testTestMessage.o
-
 labelMessageTestSrc=../message.cpp ../labelMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
 labelMessageTestInc=$(labelMessageTestSrc:.cpp=.h)
 labelMessageTestObjs=$(labelMessageTestSrc:.cpp=.o) testLabelMessage.o
 
-edgeMessageTestSrc=../message.cpp ../edgeMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp \
-				   ../labelMessage.cpp
-edgeMessageTestInc=$(edgeMessageTestSrc:.cpp=.h)
-edgeMessageTestObjs=$(edgeMessageTestSrc:.cpp=.o) testEdgeMessage.o
+ALL_OBJS=$(labelMessageTestObjs)
 
-colorMessageTestSrc=../message.cpp ../colorMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
-colorMessageTestInc=$(colorMessageTestSrc:.cpp=.h)
-colorMessageTestObjs=$(colorMessageTestSrc:.cpp=.o) testColorMessage.o
-
-ALL_OBJS=$(colorTestObjs) $(testCCObjs) $(testMessageObjs) $(labelMessageTestObjs) $(edgeMessageTestObjs) $(colorMessageTestObjs)
-
-BINS=colorTest testLabelMessage testEdgeMessage testColorMessage
+BINS=testLabelMessage
 
 all: $(BINS)
 
-colorTest: $(colorTestObjs)
-	$(CXX) $(CXXFLAGS) $^ -o colorTest $(LIBS) $(LDFLAGS)
-
-testCC: $(testCCObjs) 
-	$(CXX) $(CXXFLAGS) $(testCCObjs) -o testClientConnection $(LIBS) $(LDFLAGS)
-
 testLabelMessage: $(labelMessageTestObjs)
 	$(CXX) $^ -o testLabelMessage $(LIBS) $(LDFLAGS)
-
-testEdgeMessage: $(edgeMessageTestObjs)
-	$(CXX) $^ -o testEdgeMessage $(LIBS) $(LDFLAGS)
-
-testColorMessage: $(colorMessageTestObjs)
-	$(CXX) $^ -o testColorMessage $(LIBS) $(LDFLAGS)
-
-testTestMessage: 
-	$(CXX) $(CXXFLAGS) $(testMessageSrc) testTestMessage.cpp -o testMessage $(LIBS) $(LDFLAGS)
 
 test: $(BINS)
 	@for b in $(BINS); do ./$$b; done; 

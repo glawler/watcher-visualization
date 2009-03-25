@@ -16,6 +16,7 @@
 using namespace std;
 using namespace boost;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost::unit_test_framework;
 
 BOOST_AUTO_TEST_CASE( ctor_test )
