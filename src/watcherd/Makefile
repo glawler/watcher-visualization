@@ -97,7 +97,7 @@ log.properties:
 	cp ../../etc/watcher.log.properties.sample ./log.properties
 
 clean: 
-	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o) watcherdMain.o depend
+	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o) watcherdMain.o 
 
 tags: $(SRCS) $(HDRS)
 	ctags -R . ../../include
