@@ -22,13 +22,16 @@ OBJS=${SRCS:.cpp=.o}
 
 all: libwatcher.a
 
-.PHONY : clean
+.PHONY : clean tags
 
 libwatcher.a: ${OBJS}
 	ar cr $@ ${OBJS}
 
 clean:
-	$(RM) -f libwatcher.a ${OBJS} depend
+	$(RM) -f libwatcher.a ${OBJS} 
+
+tags: 
+	ctags -R ..
 
 DEPENDSOURCES:=${shell find . -name \*.cpp -o -name \*.c -o -name \*.h -o -name \*.hpp}
 depend: 
