@@ -1,4 +1,4 @@
-logPropertiesFile = "log.properties";
+logPropertiesFile = "watcherd.log.properties";
 server = "glory";
 port = "8095";
 serverThreadNum = 8;

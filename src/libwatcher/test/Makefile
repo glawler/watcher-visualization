@@ -41,7 +41,7 @@ clean:
 depend: $(SRCS)
 	@echo makedepend
 	@$(RM) depend
-	@makedepend -f- *.cpp *.h ../*.cpp ../*.h* > $@ 2>/dev/null;
+	@gcc -MM $(CXXFLAGS) *.cpp *.h ../*.cpp ../*.h* > $@ 2>/dev/null;
 	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
 
 DEPEND=$(shell if [ -r depend ] ; then echo -n 1; else echo -n 0; fi;)

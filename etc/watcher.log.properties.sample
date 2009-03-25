@@ -9,13 +9,13 @@ log4j.rootLogger=debug, flog, stdout
 # log4j.logger.TimeScaleDraw=trace
 # log4j.logger.GraphCurve=trace
 # log4j.logger.GraphPlot=trace
-log4j.logger.singletonConfig=trace
+# log4j.logger.singletonConfig=trace
 # log4j.logger.Skybox=trace
 # log4j.logger.BackgroundImage=trace
 # log4j.logger.QWatcherGraphDialog=trace
-log4j.logger.WatcherMainWindow=trace
+# log4j.logger.WatcherMainWindow=trace
 # log4j.logger.WatcherScrollingGraphControl=trace
-log4j.logger.WatcherPropertyData=trace
+# log4j.logger.WatcherPropertyData=trace
 
 # stdout is set to be a ConsoleAppender.
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender

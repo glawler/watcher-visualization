@@ -65,7 +65,7 @@ MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp col
 
 BINS=$(MAINS:.cpp=) watcherd
 
-all: $(BINS) watcherd.cfg log.properties 
+all: $(BINS) watcherd.cfg watcherd.log.properties 
 
 .phony: clean
 
@@ -94,9 +94,9 @@ watcherd.cfg:
 	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample
 	cp ../../etc/watcherd.cfg.sample ./watcherd.cfg
 
-log.properties: 
-	@ echo Creating log.properties from sample configuration in ../../etc/watcher.log.properties.sample
-	cp ../../etc/watcher.log.properties.sample ./log.properties
+watcherd.log.properties: 
+	@ echo Creating log.properties from sample configuration in ../../etc/watcherd.log.properties.sample
+	cp ../../etc/watcherd.log.properties.sample ./watcherd.log.properties
 
 clean: 
 	$(RM) $(BINS) $(OBJS) $(MAINS:.cpp=.o) watcherdMain.o 
@@ -109,7 +109,7 @@ depend:
 	@echo Building dependencies...
 	@$(RM) depend
 	@$(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(CFLAGS) ${DEPENDSOURCES} 2>/dev/null > $@;
-	@for f in ${OBJS} ; do echo "$$f: Makefile" >> $@; done
+	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
 
 -include depend
 
