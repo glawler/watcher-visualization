@@ -53,13 +53,16 @@ namespace watcher
             void doClose();
             /** 
              * Connect to the server. This function will not return until connected.
+             * Will loop until connected, trying every X seconds.
              */
             void doConnect(); 
 
             /**
-             * Attempt connection to server. Will loop until connected, trying every X seconds.
+             * Attempt connection to server. Will set 'connected' to true, if successful. Will
+             * also return true on success.
+             * @return true on success, false otherwise.
              */
-            void tryConnect(); 
+            bool tryConnect(); 
 
             void doWrite(const event::MessagePtr &message); 
 

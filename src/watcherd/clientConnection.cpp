@@ -60,16 +60,15 @@ void ClientConnection::doConnect()
 {
     TRACE_ENTER();
     // Don't exit this function until we're connected. doConnect() is synchronus
-    while(!connected)
+    while(false==tryConnect())
     {
-        tryConnect();
         LOG_WARN("Unable to connect to server, trying again in 5 seconds.");
         sleep(5);
     }
     TRACE_EXIT();
 }
 
-void ClientConnection::tryConnect()
+bool ClientConnection::tryConnect()
 {
     TRACE_ENTER();
 
@@ -121,7 +120,8 @@ void ClientConnection::tryConnect()
             LOG_ERROR("Caught connection error: " << e.what() << " : " << e.code());
     }
 
-    TRACE_EXIT();
+    TRACE_EXIT_RET((connected==true?"true":"false"));
+    return connected;
 }
 
 tcp::socket& ClientConnection::getSocket()
