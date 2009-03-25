@@ -17,12 +17,30 @@ namespace watcher
     {
         public:
             // Connect to the service service on server server using the boost::io_service given.
-            explicit ClientConnection(
+            ClientConnection(
                     boost::asio::io_service& io_service, 
                     const std::string &server, 
                     const std::string &service);
 
+            virtual ~ClientConnection(); 
+
+            /**
+             * sendMessage() will send a message to the server.
+             *
+             * @param message - The message to send.
+             * @return a bool - currently ignored. 
+             */
             bool sendMessage(const event::MessagePtr message);
+
+            /** 
+             * messageArrive() is call back invoked by the underlying network
+             * code when a message arrives from the server. This method is a pure virtual
+             * and thus must be implemented by the derived class.
+             *
+             * @param message - the newly arrived message.
+             * @return a bool - currently ignored. 
+             */
+            virtual bool messageArrive(const event::Message &message)=0;
 
             void close(); 
             
@@ -33,7 +51,16 @@ namespace watcher
             DECLARE_LOGGER();
 
             void doClose();
+            /** 
+             * Connect to the server. This function will not return until connected.
+             */
             void doConnect(); 
+
+            /**
+             * Attempt connection to server. Will loop until connected, trying every X seconds.
+             */
+            void tryConnect(); 
+
             void doWrite(const event::MessagePtr &message); 
 
             bool connected; 

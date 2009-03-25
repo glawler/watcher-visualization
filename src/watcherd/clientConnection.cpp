@@ -34,6 +34,13 @@ ClientConnection::ClientConnection(
     TRACE_EXIT();
 }
 
+//virtual 
+ClientConnection::~ClientConnection()
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
 void ClientConnection::doClose()
 {
     TRACE_ENTER();
@@ -50,6 +57,19 @@ void ClientConnection::close()
 }
 
 void ClientConnection::doConnect()
+{
+    TRACE_ENTER();
+    // Don't exit this function until we're connected. doConnect() is synchronus
+    while(!connected)
+    {
+        tryConnect();
+        LOG_WARN("Unable to connect to server, trying again in 5 seconds.");
+        sleep(5);
+    }
+    TRACE_EXIT();
+}
+
+void ClientConnection::tryConnect()
 {
     TRACE_ENTER();
 
@@ -99,14 +119,6 @@ void ClientConnection::doConnect()
              LOG_INFO("watcherd service not found. Please add \"watcherd    8095/tcp\" to your /etc/services file.")
         else
             LOG_ERROR("Caught connection error: " << e.what() << " : " << e.code());
-    }
-    if (!connected)
-    {
-        LOG_WARN("Unable to connect to server, trying again in 5 seconds.");
-        // boost::asio::deadline_timer t(ioService, boost::posix_time::seconds(5));
-        // t.wait(); 
-        sleep(5);       // GTL - don't exit this function until we're connected. doConnect() is synchronus
-        doConnect();
     }
 
     TRACE_EXIT();
