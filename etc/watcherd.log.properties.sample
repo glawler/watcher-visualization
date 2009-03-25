@@ -1,0 +1,40 @@
+# log4j.rootLogger=info, flog, stdout
+# log4j.rootLogger=warn, flog, stdout
+log4j.rootLogger=debug, flog, stdout
+# log4j.rootLogger=trace, flog, stdout
+
+# Set levels per module
+# log4j.logger.global=trace
+
+# log4j.logger.clientConnection=trace
+# log4j.logger.client=trace
+# log4j.logger.colorMessageHandler=trace
+# log4j.logger.dataMarshaller=trace
+# log4j.logger.dataRequestMessageHandler=trace
+# log4j.logger.edgeMessageHandler=trace
+# log4j.logger.gpsMessageHandler=trace
+# log4j.logger.labelMessageHandler=trace
+# log4j.logger.messageFactory=trace
+# log4j.logger.messageHandler=trace
+# log4j.logger.messageHandlerFactory=trace
+# log4j.logger.messageStatusHandler=trace
+# log4j.logger.serverConnection=trace
+# log4j.logger.server=trace
+# log4j.logger.singletonConfig=trace
+# log4j.logger.testMessageHandler=trace
+# log4j.logger.watcherdClientConnection=trace
+# log4j.logger.watcherd=trace
+
+# stdout is set to be a ConsoleAppender.
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
+
+# flog is set to log to a file, not appended
+log4j.appender.flog=org.apache.log4j.FileAppender
+log4j.appender.flog.layout=org.apache.log4j.PatternLayout
+log4j.appender.flog.file=watcher.log
+log4j.appender.flog.append=false
+log4j.appender.flog.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
+
+
