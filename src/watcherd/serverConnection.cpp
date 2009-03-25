@@ -87,6 +87,7 @@ namespace watcher {
         {
             if (e==boost::asio::error::eof)
             {
+                LOG_DEBUG("Received empty message from client"); 
                 LOG_INFO("Connection to client closed."); 
             }
             else
