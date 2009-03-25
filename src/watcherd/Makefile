@@ -106,7 +106,7 @@ DEPENDSOURCES:=${shell find . -name \*.cpp -o -name \*.c -o -name \*.h -o -name 
 depend: 
 	@echo Building dependencies...
 	@$(RM) depend
-	@$(CXX) -MM $(CPPFLAGS) $(CFLAGS) ${DEPENDSOURCES} 2>/dev/null > $@;
+	@$(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(CFLAGS) ${DEPENDSOURCES} 2>/dev/null > $@;
 	@for f in ${OBJS} ; do echo "$$f: Makefile" >> $@; done
 
 -include depend
