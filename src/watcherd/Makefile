@@ -56,7 +56,7 @@ HDRS=messageFactory.h singletonConfig.h \
 	clientConnection.h messageHandler.h messageStatusHandler.h gpsMessageHandler.h \
 	messageHandlerFactory.h client.h \
 	labelMessageHandler.h edgeMessageHandler.h \
-	colorMessageHandler.h watcherd.h dataRequestMessage.h dataRequestMessageHandler.h
+	colorMessageHandler.h watcherd.h dataRequestMessageHandler.h
 OBJS=$(SRCS:.cpp=.o)
 
 MAINS=gpsMessageTest.cpp testCC.cpp labelMessageTest.cpp edgeMessageTest.cpp colorMessageTest.cpp dataRequestMessageTest.cpp
