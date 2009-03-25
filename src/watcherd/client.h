@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include "logger.h"
 
-#include "clientConnection.h"
+#include "watcherdClientConnection.h"
 #include <libwatcher/message.h>
 
 namespace watcher 
@@ -40,7 +40,7 @@ namespace watcher
             std::string server;
             std::string service;
 
-            ClientConnectionPtr clientConnection;
+            WatcherdClientConnectionPtr watcherdClientConnection;
     };
 
     typedef boost::shared_ptr<Client> ClientPtr;

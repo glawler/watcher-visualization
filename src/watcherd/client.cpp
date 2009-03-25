@@ -13,7 +13,7 @@ Client::Client(
     service(service_)
 {
     TRACE_ENTER();
-    clientConnection = ClientConnectionPtr(new ClientConnection(ioService, server, service));
+    watcherdClientConnection = WatcherdClientConnectionPtr(new WatcherdClientConnection(ioService, server, service));
     TRACE_EXIT();
 }
 
@@ -21,7 +21,7 @@ bool Client::sendMessage(const MessagePtr request)
 {
     TRACE_ENTER(); 
 
-    bool retVal=clientConnection->sendMessage(request);
+    bool retVal=watcherdClientConnection->sendMessage(request);
     ioService.run();
     ioService.reset();
 
