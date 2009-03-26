@@ -19,7 +19,6 @@ SRCS += edgeMessage.cpp labelMessage.cpp watcherColors.cpp colorMessage.cpp \
 
 OBJS=${SRCS:.cpp=.o}
 
-
 all: libwatcher.a
 
 .PHONY : clean tags

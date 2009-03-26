@@ -1,5 +1,5 @@
 # melkins - compilation for Fedora 10
-F10=0
+F10=1
 
 TOPDIR=../..
 
