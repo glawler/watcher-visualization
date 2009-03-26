@@ -14,10 +14,10 @@ WATCHERD_DIR=../../watcherd/
 
 # GTL - experimental automatic use of multiprocessor systems to speed up make
 # May break things, don't know.
-PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
-ifneq (${PROCCOUNT}, 0)
-	MAKEFLAGS+=-j $(PROCCOUNT)
-endif
+#PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
+#ifneq (${PROCCOUNT}, 0)
+#	MAKEFLAGS+=-j $(PROCCOUNT)
+#endif
 
 labelMessageTestSrc=../message.cpp ../labelMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
 labelMessageTestInc=$(labelMessageTestSrc:.cpp=.h)

@@ -1,34 +1,30 @@
 #ifndef WATCHER_GLOBAL_FUNCTIONS
 #define WATCHER_GLOBAL_FUNCTIONS
 
-namespace boost {
-    namespace archive {
-        class polymorphic_iarchive;
-        class polymorphic_oarchive;
-    }
-    namespace asio
-    {
-        namespace ip
-        {
-            class address;
-        }
-    }
-}
+#include <boost/asio/ip/address.hpp>
+#include <boost/serialization/split_free.hpp>
 
-//
-// These are various functions that are needed, but don't really belong anywhere else, like
-// serializations for 3rd party objects. 
-//
+BOOST_SERIALIZATION_SPLIT_FREE(boost::asio::ip::address);
 
-// Serialize asio addresses.
-namespace boost
+namespace boost 
 {
-    namespace serialization
+    namespace serialization 
     {
-        void serialize(boost::archive::polymorphic_iarchive & ar, boost::asio::ip::address &address, const unsigned int file_version);
-        void serialize(boost::archive::polymorphic_oarchive & ar, boost::asio::ip::address &address, const unsigned int file_version);
+        template<class Archive>
+            void save(Archive & ar, const boost::asio::ip::address & a, const unsigned int version)
+            {
+                std::string tmp=a.to_string();
+                ar & tmp;
+            }
+
+        template<class Archive>
+            void load(Archive & ar, boost::asio::ip::address & a, const unsigned int version)
+            {
+                std::string tmp;
+                ar & tmp;
+                a=boost::asio::ip::address::from_string(tmp);
+            }
     }
 }
-
 
 #endif //  WATCHER_GLOBAL_FUNCTIONS
