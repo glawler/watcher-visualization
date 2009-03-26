@@ -1,14 +1,25 @@
+F10=0
 
 BVER=gcc41-mt
-LDFLAGS+=-L../../../lib -L/usr/local/lib
-LDFLAGS+=-llog4cxx -lpthread -llogger
+LDFLAGS+=-L../../../lib
+LDFLAGS+=-llog4cxx -llogger
+ifeq ($(F10),1)
+LDFLAGS+=-lboost_serialization-mt
+LDFLAGS+=-lboost_system-mt
+LDFLAGS+=-lboost_thread-mt
+LDFLAGS+=-lboost_unit_test_framework-mt
+else
+LDFLAGS+=-L/usr/local/lib
 LDFLAGS+=-lboost_serialization-gcc41-mt
 LDFLAGS+=-lboost_system-gcc41-mt
 LDFLAGS+=-lboost_thread-gcc41-mt
 LDFLAGS+=-lboost_unit_test_framework-gcc41-mt
-CXXFLAGS+=-I.. -I/usr/local/include/boost-1_36 -I../../../include 
+CXXFLAGS+=-I/usr/local/include/boost-1_36
+endif
+CXXFLAGS+=-I.. -I../../../include 
 CXXFLAGS+=-O0 -ggdb -Wall
 CXXFLAGS+=-DBOOST_TEST_DYN_LINK
+CXXFLAGS+=-pthread
 
 WATCHERD_DIR=../../watcherd/
 
