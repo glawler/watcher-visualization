@@ -44,6 +44,25 @@ namespace watcher {
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
             private:
+                friend class boost::serialization::access;
+                template <typename Archive>
+                void serialize(Archive & ar, const unsigned int file_version)
+                {
+                    TRACE_ENTER();
+                    ar & boost::serialization::base_object<Message>(*this);
+                    ar & label;
+                    ar & foreground;
+                    ar & background;
+                    ar & expiration;
+                    ar & fontSize;
+                    ar & address;
+                    ar & addLabel;
+                    ar & lat;
+                    ar & lng;
+                    ar & alt;
+                    TRACE_EXIT();
+                }
+
                 DECLARE_LOGGER();
         };
 
@@ -52,27 +71,4 @@ namespace watcher {
         std::ostream &operator<<(std::ostream &out, const LabelMessage &mess);
     }
 }
-
-namespace boost {
-    namespace serialization {
-                template <typename Archive>
-                void serialize(Archive & ar, watcher::event::LabelMessage &mess, const unsigned int file_version)
-                {
-                    TRACE_ENTER();
-                    ar & boost::serialization::base_object<watcher::event::Message>(mess);
-                    ar & mess.label;
-                    ar & mess.foreground;
-                    ar & mess.background;
-                    ar & mess.expiration;
-                    ar & mess.fontSize;
-                    ar & mess.address;
-                    ar & mess.addLabel;
-                    ar & mess.lat;
-                    ar & mess.lng;
-                    ar & mess.alt;
-                    TRACE_EXIT();
-                }
-    }
-}
-
 #endif // WATCHER_LABEL_MESSAGE_DATA_H
