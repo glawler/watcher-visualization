@@ -1,5 +1,5 @@
 # melkins - compilation for Fedora 10
-F10=1
+-include Makefile.local
 
 TOPDIR=../..
 

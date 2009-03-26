@@ -1,4 +1,4 @@
-F10=0
+-include Makefile.local
 
 BVER=gcc41-mt
 LDFLAGS+=-L../../../lib
