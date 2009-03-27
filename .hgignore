@@ -106,22 +106,24 @@ syntax: regexp
 ^src/watcherd/watcherd.cfg
 ^src/watcherd/watcherd
 ^src/watcherd/depend
-^src/watcherd/test/depend
-^src/watcherd/test/testClientConnection
 ^src/watcherd/gpsMessageTest
 ^src/watcherd/labelMessageTest
 ^src/watcherd/colorMessageTest
 ^src/watcherd/edgeMessageTest
+^src/watcherd/dataRequestMessageTest
 ^src/watcherd/testCC
 
-^src/watcherd/test/testEdgeMessage
-^src/watcherd/test/testLabelMessage
-^src/watcherd/test/colorTest
-^src/watcherd/test/testColorMessage
-^src/watcherd/test/archived.txt
-^src/watcherd/test/archived.dat
-^src/watcherd/test/testMessage
-^src/watcherd/dataRequestMessageTest
+^src/libwatcher/test/depend
+^src/libwatcher/test/testClientConnection
+^src/libwatcher/test/testEdgeMessage
+^src/libwatcher/test/testLabelMessage
+^src/libwatcher/test/colorTest
+^src/libwatcher/test/testColorMessage
+^src/libwatcher/test/archived.txt
+^src/libwatcher/test/archived.dat
+^src/libwatcher/test/testMessage
+^src/libwatcher/dataRequestMessageTest
+^src/libwatcher/test/log.properties
 
 #
 # watcherHierarcyClient
