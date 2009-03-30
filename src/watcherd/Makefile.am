@@ -16,6 +16,7 @@ CPPFLAGS += -I$(TOPDIR)/include
 CPPFLAGS += @BOOST_CPPFLAGS@
 
 LDFLAGS+=-L../libwatcher
+LDFLAGS+=-L../util
 LDFLAGS+=-L$(TOPDIR)/lib
 LDFLAGS += @BOOST_LDFLAGS@
 
