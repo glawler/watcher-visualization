@@ -12,11 +12,13 @@ TOPDIR=../..
 
 CPPFLAGS += -I..
 CPPFLAGS += -I../util
+CPPFLAGS += -I../logger
 CPPFLAGS += -I$(TOPDIR)/include
 CPPFLAGS += @BOOST_CPPFLAGS@
 
 LDFLAGS+=-L../libwatcher
 LDFLAGS+=-L../util
+LDFLAGS+=-L../logger
 LDFLAGS+=-L$(TOPDIR)/lib
 LDFLAGS += @BOOST_LDFLAGS@
 

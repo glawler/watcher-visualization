@@ -116,6 +116,8 @@ syntax: regexp
 #
 # watcherd
 # 
+^src/configure
+
 ^src/watcherd/client
 ^src/watcherd/log.properties
 ^src/watcherd/watcherd.cfg
@@ -124,11 +126,18 @@ syntax: regexp
 ^src/watcherd/gpsMessageTest
 ^src/watcherd/labelMessageTest
 ^src/watcherd/colorMessageTest
+^src/watcherd/Makefile
 ^src/watcherd/edgeMessageTest
 ^src/watcherd/dataRequestMessageTest
 ^src/watcherd/testCC
 ^src/watcherd/Makefile.local
 
+^src/util/Makefile
+
+^src/libwatcher/Makefile
+^src/libwatcher/Makefile.local
+
+^src/libwatcher/test/Makefile
 ^src/libwatcher/test/depend
 ^src/libwatcher/test/testClientConnection
 ^src/libwatcher/test/testEdgeMessage
@@ -138,11 +147,8 @@ syntax: regexp
 ^src/libwatcher/test/archived.txt
 ^src/libwatcher/test/archived.dat
 ^src/libwatcher/test/testMessage
-^src/libwatcher/dataRequestMessageTest
 ^src/libwatcher/test/log.properties
 ^src/libwatcher/test/Makefile.local
-
-^src/libwatcher/Makefile.local
 
 #
 # watcherHierarcyClient

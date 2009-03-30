@@ -8,5 +8,5 @@ AX_BOOST_ASIO
 AX_BOOST_SERIALIZATION
 AX_BOOST_THREAD
 AX_BOOST_UNIT_TEST_FRAMEWORK
-AC_CONFIG_FILES([Makefile util/Makefile libwatcher/Makefile libwatcher/test/Makefile watcherd/Makefile])
+AC_CONFIG_FILES([Makefile logger/Makefile util/Makefile libwatcher/Makefile libwatcher/test/Makefile watcherd/Makefile])
 AC_OUTPUT
