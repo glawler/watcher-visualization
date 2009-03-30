@@ -11,6 +11,8 @@ namespace watcher
          * nodeIdentifer is used to hide the implementation of how to uniquely identify a node. 
          */ 
         typedef boost::asio::ip::address NodeIdentifier;
+
+        const NodeIdentifier Watchers;   /// Watchers
     }
 }
 
