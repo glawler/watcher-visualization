@@ -10,7 +10,7 @@
 
 #include <boost/serialization/shared_ptr.hpp>  // Need this to serialize shared_ptrs. 
 
-#include "../labelMessage.h"
+#include <libwatcher/labelMessage.h>
 #include "logger.h"
 
 using namespace std;

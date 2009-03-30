@@ -1,0 +1,12 @@
+CPPFLAGS += -I../..
+CPPFLAGS += -I../../../include
+CPPFLAGS += @BOOST_CPPFLAGS@
+DEFS += -DBOOST_TEST_DYN_LINK
+LDFLAGS += -L..
+LDFLAGS += -L../../../lib
+LDFLAGS += @BOOST_LDFLAGS@
+LIBS += -lwatcher -llogger -llog4cxx
+LIBS += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
+bin_PROGRAMS=testLabelMessage testEdgeMessage
+testLabelMessage_SOURCES=testLabelMessage.cpp
+testEdgeMessage_SOURCES=testEdgeMessage.cpp

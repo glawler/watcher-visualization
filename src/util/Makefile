@@ -6,6 +6,8 @@ SRCS=$(shell echo *.cpp)
 HDRS=$(shell echo *.h)
 OBJS=$(SRCS:.cpp=.o)
 
+all: $(LIB)
+
 $(LIB): $(OBJS) $(HDRS)
 	$(AR) rv $@ $^
 	ranlib $@

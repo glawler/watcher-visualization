@@ -37,6 +37,14 @@ stamp-h1
 config.log
 config.cache
 config.status
+*.in
+config.guess
+missing
+aclocal.m4
+config.sub
+depcomp
+install-sh
+autom4te.cache
 
 tags
 

@@ -10,12 +10,13 @@
 
 #include <boost/serialization/shared_ptr.hpp>  // Need this to serialize shared_ptrs. 
 
-#include "../edgeMessage.h"
+#include <libwatcher/edgeMessage.h>
 #include "logger.h"
 
 using namespace std;
 using namespace boost;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost::unit_test_framework;
 
 EdgeMessagePtr createEdgeMessage()
