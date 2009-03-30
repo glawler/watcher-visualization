@@ -119,6 +119,7 @@ syntax: regexp
 ^src/watcherd/edgeMessageTest
 ^src/watcherd/dataRequestMessageTest
 ^src/watcherd/testCC
+^src/watcherd/Makefile.local
 
 ^src/libwatcher/test/depend
 ^src/libwatcher/test/testClientConnection
@@ -131,6 +132,9 @@ syntax: regexp
 ^src/libwatcher/test/testMessage
 ^src/libwatcher/dataRequestMessageTest
 ^src/libwatcher/test/log.properties
+^src/libwatcher/test/Makefile.local
+
+^src/libwatcher/Makefile.local
 
 #
 # watcherHierarcyClient
