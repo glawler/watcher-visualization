@@ -14,13 +14,13 @@ CPPFLAGS += -I..
 CPPFLAGS += -I../util
 CPPFLAGS += -I../logger
 CPPFLAGS += -I$(TOPDIR)/include
-CPPFLAGS += @BOOST_CPPFLAGS@
+CPPFLAGS += $(BOOST_CPPFLAGS)
 
 LDFLAGS+=-L../libwatcher
 LDFLAGS+=-L../util
 LDFLAGS+=-L../logger
 LDFLAGS+=-L$(TOPDIR)/lib
-LDFLAGS += @BOOST_LDFLAGS@
+LDFLAGS += $(BOOST_LDFLAGS)
 
 LDADD = libfeeder.a
 
@@ -29,7 +29,8 @@ LIBS+=-lconfig++
 LIBS+=-llogger
 LIBS+=-llog4cxx
 LIBS+=-lwatcherutils
-LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB)
+LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
+
 
 BUILT_SOURCES=watcherd.cfg watcherd.log.properties 
 
