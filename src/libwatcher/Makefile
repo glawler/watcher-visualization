@@ -19,26 +19,26 @@ SRCS += edgeMessage.cpp labelMessage.cpp watcherColors.cpp colorMessage.cpp \
 
 OBJS=${SRCS:.cpp=.o}
 
-all: libwatcher.a
+.PHONY : all clean tags
 
-.PHONY : clean tags
+all:: .deps
+
+all:: libwatcher.a
 
 libwatcher.a: ${OBJS}
 	ar cr $@ ${OBJS}
 
 clean:
-	$(RM) -f libwatcher.a ${OBJS} 
+	$(RM) -f libwatcher.a ${OBJS} .deps/*
 
 tags: 
 	ctags -R ..
 
-DEPENDSOURCES:=${shell find . -name \*.cpp -o -name \*.c -o -name \*.h -o -name \*.hpp}
-depend: 
-	@echo Building dependencies...
-	@$(RM) depend
-	@$(CXX) -MM $(CPPFLAGS) $(CFLAGS) ${DEPENDSOURCES} 2>/dev/null > $@; 
-	@for f in ${OBJS}  ; do echo "$$f: Makefile" >> $@; done
+# no errors if .deps/*.d doesn't exist
+-include .deps/*.d
 
-# no errors if "depend" doesn't exist
--include depend
+.deps:
+	@mkdir .deps
 
+.cpp.o:
+	${CXX} -c ${CPPFLAGS} -MMD -MF .deps/$*.d -o $@ $<
