@@ -7,6 +7,7 @@
 SUBDIRS=. test
 
 CPPFLAGS += -I../../include
+CPPFLAGS += @BOOST_CPPFLAGS@
 
 noinst_LIBRARIES=libwatcher.a
 
