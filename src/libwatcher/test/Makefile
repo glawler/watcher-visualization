@@ -17,11 +17,13 @@ LDFLAGS+=-lboost_unit_test_framework-gcc41-mt
 CXXFLAGS+=-I/usr/local/include/boost-1_36
 endif
 CXXFLAGS+=-I.. -I../../../include 
-CXXFLAGS+=-O0 -ggdb -Wall
+CXXFLAGS+=-O0 -ggdb -Wall -Weffc++
 CXXFLAGS+=-DBOOST_TEST_DYN_LINK
 CXXFLAGS+=-pthread
 
 WATCHERD_DIR=../../watcherd/
+
+LIBS += -L.. -lwatcher
 
 # GTL - experimental automatic use of multiprocessor systems to speed up make
 # May break things, don't know.
@@ -30,34 +32,25 @@ WATCHERD_DIR=../../watcherd/
 #	MAKEFLAGS+=-j $(PROCCOUNT)
 #endif
 
-labelMessageTestSrc=../message.cpp ../labelMessage.cpp ../watcherColors.cpp ../messageTypesAndVersions.cpp ../watcherGlobalFunctions.cpp
-labelMessageTestInc=$(labelMessageTestSrc:.cpp=.h)
-labelMessageTestObjs=$(labelMessageTestSrc:.cpp=.o) testLabelMessage.o
-
-ALL_OBJS=$(labelMessageTestObjs)
-
 BINS=testLabelMessage
 
-all: $(BINS)
+.PHONY : all clean test
 
-testLabelMessage: $(labelMessageTestObjs)
-	$(CXX) $^ -o testLabelMessage $(LIBS) $(LDFLAGS)
+all: .deps $(BINS)
+
+testLabelMessage: testLabelMessage.o
+	$(CXX) -o testLabelMessage $^ $(LIBS) $(LDFLAGS)
 
 test: $(BINS)
 	@for b in $(BINS); do ./$$b; done; 
 
 clean: 
-	rm -f $(BINS) $(ALL_OBJS)
+	rm -f $(BINS) *.o
 
-depend: $(SRCS)
-	@echo makedepend
-	@$(RM) depend
-	@gcc -MM $(CXXFLAGS) *.cpp *.h ../*.cpp ../*.h* > $@ 2>/dev/null;
-	@for f in ${OBJS} depend ; do echo "$$f: Makefile" >> $@; done
+.deps:
+	@mkdir .deps
 
-DEPEND=$(shell if [ -r depend ] ; then echo -n 1; else echo -n 0; fi;)
-ifeq (${DEPEND}, 1)
-	include depend
-endif
+-include .deps/*.d
 
-
+.cpp.o:
+	${CXX} -c ${CXXFLAGS} -MMD -MF .deps/$*.d -o $@ $<
