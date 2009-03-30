@@ -60,6 +60,13 @@ syntax: regexp
 ^src/watcher/legacyWatcher/labeltest$
 ^src/watcher/legacyWatcher/routingdetector$
 ^src/watcher/legacyWatcher/watchergraphtest$
+^bin/edgetest
+^bin/labeltest
+^bin/routingdetector
+^bin/watcherpropertytest
+^bin/libidsCommunications.a
+^bin/floatinglabeltest
+
 
 # ignore libconfig files
 ^src/libconfig-1.3.1/*
