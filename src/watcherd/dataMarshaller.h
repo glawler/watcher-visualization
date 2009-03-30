@@ -48,7 +48,7 @@ namespace watcher
                 LOG_DEBUG("Unmarshalling a header of " << boost::lexical_cast<std::string>(bufferSize) << " bytes.");
                 if (bufferSize < header_length)
                 {
-                    // GTL LOG ERROR
+                    LOG_ERROR("Not enought data in payload to unmarshal the packet or packet is corrupt"); 
                     // set boost::error
                     TRACE_EXIT_RET("false");
                     return false;
