@@ -12,6 +12,14 @@ If you want to build the 1.36 version, I've put the tar file in ./tars.
 Yum installed libs: libpcap-devel, freeglut-devel, qt, boost
 built: libidmef (SPARTA version)
 
+Fedora 10 build with rpmfusion yum repos installed:
+---------------------------------------------------
+Many of the libraries used by watcher are available via yum:
+sudo yum install libpcap.i386 libpcap-devel.i386
+sudo yum install freeglut.i386 freeglut-devel.i386
+sudo yum install libconfig.i386 libconfig-devel.i386
+sudo yum install log4cxx.i386 log4cxx-devel.i386
+sudo yum install qwt.i386 qwt-devel.i386
 
 Install QT:
 ----------------------------------------------------------------
@@ -46,6 +54,8 @@ changing the --prefix argument to ./configure.
 
 libconfig 
 -----------------------------------------------------
+-- Note that with Fedora 10 (with the rpmfusion yum repos) you 
+-- can just install this via yum: 'sudo yum install libconfig.i386 libconfig-devel.i386'
 libconfig gives a C and C++ interface to writing and 
 reading configuration files. 
 
@@ -85,6 +95,9 @@ log4cxx
 This lib requires that two others be installed. Here's 
 how I did it:
 
+-- Note that with Fedora 10 (with the rpmfusion yum repos) you 
+-- can just install these via: 'sudo yum install log4cxx.i386 log4cxx-devel.i386'
+
 # ( When I installed on coke I got errors during 'make check' - I ignored them. )
 
 # install APR (Apache run-time)
@@ -120,6 +133,9 @@ make install
 
 Qwt - the 2d graphing library for use with QT
 ---------------------------------------------
+-- Note that with Fedora 10 (with the rpmfusion yum repos) you 
+-- can just install this via yum: 'sudo yum install qwt.i386 qwt-devel.i386'
+--
 cd src
 tar jxvf ../tars/qwt-5.1.1.tar.bz2 
 cd qwt-5.1.1/
