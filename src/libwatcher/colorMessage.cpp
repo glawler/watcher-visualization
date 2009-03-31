@@ -6,10 +6,11 @@
 using namespace std;
 using namespace boost;
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::ColorMessage, "watcher::event::ColorMessage");
+
 namespace watcher {
     namespace event {
         INIT_LOGGER(ColorMessage, "Message.ColorMessage");
-        BOOST_CLASS_EXPORT_GUID(ColorMessage, "ColorMessage");
 
         ColorMessage::ColorMessage() : 
             Message(COLOR_MESSAGE_TYPE, COLOR_MESSAGE_VERSION),

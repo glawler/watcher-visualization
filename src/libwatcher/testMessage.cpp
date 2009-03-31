@@ -4,12 +4,13 @@
 
 #include "testMessage.h"
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::TestMessage, "watcher::event::TestMessage");
+
 using namespace std;
 namespace watcher {
     namespace event {
 
         INIT_LOGGER(TestMessage, "Message.TestMessage");
-        BOOST_CLASS_EXPORT_GUID(TestMessage, "TestMessage");
 
         TestMessage::TestMessage() : 
             Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION), 

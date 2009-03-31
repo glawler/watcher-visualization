@@ -13,11 +13,12 @@
 using namespace std;
 using namespace boost;
 
+        BOOST_CLASS_EXPORT_GUID(watcher::event::EdgeMessage, "EdgeMessage");
+
 namespace watcher {
     namespace event {
 
         INIT_LOGGER(EdgeMessage, "Message.EdgeMessage");
-        BOOST_CLASS_EXPORT_GUID(EdgeMessage, "EdgeMessage");
 
         EdgeMessage::EdgeMessage(
                                  const asio::ip::address &node1_,        

@@ -4,10 +4,11 @@
 
 using namespace std;
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::GPSMessage, "watcher::event::GPSMessage");
+
 namespace watcher {
     namespace event {
         INIT_LOGGER(GPSMessage, "Message.GPSMessage");
-        BOOST_CLASS_EXPORT_GUID(GPSMessage, "GPSMessage");
 
         GPSMessage::GPSMessage(const float &lat_, const float &lng_, const float &alt_) : 
             Message(GPS_MESSAGE_TYPE, GPS_MESSAGE_VERSION),

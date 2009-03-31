@@ -10,10 +10,11 @@
 using namespace boost; 
 using namespace std;
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::Color, "watcher::event::Color");
+
 namespace watcher {
     namespace event {
         INIT_LOGGER(Color, "Color");
-        BOOST_CLASS_EXPORT_GUID(Color, "watcher::Color");
 
         const Color Color::black(0x00, 0x00, 0x00, 0x00);
         const Color Color::white(0xff, 0xff, 0xff, 0x00);

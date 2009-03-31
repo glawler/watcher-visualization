@@ -7,11 +7,12 @@
 
 using namespace std;
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::Message, "watcher::event::Message");
+
 namespace watcher {
     namespace event {
         INIT_LOGGER(Message, "Message");
 
-        BOOST_CLASS_EXPORT_GUID(Message, "Message");
 
         Message::Message() : version(0), type(UNKNOWN_MESSAGE_TYPE), timestamp(0)
         {

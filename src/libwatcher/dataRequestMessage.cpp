@@ -4,11 +4,12 @@
 
 using namespace std;
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::DataRequestMessage, "watcher::event::DataRequestMessage"); 
+
 namespace watcher {
     namespace event {
 
         INIT_LOGGER(DataRequestMessage, "Message.DataRequestMessage");
-        BOOST_CLASS_EXPORT_GUID(DataRequestMessage, "DataRequestMessage"); 
 
         DataRequestMessage::DataRequestMessage() : 
             Message(DATA_REQUEST_MESSAGE_TYPE, DATA_REQUEST_MESSAGE_VERSION),

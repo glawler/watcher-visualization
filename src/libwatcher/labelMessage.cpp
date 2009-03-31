@@ -8,10 +8,11 @@
 
 using namespace std;
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::LabelMessage, "LabelMessage");
+
 namespace watcher {
     namespace event {
         INIT_LOGGER(LabelMessage, "Message.LabelMessage");
-        BOOST_CLASS_EXPORT_GUID(LabelMessage, "LabelMessage");
 
         LabelMessage::LabelMessage(const string &label_, int fontSize_)   :
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),

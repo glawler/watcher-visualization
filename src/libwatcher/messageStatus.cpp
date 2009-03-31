@@ -4,11 +4,12 @@
 
 using namespace std;
 
+BOOST_CLASS_EXPORT_GUID(watcher::event::MessageStatus, "watcher::event::MessageStatus"); 
+
 namespace watcher {
     namespace event {
 
         INIT_LOGGER(MessageStatus, "Message.Status");
-        BOOST_CLASS_EXPORT_GUID(MessageStatus, "MessageStatus"); 
 
         MessageStatus::MessageStatus(const Status stat) : 
             Message(MESSAGE_STATUS_TYPE, MESSAGE_STATUS_VERSION),
