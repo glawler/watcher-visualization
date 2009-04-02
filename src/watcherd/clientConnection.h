@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 
-#include <libwatcher/message.h>
+#include "libwatcher/message.h"
 #include "dataMarshaller.h"
 
 namespace watcher 
