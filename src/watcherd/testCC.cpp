@@ -67,8 +67,8 @@ int main(int argc, char **argv)
         string strVal = "from testCC"; 
         for (int i = 0; i < loopCount; i++)
         {
-            ints.push_back(i);
-            ints.push_back(i*2);
+            ints.push_back(i+1);
+            ints.push_back((i+1)*2);
             c.sendMessage(shared_ptr<TestMessage>(new TestMessage(strVal, ints))); 
         }
 
