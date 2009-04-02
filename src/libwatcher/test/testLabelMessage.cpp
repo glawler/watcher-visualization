@@ -99,6 +99,23 @@ BOOST_AUTO_TEST_CASE( archive_test )
 
     LOG_INFO( "Checking binary archiving..." ); 
     BOOST_CHECK_EQUAL( lmOut, lmIn );
+
+    LOG_INFO("Checking shared_ptr archiving"); 
+
+    LabelMessagePtr lmp(new LabelMessage("THis is a shared_ptr labelMessage"));
+    ostringstream os3; 
+    archive::polymorphic_binary_oarchive oa3(os3);
+    oa3 << lmp; 
+
+    LabelMessagePtr lmp2;
+    istringstream is3(os3.str());
+    archive::polymorphic_binary_iarchive ia3(is3);
+    ia3 >> lmp2;
+
+    LOG_INFO("Checking equality of archived data via shared_ptrs..."); 
+    LOG_DEBUG("*lmp: " << *lmp); 
+    LOG_DEBUG("*lmp2: " << *lmp2); 
+    BOOST_CHECK_EQUAL( *lmp, *lmp2 );
 }
 
 BOOST_AUTO_TEST_CASE( output_test )
