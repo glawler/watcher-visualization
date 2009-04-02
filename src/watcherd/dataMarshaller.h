@@ -10,13 +10,14 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/asio.hpp>
 
-#include <libwatcher/message.h>
-
+#include <boost/archive/archive_exception.hpp>
 #include <boost/serialization/export.hpp>
+
 #include <boost/archive/polymorphic_text_iarchive.hpp>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
+
 #include <boost/serialization/shared_ptr.hpp> 
 #include <boost/serialization/vector.hpp> 
 
@@ -110,11 +111,24 @@ namespace watcher
                 { 
                     TRACE_ENTER();
 
+                    // LOG_DEBUG("Serializing message: " << *t); 
+
                     // Serialize the data first so we know how large it is.
-                    std::stringstream archive_stream;
-                    boost::archive::polymorphic_text_oarchive archive(archive_stream);
-                    archive << t;
-                    outbound_data_ = archive_stream.str(); 
+                    try
+                    {
+                        std::ostringstream archive_stream;
+                        boost::archive::polymorphic_text_oarchive pto(archive_stream);
+                        pto << t;
+                        outbound_data_ = archive_stream.str(); 
+                    }
+                    catch(boost::archive::archive_exception e)
+                    {
+                        LOG_WARN("Caught exception when serializing message: " << e.what());  
+                        TRACE_EXIT_RET("false");
+                        return false;
+                    }
+
+                    LOG_DEBUG("Serialized message data"); 
 
                     // Format the header.
                     std::ostringstream header_stream;
