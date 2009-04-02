@@ -45,6 +45,9 @@ libfeeder_a_SOURCES= messageFactory.cpp singletonConfig.cpp \
 bin_PROGRAMS=watcherd gpsMessageTest labelMessageTest edgeMessageTest colorMessageTest dataRequestMessageTest testCC
 watcherd_SOURCES=watcherdMain.cpp
 
+ctags:
+	ctags -R .. 
+
 watcherd.cfg: 
 	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample
 	cp ../../etc/watcherd.cfg.sample ./watcherd.cfg
