@@ -6,8 +6,6 @@
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "dataMarshaller.h"
-#include <libwatcher/gpsMessage.h>
 #include "messageHandler.h"
 #include "messageHandlerFactory.h"
 
@@ -167,8 +165,14 @@ void ClientConnection::doWrite(const MessagePtr &message)
     transferData.push_back(dataPtr);
     if(!writeInProgress)
     {
+        LOG_DEBUG("Marshaling outbound message"); 
         outBuffers.clear(); 
-        dataMarshaller.marshal(dataPtr->theRequest, outBuffers);
+        if (!dataMarshaller.marshal(dataPtr->theRequest, outBuffers))
+        {
+            LOG_WARN("Error marshaling message, not sending"); 
+            TRACE_EXIT(); 
+            return;
+        }
         LOG_INFO("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest<< ")");
         int numBytes=0;
         for(OutBuffers::const_iterator i = outBuffers.begin(); i !=  outBuffers.end(); ++i)
