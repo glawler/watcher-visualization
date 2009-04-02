@@ -87,7 +87,7 @@ namespace watcher {
         {
             if (e==boost::asio::error::eof)
             {
-                LOG_DEBUG("Received empty message from client"); 
+                LOG_DEBUG("Received empty message from clienti or client closed connection.");
                 LOG_INFO("Connection to client closed."); 
             }
             else
@@ -104,7 +104,7 @@ namespace watcher {
 
         if (!e)
         {
-            if (dataMarshaller.unmarshalPayload(request, incomingBuffer.begin(), bytes_transferred))
+            if (dataMarshaller.unmarshalPayload(*request, incomingBuffer.begin(), bytes_transferred))
             {
                 boost::asio::ip::address nodeAddr(socket_.remote_endpoint().address()); 
 
@@ -132,7 +132,7 @@ namespace watcher {
 
                             LOG_DEBUG("Marshalling outbound message"); 
                             OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                            dataMarshaller.marshal(reply, *obDataPtr);
+                            dataMarshaller.marshal(*reply, *obDataPtr);
                             LOG_INFO("Sending reply: " << *reply);
                             boost::asio::async_write(socket_, *obDataPtr, 
                                                      strand_.wrap(
@@ -167,7 +167,7 @@ namespace watcher {
                 LOG_WARN("Did not understand incoming message. Sending back a nack");
                 MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
                 OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(reply, *obDataPtr);
+                dataMarshaller.marshal(*reply, *obDataPtr);
                 LOG_INFO("Sending NACK as reply: " << *reply);
 
                 replies.push_back(reply);
@@ -208,7 +208,7 @@ namespace watcher {
                 LOG_DEBUG("Still more replies to send, sending next one."); 
                 LOG_DEBUG("Marshalling outbound message"); 
                 OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(replies.front(), *obDataPtr);
+                dataMarshaller.marshal(*replies.front(), *obDataPtr);
                 LOG_DEBUG("Sending reply message: " << *replies.front());
                 boost::asio::async_write(socket_, *obDataPtr, 
                                          strand_.wrap(

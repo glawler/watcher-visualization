@@ -167,7 +167,7 @@ void ClientConnection::doWrite(const MessagePtr &message)
     {
         LOG_DEBUG("Marshaling outbound message"); 
         outBuffers.clear(); 
-        if (!dataMarshaller.marshal(dataPtr->theRequest, outBuffers))
+        if (!dataMarshaller.marshal(*dataPtr->theRequest, outBuffers))
         {
             LOG_WARN("Error marshaling message, not sending"); 
             TRACE_EXIT(); 
@@ -211,7 +211,7 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
         if (!transferData.empty())
         {
             outBuffers.clear(); 
-            dataMarshaller.marshal(dataPtr->theRequest, outBuffers);
+            dataMarshaller.marshal(*dataPtr->theRequest, outBuffers);
             LOG_DEBUG("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest << ")");
             int numBytes=0;
             for(OutBuffers::const_iterator i = outBuffers.begin(); i !=  outBuffers.end(); ++i)
@@ -266,7 +266,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             {
                 LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it. Payload size: " << payloadSize); 
 
-                bool result = dataMarshaller.unmarshalPayload(dataPtr->theReply, &dataPtr->incomingBuffer[0], payloadSize); 
+                bool result = dataMarshaller.unmarshalPayload(*dataPtr->theReply, &dataPtr->incomingBuffer[0], payloadSize); 
 
                 if (result)
                 {
@@ -335,7 +335,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
 //     {
 //         LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it."); 
 // 
-//         bool result = dataMarshaller.unmarshalPayload(dataPtr->theReply, &dataPtr->incomingBuffer[0], bytes_transferred); 
+//         bool result = dataMarshaller.unmarshalPayload(*dataPtr->theReply, &dataPtr->incomingBuffer[0], bytes_transferred); 
 // 
 //         if (result)
 //         {
