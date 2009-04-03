@@ -150,6 +150,11 @@ syntax: regexp
 ^src/libwatcher/test/testMessage
 ^src/libwatcher/test/log.properties
 ^src/libwatcher/test/Makefile.local
+^src/libwatcher/test/testSeekMessage
+^src/libwatcher/test/testSpeedMessage
+^src/libwatcher/test/testStartMessage
+^src/libwatcher/test/testStopMessage
+
 
 ^src/util/Makefile
 ^src/logger/Makefile
