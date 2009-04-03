@@ -5,15 +5,15 @@
 
 namespace watcher 
 {
-    namespace watchapi 
-    {
-        /** 
-         * nodeIdentifer is used to hide the implementation of how to uniquely identify a node. 
-         */ 
-        typedef boost::asio::ip::address NodeIdentifier;
+    /** 
+     * @typedef nodeIdentifer is used to hide the implementation of how to uniquely identify a node. 
+     */ 
+    typedef boost::asio::ip::address NodeIdentifier;
 
-        const NodeIdentifier Watchers;   /// Watchers
-    }
+    /**
+     * @typedef Give timestamp its own type - it's Unix epoch milliseconds 
+     */
+    typedef long long int Timestamp;    // in Epoch milliseconds
 }
 
 #endif // WATCHER_TYPES_HELLO_THERE_H
