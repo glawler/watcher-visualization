@@ -37,6 +37,10 @@ namespace watcher {
                     out << static_cast<int>(DATA_REQUEST_MESSAGE_TYPE) << " (data request)";
                     break;
 
+                case USER_DEFINED_MESSAGE_TYPE: 
+                    out << static_cast<int>(USER_DEFINED_MESSAGE_TYPE) << " (user defined)";
+                    break;
+
                     // don't put default case so the (smart) compiler can
                     // tell us if we've not put a MessageType here....
             }
