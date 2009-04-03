@@ -21,7 +21,7 @@ namespace watcher {
         class WatcherMessage {
                 friend class boost::serialization::access;
                 template <typename Archive>
-                void serialiaze(Archive& ar, unsigned int version) {};
+                void serialize(Archive& ar, unsigned int version) {};
             protected:
                 //don't allow for direct contruction
                 WatcherMessage() {};

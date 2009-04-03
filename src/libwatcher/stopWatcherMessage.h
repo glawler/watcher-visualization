@@ -25,6 +25,7 @@ namespace watcher {
         void StopMessage::serialize(Archive& ar, const unsigned int version)
         {
             TRACE_ENTER();
+            ar & boost::serialization::base_object<WatcherMessage>(*this);
             TRACE_EXIT();
         }
     }

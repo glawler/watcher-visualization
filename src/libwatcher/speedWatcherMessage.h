@@ -30,6 +30,7 @@ namespace watcher {
         void SpeedMessage::serialize(Archive & ar, const unsigned int version)
         {
             TRACE_ENTER();
+            ar & boost::serialization::base_object<WatcherMessage>(*this);
             ar & speed;
             TRACE_EXIT();
         }

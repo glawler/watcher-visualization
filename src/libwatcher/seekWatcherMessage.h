@@ -37,6 +37,7 @@ namespace watcher {
         void SeekMessage::serialize(Archive& ar, const unsigned int version)
         {
             TRACE_ENTER();
+            ar & boost::serialization::base_object<WatcherMessage>(*this);
             ar & offset;
             ar & rel;
             TRACE_EXIT();
