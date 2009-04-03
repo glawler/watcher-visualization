@@ -23,7 +23,9 @@ namespace watcher {
                 float speed;    //< playback speed.  negative value indicates reverse direction
 
             public:
-                SpeedMessage(float speed);
+                SpeedMessage(float speed = 1.0);
+                bool operator== (const SpeedMessage& rhs) const { return speed == rhs.speed; }
+                friend std::ostream& operator<< (std::ostream& o, const SpeedMessage& rhs);
         };
 
         template <typename Archive>
