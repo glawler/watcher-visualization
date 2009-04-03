@@ -28,11 +28,9 @@ boost::shared_ptr<MessageHandler> MessageHandlerFactory::getMessageHandler(const
         case MESSAGE_STATUS_TYPE: 
             return boost::shared_ptr<MessageStatusHandler>(new MessageStatusHandler);
             break;
-            /*
         case TEST_MESSAGE_TYPE: 
             return boost::shared_ptr<TestMessageHandler>(new TestMessageHandler);
             break;
-            */
         case GPS_MESSAGE_TYPE: 
             return boost::shared_ptr<GPSMessageHandler>(new GPSMessageHandler);
             break;
@@ -47,6 +45,8 @@ boost::shared_ptr<MessageHandler> MessageHandlerFactory::getMessageHandler(const
             break;
         case DATA_REQUEST_MESSAGE_TYPE: 
             return boost::shared_ptr<DataRequestMessageHandler>(new DataRequestMessageHandler);
+            break;
+        case USER_DEFINED_MESSAGE_TYPE:
             break;
 
             // GTL - don't put default case

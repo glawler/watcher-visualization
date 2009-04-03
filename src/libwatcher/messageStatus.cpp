@@ -58,7 +58,7 @@ namespace watcher {
         const char *MessageStatus::statusToString(const Status &status)
         {
             TRACE_ENTER();
-            const char *retVal;
+            const char *retVal="";
             switch(status)
             {
                 case status_ok: retVal="ok"; break;

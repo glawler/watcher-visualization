@@ -10,15 +10,16 @@ namespace watcher {
         //
         typedef enum 
         {
-            UNKNOWN_MESSAGE_TYPE      = 0,
-            MESSAGE_STATUS_TYPE       = 1,
-            TEST_MESSAGE_TYPE         = 2,
-            GPS_MESSAGE_TYPE          = 3,
-            LABEL_MESSAGE_TYPE        = 4,
-            EDGE_MESSAGE_TYPE         = 5,
-            COLOR_MESSAGE_TYPE        = 6,
-            DATA_REQUEST_MESSAGE_TYPE = 7
+            UNKNOWN_MESSAGE_TYPE      = 0x0,
+            MESSAGE_STATUS_TYPE       = 0x1,
+            TEST_MESSAGE_TYPE         = 0x2,
+            GPS_MESSAGE_TYPE          = 0x3,
+            LABEL_MESSAGE_TYPE        = 0x4,
+            EDGE_MESSAGE_TYPE         = 0x5,
+            COLOR_MESSAGE_TYPE        = 0x6,
+            DATA_REQUEST_MESSAGE_TYPE = 0x7,
 
+            USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
 
         std::ostream& operator<< (std::ostream &out, const MessageType &type);

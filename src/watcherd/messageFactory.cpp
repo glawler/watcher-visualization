@@ -1,13 +1,13 @@
 #include "messageFactory.h"
 
-#include <libwatcher/message.h>
-#include <libwatcher/labelMessage.h>
-#include <libwatcher/edgeMessage.h>
-#include <libwatcher/colorMessage.h>
-#include <libwatcher/gpsMessage.h>
-#include <libwatcher/messageStatus.h>
-#include <libwatcher/dataRequestMessage.h>
-//#include "testMessage.h"
+#include "libwatcher/message.h"
+#include "libwatcher/labelMessage.h"
+#include "libwatcher/edgeMessage.h"
+#include "libwatcher/colorMessage.h"
+#include "libwatcher/gpsMessage.h"
+#include "libwatcher/messageStatus.h"
+#include "libwatcher/dataRequestMessage.h"
+#include "libwatcher/testMessage.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -25,10 +25,9 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
         case MESSAGE_STATUS_TYPE:
             return boost::shared_ptr<MessageStatus>(new MessageStatus);
             break;
-            /*
         case TEST_MESSAGE_TYPE:
             return boost::shared_ptr<TestMessage>(new TestMessage);
-            break; */
+            break; 
         case GPS_MESSAGE_TYPE:
             return boost::shared_ptr<GPSMessage>(new GPSMessage);
             break;
@@ -43,6 +42,8 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
             break;
         case DATA_REQUEST_MESSAGE_TYPE:
             return boost::shared_ptr<DataRequestMessage>(new DataRequestMessage);
+            break;
+        case USER_DEFINED_MESSAGE_TYPE:
             break;
 
             

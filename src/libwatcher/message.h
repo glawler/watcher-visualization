@@ -7,10 +7,10 @@
 
 #include "logger.h"
 #include "messageTypesAndVersions.h"
+#include "watcherTypes.h"
 
 namespace watcher {
     namespace event {
-        typedef long long int Timestamp;    // in Epoch milliseconds
 
         /** Base class for all messages generated from the test node daemon.
          */
