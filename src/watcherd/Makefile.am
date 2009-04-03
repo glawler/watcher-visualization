@@ -10,6 +10,9 @@
 
 TOPDIR=../..
 
+# "Fixes" warning in log4cxx about type punning. 
+CPPFLAGS += -fno-strict-aliasing
+
 CPPFLAGS += -I..
 CPPFLAGS += -I../util
 CPPFLAGS += -I../logger
@@ -34,14 +37,18 @@ LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_S
 
 BUILT_SOURCES=watcherd.cfg watcherd.log.properties 
 
-noinst_LIBRARIES=libfeeder.a
-libfeeder_a_SOURCES= messageFactory.cpp singletonConfig.cpp \
+noinst_LIBRARIES=libfeeder.a libwatcherdAPI.a
+libfeeder_a_SOURCES= \
+	messageFactory.cpp singletonConfig.cpp \
 	 serverConnection.cpp dataMarshaller.cpp server.cpp \
 	 clientConnection.cpp messageHandler.cpp messageStatusHandler.cpp \
 	 gpsMessageHandler.cpp messageHandlerFactory.cpp client.cpp \
-	 labelMessageHandler.cpp  edgeMessageHandler.cpp \
+	 labelMessageHandler.cpp  edgeMessageHandler.cpp testMessageHandler.cpp \
 	 colorMessageHandler.cpp watcherd.cpp dataRequestMessageHandler.cpp \
 	 watcherdClientConnection.cpp
+libwatcherdAPI_a_SOURCES= \
+	 messageStream.cpp clientConnection.cpp messageStreamFilter.cpp
+
 bin_PROGRAMS=watcherd gpsMessageTest labelMessageTest edgeMessageTest colorMessageTest dataRequestMessageTest testCC
 watcherd_SOURCES=watcherdMain.cpp
 
