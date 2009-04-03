@@ -97,7 +97,8 @@ bool MessageStream::stopStream()
 bool MessageStream::messageArrived(MessagePtr message)
 {
     TRACE_ENTER();
-    TRACE_EXIT();
+    TRACE_EXIT_RET("false"); 
+    return false;
 }
 
 std::ostream &operator<<(std::ostream &out, const MessageStream &messStream)
