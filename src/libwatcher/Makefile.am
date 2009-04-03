@@ -7,7 +7,7 @@
 SUBDIRS=. test
 
 # "Fixes" warning in log4cxx about type punning. 
-CPPFLAGS += -fno-strict-aliasing
+CXXFLAGS += -fno-strict-aliasing
 
 CPPFLAGS += -I../../include
 CPPFLAGS += @BOOST_CPPFLAGS@
