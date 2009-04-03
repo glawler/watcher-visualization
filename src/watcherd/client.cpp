@@ -7,13 +7,15 @@ INIT_LOGGER(Client, "Client");
 
 Client::Client(
         const std::string& server_, 
+        WatcherdClientMessageHandlerPtr messageHandler,
         const std::string& service_) :
     ioService(),
     server(server_),
-    service(service_)
+    service(service_),
+    watcherdClientConnection(new WatcherdClientConnection(messageHandler, ioService, server, service))
+
 {
     TRACE_ENTER();
-    watcherdClientConnection = WatcherdClientConnectionPtr(new WatcherdClientConnection(ioService, server, service));
     TRACE_EXIT();
 }
 

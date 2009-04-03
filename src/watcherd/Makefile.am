@@ -10,6 +10,8 @@
 
 TOPDIR=../..
 
+SUBDIRS=. test
+
 # "Fixes" warning in log4cxx about type punning. 
 CPPFLAGS += -fno-strict-aliasing
 
@@ -45,9 +47,9 @@ libfeeder_a_SOURCES= \
 	 gpsMessageHandler.cpp messageHandlerFactory.cpp client.cpp \
 	 labelMessageHandler.cpp  edgeMessageHandler.cpp testMessageHandler.cpp \
 	 colorMessageHandler.cpp watcherd.cpp dataRequestMessageHandler.cpp \
-	 watcherdClientConnection.cpp
+	 watcherdClientConnection.cpp 
 libwatcherdAPI_a_SOURCES= \
-	 messageStream.cpp clientConnection.cpp messageStreamFilter.cpp
+	 messageStream.cpp clientConnection.cpp messageStreamFilter.cpp watcherdClientConnection.cpp client.cpp
 
 bin_PROGRAMS=watcherd gpsMessageTest labelMessageTest edgeMessageTest colorMessageTest dataRequestMessageTest testCC
 watcherd_SOURCES=watcherdMain.cpp

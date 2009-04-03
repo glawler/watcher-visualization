@@ -133,6 +133,7 @@ syntax: regexp
 ^src/watcherd/dataRequestMessageTest
 ^src/watcherd/testCC
 ^src/watcherd/Makefile.local
+^src/watcherd/test/Makefile
 
 ^src/libwatcher/Makefile
 ^src/libwatcher/Makefile.local
