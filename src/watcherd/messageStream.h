@@ -3,8 +3,11 @@
 
 #include <string>
 #include <vector>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/noncopyable.hpp>
 #include "libwatcher/watcherTypes.h"    // for Timestamp
 #include "libwatcher/message.h"         // for MessagePtr
+#include "client.h"
 #include "messageStreamFilter.h"
 
 namespace watcher
@@ -16,7 +19,10 @@ namespace watcher
      * @author Geoff Lawler <geoff.lawler@sparta.com>
      * @date 2009-04-03
      */
-    class MessageStream
+    class MessageStream : 
+        public WatcherdClientMessageHandler, 
+        public boost::enable_shared_from_this<MessageStream>,
+        private boost::noncopyable
     {
         public:
             /** 
@@ -123,7 +129,11 @@ namespace watcher
 
         protected:
 
-            // noop
+            /**
+             * Handle the arrival of a message. Implement the abstract method in ClientMessageHandler
+             */
+            virtual bool messageArrived(MessagePtr message);
+
 
         private:
             DECLARE_LOGGER();
@@ -140,7 +150,7 @@ namespace watcher
             MessageStream &operator=(const MessageStream &ms); /// No operator = allowed.
 
             /** This is the connection to the message server (watcherd instance) used to send/recv messages */
-            // Client connection;
+            ClientPtr connection;
 
     }; // like a fired school teacher.
 

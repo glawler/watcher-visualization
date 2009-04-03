@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     {
         asio::io_service ioserv;
 
-        WatcherdClientConnection c(ioserv, serverName, "watcherd"); 
+        WatcherdClientConnection c(WatcherdClientMessageHandlerPtr(), ioserv, serverName, "watcherd"); 
 
         vector<int> ints;
         string strVal = "from testCC"; 

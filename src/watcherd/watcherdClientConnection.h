@@ -11,6 +11,26 @@
 namespace watcher 
 {
     /**
+     * @class WatcherdClientMessageHandler
+     * This is a small one abstract method class. The single 
+     * method is messageArrived() which is invoked by the 
+     * WatcherdClientConnection instance that this class is a 
+     * part of. The top level class that wants to handle its 
+     * own messages should derive from this class and pass a pointer
+     * to itself into the WatcherdClientConnection instance that it
+     * uses to connect to the server. 
+     */
+    class WatcherdClientMessageHandler
+    {
+        public:
+            WatcherdClientMessageHandler() {}; 
+            virtual ~WatcherdClientMessageHandler() {} ;
+            virtual bool messageArrived(event::MessagePtr message)=0;
+    };
+
+    typedef boost::shared_ptr<WatcherdClientMessageHandler> WatcherdClientMessageHandlerPtr;
+
+    /**
      * @class WatcherdClientConnection
      *
      * @brief This class encapsulates a network connection to a watcherd instance. It 
@@ -21,6 +41,7 @@ namespace watcher
         public:
             // Connect to the service service on server server using the boost::io_service given.
             explicit WatcherdClientConnection(
+                    WatcherdClientMessageHandlerPtr messageHandler,
                     boost::asio::io_service& io_service, 
                     const std::string &server, 
                     const std::string &service);
@@ -39,6 +60,8 @@ namespace watcher
         private:
 
             DECLARE_LOGGER();
+
+            WatcherdClientMessageHandlerPtr messageArrivalHandler;
     };
 
     typedef boost::shared_ptr<WatcherdClientConnection> WatcherdClientConnectionPtr;

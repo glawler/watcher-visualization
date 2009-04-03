@@ -1,3 +1,4 @@
+#include <boost/pointer_cast.hpp>
 #include "messageStream.h"
 
 using namespace watcher;
@@ -6,7 +7,11 @@ using namespace std;
 
 INIT_LOGGER(MessageStream, "MessageStream");
 
-MessageStream::MessageStream(const string &serverName, const Timestamp &startTime, const float streamRate)
+MessageStream::MessageStream(const string &serverName_, const Timestamp &startTime_, const float streamRate_) : 
+    messageStreamFilters(),
+    streamRate(streamRate_),
+    streamStartTime(startTime_),
+    connection(new Client(serverName_, shared_from_this()))  // GTL - there has got to be a better way to do this.
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -18,6 +23,7 @@ MessageStream::~MessageStream()
     TRACE_ENTER();
     TRACE_EXIT();
 }
+
 bool MessageStream::setStreamTimeStart(const Timestamp &startTime)
 {
     TRACE_ENTER()
@@ -85,6 +91,13 @@ bool MessageStream::stopStream()
     // return retVal;
     TRACE_EXIT_RET("true"); 
     return true;
+}
+
+//virtual 
+bool MessageStream::messageArrived(MessagePtr message)
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
 }
 
 std::ostream &operator<<(std::ostream &out, const MessageStream &messStream)
