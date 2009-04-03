@@ -2,7 +2,10 @@
  * @author Michael Elkins <michael.elkins@sparta.com>
  * @date 2009-03-20
  */
+#include <boost/serialization/export.hpp>
 #include "seekWatcherMessage.h"
+
+BOOST_CLASS_EXPORT_GUID(watcher::watchapi::SeekMessage, "SeekMessage");
 
 namespace watcher {
     namespace watchapi {
