@@ -22,5 +22,10 @@ namespace watcher {
             TRACE_ENTER();
             TRACE_EXIT();
         }
+
+        std::ostream& operator<< (std::ostream& o, const SeekMessage& m)
+        {
+            return o << "SeekMessage(offset=" << m.offset << " , rel=" << m.rel << ')';
+        }
     }
 }

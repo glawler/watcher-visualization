@@ -23,7 +23,10 @@ namespace watcher {
                     cur,        //< offset is relative to current position in stream
                     end         //< offset is relative to end of stream
                 };
-                SeekMessage(float offset, whence);
+                SeekMessage(float offset = 0, whence = start);
+                bool operator== (const SeekMessage &rhs) const { return offset == rhs.offset && rel == rhs.rel; }
+
+                friend std::ostream& operator<< (std::ostream& o, const SeekMessage& m);
 
             private:
                 friend class boost::serialization::access;
