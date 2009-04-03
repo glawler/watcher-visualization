@@ -2,6 +2,8 @@
 
 using namespace watcher;
 
+INIT_LOGGER(WatcherRegion, "WatcherRegion");
+
 WatcherRegion::WatcherRegion()
 {
     TRACE_ENTER();

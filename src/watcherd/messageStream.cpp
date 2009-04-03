@@ -4,6 +4,8 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace std;
 
+INIT_LOGGER(MessageStream, "MessageStream");
+
 MessageStream::MessageStream(const string &serverName, const Timestamp &startTime, const float streamRate)
 {
     TRACE_ENTER();

@@ -2,6 +2,7 @@
 
 using namespace watcher;
 
+INIT_LOGGER(MessageStreamFilter, "MessageStreamFilter");
 
 MessageStreamFilter::MessageStreamFilter() : 
             layer(""), messageType(0), region()

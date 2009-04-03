@@ -6,24 +6,27 @@ log4j.rootLogger=debug, flog, stdout
 # Set levels per module
 # log4j.logger.global=trace
 
-# log4j.logger.clientConnection=trace
-# log4j.logger.client=trace
-# log4j.logger.colorMessageHandler=trace
-# log4j.logger.dataMarshaller=trace
-# log4j.logger.dataRequestMessageHandler=trace
-# log4j.logger.edgeMessageHandler=trace
-# log4j.logger.gpsMessageHandler=trace
-# log4j.logger.labelMessageHandler=trace
-# log4j.logger.messageFactory=trace
-# log4j.logger.messageHandler=trace
-# log4j.logger.messageHandlerFactory=trace
-# log4j.logger.messageStatusHandler=trace
-# log4j.logger.serverConnection=trace
-# log4j.logger.server=trace
-# log4j.logger.singletonConfig=trace
-# log4j.logger.testMessageHandler=trace
-# log4j.logger.watcherdClientConnection=trace
-# log4j.logger.watcherd=trace
+# log4j.logger.ClientConnection=trace
+# log4j.logger.Client=trace
+# log4j.logger.ColorMessageHandler=trace
+# log4j.logger.DataMarshaller=trace
+# log4j.logger.DataRequestMessageHandler=trace
+# log4j.logger.EdgeMessageHandler=trace
+# log4j.logger.GPSMessageHandler=trace
+# log4j.logger.LabelMessageHandler=trace
+# log4j.logger.MessageFactory=trace
+# log4j.logger.MessageHandler=trace
+# log4j.logger.MessageHandlerFactory=trace
+# log4j.logger.MessageStatusHandler=trace
+# log4j.logger.MessageStream=trace
+# log4j.logger.MessageStreamFilter=trace
+# log4j.logger.ServerConnection=trace
+# log4j.logger.Server=trace
+# log4j.logger.SingletonConfig=trace
+# log4j.logger.TestMessageHandler=trace
+# log4j.logger.WatcherdClientConnection=trace
+# log4j.logger.Watcherd=trace
+# log4j.logger.WatcherRegion=trace
 
 # stdout is set to be a ConsoleAppender.
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender
