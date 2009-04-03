@@ -6,6 +6,9 @@
 #endif 
 SUBDIRS=. test
 
+# "Fixes" warning in log4cxx about type punning. 
+CPPFLAGS += -fno-strict-aliasing
+
 CPPFLAGS += -I../../include
 CPPFLAGS += @BOOST_CPPFLAGS@
 
@@ -15,4 +18,5 @@ libwatcher_a_SOURCES=seekWatcherMessage.cpp speedWatcherMessage.cpp startWatcher
 	stopWatcherMessage.cpp nodeStatusMessage.cpp \
 	edgeMessage.cpp labelMessage.cpp watcherColors.cpp colorMessage.cpp \
 	gpsMessage.cpp messageStatus.cpp dataRequestMessage.cpp message.cpp \
-	messageTypesAndVersions.cpp testMessage.cpp
+	messageTypesAndVersions.cpp testMessage.cpp \
+	watcherRegion.cpp 
