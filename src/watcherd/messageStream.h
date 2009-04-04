@@ -48,6 +48,8 @@ namespace watcher
              */
             virtual ~MessageStream();
 
+            bool init();
+
             /**
              * startStream()
              * Start the stream of messages from the message server.

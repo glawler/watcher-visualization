@@ -14,9 +14,15 @@ MessageStream::MessageStream(const string &serverName_, const Timestamp &startTi
     connection(new Client(serverName_))
 {
     TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+bool MessageStream::init()
+{
+    TRACE_ENTER();
     ClientMessageHandlerPtr tmp(shared_from_this());
     LOG_DEBUG("Setting message handler to this class. this pointer: " << tmp); 
-    // connection->setMessageHandler(tmp); 
+    connection->setMessageHandler(tmp); 
     TRACE_EXIT();
 }
 
