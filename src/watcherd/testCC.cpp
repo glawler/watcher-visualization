@@ -2,7 +2,7 @@
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "watcherdClientConnection.h"
+#include "clientConnection.h"
 #include <libwatcher/testMessage.h>
 
 #include "initConfig.h"
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     {
         asio::io_service ioserv;
 
-        WatcherdClientConnection c(WatcherdClientMessageHandlerPtr(), ioserv, serverName, "watcherd"); 
+        ClientConnection c(ioserv, serverName, "watcherd"); 
 
         vector<int> ints;
         string strVal = "from testCC"; 
@@ -69,6 +69,7 @@ int main(int argc, char **argv)
         {
             ints.push_back(i+1);
             ints.push_back((i+1)*2);
+            LOG_INFO("Sending message number " << i); 
             c.sendMessage(shared_ptr<TestMessage>(new TestMessage(strVal, ints))); 
         }
 

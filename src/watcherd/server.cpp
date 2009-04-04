@@ -8,6 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 // Modified by Geoff Lawler, SPARTA inc.
+//
 
 #include "server.h"
 #include <boost/thread.hpp>

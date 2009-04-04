@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
            config.getRoot().add("serverThreadNum", libconfig::Setting::TypeInt)=static_cast<int>(numThreads);
     }
 
-    boost::shared_ptr<Watcherd> theWatcherDaemon(new Watcherd);
+    WatcherdPtr theWatcherDaemon(new Watcherd);
     try
     {
         theWatcherDaemon->run(address, port, (int)numThreads);

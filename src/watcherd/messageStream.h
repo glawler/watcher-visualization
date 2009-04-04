@@ -5,9 +5,12 @@
 #include <vector>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
+
 #include "libwatcher/watcherTypes.h"    // for Timestamp
 #include "libwatcher/message.h"         // for MessagePtr
+
 #include "client.h"
+#include "clientMessageHandler.h"
 #include "messageStreamFilter.h"
 
 namespace watcher
@@ -20,9 +23,8 @@ namespace watcher
      * @date 2009-04-03
      */
     class MessageStream : 
-        public WatcherdClientMessageHandler, 
-        public boost::enable_shared_from_this<MessageStream>,
-        private boost::noncopyable
+        public ClientMessageHandler, 
+        public boost::enable_shared_from_this<MessageStream>
     {
         public:
             /** 
@@ -130,10 +132,9 @@ namespace watcher
         protected:
 
             /**
-             * Handle the arrival of a message. Implement the abstract method in ClientMessageHandler
+             * Handle the arrival of a message. Overridden from ClientMessageHandler base class.
              */
-            virtual bool messageArrived(MessagePtr message);
-
+            virtual bool handleMessageArrive(const MessagePtr message, MessagePtr &response);
 
         private:
             DECLARE_LOGGER();

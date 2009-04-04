@@ -22,56 +22,12 @@ MessageHandler::~MessageHandler()
     TRACE_EXIT();
 }
 
-MessageHandler::ConnectionCommand MessageHandler::produceReply(const MessagePtr &request, MessagePtr &reply)
+
+bool MessageHandler::handleMessageArrive(const MessagePtr message, MessagePtr &response)
 {
     TRACE_ENTER();
-    LOG_DEBUG("Producing reply for message: " << *request);
-    reply=MessageStatusPtr(new MessageStatus(MessageStatus::status_ack));
-    LOG_DEBUG("Produced reply: " << *reply);
-
-    TRACE_EXIT_RET("writeMessage"); 
-    return writeMessage;
-}
-
-MessageHandler::ConnectionCommand MessageHandler::handleReply(const MessagePtr &request, const MessagePtr &reply)
-{
-    TRACE_ENTER();
-
-    LOG_INFO("Recv'd :" << "\n\t" << *reply << endl << "In reply to: " << "\n\t" << *request);
-
-    if (reply->type != MESSAGE_STATUS_TYPE)
-    {
-        LOG_WARN("Got a non-message status message in reply.");
-        TRACE_EXIT_RET("closeConnection");
-        return closeConnection;
-    }
-
-    MessageStatusPtr mess=boost::dynamic_pointer_cast<MessageStatus>(reply); 
-
-    if(mess)
-    {
-        if(mess->status!=MessageStatus::status_ack && mess->status!=MessageStatus::status_ok) 
-        {
-            LOG_WARN("Recv'd non ack reply to request: " << MessageStatus::statusToString(mess->status)); 
-        }
-        else
-        {
-            LOG_INFO("Recv'd ack to request, all is well."); 
-        }
-    }
-    else
-    {
-        LOG_ERROR("Look into this: unable to dynamically cast a shared_ptr<base> to shared_ptr<derived> even though it is the right type"); 
-    }
-
-    TRACE_EXIT_RET("closeConnection");
-    return closeConnection;
-}
-
-void MessageHandler::handleMessageArrive(const MessagePtr message)
-{
-    TRACE_ENTER();
-    LOG_INFO("Recv'd message: " << message); 
-    TRACE_EXIT();
+    LOG_INFO("Recv'd message: " << *message); 
+    TRACE_EXIT_RET("true");
+    return true;
 }
 

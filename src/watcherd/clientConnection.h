@@ -8,6 +8,8 @@
 #include <boost/array.hpp>
 
 #include "libwatcher/message.h"
+
+#include "messageHandler.h"
 #include "dataMarshaller.h"
 
 namespace watcher 
@@ -32,18 +34,24 @@ namespace watcher
              */
             bool sendMessage(const event::MessagePtr message);
 
-            /** 
-             * messageArrive() is call back invoked by the underlying network
-             * code when a message arrives from the server. This method is a pure virtual
-             * and thus must be implemented by the derived class.
-             *
-             * @param message - the newly arrived message.
-             * @return a bool - currently ignored. 
-             */
-            virtual bool messageArrive(const event::Message &message)=0;
 
+            /**
+             * setMessageHandler() Set a messageHandler if you want direct access to the 
+             * responses sent via sendMessage().
+             * @param messageHandler - an instance of a message handler class. 
+             */
+            void setMessageHandler(MessageHandlerPtr messageHandler); 
+
+            /**
+             * close()
+             * close the connection to the server.
+             */
             void close(); 
-            
+           
+            /**
+             * getSocket()
+             * @return socket - the underlying socket for this connection.
+             */
             boost::asio::ip::tcp::socket& getSocket();
 
         private:
@@ -101,6 +109,8 @@ namespace watcher
 
             std::string server;
             std::string service;
+
+            MessageHandlerPtr messageHandler;
     };
 
     typedef boost::shared_ptr<ClientConnection> ClientConnectionPtr;

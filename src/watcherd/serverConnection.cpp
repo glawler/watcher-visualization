@@ -1,7 +1,6 @@
 #include "serverConnection.h"
 #include <vector>
 #include <boost/bind.hpp>
-#include "messageHandlerFactory.h"
 
 #include <boost/archive/polymorphic_text_iarchive.hpp>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
@@ -110,56 +109,28 @@ namespace watcher {
 
                 LOG_INFO("Recvd message from " << nodeAddr <<  " :" << *request); 
 
-                MessageHandlerPtr handler;
-                if (!messageHandler)
-                    handler = MessageHandlerFactory::getMessageHandler(request->type);
-                else
-                    handler=messageHandler;
-
-                handler->handleMessageArrive(request);
-
                 MessagePtr reply;
-                MessageHandler::ConnectionCommand cmd = handler->produceReply(request, reply);
-
-                switch(cmd)
+                if(messageHandler->handleMessageArrive(request, reply))
                 {
-                    case MessageHandler::writeMessage:
-                        {
-                            // Keep track of this reply in case of write error
-                            // and so we know when to stop sending replays and we can 
-                            // close the socket to the client.
-                            replies.push_back(reply); 
+                    // LOG_DEBUG("Sending back a message (at " << reply "): " << *reply); 
+                    LOG_DEBUG("Sending back a message (at " << reply << "): " << reply); 
 
-                            LOG_DEBUG("Marshalling outbound message"); 
-                            OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                            dataMarshaller.marshal(*reply, *obDataPtr);
-                            LOG_INFO("Sending reply: " << *reply);
-                            boost::asio::async_write(socket_, *obDataPtr, 
-                                                     strand_.wrap(
-                                                                  boost::bind(
-                                                                              &ServerConnection::handle_write, 
-                                                                              shared_from_this(),
-                                                                              boost::asio::placeholders::error, 
-                                                                              reply))); 
-                            break;
-                        }
-                    case MessageHandler::readMessage:
-                        {
-                            LOG_DEBUG("Readig another message via the connection");
-                            start();
-                            break;
-                        }
-                    case MessageHandler::closeConnection:
-                        {
-                            LOG_INFO("Not sending reply - request doesn't need one"); 
-                            // This execution branch causes this connection to disapear.
-                            break;
-                        }
-                    case MessageHandler::stayConnected:
-                        {
-                            LOG_INFO("We are supposed to stay connected.\n"); 
-                            break;
-                        }
+                    // Keep track of this reply in case of write error
+                    // and so we know when to stop sending replays and we can 
+                    // close the socket to the client.
+                    replies.push_back(reply); 
+
+                    LOG_DEBUG("Marshalling outbound message"); 
+                    OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
+                    dataMarshaller.marshal(*reply, *obDataPtr);
+                    LOG_INFO("Sending reply: " << *reply);
+                    boost::asio::async_write(socket_, *obDataPtr, 
+                            strand_.wrap(
+                                boost::bind(
+                                    &ServerConnection::handle_write, 
+                                    shared_from_this(),
+                                    boost::asio::placeholders::error, 
+                                    reply))); 
                 }
             }
             else
@@ -171,10 +142,15 @@ namespace watcher {
                 LOG_INFO("Sending NACK as reply: " << *reply);
 
                 replies.push_back(reply);
-                boost::asio::async_write(socket_, *obDataPtr,
-                                         strand_.wrap(
-                                                      boost::bind(&ServerConnection::handle_write, shared_from_this(),
-                                                                  boost::asio::placeholders::error, reply)));
+                boost::asio::async_write(
+                        socket_, 
+                        *obDataPtr,
+                        strand_.wrap(
+                            boost::bind(
+                                &ServerConnection::handle_write, 
+                                shared_from_this(),
+                                boost::asio::placeholders::error, 
+                                reply)));
             }
         }
 

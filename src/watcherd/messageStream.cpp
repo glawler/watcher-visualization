@@ -11,9 +11,12 @@ MessageStream::MessageStream(const string &serverName_, const Timestamp &startTi
     messageStreamFilters(),
     streamRate(streamRate_),
     streamStartTime(startTime_),
-    connection(new Client(serverName_, shared_from_this()))  // GTL - there has got to be a better way to do this.
+    connection(new Client(serverName_))
 {
     TRACE_ENTER();
+    ClientMessageHandlerPtr tmp(shared_from_this());
+    LOG_DEBUG("Setting message handler to this class. this pointer: " << tmp); 
+    // connection->setMessageHandler(tmp); 
     TRACE_EXIT();
 }
 
@@ -94,11 +97,14 @@ bool MessageStream::stopStream()
 }
 
 //virtual 
-bool MessageStream::messageArrived(MessagePtr message)
+bool MessageStream::handleMessageArrive(const MessagePtr message, MessagePtr &response)
 {
     TRACE_ENTER();
-    TRACE_EXIT_RET("false"); 
-    return false;
+
+    bool retVal=ClientMessageHandler::handleMessageArrive(message, response);
+
+    TRACE_EXIT_RET((retVal==true?"true":"false"));
+    return retVal;
 }
 
 std::ostream &operator<<(std::ostream &out, const MessageStream &messStream)

@@ -7,31 +7,41 @@
 #include <boost/shared_ptr.hpp>
 #include "logger.h"
 
-#include "watcherdClientConnection.h"
-#include <libwatcher/message.h>
+#include "clientConnection.h"
+#include "libwatcher/message.h"
 
 namespace watcher 
 {
     //
     // Currently it's just a thin wrapper around the clientConnection class. 
-    // In the future, I may make this class a little easier to use by: 
-    // - put it in a library 
-    // - remove boost dependencies, etc
-    // - add a got-a-response callback, etc. 
     //
     class Client : private boost::noncopyable
     {
         public:
-            /// Construct the Client to connect to the specified TCP address and service.
-            // to send messages. Default service is "watcherd" - a watcherd running somewhere.
+            /**
+             * Construct the Client to connect to the specified TCP address and service.
+             * to send messages. Default service is "watcherd" - a watcherd running somewhere.
+             */
             explicit Client(
                     const std::string& server, 
-                    WatcherdClientMessageHandlerPtr messageHandler=WatcherdClientMessageHandlerPtr(),
                     const std::string& service="watcherd");
 
-            ~Client() {} 
+            virtual ~Client();
 
+            /**
+             * Send a messsage to the server.
+             * 
+             * @param - message - the message to be sent. 
+             * @return - boolean - true on success, false otherwise
+             */
             bool sendMessage(const event::MessagePtr message);
+
+            /**
+             * setMessageHandler() Set a messageHandler if you want direct access to the 
+             * responses sent via sendMessage().
+             * @param messageHandler - an instance of a message handler class. 
+             */
+            void setMessageHandler(MessageHandlerPtr messageHandler); 
 
         protected:
         private:
@@ -39,11 +49,10 @@ namespace watcher
             DECLARE_LOGGER();
 
             boost::asio::io_service ioService;
-
             std::string server;
             std::string service;
 
-            WatcherdClientConnectionPtr watcherdClientConnection;
+            ClientConnectionPtr clientConnection;
     };
 
     typedef boost::shared_ptr<Client> ClientPtr;

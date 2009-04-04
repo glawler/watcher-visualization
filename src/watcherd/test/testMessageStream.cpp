@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#define BOOST_TEST_MODULE watcher::Color test
+#define BOOST_TEST_MODULE watcher::messageStream test
 #include <boost/test/unit_test.hpp>
 
 #include "logger.h"
