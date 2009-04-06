@@ -8,6 +8,27 @@ using namespace watcher;
 using namespace libconfig;
 using namespace std;
 
+static bool readConfig(libconfig::Config &config, const string &filename)
+{
+    try
+    {
+        config.readFile(filename.c_str());
+        return true;
+    }
+    catch (ParseException &e)
+    {
+        // Can't use logging here - if we're reading the config file we probably have not
+        // init'd the logging mechanism. 
+        cerr << "Error reading configuration file " << optarg << ": " << e.what() << endl;
+        cerr << "Error: \"" << e.getError() << "\" on line: " << e.getLine() << endl;
+    }
+    catch (FileIOException &e)
+    {
+        cerr << "Unable to read file " << optarg << " given as configuration file on the command line." << endl;
+    }
+    return false;
+}
+
 bool watcher::initConfig(
             libconfig::Config &config, 
             int argc, 
@@ -18,6 +39,8 @@ bool watcher::initConfig(
 {
     int c;
     // int digit_optind = 0;
+
+    bool retVal=false;
 
     while (true) 
     {
@@ -37,27 +60,22 @@ bool watcher::initConfig(
             break;
 
         if (c==configFileChar)
-        {
-            try
-            {
-                config.readFile(optarg);
+            if(true==(retVal=readConfig(config, optarg)))
                 configFilename=optarg;
-                return true;
-            }
-            catch (ParseException &e)
-            {
-                // Can't use logging here - if we're reading the config file we probably have not
-                // init'd the logging mechanism. 
-                cerr << "Error reading configuration file " << optarg << ": " << e.what() << endl;
-                cerr << "Error: \"" << e.getError() << "\" on line: " << e.getLine() << endl;
-            }
-            catch (FileIOException &e)
-            {
-                cerr << "Unable to read file " << optarg << " given as configuration file on the command line." << endl;
-            }
-        }
+
         // else - ignore things we don't understand
     }
-    return false;
+
+    // Last ditch: look for a file called `echo argv[0]`.cfg.
+    if(retVal==false)
+    {
+        string fname(argv[0]);
+        fname+=".cfg"; 
+
+        if(true==(retVal=readConfig(config, fname)))
+            configFilename=fname;
+    }
+
+    return retVal;
 }
 
