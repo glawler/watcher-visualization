@@ -10,19 +10,16 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/asio.hpp>
 
-//
-// These should be included by the files using the dataArchiver...
-//
-// #include <boost/archive/archive_exception.hpp>
-// #include <boost/serialization/export.hpp>
-// 
-// #include <boost/archive/polymorphic_text_iarchive.hpp>
-// #include <boost/archive/polymorphic_text_oarchive.hpp>
-// #include <boost/archive/polymorphic_binary_iarchive.hpp>
-// #include <boost/archive/polymorphic_binary_oarchive.hpp>
-// 
-// #include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
-// #include <boost/serialization/vector.hpp>        // Need this to serialize std::vectors. 
+#include <boost/archive/archive_exception.hpp>
+#include <boost/serialization/export.hpp>
+
+#include <boost/archive/polymorphic_text_iarchive.hpp>
+#include <boost/archive/polymorphic_text_oarchive.hpp>
+#include <boost/archive/polymorphic_binary_iarchive.hpp>
+#include <boost/archive/polymorphic_binary_oarchive.hpp>
+
+#include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
+#include <boost/serialization/vector.hpp>        // Need this to serialize std::vectors. 
 
 #include <boost/lexical_cast.hpp>
 
