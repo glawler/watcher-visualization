@@ -17,6 +17,9 @@ namespace watcher
 {
     using namespace event;  // for libwatcher and messages. 
 
+    class MessageStream;
+    typedef boost::shared_ptr<MessageStream> MessageStreamPtr;
+
     /** 
      * @class MessageStream
      * @author Geoff Lawler <geoff.lawler@sparta.com>
@@ -26,7 +29,6 @@ namespace watcher
         public ClientMessageHandler, 
         public boost::enable_shared_from_this<MessageStream>
     {
-        public:
             /** 
              * MessageStream()
              * Create a message stream. 
@@ -43,12 +45,19 @@ namespace watcher
              */
              MessageStream(const std::string &serverName, const Timestamp &startTime=0, const float streamRate=1.0); 
 
+        public:
+
+            static MessageStreamPtr createNewMessageStream(
+                    const std::string &serverName, 
+                    const Timestamp &startTime=0, 
+                    const float streamRate=1.0);
+
+            void initConnection();
+
             /**
              * Death to all humans
              */
             virtual ~MessageStream();
-
-            bool init();
 
             /**
              * startStream()
@@ -131,12 +140,12 @@ namespace watcher
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
-        protected:
-
             /**
              * Handle the arrival of a message. Overridden from ClientMessageHandler base class.
              */
             virtual bool handleMessageArrive(const MessagePtr message, MessagePtr &response);
+
+        protected:
 
         private:
             DECLARE_LOGGER();
