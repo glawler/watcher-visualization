@@ -6,8 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "messageHandler.h"
-#include "messageHandlerFactory.h"
+#include "libwatcher/message.h"
 
 using namespace std;
 using namespace watcher;
@@ -259,9 +258,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             //                 this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
 
             if (payloadSize != asio::read(theSocket, asio::buffer(dataPtr->incomingBuffer, payloadSize)))
-            {
                 LOG_ERROR("Unable to read " << payloadSize << " bytes from server. Giving up on message.")
-            }
             else
             {
                 LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it. Payload size: " << payloadSize); 
@@ -273,48 +270,20 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                     LOG_INFO("Successfully parsed response from server for message " << dataPtr->theRequest 
                             << ": " << *dataPtr->theReply);
 
-                    MessageHandlerPtr handler = MessageHandlerFactory::getMessageHandler(dataPtr->theReply->type);
-
-                    if (!handler)
+                    if (!messageHandler)
                     {
-                        LOG_WARN("Received unknown message type - ignoring.")
+                        LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intensional)"); 
                     }
                     else 
                     {
-                        MessagePtr reply;
-                        MessageHandler::ConnectionCommand cmd = handler->handleReply(dataPtr->theRequest, dataPtr->theReply);
-
-                        switch(cmd)
-                        {
-                            case MessageHandler::writeMessage:
-                                {
-                                    LOG_DEBUG("Handler told us to write the message"); 
-                                    break;
-                                }
-                            case MessageHandler::readMessage:
-                                {
-                                    LOG_DEBUG("Handler told us to read a message"); 
-                                    break;
-                                }
-                            case MessageHandler::closeConnection:
-                                {
-                                    LOG_DEBUG("Handler told us to close the connection."); 
-                                    close();
-                                    break;
-                                }
-                            case MessageHandler::stayConnected:
-                                {
-                                    LOG_DEBUG("Handler told us to just stay connected."); 
-                                    break;
-                                }
-                        }
-
+                        MessagePtr theResponse;
+                        if(messageHandler->handleMessageArrive(dataPtr->theReply, theResponse))
+                            if(theResponse!=NULL)
+                                sendMessage(theResponse);
                     }
                 }
                 else if (!result)
-                {
                     LOG_WARN("Unable to parse incoming server response for message " << dataPtr);
-                }
             }
         }
     }
@@ -325,6 +294,13 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
     }
 
     TRACE_EXIT(); 
+}
+
+void ClientConnection::setMessageHandler(MessageHandlerPtr messageHandler_)
+{
+    TRACE_ENTER();
+    messageHandler=messageHandler_;
+    TRACE_EXIT();
 }
 
 // void ClientConnection::handle_read_payload(const boost::system::error_code &e, std::size_t bytes_transferred, const TransferDataPtr &dataPtr)

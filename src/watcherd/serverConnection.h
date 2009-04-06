@@ -18,10 +18,11 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include "messageHandlerFactory.h"
+
+#include "libwatcher/message.h"
 
 #include "dataMarshaller.h"
-#include <libwatcher/message.h>
+#include "messageHandler.h"
 
 namespace watcher 
 {

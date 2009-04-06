@@ -1,23 +1,20 @@
-#ifndef MESSSAGE_HADNERLS_H
-#define MESSSAGE_HADNERLS_H
+#ifndef GOOD_EVENING_ILL_BE_YOUR_SERVER_MESSAGE_HANDLER_THIS_EVENING_WOULD_YOU_CARE_TO_START_WITH_SOME_DRINKS_H
+#define GOOD_EVENING_ILL_BE_YOUR_SERVER_MESSAGE_HANDLER_THIS_EVENING_WOULD_YOU_CARE_TO_START_WITH_SOME_DRINKS_H
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <libwatcher/message.h>
+#include "messageHandler.h"
 
 namespace watcher 
 {
-    class MessageHandler : public boost::noncopyable
+    class ServerMessageHandler : public MessageHandler
     {
         public:
             /// Construct with a directory containing files to be served.
-            MessageHandler();
-            virtual ~MessageHandler(); 
+            ServerMessageHandler();
+            virtual ~ServerMessageHandler(); 
 
             /**
-             * Notification of message arrival. Default does nothing, but log the message. 
-             * Classes which derive from this class should handle the message arrival and if
-             * they want to respond to the message, make 'response' non-null on return.
+             * Notification of message arrival on the server. 
+             *
              * @param[in] - message - the newly arrived message. 
              * @param[out] - response. If non-null, this message will be sent back to the entity
              * which sent 'message' as a response.
@@ -31,8 +28,8 @@ namespace watcher
             DECLARE_LOGGER();
     };
 
-    typedef boost::shared_ptr<MessageHandler> MessageHandlerPtr;
+    typedef boost::shared_ptr<ServerMessageHandler> ServerMessageHandlerPtr;
 
 } // namespace 
 
-#endif // MESSSAGE_HADNERLS_H
+#endif //  GOOD_EVENING_ILL_BE_YOUR_SERVER_MESSAGE_HANDLER_THIS_EVENING_WOULD_YOU_CARE_TO_START_WITH_SOME_DRINKS_H

@@ -10,6 +10,8 @@
 
 TOPDIR=../..
 
+SUBDIRS=. test
+
 # "Fixes" warning in log4cxx about type punning. 
 CPPFLAGS += -fno-strict-aliasing
 
@@ -38,22 +40,48 @@ LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_S
 BUILT_SOURCES=watcherd.cfg watcherd.log.properties 
 
 noinst_LIBRARIES=libfeeder.a libwatcherdAPI.a
+
 libfeeder_a_SOURCES= \
-	messageFactory.cpp singletonConfig.cpp \
-	 serverConnection.cpp dataMarshaller.cpp server.cpp \
-	 clientConnection.cpp messageHandler.cpp messageStatusHandler.cpp \
-	 gpsMessageHandler.cpp messageHandlerFactory.cpp client.cpp \
-	 labelMessageHandler.cpp  edgeMessageHandler.cpp testMessageHandler.cpp \
-	 colorMessageHandler.cpp watcherd.cpp dataRequestMessageHandler.cpp \
-	 watcherdClientConnection.cpp
+	clientConnection.cpp \
+	client.cpp \
+	clientMessageHandler.cpp \
+	dataMarshaller.cpp \
+	messageFactory.cpp \
+	messageHandler.cpp \
+	singletonConfig.cpp \
+	dataMarshaller.cpp \
+	messageFactory.cpp \
+	messageHandler.cpp \
+	messageStream.cpp \
+	messageStreamFilter.cpp \
+	serverConnection.cpp \
+	server.cpp \
+	serverMessageHandler.cpp \
+	singletonConfig.cpp 
+
 libwatcherdAPI_a_SOURCES= \
-	 messageStream.cpp clientConnection.cpp messageStreamFilter.cpp
+	clientConnection.cpp \
+	client.cpp \
+	clientMessageHandler.cpp \
+	dataMarshaller.cpp \
+	messageFactory.cpp \
+	messageHandler.cpp \
+	singletonConfig.cpp \
+	dataMarshaller.cpp \
+	messageFactory.cpp \
+	messageHandler.cpp \
+	messageStream.cpp \
+	messageStreamFilter.cpp \
+	serverConnection.cpp \
+	server.cpp \
+	serverMessageHandler.cpp \
+	singletonConfig.cpp 
 
 bin_PROGRAMS=watcherd gpsMessageTest labelMessageTest edgeMessageTest colorMessageTest dataRequestMessageTest testCC
-watcherd_SOURCES=watcherdMain.cpp
+watcherd_SOURCES=watcherdMain.cpp watcherd.cpp
 
 ctags:
-	ctags -R .. 
+	ctags -R $(TOPDIR)
 
 watcherd.cfg: 
 	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample

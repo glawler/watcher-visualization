@@ -29,6 +29,8 @@ _$*
 *.log
 core
 depend
+*.cfg 
+*.properties
 
 # some automake/autoconf/libtool things
 stamp-h1
@@ -54,12 +56,9 @@ syntax: regexp
 # Ignore qt generated files. 
 ^src/watcher/moc_.*.cpp$
 ^src/watcher/ui_watcher.h$
-^src/watcher/log.properties$
 
 # ignore bins and conf files.
 ^src/watcher/watcher$
-^src/watcher/watcher.cfg$
-^src/watcher/watcher.log.properties$
 ^src/watcher/legacyWatcher/depend$
 ^src/watcher/legacyWatcher/watcher$
 ^src/watcher/Makefile$
@@ -111,8 +110,6 @@ syntax: regexp
 # ignore Pyro files.
 ^src/Pyro-3.8.1/*
 
-^etc/nerod.sample.cfg
-
 #
 # watcherd
 # 
@@ -121,8 +118,6 @@ syntax: regexp
 
 
 ^src/watcherd/client
-^src/watcherd/log.properties
-^src/watcherd/watcherd.cfg
 ^src/watcherd/watcherd
 ^src/watcherd/depend
 ^src/watcherd/gpsMessageTest
@@ -133,6 +128,8 @@ syntax: regexp
 ^src/watcherd/dataRequestMessageTest
 ^src/watcherd/testCC
 ^src/watcherd/Makefile.local
+^src/watcherd/test/Makefile
+^src/watcherd/test/testMessageStream
 
 ^src/libwatcher/Makefile
 ^src/libwatcher/Makefile.local
@@ -147,8 +144,12 @@ syntax: regexp
 ^src/libwatcher/test/archived.txt
 ^src/libwatcher/test/archived.dat
 ^src/libwatcher/test/testMessage
-^src/libwatcher/test/log.properties
 ^src/libwatcher/test/Makefile.local
+^src/libwatcher/test/testSeekMessage
+^src/libwatcher/test/testSpeedMessage
+^src/libwatcher/test/testStartMessage
+^src/libwatcher/test/testStopMessage
+
 
 ^src/util/Makefile
 ^src/logger/Makefile
@@ -157,7 +158,6 @@ syntax: regexp
 # watcherHierarcyClient
 #
 ^src/watcherHierarchyClient/depend
-^src/watcherHierarchyClient/log.properties
 ^src/watcherHierarchyClient/watcherHierarchyClient
 
 #

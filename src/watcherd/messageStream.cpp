@@ -1,3 +1,4 @@
+#include <boost/pointer_cast.hpp>
 #include "messageStream.h"
 
 using namespace watcher;
@@ -6,9 +7,22 @@ using namespace std;
 
 INIT_LOGGER(MessageStream, "MessageStream");
 
-MessageStream::MessageStream(const string &serverName, const Timestamp &startTime, const float streamRate)
+MessageStream::MessageStream(const string &serverName_, const Timestamp &startTime_, const float streamRate_) : 
+    messageStreamFilters(),
+    streamRate(streamRate_),
+    streamStartTime(startTime_),
+    connection(new Client(serverName_))
 {
     TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+bool MessageStream::init()
+{
+    TRACE_ENTER();
+    ClientMessageHandlerPtr tmp(shared_from_this());
+    LOG_DEBUG("Setting message handler to this class. this pointer: " << tmp); 
+    connection->setMessageHandler(tmp); 
     TRACE_EXIT();
 }
 
@@ -18,6 +32,7 @@ MessageStream::~MessageStream()
     TRACE_ENTER();
     TRACE_EXIT();
 }
+
 bool MessageStream::setStreamTimeStart(const Timestamp &startTime)
 {
     TRACE_ENTER()
@@ -85,6 +100,17 @@ bool MessageStream::stopStream()
     // return retVal;
     TRACE_EXIT_RET("true"); 
     return true;
+}
+
+//virtual 
+bool MessageStream::handleMessageArrive(const MessagePtr message, MessagePtr &response)
+{
+    TRACE_ENTER();
+
+    bool retVal=ClientMessageHandler::handleMessageArrive(message, response);
+
+    TRACE_EXIT_RET((retVal==true?"true":"false"));
+    return retVal;
 }
 
 std::ostream &operator<<(std::ostream &out, const MessageStream &messStream)

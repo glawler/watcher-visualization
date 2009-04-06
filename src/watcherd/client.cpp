@@ -10,10 +10,17 @@ Client::Client(
         const std::string& service_) :
     ioService(),
     server(server_),
-    service(service_)
+    service(service_),
+    clientConnection(new ClientConnection(ioService, server, service))
+
 {
     TRACE_ENTER();
-    watcherdClientConnection = WatcherdClientConnectionPtr(new WatcherdClientConnection(ioService, server, service));
+    TRACE_EXIT();
+}
+
+Client::~Client()
+{
+    TRACE_ENTER();
     TRACE_EXIT();
 }
 
@@ -21,7 +28,7 @@ bool Client::sendMessage(const MessagePtr request)
 {
     TRACE_ENTER(); 
 
-    bool retVal=watcherdClientConnection->sendMessage(request);
+    bool retVal=clientConnection->sendMessage(request);
     ioService.run();
     ioService.reset();
 
@@ -29,4 +36,9 @@ bool Client::sendMessage(const MessagePtr request)
     return retVal;
 }
 
-
+void Client::setMessageHandler(MessageHandlerPtr messageHandler)
+{
+    TRACE_ENTER();
+    clientConnection->setMessageHandler(messageHandler); 
+    TRACE_EXIT();
+}
