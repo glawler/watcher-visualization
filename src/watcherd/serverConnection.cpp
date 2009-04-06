@@ -13,6 +13,7 @@
 #include <libwatcher/message.h>
 #include <libwatcher/messageStatus.h>
 
+#include "messageFactory.h"
 #include "dataMarshaller.h"
 
 namespace watcher {
@@ -26,9 +27,6 @@ namespace watcher {
         messageHandler(messageHandler_)
     {
         TRACE_ENTER(); 
-
-        request=MessagePtr(new Message);
-
         TRACE_EXIT();
     }
 
@@ -63,14 +61,16 @@ namespace watcher {
 
             boost::logic::tribool result;
             size_t payloadSize;
-
-            if (!dataMarshaller.unmarshalHeader(incomingBuffer.begin(), bytes_transferred, payloadSize))
+            unsigned int messageType;
+            if (!dataMarshaller.unmarshalHeader(incomingBuffer.begin(), bytes_transferred, payloadSize, messageType))
             {
                 LOG_ERROR("Error parsing incoming message header.");
             }
             else
             {
                 LOG_DEBUG("Reading message payload of " << payloadSize << " bytes.");
+
+                MessagePtr newMessage=MessageFactory::makeMessage(static_cast<MessageType>(messageType)); 
                 boost::asio::async_read(
                                         socket_, 
                                         boost::asio::buffer(incomingBuffer, payloadSize), 
@@ -79,7 +79,8 @@ namespace watcher {
                                                                  &ServerConnection::handle_read_payload,
                                                                  shared_from_this(),
                                                                  boost::asio::placeholders::error,
-                                                                 boost::asio::placeholders::bytes_transferred)));
+                                                                 boost::asio::placeholders::bytes_transferred, 
+                                                                 newMessage)));
             }
         }
         else
@@ -97,32 +98,32 @@ namespace watcher {
         TRACE_EXIT();
     }
 
-    void ServerConnection::handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred)
+    void ServerConnection::handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred, MessagePtr newMessage)
     {
         TRACE_ENTER();
 
         if (!e)
         {
-            if (dataMarshaller.unmarshalPayload(*request, incomingBuffer.begin(), bytes_transferred))
+            if (dataMarshaller.unmarshalPayload(*newMessage, incomingBuffer.begin(), bytes_transferred))
             {
                 boost::asio::ip::address nodeAddr(socket_.remote_endpoint().address()); 
 
-                LOG_INFO("Recvd message from " << nodeAddr <<  " :" << *request); 
+                LOG_INFO("Recvd message from " << nodeAddr <<  " :" << *newMessage); 
 
                 MessagePtr reply;
-                if(messageHandler->handleMessageArrive(request, reply))
+                if(messageHandler->handleMessageArrive(newMessage, reply))
                 {
-                    // LOG_DEBUG("Sending back a message (at " << reply "): " << *reply); 
-                    LOG_DEBUG("Sending back a message (at " << reply << "): " << reply); 
+                    LOG_DEBUG("Sending back a message (at " << reply << "): " << *reply); 
 
                     // Keep track of this reply in case of write error
                     // and so we know when to stop sending replays and we can 
                     // close the socket to the client.
+                    // GTL Should put a lock around this push_back()
                     replies.push_back(reply); 
 
                     LOG_DEBUG("Marshalling outbound message"); 
                     OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                    dataMarshaller.marshal(*reply, *obDataPtr);
+                    dataMarshaller.marshal(*reply, reply->type, *obDataPtr);
                     LOG_INFO("Sending reply: " << *reply);
                     boost::asio::async_write(socket_, *obDataPtr, 
                             strand_.wrap(
@@ -138,9 +139,10 @@ namespace watcher {
                 LOG_WARN("Did not understand incoming message. Sending back a nack");
                 MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
                 OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(*reply, *obDataPtr);
+                dataMarshaller.marshal(*reply, reply->type, *obDataPtr);
                 LOG_INFO("Sending NACK as reply: " << *reply);
 
+                // GTL Should put a lock around this push_back()
                 replies.push_back(reply);
                 boost::asio::async_write(
                         socket_, 
@@ -184,7 +186,7 @@ namespace watcher {
                 LOG_DEBUG("Still more replies to send, sending next one."); 
                 LOG_DEBUG("Marshalling outbound message"); 
                 OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(*replies.front(), *obDataPtr);
+                dataMarshaller.marshal(*replies.front(), replies.front()->type, *obDataPtr);
                 LOG_DEBUG("Sending reply message: " << *replies.front());
                 boost::asio::async_write(socket_, *obDataPtr, 
                                          strand_.wrap(

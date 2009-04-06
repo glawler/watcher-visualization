@@ -1,5 +1,6 @@
-#include <boost/pointer_cast.hpp>
 #include "messageStream.h"
+#include "libwatcher/startWatcherMessage.h"
+#include "libwatcher/stopWatcherMessage.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -17,12 +18,20 @@ MessageStream::MessageStream(const string &serverName_, const Timestamp &startTi
     TRACE_EXIT();
 }
 
-bool MessageStream::init()
+// static 
+MessageStreamPtr MessageStream::createNewMessageStream(const string &serverName_, const Timestamp &startTime_, const float streamRate_)
 {
     TRACE_ENTER();
-    ClientMessageHandlerPtr tmp(shared_from_this());
-    LOG_DEBUG("Setting message handler to this class. this pointer: " << tmp); 
-    connection->setMessageHandler(tmp); 
+    MessageStreamPtr retVal(new MessageStream(serverName_,startTime_,streamRate_));
+    retVal->initConnection(); 
+    TRACE_EXIT();
+    return retVal;
+}
+
+void MessageStream::initConnection() 
+{
+    TRACE_ENTER();
+    connection->setMessageHandler(shared_from_this()); 
     TRACE_EXIT();
 }
 
@@ -48,6 +57,7 @@ bool MessageStream::setStreamRate(const float &messageStreamRate)
 bool MessageStream::getNextMessage(MessagePtr newMessage)
 {
     TRACE_ENTER();
+    sleep(1000000); 
     TRACE_EXIT_RET("true");
     return true;
 }
@@ -84,31 +94,25 @@ std::ostream &MessageStream::toStream(std::ostream &out) const
 bool MessageStream::startStream()
 {
     TRACE_ENTER();
-    // startWatcherMessagePtr mess(new startWatcherMessage); 
-    // bool retVal=connection.sendMessage(mess); 
-    // TRACE_EXIT_RET((retVal==true?"true":"false")); 
-    // return retVal;
-    TRACE_EXIT_RET("true"); 
-    return true;
+    StartMessagePtr mess(new StartMessage); 
+    bool retVal=connection->sendMessage(mess); 
+    TRACE_EXIT_RET((retVal==true?"true":"false")); 
+    return retVal;
 }
 bool MessageStream::stopStream()
 {
     TRACE_ENTER();
-    // stopWatcherMessagePtr mess(new stopWatcherMessage); 
-    // bool retVal=connection.sendMessage(mess); 
-    // TRACE_EXIT_RET((retVal==true?"true":"false")); 
-    // return retVal;
-    TRACE_EXIT_RET("true"); 
-    return true;
+    StopMessagePtr mess(new StopMessage); 
+    bool retVal=connection->sendMessage(mess); 
+    TRACE_EXIT_RET((retVal==true?"true":"false")); 
+    return retVal;
 }
 
 //virtual 
 bool MessageStream::handleMessageArrive(const MessagePtr message, MessagePtr &response)
 {
     TRACE_ENTER();
-
     bool retVal=ClientMessageHandler::handleMessageArrive(message, response);
-
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
 }

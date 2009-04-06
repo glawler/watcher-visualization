@@ -5,8 +5,8 @@
 #include "nodeStatusMessage.h"
 
 namespace watcher {
-    namespace watchapi {
-        INIT_LOGGER(NodeStatusMessage, "WatcherMessage.NodeStatusMessage");
+    namespace event {
+        INIT_LOGGER(NodeStatusMessage, "Message.NodeStatusMessage");
 
         // NodeStatusMessage(const statusEvent &event_) : event(event_)
         // {

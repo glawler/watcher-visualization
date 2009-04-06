@@ -5,10 +5,16 @@
 #include <boost/serialization/export.hpp>
 #include "startWatcherMessage.h"
 
-BOOST_CLASS_EXPORT_GUID(watcher::watchapi::StartMessage, "StartMessage");
+BOOST_CLASS_EXPORT_GUID(watcher::event::StartMessage, "StartMessage");
 
 namespace watcher {
-    namespace watchapi {
-        INIT_LOGGER(StartMessage, "WatcherMessage.StartMessage");
+    namespace event {
+        INIT_LOGGER(StartMessage, "Message.StartMessage");
+
+        StartMessage::StartMessage(): Message(START_MESSAGE_TYPE, START_MESSAGE_VERSION)
+        {
+            TRACE_ENTER();
+            TRACE_EXIT();
+        }
     }
 }

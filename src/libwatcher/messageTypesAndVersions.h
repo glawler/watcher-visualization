@@ -10,6 +10,7 @@ namespace watcher {
         //
         typedef enum 
         {
+            // feeder API messages
             UNKNOWN_MESSAGE_TYPE      = 0x0,
             MESSAGE_STATUS_TYPE       = 0x1,
             TEST_MESSAGE_TYPE         = 0x2,
@@ -18,6 +19,12 @@ namespace watcher {
             EDGE_MESSAGE_TYPE         = 0x5,
             COLOR_MESSAGE_TYPE        = 0x6,
             DATA_REQUEST_MESSAGE_TYPE = 0x7,
+
+            // watcherdAPI messages
+            SEEK_MESSAGE_TYPE         = 0x8,
+            START_MESSAGE_TYPE        = 0x9,
+            STOP_MESSAGE_TYPE         = 0xA,
+            SPEED_MESSAGE_TYPE        = 0xB,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
@@ -36,6 +43,11 @@ namespace watcher {
         const unsigned int EDGE_MESSAGE_VERSION         = 1;
         const unsigned int COLOR_MESSAGE_VERSION        = 1;
         const unsigned int DATA_REQUEST_MESSAGE_VERSION = 1;
+
+        const unsigned int SEEK_MESSAGE_VERSION         = 1;
+        const unsigned int START_MESSAGE_VERSION        = 1;
+        const unsigned int STOP_MESSAGE_VERSION         = 1;
+        const unsigned int SPEED_MESSAGE_VERSION        = 1;
 
         //
         // GUI bits in the watcher have a concept of a layer which can be turned on or off.

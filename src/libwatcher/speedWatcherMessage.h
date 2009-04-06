@@ -8,14 +8,14 @@
 #include "watcherMessage.h"
 
 namespace watcher {
-    namespace watchapi {
+    namespace event {
 
         /**
          * Set playback speed of event stream.
          * @author Michael Elkins <michael.elkins@sparta.com>
          * @date 2009-03-20
          */
-        class SpeedMessage : public WatcherMessage {
+        class SpeedMessage : public Message {
             private:
                 friend class boost::serialization::access;
                 template <typename Archive> void serialize(Archive & ar, const unsigned int version);
@@ -32,10 +32,12 @@ namespace watcher {
         void SpeedMessage::serialize(Archive & ar, const unsigned int version)
         {
             TRACE_ENTER();
-            ar & boost::serialization::base_object<WatcherMessage>(*this);
+            ar & boost::serialization::base_object<Message>(*this);
             ar & speed;
             TRACE_EXIT();
         }
+
+        typedef boost::shared_ptr<SpeedMessage> SpeedMessagePtr;
     }
 }
 #endif

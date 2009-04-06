@@ -2,7 +2,7 @@
 # May break things, don't know.
 #PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
 #ifneq (${PROCCOUNT}, 0)
-#	MAKEFLAGS+=-j $(PROCCOUNT)
+#      MAKEFLAGS+=-j $(PROCCOUNT)
 #endif
 
 # melkins - compilation for Fedora 10
@@ -77,7 +77,16 @@ libwatcherdAPI_a_SOURCES= \
 	serverMessageHandler.cpp \
 	singletonConfig.cpp 
 
-bin_PROGRAMS=watcherd gpsMessageTest labelMessageTest edgeMessageTest colorMessageTest dataRequestMessageTest testCC
+bin_PROGRAMS= \
+	watcherd \
+	gpsMessageTest \
+	labelMessageTest \
+	edgeMessageTest \
+	colorMessageTest \
+	dataRequestMessageTest \
+	testCC \
+	messageStream2Text
+
 watcherd_SOURCES=watcherdMain.cpp watcherd.cpp
 
 ctags:

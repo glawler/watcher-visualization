@@ -8,7 +8,7 @@
 
 using namespace std;
 using namespace watcher;
-using namespace watcher::watchapi;
+using namespace watcher::event;
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {

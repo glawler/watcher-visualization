@@ -10,14 +10,14 @@
 
 namespace watcher 
 {
-    namespace watchapi 
+    namespace event 
     {
         /**
          * Notify GUI of node connection event.
          * @author Geoff Lawler <geoff.lawler@sparta.com>
          * @date 2009-03-23
          */
-        class NodeStatusMessage : public WatcherMessage 
+        class NodeStatusMessage : public Message 
         {
             public:
                 enum statusEvent 
@@ -40,7 +40,7 @@ namespace watcher
         template <typename Archive> void NodeStatusMessage::serialize(Archive & ar, const unsigned int version)
         {
             TRACE_ENTER();
-            ar & boost::serialization::base_object<WatcherMessage>(*this);
+            ar & boost::serialization::base_object<Message>(*this);
             ar & event;
             ar & nodeId;
             TRACE_EXIT();

@@ -7,6 +7,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "libwatcher/message.h"
+#include "messageFactory.h"
 
 using namespace std;
 using namespace watcher;
@@ -135,6 +136,8 @@ bool ClientConnection::sendMessage(const MessagePtr message)
     if (!connected)
         doConnect();
 
+    // GTL - may want to marshal here. If there is an error, then don't bother connecting. 
+
     ioService.post(bind(&ClientConnection::doWrite, this, message));
 
     TRACE_EXIT_RET("true");
@@ -166,9 +169,10 @@ void ClientConnection::doWrite(const MessagePtr &message)
     {
         LOG_DEBUG("Marshaling outbound message"); 
         outBuffers.clear(); 
-        if (!dataMarshaller.marshal(*dataPtr->theRequest, outBuffers))
+        if (!dataMarshaller.marshal(*dataPtr->theRequest, dataPtr->theRequest->type, outBuffers))
         {
             LOG_WARN("Error marshaling message, not sending"); 
+            transferData.pop_back(); 
             TRACE_EXIT(); 
             return;
         }
@@ -210,7 +214,7 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
         if (!transferData.empty())
         {
             outBuffers.clear(); 
-            dataMarshaller.marshal(*dataPtr->theRequest, outBuffers);
+            dataMarshaller.marshal(*dataPtr->theRequest, dataPtr->theRequest->type, outBuffers);
             LOG_DEBUG("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest << ")");
             int numBytes=0;
             for(OutBuffers::const_iterator i = outBuffers.begin(); i !=  outBuffers.end(); ++i)
@@ -241,13 +245,14 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
     {
         LOG_DEBUG("Recv'd header"); 
         size_t payloadSize;
-        if (!dataMarshaller.unmarshalHeader(&dataPtr->incomingBuffer[0], bytes_transferred, payloadSize))
+        unsigned int messageType;
+        if (!dataMarshaller.unmarshalHeader(&dataPtr->incomingBuffer[0], bytes_transferred, payloadSize, messageType))
         {
             LOG_ERROR("Unable to parse incoming message header"); 
         }
         else
         {
-            LOG_DEBUG("Parsed header - now reading payload of size " << payloadSize); 
+            LOG_DEBUG("Parsed header - now reading payload type " << messageType << " of size " << payloadSize); 
 
             // GTL - Wanted to do an async read for the payload, but kept getting handle_read_header called before handle_read_payload.
             // So now the payload is read in sync, which should still be fast as the payload always directly follows the header. 
@@ -262,8 +267,8 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             else
             {
                 LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it. Payload size: " << payloadSize); 
-
-                bool result = dataMarshaller.unmarshalPayload(*dataPtr->theReply, &dataPtr->incomingBuffer[0], payloadSize); 
+                MessagePtr arrivedMessage=MessageFactory::makeMessage(static_cast<MessageType>(messageType)); 
+                bool result = dataMarshaller.unmarshalPayload(*arrivedMessage, &dataPtr->incomingBuffer[0], payloadSize); 
 
                 if (result)
                 {
@@ -277,7 +282,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                     else 
                     {
                         MessagePtr theResponse;
-                        if(messageHandler->handleMessageArrive(dataPtr->theReply, theResponse))
+                        if(messageHandler->handleMessageArrive(arrivedMessage, theResponse))
                             if(theResponse!=NULL)
                                 sendMessage(theResponse);
                     }
