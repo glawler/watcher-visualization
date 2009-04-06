@@ -8,6 +8,8 @@
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
 
+#include <boost/serialization/shared_ptr.hpp>  // Need this to serialize shared_ptrs. 
+
 #include <libwatcher/edgeMessage.h>
 #include "logger.h"
 
