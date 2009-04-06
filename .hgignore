@@ -150,6 +150,7 @@ syntax: regexp
 ^src/libwatcher/test/testSpeedMessage
 ^src/libwatcher/test/testStartMessage
 ^src/libwatcher/test/testStopMessage
+^src/libwatcher/test/testTestMessage
 
 
 ^src/util/Makefile

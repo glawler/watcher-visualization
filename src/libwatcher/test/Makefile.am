@@ -11,10 +11,11 @@ LDADD += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOS
 TESTS=testLabelMessage testEdgeMessage testStartMessage testStopMessage testSeekMessage \
       testSpeedMessage
 bin_PROGRAMS=testLabelMessage testEdgeMessage testStartMessage testStopMessage testSeekMessage \
-	     testSpeedMessage
+	     testSpeedMessage testTestMessage
 testLabelMessage_SOURCES=testLabelMessage.cpp
 testEdgeMessage_SOURCES=testEdgeMessage.cpp
 testStartMessage_SOURCES=testStartMessage.cpp
 testStopMessage_SOURCES=testStopMessage.cpp
 testSeekMessage_SOURCES=testSeekMessage.cpp
 testSpeedMessage_SOURCES=testSpeedMessage.cpp
+testTestMessage_SOURCES=testTestMessage.cpp
