@@ -37,6 +37,20 @@ namespace watcher {
                     out << static_cast<int>(DATA_REQUEST_MESSAGE_TYPE) << " (data request)";
                     break;
 
+                case SEEK_MESSAGE_TYPE:
+                    out << static_cast<int>(SEEK_MESSAGE_TYPE) << " (seek)";
+                    break;
+                case START_MESSAGE_TYPE:
+                    out << static_cast<int>(START_MESSAGE_TYPE) << " (start)";
+                    break;
+                case STOP_MESSAGE_TYPE:
+                    out << static_cast<int>(STOP_MESSAGE_TYPE) << " (stop)";
+                    break;
+                case SPEED_MESSAGE_TYPE:
+                    out << static_cast<int>(SPEED_MESSAGE_TYPE) << " (speed)";
+                    break;
+
+
                 case USER_DEFINED_MESSAGE_TYPE: 
                     out << static_cast<int>(USER_DEFINED_MESSAGE_TYPE) << " (user defined)";
                     break;

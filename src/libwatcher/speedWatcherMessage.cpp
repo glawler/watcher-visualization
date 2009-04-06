@@ -5,16 +5,16 @@
 #include <boost/serialization/export.hpp>
 #include "speedWatcherMessage.h"
 
-BOOST_CLASS_EXPORT_GUID(watcher::watchapi::SpeedMessage, "SpeedMessage");
+BOOST_CLASS_EXPORT_GUID(watcher::event::SpeedMessage, "SpeedMessage");
 
 namespace watcher {
-    namespace watchapi {
+    namespace event {
         /**
          * Set the playback speed of the event stream.
          * A negative value indicates reverse direction.
          */
         SpeedMessage::SpeedMessage(float speed_)
-            : speed(speed_)
+            : Message(SPEED_MESSAGE_TYPE, SPEED_MESSAGE_VERSION), speed(speed_)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -25,6 +25,6 @@ namespace watcher {
             return o << "SpeedMessage(speed=" << rhs.speed << ')';
         }
 
-        INIT_LOGGER(SpeedMessage, "WatcherMessage.SpeedMessage");
+        INIT_LOGGER(SpeedMessage, "Message.SpeedMessage");
     }
 }

@@ -8,14 +8,14 @@
 #include "watcherMessage.h"
 
 namespace watcher {
-    namespace watchapi {
+    namespace event {
 
         /**
          * Seek to a particular point in time in the event stream
          * @author Michael Elkins <michael.elkins@sparta.com>
          * @date 2009-03-20
          */
-        class SeekMessage : public WatcherMessage {
+        class SeekMessage : public Message {
             public:
                 /** Type representing how to interpet an offset */
                 enum whence {
@@ -40,7 +40,7 @@ namespace watcher {
         void SeekMessage::serialize(Archive& ar, const unsigned int version)
         {
             TRACE_ENTER();
-            ar & boost::serialization::base_object<WatcherMessage>(*this);
+            ar & boost::serialization::base_object<Message>(*this);
             ar & offset;
             ar & rel;
             TRACE_EXIT();
