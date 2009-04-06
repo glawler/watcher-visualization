@@ -3,19 +3,23 @@
 #define BOOST_TEST_MODULE watcher::Message.TestMessage test
 #include <boost/test/unit_test.hpp>
 
-#include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
-#include <boost/serialization/vector.hpp>        // Need this to serialize std::vectors. 
-
 #include <boost/archive/polymorphic_text_iarchive.hpp>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
+#include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
+#include <boost/serialization/vector.hpp>        // Need this to serialize std::vectors. 
 
 #include "libwatcher/testMessage.h"
 #include "logger.h"
 
 using namespace std;
 using namespace boost;
+using namespace boost::archive;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
@@ -49,12 +53,12 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
     {
         TestMessage tmOut(strVal, ints); 
         ostringstream os; 
-        archive::polymorphic_binary_oarchive oa(os);
+        polymorphic_binary_oarchive oa(os);
         oa << tmOut; 
 
         TestMessage tmIn;
         istringstream is(os.str());
-        archive::polymorphic_binary_iarchive ia(is);
+        polymorphic_binary_iarchive ia(is);
         ia >> tmIn;
 
         LOG_DEBUG("tmOut: " << tmOut); 
@@ -64,25 +68,26 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
     {
         TestMessagePtr tmpOut(new TestMessage(strVal, ints));
         ostringstream os; 
-        archive::polymorphic_binary_oarchive oa(os);
+        text_oarchive oa(os);
         oa << tmpOut; 
 
         TestMessagePtr tmpIn;
         istringstream is(os.str());
-        archive::polymorphic_binary_iarchive ia(is);
+        text_iarchive ia(is);
         ia >> tmpIn;
 
         LOG_DEBUG("*tmpOut: " << *tmpOut); 
-        LOG_DEBUG("*tmpIn: " << *tmpIn); 
+        LOG_DEBUG(" *tmpIn: " << *tmpIn); 
+        LOG_DEBUG("     os: " << os.str());
         BOOST_CHECK_EQUAL( *tmpOut, *tmpIn);
 
         MessagePtr mpIn;
         is.str(os.str());
-        archive::polymorphic_binary_iarchive ia2(is);
+        text_iarchive ia2(is);
         ia2 >> mpIn;
 
         LOG_DEBUG("*tmpOut: " << *tmpOut); 
-        LOG_DEBUG("* mpIn: " << * mpIn); 
+        LOG_DEBUG("  *mpIn: " << * mpIn); 
 
         LOG_ERROR("GTL - this next line actually fails. It should work, but does not."); 
         TestMessagePtr dmpIn=boost::dynamic_pointer_cast<TestMessage>(mpIn); 

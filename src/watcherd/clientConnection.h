@@ -7,11 +7,17 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 
+#include <boost/archive/polymorphic_text_iarchive.hpp>
+#include <boost/archive/polymorphic_text_oarchive.hpp>
+#include <boost/archive/polymorphic_binary_iarchive.hpp>
+#include <boost/archive/polymorphic_binary_oarchive.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/vector.hpp>
+#include "dataMarshaller.h"
+
 #include "libwatcher/message.h"
 
 #include "messageHandler.h"
-#include "dataMarshaller.h"
-
 namespace watcher 
 {
     /// Represents a single connection from a client.

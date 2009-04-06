@@ -2,14 +2,6 @@
 #include <vector>
 #include <boost/bind.hpp>
 
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
-
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/vector.hpp>
-
 #include <libwatcher/message.h>
 #include <libwatcher/messageStatus.h>
 
@@ -71,6 +63,7 @@ namespace watcher {
                 LOG_DEBUG("Reading message payload of " << payloadSize << " bytes.");
 
                 MessagePtr newMessage=MessageFactory::makeMessage(static_cast<MessageType>(messageType)); 
+                LOG_DEBUG("Createsd empty message to deserialize into: " << *newMessage); 
                 boost::asio::async_read(
                                         socket_, 
                                         boost::asio::buffer(incomingBuffer, payloadSize), 
@@ -104,7 +97,7 @@ namespace watcher {
 
         if (!e)
         {
-            if (dataMarshaller.unmarshalPayload(*newMessage, incomingBuffer.begin(), bytes_transferred))
+            if (dataMarshaller.unmarshalPayload(newMessage, incomingBuffer.begin(), bytes_transferred))
             {
                 boost::asio::ip::address nodeAddr(socket_.remote_endpoint().address()); 
 
@@ -123,7 +116,7 @@ namespace watcher {
 
                     LOG_DEBUG("Marshalling outbound message"); 
                     OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                    dataMarshaller.marshal(*reply, reply->type, *obDataPtr);
+                    dataMarshaller.marshal(reply, reply->type, *obDataPtr);
                     LOG_INFO("Sending reply: " << *reply);
                     boost::asio::async_write(socket_, *obDataPtr, 
                             strand_.wrap(
@@ -139,7 +132,7 @@ namespace watcher {
                 LOG_WARN("Did not understand incoming message. Sending back a nack");
                 MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
                 OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(*reply, reply->type, *obDataPtr);
+                dataMarshaller.marshal(reply, reply->type, *obDataPtr);
                 LOG_INFO("Sending NACK as reply: " << *reply);
 
                 // GTL Should put a lock around this push_back()
@@ -186,7 +179,7 @@ namespace watcher {
                 LOG_DEBUG("Still more replies to send, sending next one."); 
                 LOG_DEBUG("Marshalling outbound message"); 
                 OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(*replies.front(), replies.front()->type, *obDataPtr);
+                dataMarshaller.marshal(replies.front(), replies.front()->type, *obDataPtr);
                 LOG_DEBUG("Sending reply message: " << *replies.front());
                 boost::asio::async_write(socket_, *obDataPtr, 
                                          strand_.wrap(

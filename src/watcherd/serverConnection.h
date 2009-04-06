@@ -20,9 +20,9 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include "libwatcher/message.h"
+#include "messageHandler.h"
 
 #include "dataMarshaller.h"
-#include "messageHandler.h"
 
 namespace watcher 
 {

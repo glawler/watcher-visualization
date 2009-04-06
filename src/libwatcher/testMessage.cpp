@@ -18,13 +18,6 @@ namespace watcher {
             intsData()
         {
             TRACE_ENTER();
-            stringData="Hello world";
-            intsData.push_back(1);
-            intsData.push_back(666);
-            intsData.push_back(2);
-            intsData.push_back(666);
-            intsData.push_back(3);
-            intsData.push_back(668);
             TRACE_EXIT();
         }
 
