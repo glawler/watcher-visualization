@@ -8,6 +8,10 @@
 #include "libwatcher/messageStatus.h"
 #include "libwatcher/dataRequestMessage.h"
 #include "libwatcher/testMessage.h"
+#include "libwatcher/seekWatcherMessage.h"
+#include "libwatcher/startWatcherMessage.h"
+#include "libwatcher/stopWatcherMessage.h"
+#include "libwatcher/speedWatcherMessage.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -19,37 +23,48 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
 {
     switch(type)
     {
-        case UNKNOWN_MESSAGE_TYPE: 
-            return boost::shared_ptr<Message>(); 
-            break;
         case MESSAGE_STATUS_TYPE:
-            return boost::shared_ptr<MessageStatus>(new MessageStatus);
+            return MessageStatusPtr(new MessageStatus);
             break;
         case TEST_MESSAGE_TYPE:
-            return boost::shared_ptr<TestMessage>(new TestMessage);
+            return TestMessagePtr(new TestMessage);
             break; 
         case GPS_MESSAGE_TYPE:
-            return boost::shared_ptr<GPSMessage>(new GPSMessage);
+            return GPSMessagePtr(new GPSMessage);
             break;
         case LABEL_MESSAGE_TYPE:
-            return boost::shared_ptr<LabelMessage>(new LabelMessage);
+            return LabelMessagePtr(new LabelMessage);
             break;
         case EDGE_MESSAGE_TYPE:
-            return boost::shared_ptr<EdgeMessage>(new EdgeMessage);
+            return EdgeMessagePtr(new EdgeMessage);
             break;
         case COLOR_MESSAGE_TYPE:
-            return boost::shared_ptr<ColorMessage>(new ColorMessage);
+            return ColorMessagePtr(new ColorMessage);
             break;
         case DATA_REQUEST_MESSAGE_TYPE:
-            return boost::shared_ptr<DataRequestMessage>(new DataRequestMessage);
+            return DataRequestMessagePtr(new DataRequestMessage);
             break;
-        case USER_DEFINED_MESSAGE_TYPE:
+        case SEEK_MESSAGE_TYPE:
+            return SeekMessagePtr(new SeekMessage);
+            break;
+        case START_MESSAGE_TYPE:
+            return StartMessagePtr(new StartMessage);
+            break;
+        case STOP_MESSAGE_TYPE:
+            return StopMessagePtr(new StopMessage);
+            break;
+        case SPEED_MESSAGE_TYPE:
+            return SpeedMessagePtr(new SpeedMessage);
             break;
 
+            // let used defined and unknown fall through - a NULL will be returned.
+        case UNKNOWN_MESSAGE_TYPE: 
+        case USER_DEFINED_MESSAGE_TYPE:
+            break;
             
             // GTL - do not put a default or the compiler
             // won't tell us when we've missed a case.
     }
-    return boost::shared_ptr<Message>(); // == NULL
+    return MessagePtr(); // == NULL
 }
 

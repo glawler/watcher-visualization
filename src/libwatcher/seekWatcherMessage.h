@@ -45,6 +45,8 @@ namespace watcher {
             ar & rel;
             TRACE_EXIT();
         }
+
+        typedef boost::shared_ptr<SeekMessage> SeekMessagePtr;
     }
 }
 #endif

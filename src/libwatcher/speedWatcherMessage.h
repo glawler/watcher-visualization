@@ -36,6 +36,8 @@ namespace watcher {
             ar & speed;
             TRACE_EXIT();
         }
+
+        typedef boost::shared_ptr<SpeedMessage> SpeedMessagePtr;
     }
 }
 #endif
