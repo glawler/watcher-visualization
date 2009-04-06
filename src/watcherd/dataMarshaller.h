@@ -18,9 +18,6 @@
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
 #include <boost/archive/polymorphic_binary_oarchive.hpp>
 
-#include <boost/serialization/shared_ptr.hpp> 
-#include <boost/serialization/vector.hpp> 
-
 #include <boost/lexical_cast.hpp>
 
 #include "logger.h"
@@ -37,10 +34,14 @@ namespace watcher
         public:
             DataMarshaller() { }
 
-            //
-            // Unmarshal a header, returning the length of the payload which follows. 
-            //
-            bool unmarshalHeader(const char *buffer, const size_t &bufferSize, size_t &payloadSize)
+            /**
+             * Unmarshal a header, returning the length of the payload which follows. 
+             * @param[in] - buffer, the buffer which contains the header data
+             * @param[in] - bufferSize, the size of 'buffer'
+             * @param[out] - payloadSize, the size of the payload that the header is attached to.
+             * @param[out] - type, the type of the payload
+             */
+            bool unmarshalHeader(const char *buffer, const size_t &bufferSize, size_t &payloadSize, unsigned int &type)
             {
                 TRACE_ENTER();
                 payloadSize=0;
@@ -56,20 +57,22 @@ namespace watcher
                 }
                 std::string inbound_header(buffer, buffer + header_length);
                 std::stringstream is(inbound_header);
-                if (!(is >> std::hex >> payloadSize))
+                if (!(is >> std::setw(sizeof(std::string::size_type)) >> std::hex >> payloadSize) || 
+                    !(is >> std::setw(sizeof(type)) >> std::hex >> type))
                 {
                     // Header doesn't seem to be valid. Inform the caller.
-                    LOG_DEBUG("Error reading payloadsize from header: "  << strerror(errno)); 
+                    LOG_DEBUG("Error reading payloadsize and type from header: "  << strerror(errno)); 
                     TRACE_EXIT_RET("false");
                     return false;
                 }
                 return true;
             }
             
-            //
-            // Unmarshal a payload of type T. Buffer shuld contain the payload portion of a message of size
-            // given by unmarshalHeader()
-            //
+            /**
+             * Unmarshal a payload of type T. Buffer shuld contain the payload portion of a message of size
+             * given by unmarshalHeader(). T must be boost::serializable.
+             *
+             */
             template<class T>
                 bool unmarshalPayload(T &t, const char *buffer, const size_t &bufferSize)
                 {
@@ -84,7 +87,8 @@ namespace watcher
                         std::stringstream archive_stream(archive_data);
                         boost::archive::polymorphic_text_iarchive archive(archive_stream);
                         archive >> t;
-                        LOG_DEBUG("Unmarshalled payload - size: " << boost::lexical_cast<std::string>(archive_data.size()) << " data: " << archive_data);
+                        LOG_DEBUG("Unmarshalled payload - size: " << boost::lexical_cast<std::string>(archive_data.size()) << 
+                                " data: " << archive_data);
                     }
                     catch (boost::archive::archive_exception& e)
                     {
@@ -106,8 +110,14 @@ namespace watcher
                     return true;
                 }
 
+            /**
+             * Marshal an instance of class T.
+             * @param[in] - T, the instance to marshal.
+             * @param[in] - type, the type of the payload (used to regenerate a T instance when unmarshalling). 
+             * @param[out] - outbuffers, the seraialized instance of T.
+             */
             template<class T>
-                bool marshal(const T &t, std::vector<boost::asio::const_buffer> &outBuffers)
+                bool marshal(const T &t, unsigned int type, std::vector<boost::asio::const_buffer> &outBuffers)
                 { 
                     TRACE_ENTER();
 
@@ -128,11 +138,14 @@ namespace watcher
                         return false;
                     }
 
-                    LOG_DEBUG("Serialized message data"); 
+                    LOG_DEBUG("Serialized " << outbound_data_.size() << " bytes of message data"); 
 
                     // Format the header.
+                    // GTL - may be nice to put the header itself into a class that supports archive/serialization...
                     std::ostringstream header_stream;
-                    header_stream << std::setw(header_length) << std::hex << outbound_data_.size();
+                    header_stream << std::setw(sizeof(std::string::size_type)) << std::hex << outbound_data_.size(); 
+                    header_stream << std::setw(sizeof(type))                   << std::hex << type;
+                    LOG_DEBUG("header_length: " << header_length << " header_stream:" << header_stream << " size: " << header_stream.str().size() << " sizeof: " << sizeof(outbound_data_.size()) + sizeof(type)); 
                     if (!header_stream || header_stream.str().size() != header_length)
                     {
                         TRACE_EXIT_RET("false");
@@ -142,7 +155,8 @@ namespace watcher
 
                     // We can print it as a string as long as we're using text_archive.
                     {
-                        LOG_DEBUG("Outbound payload - size: " << boost::lexical_cast<std::string>(outbound_data_.size()) << " data: " << outbound_data_);
+                        LOG_DEBUG("Outbound payload - size: " << boost::lexical_cast<std::string>(outbound_data_.size()) << 
+                                  " data: " << outbound_data_);
                     }
 
                     outBuffers.push_back(boost::asio::buffer(outbound_header_));
@@ -152,8 +166,10 @@ namespace watcher
                     return true;
                 }
 
-            // The size of a fixed length header.
-            enum { header_length = 8 };
+            /** The size of a fixed length header.
+             * Can be used to allocate a header buffer.
+             */
+            enum { header_length = sizeof(std::string::size_type) + sizeof(unsigned int)  };
 
         private:
 
