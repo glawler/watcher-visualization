@@ -9,12 +9,16 @@
 
 #include <libwatcher/speedWatcherMessage.h>
 
+#include "logger.h"
+
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
+    LOAD_LOG_PROPS("log.properties"); 
+
     /* Ensure the class can be instantiated */
     SpeedMessage m1;
 
@@ -83,6 +87,23 @@ BOOST_AUTO_TEST_CASE ( shared_archive_base_test )
     BOOST_CHECK_NE( *dnewmsg, 0 );
 
     BOOST_CHECK_EQUAL( *dmsg, *dnewmsg );
+
+    // GTL - check that the pointers are pointing to correct vtables
+    LOG_DEBUG("     *msg: " << *msg); 
+    LOG_DEBUG("  *newmsg: " << *newmsg); 
+    LOG_DEBUG("    *dmsg: " << *dmsg); 
+    LOG_DEBUG(" *dnewmsg: " << *dnewmsg); 
+
+    string dStr("SpeedMessage(speed=37)");  // This is the output of operator<< on derived speedTest
+    ostringstream boutput, doutput;
+    boutput << *newmsg;
+    doutput << *dnewmsg; 
+
+    BOOST_CHECK_NE( dStr, boutput.str() );
+    BOOST_CHECK_EQUAL( dStr, doutput.str() );
+
+    LOG_DEBUG("   base: " << boutput.str()); 
+    LOG_DEBUG("derived: " << doutput.str()); 
 }
 
 BOOST_AUTO_TEST_CASE ( shared_poly_archive_base_test )
