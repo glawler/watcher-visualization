@@ -2,6 +2,7 @@
 #define WATCHER_TYPES_HELLO_THERE_H
 
 #include <boost/asio.hpp>
+#include <boost/asio/ip/address.hpp>
 
 namespace watcher 
 {
