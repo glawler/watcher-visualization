@@ -3,6 +3,9 @@
 #define BOOST_TEST_MODULE watcher::Message.TestMessage test
 #include <boost/test/unit_test.hpp>
 
+#include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
+#include <boost/serialization/vector.hpp>        // Need this to serialize std::vectors. 
+
 #include <boost/archive/polymorphic_text_iarchive.hpp>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
 #include <boost/archive/polymorphic_binary_iarchive.hpp>
@@ -19,7 +22,6 @@
 
 using namespace std;
 using namespace boost;
-using namespace boost::archive;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
@@ -85,12 +87,14 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
         is.str(os.str());
         text_iarchive ia2(is);
         ia2 >> mpIn;
+        BOOST_CHECK_NE( mpIn.get(), static_cast<Message*>(0) );
 
         LOG_DEBUG("*tmpOut: " << *tmpOut); 
         LOG_DEBUG("  *mpIn: " << * mpIn); 
 
         LOG_ERROR("GTL - this next line actually fails. It should work, but does not."); 
-        TestMessagePtr dmpIn=boost::dynamic_pointer_cast<TestMessage>(mpIn); 
+        TestMessagePtr dmpIn = dynamic_pointer_cast<TestMessage>(mpIn); 
+        BOOST_CHECK_NE( dmpIn.get(), static_cast<TestMessage*>(0) );
 
         LOG_DEBUG("*dmpIn: " << * dmpIn); 
         BOOST_CHECK_EQUAL( *tmpOut, * dmpIn);

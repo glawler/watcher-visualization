@@ -20,9 +20,9 @@ namespace watcher {
                 friend class boost::serialization::access;
                 template <typename Archive> void serialize(Archive & ar, const unsigned int version);
                 DECLARE_LOGGER();
-                float speed;    //< playback speed.  negative value indicates reverse direction
 
             public:
+                float speed;    //< playback speed.  negative value indicates reverse direction
                 SpeedMessage(float speed = 1.0);
                 bool operator== (const SpeedMessage& rhs) const { return speed == rhs.speed; }
                 friend std::ostream& operator<< (std::ostream& o, const SpeedMessage& rhs);

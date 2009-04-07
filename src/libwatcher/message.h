@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
+#include <boost/serialization/shared_ptr.hpp>
 
 #include "logger.h"
 #include "messageTypesAndVersions.h"
