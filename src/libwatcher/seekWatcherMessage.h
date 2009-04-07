@@ -23,6 +23,10 @@ namespace watcher {
                     cur,        //< offset is relative to current position in stream
                     end         //< offset is relative to end of stream
                 };
+
+                float offset;   //< offset into stream in seconds
+                whence rel;     //< specifies how offset is interpreted
+
                 SeekMessage(float offset = 0, whence = start);
                 bool operator== (const SeekMessage &rhs) const { return offset == rhs.offset && rel == rhs.rel; }
 
@@ -32,8 +36,6 @@ namespace watcher {
                 friend class boost::serialization::access;
                 template <typename Archive> void serialize(Archive& ar, const unsigned int version);
                 DECLARE_LOGGER();
-                float offset;   //< offset into stream in seconds
-                whence rel;     //< specifies how offset is interpreted
         };
 
         template <typename Archive>
