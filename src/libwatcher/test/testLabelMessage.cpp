@@ -3,12 +3,11 @@
 #define BOOST_TEST_MODULE watcher::Message.LabelMessage test
 #include <boost/test/unit_test.hpp>
 
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
-#include <boost/serialization/base_object.hpp>
 #include <boost/serialization/shared_ptr.hpp>  // Need this to serialize shared_ptrs. 
 
 #include <libwatcher/labelMessage.h>
@@ -73,14 +72,14 @@ BOOST_AUTO_TEST_CASE( archive_test )
 
     LOG_INFO("Serializing: " << lmOut); 
     ostringstream os1;
-    archive::polymorphic_text_oarchive oa1(os1);
+    archive::text_oarchive oa1(os1);
     oa1 << lmOut;
 
     LOG_INFO("Serialized lmOut: " << os1.str()); 
 
     LabelMessage lmIn;
     istringstream is1(os1.str());
-    archive::polymorphic_text_iarchive ia1(is1);
+    archive::text_iarchive ia1(is1);
     ia1 >> lmIn;
 
     LOG_INFO( "Checking text archiving..." ); 
@@ -91,11 +90,11 @@ BOOST_AUTO_TEST_CASE( archive_test )
     BOOST_CHECK_EQUAL( lmOut, lmIn );
 
     ostringstream os2;
-    archive::polymorphic_binary_oarchive oa2(os2);
+    archive::binary_oarchive oa2(os2);
     oa2 << lmOut;
 
     istringstream is2(os2.str());
-    archive::polymorphic_binary_iarchive ia2(is2);
+    archive::binary_iarchive ia2(is2);
     ia2 >> lmIn;
 
     LOG_INFO( "Checking binary archiving..." ); 
@@ -109,12 +108,12 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
     LabelMessagePtr archivedDataPtr(new LabelMessage("THis is a shared_ptr labelMessage"));
     {
         ostringstream os; 
-        archive::polymorphic_binary_oarchive oa(os);
+        archive::binary_oarchive oa(os);
         oa << archivedDataPtr; 
 
         LabelMessagePtr unArchivedDataPtr;
         istringstream is(os.str());
-        archive::polymorphic_binary_iarchive ia(is);
+        archive::binary_iarchive ia(is);
         ia >> unArchivedDataPtr;
 
         LOG_INFO("Checking equality of archived data via shared_ptrs..."); 
@@ -122,33 +121,35 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
         LOG_DEBUG("*unArchivedDataPtr: " << *unArchivedDataPtr); 
         BOOST_CHECK_EQUAL( *archivedDataPtr, *unArchivedDataPtr );
     }
+
     LOG_INFO("------------Testing unarchiving via a base class shared_ptr"); 
     {
         ostringstream os; 
-        archive::polymorphic_text_oarchive oa(os);
+        archive::text_oarchive oa(os);
         oa << archivedDataPtr; 
 
         MessagePtr basePtrToUnarchived(new LabelMessage);  // base class ptr points to derived class instance. 
 
         LOG_DEBUG("*archivedDataPtr before unarchiving    : " << *archivedDataPtr); 
         LOG_DEBUG("*basePtrToUnarchived before unarchiving: " << *basePtrToUnarchived); 
+        LOG_DEBUG( "serialized: " << os.str() );
 
         istringstream is(os.str());
-        archive::polymorphic_text_iarchive ia(is);
+        archive::text_iarchive ia(is);
         ia >> basePtrToUnarchived;
+
 
         LOG_DEBUG("*basePtrToUnarchived after unarchiving: " << *basePtrToUnarchived); 
 
-        // LabelMessagePtr derivedPtrToUnarchived=boost::dynamic_pointer_cast<LabelMessage>(basePtrToUnarchived);
-        //
-        // BOOST_REQUIRE( derivedPtrToUnarchived.get() != 0 );   <-------- GTL FAIL!
+        LabelMessagePtr derivedPtrToUnarchived = boost::dynamic_pointer_cast<LabelMessage>(basePtrToUnarchived);
+        BOOST_REQUIRE( derivedPtrToUnarchived.get() != 0 );  // <-------- GTL FAIL!
 
         LOG_INFO("Checking equality of archived data via shared_ptrs..."); 
         LOG_DEBUG("*archivedDataPtr: " << *archivedDataPtr); 
         LOG_DEBUG("*basePtrToUnarchived: " << *basePtrToUnarchived); 
-        // LOG_DEBUG("*derivedPtrToUnarchived: " << *derivedPtrToUnarchived); 
+        LOG_DEBUG("*derivedPtrToUnarchived: " << *derivedPtrToUnarchived); 
         
-        // BOOST_CHECK_EQUAL( *archivedDataPtr, *derivedPtrToUnarchived );     // GTL FAIL!
+        BOOST_CHECK_EQUAL( *archivedDataPtr, *derivedPtrToUnarchived );     // GTL FAIL!
 
     }
 

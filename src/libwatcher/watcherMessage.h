@@ -19,10 +19,9 @@ namespace watcher {
          * @author Michael Elkins <michael.elkins@sparta.com>
          * @date 2009-03-20
          */
-        class WatcherMessage : public Message {
+        class WatcherMessage {
                 friend class boost::serialization::access;
-                template <typename Archive>
-                void serialize(Archive& ar, unsigned int version) {};
+                template <typename Archive> void serialize(Archive& ar, unsigned int version);
             protected:
                 //don't allow for direct contruction
                 WatcherMessage() {};
@@ -30,6 +29,14 @@ namespace watcher {
             public:
                 virtual ~WatcherMessage() {};
         };
+
+        template <typename Archive> void WatcherMessage::serialize(Archive& ar, unsigned int version)
+        {
+            TRACE_ENTER();
+            TRACE_EXIT();
+        }
+
+        typedef boost::shared_ptr<WatcherMessage> WatcherMessagePtr;
     }
 }
 #endif

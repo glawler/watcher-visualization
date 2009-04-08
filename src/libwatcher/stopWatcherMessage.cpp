@@ -2,10 +2,12 @@
  * @author Michael Elkins <michael.elkins@sparta.com>
  * @date 2009-03-20
  */
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/export.hpp>
 #include "stopWatcherMessage.h"
-
-BOOST_CLASS_EXPORT_GUID(watcher::event::StopMessage, "StopMessage");
 
 namespace watcher {
     namespace event {
@@ -16,5 +18,14 @@ namespace watcher {
             TRACE_ENTER();
             TRACE_EXIT();
         }
+
+        template <typename Archive> void StopMessage::serialize(Archive& ar, const unsigned int version)
+        {
+            TRACE_ENTER();
+            ar & boost::serialization::base_object<Message>(*this);
+            TRACE_EXIT();
+        }
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::StopMessage)

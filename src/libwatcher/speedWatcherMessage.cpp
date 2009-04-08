@@ -2,10 +2,13 @@
  * @author Michael Elkins <michael.elkins@sparta.com>
  * @date 2009-03-20
  */
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/export.hpp>
-#include "speedWatcherMessage.h"
 
-BOOST_CLASS_EXPORT_GUID(watcher::event::SpeedMessage, "SpeedMessage");
+#include "speedWatcherMessage.h"
 
 namespace watcher {
     namespace event {
@@ -25,6 +28,17 @@ namespace watcher {
             return o << "SpeedMessage(speed=" << rhs.speed << ')';
         }
 
+        template <typename Archive>
+        void SpeedMessage::serialize(Archive & ar, const unsigned int version)
+        {
+            TRACE_ENTER();
+            ar & boost::serialization::base_object<Message>(*this);
+            ar & speed;
+            TRACE_EXIT();
+        }
+
         INIT_LOGGER(SpeedMessage, "Message.SpeedMessage");
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::SpeedMessage);

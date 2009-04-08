@@ -1,3 +1,7 @@
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/array.hpp>        // address.v4 bytes is an array of char
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/export.hpp>
@@ -7,8 +11,6 @@
 #include "watcherGlobalFunctions.h"     // for address serialization
 
 using namespace std;
-
-BOOST_CLASS_EXPORT_GUID(watcher::event::LabelMessage, "LabelMessage");
 
 namespace watcher {
     namespace event {
@@ -163,5 +165,25 @@ namespace watcher {
             TRACE_EXIT();
             return out;
         }
+
+        template <typename Archive> void LabelMessage::serialize(Archive & ar, const unsigned int file_version)
+        {
+            TRACE_ENTER();
+            ar & boost::serialization::base_object<Message>(*this);
+            ar & label;
+            ar & foreground;
+            ar & background;
+            ar & expiration;
+            ar & fontSize;
+            ar & address;
+            ar & addLabel;
+            ar & lat;
+            ar & lng;
+            ar & alt;
+            TRACE_EXIT();
+        }
+
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::LabelMessage);

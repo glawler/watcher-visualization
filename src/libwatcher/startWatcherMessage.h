@@ -5,7 +5,7 @@
 #ifndef START_WATCHER_MESSAGE_H
 #define START_WATCHER_MESSAGE_H
 
-#include "watcherMessage.h"
+#include "message.h"
 
 namespace watcher {
     namespace event {
@@ -17,21 +17,18 @@ namespace watcher {
          */
         class StartMessage : public Message {
             public:
-            StartMessage(); 
+                StartMessage(); 
             private:
-            template <typename Archive> void serialize(Archive & ar, const unsigned int version);
-            friend class boost::serialization::access;
-            DECLARE_LOGGER();
+                template <typename Archive> void serialize(Archive & ar, const unsigned int version);
+                friend class boost::serialization::access;
+                DECLARE_LOGGER();
         };
 
-        template <typename Archive> void StartMessage::serialize(Archive & ar, const unsigned int version)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            TRACE_EXIT();
-        }
+        std::ostream& operator<< (std::ostream&, const StartMessage&);
 
         typedef boost::shared_ptr<StartMessage> StartMessagePtr;
+
+        bool operator== (const StartMessage& lhs, const StartMessage& rhs);
     }
 }
 #endif

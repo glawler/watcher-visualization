@@ -5,8 +5,9 @@
 #ifndef NODE_CONNECTION_MESSAGE_H
 #define NODE_CONNECTION_MESSAGE_H
 
-#include "watcherMessage.h"
+#include "message.h"
 #include "watcherTypes.h"
+#include "watcherGlobalFunctions.h"
 
 namespace watcher 
 {
@@ -26,7 +27,7 @@ namespace watcher
                     disconnnect
                 };
 
-                NodeStatusMessage(const statusEvent &event); 
+                NodeStatusMessage(const statusEvent &event = connect); 
 
                 template <typename Archive> void serialize(Archive & ar, const unsigned int version);
 
@@ -35,18 +36,10 @@ namespace watcher
 
                 statusEvent event;    // What happened
                 NodeIdentifier nodeId;
+                friend class boost::serialization::access;
+                friend std::ostream& operator<<(std::ostream&, const NodeStatusMessage&);
         };
 
-        template <typename Archive> void NodeStatusMessage::serialize(Archive & ar, const unsigned int version)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & event;
-            ar & nodeId;
-            TRACE_EXIT();
-        }
     }
 }
 #endif
-
-

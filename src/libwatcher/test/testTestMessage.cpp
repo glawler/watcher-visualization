@@ -4,18 +4,11 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
-#include <boost/serialization/vector.hpp>        // Need this to serialize std::vectors. 
-
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
-
-#include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
-#include <boost/serialization/vector.hpp>        // Need this to serialize std::vectors. 
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
 #include "libwatcher/testMessage.h"
 #include "logger.h"
@@ -25,6 +18,7 @@ using namespace boost;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
+using namespace boost::archive;
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
@@ -55,46 +49,51 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
     {
         TestMessage tmOut(strVal, ints); 
         ostringstream os; 
-        polymorphic_binary_oarchive oa(os);
+        binary_oarchive oa(os);
         oa << tmOut; 
 
         TestMessage tmIn;
         istringstream is(os.str());
-        polymorphic_binary_iarchive ia(is);
+        binary_iarchive ia(is);
         ia >> tmIn;
 
         LOG_DEBUG("tmOut: " << tmOut); 
         LOG_DEBUG(" tmIn: " << tmIn); 
         BOOST_CHECK_EQUAL( tmOut, tmIn);
     }
+
     {
         TestMessagePtr tmpOut(new TestMessage(strVal, ints));
         ostringstream os; 
         text_oarchive oa(os);
         oa << tmpOut; 
 
-        TestMessagePtr tmpIn;
-        istringstream is(os.str());
-        text_iarchive ia(is);
-        ia >> tmpIn;
+        string archived(os.str());
+        LOG_DEBUG(" *tmpOut: " << *tmpOut); 
+        LOG_DEBUG("archived: " << archived);
 
-        LOG_DEBUG("*tmpOut: " << *tmpOut); 
-        LOG_DEBUG(" *tmpIn: " << *tmpIn); 
-        LOG_DEBUG("     os: " << os.str());
+        istringstream is(archived);
+        text_iarchive ia(is);
+        TestMessagePtr tmpIn;
+        ia >> tmpIn;
+        BOOST_REQUIRE(tmpIn.get() != 0);
+
+        LOG_DEBUG("  *tmpIn: " << *tmpIn); 
+
         BOOST_CHECK_EQUAL( *tmpOut, *tmpIn);
 
         MessagePtr mpIn;
-        is.str(os.str());
-        text_iarchive ia2(is);
+        istringstream is2(archived);
+        text_iarchive ia2(is2);
         ia2 >> mpIn;
-        BOOST_CHECK_NE( mpIn.get(), static_cast<Message*>(0) );
+        BOOST_REQUIRE( mpIn.get() != 0 );
 
         LOG_DEBUG("*tmpOut: " << *tmpOut); 
         LOG_DEBUG("  *mpIn: " << * mpIn); 
 
         LOG_ERROR("GTL - this next line actually fails. It should work, but does not."); 
         TestMessagePtr dmpIn = dynamic_pointer_cast<TestMessage>(mpIn); 
-        BOOST_CHECK_NE( dmpIn.get(), static_cast<TestMessage*>(0) );
+        BOOST_REQUIRE( dmpIn.get() != 0 );
 
         LOG_DEBUG("*dmpIn: " << * dmpIn); 
         BOOST_CHECK_EQUAL( *tmpOut, * dmpIn);

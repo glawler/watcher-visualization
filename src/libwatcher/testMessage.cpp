@@ -1,12 +1,15 @@
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/export.hpp>
 
 #include "testMessage.h"
 
-BOOST_CLASS_EXPORT_GUID(watcher::event::TestMessage, "watcher::event::TestMessage");
-
 using namespace std;
+
 namespace watcher {
     namespace event {
 
@@ -21,7 +24,7 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        TestMessage::TestMessage(const string &str, const vector<int> ints) :
+        TestMessage::TestMessage(const string &str, const vector<int>& ints) :
             Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION),
             stringData(str),
             intsData(ints)
@@ -30,6 +33,7 @@ namespace watcher {
             TRACE_EXIT();
         }
 
+#if 0
         TestMessage::TestMessage(const TestMessage &other) :
             Message(other.type, other.version), 
             stringData(other.stringData),
@@ -38,6 +42,7 @@ namespace watcher {
             TRACE_ENTER();
             TRACE_EXIT();
         }
+#endif
 
         bool TestMessage::operator==(const TestMessage &other) const
         {
@@ -52,6 +57,7 @@ namespace watcher {
             return retVal;
         }
 
+#if 0
         TestMessage &TestMessage::operator=(const TestMessage &other)
         {
             TRACE_ENTER();
@@ -63,6 +69,7 @@ namespace watcher {
             TRACE_EXIT();
             return *this;
         }
+#endif
 
         // virtual 
         std::ostream &TestMessage::toStream(std::ostream &out) const
@@ -88,5 +95,16 @@ namespace watcher {
             TRACE_EXIT();
             return out;
         }
+
+        template <typename Archive> void TestMessage::serialize(Archive & ar, const unsigned int file_version)
+        {
+            TRACE_ENTER();
+            ar & boost::serialization::base_object<Message>(*this);
+            ar & stringData;
+            ar & intsData;
+            TRACE_EXIT();
+        }
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::TestMessage);

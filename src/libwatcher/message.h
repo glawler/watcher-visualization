@@ -13,10 +13,19 @@
 namespace watcher {
     namespace event {
 
+        class Message;
+        typedef boost::shared_ptr<Message> MessagePtr; 
+
         /** Base class for all messages generated from the test node daemon.
          */
         class Message {
             public:
+                // de-serialize object via input stream
+                static MessagePtr unpack(std::istream&);
+
+                // seralize object to ostream
+                void pack(std::ostream&) const;
+
                 unsigned int version;
                 MessageType type;
                 Timestamp timestamp;  
@@ -33,25 +42,16 @@ namespace watcher {
                 // output the class as a stream. Derived classes 
                 // should call the base classes' implementation.
                 virtual std::ostream &toStream(std::ostream &out) const;
-                std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
+                inline std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
             protected:
             private:
                 friend class boost::serialization::access;
-                template <typename Archive>
-                void serialize(Archive & ar, const unsigned int file_version)
-                {
-                    TRACE_ENTER();
-                    ar & version;
-                    ar & type;
-                    ar & timestamp;
-                    TRACE_EXIT();
-                }
-
+                template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
                 DECLARE_LOGGER();
         };
 
-        typedef boost::shared_ptr<Message> MessagePtr; 
+
         std::ostream &operator<<(std::ostream &out, const Message &mess);
     }
 }

@@ -5,7 +5,7 @@
 #ifndef STOP_WATCHER_MESSAGE_H
 #define STOP_WATCHER_MESSAGE_H
 
-#include "watcherMessage.h"
+#include "message.h"
 
 namespace watcher {
     namespace event {
@@ -25,16 +25,7 @@ namespace watcher {
             DECLARE_LOGGER();
         };
 
-        template <typename Archive>
-            void StopMessage::serialize(Archive& ar, const unsigned int version)
-            {
-                TRACE_ENTER();
-                ar & boost::serialization::base_object<Message>(*this);
-                TRACE_EXIT();
-            }
-
         typedef boost::shared_ptr<StopMessage> StopMessagePtr;
     }
-
 }
 #endif

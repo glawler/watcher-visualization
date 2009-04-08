@@ -1,13 +1,14 @@
 #include <sys/time.h>
-#include "message.h"
 
-#include <boost/archive/polymorphic_iarchive.hpp>
-#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/export.hpp>
 
-using namespace std;
+#include "message.h"
 
-BOOST_CLASS_EXPORT_GUID(watcher::event::Message, "watcher::event::Message");
+using namespace std;
 
 namespace watcher {
     namespace event {
@@ -80,5 +81,33 @@ namespace watcher {
             TRACE_EXIT();
             return out;
         }
+
+        template <typename Archive> void Message::serialize(Archive & ar, const unsigned int file_version)
+        {
+            TRACE_ENTER();
+            ar & version;
+            ar & type;
+            ar & timestamp;
+            TRACE_EXIT();
+        }
+
+        MessagePtr Message::unpack(std::istream& is)
+        {
+            boost::archive::text_iarchive ia(is);
+            Message* ret = 0;
+            ia >> ret;
+            return MessagePtr(ret);
+        }
+
+        void Message::pack(std::ostream& os) const
+        {
+            TRACE_ENTER();
+            boost::archive::text_oarchive oa(os);
+            const Message* base = this;
+            oa << base;
+            TRACE_EXIT();
+        }
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::Message);
