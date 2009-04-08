@@ -3,7 +3,9 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <libwatcher/message.h>
+#include <vector>
+
+#include "libwatcher/message.h"
 
 namespace watcher 
 {
@@ -24,7 +26,8 @@ namespace watcher
              * @return - boolean. true, if message handled, false on error or otherwise. If the return
              * value is negative, the response message will not be sent even if non-null.
              */
-            virtual bool handleMessageArrive(const event::MessagePtr message, event::MessagePtr &response);
+            virtual bool handleMessageArrive(const event::MessagePtr &message, event::MessagePtr &response);
+            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages, event::MessagePtr &response);
 
         private:
 

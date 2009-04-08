@@ -46,7 +46,6 @@ bool ClientMessageHandler::handleMessageArrive(const MessagePtr message, Message
         {
             LOG_WARN("Server didn't ack or give us an OK for the message we sent them. Status: " << mess->statusToString(mess->status));
             retVal=false;
-            
         }
         retVal=true;
     }
@@ -54,3 +53,23 @@ bool ClientMessageHandler::handleMessageArrive(const MessagePtr message, Message
     return retVal;
 }
 
+// virtual 
+bool ClientMessageHandler::handleMessagesArrive(const std::vector<event::MessagePtr> &messages, event::MessagePtr &response)
+{
+    TRACE_ENTER();
+
+    MessageHandler::handleMessagesArrive(messages, response); 
+
+    for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
+    {
+        if(!handleMessageArrive(*i, response))  // may be overwriting responses from earlier loop iterations...
+        {
+            TRACE_EXIT_RET("false"); 
+            return false;
+        }
+    }
+
+    TRACE_EXIT_RET("true");
+    return true;
+    TRACE_EXIT(); 
+}

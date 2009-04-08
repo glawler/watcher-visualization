@@ -49,6 +49,9 @@ namespace watcher {
                 case SPEED_MESSAGE_TYPE:
                     out << static_cast<int>(SPEED_MESSAGE_TYPE) << " (speed)";
                     break;
+                case NODE_STATUS_MESSAGE_TYPE:
+                    out << static_cast<int>(NODE_STATUS_MESSAGE_TYPE) << " (node status)";
+                    break;
 
 
                 case USER_DEFINED_MESSAGE_TYPE: 
