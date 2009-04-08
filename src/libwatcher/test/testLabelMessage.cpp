@@ -141,3 +141,30 @@ BOOST_AUTO_TEST_CASE( output_test )
     // Althought testing against the timestamp string will be tricky.
 }
 
+//
+// This is really more a test of message::unpack(). Can it handle mulitple messages in the same stream?
+//
+BOOST_AUTO_TEST_CASE( multi_pack_test )
+{
+    unsigned int loopNum=5;
+    ostringstream os;
+    LabelMessagePtr m;
+    for(unsigned int i=0; i<loopNum; i++)
+    {
+        m=LabelMessagePtr(new LabelMessage("Expiration will vary, look there")); 
+        m->expiration=i;
+        m->pack(os);
+    }
+
+    LOG_DEBUG("Multiple messages in a stream: " << os.str()); 
+
+    istringstream is(os.str()); 
+    for(unsigned int i=0; i<loopNum; i++)
+    {
+        m=boost::dynamic_pointer_cast<LabelMessage>(Message::unpack(is)); 
+        BOOST_REQUIRE(m.get()!=0); 
+        BOOST_CHECK_EQUAL(m->expiration, i);
+        LOG_DEBUG("Unpacked: " << *m); 
+    }
+}
+
