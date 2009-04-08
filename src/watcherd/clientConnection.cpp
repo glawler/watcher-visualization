@@ -144,13 +144,6 @@ bool ClientConnection::sendMessage(const MessagePtr message)
     return true;
 }
 
-//
-// Protocol sequence: 
-//      aysnc write -> handle write ->
-//      (if more data to send: GOTO 10)
-//      async read header -> handle read header ->
-//      async read payload -> handle read payload
-//
 void ClientConnection::doWrite(const MessagePtr &message)
 {
     TRACE_ENTER();
@@ -169,7 +162,7 @@ void ClientConnection::doWrite(const MessagePtr &message)
     {
         LOG_DEBUG("Marshaling outbound message"); 
         outBuffers.clear(); 
-        if (!dataMarshaller.marshal(dataPtr->theRequest, dataPtr->theRequest->type, outBuffers))
+        if (!DataMarshaller::marshalPayload(dataPtr->theRequest, outBuffers))
         {
             LOG_WARN("Error marshaling message, not sending"); 
             transferData.pop_back(); 
@@ -177,10 +170,7 @@ void ClientConnection::doWrite(const MessagePtr &message)
             return;
         }
         LOG_INFO("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest<< ")");
-        int numBytes=0;
-        for(OutBuffers::const_iterator i = outBuffers.begin(); i !=  outBuffers.end(); ++i)
-            numBytes+=boost::asio::buffer_size(*i);
-        LOG_DEBUG("Sending " << numBytes << " bytes"); 
+        LOG_DEBUG("Sending packet"); 
         asio::async_write(theSocket, outBuffers, 
                 theStrand.wrap(
                     bind(&ClientConnection::handle_write_message, this, 
@@ -201,11 +191,18 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
     {
         // now read a response
         LOG_DEBUG("Sucessfully sent message " << dataPtr << ". Now will async read response"); 
-        boost::asio::async_read(theSocket,
-                asio::buffer(dataPtr->incomingBuffer, DataMarshaller::header_length),
+        boost::asio::async_read(
+                theSocket,
+                asio::buffer(
+                    dataPtr->incomingBuffer, 
+                    DataMarshaller::header_length),
                 theStrand.wrap(
-                    bind(&ClientConnection::handle_read_header, this, 
-                        asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
+                    bind(
+                        &ClientConnection::handle_read_header, 
+                        this, 
+                        asio::placeholders::error, 
+                        asio::placeholders::bytes_transferred, 
+                        dataPtr)));
 
         // No errors, remove the message from the outbound message list.
         transferData.remove(dataPtr); 
@@ -214,12 +211,9 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
         if (!transferData.empty())
         {
             outBuffers.clear(); 
-            dataMarshaller.marshal(dataPtr->theRequest, dataPtr->theRequest->type, outBuffers);
+            DataMarshaller::marshalPayload(dataPtr->theRequest, outBuffers);
             LOG_DEBUG("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest << ")");
-            int numBytes=0;
-            for(OutBuffers::const_iterator i = outBuffers.begin(); i !=  outBuffers.end(); ++i)
-                numBytes+=boost::asio::buffer_size(*i);
-            LOG_DEBUG("Sending " << numBytes << " bytes"); 
+            LOG_DEBUG("Sending packet"); 
             asio::async_write(theSocket, outBuffers, 
                     theStrand.wrap(bind(&ClientConnection::handle_write_message, 
                             this, asio::placeholders::error, transferData.front())));
@@ -245,14 +239,15 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
     {
         LOG_DEBUG("Recv'd header"); 
         size_t payloadSize;
-        unsigned int messageType;
-        if (!dataMarshaller.unmarshalHeader(&dataPtr->incomingBuffer[0], bytes_transferred, payloadSize, messageType))
+        unsigned short messageNum;
+        if (!DataMarshaller::unmarshalHeader(&dataPtr->incomingBuffer[0], bytes_transferred, payloadSize, messageNum))
         {
             LOG_ERROR("Unable to parse incoming message header"); 
         }
         else
         {
-            LOG_DEBUG("Parsed header - now reading payload type " << messageType << " of size " << payloadSize); 
+            LOG_DEBUG("Parsed header - now reading " << messageNum << " message" << (messageNum>1?"s":"") 
+                    << " from a buffer of " << payloadSize << " bytes."); 
 
             // GTL - Wanted to do an async read for the payload, but kept getting handle_read_header called before handle_read_payload.
             // So now the payload is read in sync, which should still be fast as the payload always directly follows the header. 
@@ -263,32 +258,30 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             //                 this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
 
             if (payloadSize != asio::read(theSocket, asio::buffer(dataPtr->incomingBuffer, payloadSize)))
+            {
                 LOG_ERROR("Unable to read " << payloadSize << " bytes from server. Giving up on message.")
+            }
             else
             {
-                LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it. Payload size: " << payloadSize); 
-                MessagePtr arrivedMessage=MessageFactory::makeMessage(static_cast<MessageType>(messageType)); 
-                bool result = dataMarshaller.unmarshalPayload(arrivedMessage, &dataPtr->incomingBuffer[0], payloadSize); 
-
-                if (result)
+                vector<MessagePtr> arrivedMessages; 
+                if(!DataMarshaller::unmarshalPayload(arrivedMessages, messageNum, &dataPtr->incomingBuffer[0], payloadSize))
                 {
-                    LOG_INFO("Successfully parsed response from server for message " << dataPtr->theRequest 
-                            << ": " << *dataPtr->theReply);
-
+                    LOG_WARN("Unable to parse incoming server response for message " << dataPtr);
+                }
+                else
+                {
                     if (!messageHandler)
                     {
-                        LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intensional)"); 
+                        LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intentional)"); 
                     }
                     else 
                     {
                         MessagePtr theResponse;
-                        if(messageHandler->handleMessageArrive(arrivedMessage, theResponse))
-                            if(theResponse!=NULL)
+                        if(messageHandler->handleMessagesArrive(arrivedMessages, theResponse))
+                            if(theResponse)
                                 sendMessage(theResponse);
                     }
                 }
-                else if (!result)
-                    LOG_WARN("Unable to parse incoming server response for message " << dataPtr);
             }
         }
     }

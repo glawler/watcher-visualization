@@ -20,9 +20,9 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include "libwatcher/message.h"
-#include "messageHandler.h"
 
 #include "dataMarshaller.h"
+#include "messageHandler.h"
 
 namespace watcher 
 {
@@ -48,10 +48,11 @@ namespace watcher
             void handle_read_header(
                     const boost::system::error_code& e, 
                     std::size_t bytes_transferred);
+
             void handle_read_payload(
                     const boost::system::error_code& e, 
                     std::size_t bytes_transferred, 
-                    event::MessagePtr newMessage); 
+                    unsigned short messageNum); 
 
             /// Handle completion of a write operation.
             void handle_write(const boost::system::error_code& e, event::MessagePtr reply);
@@ -67,15 +68,10 @@ namespace watcher
             IncomingBuffer incomingBuffer;
 
             /// Buffer for outgoing data
-            typedef std::vector<boost::asio::const_buffer> OutboundDataBuffers;
-            typedef boost::shared_ptr<OutboundDataBuffers> OutboundDataBuffersPtr;
-            OutboundDataBuffers outboundDataBuffers;
+            DataMarshaller::NetworkMarshalBuffers outboundDataBuffers;
 
             /// The replies to be sent back to the client.
             std::list<event::MessagePtr> replies;
-
-            // Use the utiliity class for arbitrary marshal/unmarhasl
-            DataMarshaller dataMarshaller;
 
             MessageHandlerPtr messageHandler;
     };

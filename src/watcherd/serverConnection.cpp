@@ -8,6 +8,8 @@
 #include "messageFactory.h"
 #include "dataMarshaller.h"
 
+using namespace std; 
+
 namespace watcher {
     using namespace event;
 
@@ -44,36 +46,35 @@ namespace watcher {
         TRACE_EXIT();
     }
 
-    void ServerConnection::handle_read_header(const boost::system::error_code& e, std::size_t bytes_transferred)
+    void ServerConnection::handle_read_header(const boost::system::error_code& e, size_t bytes_transferred)
     {
         TRACE_ENTER(); 
         if (!e)
         {
             LOG_DEBUG("Read " << bytes_transferred << " bytes."); 
 
-            boost::logic::tribool result;
             size_t payloadSize;
-            unsigned int messageType;
-            if (!dataMarshaller.unmarshalHeader(incomingBuffer.begin(), bytes_transferred, payloadSize, messageType))
+            unsigned short numOfMessages;
+            if (!DataMarshaller::unmarshalHeader(incomingBuffer.begin(), bytes_transferred, payloadSize, numOfMessages))
             {
                 LOG_ERROR("Error parsing incoming message header.");
             }
             else
             {
-                LOG_DEBUG("Reading message payload of " << payloadSize << " bytes.");
+                LOG_DEBUG("Reading packet payload of " << payloadSize << " bytes.");
 
-                MessagePtr newMessage=MessageFactory::makeMessage(static_cast<MessageType>(messageType)); 
-                LOG_DEBUG("Createsd empty message to deserialize into: " << *newMessage); 
                 boost::asio::async_read(
-                                        socket_, 
-                                        boost::asio::buffer(incomingBuffer, payloadSize), 
-                                        strand_.wrap(
-                                                     boost::bind(
-                                                                 &ServerConnection::handle_read_payload,
-                                                                 shared_from_this(),
-                                                                 boost::asio::placeholders::error,
-                                                                 boost::asio::placeholders::bytes_transferred, 
-                                                                 newMessage)));
+                        socket_, 
+                        boost::asio::buffer(
+                            incomingBuffer, 
+                            payloadSize),  // Should incoming buffer be new'd()? 
+                        strand_.wrap(
+                            boost::bind(
+                                &ServerConnection::handle_read_payload,
+                                shared_from_this(),
+                                boost::asio::placeholders::error,
+                                boost::asio::placeholders::bytes_transferred, 
+                                numOfMessages)));
             }
         }
         else
@@ -91,20 +92,21 @@ namespace watcher {
         TRACE_EXIT();
     }
 
-    void ServerConnection::handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred, MessagePtr newMessage)
+    void ServerConnection::handle_read_payload(const boost::system::error_code& e, size_t bytes_transferred, unsigned short numOfMessages)
     {
         TRACE_ENTER();
 
         if (!e)
         {
-            if (dataMarshaller.unmarshalPayload(newMessage, incomingBuffer.begin(), bytes_transferred))
+            vector<MessagePtr> arrivedMessages; 
+            if (DataMarshaller::unmarshalPayload(arrivedMessages, numOfMessages, incomingBuffer.begin(), bytes_transferred))
             {
                 boost::asio::ip::address nodeAddr(socket_.remote_endpoint().address()); 
 
-                LOG_INFO("Recvd message from " << nodeAddr <<  " :" << *newMessage); 
+                LOG_INFO("Recvd " << arrivedMessages.size() << " message" << (arrivedMessages.size()>1?"s":"") << " from " << nodeAddr); 
 
                 MessagePtr reply;
-                if(messageHandler->handleMessageArrive(newMessage, reply))
+                if(messageHandler->handleMessagesArrive(arrivedMessages, reply))
                 {
                     LOG_DEBUG("Sending back a message (at " << reply << "): " << *reply); 
 
@@ -115,10 +117,16 @@ namespace watcher {
                     replies.push_back(reply); 
 
                     LOG_DEBUG("Marshalling outbound message"); 
-                    OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                    dataMarshaller.marshal(reply, reply->type, *obDataPtr);
+
+                    // GTL - this is ugly and probably a memory leak.
+                    DataMarshaller::NetworkMarshalBuffersPtr obDataPtr=
+                        DataMarshaller::NetworkMarshalBuffersPtr(new DataMarshaller::NetworkMarshalBuffers);
+
+                    DataMarshaller::marshalPayload(reply, *obDataPtr);
                     LOG_INFO("Sending reply: " << *reply);
-                    boost::asio::async_write(socket_, *obDataPtr, 
+                    boost::asio::async_write(
+                            socket_, 
+                            *obDataPtr,         // GTL - leak here. 
                             strand_.wrap(
                                 boost::bind(
                                     &ServerConnection::handle_write, 
@@ -131,19 +139,23 @@ namespace watcher {
             {
                 LOG_WARN("Did not understand incoming message. Sending back a nack");
                 MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
-                OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(reply, reply->type, *obDataPtr);
+
+                // GTL - this is ugly and probably a memory leak.
+                DataMarshaller::NetworkMarshalBuffersPtr obDataPtr=
+                    DataMarshaller::NetworkMarshalBuffersPtr(new DataMarshaller::NetworkMarshalBuffers);
+
+                DataMarshaller::marshalPayload(reply, *obDataPtr);
                 LOG_INFO("Sending NACK as reply: " << *reply);
 
                 // GTL Should put a lock around this push_back()
                 replies.push_back(reply);
                 boost::asio::async_write(
                         socket_, 
-                        *obDataPtr,
+                        *obDataPtr,         // GTL - leak here. 
                         strand_.wrap(
                             boost::bind(
                                 &ServerConnection::handle_write, 
-                                shared_from_this(),
+                                shared_from_this(), 
                                 boost::asio::placeholders::error, 
                                 reply)));
             }
@@ -178,16 +190,25 @@ namespace watcher {
             {
                 LOG_DEBUG("Still more replies to send, sending next one."); 
                 LOG_DEBUG("Marshalling outbound message"); 
-                OutboundDataBuffersPtr obDataPtr=OutboundDataBuffersPtr(new OutboundDataBuffers);
-                dataMarshaller.marshal(replies.front(), replies.front()->type, *obDataPtr);
+
+                // GTL - this is ugly and probably a memory leak.
+                DataMarshaller::NetworkMarshalBuffersPtr obDataPtr=
+                    DataMarshaller::NetworkMarshalBuffersPtr(new DataMarshaller::NetworkMarshalBuffers);
+
+
+                // Once we get the symantics of multiple messages per packet down, we can send all these
+                // replies in a single packet.
+                DataMarshaller::marshalPayload(replies.front(), *obDataPtr);
                 LOG_DEBUG("Sending reply message: " << *replies.front());
-                boost::asio::async_write(socket_, *obDataPtr, 
-                                         strand_.wrap(
-                                                      boost::bind(
-                                                                  &ServerConnection::handle_write, 
-                                                                  shared_from_this(),
-                                                                  boost::asio::placeholders::error, 
-                                                                  replies.front()))); 
+                boost::asio::async_write(
+                        socket_, 
+                        *obDataPtr,             // GTL - leak
+                        strand_.wrap(
+                            boost::bind(
+                                &ServerConnection::handle_write,
+                                shared_from_this(),
+                                boost::asio::placeholders::error,
+                                replies.front()))); 
             }
         }
         else

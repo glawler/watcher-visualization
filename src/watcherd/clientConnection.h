@@ -86,9 +86,7 @@ namespace watcher
             boost::asio::io_service &ioService;
             boost::asio::io_service::strand theStrand;
 
-            typedef boost::asio::const_buffer OutBuffer;
-            typedef std::vector<OutBuffer> OutBuffers;
-            OutBuffers outBuffers;
+            DataMarshaller::NetworkMarshalBuffers outBuffers;
 
             typedef boost::array<char, 8192> IncomingBuffer;
             typedef struct 
@@ -109,9 +107,6 @@ namespace watcher
                     const TransferDataPtr &dataPtr);
             void handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred, 
                     const TransferDataPtr &dataPtr);
-
-            // std::list<MessagePtr> writeMessages;
-            DataMarshaller dataMarshaller;
 
             std::string server;
             std::string service;
