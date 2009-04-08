@@ -12,6 +12,7 @@
 #include "libwatcher/startWatcherMessage.h"
 #include "libwatcher/stopWatcherMessage.h"
 #include "libwatcher/speedWatcherMessage.h"
+#include "libwatcher/nodeStatusMessage.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -55,6 +56,9 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
             break;
         case SPEED_MESSAGE_TYPE:
             return SpeedMessagePtr(new SpeedMessage);
+            break;
+        case NODE_STATUS_MESSAGE_TYPE:
+            return NodeStatusMessagePtr(new NodeStatusMessage);
             break;
 
             // let used defined and unknown fall through - a NULL will be returned.
