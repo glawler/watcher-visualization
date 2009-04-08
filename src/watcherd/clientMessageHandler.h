@@ -24,6 +24,7 @@ namespace watcher
              * value is negative, the response message will not be sent even if non-null.
              */
             virtual bool handleMessageArrive(const event::MessagePtr message, event::MessagePtr &response);
+            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages, event::MessagePtr &response);
 
         private:
 
