@@ -1,21 +1,11 @@
-#include <stdlib.h>
-
 #define BOOST_TEST_MODULE watcher::Message.LabelMessage test
 #include <boost/test/unit_test.hpp>
-
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-
-#include <boost/serialization/shared_ptr.hpp>  // Need this to serialize shared_ptrs. 
 
 #include <libwatcher/labelMessage.h>
 #include "logger.h"
 
 using namespace std;
 using namespace boost;
-using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
 
@@ -72,15 +62,13 @@ BOOST_AUTO_TEST_CASE( archive_test )
 
     LOG_INFO("Serializing: " << lmOut); 
     ostringstream os1;
-    archive::text_oarchive oa1(os1);
-    oa1 << lmOut;
+    lmOut.pack(os1); 
 
     LOG_INFO("Serialized lmOut: " << os1.str()); 
 
     LabelMessage lmIn;
     istringstream is1(os1.str());
-    archive::text_iarchive ia1(is1);
-    ia1 >> lmIn;
+    lmIn=*(boost::dynamic_pointer_cast<LabelMessage>(Message::unpack(is1))); 
 
     LOG_INFO( "Checking text archiving..." ); 
     LOG_DEBUG("Comparing these two messages:"); 
@@ -88,33 +76,19 @@ BOOST_AUTO_TEST_CASE( archive_test )
     LOG_DEBUG("lmIn :" << lmIn); 
 
     BOOST_CHECK_EQUAL( lmOut, lmIn );
-
-    ostringstream os2;
-    archive::binary_oarchive oa2(os2);
-    oa2 << lmOut;
-
-    istringstream is2(os2.str());
-    archive::binary_iarchive ia2(is2);
-    ia2 >> lmIn;
-
-    LOG_INFO( "Checking binary archiving..." ); 
-    BOOST_CHECK_EQUAL( lmOut, lmIn );
 }
 
 BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
 {
-    LOG_INFO("------------------------------------------Testing LabelMessagePtr archiving..."); 
-
-    LabelMessagePtr archivedDataPtr(new LabelMessage("THis is a shared_ptr labelMessage"));
+    LOG_INFO("----------------Testing LabelMessagePtr archiving..."); 
     {
+        LabelMessagePtr archivedDataPtr(new LabelMessage("THis is a shared_ptr labelMessage"));
         ostringstream os; 
-        archive::binary_oarchive oa(os);
-        oa << archivedDataPtr; 
+        archivedDataPtr->pack(os); 
 
         LabelMessagePtr unArchivedDataPtr;
         istringstream is(os.str());
-        archive::binary_iarchive ia(is);
-        ia >> unArchivedDataPtr;
+        unArchivedDataPtr=boost::dynamic_pointer_cast<LabelMessage>(Message::unpack(is)); 
 
         LOG_INFO("Checking equality of archived data via shared_ptrs..."); 
         LOG_DEBUG("*archivedDataPtr: " << *archivedDataPtr); 
@@ -124,20 +98,13 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
 
     LOG_INFO("------------Testing unarchiving via a base class shared_ptr"); 
     {
+        LabelMessagePtr archivedDataPtr(new LabelMessage("THis is a shared_ptr labelMessage"));
         ostringstream os; 
-        archive::text_oarchive oa(os);
-        oa << archivedDataPtr; 
+        archivedDataPtr->pack(os); 
 
-        MessagePtr basePtrToUnarchived(new LabelMessage);  // base class ptr points to derived class instance. 
-
-        LOG_DEBUG("*archivedDataPtr before unarchiving    : " << *archivedDataPtr); 
-        LOG_DEBUG("*basePtrToUnarchived before unarchiving: " << *basePtrToUnarchived); 
-        LOG_DEBUG( "serialized: " << os.str() );
-
+        MessagePtr basePtrToUnarchived;
         istringstream is(os.str());
-        archive::text_iarchive ia(is);
-        ia >> basePtrToUnarchived;
-
+        basePtrToUnarchived=Message::unpack(is); 
 
         LOG_DEBUG("*basePtrToUnarchived after unarchiving: " << *basePtrToUnarchived); 
 
@@ -150,9 +117,7 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
         LOG_DEBUG("*derivedPtrToUnarchived: " << *derivedPtrToUnarchived); 
         
         BOOST_CHECK_EQUAL( *archivedDataPtr, *derivedPtrToUnarchived );     // GTL FAIL!
-
     }
-
 }
 
 BOOST_AUTO_TEST_CASE( output_test )
@@ -174,6 +139,5 @@ BOOST_AUTO_TEST_CASE( output_test )
 
     LOG_FATAL("To do: finish writing output unit test"); 
     // Althought testing against the timestamp string will be tricky.
-
 }
 
