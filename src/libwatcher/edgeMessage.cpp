@@ -1,5 +1,10 @@
 #include <boost/asio.hpp>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+
 #include <boost/serialization/string.hpp>       // for serializing addresses.
 #include <boost/serialization/shared_ptr.hpp>   // for serializing LabelMessagePtrs
 #include <boost/serialization/export.hpp>
@@ -120,6 +125,26 @@ namespace watcher {
             return retVal;
         }
 
+        template <typename Archive> 
+            void EdgeMessage::serialize(Archive& ar, const unsigned int version)
+            {
+                TRACE_ENTER();
+
+                ar & boost::serialization::base_object<Message>(*this);
+                ar & node1;
+                ar & node2;
+                ar & edgeColor;
+                ar & expiration;
+                ar & width;
+                ar & layer;
+                ar & addEdge;
+                ar & node1Label;
+                ar & middleLabel;
+                ar & node2Label;
+                ar & bidirectional;
+
+                TRACE_EXIT();
+            }
         EdgeMessage &EdgeMessage::operator=(const EdgeMessage &other)
         {
             TRACE_ENTER();
