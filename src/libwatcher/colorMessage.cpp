@@ -1,3 +1,7 @@
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/export.hpp>
 
 #include "watcherGlobalFunctions.h" // for address serialization
@@ -5,8 +9,6 @@
 
 using namespace std;
 using namespace boost;
-
-BOOST_CLASS_EXPORT_GUID(watcher::event::ColorMessage, "watcher::event::ColorMessage");
 
 namespace watcher {
     namespace event {
@@ -100,5 +102,17 @@ namespace watcher {
             return out;
         }
 
+        template <typename Archive> void ColorMessage::serialize(Archive& ar, const unsigned int file_version)
+        {
+            TRACE_ENTER();
+            ar & boost::serialization::base_object<Message>(*this);
+            ar & color;
+            ar & nodeAddr;
+            ar & flashPeriod;
+            ar & expiration;
+            TRACE_EXIT();
+        }
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::ColorMessage);

@@ -33,18 +33,7 @@ namespace watcher {
 
             private:
                 friend class boost::serialization::access;
-                template <typename Archive>
-                void serialize(Archive& ar, const unsigned int file_version)
-                {
-                    TRACE_ENTER();
-                    ar & boost::serialization::base_object<Message>(*this);
-                    ar & color;
-                    ar & nodeAddr;
-                    ar & flashPeriod;
-                    ar & expiration;
-                    TRACE_EXIT();
-                }
-
+                template <typename Archive> void serialize(Archive& ar, const unsigned int file_version);
                 DECLARE_LOGGER();
         };
 

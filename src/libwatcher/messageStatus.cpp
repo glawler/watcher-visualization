@@ -1,10 +1,12 @@
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/export.hpp>
 
 #include "messageStatus.h"
 
 using namespace std;
-
-BOOST_CLASS_EXPORT_GUID(watcher::event::MessageStatus, "watcher::event::MessageStatus"); 
 
 namespace watcher {
     namespace event {
@@ -88,5 +90,15 @@ namespace watcher {
             TRACE_EXIT();
             return out;
         }
+
+        template <typename Archive> void MessageStatus::serialize(Archive & ar, const unsigned int file_version)
+        {
+            TRACE_ENTER();
+            ar & boost::serialization::base_object<Message>(*this);
+            ar & status;
+            TRACE_EXIT();
+        }
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::MessageStatus);

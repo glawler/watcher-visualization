@@ -1,5 +1,9 @@
 #include <boost/asio.hpp>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/string.hpp>       // for serializing addresses.
 #include <boost/serialization/shared_ptr.hpp>   // for serializing LabelMessagePtrs
 #include <boost/serialization/export.hpp>
@@ -13,7 +17,6 @@
 using namespace std;
 using namespace boost;
 
-        BOOST_CLASS_EXPORT_GUID(watcher::event::EdgeMessage, "EdgeMessage");
 
 namespace watcher {
     namespace event {
@@ -180,5 +183,28 @@ namespace watcher {
             TRACE_EXIT();
             return out;
         }
+
+        template <typename Archive> void EdgeMessage::serialize(Archive& ar, const unsigned int file_version) 
+        {
+            TRACE_ENTER();
+
+            ar & boost::serialization::base_object<Message>(*this);
+            ar & node1;
+            ar & node2;
+            ar & edgeColor;
+            ar & expiration;
+            ar & width;
+            ar & layer;
+            ar & addEdge;
+            ar & node1Label;
+            ar & middleLabel;
+            ar & node2Label;
+            ar & bidirectional;
+
+            TRACE_EXIT();
+        }
+
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::EdgeMessage);
