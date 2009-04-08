@@ -33,13 +33,12 @@ namespace watcher
             virtual ~ClientConnection(); 
 
             /**
-             * sendMessage() will send a message to the server.
+             * sendMessage() will send a packet to the server which contains the message. 
              *
              * @param message - The message to send.
              * @return a bool - currently ignored. 
              */
             bool sendMessage(const event::MessagePtr message);
-
 
             /**
              * setMessageHandler() Set a messageHandler if you want direct access to the 

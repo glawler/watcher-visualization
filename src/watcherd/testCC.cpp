@@ -73,6 +73,17 @@ int main(int argc, char **argv)
             c.sendMessage(shared_ptr<TestMessage>(new TestMessage(strVal, ints))); 
         }
 
+        // vector<MessagePtr> messages;
+        // for (int i = 0; i < loopCount; i++)
+        // {
+        //     ints.push_back(i+1);
+        //     ints.push_back((i+1)*2);
+        //     MessagePtr m=MessagePtr(new TestMessage(strVal, ints));
+        //     messages.push_back(m);
+        // }
+        //
+        // c.sendMessages(messages); 
+
         ioserv.run(); 
 
         // sleep(60); 

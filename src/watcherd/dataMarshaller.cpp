@@ -30,11 +30,12 @@ bool DataMarshaller::unmarshalHeader(const char *buffer, const size_t &bufferSiz
 
     string inbound_header(buffer, buffer + header_length);
     stringstream is(inbound_header);
-    if (!(is >> std::setw(sizeof(std::string::size_type)) >> std::hex >> payloadSize) || 
-        !(is >> std::setw(sizeof(messageNum)) >> std::hex >> messageNum))
+    if (!(is >> std::setw(sizeof(payloadSize)) >> std::hex >> payloadSize) || 
+        !(is >> std::setw(sizeof(messageNum))  >> std::hex >> messageNum))
     {
         // Header doesn't seem to be valid. Inform the caller.
-        LOG_DEBUG("Error reading payloadsize and type from header: "  << strerror(errno)); 
+        LOG_DEBUG("Error reading parsing packet header: "  << strerror(errno)); 
+        LOG_DEBUG("payloadSize: " << payloadSize << " messageNum: " << messageNum); 
         TRACE_EXIT_RET("false");
         return false;
     }
