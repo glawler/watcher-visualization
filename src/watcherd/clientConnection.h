@@ -85,8 +85,6 @@ namespace watcher
             boost::asio::io_service &ioService;
             boost::asio::io_service::strand theStrand;
 
-            DataMarshaller::NetworkMarshalBuffers outBuffers;
-
             typedef boost::array<char, 8192> IncomingBuffer;
             typedef struct 
             {

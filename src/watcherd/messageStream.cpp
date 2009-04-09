@@ -109,12 +109,28 @@ bool MessageStream::stopStream()
 }
 
 //virtual 
-bool MessageStream::handleMessageArrive(const MessagePtr message, MessagePtr &response)
+bool MessageStream::handleMessageArrive(const MessagePtr &message, MessagePtr &response)
 {
     TRACE_ENTER();
     bool retVal=ClientMessageHandler::handleMessageArrive(message, response);
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
+}
+
+//virtual 
+bool MessageStream::handleMessagesArrive(const vector<MessagePtr> &messages, MessagePtr &response)
+{
+    TRACE_ENTER();
+    for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
+    {
+        if(!handleMessageArrive(*m, response))
+        {
+            TRACE_EXIT_RET("false"); 
+            return false;
+        }
+    }
+    TRACE_EXIT_RET("true"); 
+    return true;
 }
 
 std::ostream &operator<<(std::ostream &out, const MessageStream &messStream)

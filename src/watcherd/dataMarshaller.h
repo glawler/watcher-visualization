@@ -10,6 +10,30 @@
 
 namespace watcher 
 {
+    // A reference-counted non-modifiable buffer class.
+    class shared_const_buffer
+    {
+        public:
+            // Construct from a std::string.
+            explicit shared_const_buffer(const std::string& data)
+                : data_(new std::vector<char>(data.begin(), data.end())),
+                buffer_(boost::asio::buffer(*data_))
+        {
+        }
+
+            // Implement the ConstBufferSequence requirements.
+            typedef boost::asio::const_buffer value_type;
+            typedef const boost::asio::const_buffer* const_iterator;
+            const boost::asio::const_buffer* begin() const { return &buffer_; }
+            const boost::asio::const_buffer* end() const { return &buffer_ + 1; }
+
+            operator boost::asio::const_buffer() const { return buffer_; } 
+
+        private:
+            boost::shared_ptr<std::vector<char> > data_;
+            boost::asio::const_buffer buffer_;
+    };
+    
     /**
      * The DataMarshaller class marshals and unmarshals Messages for transport
      * over the network. It appends a small header (size, type) to the self-serializing
@@ -24,7 +48,8 @@ namespace watcher
             /** 
              * @typedef a sequence of buffers used to write to the network.
              */
-            typedef boost::asio::const_buffer NetworkMarshalBuffer;
+            typedef shared_const_buffer NetworkMarshalBuffer;
+            // typedef std::vector<NetworkMarshalBuffer> NetworkMarshalBuffers;
             typedef std::deque<NetworkMarshalBuffer> NetworkMarshalBuffers;
             typedef boost::shared_ptr<NetworkMarshalBuffers> NetworkMarshalBuffersPtr;
 
@@ -71,7 +96,7 @@ namespace watcher
                     const size_t &bufferSize);
 
             /**
-             * Marshal a single Message into an asio::const_buffer.
+             * Marshal a single Message into a NetworkMarshalBuffer. 
              * @param[in] - Message, the Message to marshal.
              * @param[out] - outbuffers, the seraialized instance of message. 
              * @return - true on success, false otherwise.
@@ -81,7 +106,7 @@ namespace watcher
                     NetworkMarshalBuffers &outBuffers);
 
             /**
-             * Marshal some number of Messages into an asio::const_buffer.
+             * Marshal some number of Messages into a NetworkMarshalBuffer. 
              * @param[in] - Message, the Message to marshal.
              * @param[out] - outbuffers, the seraialized instance of message. 
              * @return - true on success, false otherwise.

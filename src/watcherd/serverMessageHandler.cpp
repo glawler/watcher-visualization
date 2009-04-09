@@ -22,7 +22,7 @@ ServerMessageHandler::~ServerMessageHandler()
     TRACE_EXIT();
 }
 
-bool ServerMessageHandler::handleMessageArrive(const MessagePtr message, MessagePtr &response)
+bool ServerMessageHandler::handleMessageArrive(const MessagePtr &message, MessagePtr &response)
 {
     TRACE_ENTER();
 

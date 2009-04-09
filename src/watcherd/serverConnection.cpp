@@ -118,15 +118,12 @@ namespace watcher {
 
                     LOG_DEBUG("Marshalling outbound message"); 
 
-                    // GTL - this is ugly and probably a memory leak.
-                    DataMarshaller::NetworkMarshalBuffersPtr obDataPtr=
-                        DataMarshaller::NetworkMarshalBuffersPtr(new DataMarshaller::NetworkMarshalBuffers);
-
-                    DataMarshaller::marshalPayload(reply, *obDataPtr);
+                    DataMarshaller::NetworkMarshalBuffers outBuffers;
+                    DataMarshaller::marshalPayload(reply, outBuffers);
                     LOG_INFO("Sending reply: " << *reply);
                     boost::asio::async_write(
                             socket_, 
-                            *obDataPtr,         // GTL - leak here. 
+                            outBuffers,   
                             strand_.wrap(
                                 boost::bind(
                                     &ServerConnection::handle_write, 
@@ -140,18 +137,15 @@ namespace watcher {
                 LOG_WARN("Did not understand incoming message. Sending back a nack");
                 MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
 
-                // GTL - this is ugly and probably a memory leak.
-                DataMarshaller::NetworkMarshalBuffersPtr obDataPtr=
-                    DataMarshaller::NetworkMarshalBuffersPtr(new DataMarshaller::NetworkMarshalBuffers);
-
-                DataMarshaller::marshalPayload(reply, *obDataPtr);
+                DataMarshaller::NetworkMarshalBuffers outBuffers;
+                DataMarshaller::marshalPayload(reply, outBuffers);
                 LOG_INFO("Sending NACK as reply: " << *reply);
 
                 // GTL Should put a lock around this push_back()
                 replies.push_back(reply);
                 boost::asio::async_write(
                         socket_, 
-                        *obDataPtr,         // GTL - leak here. 
+                        outBuffers,        
                         strand_.wrap(
                             boost::bind(
                                 &ServerConnection::handle_write, 
@@ -191,18 +185,15 @@ namespace watcher {
                 LOG_DEBUG("Still more replies to send, sending next one."); 
                 LOG_DEBUG("Marshalling outbound message"); 
 
-                // GTL - this is ugly and probably a memory leak.
-                DataMarshaller::NetworkMarshalBuffersPtr obDataPtr=
-                    DataMarshaller::NetworkMarshalBuffersPtr(new DataMarshaller::NetworkMarshalBuffers);
-
+                DataMarshaller::NetworkMarshalBuffers outBuffers;
 
                 // Once we get the symantics of multiple messages per packet down, we can send all these
                 // replies in a single packet.
-                DataMarshaller::marshalPayload(replies.front(), *obDataPtr);
+                DataMarshaller::marshalPayload(replies.front(), outBuffers);
                 LOG_DEBUG("Sending reply message: " << *replies.front());
                 boost::asio::async_write(
                         socket_, 
-                        *obDataPtr,             // GTL - leak
+                        outBuffers,             
                         strand_.wrap(
                             boost::bind(
                                 &ServerConnection::handle_write,

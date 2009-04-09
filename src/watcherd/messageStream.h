@@ -143,7 +143,12 @@ namespace watcher
             /**
              * Handle the arrival of a message. Overridden from ClientMessageHandler base class.
              */
-            virtual bool handleMessageArrive(const MessagePtr message, MessagePtr &response);
+            virtual bool handleMessageArrive(const MessagePtr &message, MessagePtr &response);
+
+            /**
+             * Handle the arrival of mulitple messages. Overridden from ClientMessageHandler base class.
+             */
+            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages, event::MessagePtr &response);
 
         protected:
 

@@ -161,7 +161,7 @@ void ClientConnection::doWrite(const MessagePtr &message)
     if(!writeInProgress)
     {
         LOG_DEBUG("Marshaling outbound message"); 
-        outBuffers.clear(); 
+        DataMarshaller::NetworkMarshalBuffers outBuffers;
         if (!DataMarshaller::marshalPayload(dataPtr->theRequest, outBuffers))
         {
             LOG_WARN("Error marshaling message, not sending"); 
@@ -210,7 +210,7 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
         // start a new write if we need to
         if (!transferData.empty())
         {
-            outBuffers.clear(); 
+            DataMarshaller::NetworkMarshalBuffers outBuffers;
             DataMarshaller::marshalPayload(dataPtr->theRequest, outBuffers);
             LOG_DEBUG("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest << ")");
             LOG_DEBUG("Sending packet"); 
