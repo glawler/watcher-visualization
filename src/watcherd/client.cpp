@@ -36,6 +36,18 @@ bool Client::sendMessage(const MessagePtr request)
     return retVal;
 }
 
+bool Client::sendMessages(const std::vector<event::MessagePtr> &messages)
+{
+    TRACE_ENTER();
+
+    bool retVal=clientConnection->sendMessages(messages);
+    ioService.run();
+    ioService.reset();
+
+    TRACE_EXIT_RET((retVal ? "true" : "false"));
+    return retVal;
+}
+
 void Client::setMessageHandler(MessageHandlerPtr messageHandler)
 {
     TRACE_ENTER();

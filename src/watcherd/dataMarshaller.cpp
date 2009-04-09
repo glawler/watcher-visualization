@@ -12,6 +12,42 @@ using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 
+/**
+ * GTL ERASE START
+ * preinitailize the archiving mechanism. This is a hack and should be 
+ * removed once we figure out how to do this without priming the 
+ * archive pump
+ */
+#include "libwatcher/message.h"
+#include "libwatcher/labelMessage.h"
+#include "libwatcher/edgeMessage.h"
+#include "libwatcher/colorMessage.h"
+#include "libwatcher/gpsMessage.h"
+#include "libwatcher/messageStatus.h"
+#include "libwatcher/dataRequestMessage.h"
+#include "libwatcher/testMessage.h"
+#include "libwatcher/seekWatcherMessage.h"
+#include "libwatcher/startWatcherMessage.h"
+#include "libwatcher/stopWatcherMessage.h"
+#include "libwatcher/speedWatcherMessage.h"
+#include "libwatcher/nodeStatusMessage.h"
+static MessagePtr unused_A_Ptr=MessagePtr(new LabelMessage); 
+static MessagePtr unused_B_Ptr=MessagePtr(new EdgeMessage); 
+static MessagePtr unused_C_Ptr=MessagePtr(new ColorMessage); 
+static MessagePtr unused_D_Ptr=MessagePtr(new GPSMessage); 
+static MessagePtr unused_E_Ptr=MessagePtr(new MessageStatus); 
+static MessagePtr unused_F_Ptr=MessagePtr(new DataRequestMessage); 
+static MessagePtr unused_G_Ptr=MessagePtr(new TestMessage); 
+static MessagePtr unused_H_Ptr=MessagePtr(new SeekMessage); 
+static MessagePtr unused_I_Ptr=MessagePtr(new StartMessage); 
+static MessagePtr unused_J_Ptr=MessagePtr(new StopMessage); 
+static MessagePtr unused_K_Ptr=MessagePtr(new SpeedMessage); 
+static MessagePtr unused_L_Ptr=MessagePtr(new NodeStatusMessage); 
+/** 
+ * GTL ERASE END 
+ *
+ **/
+
 #define MARSHALSHORT(a,b) \
 	do\
 	{\

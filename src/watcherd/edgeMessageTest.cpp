@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 
     watcher::Client client(server); 
     LOG_INFO("Connecting to " << server << " and sending message."); 
-    
+
     EdgeMessagePtr em = EdgeMessagePtr(new EdgeMessage);
     em->node1=head;
     em->node2=tail;

@@ -35,6 +35,7 @@ namespace watcher
              * @return - boolean - true on success, false otherwise
              */
             bool sendMessage(const event::MessagePtr message);
+            bool sendMessages(const std::vector<event::MessagePtr> &messages);
 
             /**
              * setMessageHandler() Set a messageHandler if you want direct access to the 
