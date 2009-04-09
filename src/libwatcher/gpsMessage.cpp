@@ -13,11 +13,12 @@ namespace watcher {
     namespace event {
         INIT_LOGGER(GPSMessage, "Message.GPSMessage");
 
-        GPSMessage::GPSMessage(const float &lat_, const float &lng_, const float &alt_) : 
+        GPSMessage::GPSMessage(const float &x_, const float &y_, const float &z_) : 
             Message(GPS_MESSAGE_TYPE, GPS_MESSAGE_VERSION),
-            lat(lat_),
-            lng(lng_),
-            alt(alt_)
+            x(x_),
+            y(y_),
+            z(z_),
+            dataFormat(LAT_LONG_ALT_WGS84)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -25,9 +26,10 @@ namespace watcher {
 
         GPSMessage::GPSMessage(const GPSMessage &other) :
             Message(other.type, other.version),
-            lat(other.lat),
-            lng(other.lng),
-            alt(other.alt)
+            x(other.x),
+            y(other.y),
+            z(other.z),
+            dataFormat(other.dataFormat)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -39,9 +41,10 @@ namespace watcher {
 
             bool retVal = 
                 Message::operator==(other) && 
-                lat == other.lat &&
-                lng == other.lng &&
-                alt == other.alt;
+                x == other.x &&
+                y == other.y &&
+                z == other.z && 
+                dataFormat == other.dataFormat;
 
             TRACE_EXIT_RET(retVal);
             return retVal;
@@ -52,9 +55,9 @@ namespace watcher {
             TRACE_ENTER();
 
             Message::operator=(other);
-            lat = other.lat;
-            lng = other.lng;
-            alt = other.alt;
+            x = other.x;
+            y = other.y;
+            z = other.z;
 
             TRACE_EXIT();
             return *this;
@@ -66,9 +69,10 @@ namespace watcher {
             TRACE_ENTER();
 
             Message::toStream(out);
-            out << " lat: " << lat;
-            out << " lng: " << lng;
-            out << " alt: " << alt;
+            out << " x: " << x;
+            out << " y: " << y;
+            out << " z: " << z;
+            out << " format: " << dataFormat;
 
             TRACE_EXIT();
             return out;
@@ -86,9 +90,10 @@ namespace watcher {
         {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);
-            ar & lat;
-            ar & lng;
-            ar & alt;
+            ar & x;
+            ar & y;
+            ar & z;
+            ar & dataFormat;
             TRACE_EXIT();
         }
     }

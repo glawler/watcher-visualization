@@ -9,12 +9,25 @@ namespace watcher {
     namespace event {
         class GPSMessage : public Message {
             public:
-                // The data
-                float lat;
-                float lng;
-                float alt;
 
-                GPSMessage(const float &lat=0.0, const float &lng=0.0, const float &alt=0.0);
+                // Supported GPS data formats. Default is LAT_LONG_ALT_WGS84.
+                enum DataFormat
+                {
+                    LAT_LONG_ALT_WGS84,
+                    UTM
+                }; 
+
+                // The data
+                float x;
+                float y;
+                float z;
+
+                DataFormat dataFormat;
+
+                // Only valid if format==UTM
+                std::string utmZoneReference;
+
+                GPSMessage(const float &x=0.0, const float &y=0.0, const float &z=0.0);
                 GPSMessage(const GPSMessage &other);
 
                 bool operator==(const GPSMessage &other) const;
