@@ -25,7 +25,6 @@ using namespace watcher::event;
 bool DataMarshaller::unmarshalHeader(const char *buffer, const size_t &bufferSize, size_t &payloadSize, unsigned short &messageNum)
 {
     TRACE_ENTER();
-    payloadSize=0;
 
     // logger is crashing if given anything other than a string! GTL - Test and see if this is still true.
     LOG_DEBUG("Unmarshalling a header of " << boost::lexical_cast<std::string>(bufferSize) << " bytes.");
@@ -37,11 +36,13 @@ bool DataMarshaller::unmarshalHeader(const char *buffer, const size_t &bufferSiz
         return false;
     }
 
-    const char *bufPtr=buffer; 
-    UNMARSHALSHORT(bufPtr, payloadSize);
+    const unsigned char *bufPtr=(const unsigned char*)buffer; 
+    unsigned short pSize; 
+    UNMARSHALSHORT(bufPtr, pSize);
     UNMARSHALSHORT(bufPtr, messageNum);
 
-    LOG_DEBUG("Header data: payload size: " << payloadSize << " messageNum: " << messageNum); 
+    payloadSize=pSize;  // ushort to size_t conversion.
+    LOG_DEBUG("Header data: payload size: " << pSize << " messageNum: " << messageNum); 
 
     return true;
 }
@@ -54,6 +55,8 @@ bool DataMarshaller::unmarshalPayload(MessagePtr &message, const char *buffer, c
     // Extract the Message from the payload
     istringstream s(string(buffer, bufferSize));
     message=Message::unpack(s);
+
+    LOG_DEBUG("Unmarshalled payload data: " << s.str()); 
 
     TRACE_EXIT_RET((message?"true":"false"));
     return static_cast<bool>(message);          // cast may be redundant 
@@ -79,6 +82,7 @@ bool DataMarshaller::unmarshalPayload(std::vector<MessagePtr> &messages, unsigne
         messages.push_back(m);      // marshalled with push_front, so should get same order on unmarshalling.
     }
 
+    LOG_DEBUG("Unmarshalled payload data: " << is.str()); 
     LOG_DEBUG("Successfully unmarshalled " << i << " message" << (i>0?"s":"")); 
 
     TRACE_EXIT_RET("true"); 
@@ -116,7 +120,8 @@ bool DataMarshaller::marshalPayload(const vector<MessagePtr> &messages, NetworkM
     {
         (*m)->pack(os); 
         payloadSize+=os.str().size(); 
-        outBuffers.push_front(shared_const_buffer(os.str())); 
+        outBuffers.push_front(NetworkMarshalBuffer(os.str())); 
+        LOG_DEBUG("Marshalled payload: " << os.str()); 
         os.str(""); 
     }
 
@@ -130,7 +135,7 @@ bool DataMarshaller::marshalPayload(const vector<MessagePtr> &messages, NetworkM
     MARSHALSHORT(bufPtr, messageNum);
 
     // Put the header on the front.
-    outBuffers.push_front(NetworkMarshalBuffer(string((const char*)&header, sizeof(header))));
+    outBuffers.push_front(NetworkMarshalBuffer(string((const char*)header, sizeof(header))));
 
     TRACE_EXIT_RET("true");
     return true;
