@@ -2,7 +2,7 @@
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "clientConnection.h"
+#include "client.h"
 #include <libwatcher/testMessage.h>
 
 #include "initConfig.h"
@@ -59,36 +59,39 @@ int main(int argc, char **argv)
 
     try
     {
-        asio::io_service ioserv;
+        // asio::io_service ioserv;
 
-        ClientConnection c(ioserv, serverName, "watcherd"); 
+        Client c(serverName); 
 
         vector<int> ints;
         string strVal = "from testCC"; 
         for (int i = 0; i < loopCount; i++)
         {
-            ints.push_back(i+1);
-            ints.push_back((i+1)*2);
+            if(i<100)
+            {
+                ints.push_back(i+1);
+                ints.push_back((i+1)*2);
+            }
             LOG_INFO("Sending message number " << i); 
             c.sendMessage(shared_ptr<TestMessage>(new TestMessage(strVal, ints))); 
         }
 
-        // vector<MessagePtr> messages;
-        // for (int i = 0; i < loopCount; i++)
-        // {
-        //     ints.push_back(i+1);
-        //     ints.push_back((i+1)*2);
-        //     MessagePtr m=MessagePtr(new TestMessage(strVal, ints));
-        //     messages.push_back(m);
-        // }
-        //
-        // c.sendMessages(messages); 
+        vector<MessagePtr> messages;
+        for (int i = 0; i < loopCount; i++)
+        {
+            ints.push_back(i+1);
+            ints.push_back((i+1)*2);
+            MessagePtr m=MessagePtr(new TestMessage(strVal, ints));
+            messages.push_back(m);
+        }
+        
+        c.sendMessages(messages); 
 
-        ioserv.run(); 
+        // ioserv.run(); 
 
         // sleep(60); 
 
-        c.close();
+        // c.close();
         // t.join();
     }
     catch (std::exception &e)

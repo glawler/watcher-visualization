@@ -39,6 +39,7 @@ namespace watcher
              * @return a bool - currently ignored. 
              */
             bool sendMessage(const event::MessagePtr message);
+            bool sendMessages(const std::vector<event::MessagePtr> &message);
 
             /**
              * setMessageHandler() Set a messageHandler if you want direct access to the 
@@ -77,7 +78,7 @@ namespace watcher
              */
             bool tryConnect(); 
 
-            void doWrite(const event::MessagePtr &message); 
+            void doWrite(const std::vector<event::MessagePtr> &message); 
 
             bool connected; 
 
@@ -89,7 +90,6 @@ namespace watcher
             typedef struct 
             {
                 IncomingBuffer incomingBuffer;
-                event::MessagePtr theReply;
                 event::MessagePtr theRequest;
             } TransferData;
 

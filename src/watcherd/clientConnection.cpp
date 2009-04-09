@@ -133,18 +133,30 @@ bool ClientConnection::sendMessage(const MessagePtr message)
 {
     TRACE_ENTER();
 
+    vector<MessagePtr> tmp;
+    tmp.push_back(message); 
+
+    bool retVal=sendMessages(tmp); 
+
+    TRACE_EXIT_RET((retVal?"true":"false"));
+    return retVal;
+}
+
+bool ClientConnection::sendMessages(const vector<event::MessagePtr> &messages)
+{
+    TRACE_ENTER();
+
     if (!connected)
         doConnect();
 
     // GTL - may want to marshal here. If there is an error, then don't bother connecting. 
 
-    ioService.post(bind(&ClientConnection::doWrite, this, message));
+    ioService.post(bind(&ClientConnection::doWrite, this, messages));
 
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT(); 
 }
 
-void ClientConnection::doWrite(const MessagePtr &message)
+void ClientConnection::doWrite(const vector<MessagePtr> &messages)
 {
     TRACE_ENTER();
 
@@ -155,8 +167,7 @@ void ClientConnection::doWrite(const MessagePtr &message)
 
     bool writeInProgress=!transferData.empty();
     TransferDataPtr dataPtr=TransferDataPtr(new TransferData);
-    dataPtr->theRequest=message;
-    dataPtr->theReply=MessagePtr(new Message);
+    dataPtr->theRequest=messages.front(); 
     transferData.push_back(dataPtr);
     if(!writeInProgress)
     {
@@ -171,10 +182,15 @@ void ClientConnection::doWrite(const MessagePtr &message)
         }
         LOG_INFO("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest<< ")");
         LOG_DEBUG("Sending packet"); 
-        asio::async_write(theSocket, outBuffers, 
+        asio::async_write(
+                theSocket, 
+                outBuffers, 
                 theStrand.wrap(
-                    bind(&ClientConnection::handle_write_message, this, 
-                        asio::placeholders::error, dataPtr)));
+                    bind(
+                        &ClientConnection::handle_write_message, 
+                        this, 
+                        asio::placeholders::error, 
+                        dataPtr)));
     }
 
     TRACE_EXIT(); 

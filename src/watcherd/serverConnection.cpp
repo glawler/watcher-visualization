@@ -35,14 +35,14 @@ namespace watcher {
     {
         TRACE_ENTER(); 
         boost::asio::async_read(
-                                socket_, 
-                                boost::asio::buffer(incomingBuffer, DataMarshaller::header_length),
-                                strand_.wrap(
-                                             boost::bind(
-                                                         &ServerConnection::handle_read_header, 
-                                                         shared_from_this(),
-                                                         boost::asio::placeholders::error,
-                                                         boost::asio::placeholders::bytes_transferred)));
+                socket_, 
+                boost::asio::buffer(incomingBuffer, DataMarshaller::header_length),
+                strand_.wrap(
+                    boost::bind(
+                        &ServerConnection::handle_read_header, 
+                        shared_from_this(),
+                        boost::asio::placeholders::error,
+                        boost::asio::placeholders::bytes_transferred)));
         TRACE_EXIT();
     }
 
