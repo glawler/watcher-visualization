@@ -95,8 +95,16 @@ namespace watcher {
         {
             boost::archive::text_iarchive ia(is);
             Message* ret = 0;
-            ia >> ret;
-            return MessagePtr(ret);
+            try
+            {
+                ia >> ret;
+            }
+            catch (boost::archive::archive_exception& e)
+            {
+                LOG_WARN("Exception thrown while serializing the message: " << e.what());
+                return MessagePtr();
+            }
+            return MessagePtr(ret); 
         }
 
         void Message::pack(std::ostream& os) const
