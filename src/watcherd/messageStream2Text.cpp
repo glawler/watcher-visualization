@@ -44,7 +44,8 @@ int main(int argc, char **argv)
     }
     SingletonConfig::unlock();
 
-    string logConf("log.properties");
+    string logConf(basename(argv[0]));
+    logConf+=".log.properties"; 
     if (!config.lookupValue("logPropertiesFile", logConf))
     {
         cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf 
@@ -52,8 +53,8 @@ int main(int argc, char **argv)
         config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
     }
 
+    LOAD_LOG_PROPS(logConf); 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
-    LOAD_LOG_PROPS("log.properties"); 
 
     string serverName("glory");
     string service("watcherd");
