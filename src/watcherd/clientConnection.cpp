@@ -70,13 +70,15 @@ bool ClientConnection::tryConnect()
 {
     TRACE_ENTER();
 
-    LOG_DEBUG("Starting connection sequence to " << server << " running service " << service); 
+    LOG_DEBUG("Starting connection sequence to " << server); 
 
     try
     {
         boost::system::error_code error;
         tcp::resolver resolver(ioService); 
         tcp::resolver::query query(server, service);
+        if(query.numeric_service)
+        LOG_DEBUG("Connecting to service/port " << service);
         tcp::resolver::iterator endpoint_iterator = resolver.resolve(query, error);
         tcp::resolver::iterator end;
 

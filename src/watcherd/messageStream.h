@@ -43,12 +43,22 @@ namespace watcher
              *      > 1.0 -- faster than "real time" by factor given
              *      default value is 1.0
              */
-             MessageStream(const std::string &serverName, const Timestamp &startTime=0, const float streamRate=1.0); 
+             MessageStream(
+                     const std::string &serverName, 
+                     const std::string &service="watcherd",  // can be port num or service name
+                     const Timestamp &startTime=0, 
+                     const float streamRate=1.0); 
 
         public:
 
             static MessageStreamPtr createNewMessageStream(
                     const std::string &serverName, 
+                    const Timestamp &startTime=0, 
+                    const float streamRate=1.0);
+
+            static MessageStreamPtr createNewMessageStream(
+                    const std::string &serverName, 
+                    const std::string &portNumber,  // Connect on a non-standard port (different port than watcherd service)
                     const Timestamp &startTime=0, 
                     const float streamRate=1.0);
 

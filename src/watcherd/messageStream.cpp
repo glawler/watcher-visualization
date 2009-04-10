@@ -8,11 +8,15 @@ using namespace std;
 
 INIT_LOGGER(MessageStream, "MessageStream");
 
-MessageStream::MessageStream(const string &serverName_, const Timestamp &startTime_, const float streamRate_) : 
+MessageStream::MessageStream(
+        const string &serverName_, 
+        const string &serviceOrPortNum, 
+        const Timestamp &startTime_, 
+        const float streamRate_) : 
     messageStreamFilters(),
     streamRate(streamRate_),
     streamStartTime(startTime_),
-    connection(new Client(serverName_))
+    connection(new Client(serverName_, serviceOrPortNum))
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -22,7 +26,21 @@ MessageStream::MessageStream(const string &serverName_, const Timestamp &startTi
 MessageStreamPtr MessageStream::createNewMessageStream(const string &serverName_, const Timestamp &startTime_, const float streamRate_)
 {
     TRACE_ENTER();
-    MessageStreamPtr retVal(new MessageStream(serverName_,startTime_,streamRate_));
+    MessageStreamPtr retVal(new MessageStream(serverName_,"watcherd",startTime_,streamRate_));
+    retVal->initConnection(); 
+    TRACE_EXIT();
+    return retVal;
+}
+
+// static 
+MessageStreamPtr MessageStream::createNewMessageStream(
+                    const std::string &serverName, 
+                    const std::string &portNum,  // Connect on a non-standard port (different port than watcherd service)
+                    const Timestamp &startTime, 
+                    const float streamRate)
+{
+    TRACE_ENTER();
+    MessageStreamPtr retVal(new MessageStream(serverName, portNum, startTime, streamRate));
     retVal->initConnection(); 
     TRACE_EXIT();
     return retVal;
