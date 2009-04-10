@@ -150,21 +150,26 @@ namespace watcher
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+        protected:
+
             /**
              * Handle the arrival of a message. Overridden from ClientMessageHandler base class.
+             * It is invoked by a thread in a Client instance. 
              */
             virtual bool handleMessageArrive(const MessagePtr &message, MessagePtr &response);
 
             /**
              * Handle the arrival of mulitple messages. Overridden from ClientMessageHandler base class.
+             * It is invoked by a thread in a Client instance. 
              */
             virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages, event::MessagePtr &response);
-
-        protected:
 
         private:
             DECLARE_LOGGER();
 
+            /** 
+             * private data 
+             **/
             typedef std::vector<MessageStreamFilterPtr> MessageStreamFilterList;
             typedef MessageStreamFilterList::iterator MessageStreamFilterListIterator;
             typedef MessageStreamFilterList::const_iterator MessageStreamFilterListConstIterator;
@@ -172,12 +177,29 @@ namespace watcher
 
             float streamRate;
             Timestamp streamStartTime;
-
-            MessageStream(const MessageStream &ms); /// No copies allowed though I don't know why.
-            MessageStream &operator=(const MessageStream &ms); /// No operator = allowed.
+            std::string serverName;
+            std::string serviceName;
 
             /** This is the connection to the message server (watcherd instance) used to send/recv messages */
             ClientPtr connection;
+
+            /** Incoming messages are stored in a cache until getNextMessage() is called. */
+            typedef std::vector<watcher::event::MessagePtr> MessageCache;
+            MessageCache messageCache; 
+
+            /** 
+             * Single-writer, multiple-reader around messageCache access as it will be filled 
+             * and emptied by different threads.
+             **/
+            boost::mutex messageCacheMutex;
+            boost::condition_variable messageCacheCond;
+            bool readReady;
+
+            /** 
+             * private methods 
+             **/
+            MessageStream(const MessageStream &ms); /// No copies allowed though I don't know why.
+            MessageStream &operator=(const MessageStream &ms); /// No operator = allowed.
 
     }; // like a fired school teacher.
 

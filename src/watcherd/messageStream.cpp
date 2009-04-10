@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "messageStream.h"
 #include "libwatcher/startWatcherMessage.h"
 #include "libwatcher/stopWatcherMessage.h"
@@ -5,18 +7,24 @@
 using namespace watcher;
 using namespace watcher::event;
 using namespace std;
+using namespace boost;
 
 INIT_LOGGER(MessageStream, "MessageStream");
 
 MessageStream::MessageStream(
         const string &serverName_, 
-        const string &serviceOrPortNum, 
+        const string &serviceName_, 
         const Timestamp &startTime_, 
         const float streamRate_) : 
     messageStreamFilters(),
     streamRate(streamRate_),
     streamStartTime(startTime_),
-    connection(new Client(serverName_, serviceOrPortNum))
+    serverName(serverName_),
+    serviceName(serviceName_),
+    connection(),
+    messageCache(),
+    messageCacheMutex(),
+    readReady(false)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -49,6 +57,7 @@ MessageStreamPtr MessageStream::createNewMessageStream(
 void MessageStream::initConnection() 
 {
     TRACE_ENTER();
+    connection=ClientPtr(new Client(serverName, serviceName)); 
     connection->setMessageHandler(shared_from_this()); 
     TRACE_EXIT();
 }
@@ -75,15 +84,33 @@ bool MessageStream::setStreamRate(const float &messageStreamRate)
 bool MessageStream::getNextMessage(MessagePtr newMessage)
 {
     TRACE_ENTER();
-    sleep(1000000); 
-    TRACE_EXIT_RET("true");
+    if(!connection) 
+    {
+        TRACE_EXIT_RET(false);
+        return false;
+    }
+
+    unique_lock<mutex> lock(messageCacheMutex); 
+    while(false==readReady)
+    {
+        messageCacheCond.wait(lock); 
+    }
+
+    assert(messageCache.size() > 0); 
+    newMessage=messageCache.front();
+    messageCache.erase(messageCache.begin());
+    readReady=messageCache.size()>0; 
+    LOG_DEBUG("Setting readReady to " << (readReady?"true":"false")); 
+
+    TRACE_EXIT_RET(true);
     return true;
 }
 bool MessageStream::isStreamReadable() const
 {
     TRACE_ENTER();
-    TRACE_EXIT_RET("true");
-    return true;
+    bool retVal=messageCache.size() > 1; 
+    TRACE_EXIT_RET(retVal); 
+    return retVal;
 }
 bool MessageStream::addMessageFilter(const MessageStreamFilter &filter)
 {
@@ -131,6 +158,50 @@ bool MessageStream::handleMessageArrive(const MessagePtr &message, MessagePtr &r
 {
     TRACE_ENTER();
     bool retVal=ClientMessageHandler::handleMessageArrive(message, response);
+
+    if(retVal==false)  // message is not a message status ack or status ok, so we should handle it.
+    {
+        // put new message on message queue if it's not a status message. 
+        switch (message->type)
+        {
+            case MESSAGE_STATUS_TYPE: 
+                // If we've gotten here, the message status is not ack or ok.
+                // Close the connection. 
+                connection.reset();  // should delete the connection. 
+
+            case TEST_MESSAGE_TYPE:
+            case GPS_MESSAGE_TYPE:
+            case LABEL_MESSAGE_TYPE:
+            case EDGE_MESSAGE_TYPE:
+            case COLOR_MESSAGE_TYPE:
+            case DATA_REQUEST_MESSAGE_TYPE:
+            case NODE_STATUS_MESSAGE_TYPE:
+            case USER_DEFINED_MESSAGE_TYPE:
+                {
+                    lock_guard<mutex> lock(messageCacheMutex); 
+                    messageCache.push_back(message); 
+                    readReady=true;
+                    LOG_DEBUG("Added message to queue, notifing all waiting threads that there is data to be read, readReady=true"); 
+                    messageCacheCond.notify_all();
+                }
+                break;
+
+            case SEEK_MESSAGE_TYPE:
+            case START_MESSAGE_TYPE:
+            case STOP_MESSAGE_TYPE:
+            case SPEED_MESSAGE_TYPE:
+                LOG_ERROR("Recv'd watcherAPI message at client. This shouldn't happen. Ignoring message.");
+                break;
+
+            case UNKNOWN_MESSAGE_TYPE:
+                LOG_ERROR("Recv'd unknown message type (encoded as such!). Should not happen"); 
+                break;
+
+                // GTL - do not put default, we want the compiler to complain if we miss a message type.
+        }
+        retVal=true;
+    }
+
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
 }
@@ -139,16 +210,14 @@ bool MessageStream::handleMessageArrive(const MessagePtr &message, MessagePtr &r
 bool MessageStream::handleMessagesArrive(const vector<MessagePtr> &messages, MessagePtr &response)
 {
     TRACE_ENTER();
+
+    bool retVal=true;
     for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
-    {
         if(!handleMessageArrive(*m, response))
-        {
-            TRACE_EXIT_RET("false"); 
-            return false;
-        }
-    }
-    TRACE_EXIT_RET("true"); 
-    return true;
+            retVal=false;
+
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
 
 std::ostream &operator<<(std::ostream &out, const MessageStream &messStream)

@@ -27,7 +27,7 @@ bool MessageHandler::handleMessageArrive(const MessagePtr &message, MessagePtr &
 {
     TRACE_ENTER();
     LOG_INFO("Recv'd message: " << *message); 
-    TRACE_EXIT_RET("true");
+    TRACE_EXIT_RET(true);
     return true;
 }
 
