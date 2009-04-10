@@ -2,6 +2,9 @@
 #include <vector>
 #include <boost/bind.hpp>
 
+// GTL REMOVE THIS
+#include "libwatcher/labelMessage.h"
+
 #include <libwatcher/message.h>
 #include <libwatcher/messageStatus.h>
 
@@ -118,8 +121,21 @@ namespace watcher {
 
                     LOG_DEBUG("Marshalling outbound message"); 
 
+                    vector<MessagePtr> retMessages;
+                    retMessages.push_back(reply);
+
+                    // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM
+                    for(vector<MessagePtr>::const_iterator i=arrivedMessages.begin(); i!=arrivedMessages.end(); ++i)
+                    {
+                        if((*i)->type==START_MESSAGE_TYPE)
+                        {
+                            LOG_DEBUG("Appending label message to ack status message"); 
+                            retMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message")));
+                        }
+                    }
+
                     DataMarshaller::NetworkMarshalBuffers outBuffers;
-                    DataMarshaller::marshalPayload(reply, outBuffers);
+                    DataMarshaller::marshalPayload(retMessages, outBuffers);
                     LOG_INFO("Sending reply: " << *reply);
                     boost::asio::async_write(
                             socket_, 
