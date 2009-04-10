@@ -59,9 +59,10 @@ int main(int argc, char **argv)
 
     try
     {
-        // asio::io_service ioserv;
+        asio::io_service ioserv;
 
         Client c(serverName); 
+        // ClientConnection c(ioserv, serverName, "watcherd"); 
 
         vector<int> ints;
         string strVal = "from testCC"; 

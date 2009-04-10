@@ -12,15 +12,21 @@ Client::Client(
     server(server_),
     service(service_),
     clientConnection(new ClientConnection(ioService, server, service))
-
 {
     TRACE_ENTER();
+    
+    // Yo trabajo sin reposo.
+    work=new boost::asio::io_service::work(ioService);
+
+    workThread=new boost::thread(boost::bind(&boost::asio::io_service::run, &ioService));
     TRACE_EXIT();
 }
 
 Client::~Client()
 {
     TRACE_ENTER();
+    delete work;
+    workThread->join();
     TRACE_EXIT();
 }
 
@@ -29,8 +35,6 @@ bool Client::sendMessage(const MessagePtr request)
     TRACE_ENTER(); 
 
     bool retVal=clientConnection->sendMessage(request);
-    ioService.run();
-    ioService.reset();
 
     TRACE_EXIT_RET((retVal ? "true" : "false"));
     return retVal;
@@ -41,8 +45,6 @@ bool Client::sendMessages(const std::vector<event::MessagePtr> &messages)
     TRACE_ENTER();
 
     bool retVal=clientConnection->sendMessages(messages);
-    ioService.run();
-    ioService.reset();
 
     TRACE_EXIT_RET((retVal ? "true" : "false"));
     return retVal;

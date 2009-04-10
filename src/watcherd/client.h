@@ -5,6 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 #include "logger.h"
 
 #include "clientConnection.h"
@@ -50,10 +51,14 @@ namespace watcher
             DECLARE_LOGGER();
 
             boost::asio::io_service ioService;
+
             std::string server;
             std::string service;
 
             ClientConnectionPtr clientConnection;
+
+            boost::thread *workThread;
+            boost::asio::io_service::work *work;
     };
 
     typedef boost::shared_ptr<Client> ClientPtr;
