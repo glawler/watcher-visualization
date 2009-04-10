@@ -31,7 +31,7 @@ bool ClientMessageHandler::handleMessageArrive(const MessagePtr &message, Messag
     bool retVal;
     if(message->type!=MESSAGE_STATUS_TYPE)
     {
-        LOG_ERROR("Server responded with non status message"); 
+        LOG_DEBUG("Server responded with non status message"); 
         retVal=false;
     }
     else
@@ -42,7 +42,7 @@ bool ClientMessageHandler::handleMessageArrive(const MessagePtr &message, Messag
             LOG_ERROR("Unable to convert message into a status message - soemthing is very wrong."); 
             retVal=false;
         }
-        else if(mess->status!=MessageStatus::status_ack || mess->status!=MessageStatus::status_ok)
+        else if(mess->status!=MessageStatus::status_ack && mess->status!=MessageStatus::status_ok)
         {
             LOG_WARN("Server didn't ack or give us an OK for the message we sent them. Status: " << mess->statusToString(mess->status));
             retVal=false;
