@@ -1,0 +1,345 @@
+/*
+ * This file is a project template. It illustrates the basic features
+ * of TaskJuggler and can be used as a base for your first projects.
+ * You can put your own templates in
+ *
+ * ${KDEHOME}/share/apps/taskjuggler/Templates/${LANG}/
+ *
+ * Permission to read, modify and distribute this file without any
+ * restrictions is granted.
+ *
+ * Please see the TaskJuggler manual for a more detailed
+ * description of the various syntax elements. You can find more
+ * information about TaskJuggler at http://www.taskjuggler.org!
+*/
+
+# Entire project dates
+macro projectStart [ 2009-04-01 ]
+macro projectEnd [ 2009-10-01 ]
+macro projectPeriod [ ${projectStart} - ${projectEnd} ]
+
+project watcher "watcher" "1.0" ${projectPeriod} {
+  # Hide the clock time. Only show the date.
+  timeformat "%Y-%m-%d"
+  # The currency for all money values is EUR.
+  currency "USD"
+
+  # We want to compare the baseline scenario, to one with a slightly
+  # delayed start.
+  scenario plan "Plan" {
+    scenario delayed "Delayed"
+  }
+}
+
+# Put your macros here.
+# Macro with paramater:
+macro allocateDevelopers [
+  allocate devGL { limits { dailymax 6h } }
+  allocate devME { limits { dailymax 2h } }
+]
+
+# Put your flag declarations here. You can flag task, resources and
+# accounts to use them as filter criteria when generating reports.
+# flags important, dontcare
+flags team
+
+# In order to do a simple profit and loss analysis of the project we
+# specify accounts. One for the development costs, one for the
+# documentation costs and one account to credit the customer payments
+# to.
+account costs "Costs" cost
+account rev "Payments" revenue
+
+# Global vacations go here
+# vacation "Labor Day" 2005-09-05
+# 2 days Christmas break (27th not included!)
+# vacation "Christmas" 2005-12-25 - 2005-12-27
+
+# The daily default rate of all resources. This can be overriden for each
+# resource. We specify this, so that we can do a good calculation of
+# the costs of the project.
+rate 300.0
+
+# Put your resource definitions here:
+resource dev "Developers" {
+   resource devGL "Geoff Lawler"
+   resource devME "Michael Elkins"
+   flags team
+ }
+
+# This resource does not do any work.
+# resource confRoom "Conference Room" {
+#   efficiency 0.0
+# }
+
+# Now we specify the work packages. The whole project is described as
+# a task that contains sub tasks. These sub tasks are then broken down
+# into smaller tasks and so on. The innermost tasks describe the real
+# work and have resources allocated to them. Many attributes of tasks
+# are inherited from the enclosing task. This saves you a lot of
+# writing.
+ task watcherProject "Watcher" {
+   start ${projectStart}
+
+  # All work related costs will be booked to this account unless the
+  # sub tasks specifies it differently.
+  account costs
+
+  task deliveries "Milestones" {
+    task start "Project Start" {
+      note "Showing progress/plan from April 1st onward"
+      milestone
+      start 2009-04-01
+    }
+    task demos "Demos" {
+      task barebonesnetwork "Bare bones network infrastructure" {
+        note "Show new network infrastructure working using \"GUI\" on consol node"
+        depends watcherProject.watcherd.bareBonesRealTime
+        depends watcherProject.testing.messageStream2Text.basic
+        depends watcherProject.feeders.translateHierarcyMessages
+        end 2009-04-17
+        milestone
+      }
+      task GoogleEarthDemo "Google Earth GUI" {
+        note "Show test node messages integrated into Google Earth"
+        depends watcherProject.GUIs.googleEarthGUI
+        milestone
+      }
+      task tivoModeInterface "TiVO mode interface demo" {
+        note "Show \"missing\" piece in legacy watcher - rewind of live and recorded playback"
+        depends watcherProject.watcherd.bareBonesRealTime
+        depends watcherProject.testing.messageStream2Text.basic
+        depends watcherProject.watcherd.tivoModeStreams
+        depends watcherProject.watcherd.databaseIntegration
+        depends watcherProject.GUIs.legacyWatcher.reverseModeGUIUpdate
+        milestone
+      }
+    }
+  }  #end task deliveries
+
+  task watcherd "Watcher Daemon" {
+    end ${projectEnd}
+    task bareBonesRealTime "Realtime network infrastructure implementation" {
+      note "watcherd supports realtime (no TiVO-style) message streams from test nodes"
+      allocate devGL
+      depends watcherProject.deliveries.start
+      start ${projectStart}
+      end 2009-04-16
+    }
+    task tivoModeStreams "TiVO Mode message streams" {
+      effort 10d
+      ${allocateDevelopers}
+      depends watcherProject.watcherd.bareBonesRealTime
+      depends watcherProject.watcherd.databaseIntegration
+    }
+    task dataBase "Database Development" {
+      effort 5d
+      allocate devME
+      start 2009-04-13
+      depends watcherProject.deliveries.start
+    }
+    task databaseIntegration "Database integration" {
+      effort 10d
+      allocate devME
+      depends !dataBase
+      depends !bareBonesRealTime
+    }
+    task expertKnowledgeMessages "Expert knowledge messages" {
+      effort 10d
+      allocate devME, devGL
+      depends watcherProject.watcherd.bareBonesRealTime
+      depends !databaseIntegration
+      note "For example, send current connectivity graph in single messasge"
+    }
+
+  } # end of task watcherd
+
+  task GUIs "Watcher GUIs" {
+    depends watcherProject.watcherd.bareBonesRealTime
+    task googleEarthGUI "Google Earth" {
+       task firstCut "First Cut of Google Earth GUI" {
+         note "Support for location, connections, layers, labels"
+         effort 10d
+         allocate devGL
+       }
+       task refinedCut "Refinments to first cut" {
+         note "After feedback from ARL tweak/expand/remove functionality"
+         effort 7d
+         depends !firstCut
+         allocate devGL
+       }
+       task cacheImages "Caching Google Earth Images" {
+         note "Start date is arbitrarily chosen date in future"
+         start 2009-05-20
+         effort 3d
+         allocate devGL
+       }
+    }  # end of GE GUI task
+
+    task legacyWatcher "Legacy Watcher Support - ongoing"  {
+      note "development as needed, bug fix, etc"
+      allocate devGL
+      task reverseModeGUIUpdate "Update GUI to allow reverse time" {
+        # effort 2d
+        depends watcherProject.watcherd.tivoModeStreams
+      }
+    }
+  } # end task GUIs
+
+  task feeders "Watcher Feeders" {
+    note "Test node daemons. GPSDaemon, routing daemon, etc"
+    task rewriteOldFeedersUsingNewAPI "Rewrite old feeders using new network transport API" {
+      note "Change network API at code level. (May not be needed for script based daemons."
+      allocate devGL
+      depends watcherProject.watcherd.bareBonesRealTime
+    }
+    task translateHierarcyMessages "Write shim between old and new network" {
+      note "Write daemon to read from hierarchy transport and write to new network transport"
+      start 2009-04-02
+      end 2009-04-02
+      allocate devGL
+    }
+  }
+
+  task testing "Testing" {
+    end ${projectEnd}
+    task messageStream2Text "messageStream2Text test tool" {
+      start 2009-04-03
+      allocate devGL
+      task basic "Basic functionality" {
+        # end 2009-04-05
+        duration 2d
+        note "Just stream realtime - no rate/time/direction shifts in stream"
+      }
+      task advanced "Advanced Functionality - accept and apply filters" {
+        duration 3d
+        start 2009-05-20
+        allocate devGL
+      }
+    }
+  }
+}
+
+# Bookings should be put here
+# supplement resource r1 {
+#   This is the work that has been done up until now by r1.
+#   booking 2003-06-06 2003-06-07 t1 { sloppy 2 }
+#   booking 2003-06-08 2003-06-09 t1 { sloppy 2 }
+#   booking 2003-06-11 2003-06-12 t1 { sloppy 2 }
+# }
+
+# A traditional Gantt Chart for the TaskJugglerUI
+taskreport "Gantt Chart" {
+  headline "Project Gantt Chart"
+  columns hierarchindex, name, start, end, effort, duration, chart
+  # For this report we like to have the abbreviated weekday in front
+  # of the date. %a is the tag for this.
+  timeformat "%a %Y-%m-%d"
+  loadunit days
+  hideresource 1
+}
+
+# A list of tasks showing the resources assigned to each task.
+taskreport "Task Usage" {
+  headline "Task Usage Report"
+  columns hierarchindex, name, start, end, effort { title "Work" }, duration,
+          cost, revenue
+  timeformat "%Y-%m-%d"
+  loadunit days
+  hideresource 0
+}
+
+# A list of all tasks with the percentage complete for each task
+taskreport "Tracking Gantt" {
+  headline "Tracking Gantt Chart"
+  columns hierarchindex, name, start, end, effort { title "Work" }, duration,
+          completed, chart
+  timeformat "%a %Y-%m-%d"
+  loadunit days
+  hideresource 1
+}
+
+# A graph showing resource allocation. It identifies whether each
+# resource is under- or over-allocated for.
+resourcereport "Resource Graph" {
+  headline "Resource Allocation Graph"
+  columns no, name, rate, utilization, freeload, chart
+  loadunit days
+  hidetask 1
+}
+
+# A list of all project resources, both human and material resources,
+# together with the costs for each.
+resourcereport "Resource Sheet" {
+  headline "Resource Sheet"
+  columns no, name, efficiency, id, maxeffort, rate
+  loadunit days
+  hidetask 1
+}
+
+# A list of resources and each task associated with each resource.
+resourcereport "Resource Usage" {
+  headline "Resource Usage Report"
+  columns no, name, utilization, freeload, cost
+  loadunit days
+  hidetask 0
+}
+
+# This report looks like a regular calendar that shows the tasks by
+# their dates.
+htmlweeklycalendar "Calendar.html" {
+}
+
+# This report is a status report for the current week. It also
+# provides an outlook for the next week.
+htmlstatusreport "Status-Report.html" {
+}
+
+# Current reporting period
+macro periodStart [ 2009-04-13 ]
+macro periodEnd [ 2009-04-30 ]
+htmlstatusreport "MyReport" {
+  headline "Status Report For ${now}"
+    #table 1 {
+    #  headline "Upcoming Tasks"
+    #  columns name, start, duration, end, resources, note
+    #  hidetask ~(startsafter(plan, ${periodStart})
+    #}
+    table 1 {
+      headline "Ongoing Tasks"
+      columns name, start, end, duration, resources, note
+      hidetask ~( startsbefore(plan, ${periodStart}) & endsbefore(plan, ${periodStart}) )
+    }
+    table 2 {
+      headline "Finished Tasks"
+      columns name, start, end, resources, note
+      hidetask ~endsbefore(plan, ${periodStart})
+    }
+    table 3 {
+      headline "All Tasks"
+      columns name, start, end, resources, note
+      # hidetask ~( startsafter ( plan, ${projectStart} ) & endsbefore ( plan, ${projectEnd} ) )
+    }
+  }
+
+htmltaskreport "Task-Report.html" {
+  columns no, name, start, end, note
+}
+
+
+# A P&L report for the project.
+htmlaccountreport "Accounting.html" {
+  # Besides the number of the account and the name we have a column
+  # with the total values (at the end of the project) and the values
+  # for each month of the project.
+  columns no, name, scenario, total, monthly
+  headline "P&L for the Project"
+  caption "The table shows the profit and loss
+           analysis as well as the cashflow situation of the Accounting
+           Software Project."
+  # Since this is a cashflow calculation we show accumulated values
+  # per account.
+  accumulate
+  scenarios plan, delayed
+}
+
