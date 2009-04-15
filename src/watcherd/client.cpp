@@ -25,8 +25,12 @@ Client::Client(
 Client::~Client()
 {
     TRACE_ENTER();
-    delete work;
-    workThread->join();
+    if(work)
+    {
+        delete work;
+        work=NULL; 
+        workThread->join();
+    }
     TRACE_EXIT();
 }
 
@@ -55,4 +59,17 @@ void Client::addMessageHandler(MessageHandlerPtr messageHandler)
     TRACE_ENTER();
     clientConnection->addMessageHandler(messageHandler); 
     TRACE_EXIT();
+}
+
+void Client::wait()
+{
+    TRACE_ENTER();
+
+    // remove artifical work and wait for real work, if any, to complete.
+    delete work; 
+    work=NULL; 
+    ioService.run(); 
+    workThread->join();
+
+    TRACE_EXIT(); 
 }

@@ -45,6 +45,11 @@ namespace watcher
              */
             void addMessageHandler(MessageHandlerPtr messageHandler); 
 
+            /**
+             * wait until all work is done in the client.
+             */
+            void wait();
+
         protected:
         private:
 
