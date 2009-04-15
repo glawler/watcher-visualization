@@ -164,6 +164,19 @@ namespace watcher
              */
             virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages); 
 
+            /**
+             * Notification that a message has been successfully sent.
+             *
+             * @param[in] - the message that was sent
+             * @return - boolean. If true, expect a response, else, close connection.
+             */
+            virtual bool handleMessageSent(const event::MessagePtr &message); 
+            virtual bool handleMessagesSent(const std::vector<event::MessagePtr> &messages);
+
+            // Bookkeeping
+            unsigned int messagesSent;
+            unsigned int messagesArrived;
+
         private:
             DECLARE_LOGGER();
 

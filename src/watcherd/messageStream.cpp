@@ -16,6 +16,8 @@ MessageStream::MessageStream(
         const string &serviceName_, 
         const Timestamp &startTime_, 
         const float streamRate_) : 
+    messagesSent(0),
+    messagesArrived(0),
     messageStreamFilters(),
     streamRate(streamRate_),
     streamStartTime(startTime_),
@@ -158,6 +160,8 @@ bool MessageStream::handleMessageArrive(const MessagePtr &message)
 {
     TRACE_ENTER();
 
+    messagesArrived++; 
+
     // We don't really add anything yet to a generic watcherdAPI client.
     bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(message); 
 
@@ -173,6 +177,34 @@ bool MessageStream::handleMessagesArrive(const vector<MessagePtr> &messages)
     bool retVal=true;
     for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
         if(!handleMessageArrive(*m))
+            retVal=false;
+
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
+//virtual 
+bool MessageStream::handleMessageSent(const MessagePtr &message)
+{
+    TRACE_ENTER();
+
+    messagesSent++; 
+
+    // We don't really add anything yet to a generic watcherdAPI client.
+    bool retVal=WatcherdAPIMessageHandler::handleMessageSent(message); 
+
+    TRACE_EXIT_RET((retVal==true?"true":"false"));
+    return retVal;
+}
+
+//virtual 
+bool MessageStream::handleMessagesSent(const vector<MessagePtr> &messages)
+{
+    TRACE_ENTER();
+
+    bool retVal=true;
+    for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
+        if(!handleMessageSent(*m))
             retVal=false;
 
     TRACE_EXIT_RET(retVal);
