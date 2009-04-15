@@ -62,7 +62,6 @@ int main(int argc, char **argv)
         asio::io_service ioserv;
 
         Client c(serverName); 
-        // ClientConnection c(ioserv, serverName, "watcherd"); 
 
         vector<int> ints;
         string strVal = "from testCC"; 
@@ -77,23 +76,20 @@ int main(int argc, char **argv)
             c.sendMessage(shared_ptr<TestMessage>(new TestMessage(strVal, ints))); 
         }
 
-        vector<MessagePtr> messages;
-        for (int i = 0; i < loopCount; i++)
-        {
-            ints.push_back(i+1);
-            ints.push_back((i+1)*2);
-            MessagePtr m=MessagePtr(new TestMessage(strVal, ints));
-            messages.push_back(m);
-        }
-        
-        c.sendMessages(messages); 
+        // vector<MessagePtr> messages;
+        // for (int i = 0; i < loopCount; i++)
+        // {
+        //     if(i<100)
+        //     {
+        //         ints.push_back(i+1);
+        //         ints.push_back((i+1)*2);
+        //     }
+        //     MessagePtr m=MessagePtr(new TestMessage(strVal, ints));
+        //     messages.push_back(m);
+        // }
+        // c.sendMessages(messages); 
 
-        // ioserv.run(); 
-
-        // sleep(60); 
-
-        // c.close();
-        // t.join();
+        c.wait(); 
     }
     catch (std::exception &e)
     {
