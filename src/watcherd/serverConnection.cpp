@@ -115,7 +115,7 @@ namespace watcher {
                             DataMarshaller::NetworkMarshalBuffers outBuffers;
                             DataMarshaller::marshalPayload(bogusMessages, outBuffers);
                             LOG_INFO("Sending bogus data back to startMessage sender."); 
-                            boost::asio::async_write(theSocket, outBuffers,   strand_.wrap( boost::bind( &ServerConnection::handle_write, shared_from_this(), boost::asio::placeholders::error, MessagePtr())));
+                            boost::asio::async_write(theSocket, outBuffers,   strand_.wrap( boost::bind( &ServerConnection::handle_write, shared_from_this(), boost::asio::placeholders::error, bogusMessages.front())));
                         }
                     }
                     // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM ---------END----------------
@@ -158,6 +158,8 @@ namespace watcher {
                 else
                     waitForResponse=(*mh)->handleMessageSent(message);
             }
+            if(waitForResponse)
+                start(); 
         }
         else
         {
