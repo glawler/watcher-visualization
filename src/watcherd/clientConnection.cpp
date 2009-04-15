@@ -243,7 +243,7 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
     }
     else
     {
-        LOG_WARN("Error while writing message: " << e.message());
+        LOG_WARN("Error '" << e.message() << "' while writing message: " << dataPtr->theRequest); 
         doClose(); 
     }
 
