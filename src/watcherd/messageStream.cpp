@@ -58,7 +58,7 @@ void MessageStream::initConnection()
 {
     TRACE_ENTER();
     connection=ClientPtr(new Client(serverName, serviceName)); 
-    connection->setMessageHandler(shared_from_this()); 
+    connection->addMessageHandler(shared_from_this()); 
     TRACE_EXIT();
 }
 
@@ -159,7 +159,7 @@ bool MessageStream::handleMessageArrive(const MessagePtr &message, MessagePtr &r
     TRACE_ENTER();
     bool retVal=ClientMessageHandler::handleMessageArrive(message, response);
 
-    if(retVal==false)  // message is not a message status ack or status ok, so we should handle it.
+    if(retVal==false)  // 
     {
         // put new message on message queue if it's not a status message. 
         switch (message->type)

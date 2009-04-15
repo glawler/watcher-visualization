@@ -31,7 +31,8 @@ Server::Server(
 {
     TRACE_ENTER();
 
-    new_connection_=ServerConnectionPtr(new ServerConnection(io_service_, messageHandler));
+    new_connection_=ServerConnectionPtr(new ServerConnection(io_service_));
+    new_connection_->addMessageHandler(messageHandler);
 
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::resolver resolver(io_service_);
@@ -44,7 +45,7 @@ Server::Server(
     acceptor_.listen();
 
     acceptor_.async_accept(
-            new_connection_->socket(),
+            new_connection_->getSocket(),
             boost::bind(
                 &Server::handle_accept, 
                 this, 
@@ -84,9 +85,9 @@ void Server::handle_accept(const boost::system::error_code& e)
     if (!e)
     {
         new_connection_->start();
-        new_connection_.reset(new ServerConnection(io_service_, messageHandler));
+        new_connection_.reset(new ServerConnection(io_service_));
         acceptor_.async_accept(
-                new_connection_->socket(),
+                new_connection_->getSocket(),
                 boost::bind(
                     &Server::handle_accept, 
                     this,

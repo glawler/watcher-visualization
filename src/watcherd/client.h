@@ -43,7 +43,7 @@ namespace watcher
              * responses sent via sendMessage().
              * @param messageHandler - an instance of a message handler class. 
              */
-            void setMessageHandler(MessageHandlerPtr messageHandler); 
+            void addMessageHandler(MessageHandlerPtr messageHandler); 
 
         protected:
         private:

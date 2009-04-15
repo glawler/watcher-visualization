@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
     unsigned int messageNumber=0;
     while(ms->getNextMessage(mp))
-        cout << "Message #" << (++messageNumber) << ": " << *mp;
+        cout << "Message #" << (++messageNumber) << ": " << *mp << endl; 
 
     // Save any configuration changes made during the run.
     LOG_INFO("Saving last known configuration to " << configFilename); 

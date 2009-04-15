@@ -7,21 +7,16 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/vector.hpp>
 #include "dataMarshaller.h"
+#include "connection.h"
 
 #include "libwatcher/message.h"
 
-#include "messageHandler.h"
 namespace watcher 
 {
     /// Represents a single connection from a client.
-    class ClientConnection : private boost::noncopyable
+    class ClientConnection : 
+        public Connection 
     {
         public:
             // Connect to the service service on server server using the boost::io_service given.
@@ -42,24 +37,11 @@ namespace watcher
             bool sendMessages(const std::vector<event::MessagePtr> &message);
 
             /**
-             * setMessageHandler() Set a messageHandler if you want direct access to the 
-             * responses sent via sendMessage().
-             * @param messageHandler - an instance of a message handler class. 
-             */
-            void setMessageHandler(MessageHandlerPtr messageHandler); 
-
-            /**
              * close()
              * close the connection to the server.
              */
             void close(); 
            
-            /**
-             * getSocket()
-             * @return socket - the underlying socket for this connection.
-             */
-            boost::asio::ip::tcp::socket& getSocket();
-
         private:
 
             DECLARE_LOGGER();
@@ -82,7 +64,6 @@ namespace watcher
 
             bool connected; 
 
-            boost::asio::ip::tcp::socket theSocket;
             boost::asio::io_service &ioService;
             boost::asio::io_service::strand theStrand;
 
@@ -107,8 +88,6 @@ namespace watcher
 
             std::string server;
             std::string service;
-
-            MessageHandlerPtr messageHandler;
     };
 
     typedef boost::shared_ptr<ClientConnection> ClientConnectionPtr;

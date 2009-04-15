@@ -45,6 +45,7 @@ libfeeder_a_SOURCES= \
 	clientConnection.cpp \
 	client.cpp \
 	clientMessageHandler.cpp \
+	connection.cpp \
 	dataMarshaller.cpp \
 	messageFactory.cpp \
 	messageHandler.cpp \
@@ -63,6 +64,7 @@ libwatcherdAPI_a_SOURCES= \
 	clientConnection.cpp \
 	client.cpp \
 	clientMessageHandler.cpp \
+	connection.cpp \
 	dataMarshaller.cpp \
 	messageFactory.cpp \
 	messageHandler.cpp \

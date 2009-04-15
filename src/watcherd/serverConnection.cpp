@@ -16,29 +16,21 @@ using namespace std;
 namespace watcher {
     using namespace event;
 
-    INIT_LOGGER(ServerConnection, "ServerConnection");
+    INIT_LOGGER(ServerConnection, "Connection.ServerConnection");
 
-    ServerConnection::ServerConnection(boost::asio::io_service& io_service, MessageHandlerPtr messageHandler_) :
-        strand_(io_service),
-        socket_(io_service),
-        messageHandler(messageHandler_)
+    ServerConnection::ServerConnection(boost::asio::io_service& io_service) :
+        Connection(io_service),
+        strand_(io_service)
     {
         TRACE_ENTER(); 
         TRACE_EXIT();
-    }
-
-    boost::asio::ip::tcp::socket& ServerConnection::socket()
-    {
-        TRACE_ENTER(); 
-        TRACE_EXIT();
-        return socket_;
     }
 
     void ServerConnection::start()
     {
         TRACE_ENTER(); 
         boost::asio::async_read(
-                socket_, 
+                theSocket, 
                 boost::asio::buffer(incomingBuffer, DataMarshaller::header_length),
                 strand_.wrap(
                     boost::bind(
@@ -67,7 +59,7 @@ namespace watcher {
                 LOG_DEBUG("Reading packet payload of " << payloadSize << " bytes.");
 
                 boost::asio::async_read(
-                        socket_, 
+                        theSocket, 
                         boost::asio::buffer(
                             incomingBuffer, 
                             payloadSize),  // Should incoming buffer be new'd()? 
@@ -104,71 +96,81 @@ namespace watcher {
             vector<MessagePtr> arrivedMessages; 
             if (DataMarshaller::unmarshalPayload(arrivedMessages, numOfMessages, incomingBuffer.begin(), bytes_transferred))
             {
-                boost::asio::ip::address nodeAddr(socket_.remote_endpoint().address()); 
+                boost::asio::ip::address nodeAddr(theSocket.remote_endpoint().address()); 
 
                 LOG_INFO("Recvd " << arrivedMessages.size() << " message" << (arrivedMessages.size()>1?"s":"") << " from " << nodeAddr); 
 
-                MessagePtr reply;
-                if(messageHandler->handleMessagesArrive(arrivedMessages, reply))
+                for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
                 {
-                    LOG_DEBUG("Sending back a message (at " << reply << "): " << *reply); 
+                    MessagePtr reply;
+                    bool handled=(*mh)->handleMessagesArrive(arrivedMessages, reply);
 
-                    // Keep track of this reply in case of write error
-                    // and so we know when to stop sending replays and we can 
-                    // close the socket to the client.
-                    // GTL Should put a lock around this push_back()
-                    replies.push_back(reply); 
+                    if(handled && 0!=reply)
+                    {
+                        LOG_DEBUG("Sending back a message (at " << reply << "): " << *reply); 
 
-                    LOG_DEBUG("Marshalling outbound message"); 
+                        // Keep track of this reply in case of write error
+                        // and so we know when to stop sending replays and we can 
+                        // close the socket to the client.
+                        // GTL Should put a lock around this push_back()
+                        replies.push_back(reply); 
 
-                    vector<MessagePtr> retMessages;
-                    retMessages.push_back(reply);
+                        LOG_DEBUG("Marshalling outbound message"); 
 
-                    // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM
+                        DataMarshaller::NetworkMarshalBuffers outBuffers;
+                        DataMarshaller::marshalPayload(reply, outBuffers);
+                        LOG_INFO("Sending reply: " << *reply);
+                        boost::asio::async_write(
+                                theSocket, 
+                                outBuffers,   
+                                strand_.wrap(
+                                    boost::bind(
+                                        &ServerConnection::handle_write, 
+                                        shared_from_this(),
+                                        boost::asio::placeholders::error, 
+                                        reply))); 
+                    }
+
+                    // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM ---------START----------------
                     for(vector<MessagePtr>::const_iterator i=arrivedMessages.begin(); i!=arrivedMessages.end(); ++i)
                     {
                         if((*i)->type==START_MESSAGE_TYPE)
                         {
-                            LOG_DEBUG("Appending label message to ack status message"); 
-                            retMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message")));
+                            vector<MessagePtr> bogusMessages;
+                            bogusMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message 1")));
+                            bogusMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message 2")));
+                            bogusMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message 3")));
+
+                            DataMarshaller::NetworkMarshalBuffers outBuffers;
+                            DataMarshaller::marshalPayload(bogusMessages, outBuffers);
+                            LOG_INFO("Sending bogus data back to startMessage sender."); 
+                            boost::asio::async_write(theSocket, outBuffers,   strand_.wrap( boost::bind( &ServerConnection::handle_write, shared_from_this(), boost::asio::placeholders::error, reply))); 
                         }
                     }
-
-                    DataMarshaller::NetworkMarshalBuffers outBuffers;
-                    DataMarshaller::marshalPayload(retMessages, outBuffers);
-                    LOG_INFO("Sending reply: " << *reply);
-                    boost::asio::async_write(
-                            socket_, 
-                            outBuffers,   
-                            strand_.wrap(
-                                boost::bind(
-                                    &ServerConnection::handle_write, 
-                                    shared_from_this(),
-                                    boost::asio::placeholders::error, 
-                                    reply))); 
+                    // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM ---------END----------------
                 }
             }
-            else
-            {
-                LOG_WARN("Did not understand incoming message. Sending back a nack");
-                MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
+        }
+        else
+        {
+            LOG_WARN("Did not understand incoming message. Sending back a nack");
+            MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
 
-                DataMarshaller::NetworkMarshalBuffers outBuffers;
-                DataMarshaller::marshalPayload(reply, outBuffers);
-                LOG_INFO("Sending NACK as reply: " << *reply);
+            DataMarshaller::NetworkMarshalBuffers outBuffers;
+            DataMarshaller::marshalPayload(reply, outBuffers);
+            LOG_INFO("Sending NACK as reply: " << *reply);
 
-                // GTL Should put a lock around this push_back()
-                replies.push_back(reply);
-                boost::asio::async_write(
-                        socket_, 
-                        outBuffers,        
-                        strand_.wrap(
-                            boost::bind(
-                                &ServerConnection::handle_write, 
-                                shared_from_this(), 
-                                boost::asio::placeholders::error, 
-                                reply)));
-            }
+            // GTL Should put a lock around this push_back()
+            replies.push_back(reply);
+            boost::asio::async_write(
+                    theSocket, 
+                    outBuffers,        
+                    strand_.wrap(
+                        boost::bind(
+                            &ServerConnection::handle_write, 
+                            shared_from_this(), 
+                            boost::asio::placeholders::error, 
+                            reply)));
         }
 
         // If an error occurs then no new asynchronous operations are started. This
@@ -192,7 +194,7 @@ namespace watcher {
                 // Initiate graceful connection closure.
                 // LOG_DEBUG("Connection with client completed; Doing graceful shutdown of ServerConnection"); 
                 // boost::system::error_code ignored_ec;
-                // socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+                // theSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
                 LOG_DEBUG("Restarting connection to client"); 
                 start();
             }
@@ -208,7 +210,7 @@ namespace watcher {
                 DataMarshaller::marshalPayload(replies.front(), outBuffers);
                 LOG_DEBUG("Sending reply message: " << *replies.front());
                 boost::asio::async_write(
-                        socket_, 
+                        theSocket, 
                         outBuffers,             
                         strand_.wrap(
                             boost::bind(

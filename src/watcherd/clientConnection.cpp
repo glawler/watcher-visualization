@@ -15,14 +15,14 @@ using namespace watcher::event;
 using namespace boost;
 using namespace boost::asio::ip;
 
-INIT_LOGGER(ClientConnection, "ClientConnection");
+INIT_LOGGER(ClientConnection, "Connection.ClientConnection");
 
 ClientConnection::ClientConnection(
         boost::asio::io_service& io_service, 
         const std::string &server_, 
         const std::string &service_) : 
+    Connection(io_service),
     connected(false),
-    theSocket(io_service),
     ioService(io_service),
     theStrand(io_service),
     server(server_),
@@ -43,7 +43,7 @@ void ClientConnection::doClose()
 {
     TRACE_ENTER();
     LOG_DEBUG("Closing the socket"); 
-    theSocket.close();
+    getSocket().close();
     TRACE_EXIT();
 }
 
@@ -124,13 +124,6 @@ bool ClientConnection::tryConnect()
     return connected;
 }
 
-tcp::socket& ClientConnection::getSocket()
-{
-    TRACE_ENTER(); 
-    TRACE_EXIT();
-    return theSocket;
-}
-
 bool ClientConnection::sendMessage(const MessagePtr message)
 {
     TRACE_ENTER();
@@ -155,7 +148,8 @@ bool ClientConnection::sendMessages(const vector<event::MessagePtr> &messages)
 
     ioService.post(bind(&ClientConnection::doWrite, this, messages));
 
-    TRACE_EXIT(); 
+    TRACE_EXIT_RET("true"); 
+    return true;
 }
 
 void ClientConnection::doWrite(const vector<MessagePtr> &messages)
@@ -288,17 +282,24 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                 }
                 else
                 {
-                    if (!messageHandler)
+                    if (!messageHandlers.size())
                     {
                         LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intentional)"); 
                     }
                     else 
                     {
-                        MessagePtr theResponse;
-                        if(messageHandler->handleMessagesArrive(arrivedMessages, theResponse))
-                            if(theResponse)
-                                sendMessage(theResponse);
+                        for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
+                        {
+                            MessagePtr theResponse;
+                            if((*mh)->handleMessagesArrive(arrivedMessages, theResponse))
+                                if(theResponse)
+                                    sendMessage(theResponse);
+                        }
                     }
+
+        // GTL REMOVE THIS - continue to stay connected as a test for messageStream
+        // Need to add a sendMessageHandler which will tell the connection whether to close or expect more data.
+        boost::asio::async_read( theSocket, asio::buffer( dataPtr->incomingBuffer, DataMarshaller::header_length), theStrand.wrap( bind( &ClientConnection::handle_read_header, this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
                 }
             }
         }
@@ -310,13 +311,6 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
     }
 
     TRACE_EXIT(); 
-}
-
-void ClientConnection::setMessageHandler(MessageHandlerPtr messageHandler_)
-{
-    TRACE_ENTER();
-    messageHandler=messageHandler_;
-    TRACE_EXIT();
 }
 
 // void ClientConnection::handle_read_payload(const boost::system::error_code &e, std::size_t bytes_transferred, const TransferDataPtr &dataPtr)

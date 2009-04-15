@@ -50,9 +50,9 @@ bool Client::sendMessages(const std::vector<event::MessagePtr> &messages)
     return retVal;
 }
 
-void Client::setMessageHandler(MessageHandlerPtr messageHandler)
+void Client::addMessageHandler(MessageHandlerPtr messageHandler)
 {
     TRACE_ENTER();
-    clientConnection->setMessageHandler(messageHandler); 
+    clientConnection->addMessageHandler(messageHandler); 
     TRACE_EXIT();
 }
