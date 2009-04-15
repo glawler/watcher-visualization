@@ -154,6 +154,8 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    client.wait();
+
     TRACE_EXIT_RET(EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }

@@ -119,9 +119,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    // Messages are sent and recv'd async and there is no current method to 
-    // wait until the sequence is done. So sleep for awhile. 
-    // sleep(10); 
+    client.wait();
 
     free(serverName);
     if (logProps)
