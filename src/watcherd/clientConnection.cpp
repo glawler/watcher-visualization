@@ -201,20 +201,30 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
 
     if (!e)
     {
-        // now read a response
-        LOG_DEBUG("Sucessfully sent message " << dataPtr << ". Now will async read response"); 
-        boost::asio::async_read(
-                theSocket,
-                asio::buffer(
-                    dataPtr->incomingBuffer, 
-                    DataMarshaller::header_length),
-                theStrand.wrap(
-                    bind(
-                        &ClientConnection::handle_read_header, 
-                        this, 
-                        asio::placeholders::error, 
-                        asio::placeholders::bytes_transferred, 
-                        dataPtr)));
+        LOG_DEBUG("Sucessfully sent message " << dataPtr->theRequest); 
+
+        bool waitForResponse=false;
+        for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
+        {
+            if(waitForResponse) // someone already said they wanted a response, so ignore ret val for others
+                (*mh)->handleMessageSent(dataPtr->theRequest);
+            else
+                waitForResponse=(*mh)->handleMessageSent(dataPtr->theRequest); 
+        }
+
+        if(waitForResponse)
+            boost::asio::async_read(
+                    theSocket,
+                    asio::buffer(
+                        dataPtr->incomingBuffer, 
+                        DataMarshaller::header_length),
+                    theStrand.wrap(
+                        bind(
+                            &ClientConnection::handle_read_header, 
+                            this, 
+                            asio::placeholders::error, 
+                            asio::placeholders::bytes_transferred, 
+                            dataPtr)));
 
         // No errors, remove the message from the outbound message list.
         transferData.remove(dataPtr); 
@@ -291,7 +301,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                         for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
                         {
                             MessagePtr theResponse;
-                            if((*mh)->handleMessagesArrive(arrivedMessages, theResponse))
+                            if((*mh)->handleMessagesArrive(arrivedMessages))
                                 if(theResponse)
                                     sendMessage(theResponse);
                         }
@@ -312,40 +322,4 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
 
     TRACE_EXIT(); 
 }
-
-// void ClientConnection::handle_read_payload(const boost::system::error_code &e, std::size_t bytes_transferred, const TransferDataPtr &dataPtr)
-// {
-//     TRACE_ENTER();
-// 
-//     if (!e)
-//     {
-//         LOG_DEBUG("Received reply from server for message " << dataPtr->theRequest << ", parsing it."); 
-// 
-//         bool result = dataMarshaller.unmarshalPayload(*dataPtr->theReply, &dataPtr->incomingBuffer[0], bytes_transferred); 
-// 
-//         if (result)
-//         {
-//             LOG_DEBUG("Successfully parsed response from server for message " << dataPtr->theRequest 
-//                     << ": " << *dataPtr->theReply);
-//         }
-//         else if (!result)
-//         {
-//             LOG_WARN("Unable to parse incoming server response for message " << dataPtr);
-//         }
-//         else
-//         {
-//             LOG_WARN("Did not get all the bytes for reponse to message " << dataPtr->theRequest 
-//                     << " giving up on it even though I should try to get the rest of the message"); 
-//         }
-// 
-//     }
-//     else
-//     {
-//         LOG_WARN("Error reading response from server for message " << dataPtr->theRequest << ": " << e.message());
-//         doClose(); 
-//     }
-// 
-//     TRACE_EXIT();
-// }
-
 

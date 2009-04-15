@@ -154,66 +154,25 @@ bool MessageStream::stopStream()
 }
 
 //virtual 
-bool MessageStream::handleMessageArrive(const MessagePtr &message, MessagePtr &response)
+bool MessageStream::handleMessageArrive(const MessagePtr &message)
 {
     TRACE_ENTER();
-    bool retVal=ClientMessageHandler::handleMessageArrive(message, response);
 
-    if(retVal==false)  // 
-    {
-        // put new message on message queue if it's not a status message. 
-        switch (message->type)
-        {
-            case MESSAGE_STATUS_TYPE: 
-                // If we've gotten here, the message status is not ack or ok.
-                // Close the connection. 
-                connection.reset();  // should delete the connection. 
-
-            case TEST_MESSAGE_TYPE:
-            case GPS_MESSAGE_TYPE:
-            case LABEL_MESSAGE_TYPE:
-            case EDGE_MESSAGE_TYPE:
-            case COLOR_MESSAGE_TYPE:
-            case DATA_REQUEST_MESSAGE_TYPE:
-            case NODE_STATUS_MESSAGE_TYPE:
-            case USER_DEFINED_MESSAGE_TYPE:
-                {
-                    lock_guard<mutex> lock(messageCacheMutex); 
-                    messageCache.push_back(message); 
-                    readReady=true;
-                    LOG_DEBUG("Added message to queue, notifing all waiting threads that there is data to be read, readReady=true"); 
-                    messageCacheCond.notify_all();
-                }
-                break;
-
-            case SEEK_MESSAGE_TYPE:
-            case START_MESSAGE_TYPE:
-            case STOP_MESSAGE_TYPE:
-            case SPEED_MESSAGE_TYPE:
-                LOG_ERROR("Recv'd watcherAPI message at client. This shouldn't happen. Ignoring message.");
-                break;
-
-            case UNKNOWN_MESSAGE_TYPE:
-                LOG_ERROR("Recv'd unknown message type (encoded as such!). Should not happen"); 
-                break;
-
-                // GTL - do not put default, we want the compiler to complain if we miss a message type.
-        }
-        retVal=true;
-    }
+    // We don't really add anything yet to a generic watcherdAPI client.
+    bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(message); 
 
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
 }
 
 //virtual 
-bool MessageStream::handleMessagesArrive(const vector<MessagePtr> &messages, MessagePtr &response)
+bool MessageStream::handleMessagesArrive(const vector<MessagePtr> &messages)
 {
     TRACE_ENTER();
 
     bool retVal=true;
     for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
-        if(!handleMessageArrive(*m, response))
+        if(!handleMessageArrive(*m))
             retVal=false;
 
     TRACE_EXIT_RET(retVal);

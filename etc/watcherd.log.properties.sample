@@ -2,10 +2,12 @@
 #
 # Global logging level
 #
+# log4j.rootLogger=fatal, flog, stdout
+# log4j.rootLogger=error, flog, stdout
+log4j.rootLogger=warn, flog, stdout
 # log4j.rootLogger=info, flog, stdout
-# log4j.rootLogger=warn, flog, stdout
 # log4j.rootLogger=debug, flog, stdout
-log4j.rootLogger=trace, flog, stdout
+# log4j.rootLogger=trace, flog, stdout
 
 #
 # Set levels per watcherd module
@@ -13,7 +15,8 @@ log4j.rootLogger=trace, flog, stdout
 # log4j.logger.global=trace
 # log4j.logger.ClientConnection=trace
 # log4j.logger.Client=trace
-# log4j.logger.MessageHandler.ClientMessageHandler=trace
+# log4j.logger.MessageHandler.FeederAPIMessageHandler=trace
+# log4j.logger.MessageHandler.WatcherdAPIMessageHandler=trace
 # log4j.logger.DataMarshaller=trace
 # log4j.logger.MessageFactory=trace
 # log4j.logger.MessageHandler=trace
@@ -50,7 +53,8 @@ log4j.rootLogger=trace, flog, stdout
 #
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender
 log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
+# log4j.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
+log4j.appender.stdout.layout.ConversionPattern=[%-5p] (%F:%L) - %m%n
 
 #
 # flog is set to log to a file, not appended
@@ -59,6 +63,6 @@ log4j.appender.flog=org.apache.log4j.FileAppender
 log4j.appender.flog.layout=org.apache.log4j.PatternLayout
 log4j.appender.flog.file=watcherd.log
 log4j.appender.flog.append=false
-log4j.appender.flog.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
+log4j.appender.flog.layout.ConversionPattern=%-4r [%t] %-5p %c (%-12F:%-4L) - %m%n
 
 

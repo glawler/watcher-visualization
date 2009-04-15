@@ -21,13 +21,19 @@ namespace watcher
              * Classes which derive from this class should handle the message arrival and if
              * they want to respond to the message, make 'response' non-null on return.
              * @param[in] - message - the newly arrived message. 
-             * @param[out] - response. If non-null, this message will be sent back to the entity
-             * which sent 'message' as a response.
-             * @return - boolean. true, if message handled, false on error or otherwise. If the return
-             * value is negative, the response message will not be sent even if non-null.
+             * @return - boolean. if true, keep connection open, false otherwise.
              */
-            virtual bool handleMessageArrive(const event::MessagePtr &message, event::MessagePtr &response);
-            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages, event::MessagePtr &response);
+            virtual bool handleMessageArrive(const event::MessagePtr &message);
+            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages);
+
+            /**
+             * Notification that a message has been successfully sent.
+             *
+             * @param[in] - the message that was sent
+             * @return - boolean. If true, expect a response, else, close connection.
+             */
+            virtual bool handleMessageSent(const event::MessagePtr &message); 
+            virtual bool handleMessagesSent(const std::vector<event::MessagePtr> &messages);
 
         private:
 

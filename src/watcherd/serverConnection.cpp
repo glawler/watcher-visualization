@@ -102,35 +102,6 @@ namespace watcher {
 
                 for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
                 {
-                    MessagePtr reply;
-                    bool handled=(*mh)->handleMessagesArrive(arrivedMessages, reply);
-
-                    if(handled && 0!=reply)
-                    {
-                        LOG_DEBUG("Sending back a message (at " << reply << "): " << *reply); 
-
-                        // Keep track of this reply in case of write error
-                        // and so we know when to stop sending replays and we can 
-                        // close the socket to the client.
-                        // GTL Should put a lock around this push_back()
-                        replies.push_back(reply); 
-
-                        LOG_DEBUG("Marshalling outbound message"); 
-
-                        DataMarshaller::NetworkMarshalBuffers outBuffers;
-                        DataMarshaller::marshalPayload(reply, outBuffers);
-                        LOG_INFO("Sending reply: " << *reply);
-                        boost::asio::async_write(
-                                theSocket, 
-                                outBuffers,   
-                                strand_.wrap(
-                                    boost::bind(
-                                        &ServerConnection::handle_write, 
-                                        shared_from_this(),
-                                        boost::asio::placeholders::error, 
-                                        reply))); 
-                    }
-
                     // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM ---------START----------------
                     for(vector<MessagePtr>::const_iterator i=arrivedMessages.begin(); i!=arrivedMessages.end(); ++i)
                     {
@@ -144,33 +115,23 @@ namespace watcher {
                             DataMarshaller::NetworkMarshalBuffers outBuffers;
                             DataMarshaller::marshalPayload(bogusMessages, outBuffers);
                             LOG_INFO("Sending bogus data back to startMessage sender."); 
-                            boost::asio::async_write(theSocket, outBuffers,   strand_.wrap( boost::bind( &ServerConnection::handle_write, shared_from_this(), boost::asio::placeholders::error, reply))); 
+                            boost::asio::async_write(theSocket, outBuffers,   strand_.wrap( boost::bind( &ServerConnection::handle_write, shared_from_this(), boost::asio::placeholders::error, MessagePtr())));
                         }
                     }
                     // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM ---------END----------------
+                    
+
+                    if((*mh)->handleMessagesArrive(arrivedMessages))
+                    {
+                        LOG_DEBUG("Message handler told us to keep this connection open."); 
+                        start();
+                    }
                 }
             }
         }
         else
         {
-            LOG_WARN("Did not understand incoming message. Sending back a nack");
-            MessagePtr reply=MessagePtr(new MessageStatus(MessageStatus::status_nack));
-
-            DataMarshaller::NetworkMarshalBuffers outBuffers;
-            DataMarshaller::marshalPayload(reply, outBuffers);
-            LOG_INFO("Sending NACK as reply: " << *reply);
-
-            // GTL Should put a lock around this push_back()
-            replies.push_back(reply);
-            boost::asio::async_write(
-                    theSocket, 
-                    outBuffers,        
-                    strand_.wrap(
-                        boost::bind(
-                            &ServerConnection::handle_write, 
-                            shared_from_this(), 
-                            boost::asio::placeholders::error, 
-                            reply)));
+            LOG_WARN("Did not understand incoming message."); 
         }
 
         // If an error occurs then no new asynchronous operations are started. This
@@ -187,37 +148,15 @@ namespace watcher {
 
         if (!e)
         {
-            replies.remove(message);
+            LOG_DEBUG("Successfully sent message to client: " << message); 
 
-            if (replies.empty())
+            bool waitForResponse=false;
+            for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
             {
-                // Initiate graceful connection closure.
-                // LOG_DEBUG("Connection with client completed; Doing graceful shutdown of ServerConnection"); 
-                // boost::system::error_code ignored_ec;
-                // theSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
-                LOG_DEBUG("Restarting connection to client"); 
-                start();
-            }
-            else
-            {
-                LOG_DEBUG("Still more replies to send, sending next one."); 
-                LOG_DEBUG("Marshalling outbound message"); 
-
-                DataMarshaller::NetworkMarshalBuffers outBuffers;
-
-                // Once we get the symantics of multiple messages per packet down, we can send all these
-                // replies in a single packet.
-                DataMarshaller::marshalPayload(replies.front(), outBuffers);
-                LOG_DEBUG("Sending reply message: " << *replies.front());
-                boost::asio::async_write(
-                        theSocket, 
-                        outBuffers,             
-                        strand_.wrap(
-                            boost::bind(
-                                &ServerConnection::handle_write,
-                                shared_from_this(),
-                                boost::asio::placeholders::error,
-                                replies.front()))); 
+                if(waitForResponse) // someone already said they wanted a response, so ignore ret val for others
+                    (*mh)->handleMessageSent(message);
+                else
+                    waitForResponse=(*mh)->handleMessageSent(message);
             }
         }
         else

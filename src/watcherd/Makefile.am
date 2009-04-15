@@ -41,10 +41,12 @@ BUILT_SOURCES=watcherd.cfg watcherd.log.properties
 
 noinst_LIBRARIES=libfeeder.a libwatcherdAPI.a
 
+# GTL - TBD remove objs if not needed
 libfeeder_a_SOURCES= \
 	clientConnection.cpp \
 	client.cpp \
-	clientMessageHandler.cpp \
+	feederAPIMessageHandler.cpp \
+	watcherdAPIMessageHandler.cpp \
 	connection.cpp \
 	dataMarshaller.cpp \
 	messageFactory.cpp \
@@ -63,7 +65,8 @@ libfeeder_a_SOURCES= \
 libwatcherdAPI_a_SOURCES= \
 	clientConnection.cpp \
 	client.cpp \
-	clientMessageHandler.cpp \
+	feederAPIMessageHandler.cpp \
+	watcherdAPIMessageHandler.cpp \
 	connection.cpp \
 	dataMarshaller.cpp \
 	messageFactory.cpp \

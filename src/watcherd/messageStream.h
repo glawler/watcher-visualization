@@ -10,7 +10,7 @@
 #include "libwatcher/message.h"         // for MessagePtr
 
 #include "client.h"
-#include "clientMessageHandler.h"
+#include "watcherdAPIMessageHandler.h"
 #include "messageStreamFilter.h"
 
 namespace watcher
@@ -26,7 +26,7 @@ namespace watcher
      * @date 2009-04-03
      */
     class MessageStream : 
-        public ClientMessageHandler, 
+        public WatcherdAPIMessageHandler, 
         public boost::enable_shared_from_this<MessageStream>
     {
             /** 
@@ -153,16 +153,16 @@ namespace watcher
         protected:
 
             /**
-             * Handle the arrival of a message. Overridden from ClientMessageHandler base class.
+             * Handle the arrival of a message. Overridden from base class.
              * It is invoked by a thread in a Client instance. 
              */
-            virtual bool handleMessageArrive(const MessagePtr &message, MessagePtr &response);
+            virtual bool handleMessageArrive(const MessagePtr &message);
 
             /**
-             * Handle the arrival of mulitple messages. Overridden from ClientMessageHandler base class.
+             * Handle the arrival of mulitple messages. Overridden from base class.
              * It is invoked by a thread in a Client instance. 
              */
-            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages, event::MessagePtr &response);
+            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages); 
 
         private:
             DECLARE_LOGGER();

@@ -66,9 +66,6 @@ namespace watcher
 
             /// Buffer for outgoing data
             DataMarshaller::NetworkMarshalBuffers outboundDataBuffers;
-
-            /// The replies to be sent back to the client.
-            std::list<event::MessagePtr> replies;
     };
 
     typedef boost::shared_ptr<ServerConnection> ServerConnectionPtr;
