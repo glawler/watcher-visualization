@@ -76,6 +76,7 @@ int main(int argc, char **argv)
             c.sendMessage(shared_ptr<TestMessage>(new TestMessage(strVal, ints))); 
         }
 
+        // This will quickly break things as the packet gets to be too large. 
         // vector<MessagePtr> messages;
         // for (int i = 0; i < loopCount; i++)
         // {
