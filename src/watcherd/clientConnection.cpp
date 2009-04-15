@@ -169,7 +169,7 @@ void ClientConnection::doWrite(const vector<MessagePtr> &messages)
     {
         LOG_DEBUG("Marshaling outbound message"); 
         DataMarshaller::NetworkMarshalBuffers outBuffers;
-        if (!DataMarshaller::marshalPayload(dataPtr->theRequest, outBuffers))
+        if (!DataMarshaller::marshalPayload(messages, outBuffers))
         {
             LOG_WARN("Error marshaling message, not sending"); 
             transferData.pop_back(); 
