@@ -35,7 +35,7 @@ void Watcherd::run(const std::string &address, const std::string &port, const in
     pthread_sigmask(SIG_BLOCK, &new_mask, &old_mask);
 
     // Run server in background thread.
-    serverConnection.reset(new Server(address, port, (size_t)threadNum, serverMessageHandlerPtr));
+    serverConnection.reset(new Server(*this, address, port, (size_t)threadNum, serverMessageHandlerPtr));
     connectionThread = boost::thread(boost::bind(&watcher::Server::run, serverConnection));
 
     // Restore previous signals.
