@@ -1,0 +1,52 @@
+Demo/Checkpoints
+1. Basic new network transport demo - 3rd/4th week in April
+- Run existing test node daemons and new network shim daemon
+- Run barebones watcherd that only supports 'real time' streams
+- Run messageStream2Text, which dumps test nodes' message streams to
+console
+- Shows: messages from test nodes demultiplexed through new watcherd to
+a "GUI" client. 
+
+2. Basic Google Earth Watcher GUI demo - end of May
+- Run test node daemons
+- Run watcherd
+- Run Google Earth w/watcher plugin. 
+- Shows: Basic watcher functionality in Google Earth: node location,
+node connectivity, labels, layers
+
+3. Refined Google Earth Demo - end of June
+- As 2 above.
+- Shows: Refinements to basic Google Earth implementation based on
+feedback from ARL, Cobham (nee SPARTA). 
+
+4. Full TiVO mode/playback functionality -- as completed (sometime in
+June?) - Maybe have concurrent demo at same time as refined Google Earth
+demo (#3 above)
+- Run test node daemons
+- Run watcherd
+- Run legacy watcher (with rewind control added to GUI)
+- Show live pause, rewind, fast-forward (to current time)
+- Stop test node daemons, watcherd, legacy watcher. 
+- Start recorded playback using watcherd
+- Show pause, rewind, fast-forward, etc in legacy watcher
+- TiVO mode demo shows full watcherd functionality including playback
+via packet capture database 
+
+5. TBD, end of July (or mid August), last
+checkpoint/demo. 
+- Shows: choose from list:
+- still more refined Google Earth
+- first cut of game-engine based watcher GUI
+- other GUI implementation?
+- specific functionality needed by ARL from SOW or other, TBD.
+
+6. Documentation checkpoint - end of July - 
+- Shows: "User documentation and design
+documentation to enable ARL to use and extend this software as needed
+(contractor format ...)".
+
+7. Network transport transition layer
+- Run test node daemons updated to use new API
+- Run watcherd instance
+- Run :q
+
