@@ -7,7 +7,9 @@
 #include <boost/thread.hpp>
 
 #include "libwatcher/dataRequestMessage.h"
+#include "libwatcher/message_fwd.h"
 
+#include "watcherd_fwd.h"
 #include "serverMessageHandler.h"
 #include "server.h"
 #include "libconfig.h++"
@@ -26,6 +28,15 @@ namespace watcher
 
             void run(const std::string &address, const std::string &port, const int &threadNum);
 
+            /** Subscribe a ServerConnection to the event stream. */
+            void subscribe(ServerConnectionPtr);
+
+            /** Unsubscribe a ServerConnection to the event stream. */
+            void unsubscribe(ServerConnectionPtr);
+
+            /** Post an event to all listening clients */
+            void sendMessage(event::MessagePtr);
+            void sendMessage(const std::vector<event::MessagePtr>&);
         protected:
 
         private:
@@ -39,12 +50,10 @@ namespace watcher
             ServerMessageHandlerPtr serverMessageHandlerPtr;
 
             // List of clients subscribed to messages.
-            typedef std::list<event::DataRequestMessagePtr> MessageRequesters;
-            MessageRequesters messageRequesters;
+            typedef std::list<ServerConnectionPtr> MessageRequestors;
+            MessageRequestors messageRequestors;
+            pthread_mutex_t messageRequestorsLock;
     };
-
-    typedef boost::shared_ptr<Watcherd> WatcherdPtr;
-
 }
 
 #endif // WATCHERD_H

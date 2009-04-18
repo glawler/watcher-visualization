@@ -95,5 +95,25 @@ namespace watcher {
             TRACE_EXIT();
             return out;
         }
+
+        /** Determine if the specified message type is a feeder API event.
+         * @retval true if the message type is a feeder api event
+         * @retval false otherwise
+         */
+        bool isFeederEvent(MessageType t)
+        {
+            switch(t) {
+                case UNKNOWN_MESSAGE_TYPE:
+                case MESSAGE_STATUS_TYPE:
+                case TEST_MESSAGE_TYPE:
+                case GPS_MESSAGE_TYPE:
+                case LABEL_MESSAGE_TYPE:
+                case EDGE_MESSAGE_TYPE:
+                case COLOR_MESSAGE_TYPE:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

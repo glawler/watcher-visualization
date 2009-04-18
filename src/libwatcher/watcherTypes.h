@@ -15,6 +15,8 @@ namespace watcher
      * @typedef Give timestamp its own type - it's Unix epoch milliseconds 
      */
     typedef long long int Timestamp;    // in Epoch milliseconds
+
+    const Timestamp Infinity = -1;
 }
 
 #endif // WATCHER_TYPES_HELLO_THERE_H

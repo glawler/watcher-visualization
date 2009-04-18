@@ -45,21 +45,21 @@ noinst_LIBRARIES=libfeeder.a libwatcherdAPI.a
 libfeeder_a_SOURCES= \
 	clientConnection.cpp \
 	client.cpp \
-	feederAPIMessageHandler.cpp \
-	watcherdAPIMessageHandler.cpp \
 	connection.cpp \
 	dataMarshaller.cpp \
 	messageFactory.cpp \
 	messageHandler.cpp \
 	singletonConfig.cpp \
 	dataMarshaller.cpp \
+	serverConnection.cpp \
+	server.cpp \
 	messageFactory.cpp \
 	messageHandler.cpp \
 	messageStream.cpp \
 	messageStreamFilter.cpp \
-	serverConnection.cpp \
-	server.cpp \
 	serverMessageHandler.cpp \
+	feederAPIMessageHandler.cpp \
+	watcherdAPIMessageHandler.cpp \
 	singletonConfig.cpp 
 
 libwatcherdAPI_a_SOURCES= \

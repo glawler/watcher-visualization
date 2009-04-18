@@ -63,6 +63,8 @@ namespace watcher {
         } GUILayer;
 
         std::ostream&operator<< (std::ostream &out, const GUILayer &layer);
+
+        bool isFeederEvent(MessageType);
     }
 }
 

@@ -118,7 +118,7 @@ syntax: regexp
 
 
 ^src/watcherd/client
-^src/watcherd/watcherd
+^src/watcherd/watcherd$
 ^src/watcherd/depend
 ^src/watcherd/gpsMessageTest
 ^src/watcherd/labelMessageTest

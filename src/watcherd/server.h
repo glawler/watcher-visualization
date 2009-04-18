@@ -5,6 +5,7 @@
 #include <boost/noncopyable.hpp>
 #include "serverConnection.h"
 #include "logger.h"
+#include "watcherd_fwd.h"
 
 namespace watcher 
 {
@@ -14,6 +15,7 @@ namespace watcher
         public:
             // Construct the Server to listen on the specified TCP address and port.
             explicit Server(
+                            Watcherd&,
                     const std::string& address, 
                     const std::string& port,
                     std::size_t thread_pool_size,
@@ -30,6 +32,8 @@ namespace watcher
 
             /// Handle completion of an asynchronous accept operation.
             void handle_accept(const boost::system::error_code& e);
+
+            Watcherd& watcher;
 
             /// The number of threads that will call io_service::run().
             std::size_t thread_pool_size_;

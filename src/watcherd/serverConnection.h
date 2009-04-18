@@ -22,6 +22,7 @@
 
 #include "dataMarshaller.h"
 #include "connection.h"
+#include "watcherd_fwd.h"
 
 namespace watcher 
 {
@@ -32,10 +33,15 @@ namespace watcher
     {
         public:
             /// Construct a connection with the given io_service.
-            explicit ServerConnection(boost::asio::io_service& io_service);
+            explicit ServerConnection(Watcherd&, boost::asio::io_service& io_service);
+            ~ServerConnection();
 
             /// Start the first asynchronous operation for the ServerConnection.
             void start();
+
+            /// Send a message(s) to this client
+            void sendMessage(event::MessagePtr);
+            void sendMessage(const std::vector<event::MessagePtr>&);
 
         protected:
             // 
@@ -57,15 +63,14 @@ namespace watcher
             /// Handle completion of a write operation.
             void handle_write(const boost::system::error_code& e, event::MessagePtr reply);
 
+            Watcherd& watcher;
+
             /// Strand to ensure the connection's handlers are not called concurrently.
             boost::asio::io_service::strand strand_;
 
             /// Buffer for incoming data.
             typedef boost::array<char, 8192> IncomingBuffer;
             IncomingBuffer incomingBuffer;
-
-            /// Buffer for outgoing data
-            DataMarshaller::NetworkMarshalBuffers outboundDataBuffers;
     };
 
     typedef boost::shared_ptr<ServerConnection> ServerConnectionPtr;

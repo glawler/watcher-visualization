@@ -7,12 +7,10 @@
 #include "logger.h"
 #include "messageTypesAndVersions.h"
 #include "watcherTypes.h"
+#include "message_fwd.h"
 
 namespace watcher {
     namespace event {
-
-        class Message;
-        typedef boost::shared_ptr<Message> MessagePtr; 
 
         /** Base class for all messages generated from the test node daemon.
          */

@@ -57,3 +57,50 @@ void Watcherd::run(const std::string &address, const std::string &port, const in
     TRACE_EXIT();
 }
 
+void Watcherd::subscribe(ServerConnectionPtr client)
+{
+    TRACE_ENTER();
+
+    pthread_mutex_lock(&messageRequestorsLock);
+    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+
+    messageRequestors.push_back(client);
+
+    TRACE_EXIT();
+}
+
+void Watcherd::unsubscribe(ServerConnectionPtr client)
+{
+    TRACE_ENTER();
+    pthread_mutex_lock(&messageRequestorsLock);
+    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+
+    messageRequestors.remove(client);
+    TRACE_EXIT();
+}
+
+/** Send a single message to all clients subscribed to the live stream */
+void Watcherd::sendMessage(MessagePtr msg)
+{
+    TRACE_ENTER();
+    pthread_mutex_lock(&messageRequestorsLock);
+    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+
+    // bind can't handle overloaded functions.  use member function pointer to help
+    void (ServerConnection::*ptr)(MessagePtr) = &ServerConnection::sendMessage;
+    for_each(messageRequestors.begin(), messageRequestors.end(), bind(ptr, _1, msg));
+    TRACE_EXIT();
+}
+
+/** Send a set of messages to all clients subscribed to the live stream */
+void Watcherd::sendMessage(const std::vector<MessagePtr>& msg)
+{
+    TRACE_ENTER();
+    pthread_mutex_lock(&messageRequestorsLock);
+    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+
+    // bind can't handle overloaded functions.  use member function pointer to help
+    void (ServerConnection::*ptr)(const std::vector<MessagePtr>&) = &ServerConnection::sendMessage;
+    for_each(messageRequestors.begin(), messageRequestors.end(), bind(ptr, _1, msg));
+    TRACE_EXIT();
+}
