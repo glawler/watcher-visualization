@@ -44,7 +44,9 @@ namespace watcher {
 
     ServerConnection::~ServerConnection()
     {
+        TRACE_ENTER();
         watcher.unsubscribe(shared_from_this());
+        TRACE_EXIT();
     }
 
     void ServerConnection::start()
@@ -108,7 +110,8 @@ namespace watcher {
 
             // unsubscribe to event stream, otherwise it will hold a
             // shared_ptr open
-            watcher.unsubscribe(shared_from_this());
+            if (conn_type == gui)
+                watcher.unsubscribe(shared_from_this());
         }
         TRACE_EXIT();
     }
@@ -179,7 +182,8 @@ namespace watcher {
 
             // unsubscribe to event stream, otherwise it will hold a
             // shared_ptr open
-            watcher.unsubscribe(shared_from_this());
+            if (conn_type == gui)
+                watcher.unsubscribe(shared_from_this());
         }
 
         // If an error occurs then no new asynchronous operations are started. This
@@ -201,17 +205,32 @@ namespace watcher {
             bool waitForResponse=false;
             BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers)
             {
+#if 0
+                /* melkins
+                 * The reads and writes to the socket are asynchronous, so
+                 * we should never be waiting for something to be read as
+                 * a result of a write.
+                 */
                 if(waitForResponse) // someone already said they wanted a response, so ignore ret val for others
                     mh->handleMessageSent(message);
                 else
                     waitForResponse=mh->handleMessageSent(message);
+#endif
+                    mh->handleMessageSent(message);
             }
+
+            // melkins
+            // start() calls async_read(), which is not what we want to do here
+            /*
             if(waitForResponse)
                 start(); 
+                */
         }
         else
         {
             LOG_WARN("Error while sending response to client: " << e);
+            if (conn_type == gui)
+                watcher.unsubscribe(shared_from_this());
         }
 
         // No new asynchronous operations are started. This means that all shared_ptr
