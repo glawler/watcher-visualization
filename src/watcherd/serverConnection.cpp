@@ -3,9 +3,6 @@
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 
-// GTL REMOVE THIS
-#include "libwatcher/labelMessage.h"
-
 #include <libwatcher/message.h>
 #include <libwatcher/messageStatus.h>
 
