@@ -45,7 +45,8 @@ namespace watcher {
     ServerConnection::~ServerConnection()
     {
         TRACE_ENTER();
-        watcher.unsubscribe(shared_from_this());
+        //shared_from_this() not allowed in destructor
+        //watcher.unsubscribe(shared_from_this());
         TRACE_EXIT();
     }
 
@@ -76,6 +77,9 @@ namespace watcher {
             if (!DataMarshaller::unmarshalHeader(incomingBuffer.begin(), bytes_transferred, payloadSize, numOfMessages))
             {
                 LOG_ERROR("Error parsing incoming message header.");
+
+                if (conn_type == gui)
+                    watcher.unsubscribe(shared_from_this());
             }
             else
             {
@@ -160,7 +164,8 @@ namespace watcher {
                 if (restart)
                     start();
 
-                if (conn_type != gui) {
+                if (conn_type != gui)
+                {
                     /* relay feeder message to any client requesting the live stream.
                      * Warning: currently there is no check to make sure that a client doesn't
                      * receive a message it just sent.  This should be OK since we are just
