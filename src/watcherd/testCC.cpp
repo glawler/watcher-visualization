@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     if (false==initConfig(config, argc, argv, configFilename))
     {
         cerr << "Error reading configuration file, unable to continue." << endl;
-        cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
+        cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile]" << endl;
         return 1;
     }
     SingletonConfig::unlock();
