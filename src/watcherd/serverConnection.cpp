@@ -132,18 +132,12 @@ namespace watcher {
                 boost::asio::ip::address nodeAddr(theSocket.remote_endpoint().address()); 
 
                 LOG_INFO("Recvd " << arrivedMessages.size() << " message" << (arrivedMessages.size()>1?"s":"") << " from " << nodeAddr); 
-
-                /* Flag indicating whether to continue reading from this
-                 * connection. */
-                bool restart = false;
-
                 BOOST_FOREACH(MessagePtr i, arrivedMessages)
                 {
                     if (i->type == START_MESSAGE_TYPE)
                     {
                         /* Client is requesting the live stream of events. */
                         watcher.subscribe(shared_from_this());
-                        restart = true; // keep client connection open
                         conn_type = gui;
                     }
                     else if (i->type == STOP_MESSAGE_TYPE)
@@ -152,17 +146,25 @@ namespace watcher {
                     }
                 }
 
+                /* Flag indicating whether to continue reading from this
+                 * connection. */
+                bool fail = false;
+
                 BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers)
                 {
                     if (mh->handleMessagesArrive(arrivedMessages))
                     {
-                        restart = true;
-                        LOG_DEBUG("Message handler told us to keep this connection open."); 
+                        fail = true;
+                        LOG_DEBUG("Message handler told us to close this connection."); 
                     }
                 }
 
-                if (restart)
+                if (!fail)
+                {
+                    // initiate request to read next message
+                    LOG_DEBUG("Waiting for next message.");
                     start();
+                }
 
                 if (conn_type != gui)
                 {
@@ -207,7 +209,6 @@ namespace watcher {
         {
             LOG_DEBUG("Successfully sent message to client: " << message); 
 
-            bool waitForResponse=false;
             BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers)
             {
 #if 0

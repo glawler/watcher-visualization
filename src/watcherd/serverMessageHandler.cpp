@@ -29,8 +29,8 @@ bool ServerMessageHandler::handleMessageArrive(const MessagePtr &message)
     MessageHandler::handleMessageArrive(message);
 
     // Server always keeps the connection open - client closes it when it is through with it.
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET("false");
+    return false;
 }
 
 bool ServerMessageHandler::handleMessagesArrive(const vector<MessagePtr> &messages)
@@ -39,17 +39,17 @@ bool ServerMessageHandler::handleMessagesArrive(const vector<MessagePtr> &messag
 
     for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
     {
-        if(!handleMessageArrive(*i))
+        if(handleMessageArrive(*i))
         {
             // This means if any message is a feeder api message, we cut the connection.
             // This may or may not be correct.
-            TRACE_EXIT_RET("false"); 
-            return false;
+            TRACE_EXIT_RET("true"); 
+            return true;
         }
     }
 
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET("false");
+    return false;
 }
 
 bool ServerMessageHandler::handleMessageSent(const MessagePtr &message)
@@ -59,8 +59,8 @@ bool ServerMessageHandler::handleMessageSent(const MessagePtr &message)
     // Log the message. 
     MessageHandler::handleMessageArrive(message); 
 
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET("false");
+    return false;
 }
 
 // virtual 
@@ -72,8 +72,8 @@ bool ServerMessageHandler::handleMessagesSent(const std::vector<event::MessagePt
         handleMessageSent(*i);
 
     // Server currently never wants a response, but does want the connection to remain open.
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET("false");
+    return false;
 }
 
 

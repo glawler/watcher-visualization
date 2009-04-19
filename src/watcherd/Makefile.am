@@ -55,7 +55,6 @@ libfeeder_a_SOURCES= \
 	messageHandler.cpp \
 	messageStream.cpp \
 	messageStreamFilter.cpp \
-	serverMessageHandler.cpp \
 	feederAPIMessageHandler.cpp \
 	watcherdAPIMessageHandler.cpp \
 	singletonConfig.cpp 
@@ -75,7 +74,6 @@ libwatcherdAPI_a_SOURCES= \
 	messageHandler.cpp \
 	messageStream.cpp \
 	messageStreamFilter.cpp \
-	serverMessageHandler.cpp \
 	singletonConfig.cpp 
 
 bin_PROGRAMS= \
@@ -88,7 +86,7 @@ bin_PROGRAMS= \
 	testCC \
 	messageStream2Text
 
-watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp
+watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp serverMessageHandler.cpp
 
 ctags:
 	ctags -R $(TOPDIR)

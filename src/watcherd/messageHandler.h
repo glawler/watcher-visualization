@@ -21,7 +21,7 @@ namespace watcher
              * Classes which derive from this class should handle the message arrival and if
              * they want to respond to the message, make 'response' non-null on return.
              * @param[in] - message - the newly arrived message. 
-             * @return - boolean. if true, keep connection open, false otherwise.
+             * @return boolean. if false, keep connection open, true otherwise.
              */
             virtual bool handleMessageArrive(const event::MessagePtr &message);
             virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages);

@@ -27,8 +27,8 @@ bool MessageHandler::handleMessageArrive(const MessagePtr &message)
 {
     TRACE_ENTER();
     LOG_INFO("Recv'd message: " << *message); 
-    TRACE_EXIT_RET(true);
-    return true;
+    TRACE_EXIT_RET(false);
+    return false;
 }
 
 bool MessageHandler::handleMessagesArrive(const vector<MessagePtr> &messages)
@@ -37,15 +37,15 @@ bool MessageHandler::handleMessagesArrive(const vector<MessagePtr> &messages)
 
     for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
     {
-        if(!handleMessageArrive(*i))
+        if(handleMessageArrive(*i))
         {
-            TRACE_EXIT_RET("false"); 
-            return false;
+            TRACE_EXIT_RET("true"); 
+            return true;
         }
     }
 
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET("false");
+    return false;
 }
 
 // virtual 
@@ -53,8 +53,8 @@ bool MessageHandler::handleMessageSent(const event::MessagePtr &message)
 {
     TRACE_ENTER();
     LOG_INFO("Sent message: " << *message); 
-    TRACE_EXIT_RET(true);
-    return true;
+    TRACE_EXIT_RET(false);
+    return false;
 }
 
 // virtual 
@@ -64,14 +64,14 @@ bool MessageHandler::handleMessagesSent(const std::vector<event::MessagePtr> &me
 
     for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
     {
-        if(!handleMessageSent(*i))
+        if(handleMessageSent(*i))
         {
-            TRACE_EXIT_RET("false"); 
-            return false;
+            TRACE_EXIT_RET("true"); 
+            return true;
         }
     }
 
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET("false");
+    return false;
 }
 
