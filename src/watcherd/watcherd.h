@@ -52,7 +52,7 @@ namespace watcher
             // List of clients subscribed to messages.
             typedef std::list<ServerConnectionPtr> MessageRequestors;
             MessageRequestors messageRequestors;
-            pthread_mutex_t messageRequestorsLock;
+            pthread_rwlock_t messageRequestorsLock;
     };
 }
 

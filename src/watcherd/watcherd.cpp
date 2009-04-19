@@ -15,12 +15,14 @@ Watcherd::Watcherd() :
     serverMessageHandlerPtr(new ServerMessageHandler)
 {
     TRACE_ENTER();
+    pthread_rwlock_init(&messageRequestorsLock, 0);
     TRACE_EXIT();
 }
 
 Watcherd::~Watcherd()
 {
     TRACE_ENTER();
+    pthread_rwlock_destroy(&messageRequestorsLock);
     TRACE_EXIT();
 }
 
@@ -61,10 +63,10 @@ void Watcherd::subscribe(ServerConnectionPtr client)
 {
     TRACE_ENTER();
 
-    pthread_mutex_lock(&messageRequestorsLock);
-    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+    pthread_rwlock_wrlock(&messageRequestorsLock);
+    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
 
-    messageRequestors.push_back(client);
+    messageRequestors.push_front(client);
 
     TRACE_EXIT();
 }
@@ -72,8 +74,8 @@ void Watcherd::subscribe(ServerConnectionPtr client)
 void Watcherd::unsubscribe(ServerConnectionPtr client)
 {
     TRACE_ENTER();
-    pthread_mutex_lock(&messageRequestorsLock);
-    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+    pthread_rwlock_wrlock(&messageRequestorsLock);
+    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
 
     messageRequestors.remove(client);
     TRACE_EXIT();
@@ -83,8 +85,8 @@ void Watcherd::unsubscribe(ServerConnectionPtr client)
 void Watcherd::sendMessage(MessagePtr msg)
 {
     TRACE_ENTER();
-    pthread_mutex_lock(&messageRequestorsLock);
-    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+    pthread_rwlock_rdlock(&messageRequestorsLock);
+    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
 
     // bind can't handle overloaded functions.  use member function pointer to help
     void (ServerConnection::*ptr)(MessagePtr) = &ServerConnection::sendMessage;
@@ -96,8 +98,8 @@ void Watcherd::sendMessage(MessagePtr msg)
 void Watcherd::sendMessage(const std::vector<MessagePtr>& msg)
 {
     TRACE_ENTER();
-    pthread_mutex_lock(&messageRequestorsLock);
-    shared_ptr<pthread_mutex_t> lock(&messageRequestorsLock, pthread_mutex_unlock);
+    pthread_rwlock_rdlock(&messageRequestorsLock);
+    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
 
     // bind can't handle overloaded functions.  use member function pointer to help
     void (ServerConnection::*ptr)(const std::vector<MessagePtr>&) = &ServerConnection::sendMessage;
