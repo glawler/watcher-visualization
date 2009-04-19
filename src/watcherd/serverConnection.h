@@ -67,6 +67,8 @@ namespace watcher
 
             /// Strand to ensure the connection's handlers are not called concurrently.
             boost::asio::io_service::strand strand_;
+            /// Strand for write operations
+            boost::asio::io_service::strand write_strand_;
 
             /// Buffer for incoming data.
             typedef boost::array<char, 8192> IncomingBuffer;

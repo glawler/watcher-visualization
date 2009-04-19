@@ -35,7 +35,8 @@ namespace watcher {
     ServerConnection::ServerConnection(Watcherd& w, boost::asio::io_service& io_service) :
         Connection(io_service),
         watcher(w),
-        strand_(io_service)
+        strand_(io_service),
+        write_strand_(io_service)
     {
         TRACE_ENTER(); 
         TRACE_EXIT();
@@ -239,9 +240,14 @@ namespace watcher {
         TRACE_ENTER();
         DataMarshaller::NetworkMarshalBuffers outBuffers;
         DataMarshaller::marshalPayload(msg, outBuffers);
+
+        /// FIXME melkins 2004-04-19
+        // is it safe to call async_write and async_read from different
+        // threads at the same time?  asio::tcp::socket() is listed at not
+        // shared thread safe
         async_write(theSocket,
                     outBuffers,
-                    strand_.wrap( boost::bind( &ServerConnection::handle_write,
+                    write_strand_.wrap( boost::bind( &ServerConnection::handle_write,
                                                shared_from_this(),
                                                placeholders::error,
                                                msg)));
@@ -254,9 +260,13 @@ namespace watcher {
         TRACE_ENTER();
         DataMarshaller::NetworkMarshalBuffers outBuffers;
         DataMarshaller::marshalPayload(msgs, outBuffers);
+
+        /// FIXME melkins 2004-04-19
+        // is it safe to call async_write and async_read from different
+        // threads at the same time?
         async_write(theSocket,
                     outBuffers,
-                    strand_.wrap( boost::bind( &ServerConnection::handle_write,
+                    write_strand_.wrap( boost::bind( &ServerConnection::handle_write,
                                                shared_from_this(),
                                                placeholders::error,
                                                msgs.front())));
