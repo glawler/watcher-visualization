@@ -19,12 +19,12 @@ static bool readConfig(libconfig::Config &config, const string &filename)
     {
         // Can't use logging here - if we're reading the config file we probably have not
         // init'd the logging mechanism. 
-        cerr << "Error reading configuration file " << optarg << ": " << e.what() << endl;
+        cerr << "Error reading configuration file " << filename << ": " << e.what() << endl;
         cerr << "Error: \"" << e.getError() << "\" on line: " << e.getLine() << endl;
     }
     catch (FileIOException &e)
     {
-        cerr << "Unable to read file " << optarg << " given as configuration file on the command line." << endl;
+        cerr << "Unable to read file " << filename.c_str() << " given as configuration file on the command line." << endl;
     }
     return false;
 }
