@@ -137,21 +137,7 @@ namespace watcher {
                         /* Client is requesting the live stream of events. */
                         watcher.subscribe(shared_from_this());
                         restart = true; // keep client connection open
-
-                        // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM ---------START----------------
-                        vector<MessagePtr> bogusMessages;
-                        bogusMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message 1")));
-                        bogusMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message 2")));
-                        bogusMessages.push_back(LabelMessagePtr(new LabelMessage("This is a test message 3")));
-
-                        LOG_INFO("Sending bogus data back to startMessage sender."); 
-                        sendMessage(bogusMessages);
-                        /*
-                           DataMarshaller::NetworkMarshalBuffers outBuffers;
-                           DataMarshaller::marshalPayload(bogusMessages, outBuffers);
-                           boost::asio::async_write(theSocket, outBuffers,   strand_.wrap( boost::bind( &ServerConnection::handle_write, shared_from_this(), boost::asio::placeholders::error, bogusMessages.front())));
-                           */
-                        // GTL THIS NEEDS TO GO ELSEWHERE - JUST TESTING MESSAGE STREAM ---------END----------------
+                        conn_type = gui;
                     }
                     else if (i->type == STOP_MESSAGE_TYPE)
                     {
@@ -171,15 +157,20 @@ namespace watcher {
                 if (restart)
                     start();
 
-                /* relay feeder message to any client requesting the live stream.
-                 * Warning: currently there is no check to make sure that a client doesn't
-                 * receive a message it just sent.  This should be OK since we are just
-                 * relaying feeder messages only, and the GUIs should not be sending
-                 * them. */
-                vector<MessagePtr> feeder;
-                remove_copy_if(arrivedMessages.begin(), arrivedMessages.end(), back_inserter(feeder), not_feeder_message);
-                if (! feeder.empty())
-                    watcher.sendMessage(feeder);
+                if (conn_type != gui) {
+                    /* relay feeder message to any client requesting the live stream.
+                     * Warning: currently there is no check to make sure that a client doesn't
+                     * receive a message it just sent.  This should be OK since we are just
+                     * relaying feeder messages only, and the GUIs should not be sending
+                     * them. */
+                    vector<MessagePtr> feeder;
+                    remove_copy_if(arrivedMessages.begin(), arrivedMessages.end(), back_inserter(feeder), not_feeder_message);
+                    if (! feeder.empty())
+                    {
+                        LOG_DEBUG("Sending " << feeder.size() << " feeder messages to clients.");
+                        watcher.sendMessage(feeder);
+                    }
+                }
             }
         }
         else

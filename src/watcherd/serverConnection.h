@@ -73,6 +73,10 @@ namespace watcher
             /// Buffer for incoming data.
             typedef boost::array<char, 8192> IncomingBuffer;
             IncomingBuffer incomingBuffer;
+
+            /// What type of connection is this?
+            enum connection_type { unknown, feeder, gui };
+            connection_type conn_type;
     };
 
     typedef boost::shared_ptr<ServerConnection> ServerConnectionPtr;
