@@ -10,7 +10,7 @@ AX_BOOST_ASIO
 AX_BOOST_SERIALIZATION
 AX_BOOST_THREAD
 AX_BOOST_UNIT_TEST_FRAMEWORK
-AC_CONFIG_FILES([Makefile logger/Makefile util/Makefile libwatcher/Makefile libwatcher/test/Makefile watcherd/Makefile watcherd/test/Makefile])
+AC_CONFIG_FILES([Makefile logger/Makefile util/Makefile sqlite_wrapper/Makefile libwatcher/Makefile libwatcher/test/Makefile watcherd/Makefile watcherd/test/Makefile])
 
 #override default $CXXFLAGS
 CXXFLAGS="-Wall -pthread -ggdb -O0"

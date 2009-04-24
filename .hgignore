@@ -156,6 +156,8 @@ syntax: regexp
 ^src/util/Makefile
 ^src/logger/Makefile
 
+^src/sqlite_wrapper/Makefile$
+
 #
 # watcherHierarcyClient
 #
