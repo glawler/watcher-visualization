@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
     string address("glory");
     string port("8095");
     size_t numThreads;
+    std::string dbPath("event.db");
 
     if (!config.lookupValue("server", address))
     {
@@ -82,6 +83,13 @@ int main(int argc, char* argv[])
         LOG_INFO("'serverThreadNum' not found in the configuration file, using default: " << numThreads 
                 << " and adding this to the configuration file.")
            config.getRoot().add("serverThreadNum", libconfig::Setting::TypeInt)=static_cast<int>(numThreads);
+    }
+
+    if (!config.lookupValue("databasePath", dbPath))
+    {
+        LOG_INFO("'databasePath' not found in the configuration file, using default: " << dbPath
+                << " and adding this to the configuration file.")
+           config.getRoot().add("databasePath", libconfig::Setting::TypeString)=dbPath;
     }
 
     WatcherdPtr theWatcherDaemon(new Watcherd);
