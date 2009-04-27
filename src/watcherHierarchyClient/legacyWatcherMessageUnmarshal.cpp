@@ -121,6 +121,7 @@ unsigned char *communicationsWatcherEdgeUnmarshal(unsigned char *hp, NodeEdge *&
     // watcherGraphEdgeInsert(&userGraph, e, us->manet->curtime); 
 
     TRACE_EXIT();
+    return NULL;
 } 
 
 // void gotMessageEdgeRemove(void *data, const struct MessageInfo *mi) 

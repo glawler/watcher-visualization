@@ -1,0 +1,40 @@
+
+CXXFLAGS+=-I/usr/include/libxml2 
+LDADD=-lxml2
+
+CPPFLAGS += @BOOST_CPPFLAGS@
+LDFLAGS += @BOOST_LDFLAGS@
+LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
+
+# We have to get our build/include stuff sorted out.
+CXXFLAGS+=-I../../include 
+CXXFLAGS+=-I../libwatcher 
+CXXFLAGS+=-I../watcherd
+CXXFLAGS+=-I..
+
+CFLAGS+=-I../../include
+CFLAGS+=-I/usr/include/libxml2
+
+LDFLAGS+=-L../libwatcher
+LDFLAGS+=-L../watcherd
+LDFLAGS+=-L../../lib
+LDFLAGS+=-L../logger
+
+LIBS+=-lidsCommunications
+LIBS+=-llog4cxx
+LIBS+=-llogger
+LIBS+=-lfeeder
+LIBS+=-lwatcher
+
+bin_PROGRAMS=watcherHierarchyClient
+
+watcherHierarchyClient_SOURCES=\
+	demolib.h \
+	demolib.c \
+	legacyWatcherMessageUnmarshal.cpp \
+	legacyWatcherMessageUnmarshal.h \
+	marshal.h \
+	watcherGPS.cpp \
+	watcherGPS.h \
+	watcherHierarchyClient.cpp
+

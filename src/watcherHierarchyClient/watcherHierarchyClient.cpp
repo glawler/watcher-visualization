@@ -22,6 +22,7 @@
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 using namespace boost;
 
 /*  Copyright (C) 2004  Networks Associates Technology, Inc.
@@ -49,7 +50,7 @@ typedef struct detector
  */
 static void myDetectorPositionUpdate(void *data, IDSPositionType position, IDSPositionStatus status)
 {
-    detector *st=(detector*)data;
+    // detector *st=(detector*)data;
 
     switch(position)
     {
@@ -61,6 +62,10 @@ static void myDetectorPositionUpdate(void *data, IDSPositionType position, IDSPo
                 break;
         case COORDINATOR_NEIGHBORHOOD:
             LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+            break;
+        case COORDINATOR_ROOTGROUP:
+            LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+            break;
     }
 }
 
@@ -195,9 +200,9 @@ void sendGPS(void *messageHandlerData, const struct MessageInfo *mi)
     watcherGPSUnmarshal(payload, payloadLen, &wGPS);
 
     GPSMessagePtr gpsMessage(new GPSMessage);
-    gpsMessage->lat=wGPS.lat;
-    gpsMessage->lng=wGPS.lon;
-    gpsMessage->alt=wGPS.alt;
+    gpsMessage->x=wGPS.lon;
+    gpsMessage->y=wGPS.lat;
+    gpsMessage->z=wGPS.alt;
 
     st->client->sendMessage(gpsMessage);
 
@@ -250,7 +255,7 @@ void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo *mi, b
 
     FloatingLabel lab;
     char string[260];
-    unsigned char *pos;
+    // unsigned char *pos;
     lab.text = string;
 
     LOG_DEBUG("Received hierarchy floating label message of size " << payloadLen << ", unmarshalling it."); 
@@ -368,7 +373,7 @@ static detector *detectorInit(ManetAddr us, const string &serverName, const char
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL_REMOVE, &sendFloatingLabelRemove }
     };
 
-    for (int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
+    for (unsigned int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
         messageHandlerSet(st->cs, direction, position, mode, types[i].type, types[i].messageHandler, st);
 
     return st;
@@ -395,7 +400,7 @@ static void selectLoop(detector *dt)
     fd_set readfds,writefds;
     int maxfd;
     int rc;
-    struct timeval curtime;
+    // struct timeval curtime;
     struct timeval timeout;
     int apifd;
     CommunicationsLogStatePtr cl = communicationsLogStateGet(dt->cs);
