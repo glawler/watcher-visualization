@@ -1997,7 +1997,10 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
     if (messageInfoOriginatorGet(mi) != us->addr)
         return;
 
-    location = watcherGPSUnmarshal(messageInfoRawPayloadGet(mi), messageInfoRawPayloadLenGet(mi));
+    location = globalGPSDataFormat == GPS_DATA_FORMAT_UTM ? 
+        watcherGPSUnmarshalUTM(messageInfoRawPayloadGet(mi), messageInfoRawPayloadLenGet(mi)) :
+        watcherGPSUnmarshal(messageInfoRawPayloadGet(mi), messageInfoRawPayloadLenGet(mi));
+
     if (location == NULL)
     {
         fprintf(stderr, "GPS corrupt\n");
@@ -2029,7 +2032,9 @@ void gotMessageGPS(void *data, const struct MessageInfo *mi)
 
         us->x=location->lon-utmXOffset;
         us->y=location->lat-utmYOffset;    
-        us->z=location->alt;
+        // Ignore Z-Axis in Telcordia build.
+        // us->z=location->alt;
+        us->z=-20;
 
         LOG_DEBUG("UTM given locations: lon=" << location->lon << " lat=" << location->lat << " alt=" << location->alt);
         LOG_DEBUG("UTM node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);

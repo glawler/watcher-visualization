@@ -17,6 +17,8 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: goodwinmerge.c,v 1.7 2
 
 #define MAXBUFF 1024
 
+int globalGPSFormatIsUTM=0;
+
 typedef struct
 {
 	int fd;
@@ -47,7 +49,9 @@ static void readNext(CommunicationsLogMerge *clm, int usegpsclock)
 				if (mi->type==IDSCOMMUNICATIONS_MESSAGE_WATCHER_GPS)
 				{
 					WatcherGPS *location;
-					location=watcherGPSUnmarshal(messageInfoRawPayloadGet(mi),messageInfoRawPayloadLenGet(mi));
+					location=globalGPSFormatIsUTM==1 ?
+                        watcherGPSUnmarshalUTM(messageInfoRawPayloadGet(mi),messageInfoRawPayloadLenGet(mi)) : 
+                        watcherGPSUnmarshal(messageInfoRawPayloadGet(mi),messageInfoRawPayloadLenGet(mi));
 					clm->clockdelta=clm->time[clm->buffpos]-location->time;
 					free(location);
 					fprintf(stderr,"node %d.%d.%d.%d: new clock delta = %lld\n",PRINTADDR(clm->addr),clm->clockdelta);
@@ -70,24 +74,31 @@ int main(int argc, char *argv[])
 	int outputfd=1;
 	int usegpsclock=0;
 	int ch;
+    globalGPSFormatIsUTM=0;
 
-	while((ch=getopt(argc, argv,"g?"))!=-1)
+	while((ch=getopt(argc, argv,"g?t:"))!=-1)
 	{
 		switch(ch)
-		{
-			case 'g':
-				usegpsclock=1;
-			break;
-			case '?':
-			default:
-				fprintf(stderr,"goodwinmerge [-g] goodwinfiles - merge a set of goodwin files into a single file\n"
-					"-g - rewrite timestamps to GPS time\n"
-					);
-				exit(1);
-		}
+        {
+            case 'g':
+                usegpsclock=1;
+                break;
+            case 't':
+                if(0==strncmp(optarg, "utm", 3)) 
+                    globalGPSFormatIsUTM=1;
+                break;
+            case '?':
+            default:
+                fprintf(stderr,"goodwinmerge [-g] goodwinfiles - merge a set of goodwin files into a single file\n"
+                        "-g - rewrite timestamps to GPS time\n"
+                       );
+                exit(1);
+        }
 	}
 	argc -= optind;
 	argv += optind;
+
+    printf("Assuming GPS data format is in %s format.\n", (globalGPSFormatIsUTM==1) ? "(uncompressed) UTM" : "(compressed) lat/long/alt"); 
 
 	nodeList[numnodes]=NULL;
 	for(i=0;i<argc;i++)
@@ -147,7 +158,9 @@ int main(int argc, char *argv[])
 			assert(clm->ac[clm->bufflen-1]->type==APICOMMAND_MESSAGE_REC);
 			mi=messageInfoUnmarshal(clm->ac[clm->bufflen-1]);
 			assert(mi->type==IDSCOMMUNICATIONS_MESSAGE_WATCHER_GPS);
-			location=watcherGPSUnmarshal(messageInfoRawPayloadGet(mi),messageInfoRawPayloadLenGet(mi));
+			location=globalGPSFormatIsUTM==1 ? 
+                watcherGPSUnmarshalUTM(messageInfoRawPayloadGet(mi),messageInfoRawPayloadLenGet(mi)) : 
+                watcherGPSUnmarshal(messageInfoRawPayloadGet(mi),messageInfoRawPayloadLenGet(mi));
 
 			clm->clockdelta=clm->time[clm->bufflen-1] - location->time;   /* compute clock delta between node time and GPS time */
 

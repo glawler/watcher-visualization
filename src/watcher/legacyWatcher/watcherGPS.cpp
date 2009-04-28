@@ -63,3 +63,44 @@ int watcherGPSMarshal(void *payload, int payloadlen, const WatcherGPS *gps)
 
 	return WATCHERGPSPAYLOADSIZE;
 }
+
+WatcherGPS *watcherGPSUnmarshalUTM(const void *payload, int payloadlen)
+{
+	WatcherGPS *gps;
+	const unsigned char *hp=(const unsigned char*)payload;
+
+	if (payloadlen < WATCHERGPSPAYLOADSIZE) 
+		return NULL;
+
+	gps=(WatcherGPS*)malloc(sizeof(*gps));
+
+	UNMARSHALLONG(hp,gps->lat);
+	UNMARSHALLONG(hp,gps->lon);
+	UNMARSHALLONG(hp,gps->alt);
+
+	destime tmp3;
+	UNMARSHALLONGLONG(hp,tmp3);
+	gps->time=tmp3;
+
+	return gps;
+}
+
+int watcherGPSMarshalUTM(void *payload, int payloadlen, const WatcherGPS *gps)
+{
+	unsigned char *hp=(unsigned char*)payload;
+	unsigned int tmp;
+
+	if (payloadlen<WATCHERGPSPAYLOADSIZE)
+		return 0;
+	tmp=(int)(gps->lat);
+	MARSHALLONG(hp,tmp);
+	tmp=(int)(gps->lon);
+	MARSHALLONG(hp,tmp);
+	tmp=(unsigned int)gps->alt;
+	MARSHALLONG(hp,tmp);
+
+	destime tmp2=gps->time;
+	MARSHALLONGLONG(hp, tmp2);
+
+	return WATCHERGPSPAYLOADSIZE;
+}

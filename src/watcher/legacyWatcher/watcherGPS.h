@@ -21,6 +21,9 @@ typedef struct WatcherGPS
 WatcherGPS *watcherGPSUnmarshal(const void *payload, int payloadlen);
 int watcherGPSMarshal(void *payload, int payloadlen, const WatcherGPS *gps);
 
+WatcherGPS *watcherGPSUnmarshalUTM(const void *payload, int payloadlen);
+int watcherGPSMarshalUTM(void *payload, int payloadlen, const WatcherGPS *gps);
+
 #ifdef __cplusplus
 }
 #endif

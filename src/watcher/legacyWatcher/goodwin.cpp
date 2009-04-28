@@ -27,6 +27,8 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: goodwin.cpp,v 1.23 200
 
 #define PRINTADDR(a) ((a)>>24)&0xFF,((a)>>16)&0xFF,((a)>>8)&0xFF,(a)&0xFF
 
+int globalGPSFormatIsUTM=0;
+
 typedef struct detector
 {
 	CommunicationsStatePtr cs;
@@ -43,16 +45,28 @@ typedef struct detector
 
 static void detectorSend(detector *dt)
 {
-	unsigned char payload[32];
-	int payloadlen=0;
-	WatcherGPS location;
+    unsigned char payload[32];
+    int payloadlen=0;
+    WatcherGPS location;
 
-	location.lat=dt->nod->y / 80000.0;
-	location.lon=dt->nod->x / 80000.0;
-	location.alt=0.0;
-	payloadlen=watcherGPSMarshal(payload,sizeof(payload),&location);
-	
-	communicationsLogMessage(dt->cs,IDSCOMMUNICATIONS_MESSAGE_WATCHER_GPS,payload,payloadlen);
+    if(globalGPSFormatIsUTM==0)
+    {
+        location.lat=dt->nod->y / 80000.0;
+        location.lon=dt->nod->x / 80000.0;
+        location.alt=0.0;
+    }
+    else
+    {
+        location.lat=dt->nod->y;
+        location.lon=dt->nod->x;
+        location.alt=0.0;
+    }
+
+    payloadlen=globalGPSFormatIsUTM==1?
+        watcherGPSMarshalUTM(payload,sizeof(payload),&location) : 
+        watcherGPSMarshal(payload,sizeof(payload),&location);
+
+    communicationsLogMessage(dt->cs,IDSCOMMUNICATIONS_MESSAGE_WATCHER_GPS,payload,payloadlen);
 }
 
 static void detectorStatusUpdate(void *data,ApiStatus *as)
@@ -273,8 +287,9 @@ int main(int argc, char *argv[])
 	int watcherMovementEnable=0;
 	int ch;
 	Config *conf=NULL;
+    globalGPSFormatIsUTM=0;
 
-	while ((ch = getopt(argc, argv, "?mc:")) != -1)
+	while ((ch = getopt(argc, argv, "?mc:t:")) != -1)
 	switch (ch)
 	{
 		case 'm':
@@ -286,12 +301,18 @@ int main(int argc, char *argv[])
             fprintf(stderr, "loading config: %s\n", optarg);
 			conf=configLoad(optarg);
 		break;
+        case 't':
+            if(0==strncmp(optarg, "utm", 3)) 
+                globalGPSFormatIsUTM=1;
+            break;
 		case '?':
 			usage();
 		break;
 	}
 	argc -= optind;
 	argv += optind;
+
+    printf("Assuming GPS data format is in %s format.\n", (globalGPSFormatIsUTM==1) ? "(uncompressed) UTM" : "(compressed) lat/long/alt"); 
 
 	if (argc>0)
 		logname=strdup(argv[0]);
