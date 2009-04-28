@@ -10,6 +10,7 @@ SUBDIRS=. test
 CXXFLAGS += -fno-strict-aliasing
 
 CPPFLAGS += -I../../include
+CPPFLAGS += -I../logger
 CPPFLAGS += @BOOST_CPPFLAGS@
 
 noinst_LIBRARIES=libwatcher.a

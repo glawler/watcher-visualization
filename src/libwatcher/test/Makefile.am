@@ -1,5 +1,6 @@
 CPPFLAGS += -I../..
 CPPFLAGS += -I../../../include
+CPPFLAGS += -I../../logger
 CPPFLAGS += $(BOOST_CPPFLAGS)
 DEFS += -DBOOST_TEST_DYN_LINK
 LDFLAGS += -L..
