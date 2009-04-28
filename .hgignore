@@ -57,6 +57,11 @@ syntax: regexp
 ^src/watcher/moc_.*.cpp$
 ^src/watcher/ui_watcher.h$
 
+# ignore built libs
+^src/libidmef-0.7.3_beta_McAfee20050325/*
+
+share/info/dir
+
 # ignore bins and conf files.
 ^src/watcher/watcher$
 ^src/watcher/legacyWatcher/depend$
