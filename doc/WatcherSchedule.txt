@@ -7,19 +7,25 @@ console
 - Shows: messages from test nodes demultiplexed through new watcherd to
 a "GUI" client. 
 
-2. Basic Google Earth Watcher GUI demo - end of May
+2. Network transport transition layer (don't depend on hierarchy for transport) - mid/late May
+- Don't run hierarchy daemon. :) 
+- Run test node daemons updated to use new network API: gpsDaemon, route daemon, and maybe the WHD if ARL wants it.  
+- Run watcherd instance
+- Run GE GUI (if available), legacyWatcher (using new network API), or just the text-based "GUI" log dumper program, messageStream2Text.
+
+3. Basic Google Earth Watcher GUI demo - early/Mid June
 - Run test node daemons
 - Run watcherd
 - Run Google Earth w/watcher plugin. 
 - Shows: Basic watcher functionality in Google Earth: node location,
 node connectivity, labels, layers
 
-3. Refined Google Earth Demo - end of June
-- As 2 above.
+4. Refined Google Earth Demo - end of June
+- As "Basic Google Earth" demo above.
 - Shows: Refinements to basic Google Earth implementation based on
 feedback from ARL, Cobham (nee SPARTA). 
 
-4. Full TiVO mode/playback functionality -- as completed (sometime in
+5. Full TiVO mode/playback functionality -- as completed (sometime in
 June?) - Maybe have concurrent demo at same time as refined Google Earth
 demo (#3 above)
 - Run test node daemons
@@ -32,7 +38,7 @@ demo (#3 above)
 - TiVO mode demo shows full watcherd functionality including playback
 via packet capture database 
 
-5. TBD, end of July (or mid August), last
+6. TBD, end of July (or mid August), last
 checkpoint/demo. 
 - Shows: choose from list:
 - still more refined Google Earth
@@ -40,13 +46,9 @@ checkpoint/demo.
 - other GUI implementation?
 - specific functionality needed by ARL from SOW or other, TBD.
 
-6. Documentation checkpoint - end of July - 
+7. Documentation checkpoint - end of July - 
 - Shows: "User documentation and design
 documentation to enable ARL to use and extend this software as needed
 (contractor format ...)".
 
-7. Network transport transition layer
-- Run test node daemons updated to use new API
-- Run watcherd instance
-- Run :q
 
