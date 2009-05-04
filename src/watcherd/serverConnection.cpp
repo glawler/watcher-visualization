@@ -47,6 +47,19 @@ namespace watcher {
         TRACE_EXIT();
     }
 
+    void ServerConnection::run()
+    {
+        /*
+         * Pull endpoint info out of the socket and make it available via the
+         * Connection::getPeerAddr() member function.
+         */
+        boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint();
+        endpoint_addr_ = ep.address().to_string();
+        endpoint_port_ = ep.port();
+
+        start();
+    }
+
     void ServerConnection::start()
     {
         TRACE_ENTER(); 
@@ -126,9 +139,9 @@ namespace watcher {
             vector<MessagePtr> arrivedMessages; 
             if (DataMarshaller::unmarshalPayload(arrivedMessages, numOfMessages, incomingBuffer.begin(), bytes_transferred))
             {
-                boost::asio::ip::address nodeAddr(theSocket.remote_endpoint().address()); 
+                //boost::asio::ip::address nodeAddr(theSocket.remote_endpoint().address()); 
 
-                LOG_INFO("Recvd " << arrivedMessages.size() << " message" << (arrivedMessages.size()>1?"s":"") << " from " << nodeAddr); 
+                LOG_INFO("Recvd " << arrivedMessages.size() << " message" << (arrivedMessages.size()>1?"s":"") << " from " << getPeerAddr()); 
                 BOOST_FOREACH(MessagePtr i, arrivedMessages)
                 {
                     if (i->type == START_MESSAGE_TYPE)

@@ -86,7 +86,7 @@ void Server::handle_accept(const boost::system::error_code& e)
     TRACE_ENTER();
     if (!e)
     {
-        new_connection_->start();
+       new_connection_->run();
         new_connection_.reset(new ServerConnection(watcher, io_service_));
         acceptor_.async_accept(
                 new_connection_->getSocket(),

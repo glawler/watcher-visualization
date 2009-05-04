@@ -37,7 +37,7 @@ namespace watcher
             ~ServerConnection();
 
             /// Start the first asynchronous operation for the ServerConnection.
-            void start();
+            void run();
 
             /// Send a message(s) to this client
             void sendMessage(event::MessagePtr);
@@ -47,6 +47,7 @@ namespace watcher
             // 
             //
         private:
+            void start();
 
             DECLARE_LOGGER();
 

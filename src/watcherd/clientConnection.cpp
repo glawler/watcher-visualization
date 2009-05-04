@@ -101,6 +101,11 @@ bool ClientConnection::tryConnect()
 
             if (!error)
             {
+                /* Store connection information for use by Connection::getPeerAddr() */
+                boost::asio::ip::tcp::endpoint ep = theSocket.remote_endpoint();
+                endpoint_addr_ = ep.address().to_string();
+                endpoint_port_ = ep.port();
+
                 connected=true;
                 break;
             }
