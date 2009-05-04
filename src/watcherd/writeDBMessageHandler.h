@@ -6,6 +6,8 @@
 #ifndef writedb_message_handler_h
 #define writedb_message_handler_h
 
+#include <string>
+
 #include "messageHandler.h"
 
 namespace watcher
@@ -17,11 +19,13 @@ namespace watcher
     class WriteDBMessageHandler : public MessageHandler
     {
         public:
+            WriteDBMessageHandler(const std::string& uri);
             bool handleMessageArrive(ConnectionPtr, const event::MessagePtr&);
             bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr>&);
 
         private:
             DECLARE_LOGGER();
+            std::string uri_; /// resource specifying the database to use
     };
 
 } //namespace

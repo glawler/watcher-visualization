@@ -23,6 +23,6 @@ AC_CONFIG_FILES([ \
 ])
 
 #override default $CXXFLAGS
-CXXFLAGS="-Wall -pthread -ggdb -O0"
+CXXFLAGS="-Wall -Wextra -pthread -ggdb -O0"
 
 AC_OUTPUT

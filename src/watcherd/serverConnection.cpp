@@ -47,6 +47,7 @@ namespace watcher {
         TRACE_EXIT();
     }
 
+    /** Initialization point for start of new ServerConnection thread. */
     void ServerConnection::run()
     {
         /*

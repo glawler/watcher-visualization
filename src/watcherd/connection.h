@@ -29,7 +29,7 @@ namespace watcher
             void removeMessageHandler(MessageHandlerPtr messageHandler); 
 
             const std::string& getPeerAddr() const { return endpoint_addr_; }
-            const unsigned short getPeerPort() const { return endpoint_port_; }
+            unsigned short getPeerPort() const { return endpoint_port_; }
 
         protected:
 
