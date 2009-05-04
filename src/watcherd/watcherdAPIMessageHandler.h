@@ -21,8 +21,8 @@ namespace watcher
              * @return - boolean. If true, keep connection open, close otherwise. Watcherd API 
              * usually leaves teh connection open to rec'v message streams.
              */
-            virtual bool handleMessageArrive(const event::MessagePtr &message);
-            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages); 
+            virtual bool handleMessageArrive(ConnectionPtr, const event::MessagePtr &message);
+            virtual bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr> &messages); 
 
             /**
              * Notification that a message has been successfully sent. Watcherd API clients

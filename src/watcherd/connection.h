@@ -5,7 +5,8 @@
 #include <boost/noncopyable.hpp>
 #include <list>
 
-#include "messageHandler.h"
+#include "messageHandlerFwd.h"
+#include "connection_fwd.h"
 
 namespace watcher
 {

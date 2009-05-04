@@ -8,6 +8,7 @@
 
 #include "libwatcher/message.h"
 #include "messageFactory.h"
+#include "messageHandler.h"
 
 using namespace std;
 using namespace watcher;
@@ -306,7 +307,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                         for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
                         {
                             MessagePtr theResponse;
-                            if((*mh)->handleMessagesArrive(arrivedMessages))
+                            if((*mh)->handleMessagesArrive(shared_from_this(), arrivedMessages))
                                 if(theResponse)
                                     sendMessage(theResponse);
                         }

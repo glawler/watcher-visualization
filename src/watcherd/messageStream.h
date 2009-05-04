@@ -156,13 +156,13 @@ namespace watcher
              * Handle the arrival of a message. Overridden from base class.
              * It is invoked by a thread in a Client instance. 
              */
-            virtual bool handleMessageArrive(const MessagePtr &message);
+            virtual bool handleMessageArrive(ConnectionPtr, const MessagePtr &message);
 
             /**
              * Handle the arrival of mulitple messages. Overridden from base class.
              * It is invoked by a thread in a Client instance. 
              */
-            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages); 
+            virtual bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr> &messages); 
 
             /**
              * Notification that a message has been successfully sent.

@@ -22,24 +22,24 @@ WatcherdAPIMessageHandler::~WatcherdAPIMessageHandler()
     TRACE_EXIT();
 }
 
-bool WatcherdAPIMessageHandler::handleMessageArrive(const MessagePtr &message)
+bool WatcherdAPIMessageHandler::handleMessageArrive(ConnectionPtr conn, const MessagePtr &message)
 {
     TRACE_ENTER();
 
     // Log message arrival
-    MessageHandler::handleMessageArrive(message); 
+    MessageHandler::handleMessageArrive(conn, message); 
 
     TRACE_EXIT_RET("true"); 
     return true;
 }
 
 // virtual 
-bool WatcherdAPIMessageHandler::handleMessagesArrive(const std::vector<event::MessagePtr> &messages)
+bool WatcherdAPIMessageHandler::handleMessagesArrive(ConnectionPtr conn, const std::vector<event::MessagePtr> &messages)
 {
     TRACE_ENTER();
 
     for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
-        handleMessageArrive(*i);
+        handleMessageArrive(conn, *i);
 
     // Watcherd API currently always wants a response - so always return true
     TRACE_EXIT_RET("true");
@@ -52,7 +52,7 @@ bool WatcherdAPIMessageHandler::handleMessageSent(const MessagePtr &message)
     TRACE_ENTER();
 
     // Log the message. 
-    MessageHandler::handleMessageArrive(message); 
+    MessageHandler::handleMessageSent(message); 
 
     TRACE_EXIT_RET("true");
     return true;

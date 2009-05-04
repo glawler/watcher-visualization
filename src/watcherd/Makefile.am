@@ -86,7 +86,9 @@ bin_PROGRAMS= \
 	testCC \
 	messageStream2Text
 
-watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp serverMessageHandler.cpp
+watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp \
+		 serverMessageHandler.cpp writeDBMessageHandler.cpp \
+		 writeDBMessageHandler.h
 
 ctags:
 	ctags -R $(TOPDIR)

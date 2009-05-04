@@ -162,7 +162,7 @@ namespace watcher {
 
                 BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers)
                 {
-                    if (mh->handleMessagesArrive(arrivedMessages))
+                    if (mh->handleMessagesArrive(shared_from_this(), arrivedMessages))
                     {
                         fail = true;
                         LOG_DEBUG("Message handler told us to close this connection."); 

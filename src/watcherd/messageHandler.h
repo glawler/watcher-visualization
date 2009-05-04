@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "libwatcher/message.h"
+#include "connection_fwd.h"
 
 namespace watcher 
 {
@@ -23,8 +24,8 @@ namespace watcher
              * @param[in] - message - the newly arrived message. 
              * @return boolean. if false, keep connection open, true otherwise.
              */
-            virtual bool handleMessageArrive(const event::MessagePtr &message);
-            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages);
+            virtual bool handleMessageArrive(ConnectionPtr, const event::MessagePtr &message);
+            virtual bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr> &messages);
 
             /**
              * Notification that a message has been successfully sent.

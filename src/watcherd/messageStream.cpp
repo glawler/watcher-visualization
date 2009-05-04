@@ -156,27 +156,27 @@ bool MessageStream::stopStream()
 }
 
 //virtual 
-bool MessageStream::handleMessageArrive(const MessagePtr &message)
+bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &message)
 {
     TRACE_ENTER();
 
     messagesArrived++; 
 
     // We don't really add anything yet to a generic watcherdAPI client.
-    bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(message); 
+    bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(conn, message); 
 
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
 }
 
 //virtual 
-bool MessageStream::handleMessagesArrive(const vector<MessagePtr> &messages)
+bool MessageStream::handleMessagesArrive(ConnectionPtr conn, const vector<MessagePtr> &messages)
 {
     TRACE_ENTER();
 
     bool retVal=true;
     for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
-        if(!handleMessageArrive(*m))
+        if(!handleMessageArrive(conn, *m))
             retVal=false;
 
     TRACE_EXIT_RET(retVal);

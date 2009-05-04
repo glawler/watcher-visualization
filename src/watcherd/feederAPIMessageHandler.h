@@ -20,8 +20,8 @@ namespace watcher
              * @return - boolean. If true, keep connection open, close otherwise. FeederAPI usually 
              * closes the connection.
              */
-            virtual bool handleMessageArrive(const event::MessagePtr &message);
-            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages); 
+            virtual bool handleMessageArrive(ConnectionPtr, const event::MessagePtr &message);
+            virtual bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr> &messages); 
 
             /**
              * Notification that a message has been successfully sent. Feeder API

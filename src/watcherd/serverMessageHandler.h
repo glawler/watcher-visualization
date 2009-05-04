@@ -21,8 +21,8 @@ namespace watcher
              * @return - boolean. true, if message handled, false on error or otherwise. If the return
              * value is negative, the response message will not be sent even if non-null.
              */
-            virtual bool handleMessageArrive(const event::MessagePtr &message);
-            virtual bool handleMessagesArrive(const std::vector<event::MessagePtr> &messages);
+            virtual bool handleMessageArrive(ConnectionPtr, const event::MessagePtr &message);
+            virtual bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr> &messages);
 
             /**
              * Notification that a message has been successfully sent. ServerMessageHandler

@@ -6,6 +6,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "dataMarshaller.h"
 #include "connection.h"
@@ -16,7 +17,8 @@ namespace watcher
 {
     /// Represents a single connection from a client.
     class ClientConnection : 
-        public Connection 
+        public Connection,
+        public boost::enable_shared_from_this<ClientConnection>
     {
         public:
             // Connect to the service service on server server using the boost::io_service given.

@@ -23,6 +23,7 @@
 #include "dataMarshaller.h"
 #include "connection.h"
 #include "watcherd_fwd.h"
+#include "serverConnectionFwd.h"
 
 namespace watcher 
 {
@@ -79,8 +80,6 @@ namespace watcher
             enum connection_type { unknown, feeder, gui };
             connection_type conn_type;
     };
-
-    typedef boost::shared_ptr<ServerConnection> ServerConnectionPtr;
 
 } // namespace http
 

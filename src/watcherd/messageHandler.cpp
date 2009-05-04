@@ -23,7 +23,7 @@ MessageHandler::~MessageHandler()
 }
 
 
-bool MessageHandler::handleMessageArrive(const MessagePtr &message)
+bool MessageHandler::handleMessageArrive(ConnectionPtr, const MessagePtr &message)
 {
     TRACE_ENTER();
     LOG_INFO("Recv'd message: " << *message); 
@@ -31,13 +31,13 @@ bool MessageHandler::handleMessageArrive(const MessagePtr &message)
     return false;
 }
 
-bool MessageHandler::handleMessagesArrive(const vector<MessagePtr> &messages)
+bool MessageHandler::handleMessagesArrive(ConnectionPtr conn, const vector<MessagePtr> &messages)
 {
     TRACE_ENTER();
 
     for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
     {
-        if(handleMessageArrive(*i))
+        if(handleMessageArrive(conn, *i))
         {
             TRACE_EXIT_RET("true"); 
             return true;
