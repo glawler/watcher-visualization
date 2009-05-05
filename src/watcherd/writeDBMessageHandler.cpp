@@ -9,11 +9,17 @@
 #include "messageHandler.h"
 #include "writeDBMessageHandler.h"
 #include "database.h"
+#include "connection.h"
 
-namespace
-{
+/* SQLite can support multiple connections to the same database from different
+ * threads/processes.  The way you do this is have a separate DB handle for
+ * every thread that is accessing the database.  Use
+ * boost::thread::thread_specific_ptr to store a database connection for each
+ * thread in the pool.
+ */
+namespace {
     /// Database handles for each thread in the pool
-    boost::thread_specific_ptr<watcher::DatabaseHandle> dbh;
+    boost::thread_specific_ptr<watcher::Database> dbh;
 }
 
 using namespace watcher;
@@ -26,39 +32,37 @@ INIT_LOGGER(WriteDBMessageHandler, "MessageHandler.WriteDBMessageHandler");
  * @param[in] uri resource specifying the database to write
  */
 WriteDBMessageHandler::WriteDBMessageHandler(const std::string& uri)
-: uri_(uri)
+    : uri_(uri)
 {
 }
 
-bool WriteDBMessageHandler::handleMessageArrive(ConnectionPtr conn, const event::MessagePtr& msg)
+bool WriteDBMessageHandler::handleMessageArrive(ConnectionPtr conn, const MessagePtr& msg)
 {
     TRACE_ENTER();
 
     bool ret = false; // keep connection open
 
-    /* Retrive the database handle for this thread. */
-    DatabaseHandle *db = dbh.get();
-    if (!db)
-    {
-        /* not yet set, create a new connection */
-        db = DatabaseHandle::connect(uri_);
-        dbh.reset(db);
+    if (isFeederEvent(msg->type)) { // only store feeder events
+        Database*db = dbh.get(); // Retrive the database handle for this thread.
+        if (!db) {
+            /* not yet set, create a new connection */
+            db = Database::connect(uri_);
+            dbh.reset(db);
+        }
+        db->storeEvent(conn->getPeerAddr(), msg);
     }
-
-    //FIXME db insertion goes here when defined
 
     TRACE_EXIT_RET(ret);
     return ret;
 }
 
-bool WriteDBMessageHandler::handleMessagesArrive(ConnectionPtr conn, const std::vector<event::MessagePtr>& msg)
+bool WriteDBMessageHandler::handleMessagesArrive(ConnectionPtr conn, const std::vector<MessagePtr>& msg)
 {
     TRACE_ENTER();
 
     bool ret = false; // keep connection open
 
-    BOOST_FOREACH(MessagePtr m, msg)
-    {
+    BOOST_FOREACH(MessagePtr m, msg) {
         ret |= handleMessageArrive(conn, m);
     }
 

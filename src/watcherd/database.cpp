@@ -3,24 +3,26 @@
  * @date 2009-05-04
  */
 
-#include "database.h"
-#include "sqliteDatabase.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "logger.h"
+
+#include "sqliteDatabase.h"
 
 using namespace watcher;
 
 /** Create a new connection to the specified database.
  * @param[in] uri resource name for the database to open.
  */
-DatabaseHandle* DatabaseHandle::connect(const std::string& uri)
+Database* Database::connect(const std::string& uri)
 {
     TRACE_ENTER();
     TRACE_EXIT();
-    return new SqliteDatabaseHandle(uri);
+    return new SqliteDatabase(uri);
 }
 
-DatabaseHandle::~DatabaseHandle()
+Database::~Database()
 {
     TRACE_ENTER();
     TRACE_EXIT();

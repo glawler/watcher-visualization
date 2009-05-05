@@ -125,6 +125,11 @@ int sqlite_binder(sqlite3_stmt*s, int pos, int val)
     return sqlite3_bind_int(s, pos, val);
 }
 
+int sqlite_binder(sqlite3_stmt*s, int pos, int64_t val)
+{
+    return sqlite3_bind_int64(s, pos, val);
+}
+
 int sqlite_binder(sqlite3_stmt*s, int pos, double val)
 {
     return sqlite3_bind_double(s, pos, val);
