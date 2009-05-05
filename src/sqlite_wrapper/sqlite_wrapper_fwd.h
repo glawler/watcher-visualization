@@ -10,11 +10,17 @@
 #ifndef sqlite_wrapper_fwd_h
 #define sqlite_wrapper_fwd_h
 
+struct sqlite3_stmt;
+
+#ifndef HAVE_BOOST
+namespace boost = tr1;
+#endif
+
 namespace sqlite_wrapper {
 
     class Statement;
 
-    typedef std::tr1::weak_ptr<sqlite3_stmt> StatementPtr;
+    typedef boost::weak_ptr<sqlite3_stmt> StatementPtr;
 
     class Connection;
 } //namespace

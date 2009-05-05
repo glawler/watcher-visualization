@@ -92,7 +92,8 @@ bin_PROGRAMS= \
 watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp \
 		 serverMessageHandler.cpp writeDBMessageHandler.cpp \
 		 writeDBMessageHandler.h database.h database.cpp \
-		 sqliteDatabase.h sqliteDatabase.cpp
+		 sqliteDatabase.h sqliteDatabase.cpp watcherdConfig.h \
+		 watcherdConfig.cpp
 
 ctags:
 	ctags -R $(TOPDIR)

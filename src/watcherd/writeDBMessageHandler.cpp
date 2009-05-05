@@ -42,15 +42,15 @@ bool WriteDBMessageHandler::handleMessageArrive(ConnectionPtr conn, const Messag
 
     bool ret = false; // keep connection open
 
-    if (isFeederEvent(msg->type)) { // only store feeder events
-        Database*db = dbh.get(); // Retrive the database handle for this thread.
-        if (!db) {
-            /* not yet set, create a new connection */
-            db = Database::connect(uri_);
-            dbh.reset(db);
-        }
-        db->storeEvent(conn->getPeerAddr(), msg);
+    assert(isFeederEvent(msg->type)); // only store feeder events
+
+    Database*db = dbh.get(); // Retrive the database handle for this thread.
+    if (!db) {
+        /* not yet set, create a new connection */
+        db = Database::connect(uri_);
+        dbh.reset(db);
     }
+    db->storeEvent(conn->getPeerAddr(), msg);
 
     TRACE_EXIT_RET(ret);
     return ret;

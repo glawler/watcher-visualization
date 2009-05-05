@@ -3,17 +3,13 @@
  * @date 2009-04-24
  */
 
+#include <cassert>
 #include "sqlite_wrapper.h"
 #include "sqlite_thread.h"
-#include <cassert>
-#include <tr1/functional>
 
-namespace sqlite_wrapper {
-
+using namespace sqlite_wrapper;
 using namespace std;
-using namespace std::tr1;
-
-void(*sqlite_static)(void *) = reinterpret_cast<void(*)(void*)>(SQLITE_STATIC);
+using namespace boost;
 
 void config(int mode)
 {
@@ -49,13 +45,13 @@ Statement Connection::prepare(const std::string& s)
     sqlite3_stmt *stmt;
     int res = sqlite3_prepare_v2(db_, s.c_str(), -1, &stmt, 0);
     error_check(res);
-    statements_.push_front( shared_ptr<sqlite3_stmt>(stmt, sqlite3_finalize) );
+    statements_.push_front(shared_ptr<sqlite3_stmt>(stmt, sqlite3_finalize) );
     return Statement( ImplPtr( new Impl(*this, weak_ptr<sqlite3_stmt>( statements_.front() ))));
 }
 
 Statement& Statement::reset()
 {
-    std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+    shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
     error_check(sqlite3_reset(p.get()));
     pos_ = 1;
     impl_->nrows = 0;
@@ -120,34 +116,38 @@ Connection::~Connection()
     Connection::close(true);
 }
 
-int sqlite_binder(sqlite3_stmt*s, int pos, int val)
+int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, int val)
 {
     return sqlite3_bind_int(s, pos, val);
 }
 
-int sqlite_binder(sqlite3_stmt*s, int pos, int64_t val)
+int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, int64_t val)
 {
     return sqlite3_bind_int64(s, pos, val);
 }
 
-int sqlite_binder(sqlite3_stmt*s, int pos, double val)
+int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, double val)
 {
     return sqlite3_bind_double(s, pos, val);
 }
 
-int sqlite_binder(sqlite3_stmt*s, int pos, const char* val, size_t len, void (*)(void*) )
+/*
+ * Note: use of SQLITE_TRANSIENT in the next few calls is not optimal since it
+ * makes a copy.  However, we can't make assumptions here about the scope of
+ * the data passed in from the caller.
+ */
+
+int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, const char* val, size_t len)
 {
-    return sqlite3_bind_text(s, pos, val, len, sqlite_static);
+    return sqlite3_bind_text(s, pos, val, len, SQLITE_TRANSIENT);
 }
 
-int sqlite_binder(sqlite3_stmt*s, int pos, const void* val, size_t len, void (*)(void*) )
+int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, const void* val, size_t len)
 {
-    return sqlite3_bind_blob(s, pos, val, len, sqlite_static);
+    return sqlite3_bind_blob(s, pos, val, len, SQLITE_TRANSIENT);
 }
 
-int sqlite_binder(sqlite3_stmt* s, int pos, const std::string& st)
+int sqlite_wrapper::sqlite_binder(sqlite3_stmt* s, int pos, const std::string& st)
 {
-    return sqlite_binder(s, pos, st.c_str(), st.size(), sqlite_static);
-}
-
+    return sqlite3_bind_text(s, pos, st.c_str(), st.size(), SQLITE_TRANSIENT);
 }

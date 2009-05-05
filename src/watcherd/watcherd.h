@@ -37,6 +37,8 @@ namespace watcher
             /** Post an event to all listening clients */
             void sendMessage(event::MessagePtr);
             void sendMessage(const std::vector<event::MessagePtr>&);
+
+            libconfig::Config& config() { return config_; }
         protected:
 
         private:
@@ -45,7 +47,7 @@ namespace watcher
 
             ServerPtr serverConnection;
             boost::thread connectionThread;
-            libconfig::Config &config;
+            libconfig::Config &config_;
 
             ServerMessageHandlerPtr serverMessageHandlerPtr;
 

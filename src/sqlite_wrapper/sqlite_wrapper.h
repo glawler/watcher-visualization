@@ -9,13 +9,21 @@
 #include <stdexcept>
 #include <string>
 #include <list>
+#ifdef HAVE_BOOST
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+#else
 #include <tr1/memory>
+namespace boost = tr1;
+#endif
 #include <vector>
 #include <cstring>
-#include <sqlite3.h>
 
 // include the forward decls to ensure consistency
 #include "sqlite_wrapper_fwd.h"
+
+#include <sqlite3.h>
 
 namespace sqlite_wrapper {
 
@@ -39,7 +47,7 @@ namespace sqlite_wrapper {
             friend class Row;
             friend class Column;
             sqlite3 *db_;
-            std::list<std::tr1::shared_ptr<sqlite3_stmt> > statements_;
+            std::list<boost::shared_ptr<sqlite3_stmt> > statements_;
             void error_check(int res) {
                 if (res != SQLITE_OK)
                     throw Exception(sqlite3_errmsg(db_));
@@ -55,7 +63,7 @@ namespace sqlite_wrapper {
         size_t nrows; // number of rows fetched
         Impl(Connection& c, StatementPtr s) : conn(c), stmt(s), nrows(0) {}
     };
-    typedef std::tr1::shared_ptr<Impl> ImplPtr;
+    typedef boost::shared_ptr<Impl> ImplPtr;
 
     class Column {
         private:
@@ -70,7 +78,7 @@ namespace sqlite_wrapper {
             Column(ImplPtr& i)
                 : pos_(0), flags_(0), gcount_(0), impl_(i)
             {
-                std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+                boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                 cols_ = sqlite3_column_count(p.get());
             }
 
@@ -83,6 +91,7 @@ namespace sqlite_wrapper {
             friend class Row;
 
         public:
+            /** Returns the number of bytes read by the last get<T>() or operator>>() call */
             size_t gcount() { return gcount_; }
 
             bool operator!() { return flags_; }
@@ -91,7 +100,7 @@ namespace sqlite_wrapper {
             //currently only used for comparing Row::end()
             bool operator!=(const Column& rhs) { return flags_ == 0; }
 
-            // move to the next column
+            /** move to the next column */
             Column& operator++() {
                 if (!flags_) {
                     if (++pos_ == cols_)
@@ -100,7 +109,7 @@ namespace sqlite_wrapper {
                 return *this;
             }
 
-            // move to the previous column
+            /** move to the previous column */
             Column& operator--() {
                 if (pos_ > 0) {
                     --pos_;
@@ -109,7 +118,7 @@ namespace sqlite_wrapper {
                 return *this;
             }
 
-            // Return a reference to a specific column
+            /** Return a reference to a specific column */
             Column& operator[] (size_t j) {
                 if (j < cols_) {
                     pos_ = j;
@@ -130,7 +139,7 @@ namespace sqlite_wrapper {
             /** read the next column as an INTEGER */
             Column& operator>> (int& i) {
                 if (!flags_) {
-                    std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+                    boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     i = sqlite3_column_int(p.get(), pos_);
                     return ++*this;
                 }
@@ -141,7 +150,7 @@ namespace sqlite_wrapper {
             Column& operator>> (double& d)
             {
                 if (!flags_) {
-                    std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+                    boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     d = sqlite3_column_double(p.get(), pos_++);
                     return ++*this;
                 }
@@ -151,7 +160,7 @@ namespace sqlite_wrapper {
             /** read the next column as a BLOB */
             template <typename T> Column& operator>> (std::vector<T>& v) {
                 if (!flags_) {
-                    std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+                    boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     const size_t valsize = sizeof(T);
                     const void *vp = sqlite3_column_blob(p.get(), pos_);
                     gcount_ = sqlite3_column_bytes(p.get(), pos_);
@@ -167,7 +176,7 @@ namespace sqlite_wrapper {
             {
                 if (!flags_)
                 {
-                    std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+                    boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     s = reinterpret_cast<const char*>(sqlite3_column_text(p.get(), pos_));
                     gcount_ = sqlite3_column_bytes(p.get(), pos_);
                     return ++*this;
@@ -189,7 +198,7 @@ namespace sqlite_wrapper {
              */
             template <typename T> Column& get(T* val, size_t nelems) {
                 if (!flags_) {
-                    std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+                    boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     const size_t valsize = sizeof(T) * nelems;
                     const void *vp = sqlite3_column_blob(p.get(), pos_);
                     const size_t blobsize = sqlite3_column_bytes(p.get(), pos_);
@@ -221,7 +230,7 @@ namespace sqlite_wrapper {
 
             void step();
 
-            inline void error_check(int res) { impl_->conn.error_check(res); }
+            void error_check(int res) { impl_->conn.error_check(res); }
 
             friend class Statement;
 
@@ -234,8 +243,7 @@ namespace sqlite_wrapper {
             // deref operator
             Column operator*() { return Column(impl_); }
             //pre-increment, get next row
-            inline Row& operator++()
-            {
+            Row& operator++() {
                 step();
                 return *this;
             }
@@ -250,10 +258,8 @@ namespace sqlite_wrapper {
     int sqlite_binder(sqlite3_stmt*, int pos, int64_t val);
     int sqlite_binder(sqlite3_stmt*, int pos, double val);
     int sqlite_binder(sqlite3_stmt*, int pos, const std::string&);
-    int sqlite_binder(sqlite3_stmt*, int pos, const char* val, size_t len, void (*)(void*) );
-    int sqlite_binder(sqlite3_stmt*, int pos, const void* val, size_t len, void (*)(void*) );
-
-    extern void (*sqlite_static)(void *);
+    int sqlite_binder(sqlite3_stmt*, int pos, const char* val, size_t len);
+    int sqlite_binder(sqlite3_stmt*, int pos, const void* val, size_t len);
 
     class Statement {
         private:
@@ -289,19 +295,17 @@ namespace sqlite_wrapper {
             size_t count() { return impl_->nrows; }
     };
 
-    template <typename T> Statement& Statement::bind(const T& val)
-    {
-        std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+    template <typename T> Statement& Statement::bind(const T& val) {
+        boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
         error_check(sqlite_binder(p.get(), pos_++, val));
         return *this;
     }
 
-    template <typename T> Statement& Statement::bind(const T* val, size_t len)
-    {
-        std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+    template <typename T> Statement& Statement::bind(const T* val, size_t len) {
+        boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
         error_check(sqlite_binder(p.get(), pos_++, val, len * sizeof(T)));
         return *this;
     }
-}
+} //namespace
 
 #endif

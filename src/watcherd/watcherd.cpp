@@ -11,7 +11,7 @@ using namespace boost;
 INIT_LOGGER(Watcherd, "Watcherd"); 
 
 Watcherd::Watcherd() : 
-    config(SingletonConfig::instance()),
+    config_(SingletonConfig::instance()),
     serverMessageHandlerPtr(new ServerMessageHandler)
 {
     TRACE_ENTER();

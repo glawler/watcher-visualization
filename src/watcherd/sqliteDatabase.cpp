@@ -40,11 +40,13 @@ void SqliteDatabase::storeEvent(const std::string& addr, MessagePtr msg)
     TRACE_ENTER();
 
     //FIXME resuse the prepared statement somehow
-    Statement st = conn_->prepare("INSERT INTO events VALUES (?,?,?)");
+    Statement st = conn_->prepare("INSERT INTO events VALUES (?,?,?,?)");
 
     // serialize event
     std::ostringstream os;
     msg->pack(os);
+
+    LOG_DEBUG("serialized event: " << os.str());
 
     // bind values
     st << msg->timestamp << msg->type << addr << os.str();

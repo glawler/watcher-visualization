@@ -196,3 +196,4 @@ share/info/dir
 ^share/idmef-message.dtd
 ^share/idmef-messages/*
 
+^src/doc/*

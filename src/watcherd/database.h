@@ -11,11 +11,9 @@
 
 #include "libwatcher/message_fwd.h"
 
-namespace watcher
-{
-    /** Abstraction of a database handle. */
-    class Database : private boost::noncopyable
-    {
+namespace watcher {
+    /** Abstract class used to provide an interface to a database backend for storing event streams. */
+    class Database : private boost::noncopyable {
         public:
             static Database* connect(const std::string&);
 

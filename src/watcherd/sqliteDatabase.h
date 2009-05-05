@@ -7,20 +7,12 @@
 #define sqlite_database_h
 
 #include "database.h"
-
 #include "logger.h"
+#include "sqlite_wrapper_fwd.h"
 
-// forward decl
-namespace sqlite_wrapper
-{
-    class Connection;
-}
-
-namespace watcher
-{
+namespace watcher {
     /** Implementation of a SQLite backend for the Event database abstraction. */
-    class SqliteDatabase : public Database
-    {
+    class SqliteDatabase : public Database {
         public:
             /** Create a new database handle backed by the specified file.
              * @param[in] path pathname for the sqlite database
@@ -30,6 +22,7 @@ namespace watcher
             void storeEvent(const std::string& addr, event::MessagePtr msg);
 
         private:
+            /** Pointer to the sqlite implementation backing this connection. */
             boost::scoped_ptr<sqlite_wrapper::Connection> conn_;
 
             DECLARE_LOGGER();

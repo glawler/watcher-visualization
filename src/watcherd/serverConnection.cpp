@@ -9,6 +9,8 @@
 #include "messageFactory.h"
 #include "dataMarshaller.h"
 #include "watcherd.h"
+#include "writeDBMessageHandler.h"
+#include "watcherdConfig.h"
 
 using namespace std; 
 using namespace boost::asio;
@@ -140,20 +142,44 @@ namespace watcher {
             vector<MessagePtr> arrivedMessages; 
             if (DataMarshaller::unmarshalPayload(arrivedMessages, numOfMessages, incomingBuffer.begin(), bytes_transferred))
             {
-                //boost::asio::ip::address nodeAddr(theSocket.remote_endpoint().address()); 
+                LOG_INFO("Recvd " << arrivedMessages.size() << " message" <<
+                         (arrivedMessages.size()>1?"s":"") << " from " <<
+                         getPeerAddr()); 
 
-                LOG_INFO("Recvd " << arrivedMessages.size() << " message" << (arrivedMessages.size()>1?"s":"") << " from " << getPeerAddr()); 
-                BOOST_FOREACH(MessagePtr i, arrivedMessages)
-                {
-                    if (i->type == START_MESSAGE_TYPE)
-                    {
-                        /* Client is requesting the live stream of events. */
-                        watcher.subscribe(shared_from_this());
-                        conn_type = gui;
-                    }
-                    else if (i->type == STOP_MESSAGE_TYPE)
-                    {
-                        watcher.unsubscribe(shared_from_this());
+                /*
+                 * If this connection type is unknown or gui, then traverse the
+                 * list of arrived messages.  For GUI clients, look for the
+                 * STOP_MESSAGE to unsubscribe from the event stream.
+                 *
+                 * For unknown clients, infer the type from the message
+                 * received:
+                 * START_MESSAGE => gui
+                 * isFeederMessage => feeder
+                 */
+                if (conn_type == unknown || conn_type == gui) {
+                    BOOST_FOREACH(MessagePtr i, arrivedMessages) {
+                        if (conn_type == gui) {
+                           if (i->type == STOP_MESSAGE_TYPE)
+                            watcher.unsubscribe(shared_from_this());
+                        } else if (conn_type == unknown) {
+                            if (i->type == START_MESSAGE_TYPE) {
+                                /* Client is requesting the live stream of events. */
+                                watcher.subscribe(shared_from_this());
+                                conn_type = gui;
+                            } else if (isFeederEvent(i->type)) {
+                                conn_type = feeder;
+
+                                /*
+                                 * This connection is a watcher test daemon.  Add a message handler to write
+                                 * its event stream to the database.
+                                 */
+                                std::string path;
+                                if (watcher.config().lookupValue(dbPath, path))
+                                    addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler(path)));
+                                else
+                                    LOG_ERROR("unable to lookup \"" << dbPath << " in server configuration");
+                            }
+                        }
                     }
                 }
 
@@ -161,24 +187,20 @@ namespace watcher {
                  * connection. */
                 bool fail = false;
 
-                BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers)
-                {
-                    if (mh->handleMessagesArrive(shared_from_this(), arrivedMessages))
-                    {
+                BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers) {
+                    if (mh->handleMessagesArrive(shared_from_this(), arrivedMessages)) {
                         fail = true;
                         LOG_DEBUG("Message handler told us to close this connection."); 
                     }
                 }
 
-                if (!fail)
-                {
+                if (!fail) {
                     // initiate request to read next message
                     LOG_DEBUG("Waiting for next message.");
                     start();
                 }
 
-                if (conn_type != gui)
-                {
+                if (conn_type == feeder) {
                     /* relay feeder message to any client requesting the live stream.
                      * Warning: currently there is no check to make sure that a client doesn't
                      * receive a message it just sent.  This should be OK since we are just
@@ -186,8 +208,7 @@ namespace watcher {
                      * them. */
                     vector<MessagePtr> feeder;
                     remove_copy_if(arrivedMessages.begin(), arrivedMessages.end(), back_inserter(feeder), not_feeder_message);
-                    if (! feeder.empty())
-                    {
+                    if (! feeder.empty()) {
                         LOG_DEBUG("Sending " << feeder.size() << " feeder messages to clients.");
                         watcher.sendMessage(feeder);
                     }
