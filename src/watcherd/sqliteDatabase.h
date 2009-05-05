@@ -1,3 +1,8 @@
+/**@file
+ * @author Michael.Elkins@cobham.com
+ * @date 2009-05-04
+ */
+
 #ifndef sqlite_database_h
 #define sqlite_database_h
 
@@ -5,14 +10,28 @@
 
 #include "logger.h"
 
+// forward decl
+namespace sqlite_wrapper
+{
+    class Connection;
+}
+
 namespace watcher
 {
-    class SqliteDatabaseHandle : public DatabaseHandle
+    /** Implementation of a SQLite backend for the Event database abstraction. */
+    class SqliteDatabase : public Database
     {
         public:
-            SqliteDatabaseHandle(const std::string& path);
-            ~SqliteDatabaseHandle();
+            /** Create a new database handle backed by the specified file.
+             * @param[in] path pathname for the sqlite database
+             */
+            SqliteDatabase(const std::string& path);
+
+            void storeEvent(const std::string& addr, event::MessagePtr msg);
+
         private:
+            boost::scoped_ptr<sqlite_wrapper::Connection> conn_;
+
             DECLARE_LOGGER();
     };
 } //namespace

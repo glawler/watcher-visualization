@@ -14,6 +14,9 @@
 #include <cstring>
 #include <sqlite3.h>
 
+// include the forward decls to ensure consistency
+#include "sqlite_wrapper_fwd.h"
+
 namespace sqlite_wrapper {
 
     // wrapper around sqlite3_config
@@ -23,10 +26,6 @@ namespace sqlite_wrapper {
         public:
             Exception(const std::string& what) : runtime_error(what) {};
     };
-
-    class Statement;
-
-    typedef std::tr1::weak_ptr<sqlite3_stmt> StatementPtr;
 
     class Connection {
         public:
@@ -41,8 +40,7 @@ namespace sqlite_wrapper {
             friend class Column;
             sqlite3 *db_;
             std::list<std::tr1::shared_ptr<sqlite3_stmt> > statements_;
-            void error_check(int res)
-            {
+            void error_check(int res) {
                 if (res != SQLITE_OK)
                     throw Exception(sqlite3_errmsg(db_));
             }
@@ -58,17 +56,6 @@ namespace sqlite_wrapper {
         Impl(Connection& c, StatementPtr s) : conn(c), stmt(s), nrows(0) {}
     };
     typedef std::tr1::shared_ptr<Impl> ImplPtr;
-
-    /*
-     * C++ to C conversion functions for use with templates.
-     */
-    int sqlite_binder(sqlite3_stmt*s, int pos, int val);
-    int sqlite_binder(sqlite3_stmt*s, int pos, double val);
-    int sqlite_binder(sqlite3_stmt*s, int pos, const std::string&);
-    int sqlite_binder(sqlite3_stmt*s, int pos, const char* val, size_t len, void (*)(void*) );
-    int sqlite_binder(sqlite3_stmt*s, int pos, const void* val, size_t len, void (*)(void*) );
-
-    extern void(*sqlite_static)(void *);
 
     class Column {
         private:
@@ -87,8 +74,7 @@ namespace sqlite_wrapper {
                 cols_ = sqlite3_column_count(p.get());
             }
 
-            inline bool check_col_type(sqlite3_stmt*p, int pos, int type)
-            {
+            inline bool check_col_type(sqlite3_stmt*p, int pos, int type) {
                 return sqlite3_column_type(p, pos) == type;
             }
 
@@ -106,10 +92,8 @@ namespace sqlite_wrapper {
             bool operator!=(const Column& rhs) { return flags_ == 0; }
 
             // move to the next column
-            Column& operator++()
-            {
-                if (!flags_)
-                {
+            Column& operator++() {
+                if (!flags_) {
                     if (++pos_ == cols_)
                         flags_ |= col_eof;
                 }
@@ -117,10 +101,8 @@ namespace sqlite_wrapper {
             }
 
             // move to the previous column
-            Column& operator--()
-            {
-                if (pos_ > 0)
-                {
+            Column& operator--() {
+                if (pos_ > 0) {
                     --pos_;
                     flags_ &= ~col_eof;
                 }
@@ -128,10 +110,8 @@ namespace sqlite_wrapper {
             }
 
             // Return a reference to a specific column
-            Column& operator[] (size_t j)
-            {
-                if (j < cols_)
-                {
+            Column& operator[] (size_t j) {
+                if (j < cols_) {
                     pos_ = j;
                     flags_ &= ~col_eof;
                 }
@@ -148,10 +128,8 @@ namespace sqlite_wrapper {
             Column& operator>> (const setcol& c) { return this[c.pos]; }
 
             /** read the next column as an INTEGER */
-            Column& operator>> (int& i)
-            {
-                if (!flags_)
-                {
+            Column& operator>> (int& i) {
+                if (!flags_) {
                     std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     i = sqlite3_column_int(p.get(), pos_);
                     return ++*this;
@@ -162,8 +140,7 @@ namespace sqlite_wrapper {
             /** read the next column as a DOUBLE */
             Column& operator>> (double& d)
             {
-                if (!flags_)
-                {
+                if (!flags_) {
                     std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     d = sqlite3_column_double(p.get(), pos_++);
                     return ++*this;
@@ -172,10 +149,8 @@ namespace sqlite_wrapper {
             }
 
             /** read the next column as a BLOB */
-            template <typename T> Column& operator>> (std::vector<T>& v)
-            {
-                if (!flags_)
-                {
+            template <typename T> Column& operator>> (std::vector<T>& v) {
+                if (!flags_) {
                     std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     const size_t valsize = sizeof(T);
                     const void *vp = sqlite3_column_blob(p.get(), pos_);
@@ -205,20 +180,15 @@ namespace sqlite_wrapper {
              * @param[in] nelems max number of elements to copy
              * @return reference to the Column object
              */
-            template <typename T, int N> Column& get(T (&val)[N], size_t nelems = N)
-            {
-                return get(&val[0], N);
-            }
+            template <typename T, int N> Column& get(T (&val)[N], size_t nelems = N) { return get(&val[0], N); }
 
             /** Read part of a BLOB into an array.
              * @param val array of some type T
              * @param[in] nelems max number of elements to copy
              * @return reference to the Column object
              */
-            template <typename T> Column& get(T* val, size_t nelems)
-            {
-                if (!flags_)
-                {
+            template <typename T> Column& get(T* val, size_t nelems) {
+                if (!flags_) {
                     std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
                     const size_t valsize = sizeof(T) * nelems;
                     const void *vp = sqlite3_column_blob(p.get(), pos_);
@@ -230,13 +200,9 @@ namespace sqlite_wrapper {
                 return *this;
             }
 
-            template <typename T, int N> Column& operator>> (T (&val)[N])
-            {
-                return get(&val[0], N);
-            }
+            template <typename T, int N> Column& operator>> (T (&val)[N]) { return get(&val[0], N); }
 
-            void reset()
-            {
+            void reset() {
                 pos_ = 0;
                 gcount_ = 0;
                 flags_ &= ~col_eof;
@@ -279,6 +245,16 @@ namespace sqlite_wrapper {
             Column end() { return Column(); }
     };
 
+    /* C++ to C conversion functions for use with templates. */
+    int sqlite_binder(sqlite3_stmt*, int pos, int val);
+    int sqlite_binder(sqlite3_stmt*, int pos, int64_t val);
+    int sqlite_binder(sqlite3_stmt*, int pos, double val);
+    int sqlite_binder(sqlite3_stmt*, int pos, const std::string&);
+    int sqlite_binder(sqlite3_stmt*, int pos, const char* val, size_t len, void (*)(void*) );
+    int sqlite_binder(sqlite3_stmt*, int pos, const void* val, size_t len, void (*)(void*) );
+
+    extern void (*sqlite_static)(void *);
+
     class Statement {
         private:
             friend class Connection;
@@ -286,8 +262,7 @@ namespace sqlite_wrapper {
             int pos_;
             ImplPtr impl_;
 
-            inline void error_check(int res)
-            {
+            inline void error_check(int res) {
                 if (res != SQLITE_OK)
                     throw sqlite_wrapper::Exception(sqlite3_errmsg(impl_->conn.db_));
             }
@@ -297,34 +272,13 @@ namespace sqlite_wrapper {
         public:
             ~Statement();
 
-            template <typename T> Statement& bind(const T& val)
-            {
-                std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
-                error_check(sqlite_binder(p.get(), pos_++, val));
-                return *this;
-            }
+            template <typename T> Statement& bind(const T& val);
+            template <typename T> Statement& bind(const T* val, size_t len);
+            template <typename T, int N> Statement& bind(const T (&val)[N] ) { return bind(val, N); }
 
-            template <typename T> Statement& bind(const T* val, size_t len)
-            {
-                std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
-                error_check(sqlite_binder(p.get(), pos_++, val, len * sizeof(T)));
-                return *this;
-            }
-
-            template <typename T, int N> Statement& bind(const T (&val)[N] )
-            {
-                return bind(val, N);
-            }
-
-            template <typename T> Statement& operator<< (const T& val)
-            {
-                return bind(val);
-            }
-
-            template <typename T, int N> Statement& operator<< (const T (&val) [N])
-            {
-                return bind(val, N);
-            }
+            // binding operators
+            template <typename T> Statement& operator<< (const T& val) { return bind(val); }
+            template <typename T, int N> Statement& operator<< (const T (&val) [N]) { return bind(val, N); }
 
             // Iterator-like functions for fetching rows
             Row rows() { return Row(impl_); }
@@ -334,6 +288,20 @@ namespace sqlite_wrapper {
 
             size_t count() { return impl_->nrows; }
     };
+
+    template <typename T> Statement& Statement::bind(const T& val)
+    {
+        std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+        error_check(sqlite_binder(p.get(), pos_++, val));
+        return *this;
+    }
+
+    template <typename T> Statement& Statement::bind(const T* val, size_t len)
+    {
+        std::tr1::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
+        error_check(sqlite_binder(p.get(), pos_++, val, len * sizeof(T)));
+        return *this;
+    }
 }
 
 #endif
