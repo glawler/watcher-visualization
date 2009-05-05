@@ -17,7 +17,7 @@ namespace watcher {
                 int fontSize;
                 Color foreground;
                 Color background;
-                unsigned int expiration;
+                unsigned int expiration;    // this should be a float
                 bool addLabel;              // add or remove the label depending on true or false here.
 
                 // A label can be attached to a node or just hanging in space.

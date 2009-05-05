@@ -3,7 +3,7 @@ AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
-# Boost 1.36 is when asio appeared
+Boost 1.36 is when asio appeared
 AX_BOOST_BASE(1.36)
 AX_BOOST_SYSTEM
 AX_BOOST_ASIO
@@ -20,6 +20,8 @@ AC_CONFIG_FILES([ \
     watcherd/Makefile 
     watcherd/test/Makefile \
     watcherHierarchyClient/Makefile \
+    feeders/Makefile \
+    feeders/routeFeeder/Makefile \
 ])
 
 #override default $CXXFLAGS

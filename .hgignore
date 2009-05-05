@@ -197,3 +197,10 @@ share/info/dir
 ^share/idmef-messages/*
 
 ^src/doc/*
+
+^src/feeders/Makefile$
+^src/feeders/routeFeeder/Makefile$
+^src/watcherHierarchyClient/Makefile$
+^src/feeders/routeFeeder/routeFeeder$
+
+
