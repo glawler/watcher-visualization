@@ -8,9 +8,14 @@
 #include <string.h>
 #include <assert.h>
 
+#include <string>
+
 #include <client.h>                     // we are a client of the watcher.
 #include <libwatcher/edgeMessage.h>     // we send edgeMessages to the watcher. 
+#include <logger.h>
 
+using namespace std;
+using namespace watcher;
 using namespace watcher::event;
 
 static const char *rcsid __attribute__ ((unused)) = "$Id: routingfeeder.c,v 1.0 2009/04/28 22:08:47 glawler Exp $";
@@ -25,225 +30,230 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: routingfeeder.c,v 1.0 
 
 typedef struct Route
 {
-	ManetAddr dst;
-	ManetAddr nexthop;
-	ManetAddr mask;
-	char iface[16];
+    unsigned int dst;
+    unsigned int nexthop;
+    unsigned int mask;
+    char iface[16];
 
-	struct Route *next;
+    struct Route *next;
 } Route;
 
 /*
-Iface   Destination     Gateway         Flags   RefCnt  Use     Metric  Mask       MTU      Window  IRTT
-eth0    7402A8C0        7C02A8C0        0007    0       0       0       FFFFFFFF   00       0
-eth0    7402A8C0        7202A8C0        0007    0       0       0       FFFFFFFF   00       0
-*/
+   Iface   Destination     Gateway         Flags   RefCnt  Use     Metric  Mask       MTU      Window  IRTT
+   eth0    7402A8C0        7C02A8C0        0007    0       0       0       FFFFFFFF   00       0
+   eth0    7402A8C0        7202A8C0        0007    0       0       0       FFFFFFFF   00       0
+   */
 
-static Route *routeRead(NodeIdentifier manetnetwork,ManetAddr manetmask)
+static Route *routeRead()
 {
-	FILE *fil;
-	char line[1024];
-	Route *list=NULL,*nxt;
+    TRACE_ENTER(); 
 
-	fil=fopen("/proc/net/route","r");
-	while(fgets(line,sizeof(line)-1,fil))
-	{
-		char iface[16];
-		int flags,refcnt,use,metric,mtu,window;
-		unsigned int dst,nexthop,mask;
-		int rc;
+    FILE *fil;
+    char line[1024];
+    Route *list=NULL,*nxt;
+
+    fil=fopen("/proc/net/route","r");
+    while(fgets(line,sizeof(line)-1,fil))
+    {
+        char iface[16];
+        int flags,refcnt,use,metric,mtu,window;
+        unsigned int dst,nexthop,mask;
+        int rc;
 
 
-		rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
+        rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
 
-		if ((rc==10) && ((ntohl(dst) & manetmask) == manetnetwork))
-		{
-//			fprintf(stderr,"%d.%d.%d.%d (%d.%d.%d.%d) -> %d.%d.%d.%d\n",PRINTADDR(dst),PRINTADDR(mask),PRINTADDR(nexthop));
-			nxt = (Route*)malloc(sizeof(*nxt));
-			assert(nxt!=NULL);
-			nxt->dst=ntohl(dst);
-			nxt->nexthop=ntohl(nexthop);
-			nxt->mask=ntohl(mask);
-			strncpy(nxt->iface,iface,sizeof(nxt->iface));
+        if (rc==10)
+        {
+            nxt = (Route*)malloc(sizeof(*nxt));
+            assert(nxt!=NULL);
+            nxt->dst=htonl(dst);
+            nxt->nexthop=htonl(nexthop);
+            nxt->mask=ntohl(mask); 
+            strncpy(nxt->iface,iface,sizeof(nxt->iface));
 
-			nxt->next=list;
-			list=nxt;
-		}
-	}
+            nxt->next=list;
+            list=nxt;
+        }
+    }
 
-	fclose(fil);
-	return list;
+    fclose(fil);
+
+    TRACE_EXIT();
+    return list;
 }
 
-static void routeDump(FILE *fil,Route *r)
+static void routeDump(Route *r)
 {
-	while(r)
-	{
-		fprintf(fil,"%d.%d.%d.%d -> %d.%d.%d.%d  mask %d.%d.%d.%d\n",PRINTADDR(r->dst),PRINTADDR(r->nexthop),PRINTADDR(r->mask));
-		r=r->next;
-	}
+    TRACE_ENTER();
+    while(r)
+    {
+        LOG_DEBUG(r->dst << " -> " << r->nexthop << " mask " << r->mask); 
+        r=r->next;
+    }
+    TRACE_EXIT();
 }
 
 static int routeNumber(Route *r)
 {
-	int count=0;
+    TRACE_ENTER();
+    int count=0;
 
-	while(r)
-	{
-		count++;
-		r=r->next;
-	}
-	return count;
+    while(r)
+    {
+        count++;
+        r=r->next;
+    }
+
+    TRACE_EXIT_RET(count); 
+    return count;
 }
 
 static void routeFree(Route *r)
 {
-	Route *d;
+    TRACE_ENTER();
+    Route *d;
 
-	while(r)
-	{
-		d=r;
-		r=r->next;
-		free(d);
-	}
+    while(r)
+    {
+        d=r;
+        r=r->next;
+        free(d);
+    }
+    TRACE_EXIT();
 }
 
 static void routeInsert(Route **list, Route *n)
 {
-	Route *nxt;
-	nxt = (Route*)malloc(sizeof(*nxt));
-	nxt->dst=n->dst;
-	nxt->nexthop=n->nexthop;
-	nxt->mask=n->mask;
+    TRACE_ENTER();
+    Route *nxt;
+    nxt = (Route*)malloc(sizeof(*nxt));
+    nxt->dst=n->dst;
+    nxt->nexthop=n->nexthop;
+    nxt->mask=n->mask;
 
-	nxt->next=*list;
-	*list=nxt;
+    nxt->next=*list;
+    *list=nxt;
+    TRACE_EXIT();
 }
 
 /* return first route to in list which has the same nexthop
- */
+*/
 static Route *routeSearchNext(Route *list, Route *key)
 {
-	Route *r;
+    TRACE_ENTER();
+    Route *r;
 
-	r=list;
-	while(r)
-	{
-		if (r->nexthop==key->nexthop)
-			return r;
-		r=r->next;
-	}
-	return NULL;
+    r=list;
+    while(r)
+    {
+        if (r->nexthop==key->nexthop)
+        {
+            TRACE_EXIT_RET(r); 
+            return r;
+        }
+        r=r->next;
+    }
+    TRACE_EXIT_RET("NULL"); 
+    return NULL;
 }
 
 typedef struct detector
 {
     Client *watcherClientPtr;
 
-	int reportperiod;		/* frequency to generate reports at */
-	int reportnum;
-	int tag;
-	NodeIdentifier manetaddr;
-	NodeIdentifier manetnetwork;
-    NodeIdentifier::netmask manetnetmask;
-	char *iface;
-	int onehopfamily;
-	int nexthopfamily;
-	int routeedgewidth;
-	Color onehopcolor;
-	Color nexthopcolor;
+    useconds_t reportperiod;		/* frequency to generate reports at */
+    int reportnum;
+    unsigned int localaddr;
+    string iface;
+    int routeedgewidth;
+    Color onehopcolor;
+    Color nexthopcolor;
 
-	int duration;			  /* Time to run (in seconds) or 0 to run until broken */
+    string nexthoplayer;
+    string onehoplayer;
 
-	ManetAddr othermouth;
-
+    int duration;			  /* Time to run (in seconds) or 0 to run until broken */
 } detector;
 
 typedef struct DetectorInit
 {
-	int reportperiod;		/* frequency to generate reports at */
-	char *iface;
-	int onehopfamily;
-	int nexthopfamily;
-	Color onehopcolor;
-	Color nexthopcolor;
-	int mouthnum;
-	int duration;			  /* Time to run (in seconds) or 0 to run until broken */
-	int routeedgewidth; 
+    useconds_t reportperiod;		/* frequency to generate reports at */
+    string iface;
+    int onehopfamily;
+    Color onehopcolor;
+    Color nexthopcolor;
+    int mouthnum;
+    int duration;			  /* Time to run (in seconds) or 0 to run until broken */
+    int routeedgewidth; 
 
     string serverName;
-    string serverPort;
+
+    string nexthoplayer;
+    string onehoplayer;
 
 } DetectorInit;
 
 static void updateRoutes(detector *st, Route *list)
 {
-	Route *r,*tmpNextHop=NULL;
-	Route *tmpOneHop=NULL;
-	int p;
+    TRACE_ENTER();
+    Route *r,*tmpNextHop=NULL;
+    Route *tmpOneHop=NULL;
 
-/*
-	for each edge in newlist,
-		if there is not an edge in oldList or tmpList to nexthop, add it, and add to tmpList
-*/
-	for(r=list;r;r=r->next)
-	{
+    /*
+     * 	for each edge in newlist,
+     * 	   	if there is not an edge in oldList or tmpList to nexthop, add it, and add to tmpList
+     */
+    for(r=list;r;r=r->next)
+    {
 
-		if ((st->iface) && (strcmp(st->iface,r->iface)!=0))    /* if we're checking interfaces, and this route is on the wrong one...  */
-			continue;
-	
+        if (st->iface != string(r->iface))    /* if we're checking interfaces, and this route is on the wrong one...  */
+            continue;
+
 #if 1
-		fprintf(stderr,"nexthop inserting us -> %d\n",r->nexthop & 0xFF);
+        LOG_DEBUG("nexthop inserting us -> " << r->nexthop); 
 #endif
 
-		if ((r->nexthop!=0) && (routeSearchNext(tmpNextHop,r)==NULL))   /* if its multi-hop, and not on the next hop list */
-		{
-		    NodeEdge edge;
-			edge.head=NODE_LOCAL;
-			edge.tail=r->nexthop;
-			edge.family=st->nexthopfamily;
-			edge.priority=COMMUNICATIONS_LABEL_PRIORITY_INFO;
-			edge.tag=st->tag;
-			edge.width=st->routeedgewidth;
-			if (edge.tail==st->othermouth)
-				edge.width=70;
-			edge.expiration=st->reportperiod*1.5;
-			memcpy(edge.color,st->nexthopcolor,sizeof(st->nexthopcolor));
-			edge.labelHead.text=NULL;
-			edge.labelMiddle.text=NULL;
-			edge.labelTail.text=NULL;
-			communicationsWatcherEdge(st->cs,&edge);
+        if ((r->nexthop!=0) && (routeSearchNext(tmpNextHop,r)==NULL))   /* if its multi-hop, and not on the next hop list */
+        {
+            EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
+            em->node1=boost::asio::ip::address_v4(st->localaddr); 
+            em->node2=boost::asio::ip::address_v4(r->nexthop);
+            em->edgeColor=st->nexthopcolor;
+            em->expiration=st->reportperiod*1.5;
+            em->width=st->routeedgewidth;
+            em->layer=ROUTING_LAYER; // GTL st->nexthoplayer;
+            em->addEdge=true;
+            em->bidirectional=false;
+            st->watcherClientPtr->sendMessage(em); 
 
-			routeInsert(&tmpNextHop,r);
-		}
+            routeInsert(&tmpNextHop,r);
+        }
 
-		if (r->nexthop==0)   /* if its a one-hop...  */
-		{
-			NodeEdge edge;
+        if (r->nexthop==0)   /* if its a one-hop... */
+        {
 #if 1
-			fprintf(stderr,"onehop inserting us -> %d\n",r->dst & 0xFF);
+            LOG_DEBUG("onehop inserting us -> " << r->dst); 
 #endif
-			edge.head=NODE_LOCAL;
-			edge.tail=r->dst;
-			edge.family=st->onehopfamily;
-			edge.priority=COMMUNICATIONS_LABEL_PRIORITY_INFO;
-			edge.tag=st->tag+1;
-			edge.width=st->routeedgewidth;
-			if (edge.tail==st->othermouth)
-				edge.width=40;
-			edge.expiration=st->reportperiod*2;
-			memcpy(edge.color,st->onehopcolor,sizeof(st->onehopcolor));
-			edge.labelHead.text=NULL;
-			edge.labelMiddle.text=NULL;
-			edge.labelTail.text=NULL;
-			communicationsWatcherEdge(st->cs,&edge);
+            EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
+            em->node1=boost::asio::ip::address_v4(st->localaddr); 
+            em->node2=boost::asio::ip::address_v4(r->dst); 
+            em->edgeColor=st->onehopcolor;
+            em->expiration=st->reportperiod*1.5;
+            em->width=st->routeedgewidth;
+            em->layer=ROUTING_LAYER; // GTL st->onehoplayer;
+            em->addEdge=true;
+            em->bidirectional=false;
+            st->watcherClientPtr->sendMessage(em); 
 
-			routeInsert(&tmpOneHop,r);
-		}
-	}
+            routeInsert(&tmpOneHop,r);
+        }
+    }
 
-	routeFree(tmpNextHop);
-	routeFree(tmpOneHop);
+    routeFree(tmpNextHop);
+    routeFree(tmpOneHop);
+
+    TRACE_EXIT();
 }
 
 
@@ -252,246 +262,178 @@ static void updateRoutes(detector *st, Route *list)
  */
 static void detectorSend(detector *st)
 {
-	Route *list;
-	destime curtime;
+    TRACE_ENTER();
 
-	list=routeRead(st->manetnetwork,st->manetnetmask);
+    Route *list;
 
-	curtime=getMilliTime();
-	printf("node= %d time= %lld numroutes= %d\n",st->manetaddr & 0xFF, curtime,routeNumber(list));
+    list=routeRead();  // read all routes.
+
+    long long int curtime;
+    struct timeval tp;
+    gettimeofday(&tp, NULL); 
+    curtime=(long long int)tp.tv_sec * 1000 + (long long int)tp.tv_usec/1000;
+
+    LOG_DEBUG("node= " << st->localaddr << " time= " << curtime << " numroutes= " << routeNumber(list)); 
 
 #ifdef DEBUG
 #if 0
-	fprintf(stderr,"old:\n");
-	routeDump(stderr,st->oldList);
+    LOG_DEBUG("old:"); 
+    routeDump(st->oldList);
 #endif
-	fprintf(stderr,"new:\n");
-	routeDump(stderr,list);
-	fprintf(stderr,"\n");
+    LOG_DEBUG("new:");
+    routeDump(list);
 #endif
 
-	st->reportnum++;
+    st->reportnum++;
 
-	updateRoutes(st,list);
+    updateRoutes(st,list);
 
-	routeFree(list);
+    routeFree(list);
+
+    TRACE_EXIT();
 }
 
-static detector *detectorInit(ManetAddr us, DetectorInit *detinit)
+static detector *detectorInit(DetectorInit *detinit)
 {
-	detector *st;
-	CommunicationsNeighbor *neighbors;
+    TRACE_ENTER();
+    detector *st;
 
-	st=(detector*)malloc(sizeof(*st));
+    st=new detector;
+    st->iface="";
 
-	// st->cs=communicationsInit(us);
-	// communicationsNameSet(st->cs,"routingdetector","");
-
-    st->watcherClientPtr=new Client(detinit->serverName, detinit->serverPort);
+    st->watcherClientPtr=new Client(detinit->serverName); 
     if(st->watcherClientPtr==NULL)
         return NULL;
 
-	if (st->cs==NULL)
-		return NULL;
+    st->duration=detinit->duration;
+    st->reportperiod=detinit->reportperiod;
+    st->reportnum=0;
+    st->iface=detinit->iface;
 
-	if (0==idsPositionRegister(st->cs, COORDINATOR_ROOT, IDSPOSITION_INFORM, positionUpdate, st))
-	{
-		fprintf(stderr, "%s(): idsPositionRegister(COORDINATOR_ROOT) failed\n",
-			__func__);
-	}
-	if (0==idsPositionRegister(st->cs, COORDINATOR_ROOTGROUP, IDSPOSITION_INFORM, positionUpdate, st))
-	{
-		fprintf(stderr, "%s(): idsPositionRegister(COORDINATOR_ROOTGROUP) failed\n",
-			__func__);
-	}
+    st->onehoplayer=detinit->onehoplayer;
+    st->onehopcolor=detinit->onehopcolor; 
 
-	st->duration=detinit->duration;
-	st->reportperiod=detinit->reportperiod;
-	st->reportnum=0;
-	if (detinit->iface)
-		st->iface=strdup(detinit->iface);
-	else
-		st->iface=NULL;
+    st->nexthoplayer=detinit->nexthoplayer;
+    st->nexthopcolor=st->nexthopcolor;
 
-	st->onehoplabel=detinit->onehoplabel;
-	st->onehopcolor=detinit->onehopcolor; 
+    st->routeedgewidth=detinit->routeedgewidth;
 
-	st->nexthoplayer=detinit->nexthoplayer;
-	st->nexthopcolor=st->nexthopcolor;
+    st->localaddr=0x7f000001;  // 127.0.0.1
 
-	st->routeedgewidth=detinit->routeedgewidth;
-
-	// st->manetnetmask=communicationsNodeMask(st->cs);
-	st->manetaddr=communicationsNodeAddress(st->cs);
-	st->manetnetwork=st->manetaddr  & st->manetnetmask;
-	st->tag=(communicationsNodeAddress(st->cs) & 0xFF ) | 0x12345600;
-
-	st->root=NODE_BROADCAST;
-
-	/* XXX should erase existing labels/edges here */
-
-	communicationsNeighborRegister(st->cs, neighborUpdate, st);
-
-	neighbors = communicationsNeighborList(st->cs);
-	while (neighbors != NULL)
-	{
-		neighborUpdate(st, neighbors);
-		neighbors = neighbors->next;
-	}
-
-#ifdef DEBUG
-	fprintf(stderr,"tag= %d\n",st->tag);
-#endif
-	return st;
+    TRACE_EXIT();
+    return st;
 }
 
-#define GETMAXFD(mfd,nfd) mfd=(nfd>mfd)?nfd:mfd
-
-/* Simple select loop to listen on the api FD, and break out every 2 seconds to
- * send messages.
- *
- * The API is not threadsafe!
+/* 
+ * Wait around until we are ready to generate a message, then do it.
  */
 static void selectLoop(detector *dt)
 {
-    fd_set readfds,writefds;
-    int maxfd;
-    int rc;
-    int apifd;
-    struct timeval nextreport,curtime;
-    struct timeval endtime;
-    struct timeval timeout;
+    TRACE_ENTER();
 
-    gettimeofday(&nextreport,NULL);
-    memcpy(&endtime,&nextreport,sizeof(endtime));
-
-    timeout.tv_sec=dt->reportperiod/1000;
-    timeout.tv_usec=(dt->reportperiod % 1000) * 1000;
-    timeradd(&curtime,&timeout,&nextreport);
-
-    endtime.tv_sec+=dt->duration;
+    time_t startTime=time(NULL); 
 
     while(1)
     {
-        FD_ZERO(&readfds);
-        FD_ZERO(&writefds);
-        maxfd=-1;
+        usleep(dt->reportperiod*1000.0); 
+        detectorSend(dt);
 
-        apifd=communicationsReturnFD(dt->cs);
-        if (apifd>0)
-        {
-            FD_SET(apifd,&readfds);
-            GETMAXFD(maxfd,apifd);
-        }
-
-        gettimeofday(&curtime,NULL);
-
-        if ((dt->duration>0) && (timercmp(&curtime,&endtime,>)))
-        {
-            return;
-        }
-
-        if (timercmp(&curtime,&nextreport,>))
-        {
-            if (apifd<0)
-                communicationsReadReady(dt->cs);
-            detectorSend(dt);
-            timeout.tv_sec=dt->reportperiod/1000;
-            timeout.tv_usec=(dt->reportperiod % 1000) * 1000;
-            timeradd(&curtime,&timeout,&nextreport);
-        }
-        timersub(&nextreport,&curtime,&timeout);
-#if 0
-        fprintf(stderr,"entering select.  timeout= %d\n",timeout.tv_sec);
-#endif
-        rc=select(maxfd+1,&readfds,&writefds,NULL,&timeout);
-
-        if (rc>0)
-        {
-            if ((apifd>0) && (FD_ISSET(apifd,&readfds)))
-            {
-#if 0
-                fprintf(stderr,"API fd readable\n");
-#endif
-                communicationsReadReady(dt->cs);
-            }
-        }
+        if (time(NULL)-startTime>dt->duration)
+            break;
     }
+
+    dt->watcherClientPtr->wait(); 
+
+    TRACE_EXIT();
 }
 
 int main(int argc, char *argv[])
 {
-	detector *dt;
-	unsigned int us=0;
-	int ch;
+    TRACE_ENTER();
+    detector *dt;
+    int ch;
+    string logPropsFile("routeFeeder.log.properties"); 
 
-	DetectorInit detinit;
-	detinit.iface=NULL;
-	detinit.onehopcolor=Color::green;
-	detinit.onehoplayer="One Hop Routing";
-	detinit.nexthopcolor=Color::blue;
-	detinit.nexthoplayer="Network Routing"; 
-	detinit.reportperiod=2000;
-	detinit.duration=0;
-	detinit.routeedgewidth=15; 
+    DetectorInit detinit;
+    detinit.iface="";
+    detinit.onehopcolor=Color::green;
+    detinit.onehoplayer="One Hop Routing";
+    detinit.nexthopcolor=Color::blue;
+    detinit.nexthoplayer="Network Routing"; 
+    detinit.reportperiod=2000;
+    detinit.duration=0;
+    detinit.routeedgewidth=15; 
 
-	while ((ch = getopt(argc, argv, "w:t:d:o:n:a:b:i:p:?")) != -1)
-	switch (ch)
+    while ((ch = getopt(argc, argv, "w:t:d:o:n:a:b:i:p:l:?")) != -1)
+        switch (ch)
+        {
+            case 'o':
+                detinit.onehopcolor.fromString(optarg);
+                break;
+            case 'n':
+                detinit.nexthopcolor.fromString(optarg); 
+                break;
+            case 't':
+                sscanf(optarg,"%d",&detinit.duration);
+                break;
+            case 'a':
+                detinit.onehoplayer=string(optarg); 
+                break;
+            case 'b':
+                detinit.nexthoplayer=string(optarg); 
+                break;
+            case 'i':
+                detinit.iface=string(optarg);
+                break;
+            case 'd':
+                detinit.serverName=string(optarg);
+                break;
+            case 'p':
+                sscanf(optarg,"%d",&detinit.reportperiod);
+                break;
+            case 'w':
+                sscanf(optarg, "%d", &detinit.routeedgewidth); 
+                break;
+            case 'l':
+                logPropsFile=string(optarg);
+                break;
+            case '?':
+            default:
+                fprintf(stderr,"routingdetector - poll the linux routing table, and draw the routes in the watcher\n"
+                        "-d ipaddr/hostname - specify watcherd to connect to (duck)\n"
+                        "-p milliseconds - specify the period to poll and report\n"
+                        "-i interface - display only routes through this ethernet interface (or any if unspecified)\n"
+                        "-o color - onehop edge color\n"
+                        "-a layer - onehop layer name\n"
+                        "-n color - nexthop edge color\n"
+                        "-b layer - nexthop layer name\n"
+                        "-t seconds - Run for this long, then exit\n"
+                        "-w width - make edges width pixels wide (default 15)\n"
+                       );
+                exit(1);
+                break;
+        }
+
+    // init the logging system
+    LOAD_LOG_PROPS(logPropsFile); 
+    LOG_INFO("Logger initialized from file \"" << logPropsFile << "\"");
+
+    if(detinit.iface=="")
     {
-        case 'o':
-            detinit.onehopcolor=Color::fromString(optarg);
-            break;
-        case 'n':
-            detinit.nexthopcolor=Color::fromString(optarg); 
-            break;
-        case 't':
-            sscanf(optarg,"%d",&detinit.duration);
-            break;
-        case 'a':
-            detinit.onehoplayer=string(optarg); 
-            break;
-        case 'b':
-            detinit.nexthoplayer=string(optarg); 
-            break;
-        case 'i':
-            detinit.iface=string(optarg);
-            break;
-        case 'd':
-            us=string(optarg);
-            break;
-        case 'p':
-            sscanf(optarg,"%d",&detinit.reportperiod);
-            break;
-        case 'w':
-            sscanf(optarg, "%d", &detinit.routeedgewidth); 
-            break;
-        case '?':
-        default:
-            fprintf(stderr,"routingdetector - poll the linux routing table, and draw the routes in the watcher\n"
-                    "-d ipaddr/hostname - specify watcherd to connect to (duck)\n"
-                    "-p milliseconds - specify the period to poll and report\n"
-                    "-i interface - display only routes through this ethernet interface (or any if unspecified)\n"
-                    "-o color - onehop edge color\n"
-                    "-a layer - onehop layer name\n"
-                    "-n color - nexthop edge color\n"
-                    "-b layer - nexthop layer name\n"
-                    "-t seconds - Run for this long, then exit\n"
-                    "-w width - make edges width pixels wide (default 15)\n"
-                   );
-            exit(1);
-            break;
+        LOG_FATAL("You must specify an interface"); 
+        exit(EXIT_FAILURE); 
     }
 
+    dt=detectorInit(&detinit);
 
-	dt=detectorInit(us,&detinit);
+    if (dt==NULL)
+    {
+        fprintf(stderr,"detector init failed, probably could not connect to infrastructure demon.\n");
+        exit(1);
+    }
+    printf("%s: starting\n",argv[0]);
+    selectLoop(dt);
 
-	if (dt==NULL)
-	{
-		fprintf(stderr,"detector init failed, probably could not connect to infrastructure demon.\n");
-		exit(1);
-	}
-	printf("%s: starting\n",argv[0]);
-	selectLoop(dt);
-
-	return 0;
+    TRACE_EXIT(); 
+    return 0;
 }
