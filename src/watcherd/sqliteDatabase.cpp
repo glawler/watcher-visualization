@@ -22,25 +22,18 @@ using namespace sqlite_wrapper;
 
 INIT_LOGGER(SqliteDatabase, "Database.SqliteDatabase");
 
-namespace {
-    bool sqlite_init = false;
-}
-
-SqliteDatabase::SqliteDatabase(const std::string& path)
+SqliteDatabase::SqliteDatabase(const std::string& path) :
+    conn_(new Connection(path, Connection::readwrite | Connection::create | Connection::nomutex))
 {
     TRACE_ENTER();
 
-    if (!sqlite_init) {
-        sqlite_init=true;
-        /* disable locks on database connections (user is required to manage) */
-        sqlite_wrapper::config(SQLITE_CONFIG_MULTITHREAD);
-    }
-
-    conn_.reset(new sqlite_wrapper::Connection(path));
+    /* Create database if it doesn't yet exist */
+    conn_->execute("CREATE TABLE IF NOT EXISTS events ( ts INTEGER, evtype INTEGER, node TEXT, data TEXT ); "
+                   "CREATE INDEX IF NOT EXISTS time ON events ( ts ASC );");
 
     /*
-     * Create a prepared statement for inserting events into the DB.  This allows
-     * reuse across calls to storeEvent().
+     * This must come after the db creation otherwise it will fail saying that
+     * table "events" does not exist.
      */
     insert_stmt_.reset(new Statement(*conn_, "INSERT INTO events VALUES (?,?,?,?)"));
 

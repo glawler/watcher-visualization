@@ -42,12 +42,34 @@ namespace sqlite_wrapper {
     };
     typedef boost::shared_ptr<Impl> ImplPtr;
 
+    /** Modes for opening the database.
+     * This is modeled on iostate.
+     */
+    enum ConnectionFlags {
+        cf_none=0, cf_readwrite=(1<<0), cf_nomutex=(1<<1), cf_fullmutex=(1<<2), cf_readonly=(1<<3), cf_create=(1<<4)
+    };
+    /** Define a typesafe bitwise-OR operator for flags */
+    inline ConnectionFlags operator| (ConnectionFlags a, ConnectionFlags b) {
+        /* The casts here are required to avoid an infinite recursion.
+         * Yes, I found this out the hard way.  */
+        return ConnectionFlags(static_cast<int>(a) | static_cast<int>(b));
+    }
+
     /** A class representing a connection to a specific database. */
     class Connection : private boost::noncopyable {
         public:
-            Connection(const std::string&);
+            typedef ConnectionFlags flags;
+            static const flags none = cf_none;
+            static const flags readwrite = cf_readwrite;
+            static const flags nomutex = cf_nomutex;
+            static const flags fullmutex = cf_fullmutex;
+            static const flags readonly = cf_readonly;
+            static const flags create = cf_create;
+
+            Connection(const std::string&, flags f = none);
             ~Connection();
             void close(bool nothrow = false);
+            void execute(const std::string&);
 
         private:
             friend class Statement;
