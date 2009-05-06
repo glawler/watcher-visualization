@@ -48,10 +48,8 @@ typedef struct detector
 /* This is called by the API when this node's position in the hierarchy changes
  * It is defined using the API function idsPositionRegister().
  */
-static void myDetectorPositionUpdate(void *data, IDSPositionType position, IDSPositionStatus status)
+static void myDetectorPositionUpdate(void *, IDSPositionType position, IDSPositionStatus status)
 {
-    // detector *st=(detector*)data;
-
     switch(position)
     {
         case COORDINATOR_ROOT: 
@@ -113,6 +111,33 @@ void sendLabelRemove(void *messageHandlerData, const struct MessageInfo *mi)
     TRACE_ENTER();
 }
 
+GUILayer legacyFamilyValue2GUILayer(unsigned int family)
+{
+    TRACE_ENTER();
+    switch (family)
+    {
+        case COMMUNICATIONS_LABEL_FAMILY_UNDEFINED: return UNDEFINED_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_PHYSICAL: return PHYSICAL_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_HIERARCHY: return HIERARCHY_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_BANDWIDTH: return BANDWIDTH_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING: return ROUTING_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING_ONEHOP: return ONE_HOP_ROUTING_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS: return ANTENNARADIUS_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_SANITYCHECK: return SANITY_CHECK_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ANOMPATHS: return ANOMPATHS_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_CORRELATION: return CORROLATION_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ALERT: return ALERT_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_CORRELATION_3HOP: return CORROLATION_3HOP_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING2: return ROUTING2_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING2_ONEHOP: return ROUTING2_ONE_HOP_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_FLOATINGGRAPH: return FLOATING_GRAPH_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_NORMPATHS: return NORMAL_PATHS_LAYER; 
+        default: return UNDEFINED_LAYER;
+    }
+
+    TRACE_EXIT(); 
+}
+
 void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEdge)
 {
     TRACE_ENTER();
@@ -133,7 +158,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
     em->node2=boost::asio::ip::address_v4(ne->tail);
     em->edgeColor=Color(ne->color[0], ne->color[1], ne->color[2], ne->color[3]); 
     em->expiration=ne->expiration;
-    em->layer=static_cast<GUILayer>(ne->family); // GTL todo: write a legacy watcher to GUILayer mapping function.
+    em->layer=legacyFamilyValue2GUILayer(ne->family); 
     em->addEdge=addEdge;
 
     // Add any labels if we have them.
@@ -233,13 +258,13 @@ void sendWatcherColor(void *messageHandlerData, const struct MessageInfo *mi)
     TRACE_EXIT();
 }
 
-void sendGraph(void *messageHandlerData, const struct MessageInfo * messageInfo) 
+void sendGraph(void *, const struct MessageInfo *) 
 {
     TRACE_ENTER();
     LOG_INFO("Ignoring 3d graph message"); 
     TRACE_EXIT();
 }
-void sendGraphEdge(void *messageHandlerData, const struct MessageInfo * messageInfo) 
+void sendGraphEdge(void *, const struct MessageInfo *) 
 {
     TRACE_ENTER();
     LOG_INFO("Ignoring 3d graph edge message"); 

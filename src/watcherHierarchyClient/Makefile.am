@@ -10,6 +10,7 @@ LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_S
 CXXFLAGS+=-I../../include 
 CXXFLAGS+=-I../libwatcher 
 CXXFLAGS+=-I../watcherd
+CXXFLAGS+=-I../logger
 CXXFLAGS+=-I..
 
 CFLAGS+=-I../../include
