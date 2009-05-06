@@ -37,6 +37,7 @@ LIBS+=-llogger
 LIBS+=-llog4cxx
 LIBS+=-lwatcherutils
 LIBS+=-lsqlite_wrapper
+LIBS+=-lsqlite3
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 
 
