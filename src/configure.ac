@@ -3,7 +3,21 @@ AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
-Boost 1.36 is when asio appeared
+
+# check for recent version of sqlite3
+AC_MSG_CHECKING([for sqlite3 >= 3.6.12])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <sqlite3.h>
+				   ]],
+                 [[#if SQLITE_VERSION_NUMBER >= 3006012
+//OK
+#else
+#  error sqlite version is too old
+#endif
+]])],
+		[AC_MSG_RESULT(ok)],
+		[AC_MSG_ERROR(sqlite is too old)])
+
+# Boost 1.36 is when asio appeared
 AX_BOOST_BASE(1.36)
 AX_BOOST_SYSTEM
 AX_BOOST_ASIO
