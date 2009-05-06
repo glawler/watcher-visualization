@@ -5,10 +5,10 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 
 # check for recent version of sqlite3
-AC_MSG_CHECKING([for sqlite3 >= 3.6.12])
+AC_MSG_CHECKING([for sqlite3 >= 3.6.10])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <sqlite3.h>
 				   ]],
-                 [[#if SQLITE_VERSION_NUMBER >= 3006012
+                 [[#if SQLITE_VERSION_NUMBER >= 3006010
 //OK
 #else
 #  error sqlite version is too old
