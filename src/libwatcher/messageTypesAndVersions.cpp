@@ -36,6 +36,9 @@ namespace watcher {
                 case DATA_REQUEST_MESSAGE_TYPE:
                     out << static_cast<int>(DATA_REQUEST_MESSAGE_TYPE) << " (data request)";
                     break;
+                case CONNECTIVITY_MESSAGE_TYPE:
+                    out << static_cast<int>(CONNECTIVITY_MESSAGE_TYPE) << " (connectivity)";
+                    break;
 
                 case SEEK_MESSAGE_TYPE:
                     out << static_cast<int>(SEEK_MESSAGE_TYPE) << " (seek)";

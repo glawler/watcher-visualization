@@ -13,6 +13,7 @@
 #include "libwatcher/stopWatcherMessage.h"
 #include "libwatcher/speedWatcherMessage.h"
 #include "libwatcher/nodeStatusMessage.h"
+#include "libwatcher/connectivityMessage.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -44,6 +45,9 @@ boost::shared_ptr<Message> MessageFactory::makeMessage(const MessageType &type)
             break;
         case DATA_REQUEST_MESSAGE_TYPE:
             return DataRequestMessagePtr(new DataRequestMessage);
+            break;
+        case CONNECTIVITY_MESSAGE_TYPE:
+            return ConnectivityMessagePtr(new ConnectivityMessage);
             break;
         case SEEK_MESSAGE_TYPE:
             return SeekMessagePtr(new SeekMessage);

@@ -31,6 +31,7 @@ using namespace watcher::event;
 #include "libwatcher/stopWatcherMessage.h"
 #include "libwatcher/speedWatcherMessage.h"
 #include "libwatcher/nodeStatusMessage.h"
+#include "libwatcher/connectivityMessage.h"
 static MessagePtr unused_A_Ptr=MessagePtr(new LabelMessage); 
 static MessagePtr unused_B_Ptr=MessagePtr(new EdgeMessage); 
 static MessagePtr unused_C_Ptr=MessagePtr(new ColorMessage); 
@@ -43,6 +44,7 @@ static MessagePtr unused_I_Ptr=MessagePtr(new StartMessage);
 static MessagePtr unused_J_Ptr=MessagePtr(new StopMessage); 
 static MessagePtr unused_K_Ptr=MessagePtr(new SpeedMessage); 
 static MessagePtr unused_L_Ptr=MessagePtr(new NodeStatusMessage); 
+static MessagePtr unused_M_Ptr=MessagePtr(new ConnectivityMessage); 
 /** 
  * GTL ERASE END 
  *

@@ -20,12 +20,12 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        std::ostream& operator<< (std::ostream& os, const StartMessage& m)
+        std::ostream& operator<< (std::ostream& os, const StartMessage& /* m */)
         {
             return os << "StartMessage()";
         }
 
-        bool operator== (const StartMessage& lhs, const StartMessage& rhs) { return true; };
+        bool operator== (const StartMessage& lhs, const StartMessage& /* rhs */) { return true; };
 
         template <typename Archive> void StartMessage::serialize(Archive & ar, const unsigned int /* version */)
         {
