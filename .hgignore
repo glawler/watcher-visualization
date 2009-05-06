@@ -32,6 +32,9 @@ depend
 *.cfg 
 *.properties
 
+# ignore databases
+*.db
+
 # some automake/autoconf/libtool things
 stamp-h1
 .deps
@@ -202,5 +205,6 @@ share/info/dir
 ^src/feeders/routeFeeder/Makefile$
 ^src/watcherHierarchyClient/Makefile$
 ^src/feeders/routeFeeder/routeFeeder$
+
 
 
