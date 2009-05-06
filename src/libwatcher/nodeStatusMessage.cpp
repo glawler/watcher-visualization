@@ -80,7 +80,7 @@ std::ostream &NodeStatusMessage::operator<<(std::ostream &out) const
 
 
 template <typename Archive>
-void NodeStatusMessage::serialize(Archive& ar, const unsigned int version)
+void NodeStatusMessage::serialize(Archive& ar, const unsigned int /* version */)
 {
     TRACE_ENTER();
     ar & boost::serialization::base_object<Message>(*this);

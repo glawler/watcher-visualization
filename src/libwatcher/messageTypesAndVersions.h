@@ -19,13 +19,14 @@ namespace watcher {
             EDGE_MESSAGE_TYPE         = 0x5,
             COLOR_MESSAGE_TYPE        = 0x6,
             DATA_REQUEST_MESSAGE_TYPE = 0x7,
+            CONNECTIVITY_MESSAGE_TYPE = 0x8,
 
             // watcherdAPI messages
-            SEEK_MESSAGE_TYPE         = 0x8,
-            START_MESSAGE_TYPE        = 0x9,
-            STOP_MESSAGE_TYPE         = 0xA,
-            SPEED_MESSAGE_TYPE        = 0xB,
-            NODE_STATUS_MESSAGE_TYPE  = 0xC,
+            SEEK_MESSAGE_TYPE         = 0x9,
+            START_MESSAGE_TYPE        = 0xA,
+            STOP_MESSAGE_TYPE         = 0xB,
+            SPEED_MESSAGE_TYPE        = 0xC,
+            NODE_STATUS_MESSAGE_TYPE  = 0xD,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
@@ -44,6 +45,7 @@ namespace watcher {
         const unsigned int EDGE_MESSAGE_VERSION         = 1;
         const unsigned int COLOR_MESSAGE_VERSION        = 1;
         const unsigned int DATA_REQUEST_MESSAGE_VERSION = 1;
+        const unsigned int CONNECTIVITY_MESSAGE_VERSION = 1;
 
         const unsigned int SEEK_MESSAGE_VERSION         = 1;
         const unsigned int START_MESSAGE_VERSION        = 1;

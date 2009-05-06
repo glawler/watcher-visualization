@@ -11,14 +11,14 @@ namespace boost
     namespace serialization 
     {
         template<class Archive>
-            void save(Archive & ar, const watcher::NodeIdentifier &a, const unsigned int version)
+            void save(Archive & ar, const watcher::NodeIdentifier &a, const unsigned int /* version */)
             {
                 std::string tmp=a.to_string();
                 ar & tmp;
             }
 
         template<class Archive>
-            void load(Archive & ar, watcher::NodeIdentifier &a, const unsigned int version)
+            void load(Archive & ar, watcher::NodeIdentifier &a, const unsigned int /* version */)
             {
                 std::string tmp;
                 ar & tmp;

@@ -29,7 +29,7 @@ namespace watcher {
         }
 
         template <typename Archive>
-        void SpeedMessage::serialize(Archive & ar, const unsigned int version)
+        void SpeedMessage::serialize(Archive & ar, const unsigned int /* version */)
         {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);

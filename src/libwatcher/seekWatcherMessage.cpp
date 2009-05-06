@@ -34,7 +34,7 @@ namespace watcher {
         }
 
         template <typename Archive>
-        void SeekMessage::serialize(Archive& ar, const unsigned int version)
+        void SeekMessage::serialize(Archive& ar, const unsigned int /* version */)
         {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);

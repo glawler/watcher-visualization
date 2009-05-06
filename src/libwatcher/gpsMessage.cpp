@@ -86,7 +86,7 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void GPSMessage::serialize(Archive & ar, const unsigned int file_version)
+        template <typename Archive> void GPSMessage::serialize(Archive & ar, const unsigned int /* file_version */)
         {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);

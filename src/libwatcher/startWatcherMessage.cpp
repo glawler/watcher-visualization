@@ -27,7 +27,7 @@ namespace watcher {
 
         bool operator== (const StartMessage& lhs, const StartMessage& rhs) { return true; };
 
-        template <typename Archive> void StartMessage::serialize(Archive & ar, const unsigned int version)
+        template <typename Archive> void StartMessage::serialize(Archive & ar, const unsigned int /* version */)
         {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);
