@@ -335,11 +335,12 @@ static void selectLoop(detector *dt)
 
     while(1)
     {
-        usleep(dt->reportperiod*1000.0); 
+        usleep(dt->reportperiod*(useconds_t)1000.0); 
         detectorSend(dt);
 
-        if (time(NULL)-startTime>dt->duration)
-            break;
+        if (dt->duration) 
+            if (time(NULL)-startTime>dt->duration)
+                break;
     }
 
     dt->watcherClientPtr->wait(); 

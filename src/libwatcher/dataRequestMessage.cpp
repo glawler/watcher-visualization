@@ -68,18 +68,9 @@ namespace watcher {
                 DATA_REQUEST_MESSAGE_TYPE
             };
 
-            GUILayer theLayers[] = { 
-                HIERARCHY_LAYER,
-                ROUTING_LAYER,
-                NODE_LAYER,
-                FLOATING_LAYER,
-            };
-
             for(unsigned int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
                 dataTypesRequested.push_back(types[i]);
 
-            for(unsigned int i = 0; i < sizeof(theLayers)/sizeof(theLayers[0]); i++)
-                layers |= theLayers[i];
         }
 
         bool DataRequestMessage::operator==(const DataRequestMessage &other) const

@@ -19,6 +19,7 @@ namespace watcher {
                 Color background;
                 unsigned int expiration;    // this should be a float
                 bool addLabel;              // add or remove the label depending on true or false here.
+                GUILayer layer;             // which layer to put the label on 
 
                 // A label can be attached to a node or just hanging in space.
                 // If address is defined it will be attached to a node, if

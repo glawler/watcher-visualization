@@ -16,8 +16,8 @@ namespace watcher {
                 boost::asio::ip::address node1;
                 boost::asio::ip::address node2;
                 Color edgeColor;
-                unsigned int expiration;    // this should be a float
-                unsigned int width;         // this should be a float
+                float expiration; 
+                float width;      
                 GUILayer layer;
                 bool addEdge;   // if true, add an edge, else remove existing edge;
                 LabelMessagePtr middleLabel;

@@ -27,20 +27,10 @@ void printCurrentlySupported(ostream &out)
         DATA_REQUEST_MESSAGE_TYPE
     };
 
-    GUILayer layers[] = { 
-        HIERARCHY_LAYER,
-        ROUTING_LAYER,
-        NODE_LAYER,
-        FLOATING_LAYER,
-    };
-
     out << "Currently supported types:" << endl;
     for(unsigned int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
         out << "\t" << types[i] << endl;
     out << endl;
-    out << "Currently supported layers:" << endl;
-    for(unsigned int i = 0; i < sizeof(layers)/sizeof(layers[0]); i++)
-        out << "\t" << layers[i] << endl;
 }
 
 void usage(const char *progName)

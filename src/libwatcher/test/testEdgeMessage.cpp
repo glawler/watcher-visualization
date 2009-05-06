@@ -40,7 +40,7 @@ EdgeMessagePtr createEdgeMessage()
     em->edgeColor=Color::red;
     em->expiration=20000;
     em->width=15;
-    em->layer=NODE_LAYER;
+    em->layer=UNDEFINED_LAYER;
     em->addEdge=true;
     em->setMiddleLabel(lmm);
     em->setNode1Label(lm1);

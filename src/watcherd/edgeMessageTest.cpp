@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
     Color edgeColor=Color::red;
     unsigned int width=15;
-    GUILayer layer=NODE_LAYER;
+    GUILayer layer=UNDEFINED_LAYER;
     bool bidirectional=false;
 
     LabelMessagePtr lm(new LabelMessage); 
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
                       break;
             case 'c': { bool val=edgeColor.fromString(optarg); if (!val) { printf("\nBad argument for edge color\n\n"); usage(argv[0]); } break; }
             case 'w': width=lexical_cast<unsigned int>(optarg); break;
-            case 'y': layer=static_cast<GUILayer>(lexical_cast<unsigned int>(optarg)); break;
+            case 'y': layer=GUILayer(optarg); break;
             case 'd': 
                       {
                           if (strstr(optarg, "true") || strstr(optarg, "TRUE")) bidirectional=true;

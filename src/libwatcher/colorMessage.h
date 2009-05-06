@@ -14,8 +14,8 @@ namespace watcher {
                 // The data
                 Color color;
                 boost::asio::ip::address nodeAddr;
-                uint32_t flashPeriod;        // this should be a float
-                uint32_t expiration;         // this should be a float
+                float flashPeriod; 
+                float expiration;  
 
                 ColorMessage();  // default: black, 127.0.0.1, no expire, no flash
                 ColorMessage(

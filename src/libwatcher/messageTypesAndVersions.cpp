@@ -67,35 +67,6 @@ namespace watcher {
             return out;
         }
 
-        ostream &operator<<(ostream &out, const GUILayer &layer)
-        {
-            TRACE_ENTER();
-
-            out << "\"";
-            switch (layer)
-            {
-
-                case HIERARCHY_LAYER:
-                    out << static_cast<int>(HIERARCHY_LAYER) << " (hierachy layer)";
-                    break;
-                case ROUTING_LAYER:
-                    out << static_cast<int>(ROUTING_LAYER) << " (routing layer)";
-                    break;
-                case NODE_LAYER:
-                    out << static_cast<int>(NODE_LAYER) << " (node  layer)";
-                    break;
-                case FLOATING_LAYER:
-                    out << static_cast<int>(FLOATING_LAYER) << " (floating layer)";
-                    break;
-
-                    // GTL - don't put default.
-            }
-            out << "\"";
-
-            TRACE_EXIT();
-            return out;
-        }
-
         /** Determine if the specified message type is a feeder API event.
          * @retval true if the message type is a feeder api event
          * @retval false otherwise

@@ -24,6 +24,7 @@ namespace watcher {
             background(Color::white),
             expiration(0),
             addLabel(true),
+            layer(),
             address(),
             lat(0),
             lng(0),
@@ -41,6 +42,7 @@ namespace watcher {
             background(Color::white),
             expiration(0),
             addLabel(true),
+            layer(),
             address(address_),
             lat(0),
             lng(0),
@@ -58,6 +60,7 @@ namespace watcher {
             background(Color::white),
             expiration(0),
             addLabel(true),
+            layer(),
             address(),
             lat(lat_),
             lng(lng_),
@@ -75,6 +78,7 @@ namespace watcher {
             background(other.background),
             expiration(other.expiration),
             addLabel(other.addLabel),
+            layer(other.layer),
             address(other.address),
             lat(other.lat),
             lng(other.lng),
@@ -124,6 +128,7 @@ namespace watcher {
             background=other.background;
             expiration=other.expiration;
             addLabel=other.addLabel;
+            layer=other.layer;
             address=other.address;
             lat=other.lat;
             lng=other.lng;
@@ -146,6 +151,7 @@ namespace watcher {
                 out << " (attached) "; 
             out << " font size: " << fontSize; 
             out << " address: " << address << (address.is_v4() ? " (v4)" : " (v6)"); 
+            out << " layer: " << layer; 
             out << " fg: (" << foreground << ")"; 
             out << " bg: (" << background << ")"; 
             out << " exp: " << expiration;
@@ -177,6 +183,7 @@ namespace watcher {
             ar & fontSize;
             ar & address;
             ar & addLabel;
+            ar & layer; 
             ar & lat;
             ar & lng;
             ar & alt;
@@ -187,3 +194,5 @@ namespace watcher {
 }
 
 BOOST_CLASS_EXPORT(watcher::event::LabelMessage);
+
+

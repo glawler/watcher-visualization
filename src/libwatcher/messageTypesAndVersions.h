@@ -51,18 +51,33 @@ namespace watcher {
         const unsigned int SPEED_MESSAGE_VERSION        = 1;
         const unsigned int NODE_STATUS_MESSAGE_VERSION  = 1;
 
-        //
-        // GUI bits in the watcher have a concept of a layer which can be turned on or off.
-        //
-        typedef enum
-        {
-            HIERARCHY_LAYER         = 1L << 0, 
-            ROUTING_LAYER           = 1L << 1,
-            NODE_LAYER              = 1L << 2,
-            FLOATING_LAYER          = 1L << 3
-        } GUILayer;
-
-        std::ostream&operator<< (std::ostream &out, const GUILayer &layer);
+        /**
+         * GUI bits in the watcher have a concept of a layer which can be turned on or off.
+         *
+         * These are default layers, but the name if a layer is not contrained by these strings
+         * and anyone that uses them should be able to handle any string value as a valid layer. 
+         * The layers are dyanmic: a feeder can specify any layer it wants during runtime and the 
+         * GUIs should be able to handle it. 
+         *
+         * The static const strings below are all the layers from the legacy watcher. 
+         */
+        typedef std::string GUILayer;
+        static const GUILayer UNDEFINED_LAYER = "Undefined";
+        static const GUILayer PHYSICAL_LAYER = "Physcial";
+        static const GUILayer HIERARCHY_LAYER = "Hierarchy"; 
+        static const GUILayer BANDWIDTH_LAYER = "Bandwidth"; 
+        static const GUILayer ROUTING_LAYER = "Routing"; 
+        static const GUILayer ONE_HOP_ROUTING_LAYER = "One Hop Routing"; 
+        static const GUILayer ANTENNARADIUS_LAYER = "Antenna Radius"; 
+        static const GUILayer SANITY_CHECK_LAYER = "Sanity Check"; 
+        static const GUILayer ANOMPATHS_LAYER = "Anomolus Paths"; 
+        static const GUILayer CORROLATION_LAYER = "Correlation"; 
+        static const GUILayer ALERT_LAYER = "Alerts"; 
+        static const GUILayer CORROLATION_3HOP_LAYER = "Three Hop Correlation"; 
+        static const GUILayer ROUTING2_LAYER = "Wormhole Routing"; 
+        static const GUILayer ROUTING2_ONE_HOP_LAYER = "Wormhole One Hop Routing"; 
+        static const GUILayer FLOATING_GRAPH_LAYER = "Floating Graph"; 
+        static const GUILayer NORMAL_PATHS_LAYER = "Normal Paths"; 
 
         bool isFeederEvent(MessageType);
     }
