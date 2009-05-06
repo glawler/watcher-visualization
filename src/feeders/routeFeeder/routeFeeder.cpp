@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sysexits.h> 	// portablish exit values. 
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -44,7 +45,7 @@ typedef struct Route
    eth0    7402A8C0        7202A8C0        0007    0       0       0       FFFFFFFF   00       0
    */
 
-static Route *routeRead()
+static Route *routeRead(unsigned int network, unsigned int netmask)
 {
     TRACE_ENTER(); 
 
@@ -63,7 +64,7 @@ static Route *routeRead()
 
         rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
 
-        if (rc==10)
+        if (rc==10 && ((ntohl(dst) & netmask) == network))
         {
             nxt = (Route*)malloc(sizeof(*nxt));
             assert(nxt!=NULL);
@@ -174,6 +175,11 @@ typedef struct detector
     string onehoplayer;
 
     int duration;			  /* Time to run (in seconds) or 0 to run until broken */
+
+	struct in_addr filterNetwork;
+	struct in_addr filterMask;
+	struct in_addr localhost;
+
 } detector;
 
 typedef struct DetectorInit
@@ -192,6 +198,10 @@ typedef struct DetectorInit
     string nexthoplayer;
     string onehoplayer;
 
+	struct in_addr filterNetwork;
+	struct in_addr filterMask;
+	struct in_addr localhost;
+
 } DetectorInit;
 
 static void updateRoutes(detector *st, Route *list)
@@ -204,6 +214,7 @@ static void updateRoutes(detector *st, Route *list)
      * 	for each edge in newlist,
      * 	   	if there is not an edge in oldList or tmpList to nexthop, add it, and add to tmpList
      */
+    vector<MessagePtr> messages;
     for(r=list;r;r=r->next)
     {
 
@@ -225,7 +236,7 @@ static void updateRoutes(detector *st, Route *list)
             em->layer=ROUTING_LAYER; // GTL st->nexthoplayer;
             em->addEdge=true;
             em->bidirectional=false;
-            st->watcherClientPtr->sendMessage(em); 
+            messages.push_back(em);
 
             routeInsert(&tmpNextHop,r);
         }
@@ -244,11 +255,12 @@ static void updateRoutes(detector *st, Route *list)
             em->layer=ROUTING_LAYER; // GTL st->onehoplayer;
             em->addEdge=true;
             em->bidirectional=false;
-            st->watcherClientPtr->sendMessage(em); 
+            messages.push_back(em);
 
             routeInsert(&tmpOneHop,r);
         }
     }
+    st->watcherClientPtr->sendMessages(messages); 
 
     routeFree(tmpNextHop);
     routeFree(tmpOneHop);
@@ -266,7 +278,7 @@ static void detectorSend(detector *st)
 
     Route *list;
 
-    list=routeRead();  // read all routes.
+    list=routeRead(st->filterNetwork.s_addr, st->filterMask.s_addr);
 
     long long int curtime;
     struct timeval tp;
@@ -318,7 +330,9 @@ static detector *detectorInit(DetectorInit *detinit)
 
     st->routeedgewidth=detinit->routeedgewidth;
 
-    st->localaddr=0x7f000001;  // 127.0.0.1
+	st->filterNetwork.s_addr=detinit->filterNetwork.s_addr;
+	st->filterMask.s_addr=detinit->filterMask.s_addr;
+	st->localhost.s_addr=detinit->localhost.s_addr;
 
     TRACE_EXIT();
     return st;
@@ -365,65 +379,106 @@ int main(int argc, char *argv[])
     detinit.duration=0;
     detinit.routeedgewidth=15; 
 
-    while ((ch = getopt(argc, argv, "w:t:d:o:n:a:b:i:p:l:?")) != -1)
+	detinit.filterNetwork.s_addr=0;
+	detinit.filterMask.s_addr=0;
+	detinit.localhost.s_addr=0;
+
+    while ((ch = getopt(argc, argv, "m:n:h:o:x:t:e:b:i:d:p:w:l:?")) != -1)
         switch (ch)
         {
+            case 'm': if(-1 == inet_pton(AF_INET, optarg, &detinit.filterMask))
+                      {
+                          fprintf(stderr, "Error parsing filter mask: %s\n", optarg); 
+                          exit(EX_USAGE); 
+                      }
+                      break;
+            case 'n': if(-1 == inet_pton(AF_INET, optarg, &detinit.filterNetwork)) 
+                      {
+                          fprintf(stderr, "Error parsing filter network: %s\n", optarg); 
+                          exit(EX_USAGE); 
+                      }
+                      break;
+            case 'h': if(-1 == inet_pton(AF_INET, optarg, &detinit.localhost)) 
+                      {
+                          fprintf(stderr, "Error parsing localhost address: %s\n", optarg); 
+                          exit(EX_USAGE); 
+                      }
+                      break;
             case 'o':
-                detinit.onehopcolor.fromString(optarg);
-                break;
-            case 'n':
-                detinit.nexthopcolor.fromString(optarg); 
-                break;
+                      detinit.onehopcolor.fromString(optarg);
+                      break;
+            case 'x':
+                      detinit.nexthopcolor.fromString(optarg); 
+                      break;
             case 't':
-                sscanf(optarg,"%d",&detinit.duration);
-                break;
-            case 'a':
-                detinit.onehoplayer=string(optarg); 
-                break;
+                      sscanf(optarg,"%d",&detinit.duration);
+                      break;
+            case 'e':
+                      detinit.onehoplayer=string(optarg); 
+                      break;
             case 'b':
-                detinit.nexthoplayer=string(optarg); 
-                break;
+                      detinit.nexthoplayer=string(optarg); 
+                      break;
             case 'i':
-                detinit.iface=string(optarg);
-                break;
+                      detinit.iface=string(optarg);
+                      break;
             case 'd':
-                detinit.serverName=string(optarg);
-                break;
+                      detinit.serverName=string(optarg);
+                      break;
             case 'p':
-                sscanf(optarg,"%d",&detinit.reportperiod);
-                break;
+                      sscanf(optarg,"%d",&detinit.reportperiod);
+                      break;
             case 'w':
-                sscanf(optarg, "%d", &detinit.routeedgewidth); 
-                break;
+                      sscanf(optarg, "%d", &detinit.routeedgewidth); 
+                      break;
             case 'l':
-                logPropsFile=string(optarg);
-                break;
+                      logPropsFile=string(optarg);
+                      break;
             case '?':
             default:
-                fprintf(stderr,"routingdetector - poll the linux routing table, and draw the routes in the watcher\n"
-                        "-d ipaddr/hostname - specify watcherd to connect to (duck)\n"
-                        "-p milliseconds - specify the period to poll and report\n"
-                        "-i interface - display only routes through this ethernet interface (or any if unspecified)\n"
-                        "-o color - onehop edge color\n"
-                        "-a layer - onehop layer name\n"
-                        "-n color - nexthop edge color\n"
-                        "-b layer - nexthop layer name\n"
-                        "-t seconds - Run for this long, then exit\n"
-                        "-w width - make edges width pixels wide (default 15)\n"
-                       );
-                exit(1);
-                break;
+                      fprintf(stderr,"routingdetector - poll the linux routing table, and draw the routes in the watcher\n"
+                              "-d ipaddr/hostname - specify watcherd address to connect to (duck)\n"
+                              "-h ipaddr - this host's address\n"
+                              "-m netmask - the mask used to filter the routes (ex. 255.255.255.0)\n"
+                              "-n network - the network used to filter the routes (ex. 192.168.1.0)\n" 
+                              "-p milliseconds - specify the period to poll and report\n"
+                              "-i interface - display only routes through this ethernet interface (or any if unspecified)\n"
+                              "-o color - onehop edge color\n"
+                              "-e layer - onehop layer name\n"
+                              "-x color - nexthop edge color\n"
+                              "-b layer - nexthop layer name\n"
+                              "-t seconds - Run for this long, then exit\n"
+                              "-w width - make edges width pixels wide (default 15)\n"
+                             );
+                      exit(1);
+                      break;
         }
 
     // init the logging system
     LOAD_LOG_PROPS(logPropsFile); 
     LOG_INFO("Logger initialized from file \"" << logPropsFile << "\"");
 
-    if(detinit.iface=="")
+	// check args, errors, etc before doing real work
+	if(detinit.localhost.s_addr == 0) 
     {
-        LOG_FATAL("You must specify an interface"); 
-        exit(EXIT_FAILURE); 
+        fprintf(stderr, "localhost address cannot be blank\n"); 
+        exit(EX_USAGE);
     }
+	if(detinit.filterNetwork.s_addr == 0) 
+	{ 
+        fprintf(stderr, "filter network cannot be blank\n"); 
+        exit(EX_USAGE);
+	}
+	if(detinit.filterMask.s_addr == 0) 
+	{ 
+        fprintf(stderr, "filter mask cannot be blank\n"); 
+        exit(EX_USAGE);
+	}
+	if(detinit.serverName.empty())
+	{ 
+        fprintf(stderr, "watcherd hostname cannot be blank\n"); 
+        exit(EX_USAGE);
+	}
 
     dt=detectorInit(&detinit);
 
