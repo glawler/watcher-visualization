@@ -22,10 +22,27 @@ using namespace sqlite_wrapper;
 
 INIT_LOGGER(SqliteDatabase, "Database.SqliteDatabase");
 
+namespace {
+    bool sqlite_init = false;
+}
+
 SqliteDatabase::SqliteDatabase(const std::string& path)
-    : conn_(new sqlite_wrapper::Connection(path))
 {
     TRACE_ENTER();
+
+    if (!sqlite_init) {
+        sqlite_init=true;
+        /* disable locks on database connections (user is required to manage) */
+        sqlite_wrapper::config(SQLITE_CONFIG_MULTITHREAD);
+    }
+
+    conn_.reset(new sqlite_wrapper::Connection(path));
+
+    /*
+     * Create a prepared statement for inserting events into the DB.  This allows
+     * reuse across calls to storeEvent().
+     */
+    insert_stmt_.reset(new Statement(*conn_, "INSERT INTO events VALUES (?,?,?,?)"));
 
     TRACE_EXIT();
 }
@@ -39,20 +56,16 @@ void SqliteDatabase::storeEvent(const std::string& addr, MessagePtr msg)
 {
     TRACE_ENTER();
 
-    //FIXME resuse the prepared statement somehow
-    Statement st = conn_->prepare("INSERT INTO events VALUES (?,?,?,?)");
-
     // serialize event
     std::ostringstream os;
     msg->pack(os);
 
-    LOG_DEBUG("serialized event: " << os.str());
+    //LOG_DEBUG("serialized event: " << os.str());
 
-    // bind values
-    st << msg->timestamp << msg->type << addr << os.str();
+    // bind values to prepared statement
+    *insert_stmt_ << msg->timestamp << msg->type << addr << os.str();
 
-    // execute the statement
-    for (Row r = st.rows(); r != st.end(); ++r) { }
+    sqlite_wrapper::execute(*insert_stmt_);
 
     TRACE_EXIT();
 }
