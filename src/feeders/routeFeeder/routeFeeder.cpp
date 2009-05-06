@@ -21,7 +21,7 @@ using namespace watcher::event;
 
 static const char *rcsid __attribute__ ((unused)) = "$Id: routingfeeder.c,v 1.0 2009/04/28 22:08:47 glawler Exp $";
 
-#define DEBUG 1
+// #define DEBUG 1
 
 /* This is a feeder which polls the routing table,
  * and draws the routing algorithm's edges on the watcher
@@ -64,7 +64,7 @@ static Route *routeRead(unsigned int network, unsigned int netmask)
 
         rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
 
-        if (rc==10 && ((ntohl(dst) & netmask) == network))
+        if (rc==10 && ((ntohl(dst) & ntohl(netmask)) == ntohl(network)))
         {
             nxt = (Route*)malloc(sizeof(*nxt));
             assert(nxt!=NULL);
@@ -84,6 +84,7 @@ static Route *routeRead(unsigned int network, unsigned int netmask)
     return list;
 }
 
+#if DEBUG
 static void routeDump(Route *r)
 {
     TRACE_ENTER();
@@ -94,6 +95,7 @@ static void routeDump(Route *r)
     }
     TRACE_EXIT();
 }
+#endif // DEBUG
 
 static int routeNumber(Route *r)
 {
@@ -165,7 +167,6 @@ typedef struct detector
 
     useconds_t reportperiod;		/* frequency to generate reports at */
     int reportnum;
-    unsigned int localaddr;
     string iface;
     int routeedgewidth;
     Color onehopcolor;
@@ -217,9 +218,9 @@ static void updateRoutes(detector *st, Route *list)
     vector<MessagePtr> messages;
     for(r=list;r;r=r->next)
     {
-
-        if (st->iface != string(r->iface))    /* if we're checking interfaces, and this route is on the wrong one...  */
-            continue;
+        if (!st->iface.empty()) 
+            if (st->iface != string(r->iface))    /* if we're checking interfaces, and this route is on the wrong one...  */
+                continue;
 
 #if 1
         LOG_DEBUG("nexthop inserting us -> " << r->nexthop); 
@@ -228,7 +229,7 @@ static void updateRoutes(detector *st, Route *list)
         if ((r->nexthop!=0) && (routeSearchNext(tmpNextHop,r)==NULL))   /* if its multi-hop, and not on the next hop list */
         {
             EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
-            em->node1=boost::asio::ip::address_v4(st->localaddr); 
+            em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
             em->node2=boost::asio::ip::address_v4(r->nexthop);
             em->edgeColor=st->nexthopcolor;
             em->expiration=st->reportperiod*1.5;
@@ -247,7 +248,7 @@ static void updateRoutes(detector *st, Route *list)
             LOG_DEBUG("onehop inserting us -> " << r->dst); 
 #endif
             EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
-            em->node1=boost::asio::ip::address_v4(st->localaddr); 
+            em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
             em->node2=boost::asio::ip::address_v4(r->dst); 
             em->edgeColor=st->onehopcolor;
             em->expiration=st->reportperiod*1.5;
@@ -260,7 +261,10 @@ static void updateRoutes(detector *st, Route *list)
             routeInsert(&tmpOneHop,r);
         }
     }
-    st->watcherClientPtr->sendMessages(messages); 
+    if (!messages.empty())
+        st->watcherClientPtr->sendMessages(messages); 
+    else
+        LOG_DEBUG("No routes found so no messages sent!"); 
 
     routeFree(tmpNextHop);
     routeFree(tmpOneHop);
@@ -285,13 +289,12 @@ static void detectorSend(detector *st)
     gettimeofday(&tp, NULL); 
     curtime=(long long int)tp.tv_sec * 1000 + (long long int)tp.tv_usec/1000;
 
-    LOG_DEBUG("node= " << st->localaddr << " time= " << curtime << " numroutes= " << routeNumber(list)); 
+    LOG_DEBUG("node= " << st->localhost.s_addr << " time= " << curtime << " numroutes= " << routeNumber(list)); 
 
 #ifdef DEBUG
-#if 0
     LOG_DEBUG("old:"); 
     routeDump(st->oldList);
-#endif
+
     LOG_DEBUG("new:");
     routeDump(list);
 #endif
