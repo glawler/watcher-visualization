@@ -22,24 +22,21 @@ CPPFLAGS += -I../sqlite_wrapper
 CPPFLAGS += -I$(TOPDIR)/include
 CPPFLAGS += $(BOOST_CPPFLAGS)
 
-LDFLAGS+=-L../libwatcher
-LDFLAGS+=-L../util
-LDFLAGS+=-L../logger
-LDFLAGS+=-L../sqlite_wrapper
-LDFLAGS+=-L$(TOPDIR)/lib
+LDFLAGS += -L$(TOPDIR)/lib
 LDFLAGS += $(BOOST_LDFLAGS)
 
-LDADD = libfeeder.a
+# watcher libs
+LDADD = libfeeder.a \
+    ../sqlite_wrapper/libsqlite_wrapper.a \
+    ../libwatcher/libwatcher.a \
+    ../util/libwatcherutils.a \
+    ../logger/liblogger.a
 
-LIBS+=-lwatcher
+# system libraries
 LIBS+=-lconfig++
-LIBS+=-llogger
 LIBS+=-llog4cxx
-LIBS+=-lwatcherutils
-LIBS+=-lsqlite_wrapper
 LIBS+=-lsqlite3
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
-
 
 BUILT_SOURCES=watcherd.cfg watcherd.log.properties 
 

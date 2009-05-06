@@ -22,7 +22,7 @@ namespace watcher {
             CONNECTIVITY_MESSAGE_TYPE = 0x8,
 
             // watcherdAPI messages
-            SEEK_MESSAGE_TYPE         = 0x9,
+            SEEK_MESSAGE_TYPE         = 0x9, // DO NOT REORDER THIS WITHOUT CHANGING isFeederEvent
             START_MESSAGE_TYPE        = 0xA,
             STOP_MESSAGE_TYPE         = 0xB,
             SPEED_MESSAGE_TYPE        = 0xC,
