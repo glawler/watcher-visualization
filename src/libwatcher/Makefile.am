@@ -20,4 +20,4 @@ libwatcher_a_SOURCES=seekWatcherMessage.cpp speedWatcherMessage.cpp startWatcher
 	edgeMessage.cpp labelMessage.cpp watcherColors.cpp colorMessage.cpp \
 	gpsMessage.cpp messageStatus.cpp dataRequestMessage.cpp message.cpp \
 	messageTypesAndVersions.cpp testMessage.cpp \
-	watcherRegion.cpp 
+	watcherRegion.cpp connectivityMessage.cpp
