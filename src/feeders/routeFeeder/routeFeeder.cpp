@@ -215,7 +215,11 @@ static void updateRoutes(detector *st, Route *list)
      * 	for each edge in newlist,
      * 	   	if there is not an edge in oldList or tmpList to nexthop, add it, and add to tmpList
      */
-    vector<MessagePtr> messages;
+    static vector<MessagePtr> messages;
+
+    if(!messages.empty())
+        messages.clear(); 
+
     for(r=list;r;r=r->next)
     {
         if (!st->iface.empty()) 
