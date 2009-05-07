@@ -81,7 +81,11 @@ namespace watcher {
         static const GUILayer FLOATING_GRAPH_LAYER = "Floating Graph"; 
         static const GUILayer NORMAL_PATHS_LAYER = "Normal Paths"; 
 
-        bool isFeederEvent(MessageType);
+        /** Determine if the specified message type is a feeder API event.
+         * @retval true if the message type is a feeder api event
+         * @retval false otherwise
+         */
+        inline bool isFeederEvent(MessageType t) { return t < SEEK_MESSAGE_TYPE; }
     }
 }
 

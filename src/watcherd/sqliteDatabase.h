@@ -25,7 +25,9 @@ namespace watcher {
             /** Pointer to the sqlite implementation backing this connection. */
             boost::scoped_ptr<sqlite_wrapper::Connection> conn_;
 
-            /** Prepared statement for resuse for storing events in storeEvent(). */
+            /** Prepared statement for resuse for storing events in storeEvent().
+             * This allows * reuse across calls to storeEvent().
+             */
             boost::scoped_ptr<sqlite_wrapper::Statement> insert_stmt_;
 
             DECLARE_LOGGER();

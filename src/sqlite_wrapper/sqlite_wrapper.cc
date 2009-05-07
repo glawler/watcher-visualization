@@ -18,10 +18,26 @@ void sqlite_wrapper::config(int mode)
         throw Exception("sqlite3_config error");
 }
 
-Connection::Connection(const std::string& path) : db_(0)
+Connection::Connection(const std::string& path, flags f) : db_(0)
 {
-    int res = sqlite3_open(path.c_str(), &db_);
+    int res;
+    if (f) {
+        int sqflags = 0;
+        if (f & readonly) sqflags |= SQLITE_OPEN_READONLY;
+        if (f & readwrite) sqflags |= SQLITE_OPEN_READWRITE;
+        if (f & create) sqflags |= SQLITE_OPEN_CREATE;
+        if (f & nomutex) sqflags |= SQLITE_OPEN_NOMUTEX;
+        if (f & fullmutex) sqflags |= SQLITE_OPEN_FULLMUTEX;
+        res = sqlite3_open_v2(path.c_str(), &db_, sqflags, 0);
+    } else
+        res = sqlite3_open(path.c_str(), &db_);
     error_check(res);
+    
+    /*
+     * Install a callback that is invoked when sqlite detects that database
+     * access would be blocked.  This will make blocked threads wait on pthread_cond_wait()
+     * to be awoken when the currently executing thread is done.
+     */
     sqlite3_busy_handler(db_, busy_handler, 0);
 }
 
@@ -64,6 +80,23 @@ void sqlite_wrapper::execute(Statement& s)
     Row r = s.rows();
     while (*r) ++r;
     s.reset();
+}
+
+/** Execute SQL statement(s).
+ * @param[in] s UTF-8 encoded SQL statements to execute.
+ * */
+void Connection::execute(const std::string& s)
+{
+    char *err = 0;
+    int res = sqlite3_exec(db_, s.c_str(), 0, 0, &err);
+
+    if (err) {
+        std::string errstr(err);
+        sqlite3_free(err);
+        throw Exception(errstr);
+    }
+
+    error_check(res);
 }
 
 Statement& Statement::reset()

@@ -71,9 +71,3 @@ namespace watcher {
         }
     }
 }
-
-// non-inlined version for -O0.  Ensure this matches what is in the header file!
-bool watcher::event::isFeederEvent(MessageType t)
-{
-    return t < SEEK_MESSAGE_TYPE;
-}
