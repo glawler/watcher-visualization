@@ -81,6 +81,7 @@ share/info/dir
 ^bin/watcherpropertytest
 ^bin/libidsCommunications.a
 ^bin/floatinglabeltest
+^bin/gpsMessageTest
 
 
 # ignore libconfig files

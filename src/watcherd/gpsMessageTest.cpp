@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (latitude == 0.0 || longitude == 0.0 || altitude == 0.0 || !serverName)
+    if (!serverName)
     {
         usage(argv[0]);
         if (serverName)
