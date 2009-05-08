@@ -12,17 +12,14 @@ def connect():
         else:
             return session
 
-def main():
+def main(serverName):
     session=connect()
     while 1:
 
-        while 1:
-            try:
-                session.query('admosy')
-            except socket.error:
-                session=connect()
-            else:
-                break
+        try:
+            session.query('admosy')
+        except socket.error:
+            session=connect()
 
         # a = altitude, d = date/time, m=mode,
         # o=postion/fix, s=status, y=satellites
@@ -51,7 +48,7 @@ def main():
                                          '-x', str(session.fix.latitude), 
                                          '-y', str(session.fix.longitude), 
                                          '-z', str(session.fix.altitude),
-                                         '-s', 'glory' ])
+                                         '-s', str(serverName) ])
             except OSError:
                 print 'Caught exception when trying to run gpsMessageTest, is it in your $PATH?'
                 print 'If not, type \'export PATH=$PATH:/path/to/dir/with/gpsMessageTest/in/it\' in this shell'
@@ -60,4 +57,12 @@ def main():
         time.sleep(1)
 
 if __name__ == '__main__': 
-    main()
+    import sys
+    from optparse import OptionParser
+    parser=OptionParser('Usage: %prog -s watcherdServerName')
+    parser.add_option('-s', '--serverName', dest='serverName', help='machine name/ip address where watcherd is running')
+    (options, args)=parser.parse_args()
+    if options.serverName==None:
+        print 'You must give a servername on the command line'
+    else:
+        main(options.serverName)
