@@ -1,6 +1,6 @@
 Here are instructions on building and running the "new old watcher"
 ------------------------------------------------------------------
-The new old watcher requires q few libraries exist on the system, i.e. be 
+The new old watcher requires a few libraries exist on the system, i.e. be 
 installed in system directories: QT 4.3 (or greater), boost 1.36 (or greater), 
 and libidmef (the McAfee version from the idmanet/unstable repository.
 
