@@ -15,11 +15,13 @@ def connect():
 def main(serverName):
     session=connect()
     while 1:
-
-        try:
-            session.query('admosy')
-        except socket.error:
-            session=connect()
+        while 1:
+            try:
+                session.query('admosy')
+            except socket.error:
+                session=connect()
+            else:
+                break
 
         # a = altitude, d = date/time, m=mode,
         # o=postion/fix, s=status, y=satellites
@@ -44,6 +46,7 @@ def main(serverName):
 
         if session.fix.latitude and session.fix.longitude:
             try:
+                # GTL -- need to check the return val here. 
                 retCode=subprocess.call(['gpsMessageTest',
                                          '-x', str(session.fix.latitude), 
                                          '-y', str(session.fix.longitude), 
@@ -63,6 +66,6 @@ if __name__ == '__main__':
     parser.add_option('-s', '--serverName', dest='serverName', help='machine name/ip address where watcherd is running')
     (options, args)=parser.parse_args()
     if options.serverName==None:
-        print 'You must give a servername on the command line'
+        print 'You must give a servername on the command line: use the \'-s server\' option to do so.'
     else:
         main(options.serverName)
