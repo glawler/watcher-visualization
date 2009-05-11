@@ -1,0 +1,3 @@
+logPropertiesFile = "messageStream2Text.log.properties";
+server = "glory";
+service = "watcherd";
