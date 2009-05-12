@@ -35,7 +35,8 @@ namespace watcher {
         Connection(io_service),
         watcher(w),
         strand_(io_service),
-        write_strand_(io_service)
+        write_strand_(io_service),
+        conn_type(unknown)
     {
         TRACE_ENTER(); 
         TRACE_EXIT();
