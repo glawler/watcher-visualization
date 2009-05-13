@@ -1,7 +1,8 @@
 #include "replayState.h"
 
-#include <queue>
+#include <deque>
 #include <boost/bind.hpp>
+#include <boost/thread.hpp>
 
 #include "libwatcher/message.h"
 #include "serverConnection.h"
@@ -21,41 +22,74 @@ const unsigned int DEFAULT_STEP = 250U /* ms */;
  */
 struct ReplayState::impl {
     boost::weak_ptr<ServerConnection> conn;
-    std::queue<MessagePtr> events;
+    std::deque<MessagePtr> events;
     boost::asio::deadline_timer timer;
     Timestamp ts; // the current effective time
     float speed; //< playback speed
     unsigned int bufsiz; //< number of database rows to prefetch
     Timestamp step;
 
+    /*
+     * Lock used for event queue.  This is required due to the seek() member
+     * function, which can be called from a different thread.
+     */
+    boost::mutex lock;
+
     impl(ServerConnectionPtr& ptr) :
         conn(ptr), timer(ptr->io_service()), ts(0), bufsiz(DEFAULT_BUFFER_SIZE),
-        step(DEFAULT_STEP) {}
+        step(DEFAULT_STEP)
+    {
+    }
 };
 
-ReplayState::ReplayState(ServerConnectionPtr& ptr, float playback_speed) :
+ReplayState::ReplayState(ServerConnectionPtr& ptr, Timestamp t, float playback_speed) :
     impl_(new impl(ptr))
 {
+    Assert<Bad_arg>(t < 0);
+    impl_->ts = t;
+
     speed(playback_speed);
+}
+
+Timestamp ReplayState::tell() const
+{
+    return impl_->ts;
+}
+
+ReplayState& ReplayState::pause()
+{
+    impl_->timer.cancel();
+    return *this;
+}
+
+ReplayState& ReplayState::seek(Timestamp t)
+{
+    Assert<Bad_arg>(t < 0);
+
+    boost::mutex::scoped_lock L(impl_->lock);
+    impl_->timer.cancel();
+    impl_->events.clear();
+    impl_->ts = t;
+    return *this;
 }
 
 ReplayState& ReplayState::speed(float f)
 {
-    Assert<Bad_speed>(f != 0);
+    Assert<Bad_arg>(f != 0);
     impl_->speed = f;
     return *this;
 }
 
 ReplayState& ReplayState::buffer_size(unsigned int n)
 {
-    Assert<Bad_buffer_size>(n != 0);
+    Assert<Bad_arg>(n != 0);
     impl_->bufsiz = n;
     return *this;
 }
 
 ReplayState& ReplayState::time_step(unsigned int n)
 {
-    Assert<Bad_step>(n != 0);
+    Assert<Bad_arg>(n != 0);
     impl_->step = n;
     return *this;
 }
@@ -69,6 +103,8 @@ ReplayState& ReplayState::time_step(unsigned int n)
  */
 void ReplayState::run()
 {
+    boost::mutex::scoped_lock L(impl_->lock);
+
     if (impl_->events.empty()) {
         /* queue is empty, pre-fetch more items from the DB */
         //FIXME need to implement this!
@@ -98,6 +134,8 @@ void ReplayState::run()
      * FIXME what should happen when the end of the event stream is reached?
      * Currently the object is destroyed when this function exits because no
      * other shared pointers will exist.
+     *
+     * One option would be to convert to live stream at this point.
      */
 }
 
@@ -113,15 +151,19 @@ void ReplayState::timer_handler(const boost::system::error_code&)
 {
     std::vector<MessagePtr> msgs;
 
-    while (! impl_->events.empty()) {
-        MessagePtr m = impl_->events.front();
-        /* Replay all events in the current time step.  Use the absolute value
-         * of the difference in order for forward and reverse replay to work
-         * properly. */
-        if (abs(m->timestamp - impl_->ts) >= impl_->step)
-            break;
-        msgs.push_back(m);
-        impl_->events.pop();
+    {
+        boost::mutex::scoped_lock L(impl_->lock);
+
+        while (! impl_->events.empty()) {
+            MessagePtr m = impl_->events.front();
+            /* Replay all events in the current time step.  Use the absolute value
+             * of the difference in order for forward and reverse replay to work
+             * properly. */
+            if (abs(m->timestamp - impl_->ts) >= impl_->step)
+                break;
+            msgs.push_back(m);
+            impl_->events.pop_front();
+        }
     }
 
     ServerConnectionPtr srv = impl_->conn.lock();
