@@ -34,6 +34,7 @@ namespace watcher {
     ServerConnection::ServerConnection(Watcherd& w, boost::asio::io_service& io_service) :
         Connection(io_service),
         watcher(w),
+        io_service_(io_service),
         strand_(io_service),
         write_strand_(io_service),
         conn_type(unknown)
