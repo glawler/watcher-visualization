@@ -7,6 +7,8 @@
 #include "libwatcher/message.h"
 #include "serverConnection.h"
 #include "Assert.h"
+#include "database.h"
+#include "watcherd.h"
 
 using namespace util;
 using namespace watcher;
@@ -28,6 +30,7 @@ struct ReplayState::impl {
     float speed; //< playback speed
     unsigned int bufsiz; //< number of database rows to prefetch
     Timestamp step;
+    enum run_state { paused, running } state;
 
     /*
      * Lock used for event queue.  This is required due to the seek() member
@@ -37,7 +40,7 @@ struct ReplayState::impl {
 
     impl(ServerConnectionPtr& ptr) :
         conn(ptr), timer(ptr->io_service()), ts(0), bufsiz(DEFAULT_BUFFER_SIZE),
-        step(DEFAULT_STEP)
+        step(DEFAULT_STEP), state(paused)
     {
     }
 };
@@ -59,6 +62,7 @@ Timestamp ReplayState::tell() const
 ReplayState& ReplayState::pause()
 {
     impl_->timer.cancel();
+    impl_->state = impl::paused;
     return *this;
 }
 
@@ -66,17 +70,39 @@ ReplayState& ReplayState::seek(Timestamp t)
 {
     Assert<Bad_arg>(t < 0);
 
-    boost::mutex::scoped_lock L(impl_->lock);
-    impl_->timer.cancel();
-    impl_->events.clear();
-    impl_->ts = t;
+    impl::run_state oldstate;
+    {
+        boost::mutex::scoped_lock L(impl_->lock);
+        oldstate = impl_->state;
+        pause();
+        impl_->events.clear();
+        impl_->ts = t;
+    }
+    if (oldstate == impl::running)
+        run();
     return *this;
 }
 
 ReplayState& ReplayState::speed(float f)
 {
     Assert<Bad_arg>(f != 0);
-    impl_->speed = f;
+    /* If speed changes direction, need to clear the event list.
+     * Check for sign change by noting that positive*negative==negative
+     */
+    if (impl_->speed * f < 0) {
+        impl::run_state oldstate;
+        {
+            boost::mutex::scoped_lock L(impl_->lock);
+
+            oldstate = impl_->state;
+            pause();
+            impl_->events.clear();
+            impl_->speed = f;
+        }
+        if (oldstate == impl::running)
+            run();
+    } else
+        impl_->speed = f;
     return *this;
 }
 
@@ -94,6 +120,13 @@ ReplayState& ReplayState::time_step(unsigned int n)
     return *this;
 }
 
+/* function object for accepting events output from Database::getEvents() */
+struct event_output {
+    std::deque<MessagePtr>& q;
+    event_output(std::deque<MessagePtr>& qq) : q(qq) {}
+    void operator() (MessagePtr m) { q.push_back(m); }
+};
+
 /** Schedule an asynchronous task to replay events from the database to a GUI
  * client.  If the local cache of upcoming events is empty, prefetch a block of
  * events from the database.
@@ -106,8 +139,13 @@ void ReplayState::run()
     boost::mutex::scoped_lock L(impl_->lock);
 
     if (impl_->events.empty()) {
-        /* queue is empty, pre-fetch more items from the DB */
-        //FIXME need to implement this!
+        // queue is empty, pre-fetch more items from the DB
+
+        boost::function<void(MessagePtr)> cb = event_output(impl_->events);
+        get_db_handle().getEvents(cb,
+                                  impl_->ts,
+                                  (impl_->speed >= 0) ? Database::forward : Database::reverse,
+                                  impl_->bufsiz);
 
         /* When starting to replay, assume that time T=0 is the time of the
          * first event in the stream. */
@@ -129,14 +167,17 @@ void ReplayState::run()
 
         impl_->timer.expires_from_now(boost::posix_time::millisec(delta));
         impl_->timer.async_wait(boost::bind(&ReplayState::timer_handler, shared_from_this(), boost::asio::placeholders::error));
+        impl_->state = impl::running;
+    } else {
+        /*
+         * FIXME what should happen when the end of the event stream is reached?
+         * Currently the object is destroyed when this function exits because no
+         * other shared pointers will exist.
+         *
+         * One option would be to convert to live stream at this point.
+         */
+        impl_->state = impl::paused;
     }
-    /*
-     * FIXME what should happen when the end of the event stream is reached?
-     * Currently the object is destroyed when this function exits because no
-     * other shared pointers will exist.
-     *
-     * One option would be to convert to live stream at this point.
-     */
 }
 
 /** Replay events to a GUI client when a timer expires.

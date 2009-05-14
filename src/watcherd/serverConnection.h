@@ -46,6 +46,10 @@ namespace watcher
 
             /// get the io_service associated with this connection
             boost::asio::io_service& io_service() { return io_service_; }
+
+            /** Get the Watcherd instance associated with this connection. */
+            Watcherd& watcherd() { return watcher; }
+
         protected:
             // 
             //

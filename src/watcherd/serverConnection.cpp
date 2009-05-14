@@ -172,14 +172,11 @@ namespace watcher {
                                 conn_type = feeder;
 
                                 /*
-                                 * This connection is a watcher test daemon.  Add a message handler to write
-                                 * its event stream to the database.
+                                 * This connection is a watcher test daemon.
+                                 * Add a message handler to write its event
+                                 * stream to the database.
                                  */
-                                std::string path;
-                                if (watcher.config().lookupValue(dbPath, path))
-                                    addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler(path)));
-                                else
-                                    LOG_ERROR("unable to lookup \"" << dbPath << " in server configuration");
+                                addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
                             }
                         }
                     }
