@@ -31,6 +31,7 @@ via packet capture database
 checkpoint/demo. 
 - first cut of game-engine based watcher GUI (most likely task)
 - specific functionality needed by ARL from SOW or other
+- Use boost.python to create a python interface for both communiction APIs.
 - other/TDB
 
 5. Documentation checkpoint - end of July - 
