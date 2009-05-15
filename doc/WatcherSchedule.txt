@@ -7,15 +7,15 @@ console
 - Shows: messages from test nodes demultiplexed through new watcherd to
 a "GUI" client. 
 
-2. Network transport transition layer (don't depend on hierarchy for transport) - mid/late May
+2. Network transport transition layer (don't depend on hierarchy for transport) - late May
 - Don't run hierarchy daemon. :) 
 - Run test node daemons updated to use new network API: gpsDaemon, route daemon, and maybe the WHD if ARL wants it.  
 - Run watcherd instance
 - Run legacyWatcher (using new network API), or just the text-based "GUI" log dumper program, messageStream2Text.
 - [optional if done in time - update legacyWatcher to not use hierarchy]
 
-3. Full TiVO mode/playback functionality -- sometime in
-June? This demo shows that the new watcherd has the DB and TiVO-mode message
+3. Full TiVO mode/playback functionality -- end of June. 
+This demo shows that the new watcherd has the DB and TiVO-mode message
 streaming engine complete. 
 - Run test node daemons
 - Run watcherd
@@ -40,7 +40,7 @@ documentation to enable ARL to use and extend this software as needed
 (contractor format ...)".
 
 ----------------------------------------------------------
-Possible Follow-on tasks:
+Option task milestones:
 
 1. Basic Google Earth Watcher GUI demo (GE as watcherd GUI)
 - Run test node daemons
