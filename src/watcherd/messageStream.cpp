@@ -85,7 +85,7 @@ bool MessageStream::setStreamRate(const float &messageStreamRate)
     TRACE_EXIT_RET("true");
     return true;
 }
-bool MessageStream::getNextMessage(MessagePtr newMessage)
+bool MessageStream::getNextMessage(MessagePtr &newMessage)
 {
     TRACE_ENTER();
     if(!connection) 

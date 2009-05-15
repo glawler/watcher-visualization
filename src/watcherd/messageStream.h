@@ -105,13 +105,13 @@ namespace watcher
             bool setStreamRate(const float &messageStreamRate);
 
             /**
-             * getNextMessage(MessagePtr newMessage)
+             * getNextMessage(MessagePtr &newMessage)
              * This function blocks until the next message arrives from the watcherd instance connected to. 
              * isStreamReadable() can be used to see if the call to getNextMessage() would block or not.
-             * @param MessagePtr - the next message in the message stream
+             * @param MessagePtr& - the next message in the message stream
              * @return - returns false on read message error - watcherd disconnect
              */
-            bool getNextMessage(MessagePtr newMessage);
+            bool getNextMessage(MessagePtr &newMessage);
 
             /**
              * isStreamReadable()
