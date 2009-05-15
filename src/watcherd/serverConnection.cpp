@@ -34,8 +34,10 @@ namespace watcher {
     ServerConnection::ServerConnection(Watcherd& w, boost::asio::io_service& io_service) :
         Connection(io_service),
         watcher(w),
+        io_service_(io_service),
         strand_(io_service),
-        write_strand_(io_service)
+        write_strand_(io_service),
+        conn_type(unknown)
     {
         TRACE_ENTER(); 
         TRACE_EXIT();
@@ -170,14 +172,11 @@ namespace watcher {
                                 conn_type = feeder;
 
                                 /*
-                                 * This connection is a watcher test daemon.  Add a message handler to write
-                                 * its event stream to the database.
+                                 * This connection is a watcher test daemon.
+                                 * Add a message handler to write its event
+                                 * stream to the database.
                                  */
-                                std::string path;
-                                if (watcher.config().lookupValue(dbPath, path))
-                                    addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler(path)));
-                                else
-                                    LOG_ERROR("unable to lookup \"" << dbPath << " in server configuration");
+                                addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
                             }
                         }
                     }

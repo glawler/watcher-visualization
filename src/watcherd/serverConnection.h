@@ -44,6 +44,12 @@ namespace watcher
             void sendMessage(event::MessagePtr);
             void sendMessage(const std::vector<event::MessagePtr>&);
 
+            /// get the io_service associated with this connection
+            boost::asio::io_service& io_service() { return io_service_; }
+
+            /** Get the Watcherd instance associated with this connection. */
+            Watcherd& watcherd() { return watcher; }
+
         protected:
             // 
             //
@@ -66,6 +72,7 @@ namespace watcher
             void handle_write(const boost::system::error_code& e, event::MessagePtr reply);
 
             Watcherd& watcher;
+            boost::asio::io_service& io_service_;
 
             /// Strand to ensure the connection's handlers are not called concurrently.
             boost::asio::io_service::strand strand_;

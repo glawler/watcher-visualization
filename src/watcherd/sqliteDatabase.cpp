@@ -62,3 +62,7 @@ void SqliteDatabase::storeEvent(const std::string& addr, MessagePtr msg)
 
     TRACE_EXIT();
 }
+
+void SqliteDatabase::getEvents( boost::function<void(event::MessagePtr)> output, Timestamp t, Direction d, unsigned int count )
+{
+}
