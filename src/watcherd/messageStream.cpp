@@ -73,13 +73,15 @@ MessageStream::~MessageStream()
 
 bool MessageStream::setStreamTimeStart(const Timestamp &startTime)
 {
-    TRACE_ENTER()
+    TRACE_ENTER();
+    LOG_DEBUG("Setting stream start time to " << startTime); 
     TRACE_EXIT_RET("true");
     return true;
 }
 bool MessageStream::setStreamRate(const float &messageStreamRate)
 {
     TRACE_ENTER();
+    LOG_DEBUG("Setting message stream rate to " << messageStreamRate); 
     TRACE_EXIT_RET("true");
     return true;
 }
@@ -114,7 +116,7 @@ bool MessageStream::isStreamReadable() const
     TRACE_EXIT_RET(retVal); 
     return retVal;
 }
-bool MessageStream::addMessageFilter(const MessageStreamFilter &filter)
+bool MessageStream::addMessageFilter(const MessageStreamFilter & /*filter*/)
 {
     TRACE_ENTER();
     
@@ -126,6 +128,15 @@ bool MessageStream::addMessageFilter(const MessageStreamFilter &filter)
 bool MessageStream::getMessageTimeRange(Timestamp &startTime, Timestamp endTime)
 {
     TRACE_ENTER();
+
+    startTime=0;
+    endTime=0;
+
+    // query watcherd for the least and greatest time here.
+    assert(0); // not yet supported - goodbye.
+
+    LOG_DEBUG("Got message time range from server. Start:" << startTime << " End:" << endTime); 
+
     TRACE_EXIT_RET("true");
     return true;
 }
@@ -164,6 +175,15 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
 
     // We don't really add anything yet to a generic watcherdAPI client.
     bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(conn, message); 
+
+    {
+        lock_guard<mutex> lock(messageCacheMutex);
+        messageCache.push_back(message); 
+        readReady=true;
+        // let lock go out of scope
+    }
+    messageCacheCond.notify_all();
+
 
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
@@ -211,7 +231,7 @@ bool MessageStream::handleMessagesSent(const vector<MessagePtr> &messages)
     return retVal;
 }
 
-std::ostream &operator<<(std::ostream &out, const MessageStream &messStream)
+std::ostream &operator<<(std::ostream &out, const MessageStream & /*messStream*/)
 {
     TRACE_ENTER();
     TRACE_EXIT();
