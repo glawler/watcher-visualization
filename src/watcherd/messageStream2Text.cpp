@@ -39,8 +39,7 @@ int main(int argc, char **argv)
     SingletonConfig::lock();
     if (false==initConfig(config, argc, argv, configFilename))
     {
-        usage(argv[0], false); 
-        cout << endl << endl << "Creating and using default configuration file." << endl << endl;
+        cout << endl << "Configuration file not found. Creating new configuration file and using default runtime values." << endl << endl;
     }
     SingletonConfig::unlock();
 
@@ -56,7 +55,7 @@ int main(int argc, char **argv)
     LOAD_LOG_PROPS(logConf); 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
 
-    string serverName("glory");
+    string serverName("127.0.0.1");
     string service("watcherd");
 
     if (!config.lookupValue("server", serverName))
@@ -74,6 +73,15 @@ int main(int argc, char **argv)
     }
 
     MessageStreamPtr ms=MessageStream::createNewMessageStream(serverName, service); 
+
+    if(!ms)
+    {
+        LOG_FATAL("Unable to create new message stream to server \"" << serverName << "\" using service (or port) \"" << service);
+        TRACE_EXIT_RET(EXIT_SUCCESS); 
+        return EXIT_FAILURE;
+    }
+
+
     MessagePtr mp(new Message);
 
     ms->startStream(); 

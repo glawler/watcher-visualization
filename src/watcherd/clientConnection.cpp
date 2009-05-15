@@ -73,25 +73,32 @@ bool ClientConnection::tryConnect()
 
     LOG_DEBUG("Starting connection sequence to " << server); 
 
-    try
-    {
-        boost::system::error_code error;
-        tcp::resolver resolver(ioService); 
-        tcp::resolver::query query(server, service);
-        if(query.numeric_service)
-        LOG_DEBUG("Connecting to service/port " << service);
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query, error);
-        tcp::resolver::iterator end;
+    boost::system::error_code error;
+    tcp::resolver resolver(ioService); 
+    tcp::resolver::query query(server, service);
+    LOG_DEBUG("Connecting to service/port " << service);
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query, error);
+    tcp::resolver::iterator end;
 
-        if (error)
+    if (error)
+    {
+        connected=false;
+        if (error==boost::asio::error::service_not_found)
         {
-            connected=false;
-            LOG_DEBUG("Error resolving query: " << error.message()); 
+            LOG_FATAL("watcherd service not found. Please add \"watcherd    8095/tcp\" to your /etc/services file.");
+        }
+        else if(error==boost::asio::error::host_not_found)
+        {
+            LOG_FATAL("Unable to resolve hostname of server \"" << server << "\". Please resolve connectivity issues and try again.");
         }
         else
-        {
-            LOG_DEBUG("Resolved connection query to " << server);
-        }
+            LOG_FATAL("Resolution error: " << error);
+
+        throw(error);
+    }
+    else
+    {
+        LOG_DEBUG("Resolved connection query to " << server);
 
         // Try each endpoint until we successfully establish a connection.
         do 
@@ -113,17 +120,9 @@ bool ClientConnection::tryConnect()
             else
             {
                 connected=false;
-                LOG_DEBUG("Connection error: " << error.message());
+                LOG_ERROR("Connection error: " << error);
             }
         } while (endpoint_iterator != end);
-    }
-    catch (const boost::system::system_error &e)
-    {
-        connected=false;
-        if (e.code()==boost::asio::error::service_not_found)
-             LOG_INFO("watcherd service not found. Please add \"watcherd    8095/tcp\" to your /etc/services file.")
-        else
-            LOG_ERROR("Caught connection error: " << e.what() << " : " << e.code());
     }
 
     TRACE_EXIT_RET((connected==true?"true":"false"));
