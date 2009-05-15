@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "watcherColors.h"
+#include <cstdio>
 #include <string>
 
 using namespace boost; 
