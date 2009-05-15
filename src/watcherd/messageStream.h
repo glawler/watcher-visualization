@@ -2,7 +2,7 @@
 #define WATCHER_MESSAGE_STREAM_H
 
 #include <string>
-#include <vector>
+#include <deque>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -197,7 +197,7 @@ namespace watcher
             ClientPtr connection;
 
             /** Incoming messages are stored in a cache until getNextMessage() is called. */
-            typedef std::vector<watcher::event::MessagePtr> MessageCache;
+            typedef std::deque<watcher::event::MessagePtr> MessageCache;
             MessageCache messageCache; 
 
             /** 

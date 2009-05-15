@@ -102,7 +102,7 @@ bool MessageStream::getNextMessage(MessagePtr newMessage)
 
     assert(messageCache.size() > 0); 
     newMessage=messageCache.front();
-    messageCache.erase(messageCache.begin());
+    messageCache.pop_front();
     readReady=messageCache.size()>0; 
     LOG_DEBUG("Setting readReady to " << (readReady?"true":"false")); 
 
