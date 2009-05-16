@@ -5,7 +5,7 @@
 TEMPLATE = app
 TARGET = watcher
 DEPENDPATH += .
-INCLUDEPATH += . ./legacyWatcher ../../include ../util ../../include/qwt
+INCLUDEPATH += . ./legacyWatcher ../../include ../util ../../include/qwt ../logger ../util
 INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include /usr/include/qwt
 QT += opengl 
 CONFIG += qt x11
@@ -18,7 +18,7 @@ QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0
 QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing
 QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing
 
-LIBS += -L../../lib 
+LIBS += -L../../lib -L../logger -L../util
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -L/usr/local/lib -lidmef 
 LIBS += -lidsCommunications 
