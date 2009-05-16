@@ -25,6 +25,7 @@ namespace watcher {
                 unsigned int version;
                 MessageType type;
                 Timestamp timestamp;  
+                NodeIdentifier fromNodeID;
 
                 Message();
                 Message(const MessageType &t, const unsigned int version);
