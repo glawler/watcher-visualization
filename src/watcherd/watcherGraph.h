@@ -147,8 +147,26 @@ namespace watcher
                 }
             }; // class MatchNodeId
 
-            /** Find a node in the graph based on a NodeIdentifier */
+            /** Find a node in the graph based on a NodeIdentifier 
+             * @param[in] id - the id of the node you want to find. 
+             * @param[out] retIter - an iterator that points to the found node.
+             * @return bool - true if successful, false otherwise
+             */
             bool findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retVal);
+
+            /** Find a node, if it doesn't exist, create it. Returns iterator to the node 
+             * @param[in] id - the id of the node you want to find/create.
+             * @param[out] retIter - an iterator that points to the found node.
+             * @return bool - true if successful, false otherwise
+             */
+            bool findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter);
+
+            /** Create a node and return an iterator to it. 
+             * @param[in] id - the id of the node you want to create. 
+             * @param[out] retIter - an iterator that points to the found node.
+             * @return bool - true if successful, false otherwise
+             */
+            bool createNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter);
 
     }; // like a fired school teacher.
 

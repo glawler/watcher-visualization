@@ -84,7 +84,7 @@ bool WatcherGraph::updateNodeLocation(const GPSMessagePtr &message)
     
     bool retVal;
     boost::graph_traits<Graph>::vertex_iterator nodeIter;
-    if(findNode(message->fromNodeID, nodeIter))
+    if(findOrCreateNode(message->fromNodeID, nodeIter))
     {
         LOG_DEBUG("Updating GPS information for node " << theGraph[*nodeIter].nodeId);
         theGraph[*nodeIter].gpsData=message; 
@@ -100,7 +100,7 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
 
     bool retVal;
     boost::graph_traits<Graph>::vertex_iterator nodeIter;
-    if(findNode(message->fromNodeID, nodeIter))
+    if(findOrCreateNode(message->fromNodeID, nodeIter))
     {
         LOG_DEBUG("Updating GPS information for node " << theGraph[*nodeIter].nodeId);
         theGraph[*nodeIter].connected=message->event==NodeStatusMessage::connect ? true : false;
@@ -111,7 +111,7 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
     return retVal;
 }
 
-bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retVal)
+bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter)
 {
     TRACE_ENTER();
 
@@ -121,10 +121,37 @@ bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>
 
     // GTL - may be a way to use boost::bind() here instead
     // of the auxillary class MatchNodeId
-    retVal = find_if(beg, end, MatchNodeId(theGraph, id)); 
+    retIter = find_if(beg, end, MatchNodeId(theGraph, id)); 
 
     TRACE_EXIT();
-    return retVal != end;
+    return retIter != end;
+}
+
+bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter)
+{
+    TRACE_ENTER();
+    bool retVal=true;
+    if(!findNode(id, retIter))
+    {
+        if(!createNode(id, retIter))
+        {
+            LOG_ERROR("Unable to create new node for id " << id << " in watcherGraph");
+            retVal=false;
+        }
+    }
+
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
+bool WatcherGraph::createNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter)
+{
+    TRACE_ENTER();
+    graph_traits<Graph>::vertex_descriptor v = add_vertex(theGraph);
+    theGraph[v].nodeId=id;
+    bool retVal=findNode(id, retIter);
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
 
 /* global operations */
