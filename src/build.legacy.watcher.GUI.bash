@@ -23,7 +23,7 @@ export CXXFLAGS="-I $TOPDIR/include"
 
 # IDMEF
 cd $SRCDIR
-tar zxvf ../tars/libidmef-0.7.3_beta_McAfee20050325.tar.gz 
+tar zkxvf ../tars/libidmef-0.7.3_beta_McAfee20050325.tar.gz 
 cd $SRCDIR/libidmef-0.7.3_beta_McAfee20050325
 ./configure --prefix=$TOPDIR
 make
@@ -31,7 +31,7 @@ make install
 
 # libconfig (for F9+, just yum install it)
 cd $SRCDIR
-tar zxvf ../tars/libconfig-1.3.1.tar.gz
+tar zkxvf ../tars/libconfig-1.3.1.tar.gz
 cd $SRCDIR/libconfig-1.3.1/
 ./configure --prefix=$TOPDIR
 make && make install
@@ -49,35 +49,35 @@ do
 done
 
 cd $SRCDIR
-tar zxvf ../tars/apr-1.3.3.tar.gz
+tar zkxvf ../tars/apr-1.3.3.tar.gz
 cd apr-1.3.3
 ./configure --prefix=$TOPDIR
-make -j 
+make  
 make install
 
 # install apr-utils
 cd $SRCDIR
-tar zxvf ../tars/apr-util-1.3.4.tar.gz
+tar zkxvf ../tars/apr-util-1.3.4.tar.gz
 cd apr-util-1.3.4
 ./configure --prefix=$TOPDIR --with-apr=$TOPDIR
-make -j 
+make  
 make install
 
 # install log4cxx
 cd $SRCDIR
-tar zxvf ../tars/apache-log4cxx-0.10.0.tar.gz
+tar zkxvf ../tars/apache-log4cxx-0.10.0.tar.gz
 cd apache-log4cxx-0.10.0
 ./configure --prefix=$TOPDIR --with-apr=$TOPDIR --with-apr-util=$TOPDIR --disable-doxygen
-make -j 
+make  
 make install
 
 cd $SRCDIR
-tar jxvf ../tars/qwt-5.1.1.tar.bz2
+tar jkxvf ../tars/qwt-5.1.1.tar.bz2
 cd qwt-5.1.1/
 # replace install dir with $TOPDIR in config file
 perl -pi -e " s|/usr/local/qwt-5.1.1|$TOPDIR| " qwtconfig.pri
 qmake-qt4
-make -j 
+make  
 make install
 
 cd $SRCDIR/logger
