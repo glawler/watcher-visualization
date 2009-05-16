@@ -65,7 +65,7 @@ namespace watcher
             WatcherGraph();
 
             /**
-             * “On a large enough time line, the survival rate for everyone drops to zero.”
+             * On a large enough time line, the survival rate for everyone drops to zero.
              */
             virtual ~WatcherGraph();
 
