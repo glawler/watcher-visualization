@@ -29,7 +29,7 @@ namespace watcher
                     disconnect
                 };
 
-                NodeStatusMessage(const statusEvent &event=connect, const NodeIdentifier &n=NodeIdentifier::from_string("127.0.0.1")); 
+                NodeStatusMessage(const statusEvent &event=connect); 
 
                 NodeStatusMessage(const NodeStatusMessage &copy); 
 
@@ -43,15 +43,14 @@ namespace watcher
 
                 static std::string statusEventToString(const statusEvent &e); 
 
+                statusEvent event;      // What happened
+
             private:
 
                 friend class boost::serialization::access;
                 template <typename Archive> void serialize(Archive& ar, const unsigned int version);
 
                 DECLARE_LOGGER();
-
-                statusEvent event;      // What happened
-                NodeIdentifier nodeId;  // To whom
         };
 
         typedef boost::shared_ptr<NodeStatusMessage> NodeStatusMessagePtr; 
