@@ -148,6 +148,13 @@ namespace watcher {
                          (arrivedMessages.size()>1?"s":"") << " from " <<
                          getPeerAddr()); 
 
+                // Add the incoming address to the Message so everyone
+                // knows who the message came from.
+                boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint();
+                BOOST_FOREACH(MessagePtr m, arrivedMessages) {
+                    m->fromNodeID=ep.address();
+                }
+
                 /*
                  * If this connection type is unknown or gui, then traverse the
                  * list of arrived messages.  For GUI clients, look for the
