@@ -13,8 +13,8 @@ namespace watcher {
         class EdgeMessage : public Message {
             public:
                 // The data
-                boost::asio::ip::address node1;
-                boost::asio::ip::address node2;
+                NodeIdentifier node1;
+                NodeIdentifier node2;
                 Color edgeColor;
                 float expiration; 
                 float width;      
@@ -27,8 +27,8 @@ namespace watcher {
 
                 EdgeMessage();
                 EdgeMessage(
-                            const boost::asio::ip::address &node1_, // address of node1
-                            const boost::asio::ip::address &node2_, // address of node2
+                            const NodeIdentifier &node1_, // address of node1
+                            const NodeIdentifier &node2_, // address of node2
                             const GUILayer &layer_,                 // Which GUI layer the edge is on
                             const Color &c_=Color::blue,            // color of edge
                             const unsigned int &width=15,           // width of the edge 
