@@ -65,7 +65,7 @@ namespace watcher {
          */
         typedef std::string GUILayer;
         static const GUILayer UNDEFINED_LAYER = "Undefined";
-        static const GUILayer PHYSICAL_LAYER = "Physcial";
+        static const GUILayer PHYSICAL_LAYER = "Physical";
         static const GUILayer HIERARCHY_LAYER = "Hierarchy"; 
         static const GUILayer BANDWIDTH_LAYER = "Bandwidth"; 
         static const GUILayer ROUTING_LAYER = "Routing"; 
