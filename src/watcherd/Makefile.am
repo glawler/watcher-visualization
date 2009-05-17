@@ -86,6 +86,7 @@ bin_PROGRAMS= \
 	edgeMessageTest \
 	colorMessageTest \
 	dataRequestMessageTest \
+	connectivityMessageTest \
 	testCC \
 	messageStream2Text \
 	connectivity2dot
