@@ -3,10 +3,19 @@
  * @author Geoff Lawler <Geoff.Lawler@cobham.com>
  * @date 2009-05-06
  */
+#include <boost/asio.hpp>
 
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/string.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/string.hpp>       // for serializing addresses.
+#include <boost/serialization/vector.hpp>       // for serializing addresses.
+#include <boost/serialization/shared_ptr.hpp>   // for serializing LabelMessagePtrs
 #include <boost/serialization/export.hpp>
+
+#include "watcherGlobalFunctions.h"             // for address serialization
+
 #include "connectivityMessage.h"
 
 using namespace std;
