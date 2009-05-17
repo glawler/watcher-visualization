@@ -141,6 +141,9 @@ share/info/dir
 ^src/watcherd/test/testMessageStream
 ^src/watcherd/messageStream2Text
 ^src/watcherd/test/testWatcherGraph
+^src/watcherd/connectivity2dot
+^src/watcherd/connectivityMessageTest
+
 
 ^src/libwatcher/Makefile
 ^src/libwatcher/Makefile.local
@@ -161,6 +164,7 @@ share/info/dir
 ^src/libwatcher/test/testStartMessage
 ^src/libwatcher/test/testStopMessage
 ^src/libwatcher/test/testTestMessage
+^src/libwatcher/test/testConnectivityMessage
 
 
 ^src/util/Makefile
