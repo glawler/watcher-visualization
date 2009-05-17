@@ -2,10 +2,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include <libwatcher/edgeMessage.h>
+#include "../watcherTypes.h"
 #include "logger.h"
 
 using namespace std;
 using namespace boost;
+using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
 
@@ -35,8 +37,8 @@ EdgeMessagePtr createEdgeMessage()
     // lm2->expiration=7500;
 
     EdgeMessagePtr em(new EdgeMessage); 
-    em->node1=asio::ip::address::from_string("192.168.1.1");
-    em->node2=asio::ip::address::from_string("192.168.1.2");
+    em->node1=NodeIdentifier::from_string("192.168.1.1");
+    em->node2=NodeIdentifier::from_string("192.168.1.2");
     em->edgeColor=Color::red;
     em->expiration=20000;
     em->width=15;
