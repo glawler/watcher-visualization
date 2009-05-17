@@ -27,6 +27,7 @@ LDFLAGS += $(BOOST_LDFLAGS)
 
 # watcher libs
 LDADD = libfeeder.a \
+		libwatcherdAPI.a \
     ../sqlite_wrapper/libsqlite_wrapper.a \
     ../libwatcher/libwatcher.a \
     ../util/libwatcherutils.a \
@@ -86,7 +87,10 @@ bin_PROGRAMS= \
 	colorMessageTest \
 	dataRequestMessageTest \
 	testCC \
-	messageStream2Text
+	messageStream2Text \
+	connectivity2dot
+
+connectivity2dot_LFLAGS=$(LFLAGS) -L. -lwatcherdAPI
 
 watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp \
 		 serverMessageHandler.cpp writeDBMessageHandler.cpp \
