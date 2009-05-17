@@ -16,7 +16,8 @@ LDFLAGS += -L$(TOPDIR)/src/logger
 LDADD = -lwatcherdAPI -lwatcher -llogger -llog4cxx
 LDADD += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(BOOST_SYSTEM_LIB)
 
-# GTL - test does not currently build, so comment out so I can commit 
-TESTS=testMessageStream
-bin_PROGRAMS=testMessageStream
+TESTS=testMessageStream testWatcherGraph
+bin_PROGRAMS=testMessageStream testWatcherGraph
 testMessageStream_SOURCES=testMessageStream.cpp
+testWatcherGraph_SOURCES=testWatcherGraph.cpp
+

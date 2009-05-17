@@ -29,12 +29,35 @@ namespace watcher
     class WatcherGraphNode
     {
         public:
-            WatcherGraphNode() : nodeId(), gpsData(), connected(false) { }
+            WatcherGraphNode();
             ~WatcherGraphNode();
 
             NodeIdentifier nodeId;
             GPSMessagePtr gpsData;
+            std::string label;
             bool connected;
+
+        protected:
+        private:
+    };
+
+    /**
+     * @class WatcherGraphEdge
+     * @author Geoff Lawler <geoff.lawler@sparta.com>
+     * @date 2009-05-15
+     *
+     * A class that holds the data in the edges of a WatcherGraph
+     */
+    class WatcherGraphEdge
+    {
+        public:
+            WatcherGraphEdge();
+            ~WatcherGraphEdge();
+
+            Color color;
+            float expiration;
+            float width;
+            bool bidirectional;
 
         protected:
         private:
@@ -76,7 +99,8 @@ namespace watcher
                 boost::vecS, 
                 boost::vecS, 
                 boost::bidirectionalS,
-                WatcherGraphNode> Graph;
+                WatcherGraphNode,
+                WatcherGraphEdge> Graph;
 
             /**
              * updateGraph()
@@ -96,7 +120,6 @@ namespace watcher
 
             /**
              * Write an instance of this class as a human readable stream to the otream given.
-             * Just calls MessageStream::toStream().
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
@@ -134,18 +157,6 @@ namespace watcher
             /** 
              * private data 
              **/
-
-            class MatchNodeId
-            {
-                const watcher::WatcherGraph::Graph &g;
-                const NodeIdentifier &id;
-                public:
-                MatchNodeId(const watcher::WatcherGraph::Graph &g_, const NodeIdentifier &id_) : g(g_), id(id_) {}
-                bool operator()(boost::graph_traits<watcher::WatcherGraph::Graph>::vertex_descriptor const &v)
-                {
-                    return g[v].nodeId == id;
-                }
-            }; // class MatchNodeId
 
             /** Find a node in the graph based on a NodeIdentifier 
              * @param[in] id - the id of the node you want to find. 

@@ -1,6 +1,8 @@
 #include <boost/pointer_cast.hpp>       // for dynamic_pointer_cast<>
 #include <boost/bind.hpp>               // for boost::bind()
 #include <boost/tuple/tuple.hpp>        // for tie()
+#include <boost/foreach.hpp>
+#include <boost/graph/graphviz.hpp>
 
 #include <algorithm>
 
@@ -12,6 +14,93 @@ using namespace watcher;
 using namespace watcher::event;
 
 INIT_LOGGER(WatcherGraph, "WatcherGraph");
+
+/// 
+// Helper classes (functors) to integrate the graph into STL and other functions.
+//
+namespace watcher {
+    /** Helper class to find nodes by their nodeIds */
+    class MatchNodeId
+    {
+        const watcher::WatcherGraph::Graph &g;
+        const NodeIdentifier &id;
+        public:
+        MatchNodeId(const watcher::WatcherGraph::Graph &g_, const NodeIdentifier &id_) : g(g_), id(id_) {}
+        bool operator()(boost::graph_traits<watcher::WatcherGraph::Graph>::vertex_descriptor const &v)
+        {
+            return g[v].nodeId == id;
+        }
+    }; // class MatchNodeId
+
+    /** Helper class to print WatcherGraphNodes as graphviz data */
+    struct WatcherNodeVertexGraphVizWriter 
+    {
+        const watcher::WatcherGraph::Graph &g;
+        WatcherNodeVertexGraphVizWriter(const watcher::WatcherGraph::Graph &g_) : g(g_) { }
+
+        void operator()(std::ostream &out, 
+                boost::graph_traits<watcher::WatcherGraph::Graph>::vertex_descriptor const &v) const
+        {
+            out << "[label=\"";
+            out << "nodeId:" << g[v].nodeId;
+            out << "\\ngpsData: " << g[v].gpsData;
+            out << "\\nlabel: " << g[v].label;
+            out << "\\nconnected: "<< g[v].connected;
+            out << "\"]";
+        }
+    };
+
+    /** Helper class to print WatcherGraphEdges as graphviz data */
+    struct WatcherNodeEdgeGraphVizWriter 
+    {
+        const watcher::WatcherGraph::Graph &g;
+        WatcherNodeEdgeGraphVizWriter(const watcher::WatcherGraph::Graph &g_) : g(g_) { }
+
+        void operator()(std::ostream &out, 
+                boost::graph_traits<watcher::WatcherGraph::Graph>::edge_descriptor const &e) const
+        {
+            out << "[color=\"" << g[e].color << "\""; 
+            out << " label=\"";
+            out << "\\nexpiration:" << g[e].expiration;
+            out << "\\nwidth:" << g[e].width;
+            out << "\\nbidirectional:" << g[e].bidirectional;
+            out << "\"]";
+        }
+    };
+}
+
+
+
+//// Node functions.
+WatcherGraphNode::WatcherGraphNode() : 
+    nodeId(), gpsData(), connected(false) 
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+WatcherGraphNode::~WatcherGraphNode() 
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+//// Edge functions
+WatcherGraphEdge::WatcherGraphEdge() : 
+    color(Color::blue), 
+    expiration(5000), 
+    width(30), 
+    bidirectional(false) 
+{ 
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+WatcherGraphEdge::~WatcherGraphEdge() 
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
 
 WatcherGraph::WatcherGraph()
 {
@@ -26,10 +115,18 @@ WatcherGraph::~WatcherGraph()
     TRACE_EXIT();
 }
 
+
 // virtual 
 std::ostream &WatcherGraph::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
+
+    write_graphviz(
+            out, 
+            theGraph, 
+            WatcherNodeVertexGraphVizWriter(theGraph), 
+            WatcherNodeEdgeGraphVizWriter(theGraph)); 
+
     TRACE_EXIT();
     return out;
 }
@@ -62,18 +159,63 @@ bool WatcherGraph::updateGraph(const MessagePtr &message)
     return retVal;
 }
 
-bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &)
+bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
 {
     TRACE_ENTER();
+
     bool retVal=true;
+
+    // There is probably a faster way to do this than removing all
+    // edges then creating all new ones. The majority of the time I 
+    // would think that these edge sets would be very similar
+
+    // remove old edges
+    graph_traits<Graph>::vertex_iterator src;
+    boost::graph_traits<Graph>::out_edge_iterator i, end;
+    findOrCreateNode(message->fromNodeID, src);
+    for(tie(i, end)=out_edges(*src, theGraph); i!=end; ++i)
+        remove_edge(i, theGraph);
+
+    // Add edges from connectivity message
+    graph_traits<Graph>::vertex_iterator dest;
+    BOOST_FOREACH(NodeIdentifier nid, message->neighbors)
+    {
+        findOrCreateNode(nid, dest);
+        add_edge(*src, *dest, theGraph);
+    }
+    
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
 
-bool WatcherGraph::addEdge(const EdgeMessagePtr &)
+bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
 {
     TRACE_ENTER();
     bool retVal=true;
+
+    graph_traits<Graph>::vertex_iterator src, dest;
+    findOrCreateNode(message->node1, src);
+    findOrCreateNode(message->node2, dest);
+
+    std::pair<graph_traits<Graph>::edge_descriptor, bool> edgeIter=add_edge(*src, *dest, theGraph);
+   
+    // The edge may already exist. Just oveerwrite the values. 
+    theGraph[edgeIter.first].color=message->edgeColor;
+    theGraph[edgeIter.first].expiration=message->expiration;
+    theGraph[edgeIter.first].width=message->width;
+    theGraph[edgeIter.first].bidirectional=message->bidirectional;
+
+    if(message->bidirectional)
+    {
+        std::pair<graph_traits<Graph>::edge_descriptor, bool> edgeIter=add_edge(*dest, *src, theGraph);
+
+        // The edge may already exist. Just oveerwrite the values. 
+        theGraph[edgeIter.first].color=message->edgeColor;
+        theGraph[edgeIter.first].expiration=message->expiration;
+        theGraph[edgeIter.first].width=message->width;
+        theGraph[edgeIter.first].bidirectional=message->bidirectional;
+    }
+
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -149,14 +291,13 @@ bool WatcherGraph::createNode(const NodeIdentifier &id, boost::graph_traits<Grap
     TRACE_ENTER();
     graph_traits<Graph>::vertex_descriptor v = add_vertex(theGraph);
     theGraph[v].nodeId=id;
+    theGraph[v].label=id.to_string(); 
     bool retVal=findNode(id, retIter);
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
 
-/* global operations */
-
-std::ostream &operator<<(std::ostream &out, const WatcherGraph &watcherGraph)
+std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph &watcherGraph)
 {
     TRACE_ENTER();
     watcherGraph.operator<<(out);
