@@ -72,8 +72,8 @@ bool watcher::initConfig(
         string fname(argv[0]);
         fname+=".cfg"; 
 
-        if(true==(retVal=readConfig(config, fname)))
-            configFilename=fname;
+        retVal=readConfig(config, fname);
+        configFilename=fname;
     }
 
     return retVal;
