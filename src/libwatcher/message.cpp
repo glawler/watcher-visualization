@@ -70,7 +70,7 @@ namespace watcher {
         std::ostream &Message::toStream(std::ostream &out) const
         {
             TRACE_ENTER();
-            out << " version: " << version << " type: " << type << " time: " << timestamp << " "; 
+            out << "from: " << fromNodeID << " version: " << version << " type: " << type << " time: " << timestamp << " "; 
             TRACE_EXIT();
             return out;
         }
