@@ -112,7 +112,7 @@ bool MessageStream::getNextMessage(MessagePtr &newMessage)
 bool MessageStream::isStreamReadable() const
 {
     TRACE_ENTER();
-    bool retVal=messageCache.size() > 1; 
+    bool retVal=messageCache.size() > 0; 
     TRACE_EXIT_RET(retVal); 
     return retVal;
 }
@@ -182,6 +182,8 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
         readReady=true;
         // let lock go out of scope
     }
+    LOG_DEBUG("MessageCache size=" << messageCache.size());
+    LOG_DEBUG("Notifing all waiting threads that there is data to be read"); 
     messageCacheCond.notify_all();
 
 
