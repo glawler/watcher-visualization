@@ -105,6 +105,7 @@ bool MessageStream::getNextMessage(MessagePtr &newMessage)
     messageCache.pop_front();
     readReady=messageCache.size()>0; 
     LOG_DEBUG("Setting readReady to " << (readReady?"true":"false")); 
+    LOG_DEBUG("MessageCache size: " << messageCache.size()); 
 
     TRACE_EXIT_RET(true);
     return true;
