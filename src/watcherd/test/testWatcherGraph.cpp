@@ -89,6 +89,14 @@ BOOST_AUTO_TEST_CASE( output_test )
     // add the same neighbors again...
     wg.updateGraph(cm); 
 
+    GPSMessagePtr gm(new GPSMessage(0.1234, 0.2345, 0.3456)); 
+    gm->fromNodeID=asio::ip::address::from_string("192.168.1.100"); 
+    wg.updateGraph(gm); 
+
+    // NodeStatusMessagePtr nsm(new NodeStatusMessage(NodeStatusMessage::connect));
+    // nsm->fromNodeID=asio::ip::address::from_string("192.168.1.100"); 
+    // wg.updateGraph(nsm); 
+
     cout << "Graph with edge message and neighbors:" << endl << wg;
 }
 
