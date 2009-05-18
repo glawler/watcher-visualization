@@ -163,6 +163,8 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
 {
     TRACE_ENTER();
 
+    LOG_DEBUG("Adding neighbors from message: " << *message); 
+
     bool retVal=true;
 
     // There is probably a faster way to do this than removing all
