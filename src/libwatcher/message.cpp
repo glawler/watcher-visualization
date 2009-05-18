@@ -6,6 +6,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/export.hpp>
 
+#include "watcherGlobalFunctions.h"     // for NodeIdentifier::serialize()
 #include "message.h"
 
 using namespace std;
@@ -88,6 +89,7 @@ namespace watcher {
             ar & version;
             ar & type;
             ar & timestamp;
+            ar & fromNodeID;
             TRACE_EXIT();
         }
 
