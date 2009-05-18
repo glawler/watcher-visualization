@@ -86,6 +86,9 @@ BOOST_AUTO_TEST_CASE( output_test )
     em->edgeColor=Color::green;
     wg.updateGraph(em); 
 
+    // add the same neighbors again...
+    wg.updateGraph(cm); 
+
     cout << "Graph with edge message and neighbors:" << endl << wg;
 }
 
