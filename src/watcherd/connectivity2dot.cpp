@@ -132,13 +132,9 @@ int main(int argc, char **argv)
 
     WatcherGraph theGraph;
     MessagePtr mp(new Message);
-    while(ms->getNextMessage(mp))
+
+    while(1)
     {
-        LOG_DEBUG("Got message: " << *mp);
-        theGraph.updateGraph(mp);
-
-        LOG_DEBUG("dumpGraph: " << connectivity2dot::dumpGraph << " dumpConfig: " << connectivity2dot::dumpConfig); 
-
         if(connectivity2dot::dumpGraph)
         {
             connectivity2dot::dumpGraph=false;
@@ -152,6 +148,13 @@ int main(int argc, char **argv)
             connectivity2dot::dumpConfig=false;
             saveConfig(configFilename);
         }
+        while(ms->isStreamReadable())
+        {
+            ms->getNextMessage(mp);
+            LOG_DEBUG("Got message: " << *mp);
+            theGraph.updateGraph(mp);
+        }
+        sleep(1); 
     }
 
     saveConfig(configFilename);
