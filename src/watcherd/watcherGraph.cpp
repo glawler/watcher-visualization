@@ -22,11 +22,11 @@ namespace watcher {
     /** Helper class to find nodes by their nodeIds */
     class MatchNodeId
     {
-        const watcher::WatcherGraph::Graph &g;
+        const WatcherGraph::Graph &g;
         const NodeIdentifier &id;
         public:
-        MatchNodeId(const watcher::WatcherGraph::Graph &g_, const NodeIdentifier &id_) : g(g_), id(id_) {}
-        bool operator()(boost::graph_traits<watcher::WatcherGraph::Graph>::vertex_descriptor const &v)
+        MatchNodeId(const WatcherGraph::Graph &g_, const NodeIdentifier &id_) : g(g_), id(id_) {}
+        bool operator()(boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v)
         {
             return g[v].nodeId == id;
         }
@@ -35,11 +35,11 @@ namespace watcher {
     /** Helper class to print WatcherGraphNodes as graphviz data */
     struct WatcherNodeVertexGraphVizWriter 
     {
-        const watcher::WatcherGraph::Graph &g;
-        WatcherNodeVertexGraphVizWriter(const watcher::WatcherGraph::Graph &g_) : g(g_) { }
+        const WatcherGraph::Graph &g;
+        WatcherNodeVertexGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
 
         void operator()(std::ostream &out, 
-                boost::graph_traits<watcher::WatcherGraph::Graph>::vertex_descriptor const &v) const
+                boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v) const
         {
             out << "[label=\"";
             out << "nodeId:" << g[v].nodeId;
@@ -53,11 +53,11 @@ namespace watcher {
     /** Helper class to print WatcherGraphEdges as graphviz data */
     struct WatcherNodeEdgeGraphVizWriter 
     {
-        const watcher::WatcherGraph::Graph &g;
-        WatcherNodeEdgeGraphVizWriter(const watcher::WatcherGraph::Graph &g_) : g(g_) { }
+        const WatcherGraph::Graph &g;
+        WatcherNodeEdgeGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
 
         void operator()(std::ostream &out, 
-                boost::graph_traits<watcher::WatcherGraph::Graph>::edge_descriptor const &e) const
+                boost::graph_traits<WatcherGraph::Graph>::edge_descriptor const &e) const
         {
             out << "[color=\"" << g[e].color << "\""; 
             out << " label=\"";
@@ -164,6 +164,7 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
     TRACE_ENTER();
 
     LOG_DEBUG("Adding neighbors from message: " << *message); 
+    LOG_DEBUG("Graph before adding: " << *this); 
 
     bool retVal=true;
 
@@ -176,7 +177,7 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
     boost::graph_traits<Graph>::out_edge_iterator i, end;
     findOrCreateNode(message->fromNodeID, src);
     for(tie(i, end)=out_edges(*src, theGraph); i!=end; ++i)
-        remove_edge(i, theGraph);
+         remove_edge(i, theGraph);
 
     // Add edges from connectivity message
     graph_traits<Graph>::vertex_iterator dest;
@@ -186,6 +187,8 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
         add_edge(*src, *dest, theGraph);
     }
     
+    LOG_DEBUG("Graph after adding: " << *this); 
+
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -267,8 +270,10 @@ bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>
     // of the auxillary class MatchNodeId
     retIter = find_if(beg, end, MatchNodeId(theGraph, id)); 
 
-    TRACE_EXIT();
-    return retIter != end;
+    bool retVal=retIter != end;
+    LOG_DEBUG( (retVal?"Found":"Did not find") << " node " << id << " in the current graph"); 
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
 
 bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter)

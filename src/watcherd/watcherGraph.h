@@ -98,7 +98,7 @@ namespace watcher
             typedef boost::adjacency_list<
                 boost::vecS, 
                 boost::vecS, 
-                boost::bidirectionalS,
+                boost::directedS,
                 WatcherGraphNode,
                 WatcherGraphEdge> Graph;
 
