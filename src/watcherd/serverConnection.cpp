@@ -152,7 +152,8 @@ namespace watcher {
                 // knows who the message came from.
                 boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint();
                 BOOST_FOREACH(MessagePtr m, arrivedMessages) {
-                    m->fromNodeID=ep.address();
+                    if(m->fromNodeID==NodeIdentifier())  // is empty
+                        m->fromNodeID=ep.address();
                 }
 
                 /*
