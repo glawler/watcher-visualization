@@ -27,6 +27,7 @@ log4j.rootLogger=warn, flog, stdout
 # log4j.logger.MessageHandler.ServerMessageHandler=trace
 # log4j.logger.SingletonConfig=trace
 # log4j.logger.Watcherd=trace
+# log4j.logger.WatcherGraph=trace
 
 #
 # set levels for libwatcher module
