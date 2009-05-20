@@ -1,14 +1,6 @@
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/array.hpp>        // address.v4 bytes is an array of char
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/export.hpp>
-
+#include "watcherSerialize.h"
 #include "labelMessage.h"
 #include "messageTypesAndVersions.h"
-#include "watcherGlobalFunctions.h"     // for address serialization
 
 using namespace std;
 

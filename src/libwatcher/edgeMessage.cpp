@@ -1,14 +1,7 @@
 #include <boost/asio.hpp>
 
 #include "watcherGlobalFunctions.h"
-
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/string.hpp>       // for serializing addresses.
-#include <boost/serialization/shared_ptr.hpp>   // for serializing LabelMessagePtrs
-#include <boost/serialization/export.hpp>
+#include "watcherSerialize.h"
 
 #include <iosfwd>
 

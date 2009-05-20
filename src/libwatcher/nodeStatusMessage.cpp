@@ -3,8 +3,8 @@
  * @author Geoff Lawler <geoff.lawler@sparta.com>
  * @date 2009-03-23
  */
+#include "watcherSerialize.h"
 #include "nodeStatusMessage.h"
-#include "watcherGlobalFunctions.h" // for NodeIdentifier serialization...
 
 using namespace std;
 using namespace watcher;
@@ -98,3 +98,5 @@ ostream &operator<<(ostream &out, const NodeStatusMessage &mess)
     TRACE_EXIT();
     return out;
 }
+
+BOOST_CLASS_EXPORT(watcher::event::NodeStatusMessage);

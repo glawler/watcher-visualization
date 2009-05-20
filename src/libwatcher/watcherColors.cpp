@@ -1,6 +1,4 @@
-#include <boost/archive/polymorphic_iarchive.hpp>
-#include <boost/archive/polymorphic_oarchive.hpp>
-#include <boost/serialization/export.hpp>
+#include "watcherSerialize.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -11,7 +9,7 @@
 using namespace boost; 
 using namespace std;
 
-BOOST_CLASS_EXPORT_GUID(watcher::event::Color, "watcher::event::Color");
+BOOST_CLASS_EXPORT(watcher::event::Color);
 
 namespace watcher {
     namespace event {
