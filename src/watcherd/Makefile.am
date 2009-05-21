@@ -1,10 +1,3 @@
-# GTL - experimental automatic use of multiprocessor systems to speed up make
-# May break things, don't know.
-#PROCCOUNT=$(shell cat /proc/cpuinfo | grep -c ^processor)
-#ifneq (${PROCCOUNT}, 0)
-#      MAKEFLAGS+=-j $(PROCCOUNT)
-#endif
-
 # melkins - compilation for Fedora 10
 -include ../Makefile.local
 
@@ -39,6 +32,9 @@ LIBS+=-llog4cxx
 LIBS+=-lsqlite3
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 
+# 
+# .cfg and .log.properties build rules are in top level Makefile.am
+#
 BUILT_SOURCES= \
 	connectivity2dot.cfg \
 	connectivity2dot.log.properties \
@@ -113,14 +109,13 @@ ctags:
 	ctags -R $(TOPDIR)
 
 #
-# cfg and log.prop files.
+# Copy sample cfg and log.properties files from ../etc
 #
-
 %.cfg : 
-	@ echo Creating $*.cfg from sample configuration at $(TOPDIR)/etc/$*.cfg.sample
-	cp -v $(TOPDIR)/etc/$*.cfg.sample ./$*.cfg
+	@ echo Creating $*.cfg from sample configuration at ../etc/$*.cfg.sample
+	cp -v ../etc/$*.cfg.sample ./$*.cfg
 
 %.log.properties: 
-	@ echo Creating $*.log.properties from sample configuration at $(TOPDIR)/etc/watcherd.log.properties.sample
-	cp -v $(TOPDIR)/etc/watcherd.log.properties.sample ./$*.log.properties
+	@ echo Creating $*.log.properties from sample configuration at ../etc/watcher.log.properties.sample
+	cp -v ../etc/watcherd.log.properties.sample ./$*.log.properties
 

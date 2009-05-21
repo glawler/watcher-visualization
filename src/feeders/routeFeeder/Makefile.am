@@ -36,14 +36,17 @@ routeFeeder_SOURCES=routeFeeder.cpp
 ctags:
 	ctags -R $(TOPDIR)
 
-routeFeeder.cfg: 
-	@ echo Creating routeFeeder.cfg from sample configuration at $(TOPDIR)/etc/routeFeeder.cfg.sample
-	cp $(TOPDIR)/etc/routeFeeder.cfg.sample ./routeFeeder.cfg
+#
+# Copy sample cfg and log.properties files from ../etc
+#
+TOPDIR=../../../
+%.cfg : 
+	@ echo Creating $*.cfg from sample configuration at $(TOPDIR)/etc/$*.cfg.sample
+	cp -v $(TOPDIR)/etc/$*.cfg.sample ./$*.cfg
 
-routeFeeder.log.properties: 
-	@ echo Creating log.properties from sample configuration in $(TOPDIR)/etc/routeFeeder.log.properties.sample
-	cp $(TOPDIR)/etc/routeFeeder.log.properties.sample ./routeFeeder.log.properties
-
+%.log.properties: 
+	@ echo Creating $*.log.properties from sample configuration at $(TOPDIR)etc/watcher.log.properties.sample
+	cp -v $(TOPDIR)etc/watcherd.log.properties.sample ./$*.log.properties
 
 
 
