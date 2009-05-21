@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE( ctor_test )
     LabelMessage lm1;
     lm1.label="Hello world";
     lm1.fontSize=60;
-    lm1.address=asio::ip::address_v4((0x7f000001));   // 127.0.0.1
+    lm1.fromNodeID=asio::ip::address_v4((0x7f000001));   // 127.0.0.1
     lm1.foreground=Color::black;
     lm1.background=Color::white;
     lm1.expiration=10;
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( archive_test )
 
     lmOut.label="Hello world";
     lmOut.fontSize=60;
-    lmOut.address=asio::ip::address::from_string("127.0.0.1"); 
+    lmOut.fromNodeID=asio::ip::address::from_string("127.0.0.1"); 
     lmOut.foreground=Color::black;
     lmOut.background=Color::white;
     lmOut.expiration=10;
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( output_test )
 
     lmp1->label="Hello world";
     lmp1->fontSize=60;
-    lmp1->address=boost::asio::ip::address::from_string("127.0.0.1");  
+    lmp1->fromNodeID=boost::asio::ip::address::from_string("127.0.0.1");  
     lmp1->foreground=Color::black;
     lmp1->background=Color::white;
     lmp1->expiration=10;

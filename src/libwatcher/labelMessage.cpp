@@ -17,7 +17,6 @@ namespace watcher {
             expiration(0),
             addLabel(true),
             layer(),
-            address(),
             lat(0),
             lng(0),
             alt(0)
@@ -35,12 +34,12 @@ namespace watcher {
             expiration(0),
             addLabel(true),
             layer(),
-            address(address_),
             lat(0),
             lng(0),
             alt(0)
         {
             TRACE_ENTER();
+            fromNodeID=address_; 
             TRACE_EXIT();
         }
 
@@ -53,7 +52,6 @@ namespace watcher {
             expiration(0),
             addLabel(true),
             layer(),
-            address(),
             lat(lat_),
             lng(lng_),
             alt(alt_)
@@ -71,7 +69,6 @@ namespace watcher {
             expiration(other.expiration),
             addLabel(other.addLabel),
             layer(other.layer),
-            address(other.address),
             lat(other.lat),
             lng(other.lng),
             alt(other.alt)
@@ -90,14 +87,14 @@ namespace watcher {
                 addLabel==other.addLabel;
 
             // Compare either address or space coords but not both. Address takes precidence.
-            if (address.to_v4().to_ulong()==0)
+            if (fromNodeID.to_v4().to_ulong()==0)
                 retVal = 
                     retVal && 
                     lat==other.lat && 
                     lng==other.lng &&
                     alt==other.alt;
             else
-                retVal = retVal && address==other.address;
+                retVal = retVal && fromNodeID==other.fromNodeID;
 
             // These are not distinguishing features
             //  foreground==other.foreground,
@@ -121,7 +118,6 @@ namespace watcher {
             expiration=other.expiration;
             addLabel=other.addLabel;
             layer=other.layer;
-            address=other.address;
             lat=other.lat;
             lng=other.lng;
             alt=other.alt;
@@ -137,12 +133,11 @@ namespace watcher {
 
             Message::toStream(out);
             out << " label: " << label;
-            if (address.to_v4().to_ulong()==0)
+            if (fromNodeID.to_v4().to_ulong()==0)
                 out << " (floating) ";
             else
                 out << " (attached) "; 
             out << " font size: " << fontSize; 
-            out << " address: " << address << (address.is_v4() ? " (v4)" : " (v6)"); 
             out << " layer: " << layer; 
             out << " fg: (" << foreground << ")"; 
             out << " bg: (" << background << ")"; 
@@ -173,7 +168,6 @@ namespace watcher {
             ar & background;
             ar & expiration;
             ar & fontSize;
-            ar & address;
             ar & addLabel;
             ar & layer; 
             ar & lat;

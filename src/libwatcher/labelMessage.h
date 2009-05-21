@@ -22,10 +22,6 @@ namespace watcher {
                 bool addLabel;              // add or remove the label depending on true or false here.
                 GUILayer layer;             // which layer to put the label on 
 
-                // A label can be attached to a node or just hanging in space.
-                // If address is defined it will be attached to a node, if
-                // lat, lng, alt are defined is will hang in space. 
-                boost::asio::ip::address address;
                 float lat, lng, alt; 
 
                 // Attach a label to this node.

@@ -90,14 +90,14 @@ namespace watcher {
         {
             TRACE_ENTER();
             node1Label=label;
-            node1Label->address=node1;
+            node1Label->fromNodeID=node1;
             TRACE_EXIT();
         }
         void EdgeMessage::setNode2Label(const LabelMessagePtr &label)
         {
             TRACE_ENTER();
             node2Label=label;
-            node2Label->address=node2;
+            node2Label->fromNodeID=node2;
             TRACE_EXIT();
         }
 
