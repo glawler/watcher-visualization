@@ -83,6 +83,8 @@ libwatcherdAPI_a_SOURCES= \
 	messageStream.cpp \
 	messageStreamFilter.cpp \
 	singletonConfig.cpp \
+	watcherGraphEdge.cpp \
+	watcherGraphNode.cpp \
 	watcherGraph.cpp
 
 bin_PROGRAMS= \
