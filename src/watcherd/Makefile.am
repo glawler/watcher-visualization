@@ -39,7 +39,17 @@ LIBS+=-llog4cxx
 LIBS+=-lsqlite3
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 
-BUILT_SOURCES=watcherd.cfg watcherd.log.properties 
+BUILT_SOURCES= \
+	connectivity2dot.cfg \
+	connectivity2dot.log.properties \
+	watcherd.cfg \
+	watcherd.log.properties \
+	testCC.cfg \
+	testCC.log.properties \
+	messageStream2Text.cfg \
+	messageStream2Text.log.properties \
+	routeFeeder.cfg \
+	routeFeeder.log.properties
 
 noinst_LIBRARIES=libfeeder.a libwatcherdAPI.a
 
@@ -102,10 +112,15 @@ watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp \
 ctags:
 	ctags -R $(TOPDIR)
 
-watcherd.cfg: 
-	@ echo Creating watcherd.cfg from sample configuration at ../../etc/watcherd.cfg.sample
-	cp ../../etc/watcherd.cfg.sample ./watcherd.cfg
+#
+# cfg and log.prop files.
+#
 
-watcherd.log.properties: 
-	@ echo Creating log.properties from sample configuration in ../../etc/watcherd.log.properties.sample
-	cp ../../etc/watcherd.log.properties.sample ./watcherd.log.properties
+%.cfg : 
+	@ echo Creating $*.cfg from sample configuration at $(TOPDIR)/etc/$*.cfg.sample
+	cp -v $(TOPDIR)/etc/$*.cfg.sample ./$*.cfg
+
+%.log.properties: 
+	@ echo Creating $*.log.properties from sample configuration at $(TOPDIR)/etc/watcherd.log.properties.sample
+	cp -v $(TOPDIR)/etc/watcherd.log.properties.sample ./$*.log.properties
+
