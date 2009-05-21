@@ -81,26 +81,25 @@ namespace watcher {
         {
             TRACE_ENTER();
 
-            bool retVal = 
-                Message::operator==(other) && 
-                label==other.label && 
-                addLabel==other.addLabel;
+            bool retVal;
 
             // Compare either address or space coords but not both. Address takes precidence.
-            if (fromNodeID.to_v4().to_ulong()==0)
+            if (fromNodeID==NodeIdentifier())
                 retVal = 
                     retVal && 
                     lat==other.lat && 
                     lng==other.lng &&
                     alt==other.alt;
             else
-                retVal = retVal && fromNodeID==other.fromNodeID;
+                retVal = fromNodeID==other.fromNodeID && label==other.label;
 
             // These are not distinguishing features
             //  foreground==other.foreground,
             //  background==other.background,
             //  expiration==other.expiration,
             //  fontSize==other.FontSize;
+
+            retVal = retVal && Message::operator==(other); 
 
             TRACE_EXIT_RET(retVal);
             return retVal;
