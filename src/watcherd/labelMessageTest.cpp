@@ -36,6 +36,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -f, --foreground=color      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
     fprintf(stderr, "   -b, --background=color      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n");
     fprintf(stderr, "   -e, --expiration=seconds    How long in secondt to diplay the label\n");
+    fprintf(stderr, "   -r, --remove                Remove the label if it is attached\n"); 
 
     exit(1); 
 }
@@ -47,13 +48,14 @@ int main(int argc, char **argv)
     int c;
     string label;
     string server;
-    string logProps("log.properties");
+    string logProps("labelMessageTest.log.properties");
     unsigned int fontSize=10;
-    asio::ip::address address(boost::asio::ip::address::from_string("127.0.0.1"));  // loclahost
+    asio::ip::address address;
     Color fg=Color::black;
     Color bg=Color::white;
     uint32_t expiration=10000;
     float lat=0.0, lng=0.0, alt=0.0;
+    bool remove=false;
 
     while (true) 
     {
@@ -70,11 +72,12 @@ int main(int argc, char **argv)
             {"foreground", required_argument, 0, 'f'},
             {"background", required_argument, 0, 'b'},
             {"expiration", required_argument, 0, 'e'},
+            {"remove", no_argument, 0, 'r'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "l:s:n:x:y:t:p:z:f:b;e:hH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "l:s:n:x:y:t:p:z:f:b:e:rhH?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -104,6 +107,7 @@ int main(int argc, char **argv)
             case 'x': lat=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
             case 'y': lng=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
             case 'z': alt=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
+            case 'r': remove=true; break;
             case 'h':
             case 'H':
             case '?':
@@ -131,13 +135,14 @@ int main(int argc, char **argv)
 
     lm->label=label;
     lm->fontSize=fontSize;
-    lm->address=address;
+    lm->fromNodeID=address;
     lm->foreground=fg;
     lm->background=bg;
     lm->expiration=expiration;
     lm->lat=lat;
     lm->lng=lng;
     lm->alt=alt;
+    lm->addLabel=!remove;
 
     if(!client.sendMessage(lm))
     {
