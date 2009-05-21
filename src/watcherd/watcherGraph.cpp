@@ -6,6 +6,11 @@
 
 #include <algorithm>
 
+#include "libwatcher/connectivityMessage.h"
+#include "libwatcher/gpsMessage.h"
+#include "libwatcher/nodeStatusMessage.h"
+#include "libwatcher/edgeMessage.h"
+
 #include "watcherGraph.h"
 
 using namespace std;
@@ -19,87 +24,78 @@ INIT_LOGGER(WatcherGraph, "WatcherGraph");
 // Helper classes (functors) to integrate the graph into STL and other functions.
 //
 namespace watcher {
-    /** Helper class to find nodes by their nodeIds */
-    class MatchNodeId
+
+    namespace GraphFunctors
     {
-        const WatcherGraph::Graph &g;
-        const NodeIdentifier &id;
-        public:
-        MatchNodeId(const WatcherGraph::Graph &g_, const NodeIdentifier &id_) : g(g_), id(id_) {}
-        bool operator()(boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v)
+        /** Helper class to find nodes by their nodeIds */
+        class MatchNodeId
         {
-            return g[v].nodeId == id;
-        }
-    }; // class MatchNodeId
+            const WatcherGraph::Graph &g;
+            const NodeIdentifier &id;
+            public:
+            MatchNodeId(const WatcherGraph::Graph &g_, const NodeIdentifier &id_) : g(g_), id(id_) {}
+            bool operator()(boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v)
+            {
+                return g[v].nodeId == id;
+            }
+        }; // class MatchNodeId
 
-    /** Helper class to print WatcherGraphNodes as graphviz data */
-    struct WatcherNodeVertexGraphVizWriter 
-    {
-        const WatcherGraph::Graph &g;
-        WatcherNodeVertexGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
-
-        void operator()(std::ostream &out, 
-                boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v) const
+        struct MatchMessageLabelPtr
         {
-            out << "[label=\"";
-            out << "nodeId:" << g[v].nodeId;
-            out << "\\ngpsData: " << g[v].gpsData;
-            out << "\\nlabel: " << g[v].label;
-            out << "\\nconnected: "<< g[v].connected;
-            out << "\"]";
-        }
-    };
+            MatchMessageLabelPtr(const LabelMessagePtr &l_) : l(l_) {} 
+            const LabelMessagePtr &l;
+            bool operator()(const LabelMessagePtr &lhs)
+            {
+                return *l == *lhs;
+            }
+        };
 
-    /** Helper class to print WatcherGraphEdges as graphviz data */
-    struct WatcherNodeEdgeGraphVizWriter 
-    {
-        const WatcherGraph::Graph &g;
-        WatcherNodeEdgeGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
-
-        void operator()(std::ostream &out, 
-                boost::graph_traits<WatcherGraph::Graph>::edge_descriptor const &e) const
+        /** Helper class to print WatcherGraphNodes as graphviz data */
+        struct WatcherNodeVertexGraphVizWriter 
         {
-            out << "[color=\"" << g[e].color << "\""; 
-            out << " label=\"";
-            out << "\\nexpiration:" << g[e].expiration;
-            out << "\\nwidth:" << g[e].width;
-            out << "\\nbidirectional:" << g[e].bidirectional;
-            out << "\"]";
-        }
-    };
-}
+            const WatcherGraph::Graph &g;
+            WatcherNodeVertexGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
 
+            void operator()(std::ostream &out, 
+                    boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v) const
+            {
+                stringstream label;
+                label << "[label=\"";
+                if (!g[v].label.empty())
+                    label << "\\nlabel:" <<  g[v].label;
+                label << "\\nnodeId: " << g[v].nodeId;
+                if (g[v].attachedLabels.size())
+                    label << "\\nattached labels: " << g[v].attachedLabels.size(); 
+                if (g[v].gpsData) 
+                    label << "\\ngps: " << g[v].gpsData->x << "," << g[v].gpsData->y << "," <<  g[v].gpsData->z;
+                label << "\"]"; 
 
+                out << label.str(); 
+            }
+        };
 
-//// Node functions.
-WatcherGraphNode::WatcherGraphNode() : 
-    nodeId(), gpsData(), connected(false) 
-{
-    TRACE_ENTER();
-    TRACE_EXIT();
-}
+        /** Helper class to print WatcherGraphEdges as graphviz data */
+        struct WatcherNodeEdgeGraphVizWriter 
+        {
+            const WatcherGraph::Graph &g;
+            WatcherNodeEdgeGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
 
-WatcherGraphNode::~WatcherGraphNode() 
-{
-    TRACE_ENTER();
-    TRACE_EXIT();
-}
+            void operator()(std::ostream &out, 
+                    boost::graph_traits<WatcherGraph::Graph>::edge_descriptor const &e) const
+            {
+                stringstream label;
+                label << "[label=\"";
+                if (!g[e].label.empty())
+                    label << "\\nlabel:" <<  g[e].label;
+                if (g[e].attachedLabels.size())
+                    label << "\\nattached labels: " << g[e].attachedLabels.size(); 
+                label << "\"]"; 
 
-//// Edge functions
-WatcherGraphEdge::WatcherGraphEdge() : 
-    color(Color::blue), 
-    expiration(5000), 
-    width(30), 
-    bidirectional(false) 
-{ 
-    TRACE_ENTER();
-    TRACE_EXIT();
-}
-
-WatcherGraphEdge::~WatcherGraphEdge() 
-{
-    TRACE_ENTER();
-    TRACE_EXIT();
+                out << label.str(); 
+                out << "[color=" << g[e].color << "]"; 
+            }
+        };
+    }
 }
 
 WatcherGraph::WatcherGraph()
@@ -113,50 +109,6 @@ WatcherGraph::~WatcherGraph()
 {
     TRACE_ENTER();
     TRACE_EXIT();
-}
-
-
-// virtual 
-std::ostream &WatcherGraph::toStream(std::ostream &out) const
-{
-    TRACE_ENTER();
-
-    write_graphviz(
-            out, 
-            theGraph, 
-            WatcherNodeVertexGraphVizWriter(theGraph), 
-            WatcherNodeEdgeGraphVizWriter(theGraph)); 
-
-    TRACE_EXIT();
-    return out;
-}
-
-bool WatcherGraph::updateGraph(const MessagePtr &message)
-{
-    TRACE_ENTER();
-    bool retVal=false;
-
-    switch(message->type)
-    {
-        case CONNECTIVITY_MESSAGE_TYPE:
-            retVal=addNodeNeighbors(dynamic_pointer_cast<ConnectivityMessage>(message));
-            break;
-        case EDGE_MESSAGE_TYPE:
-            retVal=addEdge(dynamic_pointer_cast<EdgeMessage>(message));
-            break;
-        case GPS_MESSAGE_TYPE:
-            retVal=updateNodeLocation(dynamic_pointer_cast<GPSMessage>(message));
-            break;
-        case MESSAGE_STATUS_TYPE:
-            retVal=updateNodeStatus(dynamic_pointer_cast<NodeStatusMessage>(message));
-            break;
-        default:
-            retVal=false;
-            break;
-    }
-
-    TRACE_EXIT_RET(retVal);
-    return retVal;
 }
 
 bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
@@ -198,27 +150,38 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     TRACE_ENTER();
     bool retVal=true;
 
-    graph_traits<Graph>::vertex_iterator src, dest;
+    graph_traits<Graph>::vertex_iterator src, dest, tmp;
     findOrCreateNode(message->node1, src);
     findOrCreateNode(message->node2, dest);
 
-    std::pair<graph_traits<Graph>::edge_descriptor, bool> edgeIter=add_edge(*src, *dest, theGraph);
-   
-    // The edge may already exist. Just oveerwrite the values. 
-    theGraph[edgeIter.first].color=message->edgeColor;
-    theGraph[edgeIter.first].expiration=message->expiration;
-    theGraph[edgeIter.first].width=message->width;
-    theGraph[edgeIter.first].bidirectional=message->bidirectional;
+    std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
+
+    if(!ei.second) 
+        LOG_ERROR("Unable to add edge to graph between " << message->node1 << " and " << message->node2);
+
+    theGraph[ei.first].color=message->edgeColor; 
+    theGraph[ei.first].expiration=message->expiration;
+    theGraph[ei.first].width=message->width;
+
+    if (message->node1Label && !message->node1Label->label.empty())
+        theGraph[*src].attachedLabels.push_back(message->node1Label);
+    if (message->middleLabel && !message->middleLabel->label.empty())
+        theGraph[ei.first].attachedLabels.push_back(message->middleLabel);
+    if (message->node2Label && !message->node2Label->label.empty())
+        theGraph[*src].attachedLabels.push_back(message->node2Label);
 
     if(message->bidirectional)
     {
-        std::pair<graph_traits<Graph>::edge_descriptor, bool> edgeIter=add_edge(*dest, *src, theGraph);
+        ei=add_edge(*dest, *src, theGraph);
+        if(!ei.second) 
+            LOG_ERROR("Unable to add edge to graph between " << message->node2 << " and " << message->node1);
 
-        // The edge may already exist. Just oveerwrite the values. 
-        theGraph[edgeIter.first].color=message->edgeColor;
-        theGraph[edgeIter.first].expiration=message->expiration;
-        theGraph[edgeIter.first].width=message->width;
-        theGraph[edgeIter.first].bidirectional=message->bidirectional;
+        theGraph[ei.first].color=message->edgeColor; 
+        theGraph[ei.first].expiration=message->expiration;
+        theGraph[ei.first].width=message->width;
+
+        if (message->middleLabel && !message->middleLabel->label.empty())
+            theGraph[ei.first].attachedLabels.push_back(message->middleLabel);
     }
 
     TRACE_EXIT_RET(retVal);
@@ -241,6 +204,7 @@ bool WatcherGraph::updateNodeLocation(const GPSMessagePtr &message)
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
+
 bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
 {
     TRACE_ENTER();
@@ -258,6 +222,88 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
     return retVal;
 }
 
+bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
+{
+    TRACE_ENTER();
+
+    bool retVal;
+    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    if(findOrCreateNode(message->fromNodeID, nodeIter))
+    {
+        LOG_DEBUG("Updating attached label information for node " << theGraph[*nodeIter].nodeId);
+        if (message->addLabel)
+            theGraph[*nodeIter].attachedLabels.push_back(message); 
+        else
+        {
+            // GTL - this is some ugly ass code. Compact, but very very ugly. 
+            WatcherGraphNode::LabelMessageList::iterator b=theGraph[*nodeIter].attachedLabels.begin();
+            WatcherGraphNode::LabelMessageList::iterator e=theGraph[*nodeIter].attachedLabels.end();
+            theGraph[*nodeIter].attachedLabels.erase(remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message)), e);
+        }
+        retVal=true;
+    }
+
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
+// virtual 
+std::ostream &WatcherGraph::toStream(std::ostream &out) const
+{
+    TRACE_ENTER();
+
+    write_graphviz(
+            out, 
+            theGraph, 
+            GraphFunctors::WatcherNodeVertexGraphVizWriter(theGraph), 
+            GraphFunctors::WatcherNodeEdgeGraphVizWriter(theGraph)); 
+
+    TRACE_EXIT();
+    return out;
+}
+
+bool WatcherGraph::updateGraph(const MessageStreamFilter &)
+{
+    TRACE_ENTER();
+
+    bool retVal=false;
+    LOG_ERROR("updateGraph(const MessageStreamFilter &filter) not yet implemented");
+    
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
+bool WatcherGraph::updateGraph(const MessagePtr &message)
+{
+    TRACE_ENTER();
+    bool retVal=false;
+
+    switch(message->type)
+    {
+        case CONNECTIVITY_MESSAGE_TYPE:
+            retVal=addNodeNeighbors(dynamic_pointer_cast<ConnectivityMessage>(message));
+            break;
+        case EDGE_MESSAGE_TYPE:
+            retVal=addEdge(dynamic_pointer_cast<EdgeMessage>(message));
+            break;
+        case GPS_MESSAGE_TYPE:
+            retVal=updateNodeLocation(dynamic_pointer_cast<GPSMessage>(message));
+            break;
+        case MESSAGE_STATUS_TYPE:
+            retVal=updateNodeStatus(dynamic_pointer_cast<NodeStatusMessage>(message));
+            break;
+        case LABEL_MESSAGE_TYPE:
+            retVal=addRemoveAttachedLabel(dynamic_pointer_cast<LabelMessage>(message));
+            break;
+        default:
+            retVal=false;
+            break;
+    }
+
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
 bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter)
 {
     TRACE_ENTER();
@@ -268,7 +314,7 @@ bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>
 
     // GTL - may be a way to use boost::bind() here instead
     // of the auxillary class MatchNodeId
-    retIter = find_if(beg, end, MatchNodeId(theGraph, id)); 
+    retIter = find_if(beg, end, GraphFunctors::MatchNodeId(theGraph, id)); 
 
     bool retVal=retIter != end;
     LOG_DEBUG( (retVal?"Found":"Did not find") << " node " << id << " in the current graph"); 

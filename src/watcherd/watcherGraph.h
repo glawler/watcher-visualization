@@ -1,67 +1,23 @@
 #ifndef WATCHER_GRAPH_H_WHAT_DO_VEGAN_ZOMBIES_EAT_____GRAINS__GRAINS
 #define WATCHER_GRAPH_H_WHAT_DO_VEGAN_ZOMBIES_EAT_____GRAINS__GRAINS
 
-#include <string>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "libwatcher/watcherTypes.h"            // for Timestamp
+#include "messageStreamFilter.h"
+#include "watcherGraphNode.h"
+#include "watcherGraphEdge.h"
+
+// GTL - How do I hide the message types from clients of WatcherGraph. I tried ME's 'class impl'
+// trick, but it did not work. It's very possible that I did not do it correctly. 
 #include "libwatcher/connectivityMessage.h"
 #include "libwatcher/gpsMessage.h"
 #include "libwatcher/nodeStatusMessage.h"
 #include "libwatcher/edgeMessage.h"
 
-#include "watcherdAPIMessageHandler.h"
-#include "messageStreamFilter.h"
-
 namespace watcher
 {
     using namespace event;  // for libwatcher and messages. 
-
-    /**
-     * @class WatcherGraphNode
-     * @author Geoff Lawler <geoff.lawler@sparta.com>
-     * @date 2009-05-15
-     *
-     * A class that holds the data at the vertexes of a WatcherGraph
-     */
-    class WatcherGraphNode
-    {
-        public:
-            WatcherGraphNode();
-            ~WatcherGraphNode();
-
-            NodeIdentifier nodeId;
-            GPSMessagePtr gpsData;
-            std::string label;
-            bool connected;
-
-        protected:
-        private:
-    };
-
-    /**
-     * @class WatcherGraphEdge
-     * @author Geoff Lawler <geoff.lawler@sparta.com>
-     * @date 2009-05-15
-     *
-     * A class that holds the data in the edges of a WatcherGraph
-     */
-    class WatcherGraphEdge
-    {
-        public:
-            WatcherGraphEdge();
-            ~WatcherGraphEdge();
-
-            Color color;
-            float expiration;
-            float width;
-            bool bidirectional;
-
-        protected:
-        private:
-    };
 
     /** 
      * @class WatcherGraph
@@ -93,7 +49,8 @@ namespace watcher
             virtual ~WatcherGraph();
 
             /**
-             * The graph is a bidirectional adjacency_list. 
+             * The graph is a boost directed adjacency_list. This interface is public
+             * so GUI developers can get direct access if needed. 
              */
             typedef boost::adjacency_list<
                 boost::vecS, 
@@ -101,6 +58,10 @@ namespace watcher
                 boost::directedS,
                 WatcherGraphNode,
                 WatcherGraphEdge> Graph;
+            /**
+             * The actual boost::graph.
+             */
+            Graph theGraph;
 
             /**
              * updateGraph()
@@ -114,6 +75,15 @@ namespace watcher
             bool updateGraph(const MessagePtr &message);
 
             /**
+             * updateGraph(filter)
+             * Applies the past filter to the in-memory graph.
+             * When a filter is applied to the MessageStream feeding the graph, 
+             * it should also be applied to the graph instance, otherwise old data that does
+             * not match the new stream may still be in the in-memory graph.
+             */
+             bool updateGraph(const MessageStreamFilter &filter); 
+
+            /**
              * Write an instance of this class as a human readable stream to the otream given
              */
             virtual std::ostream &toStream(std::ostream &out) const;
@@ -124,6 +94,10 @@ namespace watcher
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
         protected:
+
+        private:
+
+            DECLARE_LOGGER();
 
             /**
              * Update the graph with a list of neighbors addes or removed.
@@ -146,17 +120,9 @@ namespace watcher
             bool updateNodeStatus(const NodeStatusMessagePtr &message);
 
             /**
-             * The actual boost::graph.
+             * Update an attached label - either add or remove it.
              */
-            Graph theGraph;
-
-        private:
-
-            DECLARE_LOGGER();
-
-            /** 
-             * private data 
-             **/
+            bool addRemoveAttachedLabel(const LabelMessagePtr &message);
 
             /** Find a node in the graph based on a NodeIdentifier 
              * @param[in] id - the id of the node you want to find. 
@@ -182,11 +148,11 @@ namespace watcher
     }; // like a fired school teacher.
 
     /** typedef a shared pointer to this class
-     */
+    */
     typedef boost::shared_ptr<WatcherGraph> WatcherGraphPtr;
 
     /** write a human readable version of the WatcherGraph class to the ostream given
-     */
+    */
     std::ostream &operator<<(std::ostream &out, const WatcherGraph &watcherGraph);
 
 }
