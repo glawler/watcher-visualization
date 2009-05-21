@@ -1,0 +1,4 @@
+logPropertiesFile = "connectivity2dot.log.properties";
+server = "glory";
+service = "watcherd";
+outfile = "connectivity.dot";
