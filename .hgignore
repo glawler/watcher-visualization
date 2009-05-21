@@ -144,6 +144,11 @@ share/info/dir
 ^src/watcherd/test/testWatcherGraph
 ^src/watcherd/connectivity2dot
 ^src/watcherd/connectivityMessageTest
+^src/watcherd/test/testMessageStream
+^src/watcherd/test/testWatcherGraph
+^src/watcherd/test/testWatcherGraphEdge
+^src/watcherd/test/testWatcherGraphNode
+
 
 
 ^src/libwatcher/Makefile
