@@ -79,6 +79,7 @@ share/info/dir
 ^bin/labeltest
 ^bin/routingdetector
 ^bin/watcherpropertytest
+^bin/watchergraphtest
 ^bin/libidsCommunications.a
 ^bin/floatinglabeltest
 ^bin/gpsMessageTest
