@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 {
     TRACE_ENTER();
 
-    log4cxx::PropertyConfigurator::configure("log.properties"); 
+    log4cxx::PropertyConfigurator::configure("test.log.properties"); 
 
     // shared_ptr<Message> m = MessageFactory::makeMessage(MESSAGE_HEADER);
     //

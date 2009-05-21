@@ -52,7 +52,7 @@ EdgeMessagePtr createEdgeMessage()
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
     // Do this in first test so we can log.
-    LOAD_LOG_PROPS("log.properties"); 
+    LOAD_LOG_PROPS("test.log.properties"); 
 
     WatcherGraph wg();
 }
@@ -63,12 +63,12 @@ BOOST_AUTO_TEST_CASE( output_test )
 
     WatcherGraph wg;
 
-    cout << "Empty Graph:" << endl << wg;
+    cout << "Empty Graph:" << endl << wg << endl;
 
     EdgeMessagePtr em=createEdgeMessage();
     wg.updateGraph(em);
 
-    cout << "Graph with edge message:" << endl << wg;
+    cout << "Graph with edge message:" << endl << wg << endl;
 
     std::vector<watcher::NodeIdentifier> neighbors;
     for(unsigned long i=0xc0a80165; i<0xc0a8016a; i++) // 0xc0a80165==192.168.1.101 in host byte order
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE( output_test )
     // nsm->fromNodeID=asio::ip::address::from_string("192.168.1.100"); 
     // wg.updateGraph(nsm); 
 
-    cout << "Graph with edge message and neighbors:" << endl << wg;
+    cout << "Graph with edge message and neighbors:" << endl << wg << endl;
 }
 
 

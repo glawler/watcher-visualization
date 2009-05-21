@@ -14,7 +14,7 @@ using namespace boost::unit_test_framework;
 
 BOOST_AUTO_TEST_CASE( ctors_test )
 {
-    LOAD_LOG_PROPS("log.properties"); 
+    LOAD_LOG_PROPS("test.log.properties"); 
     MessageStreamPtr ms=MessageStream::createNewMessageStream("glory"); 
 }
 
