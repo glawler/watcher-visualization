@@ -1,12 +1,6 @@
 #include <sys/time.h>
 
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/export.hpp>
-
-#include "watcherGlobalFunctions.h"     // for NodeIdentifier::serialize()
+#include "watcherSerialize.h"
 #include "message.h"
 
 using namespace std;

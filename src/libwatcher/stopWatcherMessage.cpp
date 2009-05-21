@@ -2,11 +2,7 @@
  * @author Michael Elkins <michael.elkins@sparta.com>
  * @date 2009-03-20
  */
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/export.hpp>
+#include "watcherSerialize.h"
 #include "stopWatcherMessage.h"
 
 namespace watcher {
