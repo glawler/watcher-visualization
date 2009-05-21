@@ -6,6 +6,7 @@
 
 #include "message.h"
 #include "watcherColors.h"
+#include "watcherTypes.h" 
 
 namespace watcher {
     namespace event {
@@ -14,8 +15,8 @@ namespace watcher {
                 // The data
                 Color color;
                 boost::asio::ip::address nodeAddr;
-                float flashPeriod; 
-                float expiration;  
+                Timestamp flashPeriod; 
+                Timestamp expiration;  
 
                 ColorMessage();  // default: black, 127.0.0.1, no expire, no flash
                 ColorMessage(

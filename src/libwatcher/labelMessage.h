@@ -7,6 +7,7 @@
 #include "message.h"
 #include "watcherColors.h"
 #include "watcherGlobalFunctions.h"
+#include "watcherTypes.h" 
 
 namespace watcher {
     namespace event {
@@ -17,7 +18,7 @@ namespace watcher {
                 int fontSize;
                 Color foreground;
                 Color background;
-                unsigned int expiration;    // this should be a float
+                Timestamp  expiration;    // this should be a float
                 bool addLabel;              // add or remove the label depending on true or false here.
                 GUILayer layer;             // which layer to put the label on 
 

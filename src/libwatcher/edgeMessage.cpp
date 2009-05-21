@@ -25,7 +25,7 @@ namespace watcher {
                                  const Color &c_,
                                  const unsigned int &width_,
                                  const bool bidirectional_,
-                                 unsigned int expiration_, 
+                                 Timestamp expiration_, 
                                  const bool &addEdge_) : 
             Message(EDGE_MESSAGE_TYPE, EDGE_MESSAGE_VERSION),
             node1(node1_),

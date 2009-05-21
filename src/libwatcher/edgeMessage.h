@@ -7,6 +7,7 @@
 #include "message.h"
 #include "labelMessage.h"
 #include "watcherColors.h"
+#include "watcherTypes.h" 
 
 namespace watcher {
     namespace event {
@@ -16,7 +17,7 @@ namespace watcher {
                 NodeIdentifier node1;
                 NodeIdentifier node2;
                 Color edgeColor;
-                float expiration; 
+                Timestamp expiration; 
                 float width;      
                 GUILayer layer;
                 bool addEdge;   // if true, add an edge, else remove existing edge;
@@ -33,7 +34,7 @@ namespace watcher {
                             const Color &c_=Color::blue,            // color of edge
                             const unsigned int &width=15,           // width of the edge 
                             const bool bidirectional_=false,        // Is this edge bidirectional?
-                            unsigned int expiration_=0,             // expiration time in milliseconds, 0=never expire
+                            const Timestamp  expiration_=0,             // expiration time in milliseconds, 0=never expire
                             const bool &addEdge=true);              // If true, add an edge, else remove exising edge with same props as this one.
 
                 EdgeMessage(const EdgeMessage &other);
