@@ -37,6 +37,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -b, --background=color      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n");
     fprintf(stderr, "   -e, --expiration=seconds    How long in secondt to diplay the label\n");
     fprintf(stderr, "   -r, --remove                Remove the label if it is attached\n"); 
+    fprintf(stderr, "   -L, --layer=layer           Which layer the label is part of. Default is physical\n"); 
 
     exit(1); 
 }
@@ -56,6 +57,7 @@ int main(int argc, char **argv)
     uint32_t expiration=10000;
     float lat=0.0, lng=0.0, alt=0.0;
     bool remove=false;
+    GUILayer layer=PHYSICAL_LAYER;
 
     while (true) 
     {
@@ -73,11 +75,12 @@ int main(int argc, char **argv)
             {"background", required_argument, 0, 'b'},
             {"expiration", required_argument, 0, 'e'},
             {"remove", no_argument, 0, 'r'},
+            {"layer", required_argument, 0, 'L'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "l:s:n:x:y:t:p:z:f:b:e:rhH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "l:s:n:x:y:t:p:z:f:b:e:L:rhH?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -108,6 +111,7 @@ int main(int argc, char **argv)
             case 'y': lng=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
             case 'z': alt=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
             case 'r': remove=true; break;
+            case 'L': label=optarg; break;
             case 'h':
             case 'H':
             case '?':
@@ -143,6 +147,7 @@ int main(int argc, char **argv)
     lm->lng=lng;
     lm->alt=alt;
     lm->addLabel=!remove;
+    lm->layer=layer;
 
     if(!client.sendMessage(lm))
     {
