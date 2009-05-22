@@ -19,6 +19,10 @@ namespace watcher
 {
     using namespace event;  // for libwatcher and messages. 
 
+    // Forward decl for Ptr typedef
+    class WatcherGraph;
+    typedef boost::shared_ptr<WatcherGraph> WatcherGraphPtr; 
+
     /** 
      * @class WatcherGraph
      * @author Geoff Lawler <geoff.lawler@sparta.com>
@@ -115,9 +119,22 @@ namespace watcher
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            /** 
+             * Serialize the Graph to a stream
+             */
+             bool pack(std::ostream &os);
+
+             /**
+              * Unserialize a Graph from a stream
+              */
+             WatcherGraphPtr unpack(std::istream& is);
+
         protected:
 
         private:
+
+            friend class boost::serialization::access;
+            template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
 
             DECLARE_LOGGER();
 

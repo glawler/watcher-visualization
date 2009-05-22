@@ -13,6 +13,9 @@
 
 #include "watcherGraph.h"
 
+#include <boost/graph/adj_list_serialize.hpp>
+#include "libwatcher/watcherSerialize.h"
+
 using namespace std;
 using namespace boost;
 using namespace watcher;
@@ -428,4 +431,41 @@ std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph
     TRACE_EXIT();
     return out;
 }
+
+bool WatcherGraph::pack(ostream &os)
+{
+    TRACE_ENTER();
+    boost::archive::text_oarchive oa(os);
+    oa << (*this);
+    TRACE_EXIT();
+    return true; 
+}
+
+WatcherGraphPtr WatcherGraph::unpack(std::istream& is)
+{
+    boost::archive::text_iarchive ia(is);
+    WatcherGraph* ret = 0;
+    try
+    {
+        ia >> ret;
+    }
+    catch (boost::archive::archive_exception& e)
+    {
+        LOG_WARN("Exception thrown while serializing the graph: " << e.what());
+        return WatcherGraphPtr();
+    }
+    return WatcherGraphPtr(ret); 
+}
+
+template<typename Archive>
+void WatcherGraph::serialize(Archive &ar, const unsigned int /* file_version */)
+{
+    TRACE_ENTER();
+    ar & theGraph;
+    TRACE_EXIT();
+}
+
+
+BOOST_CLASS_EXPORT(watcher::WatcherGraph);
+
 

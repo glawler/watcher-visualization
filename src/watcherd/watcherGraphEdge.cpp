@@ -1,4 +1,6 @@
 #include <boost/foreach.hpp>
+
+#include "libwatcher/watcherSerialize.h"
 #include "watcherGraphEdge.h"
 
 using namespace watcher; 
@@ -41,4 +43,16 @@ std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph
     TRACE_EXIT();
     return out;
 }
+
+template<typename Archive>
+void WatcherGraphEdge::serialize(Archive &ar, const unsigned int /* file_version */)
+{
+    TRACE_ENTER();
+    ar & label;
+    ar & layer;
+    ar & attachedLabels; 
+    TRACE_EXIT();
+}
+
+BOOST_CLASS_EXPORT(WatcherGraphEdge); 
 

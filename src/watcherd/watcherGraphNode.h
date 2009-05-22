@@ -6,6 +6,7 @@
  * @author Geoff.Lawler@cobham.com
  * @date 2009-05-19
  */
+#include <boost/serialization/access.hpp>
 #include <list>
 #include <string>
 
@@ -50,6 +51,8 @@ namespace watcher
 
         protected:
         private:
+            friend class boost::serialization::access;
+            template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
 
             DECLARE_LOGGER(); 
     };

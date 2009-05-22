@@ -1,6 +1,8 @@
 #define BOOST_TEST_MODULE watcher::watcherGraph test
 #include <boost/test/unit_test.hpp>
 
+#include "libwatcher/watcherSerialize.h"
+
 #include "logger.h"
 #include "../watcherGraph.h"
 
@@ -9,6 +11,7 @@ using namespace boost;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
+using namespace boost::archive;
 
 EdgeMessagePtr createEdgeMessage()
 {
@@ -101,3 +104,58 @@ BOOST_AUTO_TEST_CASE( output_test )
 }
 
 
+BOOST_AUTO_TEST_CASE( serialize_test )
+{
+    WatcherGraph wg;
+
+    std::vector<watcher::NodeIdentifier> neighbors;
+    for(unsigned long i=0xc0a80165; i<0xc0a8016a; i++) // 0xc0a80165==192.168.1.101 in host byte order
+        neighbors.push_back(boost::asio::ip::address_v4(i));
+    ConnectivityMessagePtr cm(new ConnectivityMessage);
+    cm->neighbors=neighbors;
+    wg.updateGraph(cm);
+
+    LabelMessagePtr lmp(new LabelMessage("Hello There", asio::ip::address::from_string("192.168.1.103")));
+    wg.updateGraph(lmp);
+
+    ostringstream os;
+    text_oarchive oa(os); 
+    oa << wg; 
+
+    WatcherGraph wgdup;
+    istringstream is(os.str());
+    text_iarchive ia(is);
+    ia >> wgdup;
+
+    LOG_DEBUG("output: " << os.str());
+    LOG_DEBUG("input: " << is.str());
+
+    // BOOST_CHECK_EQUAL(wg, wgdup); 
+}
+
+BOOST_AUTO_TEST_CASE( pack_unpack_test )
+{
+    WatcherGraph wg;
+
+    std::vector<watcher::NodeIdentifier> neighbors;
+    for(unsigned long i=0xc0a80165; i<0xc0a8016a; i++) // 0xc0a80165==192.168.1.101 in host byte order
+        neighbors.push_back(boost::asio::ip::address_v4(i));
+    ConnectivityMessagePtr cm(new ConnectivityMessage);
+    cm->neighbors=neighbors;
+    wg.updateGraph(cm);
+
+    LabelMessagePtr lmp(new LabelMessage("Hello There", asio::ip::address::from_string("192.168.1.103")));
+    wg.updateGraph(lmp);
+
+    ostringstream os;
+    wg.pack(os); 
+
+    WatcherGraph wgdup;
+    istringstream is(os.str());
+    wgdup.unpack(is); 
+
+    LOG_DEBUG("output: " << os.str());
+    LOG_DEBUG("input: " << is.str());
+
+    // BOOST_CHECK_EQUAL(wg, wgdup); 
+}

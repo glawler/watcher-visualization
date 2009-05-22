@@ -9,6 +9,7 @@
 
 #include <string>
 #include <list>
+#include <boost/serialization/access.hpp>
 
 #include "libwatcher/watcherTypes.h"    // for Timestamp
 #include "libwatcher/labelMessage.h" 
@@ -61,6 +62,8 @@ namespace watcher
 
         protected:
         private:
+            friend class boost::serialization::access;
+            template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
 
             DECLARE_LOGGER();
 

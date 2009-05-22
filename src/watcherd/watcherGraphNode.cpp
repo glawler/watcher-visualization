@@ -5,6 +5,7 @@
  */
 
 #include <boost/foreach.hpp>
+#include "libwatcher/watcherSerialize.h"
 
 #include "watcherGraphNode.h"
 
@@ -51,4 +52,19 @@ std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph
     TRACE_EXIT();
     return out;
 }
+
+template <typename Archive> 
+void WatcherGraphNode::serialize(Archive & ar, const unsigned int /* file_version */)
+{
+    TRACE_ENTER();
+    ar & nodeId;
+    ar & layer; 
+    ar & gpsData; 
+    ar & label;
+    ar & connected;
+    ar & attachedLabels;
+    TRACE_EXIT(); 
+}
+
+BOOST_CLASS_EXPORT(watcher::WatcherGraphNode); 
 
