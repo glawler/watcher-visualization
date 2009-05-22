@@ -85,8 +85,9 @@ namespace watcher {
                     Message::operator==(other) && 
                     lat==other.lat && 
                     lng==other.lng &&
-                    alt==other.alt;
-                    label==other.label;
+                    alt==other.alt &&
+                    label==other.label &&
+                    layer==other.layer;
 
             // These are not distinguishing features
             //  foreground==other.foreground,
