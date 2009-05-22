@@ -16,7 +16,7 @@ using namespace watcher::event;
 INIT_LOGGER(WatcherGraphNode, "WatcherGraphNode"); 
 
 WatcherGraphNode::WatcherGraphNode() : 
-        nodeId(), gpsData(), label(), connected(false), layer(), attachedLabels()
+        nodeId(), gpsData(), label(), connected(false), color(), layer(), attachedLabels()
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -36,7 +36,8 @@ std::ostream &WatcherGraphNode::toStream(std::ostream &out) const
     TRACE_ENTER();
 
     out << " nodeId: " << nodeId << " layer: " << layer << " gpsData: " 
-        << gpsData << " label: " << label << " connected: " << connected;
+        << gpsData << " label: " << label << " connected: " << connected
+        << " color: " << color;
     out << " labels attached: ";
     BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
         out << "[" << *lmp << "]"; 
@@ -62,6 +63,7 @@ void WatcherGraphNode::serialize(Archive & ar, const unsigned int /* file_versio
     ar & gpsData; 
     ar & label;
     ar & connected;
+    ar & color;
     ar & attachedLabels;
     TRACE_EXIT(); 
 }

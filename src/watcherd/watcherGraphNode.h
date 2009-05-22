@@ -37,6 +37,7 @@ namespace watcher
             GPSMessagePtr gpsData;
             std::string label;
             bool connected;
+            Color color; 
 
             GUILayer layer;  // Needed so we can remove by layer if needed. 
 
