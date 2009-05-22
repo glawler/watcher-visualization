@@ -25,8 +25,9 @@ namespace watcher
      *
      * A class that holds the data at the vertexes of a WatcherGraph
      */
-    class WatcherGraphNode
+    class WatcherGraphNode 
     {
+        // GTL TO DO: put in oper=() and copy ctor(). 
         public:
             WatcherGraphNode();
             virtual ~WatcherGraphNode();
@@ -35,6 +36,8 @@ namespace watcher
             GPSMessagePtr gpsData;
             std::string label;
             bool connected;
+
+            GUILayer layer;  // Needed so we can remove by layer if needed. 
 
             typedef std::list<LabelMessagePtr> LabelMessageList;
             LabelMessageList attachedLabels; 

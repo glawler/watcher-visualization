@@ -49,6 +49,15 @@ namespace watcher {
                 return *l == *lhs;
             }
         };
+        struct MatchLabelLayer
+        {
+            MatchLabelLayer(const GUILayer &l_) : l(l_) {} 
+            const GUILayer &l;
+            bool operator()(const LabelMessagePtr &lhs)
+            {
+                return l == lhs->layer;
+            }
+        };
 
         /** Helper class to print WatcherGraphNodes as graphviz data */
         struct WatcherNodeVertexGraphVizWriter 
@@ -136,7 +145,8 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
     BOOST_FOREACH(NodeIdentifier nid, message->neighbors)
     {
         findOrCreateNode(nid, dest);
-        add_edge(*src, *dest, theGraph);
+        std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
+        theGraph[ei.first].layer=message->layer; 
     }
     
     LOG_DEBUG("Graph after adding: " << *this); 
@@ -162,6 +172,7 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     theGraph[ei.first].color=message->edgeColor; 
     theGraph[ei.first].expiration=message->expiration;
     theGraph[ei.first].width=message->width;
+    theGraph[ei.first].layer=message->layer;
 
     if (message->node1Label && !message->node1Label->label.empty())
         theGraph[*src].attachedLabels.push_back(message->node1Label);
@@ -236,9 +247,11 @@ bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
         else
         {
             // GTL - this is some ugly ass code. Compact, but very very ugly. 
+            // See http://www.sgi.com/tech/stl/remove_if.html for details
             WatcherGraphNode::LabelMessageList::iterator b=theGraph[*nodeIter].attachedLabels.begin();
             WatcherGraphNode::LabelMessageList::iterator e=theGraph[*nodeIter].attachedLabels.end();
-            theGraph[*nodeIter].attachedLabels.erase(remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message)), e);
+            WatcherGraphNode::LabelMessageList::iterator newEnd=remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message));
+            theGraph[*nodeIter].attachedLabels.erase(newEnd, e);
         }
         retVal=true;
     }
@@ -262,12 +275,70 @@ std::ostream &WatcherGraph::toStream(std::ostream &out) const
     return out;
 }
 
-bool WatcherGraph::updateGraph(const MessageStreamFilter &)
+bool WatcherGraph::updateGraph(const MessageStreamFilter &theFilter)
 {
+    // GTL - there are so many contradictions/problems/issues about filtering inmemory 
+    // watcherGraph, (what if you filter out the physical layer - does everything 
+    // else et deleted? what if you remove an edge that has labels on a different layer?) 
+    // that maybe it is best to just destroy the existing graph 
+    // and let the new incoming messages just rebuild it from the server filtered
+    // messages. 
     TRACE_ENTER();
 
     bool retVal=false;
-    LOG_ERROR("updateGraph(const MessageStreamFilter &filter) not yet implemented");
+    // handle vertices
+    {  
+        graph_traits<Graph>::vertex_iterator i, end, next;
+        tie(i, end) = vertices(theGraph);
+        for(next=i; i!=end; i=next)
+        {
+            ++next;  // In case we have to remove the vertex itself, get pointer to next vertex.
+
+            // GTL - TODO handle the region filter.  
+            {
+                LOG_ERROR("Filtering in-memory watcher data by region is not currently supported."); 
+            }
+
+            // handle layer - layer we can do. 
+            {
+                // If the node is going away, so are all the other layers on top of it. 
+                if (theGraph[*i].layer==theFilter.getLayer())
+                {
+                    remove_vertex(*i, theGraph);     // GTL - what happens to the edges here? 
+                    continue;                        // What if both vertices are removed? 
+                }
+
+                // remove the any vertex labels that have the same layer
+                WatcherGraphNode::LabelMessageList::iterator b=theGraph[*i].attachedLabels.begin();
+                WatcherGraphNode::LabelMessageList::iterator e=theGraph[*i].attachedLabels.end();
+                WatcherGraphNode::LabelMessageList::iterator newEnd=
+                    remove_if(b, e, GraphFunctors::MatchLabelLayer(theFilter.getLayer()));
+                theGraph[*i].attachedLabels.erase(newEnd, e);
+            }
+        }
+    }
+    // handle edges
+    {
+        // handle region
+        {
+            // if the vertices of the edge are removed above as 
+            // part of the vertices region removal, do the edges still exist? 
+        }
+
+        // layers
+        graph_traits<Graph>::edge_iterator i, end, next;
+        tie(i, end) = edges(theGraph);
+        for(next=i; i!=end; i=next) 
+        {
+            next++;
+            if (theGraph[*i].layer==theFilter.getLayer())
+            {
+                remove_edge(*i, theGraph);    // GTL will this cause the dtor to be called on all labels attached to this edge?
+                continue;
+            }
+        }
+    }
+
     
     TRACE_EXIT_RET(retVal);
     return retVal;

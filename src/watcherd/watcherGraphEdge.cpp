@@ -6,7 +6,7 @@ using namespace watcher;
 INIT_LOGGER(WatcherGraphEdge, "WatcherGraphEdge"); 
 
 WatcherGraphEdge::WatcherGraphEdge() : 
-    label(), color(Color::blue), expiration(-1), width(30), attachedLabels()
+    label(), color(Color::blue), expiration(-1), width(30), attachedLabels(), layer()
 { 
     TRACE_ENTER();
     TRACE_EXIT();
@@ -24,6 +24,7 @@ std::ostream &WatcherGraphEdge::toStream(std::ostream &out) const
     TRACE_ENTER();
 
     out << " label: " << label; 
+    out << " layer: " << layer;
     out << " labels attached: ";
 
     BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)

@@ -15,10 +15,10 @@ using namespace watcher::event;
 INIT_LOGGER(WatcherGraphNode, "WatcherGraphNode"); 
 
 WatcherGraphNode::WatcherGraphNode() : 
-        nodeId(), gpsData(), label(), connected(false), attachedLabels()
+        nodeId(), gpsData(), label(), connected(false), layer(), attachedLabels()
 {
-        TRACE_ENTER();
-            TRACE_EXIT();
+    TRACE_ENTER();
+    TRACE_EXIT();
 }
 
 
@@ -34,7 +34,8 @@ std::ostream &WatcherGraphNode::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
 
-    out << " nodeId: " << nodeId << " gpsData: " << gpsData << " label: " << label << " connected: " << connected;
+    out << " nodeId: " << nodeId << " layer: " << layer << " gpsData: " 
+        << gpsData << " label: " << label << " connected: " << connected;
     out << " labels attached: ";
     BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
         out << "[" << *lmp << "]"; 

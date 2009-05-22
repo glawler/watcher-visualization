@@ -76,10 +76,32 @@ namespace watcher
 
             /**
              * updateGraph(filter)
-             * Applies the past filter to the in-memory graph.
+             * Applies the passed filter to the in-memory graph. Read details below. 
+             *
              * When a filter is applied to the MessageStream feeding the graph, 
              * it should also be applied to the graph instance, otherwise old data that does
              * not match the new stream may still be in the in-memory graph.
+             *
+             * Note: that there are problems with filtering by message type for in-memory graphs.
+             * The graphs are built from incoming message, but the message themselves may not be
+             * kept. The message type->graph may be a one way operation: how do we know that an edge
+             * was created with a edgeMessage or a connectivityMessage? So filtering by message type 
+             * is not supported. 
+             *
+             * Filtering by layer works, with certain understandings. Unless it is a base layer (like 
+             * the physical layer), a layer sits on top of another layer. When a layer is removed, 
+             * all layers above that layer are removed as well. For instance if a layer that contains
+             * an edge is removed, all labels attached to that edge regardless of layer, are removed 
+             * as well. This may not be what you expect. The problem is what location do you draw a label
+             * at that is attached to a now non-existant edge? 
+             *
+             * The best approach for GUI developers may be to just clear this graph, apply the filter
+             * to the message stream, and let the filtered-message stream rebuild the graph. This may not
+             * work well for region filters though if the region is being filtered/updated more often 
+             * than the GPS messages are recieved. 
+             *
+             * It's a whole thing, you see? 
+             *
              */
              bool updateGraph(const MessageStreamFilter &filter); 
 

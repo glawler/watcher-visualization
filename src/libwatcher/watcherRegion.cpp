@@ -25,7 +25,7 @@ std::ostream &WatcherRegion::toStream(std::ostream &out) const
     return out; 
 }
 
-std::ostream &operator<<(std::ostream &out, const WatcherRegion &region)
+std::ostream &watcher::operator<<(std::ostream &out, const WatcherRegion &region)
 {
     TRACE_ENTER();
     TRACE_EXIT();

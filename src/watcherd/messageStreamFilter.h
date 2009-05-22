@@ -2,13 +2,15 @@
 #define THIS_ONE_TIME_AT_BAND_CAMP____H
 
 #include <ostream>
-#include <string>
 #include <boost/shared_ptr.hpp>
 #include "libwatcher/watcherRegion.h"
+#include "libwatcher/messageTypesAndVersions.h"  // for GUILayer
 #include "logger.h"
 
 namespace watcher
 {
+    using namespace event; 
+    
     /** 
      * @class MessageStreamFilter
      * @author Geoff Lawler <geoff.lawler@sparta.com>
@@ -29,34 +31,34 @@ namespace watcher
             virtual ~MessageStreamFilter();
 
             /**
-             * getLayer()
+             m getLayer()
              * @return Returns the current layer of this filter
              */
-            std::string getLayer() const; 
+            GUILayer getLayer() const; 
 
             /**
              * setLayer()
              * @param layer - set the layer of this filter to be the value passed in.
              */
-            void setLayer(const std::string &layer); 
+            void setLayer(const GUILayer &layer); 
 
             /**
              * getMessageType()
              * @return Returns the current message type of this filter
              */
-            float getMessageType() const; 
+            unsigned int getMessageType() const; 
 
             /**
              * setMessageType()
              * @param type - set the messageType of this filter to be the value passed in.
              */
-            void setMessageType(const float &type); 
+            void setMessageType(const unsigned int &type); 
 
             /**
              * getRegion()
              * @return Returns the current region of this filter
              */
-            std::string getRegion() const; 
+            WatcherRegion getRegion() const; 
 
             /**
              * setRegion()

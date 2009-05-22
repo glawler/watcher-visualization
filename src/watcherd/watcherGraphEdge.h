@@ -51,6 +51,8 @@ namespace watcher
             typedef std::list<LabelMessagePtr> LabelMessageList;
             LabelMessageList attachedLabels; 
 
+            GUILayer layer;  // Needed so we can remove by layer if needed. 
+
             /** output operator **/
             virtual std::ostream &toStream(std::ostream &out) const;
 
