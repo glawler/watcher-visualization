@@ -20,7 +20,7 @@ namespace watcher {
         }
 
         GPSMessage::GPSMessage(const GPSMessage &other) :
-            Message(other.type, other.version),
+            Message(other), 
             x(other.x),
             y(other.y),
             z(other.z),
