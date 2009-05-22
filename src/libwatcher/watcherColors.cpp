@@ -125,6 +125,13 @@ namespace watcher {
             return *this;
         }
 
+        std::string Color::toString() const
+        {
+            TRACE_ENTER();
+            TRACE_EXIT();
+            return Color::toString(Color(r,g,b,a)); 
+        }
+
         std::ostream &Color::toStream(std::ostream &out) const
         {
             TRACE_ENTER();

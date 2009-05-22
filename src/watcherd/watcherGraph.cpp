@@ -10,6 +10,7 @@
 #include "libwatcher/gpsMessage.h"
 #include "libwatcher/nodeStatusMessage.h"
 #include "libwatcher/edgeMessage.h"
+#include "libwatcher/colorMessage.h"
 
 #include "watcherGraph.h"
 
@@ -71,18 +72,22 @@ namespace watcher {
             void operator()(std::ostream &out, 
                     boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v) const
             {
+                out << "[";
                 stringstream label;
-                label << "[label=\"";
-                if (!g[v].label.empty())
-                    label << "\\nlabel:" <<  g[v].label;
-                label << "\\nnodeId: " << g[v].nodeId;
+                label << "label=\"nodeId: " << g[v].nodeId;
                 if (g[v].attachedLabels.size())
-                    label << "\\nattached labels: " << g[v].attachedLabels.size(); 
+                    label << "\\n numlabels: " << g[v].attachedLabels.size(); 
                 if (g[v].gpsData) 
                     label << "\\ngps: " << g[v].gpsData->x << "," << g[v].gpsData->y << "," <<  g[v].gpsData->z;
-                label << "\"]"; 
+                label << "\""; 
 
                 out << label.str(); 
+                if (g[v].color) 
+                    out << " color=" << g[v].color->color.toString();
+                else
+                    out << " color=black"; 
+                
+                out << "]"; 
             }
         };
 
@@ -95,16 +100,18 @@ namespace watcher {
             void operator()(std::ostream &out, 
                     boost::graph_traits<WatcherGraph::Graph>::edge_descriptor const &e) const
             {
+                out << "[";
                 stringstream label;
-                label << "[label=\"";
+                label << " label=\"";
                 if (!g[e].label.empty())
                     label << "\\nlabel:" <<  g[e].label;
                 if (g[e].attachedLabels.size())
-                    label << "\\nattached labels: " << g[e].attachedLabels.size(); 
-                label << "\"]"; 
+                    label << "\\nnumlabels: " << g[e].attachedLabels.size(); 
+                label << "\""; 
 
                 out << label.str(); 
-                out << "[color=" << g[e].color << "]"; 
+                out << " color=" << g[e].color;
+                out << "]"; 
             }
         };
     }
@@ -227,8 +234,25 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
     boost::graph_traits<Graph>::vertex_iterator nodeIter;
     if(findOrCreateNode(message->fromNodeID, nodeIter))
     {
-        LOG_DEBUG("Updating GPS information for node " << theGraph[*nodeIter].nodeId);
+        LOG_DEBUG("Updating connection status for node " << theGraph[*nodeIter].nodeId);
         theGraph[*nodeIter].connected=message->event==NodeStatusMessage::connect ? true : false;
+        retVal=true;
+    }
+    
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
+bool WatcherGraph::updateNodeColor(const ColorMessagePtr &message)
+{
+    TRACE_ENTER();
+
+    bool retVal;
+    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    if(findOrCreateNode(message->fromNodeID, nodeIter))
+    {
+        LOG_DEBUG("Updating color information for node " << theGraph[*nodeIter].nodeId);
+        theGraph[*nodeIter].color=message; 
         retVal=true;
     }
     
@@ -368,6 +392,9 @@ bool WatcherGraph::updateGraph(const MessagePtr &message)
             break;
         case LABEL_MESSAGE_TYPE:
             retVal=addRemoveAttachedLabel(dynamic_pointer_cast<LabelMessage>(message));
+            break;
+        case COLOR_MESSAGE_TYPE:
+            retVal=updateNodeColor(dynamic_pointer_cast<ColorMessage>(message));
             break;
         default:
             retVal=false;

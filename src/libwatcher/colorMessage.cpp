@@ -12,7 +12,6 @@ namespace watcher {
         ColorMessage::ColorMessage() : 
             Message(COLOR_MESSAGE_TYPE, COLOR_MESSAGE_VERSION),
             color(Color::black),
-            nodeAddr(asio::ip::address::from_string("127.0.0.1")),
             flashPeriod(0),
             expiration(0)
         {
@@ -28,18 +27,17 @@ namespace watcher {
                                    const uint32_t &f) : 
             Message(COLOR_MESSAGE_TYPE, COLOR_MESSAGE_VERSION),
             color(c), 
-            nodeAddr(address),
             flashPeriod(e),
             expiration(f)
         {
             TRACE_ENTER();
+            fromNodeID=address;
             TRACE_EXIT();
         }
 
         ColorMessage::ColorMessage(const ColorMessage &other) : 
             Message(other.type, other.version),
             color(other.color), 
-            nodeAddr(other.nodeAddr),
             flashPeriod(other.flashPeriod),
             expiration(other.expiration)
         {
@@ -55,7 +53,6 @@ namespace watcher {
             bool retVal = 
                 Message::operator==(other) && 
                 color == other.color;
-            nodeAddr == other.nodeAddr;
 
             TRACE_EXIT_RET(retVal);
             return retVal;
@@ -67,7 +64,6 @@ namespace watcher {
 
             Message::operator=(other);
             color = other.color;
-            nodeAddr = other.nodeAddr;
             flashPeriod = other.flashPeriod;
             expiration = other.expiration;
 
@@ -82,7 +78,6 @@ namespace watcher {
 
             Message::toStream(out);
             out << " color: " << color; 
-            out << " node: " << nodeAddr;
             out << " flashPeriod: " << flashPeriod;
             out << " expiration: " << expiration;
             TRACE_EXIT();
@@ -102,7 +97,6 @@ namespace watcher {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);
             ar & color;
-            ar & nodeAddr;
             ar & flashPeriod;
             ar & expiration;
             TRACE_EXIT();

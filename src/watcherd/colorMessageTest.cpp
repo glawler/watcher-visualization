@@ -143,7 +143,7 @@ int main(int argc, char **argv)
     ColorMessagePtr cm(new ColorMessage);
 
     cm->color=color;
-    cm->nodeAddr=nodeAddr;
+    cm->fromNodeID=nodeAddr;
     cm->flashPeriod=flashTime;
     cm->expiration=expiration;
 

@@ -14,7 +14,6 @@ namespace watcher {
             public:
                 // The data
                 Color color;
-                boost::asio::ip::address nodeAddr;
                 Timestamp flashPeriod; 
                 Timestamp expiration;  
 

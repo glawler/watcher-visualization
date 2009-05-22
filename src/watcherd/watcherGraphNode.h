@@ -13,6 +13,7 @@
 #include "logger.h"
 #include "libwatcher/gpsMessage.h"
 #include "libwatcher/labelMessage.h"
+#include "libwatcher/colorMessage.h"
 #include "libwatcher/messageTypesAndVersions.h"     // for GUILayer
 
 namespace watcher
@@ -37,7 +38,9 @@ namespace watcher
             GPSMessagePtr gpsData;
             std::string label;
             bool connected;
-            Color color; 
+
+            // We keep the entire message so we can keep track of expiration and flash.
+            ColorMessagePtr color;
 
             GUILayer layer;  // Needed so we can remove by layer if needed. 
 

@@ -159,6 +159,11 @@ namespace watcher
             bool updateNodeStatus(const NodeStatusMessagePtr &message);
 
             /**
+             * Update a node's color.
+             */
+            bool updateNodeColor(const ColorMessagePtr &message);
+
+            /**
              * Update an attached label - either add or remove it.
              */
             bool addRemoveAttachedLabel(const LabelMessagePtr &message);

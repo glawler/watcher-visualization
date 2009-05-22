@@ -36,7 +36,11 @@ namespace watcher
                 static const Color brown;
                 static const Color deeppink;
 
+                // Static toString()
                 static std::string toString(const Color &c); 
+
+                // Member toString();
+                std::string toString() const; 
 
                 //
                 // Now the real Color class begins...

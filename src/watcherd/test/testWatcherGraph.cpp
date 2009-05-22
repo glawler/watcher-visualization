@@ -99,6 +99,9 @@ BOOST_AUTO_TEST_CASE( output_test )
     // NodeStatusMessagePtr nsm(new NodeStatusMessage(NodeStatusMessage::connect));
     // nsm->fromNodeID=asio::ip::address::from_string("192.168.1.100"); 
     // wg.updateGraph(nsm); 
+  
+    ColorMessagePtr colm(new ColorMessage(Color::red, asio::ip::address::from_string("192.168.1.101"))); 
+    wg.updateGraph(colm); 
 
     cout << "Graph with edge message and neighbors:" << endl << wg << endl;
 }

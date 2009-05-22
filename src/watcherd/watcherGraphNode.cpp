@@ -37,7 +37,7 @@ std::ostream &WatcherGraphNode::toStream(std::ostream &out) const
 
     out << " nodeId: " << nodeId << " layer: " << layer << " gpsData: " 
         << gpsData << " label: " << label << " connected: " << connected
-        << " color: " << color;
+        << " color: " << *color;
     out << " labels attached: ";
     BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
         out << "[" << *lmp << "]"; 
