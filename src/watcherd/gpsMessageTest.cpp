@@ -6,6 +6,7 @@
 #include "logger.h"
 #include "client.h"
 #include <libwatcher/gpsMessage.h>
+#include <libwatcher/watcherTypes.h> // for NodeIdentifer
 
 using namespace std;
 using namespace watcher;
@@ -13,9 +14,12 @@ using namespace watcher::event;
 
 void usage(const char *progName)
 {
-    fprintf(stderr, "Usage: %s -x val -y val -z val -s|servername server [-l|logProps log.propertiesFile]\n", basename(progName)); 
-    fprintf(stderr, "Where x == longitude, y == latitude, and z == altitude\n"); 
-    fprintf(stderr, "   and s|servername == the server address or hostname\n"); 
+    fprintf(stderr, "Usage: %s -x val -y val -z val -s|servername server [-n|--fromNode=ipaddress][-l|logProps log.propertiesFile]\n", basename(progName)); 
+    fprintf(stderr, "Where:\n");
+    fprintf(stderr, "   x == longitude, y == latitude, and z == altitude\n"); 
+    fprintf(stderr, "   s|servername == the server address or hostname\n"); 
+    fprintf(stderr, "   n|fromNode == The address of the node of the GPS data. Localhost is default\n"); 
+    fprintf(stderr, "   l|logProps == The file to read the logging properties from\n"); 
 
     exit(1); 
 }
@@ -45,6 +49,7 @@ int main(int argc, char **argv)
 
     float latitude, longitude, altitude;
     latitude = longitude = altitude = 0.0;
+    NodeIdentifier nodeAddr; 
 
     while (true) 
     {
@@ -55,10 +60,11 @@ int main(int argc, char **argv)
             {"latitude", required_argument, 0, 'x'},
             {"longitude", required_argument, 0, 'y'},
             {"altitude", required_argument, 0, 'z'},
+            {"fromNode", required_argument, 0, 'n'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "l:s:x:y:z:hH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "l:s:x:y:z:n:hH?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -79,6 +85,17 @@ int main(int argc, char **argv)
                 break;
             case 'z': 
                 altitude = str2float(optarg, "altitude (z)"); 
+                break;
+            case 'n':
+                {
+                    boost::system::error_code ec;
+                    nodeAddr=NodeIdentifier::from_string(optarg, ec);
+                    if (ec)
+                    {
+                        fprintf(stderr, "I don't understand the fromNode argument, \"%s\". It must be an ip address.\n", optarg); 
+                        exit(0);
+                    }
+                }
                 break;
             case 'h':
             case 'H':
@@ -108,6 +125,12 @@ int main(int argc, char **argv)
     watcher::Client client(serverName); 
     printf("Connecting to %s and sending message.\n", serverName);
     GPSMessagePtr message = GPSMessagePtr(new GPSMessage(latitude, longitude, altitude));
+
+    if(NodeIdentifier()!=nodeAddr) // not empty address
+    {
+        LOG_INFO("Using " << nodeAddr << " as the node's address");
+        message->fromNodeID=nodeAddr;
+    }
 
     if(!client.sendMessage(message))
     {
