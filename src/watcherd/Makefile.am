@@ -33,7 +33,7 @@ LIBS+=-lsqlite3
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 
 # 
-# .cfg and .log.properties build rules are in top level Makefile.am
+# .cfg and .log.properties build rules are below
 #
 BUILT_SOURCES= \
 	connectivity2dot.cfg \
