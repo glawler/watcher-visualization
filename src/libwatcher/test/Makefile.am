@@ -7,7 +7,8 @@ LDFLAGS += -L..
 LDFLAGS += -L../../../lib
 LDFLAGS += -L../../logger
 LDFLAGS += $(BOOST_LDFLAGS)
-LDADD = -lwatcher -llogger -llog4cxx
+# LDADD = -lwatcher -llogger -llog4cxx
+LDADD = ../libwatcher.a ../../logger/liblogger.a -llog4cxx
 LDADD += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(BOOST_SYSTEM_LIB)
 TESTS=testLabelMessage testEdgeMessage testStartMessage testStopMessage testSeekMessage \
       testSpeedMessage colorTest testConnectivityMessage
