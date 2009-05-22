@@ -30,7 +30,10 @@ namespace watcher {
         }
 
         Message::Message(const Message &other) :
-            version(other.version), type(other.type), timestamp(other.timestamp)
+            version(other.version), 
+            type(other.type), 
+            timestamp(other.timestamp), 
+            fromNodeID(other.fromNodeID)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -56,6 +59,7 @@ namespace watcher {
             version=other.version;
             type=other.type;
             timestamp=other.timestamp;
+            fromNodeID=other.fromNodeID;
             TRACE_EXIT();
             return *this;
         }

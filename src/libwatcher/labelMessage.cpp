@@ -61,7 +61,7 @@ namespace watcher {
         }
 
         LabelMessage::LabelMessage(const LabelMessage &other) : 
-            Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
+            Message(other),
             label(other.label),
             fontSize(other.fontSize),
             foreground(other.foreground),
@@ -80,26 +80,19 @@ namespace watcher {
         bool LabelMessage::operator==(const LabelMessage &other) const
         {
             TRACE_ENTER();
-
-            bool retVal;
-
-            // Compare either address or space coords but not both. Address takes precidence.
-            if (fromNodeID==NodeIdentifier())
-                retVal = 
-                    retVal && 
+ 
+            bool retVal = 
+                    Message::operator==(other) && 
                     lat==other.lat && 
                     lng==other.lng &&
                     alt==other.alt;
-            else
-                retVal = fromNodeID==other.fromNodeID && label==other.label;
+                    label==other.label;
 
             // These are not distinguishing features
             //  foreground==other.foreground,
             //  background==other.background,
             //  expiration==other.expiration,
             //  fontSize==other.FontSize;
-
-            retVal = retVal && Message::operator==(other); 
 
             TRACE_EXIT_RET(retVal);
             return retVal;
