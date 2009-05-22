@@ -93,6 +93,7 @@ namespace watcher {
 
         MessagePtr Message::unpack(std::istream& is)
         {
+            is >> std::setprecision(std::numeric_limits<double>::digits10 + 2); 
             boost::archive::text_iarchive ia(is);
             Message* ret = 0;
             try
@@ -110,6 +111,7 @@ namespace watcher {
         void Message::pack(std::ostream& os) const
         {
             TRACE_ENTER();
+            os << std::setprecision(std::numeric_limits<double>::digits10 + 2); 
             boost::archive::text_oarchive oa(os);
             const Message* base = this;
             oa << base;

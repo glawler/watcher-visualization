@@ -18,16 +18,16 @@ namespace watcher {
                 }; 
 
                 // The data
-                float x;
-                float y;
-                float z;
+                double x;
+                double y;
+                double z;
 
                 DataFormat dataFormat;
 
                 // Only valid if format==UTM
                 std::string utmZoneReference;
 
-                GPSMessage(const float &x=0.0, const float &y=0.0, const float &z=0.0);
+                GPSMessage(const double &x=0.0, const double &y=0.0, const double &z=0.0);
                 GPSMessage(const GPSMessage &other);
 
                 bool operator==(const GPSMessage &other) const;

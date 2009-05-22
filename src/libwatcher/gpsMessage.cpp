@@ -8,7 +8,7 @@ namespace watcher {
     namespace event {
         INIT_LOGGER(GPSMessage, "Message.GPSMessage");
 
-        GPSMessage::GPSMessage(const float &x_, const float &y_, const float &z_) : 
+        GPSMessage::GPSMessage(const double &x_, const double &y_, const double &z_) : 
             Message(GPS_MESSAGE_TYPE, GPS_MESSAGE_VERSION),
             x(x_),
             y(y_),
@@ -62,7 +62,8 @@ namespace watcher {
         std::ostream &GPSMessage::toStream(std::ostream &out) const
         {
             TRACE_ENTER();
-
+            
+            out << std::setprecision(std::numeric_limits<double>::digits10 + 2); 
             Message::toStream(out);
             out << " x: " << x;
             out << " y: " << y;

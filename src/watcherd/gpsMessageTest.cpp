@@ -24,14 +24,14 @@ void usage(const char *progName)
     exit(1); 
 }
 
-float str2float(const char *arg, const char *name)
+double str2double(const char *arg, const char *name)
 {
     TRACE_ENTER();
 
-    float retVal = strtod(arg, NULL);
+    double retVal = strtod(arg, NULL);
     if(errno == EINVAL || errno == ERANGE)
     {
-        fprintf(stderr, "Unable to make sense of the %s argument '%s'. It should be a float.", name, arg);
+        fprintf(stderr, "Unable to make sense of the %s argument '%s'. It should be a double.", name, arg);
         return 0.0;
     }
     return retVal;
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     char *serverName=NULL;
     char *logProps=NULL;
 
-    float latitude, longitude, altitude;
+    double latitude, longitude, altitude;
     latitude = longitude = altitude = 0.0;
     NodeIdentifier nodeAddr; 
 
@@ -78,13 +78,13 @@ int main(int argc, char **argv)
                 serverName = strdup(optarg);  // buffer overflow here :) 
                 break;
             case 'x':
-                latitude = str2float(optarg, "latitude (x)"); 
+                latitude = str2double(optarg, "latitude (x)"); 
                 break;
             case 'y':
-                longitude = str2float(optarg, "longitude (y)"); 
+                longitude = str2double(optarg, "longitude (y)"); 
                 break;
             case 'z': 
-                altitude = str2float(optarg, "altitude (z)"); 
+                altitude = str2double(optarg, "altitude (z)"); 
                 break;
             case 'n':
                 {
