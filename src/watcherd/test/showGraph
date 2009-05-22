@@ -1,17 +1,20 @@
-../connectivityMessageTest --servername glory --fromNode 192.168.1.101 192.168.1.{102,103,104,105}
-../connectivityMessageTest --servername glory --fromNode 192.168.1.103 192.168.1.{101,102,104,105}
-../edgeMessageTest -s glory -h 192.168.1.102 -t 192.168.1.106 -c red -w 50 -d true  -l "Middle Label Text"
-../gpsMessageTest -s glory -x 0.12 -y 0.23 -z 0.34 
-../labelMessageTest -s glory -l "Hello World" -n 192.168.1.101
-../labelMessageTest -s glory -l "Hello World Too" -n 192.168.1.101
-../labelMessageTest -s glory -l "One" -n 192.168.1.102
-../labelMessageTest -s glory -l "Two" -n 192.168.1.102
-../labelMessageTest -s glory -l "Three" -n 192.168.1.102
-../labelMessageTest -s glory -l "Three" -n 192.168.1.103 
-../labelMessageTest -s glory -l "Three" -n 192.168.1.103 -r
-../labelMessageTest -s glory -l "one" -x 1.234 -y 2.345 -z 3.456
-../colorMessageTest -s glory -c blue -n 192.168.1.101
-../colorMessageTest -s glory -c green -n 192.168.1.102
+#/usr/bin/env bash 
+
+SERVER=$(hostname -s);
+../connectivityMessageTest --servername $SERVER --fromNode 192.168.1.101 192.168.1.{102,103,104,105}
+../connectivityMessageTest --servername $SERVER --fromNode 192.168.1.103 192.168.1.{101,102,104,105}
+../edgeMessageTest -s $SERVER -h 192.168.1.102 -t 192.168.1.106 -c red -w 50 -d true  -l "Middle Label Text"
+../gpsMessageTest -s $SERVER -x 0.12 -y 0.23 -z 0.34 
+../labelMessageTest -s $SERVER -l "Hello World" -n 192.168.1.101
+../labelMessageTest -s $SERVER -l "Hello World Too" -n 192.168.1.101
+../labelMessageTest -s $SERVER -l "One" -n 192.168.1.102
+../labelMessageTest -s $SERVER -l "Two" -n 192.168.1.102
+../labelMessageTest -s $SERVER -l "Three" -n 192.168.1.102
+../labelMessageTest -s $SERVER -l "Three" -n 192.168.1.103 
+../labelMessageTest -s $SERVER -l "Three" -n 192.168.1.103 -r
+../labelMessageTest -s $SERVER -l "one" -x 1.234 -y 2.345 -z 3.456
+../colorMessageTest -s $SERVER -c blue -n 192.168.1.101
+../colorMessageTest -s $SERVER -c green -n 192.168.1.102
 sleep 1;
 pkill -USR1 connectivity2 && dot -Tpdf < ../connectivity.dot > connectivity.pdf && evince connectivity.pdf
 
