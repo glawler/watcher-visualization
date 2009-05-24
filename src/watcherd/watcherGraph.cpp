@@ -213,13 +213,13 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     {
         LabelMessagePtr lmp(new LabelMessage(*message->middleLabel));
         lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
-        theGraph[*src].attachedLabels.push_back(lmp);
+        theGraph[ei.first].attachedLabels.push_back(lmp);
     }
     if (message->node2Label && !message->node2Label->label.empty())
     {
         LabelMessagePtr lmp(new LabelMessage(*message->node2Label));
         lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
-        theGraph[*src].attachedLabels.push_back(lmp);
+        theGraph[*dest].attachedLabels.push_back(lmp);
     }
 
     if(message->bidirectional)
