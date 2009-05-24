@@ -163,6 +163,47 @@ BOOST_AUTO_TEST_CASE( pack_unpack_test )
     // BOOST_CHECK_EQUAL(wg, wgdup); 
 }
 
+BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
+{
+    WatcherGraph wg; 
+
+    NodeIdentifier node1=asio::ip::address::from_string("192.168.1.101");
+    NodeIdentifier node2=asio::ip::address::from_string("192.168.1.102");
+
+    unsigned int numEdges=6;
+    for (unsigned int i=0; i < numEdges; i++)
+    {
+        EdgeMessagePtr emp(new EdgeMessage);
+        emp->node1=node1;
+        emp->node2=node2;
+        emp->expiration=Timestamp(i*1000)-500;      // first edge never expires
+
+        // all labels expire in 2 seconds, so they should all disapear halfway though.
+        // GTL - TODO: add a BOOST_CHECK to test this. 
+        emp->middleLabel.reset(new LabelMessage("Hello There"));
+        emp->middleLabel->expiration=2000;          // all labels expire in 2 seconds, so they should all disapear halfway though. 
+
+        wg.updateGraph(emp);
+    }
+
+    for (unsigned int i=0; i < numEdges; i++)
+    {
+        LOG_INFO("Current edges in graph at " << Timestamp(time(NULL)*1000)); 
+        graph_traits<WatcherGraph::Graph>::edge_iterator ei, eEnd; 
+        for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei)
+        {
+            LOG_INFO("Edge: " << wg.theGraph[*ei]); 
+        }
+
+        BOOST_CHECK_EQUAL(numEdges-i, num_edges(wg.theGraph)); 
+
+        sleep(1); 
+        wg.doMaintanence(); // should remove one edge
+    }
+
+    BOOST_CHECK_EQUAL( (size_t)1, num_edges(wg.theGraph)); 
+}
+
 BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
 {
     WatcherGraph wg; 
@@ -214,37 +255,3 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
     BOOST_CHECK_EQUAL( (size_t)1, wg.theGraph[*theNodeIter].attachedLabels.size() );
 }
 
-BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
-{
-    WatcherGraph wg; 
-
-    NodeIdentifier node1=asio::ip::address::from_string("192.168.1.101");
-    NodeIdentifier node2=asio::ip::address::from_string("192.168.1.102");
-
-    unsigned int numEdges=6;
-    for (unsigned int i=0; i < numEdges; i++)
-    {
-        EdgeMessagePtr emp(new EdgeMessage);
-        emp->node1=node1;
-        emp->node2=node2;
-        emp->expiration=Timestamp(i*1000)-500;      // first edge never expires
-        wg.updateGraph(emp);
-    }
-
-    for (unsigned int i=0; i < numEdges; i++)
-    {
-        LOG_INFO("Current edges in graph at " << Timestamp(time(NULL)*1000)); 
-        graph_traits<WatcherGraph::Graph>::edge_iterator ei, eEnd; 
-        for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei)
-        {
-            LOG_INFO("Edge: " << wg.theGraph[*ei]); 
-        }
-
-        BOOST_CHECK_EQUAL(numEdges-i, num_edges(wg.theGraph)); 
-
-        sleep(1); 
-        wg.doMaintanence(); // should remove one edge
-    }
-
-    BOOST_CHECK_EQUAL( (size_t)1, num_edges(wg.theGraph)); 
-}

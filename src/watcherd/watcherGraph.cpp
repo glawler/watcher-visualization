@@ -198,27 +198,33 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     if(!ei.second) 
         LOG_ERROR("Unable to add edge to graph between " << message->node1 << " and " << message->node2);
 
+    Timestamp now=time(NULL)*1000; 
+
     theGraph[ei.first].color=message->edgeColor; 
-    theGraph[ei.first].expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1; 
+    if (message->expiration>0) 
+        theGraph[ei.first].expiration=now+message->expiration;  
     theGraph[ei.first].width=message->width;
     theGraph[ei.first].layer=message->layer;
 
     if (message->node1Label && !message->node1Label->label.empty())
     {
         LabelMessagePtr lmp(new LabelMessage(*message->node1Label));
-        lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
+        if (lmp->expiration>0)
+            lmp->expiration+=now; 
         theGraph[*src].attachedLabels.push_back(lmp);
     }
     if (message->middleLabel && !message->middleLabel->label.empty())
     {
         LabelMessagePtr lmp(new LabelMessage(*message->middleLabel));
-        lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
+        if (lmp->expiration>0)
+            lmp->expiration+=now; 
         theGraph[ei.first].attachedLabels.push_back(lmp);
     }
     if (message->node2Label && !message->node2Label->label.empty())
     {
         LabelMessagePtr lmp(new LabelMessage(*message->node2Label));
-        lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
+        if (lmp->expiration>0)
+            lmp->expiration+=now; 
         theGraph[*dest].attachedLabels.push_back(lmp);
     }
 
@@ -233,7 +239,12 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         theGraph[ei.first].width=message->width;
 
         if (message->middleLabel && !message->middleLabel->label.empty())
-            theGraph[ei.first].attachedLabels.push_back(message->middleLabel);
+        {
+            LabelMessagePtr lmp(new LabelMessage(*message->middleLabel));
+            if (lmp->expiration>0)
+                lmp->expiration+=now; 
+            theGraph[ei.first].attachedLabels.push_back(lmp);
+        }
     }
 
     TRACE_EXIT_RET(retVal);
