@@ -148,6 +148,7 @@ int main(int argc, char **argv)
             connectivity2dot::dumpConfig=false;
             saveConfig(configFilename);
         }
+        theGraph.doMaintanence(); // check expiration, etc. 
         while(ms->isStreamReadable())
         {
             ms->getNextMessage(mp);

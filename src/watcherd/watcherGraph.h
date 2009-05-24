@@ -60,7 +60,7 @@ namespace watcher
                 boost::vecS, 
                 boost::vecS, 
                 boost::directedS,
-                WatcherGraphNode,
+                WatcherGraphNode, 
                 WatcherGraphEdge> Graph;
             /**
              * The actual boost::graph.
@@ -129,6 +129,19 @@ namespace watcher
               */
              WatcherGraphPtr unpack(std::istream& is);
 
+             /**
+              * Update Graph internals (component experations, etc). 
+              * Should be called periodically.
+              */
+            void doMaintanence();
+
+            /** Find a node in the graph based on a NodeIdentifier 
+             * @param[in] id - the id of the node you want to find. 
+             * @param[out] retIter - an iterator that points to the found node.
+             * @return bool - true if successful, false otherwise
+             */
+            bool findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retVal);
+
         protected:
 
         private:
@@ -167,13 +180,6 @@ namespace watcher
              * Update an attached label - either add or remove it.
              */
             bool addRemoveAttachedLabel(const LabelMessagePtr &message);
-
-            /** Find a node in the graph based on a NodeIdentifier 
-             * @param[in] id - the id of the node you want to find. 
-             * @param[out] retIter - an iterator that points to the found node.
-             * @return bool - true if successful, false otherwise
-             */
-            bool findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retVal);
 
             /** Find a node, if it doesn't exist, create it. Returns iterator to the node 
              * @param[in] id - the id of the node you want to find/create.

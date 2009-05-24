@@ -27,10 +27,20 @@ std::ostream &WatcherGraphEdge::toStream(std::ostream &out) const
 
     out << " label: " << label; 
     out << " layer: " << layer;
+    out << " color: " << color;
+    out << " expiration: " << expiration;
+    out << " width: " << width;
     out << " labels attached: ";
-
-    BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
-        out << "[" << *lmp << "]"; 
+    
+    if (attachedLabels.size())
+    {
+        BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
+            out << "[" << *lmp << "]"; 
+    }
+    else
+    {
+        out << "(none)"; 
+    }
 
     TRACE_EXIT();
     return out; 

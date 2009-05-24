@@ -162,3 +162,89 @@ BOOST_AUTO_TEST_CASE( pack_unpack_test )
 
     // BOOST_CHECK_EQUAL(wg, wgdup); 
 }
+
+BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
+{
+    WatcherGraph wg; 
+
+    struct 
+    {
+        char *str;
+        Timestamp exp;
+    } labelData [] = {
+        { "This message will never self destruct", -1}, 
+        { "This message will self destruct in .5 seconds", 500 }, 
+        { "This message will self destruct in 1.5 seconds", 1500 }, 
+        { "This message will self destruct in 2.5 seconds", 2500 }, 
+        { "This message will self destruct in 3.5 seconds", 3500 }, 
+        { "This message will self destruct in 4.5 seconds", 4500 }
+    }; 
+
+    size_t numLabels=sizeof(labelData)/sizeof(labelData[0]);
+    NodeIdentifier nodeAddr=asio::ip::address::from_string("192.168.1.100");
+    for (unsigned int i=0; i<numLabels; i++)
+    {
+        LabelMessagePtr lmp(new LabelMessage(labelData[i].str)); 
+        lmp->fromNodeID=nodeAddr;
+        lmp->expiration=labelData[i].exp; 
+        wg.updateGraph(lmp);
+    }
+
+    graph_traits<WatcherGraph::Graph>::vertex_iterator theNodeIter;
+    wg.findNode(nodeAddr, theNodeIter); 
+
+    BOOST_CHECK_EQUAL( numLabels, wg.theGraph[*theNodeIter].attachedLabels.size() );  
+
+    for (unsigned int i=0; i<numLabels; i++)
+    {
+        WatcherGraphNode::LabelMessageList::iterator labelIterBegin=wg.theGraph[*theNodeIter].attachedLabels.begin(); 
+        WatcherGraphNode::LabelMessageList::iterator labelIterEnd=wg.theGraph[*theNodeIter].attachedLabels.end(); 
+        LOG_INFO("Current lables on node " << wg.theGraph[*theNodeIter].nodeId << " at " << Timestamp(time(NULL)*1000)); 
+        for( ;labelIterBegin!=labelIterEnd; ++labelIterBegin)
+        {
+            LOG_INFO("\t" << **labelIterBegin); 
+        }
+
+        BOOST_CHECK_EQUAL( numLabels-i, wg.theGraph[*theNodeIter].attachedLabels.size() );
+
+        sleep(1);
+        wg.doMaintanence();  // Should remove one label
+    }
+
+    BOOST_CHECK_EQUAL( (size_t)1, wg.theGraph[*theNodeIter].attachedLabels.size() );
+}
+
+BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
+{
+    WatcherGraph wg; 
+
+    NodeIdentifier node1=asio::ip::address::from_string("192.168.1.101");
+    NodeIdentifier node2=asio::ip::address::from_string("192.168.1.102");
+
+    unsigned int numEdges=6;
+    for (unsigned int i=0; i < numEdges; i++)
+    {
+        EdgeMessagePtr emp(new EdgeMessage);
+        emp->node1=node1;
+        emp->node2=node2;
+        emp->expiration=Timestamp(i*1000)-500;      // first edge never expires
+        wg.updateGraph(emp);
+    }
+
+    for (unsigned int i=0; i < numEdges; i++)
+    {
+        LOG_INFO("Current edges in graph at " << Timestamp(time(NULL)*1000)); 
+        graph_traits<WatcherGraph::Graph>::edge_iterator ei, eEnd; 
+        for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei)
+        {
+            LOG_INFO("Edge: " << wg.theGraph[*ei]); 
+        }
+
+        BOOST_CHECK_EQUAL(numEdges-i, num_edges(wg.theGraph)); 
+
+        sleep(1); 
+        wg.doMaintanence(); // should remove one edge
+    }
+
+    BOOST_CHECK_EQUAL( (size_t)1, num_edges(wg.theGraph)); 
+}

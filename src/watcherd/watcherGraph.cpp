@@ -62,6 +62,25 @@ namespace watcher {
                 return l == lhs->layer;
             }
         };
+        struct LabelExpired
+        {
+            LabelExpired(const Timestamp &t) : now(t) {}
+            const Timestamp now;
+            bool operator()(const LabelMessagePtr lhs)
+            {
+                return (lhs->expiration > 0) ? (now > lhs->expiration) : false; 
+            }
+        };
+        struct EdgeExpired
+        {
+            EdgeExpired(const WatcherGraph::Graph &g_, const Timestamp &t_) : g(g_), t(t_) {}
+            const WatcherGraph::Graph &g;
+            const Timestamp &t;
+            bool operator()(boost::graph_traits<WatcherGraph::Graph>::edge_descriptor const &e)
+            {
+                return (g[e].expiration > 0) ? (t > g[e].expiration) : false; 
+            }
+        };
 
         /** Helper class to print WatcherGraphNodes as graphviz data */
         struct WatcherNodeVertexGraphVizWriter 
@@ -180,16 +199,28 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         LOG_ERROR("Unable to add edge to graph between " << message->node1 << " and " << message->node2);
 
     theGraph[ei.first].color=message->edgeColor; 
-    theGraph[ei.first].expiration=message->expiration;
+    theGraph[ei.first].expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1; 
     theGraph[ei.first].width=message->width;
     theGraph[ei.first].layer=message->layer;
 
     if (message->node1Label && !message->node1Label->label.empty())
-        theGraph[*src].attachedLabels.push_back(message->node1Label);
+    {
+        LabelMessagePtr lmp(new LabelMessage(*message->node1Label));
+        lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
+        theGraph[*src].attachedLabels.push_back(lmp);
+    }
     if (message->middleLabel && !message->middleLabel->label.empty())
-        theGraph[ei.first].attachedLabels.push_back(message->middleLabel);
+    {
+        LabelMessagePtr lmp(new LabelMessage(*message->middleLabel));
+        lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
+        theGraph[*src].attachedLabels.push_back(lmp);
+    }
     if (message->node2Label && !message->node2Label->label.empty())
-        theGraph[*src].attachedLabels.push_back(message->node2Label);
+    {
+        LabelMessagePtr lmp(new LabelMessage(*message->node2Label));
+        lmp->expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
+        theGraph[*src].attachedLabels.push_back(lmp);
+    }
 
     if(message->bidirectional)
     {
@@ -198,7 +229,7 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
             LOG_ERROR("Unable to add edge to graph between " << message->node2 << " and " << message->node1);
 
         theGraph[ei.first].color=message->edgeColor; 
-        theGraph[ei.first].expiration=message->expiration;
+        theGraph[ei.first].expiration=message->expiration>0 ? Timestamp(message->expiration+(time(NULL)*1000)) : -1;
         theGraph[ei.first].width=message->width;
 
         if (message->middleLabel && !message->middleLabel->label.empty())
@@ -207,6 +238,38 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
 
     TRACE_EXIT_RET(retVal);
     return retVal;
+}
+
+void WatcherGraph::doMaintanence()
+{
+    TRACE_ENTER();
+
+    Timestamp now=Timestamp(time(NULL)*1000); 
+
+    // remove edges that have expired
+    remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
+
+    // Remove expired edge labels
+    graph_traits<Graph>::edge_iterator ei, eEnd;
+    for(tie(ei, eEnd)=edges(theGraph); ei!=eEnd; ++ei)
+    {
+        WatcherGraphNode::LabelMessageList::iterator b=theGraph[*ei].attachedLabels.begin();
+        WatcherGraphNode::LabelMessageList::iterator e=theGraph[*ei].attachedLabels.end();
+        WatcherGraphNode::LabelMessageList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now));
+        theGraph[*ei].attachedLabels.erase(newEnd, e);
+    }
+
+    // remove expired node labels
+    graph_traits<Graph>::vertex_iterator vi, vEnd;
+    for(tie(vi, vEnd)=vertices(theGraph); vi!=vEnd; ++vi)
+    {
+        WatcherGraphNode::LabelMessageList::iterator b=theGraph[*vi].attachedLabels.begin();
+        WatcherGraphNode::LabelMessageList::iterator e=theGraph[*vi].attachedLabels.end();
+        WatcherGraphNode::LabelMessageList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now));
+        theGraph[*vi].attachedLabels.erase(newEnd, e);
+    }
+
+    TRACE_EXIT();
 }
 
 bool WatcherGraph::updateNodeLocation(const GPSMessagePtr &message)
@@ -270,7 +333,11 @@ bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
     {
         LOG_DEBUG("Updating attached label information for node " << theGraph[*nodeIter].nodeId);
         if (message->addLabel)
-            theGraph[*nodeIter].attachedLabels.push_back(message); 
+        {
+            LabelMessagePtr lmp(new LabelMessage(*message));
+            lmp->expiration=(message->expiration<0) ? -1 : Timestamp(message->expiration+(time(NULL)*1000));
+            theGraph[*nodeIter].attachedLabels.push_back(lmp);
+        }
         else
         {
             // GTL - this is some ugly ass code. Compact, but very very ugly. 
