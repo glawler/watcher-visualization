@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( output_test )
 
     wgn.nodeId.from_string("192.168.1.123");
     wgn.gpsData=GPSMessagePtr(new GPSMessage(0.1234, 0.2345, 0.3456));
-    wgn.label="This is a label there are others like it, but this on is mine."; 
+    wgn.label="This is a label there are others like it, but this one is mine."; 
     wgn.connected=true;
 
     LabelMessagePtr lmp(new LabelMessage("Hello"));

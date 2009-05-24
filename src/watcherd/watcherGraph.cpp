@@ -315,7 +315,7 @@ bool WatcherGraph::updateNodeColor(const ColorMessagePtr &message)
     if(findOrCreateNode(message->fromNodeID, nodeIter))
     {
         LOG_DEBUG("Updating color information for node " << theGraph[*nodeIter].nodeId);
-        theGraph[*nodeIter].color=message; 
+        theGraph[*nodeIter].color.reset(new ColorMessage(*message)); 
         retVal=true;
     }
     
