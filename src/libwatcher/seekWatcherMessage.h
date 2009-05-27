@@ -17,6 +17,11 @@ namespace watcher {
          */
         class SeekMessage : public Message {
             public:
+                /** constat referring to first element in the database */
+                static Timestamp const epoch = 0;
+                /** constant refering to last event in the database, or live playback */
+                static Timestamp const eof = -1;
+
                 /** Type representing how to interpet an offset */
                 enum whence {
                     start,      //< offset is relative to start of stream
@@ -24,11 +29,11 @@ namespace watcher {
                     end         //< offset is relative to end of stream
                 };
 
-                float offset;   //< offset into stream in seconds
+                Timestamp offset;   //< offset into stream in milliseconds
                 whence rel;     //< specifies how offset is interpreted
 
-                SeekMessage(float offset = 0, whence = start);
-                inline bool operator== (const SeekMessage &rhs) const { return offset == rhs.offset && rel == rhs.rel; }
+                SeekMessage(Timestamp offset = 0, whence = start);
+                bool operator== (const SeekMessage &rhs) const;
 
                 friend std::ostream& operator<< (std::ostream& o, const SeekMessage& m);
 
@@ -37,6 +42,8 @@ namespace watcher {
                 template <typename Archive> void serialize(Archive& ar, const unsigned int version);
                 DECLARE_LOGGER();
         };
+
+        inline bool SeekMessage::operator== (const SeekMessage &rhs) const { return offset == rhs.offset && rel == rhs.rel; }
 
         typedef boost::shared_ptr<SeekMessage> SeekMessagePtr;
     }

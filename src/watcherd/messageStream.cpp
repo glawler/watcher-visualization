@@ -3,6 +3,8 @@
 #include "messageStream.h"
 #include "libwatcher/startWatcherMessage.h"
 #include "libwatcher/stopWatcherMessage.h"
+#include "libwatcher/seekWatcherMessage.h"
+#include "libwatcher/speedWatcherMessage.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -61,6 +63,8 @@ void MessageStream::initConnection()
     TRACE_ENTER();
     connection=ClientPtr(new Client(serverName, serviceName)); 
     connection->addMessageHandler(shared_from_this()); 
+    setStreamTimeStart(streamStartTime);
+    setStreamRate(streamRate);
     TRACE_EXIT();
 }
 
@@ -75,16 +79,22 @@ bool MessageStream::setStreamTimeStart(const Timestamp &startTime)
 {
     TRACE_ENTER();
     LOG_DEBUG("Setting stream start time to " << startTime); 
-    TRACE_EXIT_RET("true");
-    return true;
+    SeekMessagePtr mess(new SeekMessage(startTime)); 
+    bool retVal=connection->sendMessage(mess); 
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
+
 bool MessageStream::setStreamRate(const float &messageStreamRate)
 {
     TRACE_ENTER();
     LOG_DEBUG("Setting message stream rate to " << messageStreamRate); 
-    TRACE_EXIT_RET("true");
-    return true;
+    SpeedMessagePtr mess(new SpeedMessage(messageStreamRate)); 
+    bool retVal=connection->sendMessage(mess); 
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
+
 bool MessageStream::getNextMessage(MessagePtr &newMessage)
 {
     TRACE_ENTER();
@@ -110,6 +120,7 @@ bool MessageStream::getNextMessage(MessagePtr &newMessage)
     TRACE_EXIT_RET(true);
     return true;
 }
+
 bool MessageStream::isStreamReadable() const
 {
     TRACE_ENTER();
@@ -117,6 +128,7 @@ bool MessageStream::isStreamReadable() const
     TRACE_EXIT_RET(retVal); 
     return retVal;
 }
+
 bool MessageStream::addMessageFilter(const MessageStreamFilter & /*filter*/)
 {
     TRACE_ENTER();
@@ -126,6 +138,7 @@ bool MessageStream::addMessageFilter(const MessageStreamFilter & /*filter*/)
     TRACE_EXIT_RET("true");
     return true;
 }
+
 bool MessageStream::getMessageTimeRange(Timestamp &startTime, Timestamp endTime)
 {
     TRACE_ENTER();
@@ -150,6 +163,7 @@ std::ostream &MessageStream::toStream(std::ostream &out) const
     TRACE_EXIT();
     return out; 
 }
+
 bool MessageStream::startStream()
 {
     TRACE_ENTER();
@@ -158,6 +172,7 @@ bool MessageStream::startStream()
     TRACE_EXIT_RET((retVal==true?"true":"false")); 
     return retVal;
 }
+
 bool MessageStream::stopStream()
 {
     TRACE_ENTER();

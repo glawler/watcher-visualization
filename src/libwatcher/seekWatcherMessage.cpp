@@ -3,7 +3,6 @@
  * @date 2009-03-20
  */
 #include "watcherSerialize.h"
-
 #include "seekWatcherMessage.h"
 
 namespace watcher {
@@ -15,7 +14,7 @@ namespace watcher {
          * @param offset_ time at which to seek to
          * @param w how to interpret the time offset
          */
-        SeekMessage::SeekMessage(float offset_, whence w)
+        SeekMessage::SeekMessage(Timestamp offset_, whence w)
             : Message(SEEK_MESSAGE_TYPE, SEEK_MESSAGE_VERSION), offset(offset_), rel(w)
         {
             TRACE_ENTER();

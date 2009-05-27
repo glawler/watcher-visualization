@@ -179,7 +179,7 @@ namespace sqlite_wrapper {
     };
 
     /** read the next column as a BLOB */
-    template <typename T> Column& Column::operator>> (std::vector<T>& v) {
+    template <typename T> inline Column& Column::operator>> (std::vector<T>& v) {
         if (!flags_) {
             boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
             const size_t valsize = sizeof(T);
@@ -197,7 +197,7 @@ namespace sqlite_wrapper {
      * @param[in] nelems max number of elements to copy
      * @return reference to the Column object
      */
-    template <typename T> Column& Column::get(T* val, size_t nelems) {
+    template <typename T> inline Column& Column::get(T* val, size_t nelems) {
         if (!flags_) {
             boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
             const size_t valsize = sizeof(T) * nelems;
@@ -231,15 +231,19 @@ namespace sqlite_wrapper {
             //< for checking validity ala iostreams
             bool operator! () const { return flags_; }
 
+            operator bool () const { return !flags_; }
+
             //pre-increment, get next row
-            Row& operator++() {
-                step();
-                return *this;
-            }
+            Row& operator++();
 
             // iterator-like support for fetching column data
             Column columns() { return Column(impl_); }
     };
+
+    inline Row& Row::operator++() {
+        step();
+        return *this;
+    }
 
     /* C++ to C conversion functions for use with templates. */
     int sqlite_binder(sqlite3_stmt*, int pos, int val);
@@ -286,13 +290,13 @@ namespace sqlite_wrapper {
             size_t count() { return impl_->nrows; }
     };
 
-    template <typename T> Statement& Statement::operator<< (const T& val) {
+    template <typename T> inline Statement& Statement::operator<< (const T& val) {
         boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
         error_check(sqlite_binder(p.get(), pos_++, val));
         return *this;
     }
 
-    template <typename T> Statement& Statement::bind(const T* val, size_t len) {
+    template <typename T> inline Statement& Statement::bind(const T* val, size_t len) {
         boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
         error_check(sqlite_binder(p.get(), pos_++, val, len * sizeof(T)));
         return *this;

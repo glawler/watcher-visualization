@@ -63,6 +63,23 @@ void SqliteDatabase::storeEvent(const std::string& addr, MessagePtr msg)
     TRACE_EXIT();
 }
 
-void SqliteDatabase::getEvents( boost::function<void(event::MessagePtr)> output, Timestamp t, Direction d, unsigned int count )
+void SqliteDatabase::getEvents(boost::function<void(event::MessagePtr)> output,
+                               Timestamp t, Direction d, unsigned int count)
 {
+    TRACE_ENTER();
+    std::ostringstream os;
+    os << "SELECT data FROM events WHERE ts" << (d == forward ? ">=" : "<=") << t <<
+        " ORDER BY " << (d == forward ? "ASC" : "DESC") <<
+        " LIMIT " << count;
+
+    // read each serialized event from a row, unpack and pass to callback function
+    Statement st(*conn_, os.str());
+    for (Row r(st.rows()); r; ++r) {
+        Column c(r.columns());
+        std::string data;
+        c >> data;
+        std::istringstream is(data);
+        output(Message::unpack(is));
+    }
+    TRACE_EXIT();
 }
