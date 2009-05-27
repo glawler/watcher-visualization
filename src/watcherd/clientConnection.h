@@ -43,7 +43,7 @@ namespace watcher
              * close the connection to the server.
              */
             void close(); 
-           
+
         private:
 
             DECLARE_LOGGER();
@@ -67,26 +67,16 @@ namespace watcher
             bool connected; 
 
             boost::asio::io_service &ioService;
-            boost::asio::io_service::strand theStrand;
+            boost::asio::io_service::strand theStrand; // for reading
+            boost::asio::io_service::strand writeStrand;
 
             typedef boost::array<char, 8192> IncomingBuffer;
-            typedef struct 
-            {
-                IncomingBuffer incomingBuffer;
-                event::MessagePtr theRequest;
-            } TransferData;
+            IncomingBuffer incomingBuffer;
 
-            typedef boost::shared_ptr<TransferData> TransferDataPtr;
-            std::list<TransferDataPtr> transferData;
-
-            // void handle_resolve(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
-            // void handle_connect(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
-
-            void handle_write_message(const boost::system::error_code& e, const TransferDataPtr &dataPtr);
-            void handle_read_header(const boost::system::error_code& e, std::size_t bytes_transferred, 
-                    const TransferDataPtr &dataPtr);
-            void handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred, 
-                    const TransferDataPtr &dataPtr);
+            void handle_write_message(const boost::system::error_code& e, std::vector<event::MessagePtr> messages);
+            void handle_read_header(const boost::system::error_code& e, std::size_t bytes_transferred);
+            void handle_read_payload(const boost::system::error_code& e, std::size_t bytes_transferred);
+            void run();
 
             std::string server;
             std::string service;

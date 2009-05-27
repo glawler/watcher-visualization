@@ -47,7 +47,7 @@ namespace watcher {
              * @param[in] ts the time at which to begin event playback (milliseconds)
              * @param[in] speed event playback speed
              */
-            ReplayState(ServerConnectionPtr& ptr, Timestamp ts, float speed = 1.0f);
+            ReplayState(ServerConnectionPtr ptr, Timestamp ts = 0, float speed = 1.0f);
 
             /** Start event playback. */
             void run();
@@ -93,8 +93,11 @@ namespace watcher {
              */
             ReplayState& time_step(unsigned int n);
 
+            ~ReplayState();
+
         private:
             struct impl;
+            //impl* impl_;
             boost::scoped_ptr<impl> impl_;
             void timer_handler(const boost::system::error_code& error);
     };

@@ -24,6 +24,7 @@
 #include "connection.h"
 #include "watcherd_fwd.h"
 #include "serverConnectionFwd.h"
+#include "replayState.h"
 
 namespace watcher 
 {
@@ -86,6 +87,11 @@ namespace watcher
             /// What type of connection is this?
             enum connection_type { unknown, feeder, gui };
             connection_type conn_type;
+
+            /// state variables for Live and Replay tracking
+            boost::shared_ptr<ReplayState> replay;
+            bool isPlaying_;
+            bool isLive_;
     };
 
 } // namespace http

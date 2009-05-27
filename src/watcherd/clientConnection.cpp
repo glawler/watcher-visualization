@@ -4,6 +4,7 @@
 #include <string>
 
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "libwatcher/message.h"
@@ -26,6 +27,7 @@ ClientConnection::ClientConnection(
     connected(false),
     ioService(io_service),
     theStrand(io_service),
+    writeStrand(io_service),
     server(server_),
     service(service_)
 {
@@ -125,6 +127,9 @@ bool ClientConnection::tryConnect()
         } while (endpoint_iterator != end);
     }
 
+    if (connected)
+        run(); // start message reader strand
+
     TRACE_EXIT_RET((connected==true?"true":"false"));
     return connected;
 }
@@ -149,130 +154,74 @@ bool ClientConnection::sendMessages(const vector<event::MessagePtr> &messages)
     if (!connected)
         doConnect();
 
-    // GTL - may want to marshal here. If there is an error, then don't bother connecting. 
+    LOG_DEBUG("Marshaling outbound message"); 
+    DataMarshaller::NetworkMarshalBuffers outBuffers;
+    if (!DataMarshaller::marshalPayload(messages, outBuffers)) {
+        LOG_WARN("Error marshaling message, not sending"); 
+        TRACE_EXIT_RET("false"); 
+        return false;
+    }
 
-    ioService.post(bind(&ClientConnection::doWrite, this, messages));
+    LOG_INFO("Sending message: " << *(messages.front()) << " (" << messages.front() << ")");
+    async_write(theSocket, 
+                outBuffers, 
+                writeStrand.wrap(bind(&ClientConnection::handle_write_message, 
+                                      this, 
+                                      asio::placeholders::error, 
+                                      messages)));
 
     TRACE_EXIT_RET("true"); 
+
     return true;
 }
 
-void ClientConnection::doWrite(const vector<MessagePtr> &messages)
+void ClientConnection::handle_write_message(const boost::system::error_code &e, vector<MessagePtr> messages)
 {
     TRACE_ENTER();
 
     if (!connected)
         doConnect();
 
-    // GTL - Should there be a mutex access in here somewhere?
+    if (!e) {
+        LOG_DEBUG("Sucessfully sent message " << messages.front()); 
 
-    bool writeInProgress=!transferData.empty();
-    TransferDataPtr dataPtr=TransferDataPtr(new TransferData);
-    dataPtr->theRequest=messages.front(); 
-    transferData.push_back(dataPtr);
-    if(!writeInProgress)
-    {
-        LOG_DEBUG("Marshaling outbound message"); 
-        DataMarshaller::NetworkMarshalBuffers outBuffers;
-        if (!DataMarshaller::marshalPayload(messages, outBuffers))
-        {
-            LOG_WARN("Error marshaling message, not sending"); 
-            transferData.pop_back(); 
-            TRACE_EXIT(); 
-            return;
-        }
-        LOG_INFO("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest<< ")");
-        LOG_DEBUG("Sending packet"); 
-        asio::async_write(
-                theSocket, 
-                outBuffers, 
-                theStrand.wrap(
-                    bind(
-                        &ClientConnection::handle_write_message, 
-                        this, 
-                        asio::placeholders::error, 
-                        dataPtr)));
-    }
-
-    TRACE_EXIT(); 
-}
-
-void ClientConnection::handle_write_message(const boost::system::error_code &e, const TransferDataPtr &dataPtr)
-{
-    TRACE_ENTER();
-
-    if (!connected)
-        doConnect();
-
-    if (!e)
-    {
-        LOG_DEBUG("Sucessfully sent message " << dataPtr->theRequest); 
-
-        bool waitForResponse=false;
-        for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
-        {
-            if(waitForResponse) // someone already said they wanted a response, so ignore ret val for others
-                (*mh)->handleMessageSent(dataPtr->theRequest);
-            else
-                waitForResponse=(*mh)->handleMessageSent(dataPtr->theRequest); 
-        }
-
-        if(waitForResponse)
-            boost::asio::async_read(
-                    theSocket,
-                    asio::buffer(
-                        dataPtr->incomingBuffer, 
-                        DataMarshaller::header_length),
-                    theStrand.wrap(
-                        bind(
-                            &ClientConnection::handle_read_header, 
-                            this, 
-                            asio::placeholders::error, 
-                            asio::placeholders::bytes_transferred, 
-                            dataPtr)));
-
-        // No errors, remove the message from the outbound message list.
-        transferData.remove(dataPtr); 
-
-        // start a new write if we need to
-        if (!transferData.empty())
-        {
-            DataMarshaller::NetworkMarshalBuffers outBuffers;
-            DataMarshaller::marshalPayload(dataPtr->theRequest, outBuffers);
-            LOG_DEBUG("Sending message: " << *dataPtr->theRequest << " (" << dataPtr->theRequest << ")");
-            LOG_DEBUG("Sending packet"); 
-            asio::async_write(theSocket, outBuffers, 
-                    theStrand.wrap(bind(&ClientConnection::handle_write_message, 
-                            this, asio::placeholders::error, transferData.front())));
+        BOOST_FOREACH(MessageHandlerPtr& mh, messageHandlers) {
+            mh->handleMessagesSent(messages);
         }
     }
     else
     {
-        LOG_WARN("Error '" << e.message() << "' while writing message: " << dataPtr->theRequest); 
+        LOG_WARN("Error '" << e.message() << "' while writing message: " << messages.front());
         doClose(); 
     }
 
     TRACE_EXIT();
 }
 
-void ClientConnection::handle_read_header(const boost::system::error_code &e, std::size_t bytes_transferred, const TransferDataPtr &dataPtr)
+void ClientConnection::run()
+{
+    async_read(theSocket,
+               asio::buffer(incomingBuffer, DataMarshaller::header_length),
+               theStrand.wrap(bind(&ClientConnection::handle_read_header,
+                                   this,
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred)));
+}
+
+void ClientConnection::handle_read_header(const boost::system::error_code &e, std::size_t bytes_transferred)
 {
     TRACE_ENTER();
 
     if (!connected)
         doConnect();
 
-    if (!e)
-    {
+    if (!e) {
         LOG_DEBUG("Recv'd header"); 
         size_t payloadSize;
         unsigned short messageNum;
-        if (!DataMarshaller::unmarshalHeader(&dataPtr->incomingBuffer[0], bytes_transferred, payloadSize, messageNum))
-        {
+        if (!DataMarshaller::unmarshalHeader(&incomingBuffer[0], bytes_transferred, payloadSize, messageNum)) {
             LOG_ERROR("Unable to parse incoming message header"); 
-        }
-        else
-        {
+        } else {
             LOG_DEBUG("Parsed header - now reading " << messageNum << " message" << (messageNum>1?"s":"") 
                     << " from a buffer of " << payloadSize << " bytes."); 
 
@@ -284,38 +233,33 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             //         theStrand.wrap(boost::bind(&ClientConnection::handle_read_payload, 
             //                 this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
 
-            if (payloadSize != asio::read(theSocket, asio::buffer(dataPtr->incomingBuffer, payloadSize)))
-            {
-                LOG_ERROR("Unable to read " << payloadSize << " bytes from server. Giving up on message.")
-            }
-            else
-            {
-                vector<MessagePtr> arrivedMessages; 
-                if(!DataMarshaller::unmarshalPayload(arrivedMessages, messageNum, &dataPtr->incomingBuffer[0], payloadSize))
-                {
-                    LOG_WARN("Unable to parse incoming server response for message " << dataPtr);
-                }
-                else
-                {
-                    if (!messageHandlers.size())
-                    {
-                        LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intentional)"); 
-                    }
-                    else 
-                    {
-                        for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh)
-                        {
-                            MessagePtr theResponse;
-                            if((*mh)->handleMessagesArrive(shared_from_this(), arrivedMessages))
-                                if(theResponse)
-                                    sendMessage(theResponse);
-                        }
-                    }
+            bool closeConnection = false;
 
-        // GTL REMOVE THIS - continue to stay connected as a test for messageStream
-        // Need to add a sendMessageHandler which will tell the connection whether to close or expect more data.
-        boost::asio::async_read( theSocket, asio::buffer( dataPtr->incomingBuffer, DataMarshaller::header_length), theStrand.wrap( bind( &ClientConnection::handle_read_header, this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
+            if (payloadSize != asio::read(theSocket, asio::buffer(incomingBuffer, payloadSize))) {
+                LOG_ERROR("Unable to read " << payloadSize << " bytes from server. Giving up on message.");
+                closeConnection = true;
+            } else {
+                vector<MessagePtr> arrivedMessages; 
+                if(!DataMarshaller::unmarshalPayload(arrivedMessages, messageNum, &incomingBuffer[0], payloadSize)) {
+                    LOG_WARN("Unable to parse incoming server message ");
+                    closeConnection = true;
+                } else if (!messageHandlers.size()) {
+                    LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intentional)"); 
+                } else {
+                    for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh) {
+                        //FIXME for now ignore the return value from the handler and always keep the connection open
+                        //not sure what will happen if it gets closed.
+
+                        //closeConnection &=
+                        (*mh)->handleMessagesArrive(shared_from_this(), arrivedMessages);
+                    }
                 }
+            }
+
+            if (!closeConnection) {
+                run(); // start another read
+            } else {
+                LOG_DEBUG("error occurred, or handler requested connection to be shut down");
             }
         }
     }

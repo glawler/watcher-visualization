@@ -42,33 +42,42 @@ struct ReplayState::impl {
         conn(ptr), timer(ptr->io_service()), ts(0), bufsiz(DEFAULT_BUFFER_SIZE),
         step(DEFAULT_STEP), state(paused)
     {
+        TRACE_ENTER();
+        TRACE_EXIT();
     }
 };
 
-ReplayState::ReplayState(ServerConnectionPtr& ptr, Timestamp t, float playback_speed) :
+ReplayState::ReplayState(ServerConnectionPtr ptr, Timestamp t, float playback_speed) :
     impl_(new impl(ptr))
 {
-    Assert<Bad_arg>(t < 0);
+    TRACE_ENTER();
+    Assert<Bad_arg>(t >= 0);
     impl_->ts = t;
 
     speed(playback_speed);
+    TRACE_EXIT();
 }
 
 Timestamp ReplayState::tell() const
 {
+    TRACE_ENTER();
+    TRACE_EXIT_RET(impl_->ts);
     return impl_->ts;
 }
 
 ReplayState& ReplayState::pause()
 {
+    TRACE_ENTER();
     impl_->timer.cancel();
     impl_->state = impl::paused;
+    TRACE_EXIT();
     return *this;
 }
 
 ReplayState& ReplayState::seek(Timestamp t)
 {
-    Assert<Bad_arg>(t < 0);
+    TRACE_ENTER();
+    Assert<Bad_arg>(t >= 0);
 
     impl::run_state oldstate;
     {
@@ -80,11 +89,13 @@ ReplayState& ReplayState::seek(Timestamp t)
     }
     if (oldstate == impl::running)
         run();
+    TRACE_EXIT();
     return *this;
 }
 
 ReplayState& ReplayState::speed(float f)
 {
+    TRACE_ENTER();
     Assert<Bad_arg>(f != 0);
     /* If speed changes direction, need to clear the event list.
      * Check for sign change by noting that positive*negative==negative
@@ -103,20 +114,25 @@ ReplayState& ReplayState::speed(float f)
             run();
     } else
         impl_->speed = f;
+    TRACE_EXIT();
     return *this;
 }
 
 ReplayState& ReplayState::buffer_size(unsigned int n)
 {
+    TRACE_ENTER();
     Assert<Bad_arg>(n != 0);
     impl_->bufsiz = n;
+    TRACE_EXIT();
     return *this;
 }
 
 ReplayState& ReplayState::time_step(unsigned int n)
 {
+    TRACE_ENTER();
     Assert<Bad_arg>(n != 0);
     impl_->step = n;
+    TRACE_EXIT();
     return *this;
 }
 
@@ -136,6 +152,7 @@ struct event_output {
  */
 void ReplayState::run()
 {
+    TRACE_ENTER();
     boost::mutex::scoped_lock L(impl_->lock);
 
     if (impl_->events.empty()) {
@@ -178,6 +195,7 @@ void ReplayState::run()
          */
         impl_->state = impl::paused;
     }
+    TRACE_EXIT();
 }
 
 /** Replay events to a GUI client when a timer expires.
@@ -190,6 +208,7 @@ void ReplayState::run()
  */
 void ReplayState::timer_handler(const boost::system::error_code&)
 {
+    TRACE_ENTER();
     std::vector<MessagePtr> msgs;
 
     {
@@ -212,4 +231,14 @@ void ReplayState::timer_handler(const boost::system::error_code&)
         srv->sendMessage(msgs);
         run(); // reschedule this task
     }
+    TRACE_EXIT();
+}
+
+/* This is required to be defined, otherwise a the default dtor will cause a
+ * compiler error due to use of scoped_ptr with an incomplete type.
+ */
+ReplayState::~ReplayState()
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
 }

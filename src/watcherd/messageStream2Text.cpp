@@ -1,5 +1,7 @@
 #include <iostream>
-#include <stdlib.h>     // for EXIT_SUCCESS/FAILURE
+#include <cstdlib>     // for EXIT_SUCCESS/FAILURE
+#include <unistd.h>
+#include <getopt.h>
 
 #include "initConfig.h"
 #include "singletonConfig.h"
@@ -11,12 +13,22 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace libconfig;
 
+option Options[] = {
+    { "help", 0, NULL, 'h' },
+    { "config", 1, NULL, 'c' },
+    { "speed", 1, NULL, 's' },
+    { "seek", 1, NULL, 'S' },
+    { 0, 0, NULL, 0 }
+};
+
 void usage(const char *progName, bool exitp)
 {
     cout << "Usage: " << basename(progName) << " [-c config filename]" << endl;
     cout << "Args: " << endl; 
     cout << "   -h, show this messsage and exit." << endl; 
     cout << "   -c configfile - If not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
+    cout << "   -s, --speed=FLOAT - specify the event playback speed." << endl;
+    cout << "   -S, --seek=INT - specify the offset in milliseconds to start event playback (default: live playback)." << endl;
     cout << "If a configuration file is not found on startup, a default one will be created, used, and saved on program exit." << endl;
     cout << "Config file settings:" << endl;
     cout << "server - name or ipaddress of the server to connect to." << endl;
@@ -30,9 +42,25 @@ int main(int argc, char **argv)
 {
     TRACE_ENTER(); 
 
-    for(int i=0; i<argc; i++)
-        if(0==strncmp(argv[i], "-h", sizeof("-h")) || 0==strncmp(argv[i], "--help", sizeof("--help")))
-            usage(argv[0], true); 
+    int i;
+    float rate = 1.0; // playback rate
+    Timestamp pos = -1; // default to live playback
+
+    while ((i = getopt_long(argc, argv, "hc:s:S:", Options, NULL)) != -1) {
+        switch (i) {
+            case 'c':
+                //handled below
+                break;
+            case 's':
+                rate = atof(optarg);
+                break;
+            case 'S':
+                pos = strtoll(optarg, NULL, 10);
+                break;
+            default:
+                usage(argv[0], true); 
+        }
+    }
 
     string configFilename;
     Config &config=SingletonConfig::instance();
@@ -72,7 +100,7 @@ int main(int argc, char **argv)
         config.getRoot().add("service", libconfig::Setting::TypeString)=service;
     }
 
-    MessageStreamPtr ms=MessageStream::createNewMessageStream(serverName, service); 
+    MessageStreamPtr ms=MessageStream::createNewMessageStream(serverName, service, pos, rate); 
 
     if(!ms)
     {
@@ -84,8 +112,10 @@ int main(int argc, char **argv)
 
     MessagePtr mp(new Message);
 
+    LOG_INFO("Starting event playback");
     ms->startStream(); 
 
+    LOG_INFO("Waiting for events ");
     unsigned int messageNumber=0;
     while(ms->getNextMessage(mp))
         cout << "Message #" << (++messageNumber) << ": " << *mp << endl; 

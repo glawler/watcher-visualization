@@ -5,6 +5,8 @@
 
 #include <libwatcher/message.h>
 #include <libwatcher/messageStatus.h>
+#include <libwatcher/seekWatcherMessage.h>
+#include <libwatcher/speedWatcherMessage.h>
 
 #include "messageFactory.h"
 #include "dataMarshaller.h"
@@ -37,7 +39,8 @@ namespace watcher {
         io_service_(io_service),
         strand_(io_service),
         write_strand_(io_service),
-        conn_type(unknown)
+        conn_type(unknown),
+        isPlaying_(false), isLive_(true)
     {
         TRACE_ENTER(); 
         TRACE_EXIT();
@@ -168,24 +171,72 @@ namespace watcher {
                  */
                 if (conn_type == unknown || conn_type == gui) {
                     BOOST_FOREACH(MessagePtr i, arrivedMessages) {
-                        if (conn_type == gui) {
-                           if (i->type == STOP_MESSAGE_TYPE)
-                            watcher.unsubscribe(shared_from_this());
-                        } else if (conn_type == unknown) {
-                            if (i->type == START_MESSAGE_TYPE) {
-                                /* Client is requesting the live stream of events. */
-                                watcher.subscribe(shared_from_this());
+                        if (i->type == START_MESSAGE_TYPE) {
+                            /* Client is requesting the live stream of events. */
+                            if (conn_type == unknown) {
                                 conn_type = gui;
-                            } else if (isFeederEvent(i->type)) {
-                                conn_type = feeder;
-
-                                /*
-                                 * This connection is a watcher test daemon.
-                                 * Add a message handler to write its event
-                                 * stream to the database.
-                                 */
-                                addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
+                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
                             }
+                            if (!isPlaying_) {
+                                isPlaying_ = true;
+                                if (isLive_)
+                                    watcher.subscribe(shared_from_this());
+                                else
+                                    replay->run();
+                            }
+                        } else if (i->type == SEEK_MESSAGE_TYPE) {
+                            if (conn_type == unknown) {
+                                conn_type = gui;
+                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
+                            }
+                            SeekMessagePtr p = boost::dynamic_pointer_cast<SeekMessage>(i);
+                            if (p) {
+                                if (p->offset == SeekMessage::eof) {
+                                    // switch to live stream
+                                    if (!isLive_) {
+                                        isLive_ = true;
+                                        replay->pause();
+                                        if (isPlaying_)
+                                            watcher.subscribe(shared_from_this());
+                                    }
+                                } else {
+                                    replay->seek(p->offset);
+
+                                    // when switching from live to replay while playing, kick off the replay strand
+                                    if (isLive_ && isPlaying_)
+                                        replay->run();
+                                    isLive_ = false;
+                                }
+                            }
+                        } else if (i->type == SPEED_MESSAGE_TYPE) {
+                            if (conn_type == unknown) {
+                                conn_type = gui;
+                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
+                            }
+                            SpeedMessagePtr p = boost::dynamic_pointer_cast<SpeedMessage>(i);
+                            if (p)
+                                replay->speed(p->speed);
+                        } else if (i->type == STOP_MESSAGE_TYPE) {
+                            if (conn_type == unknown) {
+                                conn_type = gui;
+                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
+                            }
+                            if (isPlaying_) {
+                                if (isLive_)
+                                    watcher.unsubscribe(shared_from_this());
+                                else
+                                    replay->pause();
+                                isPlaying_ = false;
+                            }
+                        } else if (isFeederEvent(i->type)) {
+                            conn_type = feeder;
+
+                            /*
+                             * This connection is a watcher test daemon.
+                             * Add a message handler to write its event
+                             * stream to the database.
+                             */
+                            addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
                         }
                     }
                 }
