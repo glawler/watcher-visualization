@@ -170,7 +170,7 @@ namespace watcher {
                  * isFeederMessage => feeder
                  */
                 if (conn_type == unknown || conn_type == gui) {
-                    BOOST_FOREACH(MessagePtr i, arrivedMessages) {
+                    BOOST_FOREACH(MessagePtr& i, arrivedMessages) {
                         if (i->type == START_MESSAGE_TYPE) {
                             /* Client is requesting the live stream of events. */
                             if (conn_type == unknown) {
@@ -245,7 +245,7 @@ namespace watcher {
                  * connection. */
                 bool fail = false;
 
-                BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers) {
+                BOOST_FOREACH(MessageHandlerPtr& mh, messageHandlers) {
                     if (mh->handleMessagesArrive(shared_from_this(), arrivedMessages)) {
                         fail = true;
                         LOG_DEBUG("Message handler told us to close this connection."); 
