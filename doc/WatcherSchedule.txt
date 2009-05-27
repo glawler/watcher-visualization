@@ -27,6 +27,23 @@ streaming engine complete.
 - TiVO mode demo shows full watcherd functionality including playback
 via packet capture database 
 
+4. Run legacyWatcher with new API and show new features. End of June (probably
+concurrent with demo #3 above). 
+- Run test node daemons
+- Run watcherd
+- Run legacy watcher
+- Show existing layers in GUI (menu, etc)
+- From testnode create new layer via labelMessageTest -l "Hello" -y "new layer"
+- Show that the new layer is in the GUI and toggles. 
+    (Shows new feature: dynamic layers, test node driven, client-side handled.) 
+- Close watcher to save state
+- Show the new layer information is saved in the cfg. 
+    (Shows support for automatic, loadable display settings.)
+- Edit new layer in local cfg file and restart watcher.
+- Show that the new layer display characteristics have changed. 
+    (Shows new feature: client-side, GUI-specific display characteristics.)
+    (Shows support for automatic, loadable display settings.)
+
 4. TBD, end of July (or mid August), last
 checkpoint/demo. 
 - first cut of game-engine based watcher GUI (most likely task)
