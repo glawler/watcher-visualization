@@ -40,9 +40,13 @@ concurrent with demo #3 above).
 - Show the new layer information is saved in the cfg. 
     (Shows support for automatic, loadable display settings.)
 - Edit new layer in local cfg file and restart watcher.
+- Edit cfg file and modify deafult node label to default setting, like
+    "oneOctet" to 'fourOctet". 
 - Show that the new layer display characteristics have changed. 
     (Shows new feature: client-side, GUI-specific display characteristics.)
     (Shows support for automatic, loadable display settings.)
+- Show that new node label has taken effect. 
+    (Shows new feature: default node label config.)
 
 4. TBD, end of July (or mid August), last
 checkpoint/demo. 
