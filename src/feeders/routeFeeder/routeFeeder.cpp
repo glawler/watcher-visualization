@@ -236,7 +236,7 @@ static void updateRoutes(detector *st, Route *list)
             em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
             em->node2=boost::asio::ip::address_v4(r->nexthop);
             em->edgeColor=st->nexthopcolor;
-            em->expiration=st->reportperiod*1.5;
+            em->expiration=Timestamp(st->reportperiod*1.5); 
             em->width=st->routeedgewidth;
             em->layer=ROUTING_LAYER; // GTL st->nexthoplayer;
             em->addEdge=true;
@@ -255,7 +255,7 @@ static void updateRoutes(detector *st, Route *list)
             em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
             em->node2=boost::asio::ip::address_v4(r->dst); 
             em->edgeColor=st->onehopcolor;
-            em->expiration=st->reportperiod*1.5;
+            em->expiration=Timestamp(st->reportperiod*1.5); 
             em->width=st->routeedgewidth;
             em->layer=ROUTING_LAYER; // GTL st->onehoplayer;
             em->addEdge=true;
