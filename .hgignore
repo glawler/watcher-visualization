@@ -148,8 +148,7 @@ share/info/dir
 ^src/watcherd/test/testWatcherGraph
 ^src/watcherd/test/testWatcherGraphEdge
 ^src/watcherd/test/testWatcherGraphNode
-
-
+^src/watcherd/test/testLoadSaveDisplayInfo
 
 ^src/libwatcher/Makefile
 ^src/libwatcher/Makefile.local
