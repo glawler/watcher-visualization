@@ -65,6 +65,7 @@ namespace watcher
                 ~Color(); 
 
                 bool operator==(const Color &c) const;
+                bool operator!=(const Color &c) const { return !(*this==c); }
                 Color &operator=(const Color &other);
 
                 std::ostream &toStream(std::ostream &out) const;
