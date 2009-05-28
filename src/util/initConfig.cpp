@@ -1,4 +1,6 @@
+#include "boost/filesystem.hpp"
 #include <iostream>
+#include <fstream>
 
 #include "initConfig.h"
 #include "libconfig.h++"
@@ -7,11 +9,19 @@
 using namespace watcher;
 using namespace libconfig;
 using namespace std;
+namespace bf=boost::filesystem;
 
 static bool readConfig(libconfig::Config &config, const string &filename)
 {
     try
     {
+        // make sure it exists. 
+        if (!bf::exists(filename))
+        {
+            ofstream f(filename.c_str());
+            f.close();
+        }
+
         config.readFile(filename.c_str());
         return true;
     }
@@ -21,10 +31,7 @@ static bool readConfig(libconfig::Config &config, const string &filename)
         // init'd the logging mechanism. 
         cerr << "Error reading configuration file " << filename << ": " << e.what() << endl;
         cerr << "Error: \"" << e.getError() << "\" on line: " << e.getLine() << endl;
-    }
-    catch (FileIOException &e)
-    {
-        cerr << "Unable to read file " << filename.c_str() << " given as configuration file on the command line." << endl;
+        exit(EXIT_FAILURE);  // !!!
     }
     return false;
 }
@@ -60,8 +67,13 @@ bool watcher::initConfig(
             break;
 
         if (c==configFileChar)
+        {
             if(true==(retVal=readConfig(config, optarg)))
+            {
                 configFilename=optarg;
+                break;
+            }
+        }
 
         // else - ignore things we don't understand
     }
@@ -69,11 +81,14 @@ bool watcher::initConfig(
     // Last ditch: look for a file called `echo argv[0]`.cfg.
     if(retVal==false)
     {
-        string fname(argv[0]);
+        string fname(bf::basename(argv[0])); 
         fname+=".cfg"; 
 
         retVal=readConfig(config, fname);
-        configFilename=fname;
+        if(retVal)
+            configFilename=fname;
+        else
+            configFilename="";
     }
 
     return retVal;
