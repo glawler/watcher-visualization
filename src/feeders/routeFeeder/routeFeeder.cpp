@@ -11,8 +11,9 @@
 
 #include <string>
 
-#include <client.h>                     // we are a client of the watcher.
-#include <libwatcher/edgeMessage.h>     // we send edgeMessages to the watcher. 
+#include <client.h>                         // we are a client of the watcher.
+#include <libwatcher/edgeMessage.h>         // we may send edgeMessages to the watcher. 
+#include <libwatcher/connectivityMessage.h> // we may send connectivityMessages to the watcher. 
 #include <logger.h>
 
 using namespace std;
@@ -181,6 +182,8 @@ typedef struct detector
 	struct in_addr filterMask;
 	struct in_addr localhost;
 
+    int useConnectivityMessage;
+
 } detector;
 
 typedef struct DetectorInit
@@ -203,6 +206,8 @@ typedef struct DetectorInit
 	struct in_addr filterMask;
 	struct in_addr localhost;
 
+    int useConnectivityMessage;
+
 } DetectorInit;
 
 static void updateRoutes(detector *st, Route *list)
@@ -216,6 +221,10 @@ static void updateRoutes(detector *st, Route *list)
      * 	   	if there is not an edge in oldList or tmpList to nexthop, add it, and add to tmpList
      */
     static vector<MessagePtr> messages;
+    ConnectivityMessagePtr nextHopMessage(new ConnectivityMessage);
+    ConnectivityMessagePtr oneHopMessage(new ConnectivityMessage); 
+    nextHopMessage->layer=ROUTING_LAYER;
+    oneHopMessage->layer=ONE_HOP_ROUTING_LAYER;
 
     if(!messages.empty())
         messages.clear(); 
@@ -232,16 +241,21 @@ static void updateRoutes(detector *st, Route *list)
 
         if ((r->nexthop!=0) && (routeSearchNext(tmpNextHop,r)==NULL))   /* if its multi-hop, and not on the next hop list */
         {
-            EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
-            em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
-            em->node2=boost::asio::ip::address_v4(r->nexthop);
-            em->edgeColor=st->nexthopcolor;
-            em->expiration=Timestamp(st->reportperiod*1.5); 
-            em->width=st->routeedgewidth;
-            em->layer=ROUTING_LAYER; // GTL st->nexthoplayer;
-            em->addEdge=true;
-            em->bidirectional=false;
-            messages.push_back(em);
+            if (!st->useConnectivityMessage)
+            {
+                EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
+                em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
+                em->node2=boost::asio::ip::address_v4(r->nexthop);
+                em->edgeColor=st->nexthopcolor;
+                em->expiration=Timestamp(st->reportperiod*1.5); 
+                em->width=st->routeedgewidth;
+                em->layer=ROUTING_LAYER; // GTL st->nexthoplayer;
+                em->addEdge=true;
+                em->bidirectional=false;
+                messages.push_back(em);
+            }
+            else
+                nextHopMessage->neighbors.push_back(boost::asio::ip::address_v4(r->nexthop));
 
             routeInsert(&tmpNextHop,r);
         }
@@ -251,20 +265,34 @@ static void updateRoutes(detector *st, Route *list)
 #if 1
             LOG_DEBUG("onehop inserting us -> " << r->dst); 
 #endif
-            EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
-            em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
-            em->node2=boost::asio::ip::address_v4(r->dst); 
-            em->edgeColor=st->onehopcolor;
-            em->expiration=Timestamp(st->reportperiod*1.5); 
-            em->width=st->routeedgewidth;
-            em->layer=ROUTING_LAYER; // GTL st->onehoplayer;
-            em->addEdge=true;
-            em->bidirectional=false;
-            messages.push_back(em);
+            if (!st->useConnectivityMessage)
+            {
+                EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
+                em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
+                em->node2=boost::asio::ip::address_v4(r->dst); 
+                em->edgeColor=st->onehopcolor;
+                em->expiration=Timestamp(st->reportperiod*1.5); 
+                em->width=st->routeedgewidth;
+                em->layer=ROUTING_LAYER; // GTL st->onehoplayer;
+                em->addEdge=true;
+                em->bidirectional=false;
+                messages.push_back(em);
+            }
+            else
+                oneHopMessage->neighbors.push_back(boost::asio::ip::address_v4(r->dst));
 
             routeInsert(&tmpOneHop,r);
         }
     }
+
+    if (st->useConnectivityMessage)
+    {
+        if (nextHopMessage->neighbors.size())
+            messages.push_back(nextHopMessage); 
+        if (oneHopMessage->neighbors.size())
+            messages.push_back(oneHopMessage); 
+    }
+
     if (!messages.empty())
         st->watcherClientPtr->sendMessages(messages); 
     else
@@ -341,6 +369,8 @@ static detector *detectorInit(DetectorInit *detinit)
 	st->filterMask.s_addr=detinit->filterMask.s_addr;
 	st->localhost.s_addr=detinit->localhost.s_addr;
 
+    st->useConnectivityMessage=detinit->useConnectivityMessage;
+
     TRACE_EXIT();
     return st;
 }
@@ -390,7 +420,9 @@ int main(int argc, char *argv[])
 	detinit.filterMask.s_addr=0;
 	detinit.localhost.s_addr=0;
 
-    while ((ch = getopt(argc, argv, "m:n:h:o:x:t:e:b:i:d:p:w:l:?")) != -1)
+    detinit.useConnectivityMessage=0; 
+
+    while ((ch = getopt(argc, argv, "m:n:h:o:x:t:e:b:i:d:p:w:l:c?")) != -1)
         switch (ch)
         {
             case 'm': if(-1 == inet_pton(AF_INET, optarg, &detinit.filterMask))
@@ -441,9 +473,12 @@ int main(int argc, char *argv[])
             case 'l':
                       logPropsFile=string(optarg);
                       break;
+            case 'c':
+                    detinit.useConnectivityMessage=1;
+                    break;
             case '?':
             default:
-                      fprintf(stderr,"routingdetector - poll the linux routing table, and draw the routes in the watcher\n"
+                      fprintf(stderr,"%s - poll the linux routing table, and draw the routes in the watcher\n"
                               "-d ipaddr/hostname - specify watcherd address to connect to (duck)\n"
                               "-h ipaddr - this host's address\n"
                               "-m netmask - the mask used to filter the routes (ex. 255.255.255.0)\n"
@@ -455,7 +490,9 @@ int main(int argc, char *argv[])
                               "-x color - nexthop edge color\n"
                               "-b layer - nexthop layer name\n"
                               "-t seconds - Run for this long, then exit\n"
-                              "-w width - make edges width pixels wide (default 15)\n"
+                              "-w width - make edges width pixels wide (default 15)\n" 
+                              "-c - send connectivity messages - let the GUI decide how to display the routes\n",
+                              basename(argv[0])
                              );
                       exit(1);
                       break;
