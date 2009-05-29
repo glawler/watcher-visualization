@@ -94,12 +94,6 @@ libwatcherdAPI_a_SOURCES= \
 
 bin_PROGRAMS= \
 	watcherd \
-	gpsMessageTest \
-	labelMessageTest \
-	edgeMessageTest \
-	colorMessageTest \
-	dataRequestMessageTest \
-	connectivityMessageTest \
 	testCC \
 	messageStream2Text \
 	connectivity2dot

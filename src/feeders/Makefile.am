@@ -1,1 +1,1 @@
-SUBDIRS=routeFeeder
+SUBDIRS=routeFeeder commandline

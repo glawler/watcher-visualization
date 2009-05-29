@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     watcher::Timestamp startTime=0;
     int timeFactor=1;
 
-    string logProps("log.properties");
+    string logProps("sendMessage.log.properties");
 
     while (true) 
     {
