@@ -44,8 +44,11 @@ ctags:
 	cp -v $(TOPDIR)/etc/$*.cfg.sample ./$*.cfg
 
 %.log.properties: 
-	@ echo Creating $*.log.properties from sample configuration at $(TOPDIR)etc/watcher.log.properties.sample
-	cp -v $(TOPDIR)etc/watcherd.log.properties.sample ./$*.log.properties
+	@ echo Creating $*.log.properties from sample configuration at $(TOPDIR)/etc/watcher.log.properties.sample
+	cp -v $(TOPDIR)/etc/watcherd.log.properties.sample ./$*.log.properties
+	@ echo This is probably a bad idea - attempting to set the correct output log file in log.properties.
+	@ perl -pi -e 's/watcherd.log/$*.log/g' ./$*.log.properties
+
 
 
 

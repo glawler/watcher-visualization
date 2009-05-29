@@ -135,7 +135,6 @@ share/info/dir
 ^src/watcherd/Makefile.local
 ^src/watcherd/test/Makefile
 ^src/watcherd/test/testMessageStream
-^src/watcherd/messageStream2Text
 ^src/watcherd/test/testWatcherGraph
 ^src/watcherd/connectivity2dot
 ^src/watcherd/test/testMessageStream
@@ -165,13 +164,19 @@ share/info/dir
 ^src/libwatcher/test/testTestMessage
 ^src/libwatcher/test/testConnectivityMessage
 
-^src/feeders/commandline/Makefile
-^src/feeders/commandline/sendColorMessage
-^src/feeders/commandline/sendConnectivityMessage
-^src/feeders/commandline/sendDataRequestMessage
-^src/feeders/commandline/sendEdgeMessage
-^src/feeders/commandline/sendGPSMessage
-^src/feeders/commandline/sendLabelMessage
+^src/clients/Makefile
+^src/clients/commandlineFeeders/Makefile
+^src/clients/commandlineFeeders/sendColorMessage
+^src/clients/commandlineFeeders/sendConnectivityMessage
+^src/clients/commandlineFeeders/sendDataRequestMessage
+^src/clients/commandlineFeeders/sendEdgeMessage
+^src/clients/commandlineFeeders/sendGPSMessage
+^src/clients/commandlineFeeders/sendLabelMessage
+^src/clients/messageStream2Text/Makefile
+^src/clients/messageStream2Text/messageStream2Text
+^src/clients/routeFeeder/Makefile
+^src/clients/routeFeeder/routeFeeder
+
 
 
 ^src/util/Makefile

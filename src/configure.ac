@@ -35,9 +35,10 @@ AC_CONFIG_FILES([ \
     watcherd/Makefile 
     watcherd/test/Makefile \
     watcherHierarchyClient/Makefile \
-    feeders/Makefile \
-    feeders/routeFeeder/Makefile \
-    feeders/commandline/Makefile \
+    clients/Makefile \
+    clients/routeFeeder/Makefile \
+    clients/messageStream2Text/Makefile \
+    clients/commandlineFeeders/Makefile \
 ])
 
 #override default $CXXFLAGS
