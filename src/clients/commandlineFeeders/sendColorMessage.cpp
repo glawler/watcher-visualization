@@ -9,6 +9,7 @@
 #include "client.h"
 #include <libwatcher/colorMessage.h>
 #include <libwatcher/watcherColors.h>
+#include "sendMessageHandler.h"
 
 using namespace std;
 using namespace watcher;
@@ -139,6 +140,7 @@ int main(int argc, char **argv)
 
     watcher::Client client(server); 
     LOG_INFO("Connecting to " << server << " and sending message."); 
+    client.addMessageHandler(SendMessageHandler::create());
 
     ColorMessagePtr cm(new ColorMessage);
 

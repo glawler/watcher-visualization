@@ -7,6 +7,7 @@
 #include "client.h"
 #include <libwatcher/gpsMessage.h>
 #include <libwatcher/watcherTypes.h> // for NodeIdentifer
+#include "sendMessageHandler.h"
 
 using namespace std;
 using namespace watcher;
@@ -124,6 +125,7 @@ int main(int argc, char **argv)
 
     watcher::Client client(serverName); 
     printf("Connecting to %s and sending message.\n", serverName);
+    client.addMessageHandler(SendMessageHandler::create());
     GPSMessagePtr message = GPSMessagePtr(new GPSMessage(latitude, longitude, altitude));
 
     if(NodeIdentifier()!=nodeAddr) // not empty address

@@ -20,7 +20,7 @@ namespace watcher {
             return os << "StartMessage()";
         }
 
-        bool operator== (const StartMessage& lhs, const StartMessage& /* rhs */) { return true; };
+        bool operator== (const StartMessage& /*lhs*/, const StartMessage& /* rhs */) { return true; };
 
         template <typename Archive> void StartMessage::serialize(Archive & ar, const unsigned int /* version */)
         {
