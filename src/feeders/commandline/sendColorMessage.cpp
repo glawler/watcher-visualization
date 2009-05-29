@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     asio::ip::address nodeAddr=boost::asio::ip::address::from_string("127.0.0.1"); 
     uint32_t flashTime=0;
     uint32_t expiration=0; 
-    string logProps("log.properties");
+    string logProps("sendMessage.log.properties");
 
     bool colorSet=false;
 

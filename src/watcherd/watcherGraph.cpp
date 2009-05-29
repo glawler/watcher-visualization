@@ -198,7 +198,7 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     if(!ei.second) 
         LOG_ERROR("Unable to add edge to graph between " << message->node1 << " and " << message->node2);
 
-    Timestamp now=time(NULL)*1000; 
+    Timestamp now=Timestamp(time(NULL))*1000; 
 
     theGraph[ei.first].color=message->edgeColor; 
     if (message->expiration>0) 
@@ -255,7 +255,7 @@ void WatcherGraph::doMaintanence()
 {
     TRACE_ENTER();
 
-    Timestamp now=Timestamp(time(NULL)*1000); 
+    Timestamp now=Timestamp(time(NULL))*1000; 
 
     // remove edges that have expired
     remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
@@ -346,7 +346,7 @@ bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
         if (message->addLabel)
         {
             LabelMessagePtr lmp(new LabelMessage(*message));
-            lmp->expiration=(message->expiration<0) ? -1 : Timestamp(message->expiration+(time(NULL)*1000));
+            lmp->expiration=(message->expiration<0) ? -1 : message->expiration+(Timestamp(time(NULL))*1000); 
             theGraph[*nodeIter].attachedLabels.push_back(lmp);
         }
         else

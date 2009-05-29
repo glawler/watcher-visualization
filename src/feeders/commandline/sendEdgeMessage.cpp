@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 
     uint32_t expiration=10000;
 
-    string logProps("log.properties");
+    string logProps("sendMessage.log.properties");
 
     while (true) 
     {

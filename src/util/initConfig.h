@@ -18,10 +18,14 @@ namespace watcher
      * a configuration file of the form 'programname.cfg', is searched for
      * and used if found. (Where "programname" is the basename of argv[0].)
      *
-     * @param[out] config - the config object to initialize.
+     * Once the filename is found, if there is an error parsing the data, 
+     * exit(EXIT_FAILURE) is called as it is assumed that bad/unreadable input 
+     * to a program is a FATAL error. 
+     *
+     * @param[in/out] config - the config object to initialize.
      * @param[in] argc - number of args in argv
      * @param[in] argv - strings on the command line
-     * @param[in] configFilename - The name of the configuration file, if found.
+     * @param[out] configFilename - The name of the configuration file, if found.
      * @param[in] commandLineShort - the short form of the command line arg that contains the 
      *  configuration filename. (ex: "-c foobar.cfg", the value is 'c')
      * @param[in] commandLineLong - The long form of the command line arguement that 

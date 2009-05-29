@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     int c;
     string label;
     string server;
-    string logProps("labelMessageTest.log.properties");
+    string logProps("sendMessage.log.properties");
     unsigned int fontSize=10;
     asio::ip::address address;
     Color fg=Color::black;

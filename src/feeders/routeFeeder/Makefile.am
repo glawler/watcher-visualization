@@ -39,7 +39,6 @@ ctags:
 #
 # Copy sample cfg and log.properties files from ../etc
 #
-TOPDIR=../../../
 %.cfg : 
 	@ echo Creating $*.cfg from sample configuration at $(TOPDIR)/etc/$*.cfg.sample
 	cp -v $(TOPDIR)/etc/$*.cfg.sample ./$*.cfg

@@ -30,7 +30,7 @@ LDADD = libfeeder.a \
 LIBS+=-lconfig++
 LIBS+=-llog4cxx
 LIBS+=-lsqlite3
-LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
+LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
 
 # 
 # .cfg and .log.properties build rules are below
@@ -85,16 +85,15 @@ libwatcherdAPI_a_SOURCES= \
 	singletonConfig.cpp \
 	watcherGraphEdge.cpp \
 	watcherGraphNode.cpp \
-	watcherGraph.cpp
+	watcherGraph.cpp \
+	displayInfo.cpp \
+	layerDisplayInfo.cpp \
+	nodeDisplayInfo.cpp \
+	edgeDisplayInfo.cpp \
+	labelDisplayInfo.cpp
 
 bin_PROGRAMS= \
 	watcherd \
-	gpsMessageTest \
-	labelMessageTest \
-	edgeMessageTest \
-	colorMessageTest \
-	dataRequestMessageTest \
-	connectivityMessageTest \
 	testCC \
 	messageStream2Text \
 	connectivity2dot

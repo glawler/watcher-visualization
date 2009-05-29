@@ -4,9 +4,9 @@
 #
 # log4j.rootLogger=fatal, flog, stdout
 # log4j.rootLogger=error, flog, stdout
-log4j.rootLogger=warn, flog, stdout
+# log4j.rootLogger=warn, flog, stdout
 # log4j.rootLogger=info, flog, stdout
-# log4j.rootLogger=debug, flog, stdout
+log4j.rootLogger=debug, flog, stdout
 # log4j.rootLogger=trace, flog, stdout
 
 #
@@ -28,6 +28,11 @@ log4j.rootLogger=warn, flog, stdout
 # log4j.logger.SingletonConfig=trace
 # log4j.logger.Watcherd=trace
 # log4j.logger.WatcherGraph=trace
+# log4j.logger.DisplayInfo=trace
+# log4j.logger.LayerDisplayInfo=trace
+# log4j.logger.NodeDisplayInfo=trace
+# log4j.logger.EdgeDisplayInfo=trace
+# log4j.logger.LabelDisplayInfo=trace
 
 #
 # set levels for libwatcher module

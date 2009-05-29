@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     // Now do some actual work.
     // 
     printf("Initializing logging system\n"); 
-    LOAD_LOG_PROPS(logProps ? logProps : "log.properties");
+    LOAD_LOG_PROPS(logProps ? logProps : "sendMessage.log.properties");
 
     LOG_DEBUG("Args: server: " << serverName << " fromAddr: " << fromNodeAddr << " logProps: " << logProps); 
 

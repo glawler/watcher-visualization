@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
 
     for (unsigned int i=0; i < numEdges; i++)
     {
-        LOG_INFO("Current edges in graph at " << Timestamp(time(NULL)*1000)); 
+        LOG_INFO("Current edges in graph at " << Timestamp(time(NULL))*1000); 
         graph_traits<WatcherGraph::Graph>::edge_iterator ei, eEnd; 
         for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei)
         {
@@ -196,7 +196,8 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
         }
 
         BOOST_CHECK_EQUAL(numEdges-i, num_edges(wg.theGraph)); 
-
+        cout << "."; 
+        cout.flush(); 
         sleep(1); 
         wg.doMaintanence(); // should remove one edge
     }
@@ -248,6 +249,8 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
 
         BOOST_CHECK_EQUAL( numLabels-i, wg.theGraph[*theNodeIter].attachedLabels.size() );
 
+        cout << "."; 
+        cout.flush(); 
         sleep(1);
         wg.doMaintanence();  // Should remove one label
     }

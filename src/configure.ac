@@ -20,6 +20,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <sqlite3.h>
 # Boost 1.36 is when asio appeared
 AX_BOOST_BASE(1.36)
 AX_BOOST_SYSTEM
+AX_BOOST_FILESYSTEM
 AX_BOOST_ASIO
 AX_BOOST_SERIALIZATION
 AX_BOOST_THREAD
@@ -36,6 +37,7 @@ AC_CONFIG_FILES([ \
     watcherHierarchyClient/Makefile \
     feeders/Makefile \
     feeders/routeFeeder/Makefile \
+    feeders/commandline/Makefile \
 ])
 
 #override default $CXXFLAGS
