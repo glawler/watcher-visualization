@@ -53,6 +53,7 @@ extern LoggerPtr logger;
 #define TRACE_ENTER()       { try{ LOG_TRACE("Enter: " << __PRETTY_FUNCTION__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
 #define TRACE_EXIT()        { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
 #define TRACE_EXIT_RET(val) { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__ << ": Returned --> " << val); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
+#define TRACE_EXIT_RET_BOOL(val) { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__ << ": Returned --> " << (val ? "true":"false")); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
 
 #define LOAD_LOG_PROPS(file) { try{ log4cxx::PropertyConfigurator::configure(file); } catch(std::exception &e) { std::cerr << "Exception while loding log properties: " << e.what() << std::endl; } }
 

@@ -7,6 +7,7 @@
 #include <libwatcher/connectivityMessage.h>
 #include "logger.h"
 #include "client.h"
+#include "sendMessageHandler.h"
 
 using namespace std;
 using namespace watcher;
@@ -84,6 +85,7 @@ int main(int argc, char **argv)
     LOG_DEBUG("Args: server: " << serverName << " fromAddr: " << fromNodeAddr << " logProps: " << logProps); 
 
     watcher::Client client(serverName); 
+    client.addMessageHandler(SendMessageHandler::create());
     printf("Connecting to %s and sending message.\n", serverName);
 
     ConnectivityMessagePtr cm(new ConnectivityMessage); 

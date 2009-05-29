@@ -9,6 +9,7 @@
 #include "client.h"
 #include <libwatcher/dataRequestMessage.h>
 #include <libwatcher/messageTypesAndVersions.h>
+#include "sendMessageHandler.h"
 
 using namespace std;
 using namespace watcher;
@@ -121,6 +122,7 @@ int main(int argc, char **argv)
     LOAD_LOG_PROPS(logProps);
 
     watcher::Client client(server); 
+    client.addMessageHandler(SendMessageHandler::create());
     LOG_INFO("Connecting to " << server << " and sending message."); 
     
     DataRequestMessagePtr drm(new DataRequestMessage);

@@ -31,7 +31,7 @@ namespace watcher
              * Notification that a message has been successfully sent.
              *
              * @param[in] - the message that was sent
-             * @return - boolean. If true, expect a response, else, close connection.
+             * @return - boolean. If true, shutdown the write half of the socket, flase otherwise
              */
             virtual bool handleMessageSent(const event::MessagePtr &message); 
             virtual bool handleMessagesSent(const std::vector<event::MessagePtr> &messages);
