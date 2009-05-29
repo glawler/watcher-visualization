@@ -130,12 +130,7 @@ share/info/dir
 ^src/watcherd/client
 ^src/watcherd/watcherd$
 ^src/watcherd/depend
-^src/watcherd/gpsMessageTest
-^src/watcherd/labelMessageTest
-^src/watcherd/colorMessageTest
 ^src/watcherd/Makefile
-^src/watcherd/edgeMessageTest
-^src/watcherd/dataRequestMessageTest
 ^src/watcherd/testCC
 ^src/watcherd/Makefile.local
 ^src/watcherd/test/Makefile
@@ -143,7 +138,6 @@ share/info/dir
 ^src/watcherd/messageStream2Text
 ^src/watcherd/test/testWatcherGraph
 ^src/watcherd/connectivity2dot
-^src/watcherd/connectivityMessageTest
 ^src/watcherd/test/testMessageStream
 ^src/watcherd/test/testWatcherGraph
 ^src/watcherd/test/testWatcherGraphEdge
@@ -170,6 +164,14 @@ share/info/dir
 ^src/libwatcher/test/testStopMessage
 ^src/libwatcher/test/testTestMessage
 ^src/libwatcher/test/testConnectivityMessage
+
+^src/feeders/commandline/Makefile
+^src/feeders/commandline/sendColorMessage
+^src/feeders/commandline/sendConnectivityMessage
+^src/feeders/commandline/sendDataRequestMessage
+^src/feeders/commandline/sendEdgeMessage
+^src/feeders/commandline/sendGPSMessage
+^src/feeders/commandline/sendLabelMessage
 
 
 ^src/util/Makefile
