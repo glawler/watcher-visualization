@@ -47,5 +47,13 @@ BOOST_AUTO_TEST_CASE( pack_test )
     BOOST_REQUIRE(pnewmsg.get() != 0);
 
     BOOST_CHECK_EQUAL(*cm, *pnewmsg);
+
+    LOG_DEBUG("cm:" << *cm);
+    LOG_DEBUG("pnewmsg:" << *pnewmsg);
+
+    // ConnectivityMessagePtr cmp(new ConnectivityMessage);
+    // istringstream is2(os.str());
+    // cmp->unpack(is2);
+    // BOOST_CHECK_EQUAL(*cm, *cmp);
 }
 

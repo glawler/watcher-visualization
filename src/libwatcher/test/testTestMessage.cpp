@@ -3,13 +3,6 @@
 #define BOOST_TEST_MODULE watcher::Message.TestMessage test
 #include <boost/test/unit_test.hpp>
 
-#include <boost/serialization/shared_ptr.hpp>   // Need this to serialize shared_ptrs. 
-
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-
 #include "libwatcher/testMessage.h"
 #include "logger.h"
 
@@ -18,11 +11,10 @@ using namespace boost;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
-using namespace boost::archive;
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
-    LOAD_LOG_PROPS("log.properties"); 
+    LOAD_LOG_PROPS("test.log.properties"); 
 
     string strVal = "who tests the testTestMessage?";
     vector<int> ints;
@@ -49,13 +41,11 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
     {
         TestMessage tmOut(strVal, ints); 
         ostringstream os; 
-        binary_oarchive oa(os);
-        oa << tmOut; 
+        tmOut.pack(os);
 
-        TestMessage tmIn;
         istringstream is(os.str());
-        binary_iarchive ia(is);
-        ia >> tmIn;
+        // a little awkward
+        TestMessage tmIn(*(dynamic_pointer_cast<TestMessage>(Message::unpack(is))));
 
         LOG_DEBUG("tmOut: " << tmOut); 
         LOG_DEBUG(" tmIn: " << tmIn); 
@@ -65,34 +55,29 @@ BOOST_AUTO_TEST_CASE( shared_ptr_archive_test )
     {
         TestMessagePtr tmpOut(new TestMessage(strVal, ints));
         ostringstream os; 
-        text_oarchive oa(os);
-        oa << tmpOut; 
+        tmpOut->pack(os);
 
         string archived(os.str());
         LOG_DEBUG(" *tmpOut: " << *tmpOut); 
         LOG_DEBUG("archived: " << archived);
 
         istringstream is(archived);
-        text_iarchive ia(is);
-        TestMessagePtr tmpIn;
-        ia >> tmpIn;
+        TestMessagePtr tmpIn(dynamic_pointer_cast<TestMessage>(Message::unpack(is)));
         BOOST_REQUIRE(tmpIn.get() != 0);
 
         LOG_DEBUG("  *tmpIn: " << *tmpIn); 
 
         BOOST_CHECK_EQUAL( *tmpOut, *tmpIn);
 
-        MessagePtr mpIn;
         istringstream is2(archived);
-        text_iarchive ia2(is2);
-        ia2 >> mpIn;
+        MessagePtr mpIn(Message::unpack(is2));
         BOOST_REQUIRE( mpIn.get() != 0 );
 
         LOG_DEBUG("*tmpOut: " << *tmpOut); 
         LOG_DEBUG("  *mpIn: " << * mpIn); 
 
         LOG_ERROR("GTL - this next line actually fails. It should work, but does not."); 
-        TestMessagePtr dmpIn = dynamic_pointer_cast<TestMessage>(mpIn); 
+        TestMessagePtr dmpIn(dynamic_pointer_cast<TestMessage>(mpIn)); 
         BOOST_REQUIRE( dmpIn.get() != 0 );
 
         LOG_DEBUG("*dmpIn: " << * dmpIn); 

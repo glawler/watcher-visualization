@@ -17,10 +17,10 @@ namespace watcher
 
                 TestMessage();
                 TestMessage(const std::string &str, const std::vector<int>& ints);
-                //TestMessage(const TestMessage &other);
+                TestMessage(const TestMessage &other);
 
                 bool operator==(const TestMessage &other) const;
-                //TestMessage &operator=(const TestMessage &other);
+                TestMessage &operator=(const TestMessage &other);
 
                 virtual std::ostream &toStream(std::ostream &out) const;
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }

@@ -26,7 +26,6 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-#if 0
         TestMessage::TestMessage(const TestMessage &other) :
             Message(other.type, other.version), 
             stringData(other.stringData),
@@ -35,7 +34,6 @@ namespace watcher {
             TRACE_ENTER();
             TRACE_EXIT();
         }
-#endif
 
         bool TestMessage::operator==(const TestMessage &other) const
         {
