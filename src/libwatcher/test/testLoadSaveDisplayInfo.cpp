@@ -6,10 +6,10 @@
 #include <fstream>
 
 #include "logger.h"
-#include "edgeDisplayInfo.h"
-#include "nodeDisplayInfo.h"
-#include "labelDisplayInfo.h"
-#include "layerDisplayInfo.h"
+#include "libwatcher/edgeDisplayInfo.h"
+#include "libwatcher/nodeDisplayInfo.h"
+#include "libwatcher/labelDisplayInfo.h"
+#include "libwatcher/layerDisplayInfo.h"
 #include "singletonConfig.h"
 #include "initConfig.h"
 

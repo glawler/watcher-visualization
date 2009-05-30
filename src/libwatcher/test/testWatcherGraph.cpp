@@ -2,9 +2,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "libwatcher/watcherSerialize.h"
+#include "libwatcher/watcherGraph.h"
 
 #include "logger.h"
-#include "../watcherGraph.h"
 
 using namespace std;
 using namespace boost;
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
     {
         WatcherGraphNode::LabelMessageList::iterator labelIterBegin=wg.theGraph[*theNodeIter].attachedLabels.begin(); 
         WatcherGraphNode::LabelMessageList::iterator labelIterEnd=wg.theGraph[*theNodeIter].attachedLabels.end(); 
-        LOG_INFO("Current lables on node " << wg.theGraph[*theNodeIter].nodeId << " at " << Timestamp(time(NULL)*1000)); 
+        LOG_INFO("Current lables on node " << wg.theGraph[*theNodeIter].nodeId << " at " << Timestamp(time(NULL))*1000); 
         for( ;labelIterBegin!=labelIterEnd; ++labelIterBegin)
         {
             LOG_INFO("\t" << **labelIterBegin); 

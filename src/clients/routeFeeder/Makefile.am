@@ -23,7 +23,7 @@ LIBS+=-lconfig++
 LIBS+=-llogger
 LIBS+=-llog4cxx
 LIBS+=-lwatcherutils
-LIBS+=-lfeeder
+LIBS+=-lwatcherd
 LIBS+=-lwatcher
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 

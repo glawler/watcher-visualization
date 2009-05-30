@@ -6,16 +6,17 @@
 
 #include <algorithm>
 
-#include "libwatcher/connectivityMessage.h"
-#include "libwatcher/gpsMessage.h"
-#include "libwatcher/nodeStatusMessage.h"
-#include "libwatcher/edgeMessage.h"
-#include "libwatcher/colorMessage.h"
+#include "messageStreamFilter.h"
+
+#include "connectivityMessage.h"
+#include "gpsMessage.h"
+#include "nodeStatusMessage.h"
+#include "edgeMessage.h"
+#include "colorMessage.h"
 
 #include "watcherGraph.h"
 
-#include <boost/graph/adj_list_serialize.hpp>
-#include "libwatcher/watcherSerialize.h"
+#include "watcherSerialize.h"
 
 using namespace std;
 using namespace boost;

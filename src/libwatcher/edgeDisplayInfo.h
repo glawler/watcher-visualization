@@ -1,7 +1,7 @@
 #ifndef EDGE_DISPLAY_INFO_H
 #define EDGE_DISPLAY_INFO_H
 
-#include "libwatcher/watcherColors.h"
+#include "watcherColors.h"
 #include "displayInfo.h"
 
 namespace watcher

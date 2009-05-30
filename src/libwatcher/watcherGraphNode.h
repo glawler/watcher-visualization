@@ -11,10 +11,10 @@
 #include <string>
 
 #include "logger.h"
-#include "libwatcher/gpsMessage.h"
-#include "libwatcher/labelMessage.h"
-#include "libwatcher/colorMessage.h"
-#include "libwatcher/messageTypesAndVersions.h"     // for GUILayer
+#include "gpsMessage.h"
+#include "labelMessage.h"
+#include "colorMessage.h"
+#include "messageTypesAndVersions.h"     // for GUILayer
 
 namespace watcher
 {

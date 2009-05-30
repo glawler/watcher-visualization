@@ -3,7 +3,7 @@
 
 #include <ostream>
 #include <boost/shared_ptr.hpp>
-#include "libwatcher/watcherRegion.h"
+#include "watcherRegion.h"
 #include "libwatcher/messageTypesAndVersions.h"  // for GUILayer
 #include "logger.h"
 

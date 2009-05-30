@@ -249,7 +249,7 @@ bool MessageStream::handleMessagesSent(const vector<MessagePtr> &messages)
     return retVal;
 }
 
-std::ostream &operator<<(std::ostream &out, const MessageStream & /*messStream*/)
+std::ostream &watcher::operator<<(std::ostream &out, const MessageStream & /*messStream*/)
 {
     TRACE_ENTER();
     TRACE_EXIT();

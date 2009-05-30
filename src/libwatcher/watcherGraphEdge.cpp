@@ -1,6 +1,6 @@
 #include <boost/foreach.hpp>
 
-#include "libwatcher/watcherSerialize.h"
+#include "watcherSerialize.h"
 #include "watcherGraphEdge.h"
 
 using namespace watcher; 

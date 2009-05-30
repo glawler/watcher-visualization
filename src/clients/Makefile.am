@@ -1,4 +1,5 @@
 SUBDIRS= \
 	routeFeeder \
 	commandlineFeeders \
-	messageStream2Text
+	messageStream2Text \
+	connectivity2dot

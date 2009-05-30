@@ -6,7 +6,7 @@
 #include "initConfig.h"
 #include "singletonConfig.h"
 #include "messageStream.h"
-#include "watcherGraph.h"
+#include "libwatcher/watcherGraph.h"
 #include "logger.h"
 
 using namespace std;

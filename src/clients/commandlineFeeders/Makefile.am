@@ -7,8 +7,7 @@ CPPFLAGS+=-I../../logger
 
 # watcher libs
 LDADD =  \
-	../../watcherd/libfeeder.a \
-	../../watcherd/libwatcherdAPI.a \
+	../../watcherd/libwatcherd.a \
 	../../libwatcher/libwatcher.a \
 	../../util/libwatcherutils.a \
 	../../logger/liblogger.a 

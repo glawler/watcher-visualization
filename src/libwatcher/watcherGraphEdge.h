@@ -11,8 +11,8 @@
 #include <list>
 #include <boost/serialization/access.hpp>
 
-#include "libwatcher/watcherTypes.h"    // for Timestamp
-#include "libwatcher/labelMessage.h" 
+#include "watcherTypes.h"    // for Timestamp
+#include "labelMessage.h" 
 
 namespace watcher
 {

@@ -15,6 +15,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
+#include <boost/graph/adj_list_serialize.hpp>   // for serialing boost::graphs. 
 #include <boost/serialization/string.hpp>       // for serializing addresses.
 #include <boost/serialization/vector.hpp>       // for serializing addresses.
 #include <boost/serialization/shared_ptr.hpp>   // for serializing LabelMessagePtrs

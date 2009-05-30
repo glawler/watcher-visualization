@@ -2,7 +2,7 @@
 #define LABEL_DISPLAY_INFO_H
 
 #include <string>
-#include "libwatcher/watcherColors.h"
+#include "watcherColors.h"
 #include "displayInfo.h"
 
 namespace watcher

@@ -16,36 +16,26 @@ LDFLAGS += -L$(TOPDIR)/src/watcherd
 LDFLAGS += -L$(TOPDIR)/src/libwatcher
 LDFLAGS += -L$(TOPDIR)/lib
 LDFLAGS += -L$(TOPDIR)/src/logger
-LDADD = -lwatcherdAPI -lwatcher -llogger -llog4cxx -lconfig++ -lwatcherutils
-LDADD += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
-
-# LDADD autodependency not working on Fedora 8
-DEPENDENCIES= \
-	../libwatcherdAPI.a \
-	$(TOPDIR)/src/libwatcher/libwatcher.a
+LDFLAGS += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+LDFLAGS += -llog4cxx -lconfig++ 
+LDADD = -lwatcherd -lwatcher -lwatcherutils -llogger
 
 BUILT_SOURCES= \
-	test.log.properties
+	testCC.cfg \
+	testCC.log.properties 
+	test.log.properties 
 
-TESTS= \
-	testMessageStream \
-	testWatcherGraph \
-	testWatcherGraphNode \
-	testWatcherGraphEdge \
-	testLoadSaveDisplayInfo
+noinst_PROGRAMS=\
+	testCC
 
-bin_PROGRAMS= \
-	testMessageStream \
-	testWatcherGraph \
-	testWatcherGraphNode \
-	testWatcherGraphEdge \
-	testLoadSaveDisplayInfo
+check_PROGRAMS= \
+	testMessageStream
+
+TESTS=\
+	testMessageStream
 
 testMessageStream_SOURCES=testMessageStream.cpp
-testWatcherGraph_SOURCES=testWatcherGraph.cpp
-testWatcherGraphNode_SOURCES=testWatcherGraphNode.cpp
-testWatcherGraphEdge_SOURCES=testWatcherGraphEdge.cpp
-testLoadSaveDisplayInfo_SOURCES=testLoadSaveDisplayInfo.cpp
+testCC_SOURCES=testCC.cpp
 
 #
 # Copy sample cfg and log.properties files from $(TOPDIR)/etc

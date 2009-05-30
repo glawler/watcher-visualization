@@ -1,7 +1,7 @@
 #ifndef LAYER_DISPLAY_INFO_H
 #define LAYER_DISPLAY_INFO_H
 
-#include "libwatcher/messageTypesAndVersions.h" // for GUILayer
+#include "messageTypesAndVersions.h" // for GUILayer
 #include "displayInfo.h"
 #include "nodeDisplayInfo.h"
 #include "edgeDisplayInfo.h"

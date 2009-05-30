@@ -38,6 +38,7 @@ AC_CONFIG_FILES([ \
     clients/Makefile \
     clients/routeFeeder/Makefile \
     clients/messageStream2Text/Makefile \
+    clients/connectivity2dot/Makefile \
     clients/commandlineFeeders/Makefile \
 ])
 

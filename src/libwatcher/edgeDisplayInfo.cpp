@@ -1,6 +1,6 @@
 #include "edgeDisplayInfo.h"
 #include "singletonConfig.h" 
-#include "libwatcher/messageTypesAndVersions.h"
+#include "messageTypesAndVersions.h"
 
 using namespace watcher;
 using namespace watcher::event;

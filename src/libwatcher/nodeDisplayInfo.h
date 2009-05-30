@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "libwatcher/watcherTypes.h"  // for NodeIdentifier
-#include "libwatcher/watcherColors.h"
+#include "watcherTypes.h"  // for NodeIdentifier
+#include "watcherColors.h"
 #include "displayInfo.h"
 
 namespace watcher

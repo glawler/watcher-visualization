@@ -18,14 +18,6 @@ CPPFLAGS += $(BOOST_CPPFLAGS)
 LDFLAGS += -L$(TOPDIR)/lib
 LDFLAGS += $(BOOST_LDFLAGS)
 
-# watcher libs
-LDADD = libfeeder.a \
-		libwatcherdAPI.a \
-    ../sqlite_wrapper/libsqlite_wrapper.a \
-    ../libwatcher/libwatcher.a \
-    ../util/libwatcherutils.a \
-    ../logger/liblogger.a
-
 # system libraries
 LIBS+=-lconfig++
 LIBS+=-llog4cxx
@@ -36,75 +28,53 @@ LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_S
 # .cfg and .log.properties build rules are below
 #
 BUILT_SOURCES= \
-	connectivity2dot.cfg \
-	connectivity2dot.log.properties \
 	watcherd.cfg \
-	watcherd.log.properties \
-	testCC.cfg \
-	testCC.log.properties \
-	messageStream2Text.cfg \
-	messageStream2Text.log.properties \
-	routeFeeder.cfg \
-	routeFeeder.log.properties
+	watcherd.log.properties 
 
-noinst_LIBRARIES=libfeeder.a libwatcherdAPI.a
+noinst_LIBRARIES=libwatcherd.a
 
-# GTL - TBD remove objs if not needed
-libfeeder_a_SOURCES= \
+libwatcherd_a_SOURCES= \
 	clientConnection.cpp \
 	client.cpp \
 	connection.cpp \
 	dataMarshaller.cpp \
-	messageFactory.cpp \
-	messageHandler.cpp \
-	singletonConfig.cpp \
-	dataMarshaller.cpp \
-	messageFactory.cpp \
 	messageHandler.cpp \
 	messageStream.cpp \
 	messageStreamFilter.cpp \
 	feederAPIMessageHandler.cpp \
 	watcherdAPIMessageHandler.cpp \
-	singletonConfig.cpp 
-
-libwatcherdAPI_a_SOURCES= \
-	clientConnection.cpp \
-	client.cpp \
-	feederAPIMessageHandler.cpp \
-	watcherdAPIMessageHandler.cpp \
-	connection.cpp \
-	dataMarshaller.cpp \
-	messageFactory.cpp \
-	messageHandler.cpp \
-	singletonConfig.cpp \
-	dataMarshaller.cpp \
-	messageFactory.cpp \
-	messageHandler.cpp \
-	messageStream.cpp \
-	messageStreamFilter.cpp \
-	singletonConfig.cpp \
-	watcherGraphEdge.cpp \
-	watcherGraphNode.cpp \
-	watcherGraph.cpp \
-	displayInfo.cpp \
-	layerDisplayInfo.cpp \
-	nodeDisplayInfo.cpp \
-	edgeDisplayInfo.cpp \
-	labelDisplayInfo.cpp
+	watcherRegion.cpp
 
 bin_PROGRAMS= \
-	watcherd \
-	testCC \
-	messageStream2Text \
-	connectivity2dot
+	watcherd 
 
-connectivity2dot_LFLAGS=$(LFLAGS) -L. -lwatcherdAPI
+watcherd_SOURCES=\
+	clientConnection.cpp \
+	client.cpp \
+	connection.cpp \
+	dataMarshaller.cpp \
+	watcherdMain.cpp \
+	watcherd.cpp \
+	server.cpp \
+	serverConnection.cpp \
+	serverMessageHandler.cpp \
+	writeDBMessageHandler.cpp \
+	writeDBMessageHandler.h \
+	messageHandler.cpp \
+	database.h \
+	database.cpp \
+	sqliteDatabase.h \
+	sqliteDatabase.cpp \
+	watcherdConfig.h \
+	watcherdConfig.cpp \
+	replayState.h \
+	replayState.cpp
 
-watcherd_SOURCES=watcherdMain.cpp watcherd.cpp server.cpp serverConnection.cpp \
-		 serverMessageHandler.cpp writeDBMessageHandler.cpp \
-		 writeDBMessageHandler.h database.h database.cpp \
-		 sqliteDatabase.h sqliteDatabase.cpp watcherdConfig.h \
-		 watcherdConfig.cpp replayState.h replayState.cpp
+watcherd_LDADD = ../libwatcher/libwatcher.a 
+watcherd_LDADD += ../sqlite_wrapper/libsqlite_wrapper.a
+watcherd_LDADD += ../util/libwatcherutils.a 
+watcherd_LDADD += ../logger/liblogger.a
+
 
 ctags:
 	ctags -R $(TOPDIR)

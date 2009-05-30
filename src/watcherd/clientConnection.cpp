@@ -8,7 +8,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "libwatcher/message.h"
-#include "messageFactory.h"
 #include "messageHandler.h"
 
 using namespace std;

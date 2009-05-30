@@ -4,20 +4,20 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "messageStreamFilter.h"
 #include "watcherGraphNode.h"
 #include "watcherGraphEdge.h"
 
 // GTL - How do I hide the message types from clients of WatcherGraph. I tried ME's 'class impl'
 // trick, but it did not work. It's very possible that I did not do it correctly. 
-#include "libwatcher/connectivityMessage.h"
-#include "libwatcher/gpsMessage.h"
-#include "libwatcher/nodeStatusMessage.h"
-#include "libwatcher/edgeMessage.h"
+#include "connectivityMessage.h"
+#include "gpsMessage.h"
+#include "nodeStatusMessage.h"
+#include "edgeMessage.h"
 
 namespace watcher
 {
-    using namespace event;  // for libwatcher and messages. 
+    using namespace event;      // for libwatcher and messages. 
+    class MessageStreamFilter;  // 
 
     // Forward decl for Ptr typedef
     class WatcherGraph;
@@ -147,7 +147,7 @@ namespace watcher
         private:
 
             friend class boost::serialization::access;
-            template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
+            template <typename Archive> void serialize(Archive & ar, const unsigned int /* file_version */);
 
             DECLARE_LOGGER();
 
