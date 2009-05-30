@@ -126,22 +126,13 @@ share/info/dir
 ^src/configure
 ^src/Makefile
 
-
 ^src/watcherd/client
 ^src/watcherd/watcherd$
 ^src/watcherd/depend
 ^src/watcherd/Makefile
-^src/watcherd/testCC
 ^src/watcherd/Makefile.local
 ^src/watcherd/test/Makefile
-^src/watcherd/test/testMessageStream
-^src/watcherd/test/testWatcherGraph
-^src/watcherd/connectivity2dot
-^src/watcherd/test/testMessageStream
-^src/watcherd/test/testWatcherGraph
-^src/watcherd/test/testWatcherGraphEdge
-^src/watcherd/test/testWatcherGraphNode
-^src/watcherd/test/testLoadSaveDisplayInfo
+^src/watcherd/test/testCC
 
 ^src/libwatcher/Makefile
 ^src/libwatcher/Makefile.local
@@ -163,6 +154,10 @@ share/info/dir
 ^src/libwatcher/test/testStopMessage
 ^src/libwatcher/test/testTestMessage
 ^src/libwatcher/test/testConnectivityMessage
+^src/libwatcher/test/testLoadSaveDisplayInfo
+^src/libwatcher/test/testWatcherGraph
+^src/libwatcher/test/testWatcherGraphEdge
+^src/libwatcher/test/testWatcherGraphNode
 
 ^src/clients/Makefile
 ^src/clients/commandlineFeeders/Makefile
@@ -176,6 +171,8 @@ share/info/dir
 ^src/clients/messageStream2Text/messageStream2Text
 ^src/clients/routeFeeder/Makefile
 ^src/clients/routeFeeder/routeFeeder
+^src/clients/connectivity2dot/Makefile
+^src/clients/connectivity2dot/connectivity2dot
 
 
 
