@@ -212,12 +212,11 @@ bool MessageStream::handleMessagesArrive(ConnectionPtr conn, const vector<Messag
 {
     TRACE_ENTER();
 
-    bool retVal=true;
+    bool retVal=false;
     for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
-        if(!handleMessageArrive(conn, *m))
-            retVal=false;
+        retVal |= handleMessageArrive(conn, *m);
 
-    TRACE_EXIT_RET(retVal);
+    TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
 }
 
@@ -240,18 +239,18 @@ bool MessageStream::handleMessagesSent(const vector<MessagePtr> &messages)
 {
     TRACE_ENTER();
 
-    bool retVal=true;
+    bool retVal=false;
     for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
-        if(!handleMessageSent(*m))
-            retVal=false;
+        retVal |= handleMessageSent(*m);
 
-    TRACE_EXIT_RET(retVal);
+    TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;
 }
 
 std::ostream &watcher::operator<<(std::ostream &out, const MessageStream & /*messStream*/)
 {
     TRACE_ENTER();
+    out << "MessageStream()";
     TRACE_EXIT();
     return out;
 }

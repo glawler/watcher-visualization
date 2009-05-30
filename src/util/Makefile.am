@@ -1,5 +1,6 @@
 CPPFLAGS += -I../../include
 CPPFLAGS += -I../logger
+CPPFLAGS += $(BOOST_CPPFLAGS)
 
 noinst_LIBRARIES=libwatcherutils.a
 

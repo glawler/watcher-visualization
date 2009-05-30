@@ -62,8 +62,6 @@ namespace watcher
              */
             bool tryConnect(); 
 
-            void doWrite(const std::vector<event::MessagePtr> &message); 
-
             bool connected; 
 
             boost::asio::io_service &ioService;

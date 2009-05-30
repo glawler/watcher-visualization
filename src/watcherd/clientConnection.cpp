@@ -184,9 +184,15 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
     if (!e) {
         LOG_DEBUG("Sucessfully sent message " << messages.front()); 
 
+        bool rv = false;
         BOOST_FOREACH(MessageHandlerPtr& mh, messageHandlers) {
-            mh->handleMessagesSent(messages);
+            rv |= mh->handleMessagesSent(messages);
         }
+        if (rv) {
+            LOG_DEBUG("Handler requested shutdown of connection");
+            getSocket().shutdown(boost::asio::ip::tcp::socket::shutdown_send);
+        }
+
     }
     else
     {
@@ -242,15 +248,12 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
                 if(!DataMarshaller::unmarshalPayload(arrivedMessages, messageNum, &incomingBuffer[0], payloadSize)) {
                     LOG_WARN("Unable to parse incoming server message ");
                     closeConnection = true;
-                } else if (!messageHandlers.size()) {
+                } else if (messageHandlers.empty()) {
                     LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intentional)"); 
+                    closeConnection = true;
                 } else {
-                    for(MessageHandlerList::iterator mh=messageHandlers.begin(); mh!=messageHandlers.end(); ++mh) {
-                        //FIXME for now ignore the return value from the handler and always keep the connection open
-                        //not sure what will happen if it gets closed.
-
-                        //closeConnection &=
-                        (*mh)->handleMessagesArrive(shared_from_this(), arrivedMessages);
+                    BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers) {
+                        closeConnection |= mh->handleMessagesArrive(shared_from_this(), arrivedMessages);
                     }
                 }
             }
@@ -258,7 +261,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             if (!closeConnection) {
                 run(); // start another read
             } else {
-                LOG_DEBUG("error occurred, or handler requested connection to be shut down");
+                LOG_DEBUG("error occurred, or handler requested connection shut down");
             }
         }
     }

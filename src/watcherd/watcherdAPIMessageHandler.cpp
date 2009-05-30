@@ -8,7 +8,9 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace boost;
 
-INIT_LOGGER(WatcherdAPIMessageHandler, "MessageHandler.WatcherdAPIMessageHandler");
+namespace watcher {
+    INIT_LOGGER(WatcherdAPIMessageHandler, "MessageHandler.WatcherdAPIMessageHandler");
+}
 
 WatcherdAPIMessageHandler::WatcherdAPIMessageHandler()
 {
@@ -27,9 +29,9 @@ bool WatcherdAPIMessageHandler::handleMessageArrive(ConnectionPtr conn, const Me
     TRACE_ENTER();
 
     // Log message arrival
-    MessageHandler::handleMessageArrive(conn, message); 
+    bool rv = MessageHandler::handleMessageArrive(conn, message); 
 
-    TRACE_EXIT_RET("true"); 
+    TRACE_EXIT_RET_BOOL(rv);
     return true;
 }
 
@@ -38,13 +40,12 @@ bool WatcherdAPIMessageHandler::handleMessagesArrive(ConnectionPtr conn, const s
 {
     TRACE_ENTER();
 
+    bool rv = false;
     for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
-        handleMessageArrive(conn, *i);
+        rv |= handleMessageArrive(conn, *i);
 
-    // Watcherd API currently always wants a response - so always return true
-    TRACE_EXIT_RET("true");
-    return true;
-    TRACE_EXIT(); 
+    TRACE_EXIT_RET_BOOL(rv);
+    return rv;
 }
 
 bool WatcherdAPIMessageHandler::handleMessageSent(const MessagePtr &message)
@@ -52,10 +53,10 @@ bool WatcherdAPIMessageHandler::handleMessageSent(const MessagePtr &message)
     TRACE_ENTER();
 
     // Log the message. 
-    MessageHandler::handleMessageSent(message); 
+    bool rv = MessageHandler::handleMessageSent(message); 
 
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET_BOOL(rv);
+    return rv;
 }
 
 // virtual 
@@ -63,12 +64,10 @@ bool WatcherdAPIMessageHandler::handleMessagesSent(const std::vector<event::Mess
 {
     TRACE_ENTER();
 
+    bool rv = false;
     for(vector<MessagePtr>::const_iterator i=messages.begin(); i!=messages.end(); ++i)
-        handleMessageSent(*i);
+        rv |= handleMessageSent(*i);
 
-    // Watcherd API currently always wants a response - so always return true
-    TRACE_EXIT_RET("true");
-    return true;
+    TRACE_EXIT_RET_BOOL(rv);
+    return rv;
 }
-
-
