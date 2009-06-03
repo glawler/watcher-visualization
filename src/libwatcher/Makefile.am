@@ -23,7 +23,6 @@ libwatcher_a_SOURCES= \
 	gpsMessage.cpp \
 	labelDisplayInfo.cpp \
 	labelMessage.cpp \
-	layerDisplayInfo.cpp \
 	message.cpp \
 	messageStatus.cpp \
 	messageTypesAndVersions.cpp \

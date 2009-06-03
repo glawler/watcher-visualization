@@ -17,9 +17,12 @@ EdgeDisplayInfo::EdgeDisplayInfo() :
     flashInterval(500),
     isFlashed(false),
     label("none")
-    
 {
     TRACE_ENTER();
+
+    // create the "default" layer if it's not already there.
+    loadConfiguration(layer); 
+
     TRACE_EXIT();
 }
 
@@ -30,19 +33,17 @@ EdgeDisplayInfo::~EdgeDisplayInfo()
     TRACE_EXIT();
 }
 
-bool EdgeDisplayInfo::loadLayer(const string &basePath)
+bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
 {
     TRACE_ENTER();
 
+    layer=layer_.size()==0 ? PHYSICAL_LAYER : layer_; 
+
     Config &cfg=SingletonConfig::instance();
+
+    Setting &edgeSetting=cfg.lookup(getBasePath(layer)); 
+
     SingletonConfig::lock();
-
-    Setting &baseSetting=cfg.lookup(basePath); 
-    if (!baseSetting.exists(categoryName))
-        baseSetting.add(categoryName, Setting::TypeGroup);
-
-    // "DisplayOptions.layer.default.edge"
-    Setting &edgeSetting=cfg.lookup(basePath + string(".") + categoryName);
 
     string strVal="none"; 
     string key="label"; 
@@ -56,11 +57,11 @@ bool EdgeDisplayInfo::loadLayer(const string &basePath)
         edgeSetting.add(key, Setting::TypeString)=strVal;
     color.fromString(strVal); 
 
-    int intVal=15;
+    float floatVal=15;
     key="width"; 
-    if (!edgeSetting.lookupValue(key, intVal))
-        edgeSetting.add(key, Setting::TypeInt)=intVal;
-    width=intVal;
+    if (!edgeSetting.lookupValue(key, floatVal))
+        edgeSetting.add(key, Setting::TypeFloat)=floatVal;
+    width=floatVal;
 
     bool boolVal=false;
     key="flash"; 
@@ -68,7 +69,7 @@ bool EdgeDisplayInfo::loadLayer(const string &basePath)
         edgeSetting.add(key, Setting::TypeBoolean)=boolVal;
     flash=boolVal;
 
-    intVal=100;
+    int intVal=100;
     key="flashInterval"; 
     if (!edgeSetting.lookupValue(key, intVal))
         edgeSetting.add(key, Setting::TypeInt)=intVal;
@@ -80,19 +81,14 @@ bool EdgeDisplayInfo::loadLayer(const string &basePath)
     return true; 
 }
     
-void EdgeDisplayInfo::saveConfiguration(const string &basePath)
+void EdgeDisplayInfo::saveConfiguration()
 {
     TRACE_ENTER();
 
     Config &cfg=SingletonConfig::instance();
+    Setting &edgeSetting=cfg.lookup(getBasePath(layer)); 
+
     SingletonConfig::lock();
-
-    Setting &baseSetting=cfg.lookup(basePath); 
-    if (!baseSetting.exists(categoryName))
-        baseSetting.add(categoryName, Setting::TypeGroup);
-
-    // "DisplayOptions.layer.[LAYERNAME].edge"
-    Setting &edgeSetting=cfg.lookup(basePath + string(".") + categoryName);
 
     edgeSetting["color"]=color.toString(); 
     edgeSetting["width"]=width; 

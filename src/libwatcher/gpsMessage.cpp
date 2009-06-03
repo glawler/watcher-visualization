@@ -13,7 +13,8 @@ namespace watcher {
             x(x_),
             y(y_),
             z(z_),
-            dataFormat(LAT_LONG_ALT_WGS84)
+            dataFormat(LAT_LONG_ALT_WGS84),
+            layer(PHYSICAL_LAYER)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -24,7 +25,8 @@ namespace watcher {
             x(other.x),
             y(other.y),
             z(other.z),
-            dataFormat(other.dataFormat)
+            dataFormat(other.dataFormat),
+            layer(other.layer)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -39,7 +41,8 @@ namespace watcher {
                 x == other.x &&
                 y == other.y &&
                 z == other.z && 
-                dataFormat == other.dataFormat;
+                dataFormat == other.dataFormat &&
+                layer == other.layer;
 
             TRACE_EXIT_RET(retVal);
             return retVal;
@@ -53,6 +56,8 @@ namespace watcher {
             x = other.x;
             y = other.y;
             z = other.z;
+            dataFormat = other.dataFormat;
+            layer = other.layer; 
 
             TRACE_EXIT();
             return *this;
@@ -69,6 +74,7 @@ namespace watcher {
             out << " y: " << y;
             out << " z: " << z;
             out << " format: " << dataFormat;
+            out << " layer: " << layer; 
 
             TRACE_EXIT();
             return out;
@@ -90,6 +96,7 @@ namespace watcher {
             ar & y;
             ar & z;
             ar & dataFormat;
+            ar & layer; 
             TRACE_EXIT();
         }
     }

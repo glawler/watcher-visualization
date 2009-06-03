@@ -16,6 +16,9 @@
 #include "colorMessage.h"
 #include "messageTypesAndVersions.h"     // for GUILayer
 
+#include "nodeDisplayInfo.h"
+#include "labelDisplayInfo.h"
+
 namespace watcher
 {
     using namespace event;
@@ -34,18 +37,19 @@ namespace watcher
             WatcherGraphNode();
             virtual ~WatcherGraphNode();
 
+            /** configurable Display information about this node */
+            NodeDisplayInfoPtr displayInfo; 
+
+            /** Unique node id */
             NodeIdentifier nodeId;
+
+            /** Curerent GPS coordinates for this node. */
             GPSMessagePtr gpsData;
-            std::string label;
             bool connected;
 
-            // We keep the entire message so we can keep track of expiration and flash.
-            ColorMessagePtr color;
-
-            GUILayer layer;  // Needed so we can remove by layer if needed. 
-
-            typedef std::list<LabelMessagePtr> LabelMessageList;
-            LabelMessageList attachedLabels; 
+            /** An edge can have mulitple lables attached to it */
+            typedef std::list<LabelDisplayInfoPtr> LabelList;
+            LabelList labels;
 
             /** output operator **/
             virtual std::ostream &toStream(std::ostream &out) const;

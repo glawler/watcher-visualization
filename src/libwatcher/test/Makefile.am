@@ -19,7 +19,14 @@ LDADD += ../libwatcher.a
 LDADD += ../../watcherd/libwatcherd.a
 LDADD += ../../util/libwatcherutils.a
 LDADD += ../../logger/liblogger.a
-LDADD += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
+LDADD += \
+	$(BOOST_ASIO_LIB) \
+	$(BOOST_SERIALIZATION_LIB) \
+	$(BOOST_THREAD_LIB) \
+	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
+	$(BOOST_SYSTEM_LIB) \
+	$(BOOST_FILESYSTEM_LIB) \
+	$(BOOST_REGEX_LIB)
 
 BUILT_SOURCES=\
 	test.log.properties 

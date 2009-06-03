@@ -106,62 +106,62 @@ BOOST_AUTO_TEST_CASE( output_test )
     cout << "Graph with edge message and neighbors:" << endl << wg << endl;
 }
 
-
-BOOST_AUTO_TEST_CASE( serialize_test )
-{
-    WatcherGraph wg;
-
-    std::vector<watcher::NodeIdentifier> neighbors;
-    for(unsigned long i=0xc0a80165; i<0xc0a8016a; i++) // 0xc0a80165==192.168.1.101 in host byte order
-        neighbors.push_back(boost::asio::ip::address_v4(i));
-    ConnectivityMessagePtr cm(new ConnectivityMessage);
-    cm->neighbors=neighbors;
-    wg.updateGraph(cm);
-
-    LabelMessagePtr lmp(new LabelMessage("Hello There", asio::ip::address::from_string("192.168.1.103")));
-    wg.updateGraph(lmp);
-
-    ostringstream os;
-    text_oarchive oa(os); 
-    oa << wg; 
-
-    WatcherGraph wgdup;
-    istringstream is(os.str());
-    text_iarchive ia(is);
-    ia >> wgdup;
-
-    LOG_DEBUG("output: " << os.str());
-    LOG_DEBUG("input: " << is.str());
-
-    // BOOST_CHECK_EQUAL(wg, wgdup); 
-}
-
-BOOST_AUTO_TEST_CASE( pack_unpack_test )
-{
-    WatcherGraph wg;
-
-    std::vector<watcher::NodeIdentifier> neighbors;
-    for(unsigned long i=0xc0a80165; i<0xc0a8016a; i++) // 0xc0a80165==192.168.1.101 in host byte order
-        neighbors.push_back(boost::asio::ip::address_v4(i));
-    ConnectivityMessagePtr cm(new ConnectivityMessage);
-    cm->neighbors=neighbors;
-    wg.updateGraph(cm);
-
-    LabelMessagePtr lmp(new LabelMessage("Hello There", asio::ip::address::from_string("192.168.1.103")));
-    wg.updateGraph(lmp);
-
-    ostringstream os;
-    wg.pack(os); 
-
-    WatcherGraph wgdup;
-    istringstream is(os.str());
-    wgdup.unpack(is); 
-
-    LOG_DEBUG("output: " << os.str());
-    LOG_DEBUG("input: " << is.str());
-
-    // BOOST_CHECK_EQUAL(wg, wgdup); 
-}
+// GTL - don't do serialize until we need it and we've added serialization to the DisplayInfo classes
+// BOOST_AUTO_TEST_CASE( serialize_test )
+// {
+//     WatcherGraph wg;
+// 
+//     std::vector<watcher::NodeIdentifier> neighbors;
+//     for(unsigned long i=0xc0a80165; i<0xc0a8016a; i++) // 0xc0a80165==192.168.1.101 in host byte order
+//         neighbors.push_back(boost::asio::ip::address_v4(i));
+//     ConnectivityMessagePtr cm(new ConnectivityMessage);
+//     cm->neighbors=neighbors;
+//     wg.updateGraph(cm);
+// 
+//     LabelMessagePtr lmp(new LabelMessage("Hello There", asio::ip::address::from_string("192.168.1.103")));
+//     wg.updateGraph(lmp);
+// 
+//     ostringstream os;
+//     text_oarchive oa(os); 
+//     oa << wg; 
+// 
+//     WatcherGraph wgdup;
+//     istringstream is(os.str());
+//     text_iarchive ia(is);
+//     ia >> wgdup;
+// 
+//     LOG_DEBUG("output: " << os.str());
+//     LOG_DEBUG("input: " << is.str());
+// 
+//     // BOOST_CHECK_EQUAL(wg, wgdup); 
+// }
+// 
+// BOOST_AUTO_TEST_CASE( pack_unpack_test )
+// {
+//     WatcherGraph wg;
+// 
+//     std::vector<watcher::NodeIdentifier> neighbors;
+//     for(unsigned long i=0xc0a80165; i<0xc0a8016a; i++) // 0xc0a80165==192.168.1.101 in host byte order
+//         neighbors.push_back(boost::asio::ip::address_v4(i));
+//     ConnectivityMessagePtr cm(new ConnectivityMessage);
+//     cm->neighbors=neighbors;
+//     wg.updateGraph(cm);
+// 
+//     LabelMessagePtr lmp(new LabelMessage("Hello There", asio::ip::address::from_string("192.168.1.103")));
+//     wg.updateGraph(lmp);
+// 
+//     ostringstream os;
+//     wg.pack(os); 
+// 
+//     WatcherGraph wgdup;
+//     istringstream is(os.str());
+//     wgdup.unpack(is); 
+// 
+//     LOG_DEBUG("output: " << os.str());
+//     LOG_DEBUG("input: " << is.str());
+// 
+//     // BOOST_CHECK_EQUAL(wg, wgdup); 
+// }
 
 BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
 {
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
         EdgeMessagePtr emp(new EdgeMessage);
         emp->node1=node1;
         emp->node2=node2;
-        emp->expiration=Timestamp(i*1000)-500;      // first edge never expires
+        emp->expiration=i==0 ? Infinity : Timestamp(i*1000)-500;  
 
         // all labels expire in 2 seconds, so they should all disapear halfway though.
         // GTL - TODO: add a BOOST_CHECK to test this. 
@@ -235,19 +235,19 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
     graph_traits<WatcherGraph::Graph>::vertex_iterator theNodeIter;
     wg.findNode(nodeAddr, theNodeIter); 
 
-    BOOST_CHECK_EQUAL( numLabels, wg.theGraph[*theNodeIter].attachedLabels.size() );  
+    BOOST_CHECK_EQUAL( numLabels, wg.theGraph[*theNodeIter].labels.size() );  
 
     for (unsigned int i=0; i<numLabels; i++)
     {
-        WatcherGraphNode::LabelMessageList::iterator labelIterBegin=wg.theGraph[*theNodeIter].attachedLabels.begin(); 
-        WatcherGraphNode::LabelMessageList::iterator labelIterEnd=wg.theGraph[*theNodeIter].attachedLabels.end(); 
+        WatcherGraphNode::LabelList::iterator labelIterBegin=wg.theGraph[*theNodeIter].labels.begin(); 
+        WatcherGraphNode::LabelList::iterator labelIterEnd=wg.theGraph[*theNodeIter].labels.end(); 
         LOG_INFO("Current lables on node " << wg.theGraph[*theNodeIter].nodeId << " at " << Timestamp(time(NULL))*1000); 
         for( ;labelIterBegin!=labelIterEnd; ++labelIterBegin)
         {
-            LOG_INFO("\t" << **labelIterBegin); 
+            LOG_INFO("\t" << (*labelIterBegin)->labelText); 
         }
 
-        BOOST_CHECK_EQUAL( numLabels-i, wg.theGraph[*theNodeIter].attachedLabels.size() );
+        BOOST_CHECK_EQUAL( numLabels-i, wg.theGraph[*theNodeIter].labels.size() );
 
         cout << "."; 
         cout.flush(); 
@@ -255,6 +255,6 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
         wg.doMaintanence();  // Should remove one label
     }
 
-    BOOST_CHECK_EQUAL( (size_t)1, wg.theGraph[*theNodeIter].attachedLabels.size() );
+    BOOST_CHECK_EQUAL( (size_t)1, wg.theGraph[*theNodeIter].labels.size() );
 }
 

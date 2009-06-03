@@ -109,26 +109,6 @@ namespace watcher
              */
              bool updateGraph(const MessageStreamFilter &filter); 
 
-            /**
-             * Write an instance of this class as a human readable stream to the otream given
-             */
-            virtual std::ostream &toStream(std::ostream &out) const;
-
-            /**
-             * Write an instance of this class as a human readable stream to the otream given.
-             */
-            std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
-
-            /** 
-             * Serialize the Graph to a stream
-             */
-             bool pack(std::ostream &os);
-
-             /**
-              * Unserialize a Graph from a stream
-              */
-             WatcherGraphPtr unpack(std::istream& is);
-
              /**
               * Update Graph internals (component experations, etc). 
               * Should be called periodically.
@@ -142,12 +122,32 @@ namespace watcher
              */
             bool findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retVal);
 
+            /**
+             * Write an instance of this class as a human readable stream to the otream given
+             */
+            virtual std::ostream &toStream(std::ostream &out) const;
+
+            /**
+             * Write an instance of this class as a human readable stream to the otream given.
+             */
+            std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
+
+            /** 
+             * Serialize the Graph to a stream
+             */
+             // bool pack(std::ostream &os);
+
+             /**
+              * Unserialize a Graph from a stream
+              */
+             // WatcherGraphPtr unpack(std::istream& is);
+
         protected:
 
         private:
 
-            friend class boost::serialization::access;
-            template <typename Archive> void serialize(Archive & ar, const unsigned int /* file_version */);
+            // friend class boost::serialization::access;
+            // template <typename Archive> void serialize(Archive & ar, const unsigned int /* file_version */);
 
             DECLARE_LOGGER();
 
@@ -184,9 +184,10 @@ namespace watcher
             /** Find a node, if it doesn't exist, create it. Returns iterator to the node 
              * @param[in] id - the id of the node you want to find/create.
              * @param[out] retIter - an iterator that points to the found node.
+             * @param[in] layer - if the node is created, load this layers display information into it. 
              * @return bool - true if successful, false otherwise
              */
-            bool findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter);
+            bool findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter, const GUILayer &layer);
 
             /** Create a node and return an iterator to it. 
              * @param[in] id - the id of the node you want to create. 

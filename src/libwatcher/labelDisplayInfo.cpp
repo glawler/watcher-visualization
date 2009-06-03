@@ -14,9 +14,14 @@ LabelDisplayInfo::LabelDisplayInfo() :
     foregroundColor(Color::black),
     fontName("Times New Roman"),
     pointSize(12.5), 
-    labelText("")
+    labelText(""),
+    expiration(Infinity) 
 {
     TRACE_ENTER();
+
+    // create the "default" layer if it's not already there.
+    loadConfiguration(layer); 
+
     TRACE_EXIT();
 }
 
@@ -28,19 +33,17 @@ LabelDisplayInfo::~LabelDisplayInfo()
 }
 
 
-bool LabelDisplayInfo::loadLayer(const string &basePath)
+bool LabelDisplayInfo::loadConfiguration(const GUILayer &layer_)
 {
     TRACE_ENTER();
 
+    layer=layer_.size()==0 ? PHYSICAL_LAYER : layer_; 
+
     Config &cfg=SingletonConfig::instance();
+
+    Setting &labelSettings=cfg.lookup(getBasePath(layer)); 
+
     SingletonConfig::lock();
-
-    Setting &baseSetting=cfg.lookup(basePath); 
-
-    if (!baseSetting.exists(categoryName))
-        baseSetting.add(categoryName, Setting::TypeGroup);
-
-    Setting &labelSettings=cfg.lookup(basePath + string(".") + categoryName); 
 
     string strVal=Color::white.toString(); 
     string key="foregroundColor"; 
@@ -78,27 +81,42 @@ bool LabelDisplayInfo::loadLayer(const string &basePath)
     return true; 
 }
 
-void LabelDisplayInfo::saveConfiguration(const string &basePath)
+void LabelDisplayInfo::saveConfiguration()
 {
     TRACE_ENTER();
 
     Config &cfg=SingletonConfig::instance();
+    Setting &labelSetting=cfg.lookup(getBasePath(layer)); 
+
     SingletonConfig::lock();
-
-    Setting &baseSetting=cfg.lookup(basePath); 
-    if (!baseSetting.exists(categoryName))
-        baseSetting.add(categoryName, Setting::TypeGroup);
-
-    // "DisplayOptions.layer.[LAYERNAME].edge"
-    Setting &labelSetting=cfg.lookup(basePath + string(".") + categoryName);
 
     labelSetting["backgroundColor"]=backgroundColor.toString(); 
     labelSetting["foregroundColor"]=foregroundColor.toString(); 
     labelSetting["font"]=fontName;
     labelSetting["pointSize"]=pointSize;
-    labelSetting["labelText"]=labelText;
 
     SingletonConfig::unlock();
 
     TRACE_EXIT();
 }
+
+bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
+{
+    TRACE_ENTER();
+    
+    if (mess->expiration!=Infinity)
+        expiration=(Timestamp(time(NULL))*1000)+mess->expiration;
+    else
+        expiration=Infinity;
+
+    backgroundColor=mess->background;
+    foregroundColor=mess->foreground;
+    pointSize=mess->fontSize; 
+    layer=mess->layer; 
+    labelText=mess->label;
+
+    TRACE_EXIT_RET_BOOL(true); 
+    return true; 
+}
+
+

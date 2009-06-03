@@ -4,6 +4,7 @@
 #include <string>
 
 #include "message.h"
+#include "messageTypesAndVersions.h"
 
 namespace watcher {
     namespace event {
@@ -26,6 +27,8 @@ namespace watcher {
 
                 // Only valid if format==UTM
                 std::string utmZoneReference;
+
+                GUILayer layer; 
 
                 GPSMessage(const double &x=0.0, const double &y=0.0, const double &z=0.0);
                 GPSMessage(const GPSMessage &other);

@@ -9,7 +9,7 @@
 #include "libwatcher/edgeDisplayInfo.h"
 #include "libwatcher/nodeDisplayInfo.h"
 #include "libwatcher/labelDisplayInfo.h"
-#include "libwatcher/layerDisplayInfo.h"
+#include "libwatcher/messageTypesAndVersions.h"
 #include "singletonConfig.h"
 #include "initConfig.h"
 
@@ -52,7 +52,6 @@ BOOST_AUTO_TEST_CASE( ctors_test )
     EdgeDisplayInfo edi;
     NodeDisplayInfo ndi;
     LabelDisplayInfo lbdi;
-    LayerDisplayInfo lydi;  // Because you're once, twice, three times a lydi...
 }
 
 BOOST_AUTO_TEST_CASE( load_defaults_test )
@@ -60,66 +59,126 @@ BOOST_AUTO_TEST_CASE( load_defaults_test )
     char *fileName="test.cfg"; 
     BOOST_CHECK( configConfig(fileName) ); 
 
-    LayerDisplayInfo lydi;
-    lydi.loadLayer("testLayer"); 
+    EdgeDisplayInfoPtr edip(new EdgeDisplayInfo); 
+    edip->loadConfiguration(PHYSICAL_LAYER); 
 
-    BOOST_CHECK_EQUAL(lydi.edgeDisplayInfo.color, Color::blue); // blue is default. 
-    BOOST_CHECK_EQUAL(lydi.defaultNodeDisplayInfo.flash, false); // false is default
+    BOOST_CHECK_EQUAL(edip->color, Color::blue); // blue is default edge color.
 
     // remove config and kill file. 
-    SingletonConfig::instance().getRoot().remove("DisplayOptions"); 
+    SingletonConfig::instance().getRoot().remove("displayOptions"); 
     bf::remove(fileName); 
 }
 
 BOOST_AUTO_TEST_CASE( modify_defaults_test )
 {
-    char *layerName="testLayer"; 
+    char *layerName="Unfunny Sitcom Layer"; 
     char *defaultFileName="test.default.cfg"; 
     char *modifiedFileName="test.modified.cfg"; 
 
     BOOST_CHECK( configConfig(defaultFileName) ); 
 
     // Load defaults into new layer. 
-    LayerDisplayInfo lydi;
-    lydi.loadLayer(layerName); 
+    EdgeDisplayInfoPtr edip(new EdgeDisplayInfo); 
+    edip->loadConfiguration(layerName); 
 
     // write defaults to a file.
     SingletonConfig::instance().writeFile(defaultFileName); 
 
     // Change some of the defaults. 
-    lydi.edgeDisplayInfo.color=Color::green; 
-    lydi.labelDisplayInfo.backgroundColor=Color::yellow;
-    lydi.labelDisplayInfo.foregroundColor=Color::green;
-    lydi.defaultNodeDisplayInfo.flash=true;
-    lydi.defaultNodeDisplayInfo.label="Dharma & Greg"; 
-    lydi.saveLayer();   // Commit changes to cfg store. 
-    lydi.saveLayer();   // Doesn't hurt to save x times.
+    edip->color=Color::green; 
+    edip->width=42.42;
+    edip->label="Dharma & Greg"; 
+    edip->saveConfiguration();   // Commit changes to cfg store. 
+    edip->saveConfiguration();   // Doesn't hurt to save x times.
 
     // write to different file.
     SingletonConfig::instance().writeFile(modifiedFileName); 
     
     // clear config in memory
-    SingletonConfig::instance().getRoot().remove("DisplayOptions"); 
+    SingletonConfig::instance().getRoot().remove("displayOptions"); 
 
     // read in from new file.
     BOOST_CHECK( configConfig(modifiedFileName) ); 
 
     // Load config from freshly read in file into new layer.
-    LayerDisplayInfo lydi2;
-    lydi2.loadLayer(layerName); 
+    EdgeDisplayInfoPtr edip2(new EdgeDisplayInfo);
+    edip2->loadConfiguration(layerName); 
 
     // New layer should have same modified values as old layer. 
-    BOOST_CHECK_EQUAL(lydi.edgeDisplayInfo.color,            lydi2.edgeDisplayInfo.color); 
-    BOOST_CHECK_EQUAL(lydi.labelDisplayInfo.backgroundColor, lydi2.labelDisplayInfo.backgroundColor);
-    BOOST_CHECK_EQUAL(lydi.labelDisplayInfo.foregroundColor, lydi2.labelDisplayInfo.foregroundColor);
-    BOOST_CHECK_EQUAL(lydi.defaultNodeDisplayInfo.flash,     lydi2.defaultNodeDisplayInfo.flash); 
+    BOOST_CHECK_EQUAL(edip->color, edip2->color); 
+    BOOST_CHECK_EQUAL(edip->label, edip2->label); 
+    BOOST_CHECK_EQUAL(edip->width, edip2->width); 
 
-    BOOST_CHECK( lydi2.edgeDisplayInfo.color != Color::blue ); // blue is default, but we've changed it.
+    BOOST_CHECK( edip2->color != Color::blue ); // blue is default, but we've changed it.
 
     // remove config and kill file. 
-    SingletonConfig::instance().getRoot().remove("DisplayOptions"); 
     bf::remove(defaultFileName); 
+
+    // Load in the modified file, but load a new layer
+    edip2.reset(new EdgeDisplayInfo);
+    edip2->loadConfiguration(PHYSICAL_LAYER); 
+    BOOST_CHECK_EQUAL( edip2->color, Color::blue); 
+
+    SingletonConfig::instance().writeFile(modifiedFileName); 
+
+    SingletonConfig::instance().getRoot().remove("displayOptions"); 
     // bf::remove(modifiedFileName); 
 }
 
+BOOST_AUTO_TEST_CASE( layer_name_test )
+{
+    // GTL - this test was to allow layers with spaces, etc in them 
+    // but, meh - just don't allow them. 
+    // BOOST_CHECK(configConfig("test.cfg")); 
+    // NodeDisplayInfoPtr ndip(new NodeDisplayInfo);
+    // ndip->loadConfiguration("Layer with spaces in the name"); 
+}
 
+BOOST_AUTO_TEST_CASE( node_config_test )
+{
+    char *filename="test.node.cfg"; 
+    BOOST_CHECK(configConfig(filename)); 
+
+    NodeDisplayInfoPtr ndip1(new NodeDisplayInfo), ndip2(new NodeDisplayInfo); 
+    ndip1->loadConfiguration(PHYSICAL_LAYER); 
+
+    NodeIdentifier nid101=NodeIdentifier::from_string("192.168.1.101"); 
+    ndip1->loadConfiguration(PHYSICAL_LAYER, nid101); 
+    ndip1->sparkle=true; 
+    ndip1->spin=true; 
+    ndip1->flash=true; 
+
+    // ndip2's nodeID is ignored.  
+    // So ndip2 should not equal ndip1
+    // and should be saved in the default section
+    ndip2->nodeId=NodeIdentifier::from_string("192.168.1.3");
+    ndip2->loadConfiguration(PHYSICAL_LAYER); 
+
+    // Write it out
+    ndip1->saveConfiguration();
+    ndip2->saveConfiguration();
+    SingletonConfig::instance().writeFile(filename); 
+
+    // Forget everything and reload
+    SingletonConfig::instance().getRoot().remove("displayOptions");
+    BOOST_CHECK(configConfig(filename)); 
+
+    ndip1.reset(new NodeDisplayInfo); 
+    ndip2.reset(new NodeDisplayInfo); 
+    ndip1->loadConfiguration(PHYSICAL_LAYER, nid101); 
+    ndip2->loadConfiguration(PHYSICAL_LAYER); 
+
+    // saved not default
+    BOOST_CHECK_EQUAL( ndip1->sparkle, true ); 
+    BOOST_CHECK_EQUAL( ndip1->spin, true ); 
+    BOOST_CHECK_EQUAL( ndip1->flash, true ); 
+
+    // default
+    BOOST_CHECK_EQUAL( ndip2->sparkle, false ); 
+}
+
+BOOST_AUTO_TEST_CASE( bad_config_init_test )
+{
+    // GTL test case for a config that hasn't been initialized. 
+    // Was hanging....
+}

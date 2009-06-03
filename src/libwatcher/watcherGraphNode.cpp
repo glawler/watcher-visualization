@@ -5,7 +5,7 @@
  */
 
 #include <boost/foreach.hpp>
-#include "watcherSerialize.h"
+// #include "watcherSerialize.h"
 
 #include "watcherGraphNode.h"
 
@@ -16,7 +16,11 @@ using namespace watcher::event;
 INIT_LOGGER(WatcherGraphNode, "WatcherGraphNode"); 
 
 WatcherGraphNode::WatcherGraphNode() : 
-        nodeId(), gpsData(), label(), connected(false), color(new ColorMessage), layer(), attachedLabels()
+    displayInfo(new NodeDisplayInfo),
+    nodeId(), 
+    gpsData(), 
+    connected(false), 
+    labels()
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -35,18 +39,18 @@ std::ostream &WatcherGraphNode::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
 
-    out << " nodeId: " << nodeId << " layer: " << layer << " gpsData: " 
-        << gpsData << " label: " << label << " connected: " << connected
-        << " color: " << *color;
-    out << " labels attached: ";
+    out << " nodeId: " << nodeId << " gpsData: " << gpsData << " connected: " << connected;
+    // GTL output the display info here. 
+    out << " attached labels: " << labels.size(); 
 
-    if(attachedLabels.size())
-    {
-        BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
-            out << "[" << *lmp << "]"; 
-    }
-    else
-        out << "(none)"; 
+    // GTL - when there is an outpout operator on labelDisplayInfo, uncomment this.
+    // if(labels.size())
+    // {
+    //     BOOST_FOREACH(LabelMessagePtr lmp, labels)
+    //         out << "[" << *lmp << "]"; 
+    // }
+    // else
+    //     out << "(none)"; 
 
     TRACE_EXIT();
     return out; 
@@ -60,19 +64,17 @@ std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph
     return out;
 }
 
-template <typename Archive> 
-void WatcherGraphNode::serialize(Archive & ar, const unsigned int /* file_version */)
-{
-    TRACE_ENTER();
-    ar & nodeId;
-    ar & layer; 
-    ar & gpsData; 
-    ar & label;
-    ar & connected;
-    ar & color;
-    ar & attachedLabels;
-    TRACE_EXIT(); 
-}
-
-BOOST_CLASS_EXPORT(watcher::WatcherGraphNode); 
+// template <typename Archive> 
+// void WatcherGraphNode::serialize(Archive & ar, const unsigned int /* file_version */)
+// {
+//     TRACE_ENTER();
+//     ar & nodeId;
+//     ar & gpsData; 
+//     ar & connected;
+//     // ar & labels;
+//     // ar & displayInfo; 
+//     TRACE_EXIT(); 
+// }
+// 
+// BOOST_CLASS_EXPORT(watcher::WatcherGraphNode); 
 

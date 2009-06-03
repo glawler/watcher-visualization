@@ -1,6 +1,8 @@
 #ifndef EDGE_DISPLAY_INFO_H
 #define EDGE_DISPLAY_INFO_H
 
+#include "watcherTypes.h"   // for Timestamp
+#include "messageTypesAndVersions.h" // for GUILayer. 
 #include "watcherColors.h"
 #include "displayInfo.h"
 
@@ -20,19 +22,23 @@ namespace watcher
             EdgeDisplayInfo();
             virtual ~EdgeDisplayInfo(); 
 
-            bool loadLayer(const std::string &basePath); 
-            void saveConfiguration(const std::string &basePath);
+            /** created from an edge related message */
 
             watcher::event::Color color;
-            int width; 
+            float width; 
            
             bool flash;                         // To flash or not to flash, that is the question
-            long long int flashInterval;        // flash every flashRate milliseconds
-            long long int nextFlashUpdate;      // Next time to invert the colors. 
+            Timestamp flashInterval;            // flash every flashRate milliseconds
+            Timestamp nextFlashUpdate;          // Next time to invert the colors. 
             bool isFlashed;                     // true if color is currently inverted.
 
             std::string label;                  // written next to the edge, not used often
 
+            /** Can be loaded from cfg file ... */
+            bool loadConfiguration(const watcher::event::GUILayer &layer); 
+
+            /** Can be saved to cfg file ... */
+            void saveConfiguration(); 
 
         protected:
 
@@ -40,6 +46,8 @@ namespace watcher
 
             DECLARE_LOGGER();
     };
+
+    typedef boost::shared_ptr<EdgeDisplayInfo> EdgeDisplayInfoPtr; 
 }
 
 #endif // EDGE_DISPLAY_INFO_H

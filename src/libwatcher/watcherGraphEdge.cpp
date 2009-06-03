@@ -1,6 +1,6 @@
 #include <boost/foreach.hpp>
 
-#include "watcherSerialize.h"
+// #include "watcherSerialize.h"
 #include "watcherGraphEdge.h"
 
 using namespace watcher; 
@@ -8,7 +8,9 @@ using namespace watcher;
 INIT_LOGGER(WatcherGraphEdge, "WatcherGraphEdge"); 
 
 WatcherGraphEdge::WatcherGraphEdge() : 
-    label(), color(Color::blue), expiration(-1), width(30), attachedLabels(), layer()
+    displayInfo(new EdgeDisplayInfo),
+    labels(),
+    expiration(Infinity) 
 { 
     TRACE_ENTER();
     TRACE_EXIT();
@@ -25,22 +27,19 @@ std::ostream &WatcherGraphEdge::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
 
-    out << " label: " << label; 
-    out << " layer: " << layer;
-    out << " color: " << color;
     out << " expiration: " << expiration;
-    out << " width: " << width;
-    out << " labels attached: ";
-    
-    if (attachedLabels.size())
-    {
-        BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
-            out << "[" << *lmp << "]"; 
-    }
-    else
-    {
-        out << "(none)"; 
-    }
+    out << " num attached labels: " << labels.size(); 
+   
+    // When labelDisplayInfo gets oper<<, uncomment this. 
+    // if (attachedLabels.size())
+    // {
+    //     BOOST_FOREACH(LabelMessagePtr lmp, attachedLabels)
+    //         out << "[" << *lmp << "]"; 
+    // }
+    // else
+    // {
+    //     out << "(none)"; 
+    // }
 
     TRACE_EXIT();
     return out; 
@@ -54,15 +53,16 @@ std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph
     return out;
 }
 
-template<typename Archive>
-void WatcherGraphEdge::serialize(Archive &ar, const unsigned int /* file_version */)
-{
-    TRACE_ENTER();
-    ar & label;
-    ar & layer;
-    ar & attachedLabels; 
-    TRACE_EXIT();
-}
-
-BOOST_CLASS_EXPORT(WatcherGraphEdge); 
+// template<typename Archive>
+// void WatcherGraphEdge::serialize(Archive &ar, const unsigned int /* file_version */)
+// {
+//     TRACE_ENTER();
+//     // ar & displayInfo;
+//     // ar & labels; 
+//     ar & expiration; 
+//     
+//     TRACE_EXIT();
+// }
+// 
+// BOOST_CLASS_EXPORT(WatcherGraphEdge); 
 

@@ -3,7 +3,8 @@
 
 #include <string>
 
-#include "watcherTypes.h"  // for NodeIdentifier
+#include "watcherTypes.h"               // for NodeIdentifier
+#include "messageTypesAndVersions.h"    // for GUILayer
 #include "watcherColors.h"
 #include "displayInfo.h"
 
@@ -24,17 +25,10 @@ namespace watcher
              */
             NodeDisplayInfo();
 
-            virtual ~NodeDisplayInfo(); 
-
-            bool loadLayer(const std::string &basePath);
-
             /**
-             * saveLayer()
-             * This saves the current state of the display information to the 
-             * singleton config instance. If you want the changes saved for this layer  
-             * when the cfg file is written out, make sure to call this prior to doing so. 
+             *
              */
-            void saveConfiguration(const std::string &basePath); 
+            virtual ~NodeDisplayInfo(); 
 
             /** The node's ID. */
             NodeIdentifier nodeId;
@@ -82,12 +76,37 @@ namespace watcher
 
             watcher::event::Color color; 
 
+            /**The configuration interface. */
+            /**
+             * Given a Config path, load the Node found there. 
+             *
+             * @param basePath - the "path" to the node to load, given in libconfig's 
+             * dotted format, e.g. "foo.bar.baz". 
+             *
+             * @ param nid, if given the configuration for that specific node, if found, 
+             * will be loaded. If not found, the default node config for this layer will be loaded. 
+             * (Note - this will overwrite any existing configuration this instance may have, including
+             * resetting the nodeId). If this parameter is not specfied, the default configuration will 
+             * be loaded. 
+             *
+             * @return bool - true if config loadded, false otherwise. 
+             */
+            bool loadConfiguration(const watcher::event::GUILayer &layer, const NodeIdentifier &nid); 
+
+            /** Load the default node settings */
+            bool loadConfiguration(const watcher::event::GUILayer &layer); 
+
+            /** Save this instance to the singleton config */
+            void saveConfiguration(); 
+
         protected:
 
         private:
 
             DECLARE_LOGGER();
     };
+
+    typedef boost::shared_ptr<NodeDisplayInfo> NodeDisplayInfoPtr; 
 }
 
 #endif // NODE_DISPLAY_INFO_H

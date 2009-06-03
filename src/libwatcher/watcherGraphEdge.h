@@ -12,7 +12,8 @@
 #include <boost/serialization/access.hpp>
 
 #include "watcherTypes.h"    // for Timestamp
-#include "labelMessage.h" 
+#include "edgeDisplayInfo.h"
+#include "labelDisplayInfo.h"
 
 namespace watcher
 {
@@ -38,21 +39,15 @@ namespace watcher
              */
             virtual ~WatcherGraphEdge();
 
-            /**
-             * The edge's label. This is different that a test node attached label.
-             * It is the label of the edge itself. 
-             */
-            std::string label;
-
-            Color color;
-            Timestamp expiration;
-            float width;
+            /** Display information about this node. */
+            EdgeDisplayInfoPtr displayInfo; 
 
             /** An edge can have mulitple lables attached to it */
-            typedef std::list<LabelMessagePtr> LabelMessageList;
-            LabelMessageList attachedLabels; 
+            typedef std::list<LabelDisplayInfoPtr> LabelList;
+            LabelList labels;
 
-            GUILayer layer;  // Needed so we can remove by layer if needed. 
+            /** When this edge expires: is in absolute epoch milliseconds. */
+            Timestamp expiration; 
 
             /** output operator **/
             virtual std::ostream &toStream(std::ostream &out) const;
@@ -66,7 +61,6 @@ namespace watcher
             template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
 
             DECLARE_LOGGER();
-
     };
 
     /** typedef a shared pointer to this class

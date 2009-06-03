@@ -10,6 +10,7 @@
 
 #include "message.h"
 #include "watcherTypes.h"
+#include "messageTypesAndVersions.h"
 
 namespace watcher 
 {
@@ -44,6 +45,8 @@ namespace watcher
                 static std::string statusEventToString(const statusEvent &e); 
 
                 statusEvent event;      // What happened
+
+                GUILayer layer; 
 
             private:
 

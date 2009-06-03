@@ -26,10 +26,11 @@ BOOST_AUTO_TEST_CASE( output_test )
 
     cout << "Empty Edge:" << endl << wge << endl;
 
-    wge.label="This is an edge. There are others like it, but this on is mine."; 
-    wge.color=Color::yellow;
+    wge.displayInfo->loadConfiguration("Bogus Layer"); 
+    wge.displayInfo->label="This is an edge. There are others like it, but this on is mine."; 
+    wge.displayInfo->color=Color::yellow;
+    wge.displayInfo->width=12.232412;
     wge.expiration=10000;
-    wge.width=12.232412;
 
     struct 
     {
@@ -38,15 +39,17 @@ BOOST_AUTO_TEST_CASE( output_test )
     } data [] = {
         { "Hello" , "hello layer" }, 
         { "World" , "World layer" }, 
-        { "doodoodoodoo doodoodoodoo" , "twilight zone" }, 
-        { "Coffee Cups" , "Bed, Bath, and Beyond" }
+        { "doodoodoodoodoodoodoodoo" , "twilight zone" }, 
+        { "Coffee_Cups" , "Bed, Bath, and, Beyond" }
     };
 
     for(unsigned int i=0; i< (sizeof(data)/sizeof(data[0])); i++)
     {
         LabelMessagePtr lmp(new LabelMessage(data[i].label));
         lmp->layer=data[i].layer;
-        wge.attachedLabels.push_back(lmp);
+        LabelDisplayInfoPtr ldip(new LabelDisplayInfo); 
+        ldip->loadConfiguration(lmp); 
+        wge.labels.push_back(ldip);
     }
 
     cout << "Edge with stuff in it: " << wge << endl;

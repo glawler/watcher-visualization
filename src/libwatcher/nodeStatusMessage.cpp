@@ -14,7 +14,8 @@ INIT_LOGGER(NodeStatusMessage, "Message.NodeStatusMessage");
 
 NodeStatusMessage::NodeStatusMessage(const statusEvent &event_) : 
     Message(NODE_STATUS_MESSAGE_TYPE, NODE_STATUS_MESSAGE_VERSION), 
-    event(event_)
+    event(event_),
+    layer(PHYSICAL_LAYER)
 {
     TRACE_ENTER();
     TRACE_EXIT(); 
@@ -22,7 +23,8 @@ NodeStatusMessage::NodeStatusMessage(const statusEvent &event_) :
 
 NodeStatusMessage::NodeStatusMessage(const NodeStatusMessage &rhs) : 
     Message(rhs.type, rhs.version),
-    event(rhs.event)
+    event(rhs.event),
+    layer(rhs.layer)
 {
     TRACE_ENTER();
     TRACE_EXIT(); 
@@ -39,7 +41,8 @@ bool NodeStatusMessage::operator==(const NodeStatusMessage &other) const
     TRACE_ENTER();
     bool retVal = 
         Message::operator==(other) && 
-        event==other.event;
+        event==other.event && 
+        layer==other.layer; 
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -49,6 +52,7 @@ NodeStatusMessage &NodeStatusMessage::operator=(const NodeStatusMessage &other)
     TRACE_ENTER();
     Message::operator=(other);
     event=other.event;
+    layer=other.layer; 
     TRACE_EXIT();
     return *this;
 }
@@ -58,7 +62,7 @@ std::ostream &NodeStatusMessage::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
     Message::toStream(out); 
-    out << "event: " << statusEventToString(event) << " ";
+    out << "event: " << statusEventToString(event) << " layer: " << layer; 
     TRACE_EXIT();
     return out;
 }
@@ -77,6 +81,7 @@ void NodeStatusMessage::serialize(Archive& ar, const unsigned int /* version */)
     TRACE_ENTER();
     ar & boost::serialization::base_object<Message>(*this);
     ar & event;
+    ar & layer; 
     TRACE_EXIT();
 }
 

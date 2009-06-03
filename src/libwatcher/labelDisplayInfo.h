@@ -2,7 +2,9 @@
 #define LABEL_DISPLAY_INFO_H
 
 #include <string>
+#include "watcherTypes.h"
 #include "watcherColors.h"
+#include "labelMessage.h"
 #include "displayInfo.h"
 
 namespace watcher
@@ -21,16 +23,26 @@ namespace watcher
             LabelDisplayInfo();
             virtual ~LabelDisplayInfo(); 
 
-            bool loadLayer(const std::string &basePath);
-            void saveConfiguration(const std::string &basePath); 
-
             watcher::event::Color backgroundColor;
             watcher::event::Color foregroundColor;
 
             std::string fontName; // not really supported
             float pointSize;
 
+            /** The text in the label */
             std::string labelText; 
+
+            /** This doesn't really belong here, but I've nowhere else to put it. */
+            Timestamp expiration; 
+
+            /** Can be loaded from a LabelMessage */
+            bool loadConfiguration(const watcher::event::LabelMessagePtr &labelMessage); 
+
+            /** Can be loaded from cfg file ... */
+            bool loadConfiguration(const watcher::event::GUILayer &layer); 
+
+            /** Can be saved to cfg file ... */
+            void saveConfiguration(); 
 
         protected:
 
@@ -38,6 +50,8 @@ namespace watcher
 
             DECLARE_LOGGER();
     };
+
+    typedef boost::shared_ptr<LabelDisplayInfo> LabelDisplayInfoPtr; 
 }
 
 #endif // LABEL_DISPLAY_INFO_H

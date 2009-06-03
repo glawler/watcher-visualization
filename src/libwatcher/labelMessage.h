@@ -15,7 +15,7 @@ namespace watcher {
             public:
                 // The data
                 std::string label;
-                int fontSize;
+                float fontSize;
                 Color foreground;
                 Color background;
                 Timestamp  expiration;    // this should be a float

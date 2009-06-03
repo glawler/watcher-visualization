@@ -30,11 +30,11 @@ namespace watcher {
                 EdgeMessage(
                             const NodeIdentifier &node1_, // address of node1
                             const NodeIdentifier &node2_, // address of node2
-                            const GUILayer &layer_,                 // Which GUI layer the edge is on
+                            const GUILayer &layer_=PHYSICAL_LAYER,  // Which GUI layer the edge is on
                             const Color &c_=Color::blue,            // color of edge
                             const unsigned int &width=15,           // width of the edge 
                             const bool bidirectional_=false,        // Is this edge bidirectional?
-                            const Timestamp  expiration_=0,             // expiration time in milliseconds, 0=never expire
+                            const Timestamp  expiration_=Infinity,  // expiration time in milliseconds, 0=never expire
                             const bool &addEdge=true);              // If true, add an edge, else remove exising edge with same props as this one.
 
                 EdgeMessage(const EdgeMessage &other);

@@ -4,6 +4,7 @@
  * @date 2009-01-27
  */
 #include <boost/algorithm/string.hpp>       // for iequals();
+#include <boost/foreach.hpp>
 #include "singletonConfig.h"
 #include "nodeDisplayInfo.h"
 
@@ -33,6 +34,10 @@ NodeDisplayInfo::NodeDisplayInfo() :
     color(Color::red)
 {
     TRACE_ENTER();
+
+    // create the "default" layer if it's not already there.
+    loadConfiguration(layer); 
+
     TRACE_EXIT();
 }
 
@@ -43,18 +48,44 @@ NodeDisplayInfo::~NodeDisplayInfo()
     TRACE_EXIT();
 }
 
-// bool NodeDisplayInfo::configure()
-// {
-//     TRACE_ENTER();
-//     TRACE_EXIT();
-//     return false; 
-// }
-
-bool NodeDisplayInfo::loadLayer(const string &basePath)
+bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_, const NodeIdentifier &nid)
 {
     TRACE_ENTER();
 
+    // Convert nodeId into stupid string that libconfig can understand. 
+    // libconfig path ids cannot start with numbers or contain '.'
+    // which is really annoying. So an id for node 192.168.1.123 ends up 
+    // looking like "node_192_168_1_123". Sigh.
+    string nodeIdAsConfigId(categoryName);      // default node config is just under this. 
+    if (nid!=NodeIdentifier()) 
+    {
+        nodeId=nid; 
+        nodeIdAsConfigId+="_";
+        string nodeIdAsString(nid.to_string()); 
+        replace(nodeIdAsString.begin(), nodeIdAsString.end(), '.', '_'); 
+        nodeIdAsConfigId+=nodeIdAsString; 
+    }
+
+    LOG_DEBUG("Looking up and loading node props for node with id: \"" << nodeIdAsConfigId << "\"");
+    categoryName=nodeIdAsConfigId; 
+
+    bool retVal=loadConfiguration(layer_); 
+
+    TRACE_EXIT_RET_BOOL(retVal);
+    return retVal;
+}
+
+// virtual
+bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
+{
+    TRACE_ENTER();
+
+    layer=layer_.size()==0 ? PHYSICAL_LAYER : layer_; 
+
     Config &cfg=SingletonConfig::instance();
+
+    // "DisplayOptions.layer.[LAYERNAME].node_123_123_123_123"
+    Setting &nodeSetting=cfg.lookup(getBasePath(layer)); 
 
     SingletonConfig::lock();
 
@@ -62,13 +93,6 @@ bool NodeDisplayInfo::loadLayer(const string &basePath)
     string strVal, key;
     int intVal;
     float floatVal;
-
-    Setting &baseSetting=cfg.lookup(basePath); 
-    if (!baseSetting.exists(categoryName))
-        baseSetting.add(categoryName, Setting::TypeGroup);
-
-    // "DisplayOptions.layer.[LAYERNAME].node"
-    Setting &nodeSetting=cfg.lookup(baseSetting.getPath() + string(".") + categoryName); 
 
     strVal=NodeDisplayInfo::labelDefault2String(LAST_OCTET); 
     key="label"; 
@@ -142,7 +166,7 @@ bool NodeDisplayInfo::loadLayer(const string &basePath)
 
     SingletonConfig::unlock(); 
 
-    TRACE_EXIT();
+    TRACE_EXIT_RET_BOOL(true); 
     return true; 
 }
 
@@ -200,19 +224,17 @@ NodeDisplayInfo::NodeShape NodeDisplayInfo::stringToNodeShape(const string &shap
     return retVal;
 }
 
-void NodeDisplayInfo::saveConfiguration(const string &basePath)
+void NodeDisplayInfo::saveConfiguration()
 {
     TRACE_ENTER();
 
     Config &cfg=SingletonConfig::instance();
-    SingletonConfig::lock();
-
-    Setting &baseSetting=cfg.lookup(basePath); 
-    if (!baseSetting.exists(categoryName))
-        baseSetting.add(categoryName, Setting::TypeGroup);
 
     // "DisplayOptions.layer.[LAYERNAME].node"
-    Setting &nodeSetting=cfg.lookup(basePath + string(".") + categoryName);
+    string basePath=getBasePath(layer); 
+    Setting &nodeSetting=cfg.lookup(basePath); 
+
+    SingletonConfig::lock();
 
     nodeSetting["label"]=label;
     nodeSetting["color"]=color.toString(); 
@@ -229,3 +251,4 @@ void NodeDisplayInfo::saveConfiguration(const string &basePath)
 
     TRACE_EXIT();
 }
+
