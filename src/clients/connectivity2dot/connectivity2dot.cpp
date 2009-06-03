@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <csignal>
 #include <stdlib.h>     // for EXIT_SUCCESS/FAILURE
-#include <signal.h>
 
 #include "initConfig.h"
 #include "singletonConfig.h"
@@ -16,19 +16,20 @@ using namespace libconfig;
 
 namespace connectivity2dot
 {
-    bool dumpGraph;
-    bool dumpConfig;
+    sig_atomic_t dumpGraph;
+    sig_atomic_t dumpConfig;
 }
 
 void sigUsr1Handler(int)
 {
-    connectivity2dot::dumpGraph=true;
+    connectivity2dot::dumpGraph=1;
 }
 
 void sigUsr2Handler(int)
 {
-    connectivity2dot::dumpConfig=true;
+    connectivity2dot::dumpConfig=1;
 }
+
 void usage(const char *progName, bool exitp)
 {
     cout << "Usage: " << basename(progName) << " [-c config filename]" << endl;
@@ -81,8 +82,8 @@ int main(int argc, char **argv)
         if(0==strncmp(argv[i], "-h", sizeof("-h")) || 0==strncmp(argv[i], "--help", sizeof("--help")))
             usage(argv[0], true); 
 
-    connectivity2dot::dumpGraph=false;
-    connectivity2dot::dumpConfig=false;
+    connectivity2dot::dumpGraph=0;
+    connectivity2dot::dumpConfig=0;
 
     string configFilename;
     Config &config=SingletonConfig::instance();
@@ -104,20 +105,12 @@ int main(int argc, char **argv)
     saveConfig(configFilename);
 
     // setup signal handling.
-    struct sigaction new_action, old_action;
-    new_action.sa_handler = sigUsr1Handler;
-    sigemptyset (&new_action.sa_mask);
-    new_action.sa_flags = 0;
-    sigaction (SIGPIPE, NULL, &old_action);
-    if (old_action.sa_handler != SIG_IGN) 
-        sigaction (SIGUSR1, &new_action, NULL);
-
-    new_action.sa_handler = sigUsr2Handler;
-    sigemptyset (&new_action.sa_mask);
-    new_action.sa_flags = 0;
-    sigaction (SIGPIPE, NULL, &old_action);
-    if (old_action.sa_handler != SIG_IGN) 
-        sigaction (SIGUSR2, &new_action, NULL);
+    void (*prevFn)(int)=signal(SIGUSR1, sigUsr1Handler);
+    if (prevFn==SIG_IGN) 
+        signal(SIGUSR1, SIG_IGN);
+    prevFn=signal(SIGUSR2, sigUsr2Handler); 
+    if (prevFn==SIG_IGN) 
+        signal(SIGUSR2, SIG_IGN);
 
     MessageStreamPtr ms=MessageStream::createNewMessageStream(serverName, service); 
 
