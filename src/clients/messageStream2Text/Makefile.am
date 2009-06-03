@@ -34,7 +34,7 @@ bin_PROGRAMS=messageStream2Text
 messageStream2Text_SOURCES=messageStream2Text.cpp
 
 ctags:
-	ctags -R $(TOPDIR)
+	ctags -R $(SRCDIR)
 
 #
 # Copy sample cfg and log.properties files from ../etc
