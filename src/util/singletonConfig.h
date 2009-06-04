@@ -1,6 +1,8 @@
 #ifndef SINGLETON_CONFIG_H
 #define SINGLETON_CONFIG_H
 
+#include <string>
+
 #include "logger.h"
 #include "libconfig.h++"
 #include "pthread.h"
@@ -27,6 +29,12 @@ namespace watcher
             /** Unlock the config when finished writing */
             static void unlock();
 
+            /** Set the filename to save this configuration to */
+            void setConfigFile(const std::string &filename_); 
+
+            /** Save the configuration to the file */
+            void saveConfig();
+
         private:
             DECLARE_LOGGER();
 
@@ -34,6 +42,7 @@ namespace watcher
             ~SingletonConfig();
 
             static pthread_mutex_t accessMutex;
+            static std::string filename; 
     };
 }
 

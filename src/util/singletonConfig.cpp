@@ -30,3 +30,17 @@ void SingletonConfig::unlock()
     TRACE_EXIT();
 }
 
+void SingletonConfig::setConfigFile(const std::string &filename_)
+{
+    TRACE_ENTER();
+    filename=filename_;
+    TRACE_EXIT();
+}
+
+void SingletonConfig::saveConfig()
+{
+    TRACE_ENTER();
+    instance().writeFile(filename.data());
+    TRACE_EXIT();
+}
+
