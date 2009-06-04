@@ -72,6 +72,8 @@ namespace watcher
             /// Handle completion of a write operation.
             void handle_write(const boost::system::error_code& e, event::MessagePtr reply);
 
+            void read_error(const boost::system::error_code &e);
+
             Watcherd& watcher;
             boost::asio::io_service& io_service_;
 
