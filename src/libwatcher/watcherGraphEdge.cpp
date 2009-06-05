@@ -10,8 +10,7 @@ INIT_LOGGER(WatcherGraphEdge, "WatcherGraphEdge");
 WatcherGraphEdge::WatcherGraphEdge() : 
     displayInfo(new EdgeDisplayInfo),
     labels(),
-    expiration(Infinity), 
-    layer(PHYSICAL_LAYER)
+    expiration(Infinity) 
 { 
     TRACE_ENTER();
     TRACE_EXIT();
