@@ -10,7 +10,8 @@ INIT_LOGGER(WatcherGraphEdge, "WatcherGraphEdge");
 WatcherGraphEdge::WatcherGraphEdge() : 
     displayInfo(new EdgeDisplayInfo),
     labels(),
-    expiration(Infinity) 
+    expiration(Infinity), 
+    layer(PHYSICAL_LAYER)
 { 
     TRACE_ENTER();
     TRACE_EXIT();
@@ -29,6 +30,7 @@ std::ostream &WatcherGraphEdge::toStream(std::ostream &out) const
 
     out << " expiration: " << expiration;
     out << " num attached labels: " << labels.size(); 
+    out << " layer: " << layer; 
    
     // When labelDisplayInfo gets oper<<, uncomment this. 
     // if (attachedLabels.size())
