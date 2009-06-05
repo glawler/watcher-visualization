@@ -19,7 +19,7 @@ namespace watcher
     class SingletonConfig
     {
         public:
-            
+
             /** The underlaying Config object is directly accessible */
             static libconfig::Config &instance();
 

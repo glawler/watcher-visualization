@@ -29,7 +29,6 @@ std::ostream &WatcherGraphEdge::toStream(std::ostream &out) const
 
     out << " expiration: " << expiration;
     out << " num attached labels: " << labels.size(); 
-    out << " layer: " << layer; 
    
     // When labelDisplayInfo gets oper<<, uncomment this. 
     // if (attachedLabels.size())

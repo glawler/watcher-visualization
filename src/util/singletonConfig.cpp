@@ -4,6 +4,7 @@ using namespace watcher;
 using namespace libconfig;
 
 pthread_mutex_t SingletonConfig::accessMutex=PTHREAD_MUTEX_INITIALIZER;
+std::string SingletonConfig::filename=""; 
 
 INIT_LOGGER(SingletonConfig, "SingletonConfig");
 
