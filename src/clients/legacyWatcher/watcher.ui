@@ -1,0 +1,1327 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>766</width>
+    <height>597</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string comment="Who watches the watcher?" >Watcher</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <layout class="QVBoxLayout" >
+    <item>
+     <widget class="manetGLView" native="1" name="manetGLViewWindow" >
+      <property name="focusPolicy" >
+       <enum>Qt::StrongFocus</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" >
+      <item>
+       <widget class="QPushButton" name="goodwinPauseButton" >
+        <property name="text" >
+         <string>&amp;Pause</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="goodwinContinueButton" >
+        <property name="text" >
+         <string>&amp;Continue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="speedSlider" >
+        <property name="minimumSize" >
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximum" >
+         <number>7</number>
+        </property>
+        <property name="pageStep" >
+         <number>1</number>
+        </property>
+        <property name="value" >
+         <number>3</number>
+        </property>
+        <property name="sliderPosition" >
+         <number>3</number>
+        </property>
+        <property name="tracking" >
+         <bool>false</bool>
+        </property>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="invertedAppearance" >
+         <bool>false</bool>
+        </property>
+        <property name="tickPosition" >
+         <enum>QSlider::TicksBelow</enum>
+        </property>
+        <property name="tickInterval" >
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="SpeedLabel" name="speedLabel" >
+        <property name="text" >
+         <string>1x</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType" >
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>804</width>
+          <height>21</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="fitToWindowButton" >
+        <property name="text" >
+         <string>&amp;Fit to Window</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="resetPositionButton" >
+        <property name="text" >
+         <string>&amp;Reset Postition</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="quitButton" >
+        <property name="text" >
+         <string>&amp;Quit</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>766</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuLayers" >
+    <property name="title" >
+     <string>&amp;Layers</string>
+    </property>
+    <widget class="QMenu" name="menuRouting" >
+     <property name="title" >
+      <string>&amp;Routing</string>
+     </property>
+     <addaction name="actionRoutingOneHop" />
+     <addaction name="actionWormholeRouting" />
+     <addaction name="actionWormholeRoutingOnehop" />
+    </widget>
+    <addaction name="actionBandwidth" />
+    <addaction name="actionSanityChecks" />
+    <addaction name="actionAntennaRadius" />
+    <addaction name="actionNeighbors" />
+    <addaction name="actionHierarchy" />
+    <addaction name="menuRouting" />
+    <addaction name="actionAnomPaths" />
+    <addaction name="actionCorrelators" />
+    <addaction name="actionCorrelatorPaths" />
+    <addaction name="actionWormholeAlerts" />
+    <addaction name="actionUndefined" />
+    <addaction name="actionClearAllLabels" />
+    <addaction name="actionClearAllEdges" />
+   </widget>
+   <widget class="QMenu" name="menuView" >
+    <property name="title" >
+     <string>&amp;View</string>
+    </property>
+    <widget class="QMenu" name="menuHierarchy" >
+     <property name="tearOffEnabled" >
+      <bool>false</bool>
+     </property>
+     <property name="title" >
+      <string>&amp;Mode</string>
+     </property>
+     <addaction name="actionViewManet" />
+     <addaction name="actionViewHierarchy" />
+    </widget>
+    <addaction name="menuHierarchy" />
+    <addaction name="actionFullscreen" />
+    <addaction name="actionNormalscreen" />
+    <addaction name="action3DNodes" />
+    <addaction name="actionMonochrome" />
+    <addaction name="actionBackgroundImage" />
+   </widget>
+   <widget class="QMenu" name="menuGraphs" >
+    <property name="enabled" >
+     <bool>true</bool>
+    </property>
+    <property name="title" >
+     <string>&amp;Graphs</string>
+    </property>
+    <addaction name="actionGraphLoadAverage" />
+    <addaction name="actionGraphBandwidth" />
+   </widget>
+   <addaction name="menuLayers" />
+   <addaction name="menuView" />
+   <addaction name="menuGraphs" />
+  </widget>
+  <action name="actionGoodwinSpeed1_4" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>1/4</string>
+   </property>
+  </action>
+  <action name="actionGoodwinSpeed1_2" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>1/2</string>
+   </property>
+  </action>
+  <action name="actionGoodwinSpeed1" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>1</string>
+   </property>
+  </action>
+  <action name="actionGoodwinSpeed2" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>2</string>
+   </property>
+  </action>
+  <action name="actionGoodwinSpeed4" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>4</string>
+   </property>
+  </action>
+  <action name="actionGoodwinSpeed8" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>8</string>
+   </property>
+  </action>
+  <action name="actionGoodwinSpeed16" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>16</string>
+   </property>
+  </action>
+  <action name="actionGoodwinSpeed32" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>32</string>
+   </property>
+  </action>
+  <action name="actionGoodwinPause" >
+   <property name="text" >
+    <string>&amp;Pause</string>
+   </property>
+  </action>
+  <action name="actionGoodwinContinue" >
+   <property name="text" >
+    <string>&amp;Continue</string>
+   </property>
+  </action>
+  <action name="actionGoodwinDirectionForward" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Forward</string>
+   </property>
+  </action>
+  <action name="actionGoodwinDirectionReverse" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Reverse</string>
+   </property>
+  </action>
+  <action name="actionGoodwinStart" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>(re) star&amp;t</string>
+   </property>
+  </action>
+  <action name="actionGoodwinStop" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>St&amp;op</string>
+   </property>
+  </action>
+  <action name="actionBandwidth" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Bandwidth</string>
+   </property>
+  </action>
+  <action name="actionSanityChecks" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Sanity Checks</string>
+   </property>
+  </action>
+  <action name="actionAntennaRadius" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Antenna Radius</string>
+   </property>
+  </action>
+  <action name="actionNeighbors" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Neighbors</string>
+   </property>
+  </action>
+  <action name="actionHierarchy" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Hierarchy</string>
+   </property>
+  </action>
+  <action name="actionRoutingOneHop" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;One Hop</string>
+   </property>
+  </action>
+  <action name="actionWormholeRouting" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Wormhole Routing</string>
+   </property>
+  </action>
+  <action name="actionWormholeRoutingOnehop" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Wormhole Routing Oneho&amp;p</string>
+   </property>
+  </action>
+  <action name="actionAnomPaths" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Ano&amp;m Paths</string>
+   </property>
+  </action>
+  <action name="actionNormPaths" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Normal &amp;Paths</string>
+   </property>
+  </action>
+  <action name="actionCorrelators" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Correlators</string>
+   </property>
+  </action>
+  <action name="actionCorrelatorPaths" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Corr&amp;elator Paths</string>
+   </property>
+  </action>
+  <action name="actionWormholeAlerts" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Wormhole A&amp;lerts</string>
+   </property>
+  </action>
+  <action name="actionUndefined" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Undefined</string>
+   </property>
+  </action>
+  <action name="actionFullscreen" >
+   <property name="checkable" >
+    <bool>false</bool>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Full Screen</string>
+   </property>
+  </action>
+  <action name="action3DNodes" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;3D Nodes</string>
+   </property>
+  </action>
+  <action name="actionViewManet" >
+   <property name="text" >
+    <string>&amp;Manet</string>
+   </property>
+  </action>
+  <action name="actionViewHierarchy" >
+   <property name="text" >
+    <string>&amp;Hierarchy</string>
+   </property>
+  </action>
+  <action name="actionMonochrome" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Monochrome</string>
+   </property>
+  </action>
+  <action name="actionNormalscreen" >
+   <property name="text" >
+    <string>Normal Screen</string>
+   </property>
+  </action>
+  <action name="actionClearAllLabels" >
+   <property name="text" >
+    <string>Clear &amp;All Labels</string>
+   </property>
+  </action>
+  <action name="actionClearAllEdges" >
+   <property name="text" >
+    <string>Clear All &amp;Edges</string>
+   </property>
+  </action>
+  <action name="actionBackgroundImage" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Background Image</string>
+   </property>
+  </action>
+  <action name="actionGraphLoadAverage" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="enabled" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Load Average</string>
+   </property>
+  </action>
+  <action name="actionGraphBandwidth" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Bandwidth</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>manetGLView</class>
+   <extends>QWidget</extends>
+   <header location="global" >manetglview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SpeedLabel</class>
+   <extends>QLabel</extends>
+   <header location="global" >speedlabel.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>resetPositionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>resetPosition()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>760</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBandwidth</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleBandwidth(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>bandwidthToggled(bool)</signal>
+   <receiver>actionBandwidth</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAnomPaths</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleAnomPaths(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAntennaRadius</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleAntennaRadius(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCorrelatorPaths</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleCorrelation3Hop(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCorrelators</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleCorrelation(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNeighbors</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleNeighbors(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRoutingOneHop</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleRoutingOnehop(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSanityChecks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleSanityCheck(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionUndefined</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleUndefined(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWormholeAlerts</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleAlert(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWormholeRouting</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleWormholeRouting(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWormholeRoutingOnehop</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleWormholeRoutingOnehop(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHierarchy</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleHierarchy(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>anomPathsToggled(bool)</signal>
+   <receiver>actionAnomPaths</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>antennaRadiusToggled(bool)</signal>
+   <receiver>actionAntennaRadius</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>correlation3HopToggled(bool)</signal>
+   <receiver>actionCorrelatorPaths</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>correlationToggled(bool)</signal>
+   <receiver>actionCorrelators</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>hierarchyToggled(bool)</signal>
+   <receiver>actionHierarchy</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>neighborsToggled(bool)</signal>
+   <receiver>actionNeighbors</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>routingOnehopToggled(bool)</signal>
+   <receiver>actionRoutingOneHop</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>sanityCheckToggled(bool)</signal>
+   <receiver>actionSanityChecks</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>undefinedToggled(bool)</signal>
+   <receiver>actionUndefined</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>alertToggled(bool)</signal>
+   <receiver>actionWormholeAlerts</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>wormholeRoutingToggled(bool)</signal>
+   <receiver>actionWormholeRouting</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>wormholeRoutingOnehopToggled(bool)</signal>
+   <receiver>actionWormholeRoutingOnehop</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fitToWindowButton</sender>
+   <signal>clicked()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>fitToWindow()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>647</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>454</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action3DNodes</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleThreeDView(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>threeDViewToggled(bool)</signal>
+   <receiver>action3DNodes</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionMonochrome</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleMonochrome(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionViewHierarchy</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>hierarchyView()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionViewManet</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>manetView()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFullscreen</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showFullScreen()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNormalscreen</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClearAllEdges</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>clearAllEdges()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClearAllLabels</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>clearAllLabels()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>goodwinPauseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>goodwinPause()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>47</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>goodwinContinueButton</sender>
+   <signal>clicked()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>goodwinContinue()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>132</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>pausedGoodwin()</signal>
+   <receiver>goodwinPauseButton</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>47</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>continuedGoodwin()</signal>
+   <receiver>goodwinContinueButton</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>132</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>runningGoodwin(bool)</signal>
+   <receiver>goodwinContinueButton</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>132</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>runningGoodwin(bool)</signal>
+   <receiver>speedLabel</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>294</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>runningGoodwin(bool)</signal>
+   <receiver>speedSlider</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>229</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>runningGoodwin(bool)</signal>
+   <receiver>goodwinPauseButton</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>47</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>speedSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>speedLabel</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>229</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>294</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>speedSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>goodwinSetSpeed(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>229</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBackgroundImage</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>toggleBackgroundImage(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>backgroundImageToggled(bool)</signal>
+   <receiver>actionBackgroundImage</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>enableBackgroundImage(bool)</signal>
+   <receiver>actionBackgroundImage</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>295</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
