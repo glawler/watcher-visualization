@@ -30,10 +30,10 @@ namespace watcher
             static void unlock();
 
             /** Set the filename to save this configuration to */
-            void setConfigFile(const std::string &filename_); 
+            static void setConfigFile(const std::string &filename_); 
 
             /** Save the configuration to the file */
-            void saveConfig();
+            static void saveConfig();
 
         private:
             DECLARE_LOGGER();
