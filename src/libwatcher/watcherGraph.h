@@ -62,10 +62,19 @@ namespace watcher
                 boost::directedS,
                 WatcherGraphNode, 
                 WatcherGraphEdge> Graph;
+
+            typedef boost::graph_traits<Graph>::vertex_descriptor  vertex;
+            typedef boost::graph_traits<Graph>::vertices_size_type vertexInt;
+            typedef boost::graph_traits<Graph>::vertex_iterator    vertexIterator;
+            typedef boost::graph_traits<Graph>::edge_descriptor    edge;
+            typedef boost::graph_traits<Graph>::edges_size_type    edgeInt;
+            typedef boost::graph_traits<Graph>::edge_iterator      edgeIterator;
+
             /**
              * The actual boost::graph.
              */
             Graph theGraph;
+
 
             /**
              * updateGraph()

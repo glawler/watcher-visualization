@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
     for (unsigned int i=0; i < numEdges; i++)
     {
         LOG_INFO("Current edges in graph at " << Timestamp(time(NULL))*1000); 
-        graph_traits<WatcherGraph::Graph>::edge_iterator ei, eEnd; 
+        WatcherGraph::edgeIterator ei, eEnd; 
         for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei)
         {
             LOG_INFO("Edge: " << wg.theGraph[*ei]); 
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
         wg.updateGraph(lmp);
     }
 
-    graph_traits<WatcherGraph::Graph>::vertex_iterator theNodeIter;
+    WatcherGraph::vertexIterator theNodeIter; 
     wg.findNode(nodeAddr, theNodeIter); 
 
     BOOST_CHECK_EQUAL( numLabels, wg.theGraph[*theNodeIter].labels.size() );  
