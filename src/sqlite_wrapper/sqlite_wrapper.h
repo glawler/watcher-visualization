@@ -247,7 +247,7 @@ namespace sqlite_wrapper {
 
     /* C++ to C conversion functions for use with templates. */
     int sqlite_binder(sqlite3_stmt*, int pos, int val);
-    int sqlite_binder(sqlite3_stmt*, int pos, int64_t val);
+    int sqlite_binder(sqlite3_stmt*, int pos, long long val);
     int sqlite_binder(sqlite3_stmt*, int pos, double val);
     int sqlite_binder(sqlite3_stmt*, int pos, const std::string&);
     int sqlite_binder(sqlite3_stmt*, int pos, const char* val, size_t len);

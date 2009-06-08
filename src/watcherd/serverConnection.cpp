@@ -7,6 +7,7 @@
 #include <libwatcher/messageStatus.h>
 #include <libwatcher/seekWatcherMessage.h>
 #include <libwatcher/speedWatcherMessage.h>
+#include <libwatcher/nodeStatusMessage.h>
 
 #include "dataMarshaller.h"
 #include "watcherd.h"
@@ -82,6 +83,37 @@ namespace watcher {
         TRACE_EXIT();
     }
 
+    void ServerConnection::read_error(const boost::system::error_code &e)
+    {
+        TRACE_ENTER();
+
+        if (e == boost::asio::error::eof)
+        {
+            LOG_DEBUG("Received empty message from client or client closed connection.");
+            LOG_INFO("Connection to client closed."); 
+
+        }
+        else
+        {
+            LOG_ERROR("Error reading socket: " << e.message());
+        }
+
+        // unsubscribe to event stream, otherwise it will hold a
+        // shared_ptr open
+        if (conn_type == gui)
+            watcher.unsubscribe(shared_from_this());
+        else if (conn_type == feeder)
+        {
+            MessagePtr msg(new NodeStatusMessage(NodeStatusMessage::disconnect));
+            watcher.sendMessage(msg);
+            BOOST_FOREACH(MessageHandlerPtr& mh, messageHandlers) {
+                mh->handleMessageArrive(shared_from_this(), msg);
+            }
+        }
+
+        TRACE_EXIT();
+    }
+
     void ServerConnection::handle_read_header(const boost::system::error_code& e, size_t bytes_transferred)
     {
         TRACE_ENTER(); 
@@ -117,23 +149,7 @@ namespace watcher {
             }
         }
         else
-        {
-            if (e==boost::asio::error::eof)
-            {
-                LOG_DEBUG("Received empty message from clienti or client closed connection.");
-                LOG_INFO("Connection to client closed."); 
-
-            }
-            else
-            {
-                LOG_ERROR("Error reading socket: " << e.message());
-            }
-
-            // unsubscribe to event stream, otherwise it will hold a
-            // shared_ptr open
-            if (conn_type == gui)
-                watcher.unsubscribe(shared_from_this());
-        }
+            read_error(e);
         TRACE_EXIT();
     }
 
@@ -273,14 +289,7 @@ namespace watcher {
             }
         }
         else
-        {
-            LOG_WARN("Did not understand incoming message."); 
-
-            // unsubscribe to event stream, otherwise it will hold a
-            // shared_ptr open
-            if (conn_type == gui)
-                watcher.unsubscribe(shared_from_this());
-        }
+            read_error(e);
 
         // If an error occurs then no new asynchronous operations are started. This
         // means that all shared_ptr references to the ServerConnection object will

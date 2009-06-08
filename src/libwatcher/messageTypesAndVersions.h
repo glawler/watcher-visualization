@@ -20,13 +20,13 @@ namespace watcher {
             COLOR_MESSAGE_TYPE        = 0x6,
             DATA_REQUEST_MESSAGE_TYPE = 0x7,
             CONNECTIVITY_MESSAGE_TYPE = 0x8,
+            NODE_STATUS_MESSAGE_TYPE  = 0x9,
 
             // watcherdAPI messages
-            SEEK_MESSAGE_TYPE         = 0x9, // DO NOT REORDER THIS WITHOUT CHANGING isFeederEvent
-            START_MESSAGE_TYPE        = 0xA,
-            STOP_MESSAGE_TYPE         = 0xB,
-            SPEED_MESSAGE_TYPE        = 0xC,
-            NODE_STATUS_MESSAGE_TYPE  = 0xD,
+            SEEK_MESSAGE_TYPE         = 0xA, // DO NOT REORDER THIS WITHOUT CHANGING isFeederEvent
+            START_MESSAGE_TYPE        = 0xB,
+            STOP_MESSAGE_TYPE         = 0xC,
+            SPEED_MESSAGE_TYPE        = 0xD,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;

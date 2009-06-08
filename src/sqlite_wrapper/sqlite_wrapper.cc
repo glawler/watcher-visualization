@@ -219,7 +219,7 @@ int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, int val)
     return sqlite3_bind_int(s, pos, val);
 }
 
-int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, int64_t val)
+int sqlite_wrapper::sqlite_binder(sqlite3_stmt*s, int pos, long long val)
 {
     return sqlite3_bind_int64(s, pos, val);
 }
