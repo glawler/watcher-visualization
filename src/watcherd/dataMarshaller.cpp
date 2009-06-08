@@ -154,12 +154,14 @@ bool DataMarshaller::marshalPayload(const vector<MessagePtr> &messages, NetworkM
     // each buffer can be scatter-gather sent/recv'd.
     
     ostringstream os;
+    std::string s(os.str());
     for(vector<MessagePtr>::const_iterator m=messages.begin(); m!=messages.end(); ++m)
     {
         (*m)->pack(os); 
-        payloadSize+=os.str().size(); 
-        outBuffers.push_front(NetworkMarshalBuffer(os.str())); 
-        LOG_DEBUG("Marshalled payload: " << os.str()); 
+        s = os.str();
+        payloadSize += s.size(); 
+        outBuffers.push_back(NetworkMarshalBuffer(s)); 
+        LOG_DEBUG("Marshalled payload: " << s); 
         os.str(""); 
     }
 
