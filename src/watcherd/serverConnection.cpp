@@ -57,19 +57,6 @@ namespace watcher {
     /** Initialization point for start of new ServerConnection thread. */
     void ServerConnection::run()
     {
-        /*
-         * Pull endpoint info out of the socket and make it available via the
-         * Connection::getPeerAddr() member function.
-         */
-        boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint();
-        endpoint_addr_ = ep.address().to_string();
-        endpoint_port_ = ep.port();
-
-        start();
-    }
-
-    void ServerConnection::start()
-    {
         TRACE_ENTER(); 
         boost::asio::async_read(
                 theSocket, 
@@ -102,14 +89,6 @@ namespace watcher {
         // shared_ptr open
         if (conn_type == gui)
             watcher.unsubscribe(shared_from_this());
-        else if (conn_type == feeder)
-        {
-            MessagePtr msg(new NodeStatusMessage(NodeStatusMessage::disconnect));
-            watcher.sendMessage(msg);
-            BOOST_FOREACH(MessageHandlerPtr& mh, messageHandlers) {
-                mh->handleMessageArrive(shared_from_this(), msg);
-            }
-        }
 
         TRACE_EXIT();
     }
@@ -164,7 +143,7 @@ namespace watcher {
             {
                 LOG_INFO("Recvd " << arrivedMessages.size() << " message" <<
                          (arrivedMessages.size()>1?"s":"") << " from " <<
-                         getPeerAddr()); 
+                         remoteEndpoint().address()); 
 
                 // Add the incoming address to the Message so everyone
                 // knows who the message came from.
@@ -270,7 +249,7 @@ namespace watcher {
                 if (!fail) {
                     // initiate request to read next message
                     LOG_DEBUG("Waiting for next message.");
-                    start();
+                    run();
                 }
 
                 if (conn_type == feeder) {

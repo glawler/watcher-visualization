@@ -19,7 +19,7 @@ namespace watcher {
              */
             SqliteDatabase(const std::string& path);
 
-            void storeEvent(const std::string& addr, event::MessagePtr msg);
+            void storeEvent(event::MessagePtr msg);
             void getEvents( boost::function<void(event::MessagePtr)> output, Timestamp t, Direction d, unsigned int count );
 
         private:
