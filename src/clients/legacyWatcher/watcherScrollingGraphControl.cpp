@@ -8,7 +8,7 @@
 
 #include "watcherScrollingGraphControl.h"
 #include "graphPlot.h"
-#include "marshal.h"
+// #include "marshal.h"
 
 using namespace std;
 using namespace watcher;
@@ -40,49 +40,51 @@ WatcherScrollingGraphControl::~WatcherScrollingGraphControl()
     TRACE_EXIT();
 }
 
-void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned int nodeAddress, const unsigned char *payload)
+void WatcherScrollingGraphControl::unmarshalWatcherGraphMessage(const unsigned int /*nodeAddress*/, const unsigned char */*payload*/)
 {
     TRACE_ENTER();
 
-    char labelBuf[260];     // meh. 
-    unsigned int numOfPoints;
-    bool newPlot=false;
+    LOG_ERROR("scrolling graphs not currently supported in legacyWatcher..."); 
 
-    UNMARSHALSTRINGSHORT(payload, labelBuf);
-    string label(labelBuf);
-    UNMARSHALLONG(payload, numOfPoints);
+    // char labelBuf[260];     // meh. 
+    // unsigned int numOfPoints;
+    // bool newPlot=false;
 
-    LOG_DEBUG("Got Watcher graph message from node " << (0xFF & nodeAddress) << " with "  
-           <<  numOfPoints << " data points."); 
+    // UNMARSHALSTRINGSHORT(payload, labelBuf);
+    // string label(labelBuf);
+    // UNMARSHALLONG(payload, numOfPoints);
 
-    GraphPlotMap::iterator gp=graphPlotMap.find(label);
-    if (gp==graphPlotMap.end())
-    {
-        createDialog(label);
-        newPlot=true;
-    }
+    // LOG_DEBUG("Got Watcher graph message from node " << (0xFF & nodeAddress) << " with "  
+    //        <<  numOfPoints << " data points."); 
 
-    for (unsigned int i=0; i < numOfPoints; i++)
-    {
-        char floatBuf[64];
-        UNMARSHALSTRINGSHORT(payload, floatBuf);
-        try
-        {
-            float tmpFloat=boost::lexical_cast<float>(static_cast<const char*>(floatBuf));
-            graphPlotMap[label]->addDataPoint(nodeAddress, tmpFloat);
+    // GraphPlotMap::iterator gp=graphPlotMap.find(label);
+    // if (gp==graphPlotMap.end())
+    // {
+    //     createDialog(label);
+    //     newPlot=true;
+    // }
 
-            LOG_DEBUG("New data point: " << label << ":" << nodeAddress << " ("  
-                    << (0xFF & nodeAddress) << "):" << tmpFloat);
-        }
-        catch (boost::bad_lexical_cast &e)
-        {
-            LOG_ERROR("Unable to parse incoming graph floating point value from testnode " 
-                    << (0xFF & nodeAddress) << ". Error: " << e.what());
-        }
-    }
+    // for (unsigned int i=0; i < numOfPoints; i++)
+    // {
+    //     char floatBuf[64];
+    //     UNMARSHALSTRINGSHORT(payload, floatBuf);
+    //     try
+    //     {
+    //         float tmpFloat=boost::lexical_cast<float>(static_cast<const char*>(floatBuf));
+    //         graphPlotMap[label]->addDataPoint(nodeAddress, tmpFloat);
 
-    if (newPlot)
-        graphPlotMap[label]->curveAndLegendVisible(nodeAddress, false);  // new plots are invisible until clicked in the GUI
+    //         LOG_DEBUG("New data point: " << label << ":" << nodeAddress << " ("  
+    //                 << (0xFF & nodeAddress) << "):" << tmpFloat);
+    //     }
+    //     catch (boost::bad_lexical_cast &e)
+    //     {
+    //         LOG_ERROR("Unable to parse incoming graph floating point value from testnode " 
+    //                 << (0xFF & nodeAddress) << ". Error: " << e.what());
+    //     }
+    // }
+
+    // if (newPlot)
+    //     graphPlotMap[label]->curveAndLegendVisible(nodeAddress, false);  // new plots are invisible until clicked in the GUI
 
     TRACE_EXIT();
 }

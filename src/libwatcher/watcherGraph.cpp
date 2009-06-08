@@ -530,6 +530,30 @@ bool WatcherGraph::createNode(const NodeIdentifier &id, boost::graph_traits<Grap
     return true;
 }
 
+bool WatcherGraph::saveConfig() const
+{
+    TRACE_ENTER();
+    graph_traits<Graph>::edge_iterator ei, eEnd;
+    for(tie(ei, eEnd)=edges(theGraph); ei!=eEnd; ++ei)
+    {
+        theGraph[*ei].displayInfo->saveConfiguration(); 
+
+        BOOST_FOREACH(const LabelDisplayInfoPtr &ldip, theGraph[*ei].labels)
+            ldip->saveConfiguration();
+    }
+        
+    graph_traits<Graph>::vertex_iterator vi, vEnd;
+    for(tie(vi, vEnd)=vertices(theGraph); vi!=vEnd; ++vi)
+    {
+        theGraph[*vi].displayInfo->saveConfiguration();
+
+        BOOST_FOREACH(const LabelDisplayInfoPtr &ldip, theGraph[*vi].labels)
+            ldip->saveConfiguration();
+    }
+
+    TRACE_EXIT_RET_BOOL(true); 
+    return true;
+}
 std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph &watcherGraph)
 {
     TRACE_ENTER();

@@ -132,6 +132,13 @@ namespace watcher
             bool findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retVal);
 
             /**
+             * Save current configuration of all labels, nodes, and edges to the SingletonCconfig 
+             * instance. Call this before saving system configuration to a cfg file. 
+             */
+            bool saveConfig() const; 
+
+
+            /**
              * Write an instance of this class as a human readable stream to the otream given
              */
             virtual std::ostream &toStream(std::ostream &out) const;

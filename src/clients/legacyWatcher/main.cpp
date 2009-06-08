@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     SingletonConfig::setConfigFile(configFilename);
-    SingletonConfig::lock();
+    SingletonConfig::unlock();
 
     string logConf("watcher.log.properties");
     if (!config.lookupValue("logProperties", logConf))
@@ -84,7 +84,12 @@ int main(int argc, char *argv[])
     glutInit(&argc, argv); 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
-    ui.manetGLViewWindow->loadConfiguration(); 
+    if (!ui.manetGLViewWindow->loadConfiguration())
+    {
+        LOG_FATAL("Error in cfg file, unable to continue"); 
+        // write out what we have.
+        SingletonConfig::saveConfig();
+    }
 
     window->show();
 

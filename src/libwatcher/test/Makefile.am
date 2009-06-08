@@ -1,4 +1,6 @@
 
+CPPFLAGS += -Wno-deprecated
+
 CPPFLAGS += -I../..
 CPPFLAGS += -I../../../include
 CPPFLAGS += -I../../logger

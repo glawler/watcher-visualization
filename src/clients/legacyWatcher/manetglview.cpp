@@ -2,10 +2,14 @@
 #include <QtOpenGL>
 #include <math.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/foreach.hpp>
+#include <values.h>  // DBL_MAX
+#include <GL/glut.h>
+
+#include "libwatcher/watcherGraph.h"
 
 #include "manetglview.h"
 #include "watcherScrollingGraphControl.h"
-// #include "legacyWatcher/legacyWatcher.h"
 #include "singletonConfig.h"
 #include "backgroundImage.h"
 
@@ -13,11 +17,405 @@ INIT_LOGGER(manetGLView, "manetGLView");
 
 using namespace watcher;
 using namespace watcher::event;
-using namespace legacyWatcher;
 using namespace std;
+using namespace libconfig;
+using namespace boost;
+using namespace boost::graph;
+using namespace boost::date_time;
 using namespace boost::posix_time;
 
-static int globalAutoCenterNodesFlag = 0; 
+/*
+ * Get the world coordinate (x,y,z) for the projected coordinates (x, y)
+ * at the world coordinate "z" using the given transformation matrices.
+ */
+int manetGLView::xyAtZForModelProjViewXY(
+        XYWorldZToWorldXWorldY *xyz,
+        size_t xyz_count,
+        GLdouble modelmatrix[16], 
+        GLdouble projmatrix[16], 
+        GLint viewport[4])
+{
+    int ret;
+    GLdouble modelmatrixinv[16];
+    // get camera position in world coordinates
+    invert4x4(modelmatrixinv, modelmatrix);
+    for(;;)
+    {
+        if(xyz_count)
+        {
+            GLdouble wx, wy, wz;
+            --xyz_count;
+            if(gluUnProject(
+                        xyz[xyz_count].x, 
+                        xyz[xyz_count].y,
+                        0,
+                        modelmatrix, 
+                        projmatrix, 
+                        viewport, 
+                        &wx, &wy, &wz) == GL_TRUE)
+            {
+                if(modelmatrixinv[15] != 0.0)
+                {
+                    // camera position is modelmatrixinv*[0 0 0 1]
+                    GLdouble cx = modelmatrixinv[12]/modelmatrixinv[15];
+                    GLdouble cy = modelmatrixinv[13]/modelmatrixinv[15];
+                    GLdouble cz = modelmatrixinv[14]/modelmatrixinv[15];
+                    // get (x, y) at the given z plane
+                    GLdouble ratio = (cz)/(cz - wz);
+                    xyz[xyz_count].worldX_ret = (cx - wx)*ratio;
+                    xyz[xyz_count].worldY_ret = (cy - wy)*ratio;
+                }
+                else
+                {
+                    // orthographic projection, camera essentially at infinity.
+                    xyz[xyz_count].worldX_ret = wx;
+                    xyz[xyz_count].worldY_ret = wy;
+                }
+            }
+            else
+            {
+                ret = EINVAL;
+                break;
+            }
+        }
+        else
+        {
+            ret = 0;
+            break;
+        }
+    }
+    return ret;
+} // xyAtZForModelProjViewXY
+
+void manetGLView::invert4x4(GLdouble dst[16], GLdouble const src[16])
+{
+    // use Cramer's Method
+    // From Intel document AP-928 "Streaming SIMD Extensions - Inverse
+    // of 4x4 Matrix",
+    // <http://www.intel.com/design/pentiumiii/sml/24504301.pdf>
+    GLdouble tmp[16];
+    GLdouble det;
+    size_t i;
+
+    // pairs for first 8 elements 
+    // From here on, we use the transpose of
+    GLdouble pair0 = src[10]*src[15];
+    GLdouble pair1 = src[14]*src[11];
+    GLdouble pair2 = src[6]*src[15];
+    GLdouble pair3 = src[14]*src[7];
+    GLdouble pair4 = src[6]*src[11];
+    GLdouble pair5 = src[10]*src[7];
+    GLdouble pair6 = src[2]*src[15];
+    GLdouble pair7 = src[14]*src[3];
+    GLdouble pair8 = src[2]*src[11];
+    GLdouble pair9 = src[10]*src[3];
+    GLdouble pair10 = src[2]*src[7];
+    GLdouble pair11 = src[6]*src[3];
+    // pairs for second 8 elements
+    GLdouble pair12 = src[8]*src[13];
+    GLdouble pair13 = src[12]*src[9];
+    GLdouble pair14 = src[4]*src[13];
+    GLdouble pair15 = src[12]*src[5];
+    GLdouble pair16 = src[4]*src[9];
+    GLdouble pair17 = src[8]*src[5];
+    GLdouble pair18 = src[0]*src[13];
+    GLdouble pair19 = src[12]*src[1];
+    GLdouble pair20 = src[0]*src[9];
+    GLdouble pair21 = src[8]*src[1];
+    GLdouble pair22 = src[0]*src[5];
+    GLdouble pair23 = src[4]*src[1];
+
+    // first 8 elements
+    tmp[0] = (pair0*src[5]) + (pair3*src[9]) + (pair4*src[13]);
+    tmp[0] -= (pair1*src[5]) + (pair2*src[9]) + (pair5*src[13]);
+    tmp[1] = (pair1*src[1]) + (pair6*src[9]) + (pair9*src[13]);
+    tmp[1] -= (pair0*src[1]) + (pair7*src[9]) + (pair8*src[13]);
+    tmp[2] = (pair2*src[1]) + (pair7*src[5]) + (pair10*src[13]);
+    tmp[2] -= (pair3*src[1]) + (pair6*src[5]) + (pair11*src[13]);
+    tmp[3] = (pair5*src[1]) + (pair8*src[5]) + (pair11*src[9]);
+    tmp[3] -= (pair4*src[1]) + (pair9*src[5]) + (pair10*src[9]);
+    tmp[4] = (pair1*src[4]) + (pair2*src[8]) + (pair5*src[12]);
+    tmp[4] -= (pair0*src[4]) + (pair3*src[8]) + (pair4*src[12]);
+    tmp[5] = (pair0*src[0]) + (pair7*src[8]) + (pair8*src[12]);
+    tmp[5] -= (pair1*src[0]) + (pair6*src[8]) + (pair9*src[12]);
+    tmp[6] = (pair3*src[0]) + (pair6*src[4]) + (pair11*src[12]);
+    tmp[6] -= (pair2*src[0]) + (pair7*src[4]) + (pair10*src[12]);
+    tmp[7] = (pair4*src[0]) + (pair9*src[4]) + (pair10*src[8]);
+    tmp[7] -= (pair5*src[0]) + (pair8*src[4]) + (pair11*src[8]);
+    // second 8 elements
+    tmp[8] = (pair12*src[7]) + (pair15*src[11]) + (pair16*src[15]);
+    tmp[8] -= (pair13*src[7]) + (pair14*src[11]) + (pair17*src[15]);
+    tmp[9] = (pair13*src[3]) + (pair18*src[11]) + (pair21*src[15]);
+    tmp[9] -= (pair12*src[3]) + (pair19*src[11]) + (pair20*src[15]);
+    tmp[10] = (pair14*src[3]) + (pair19*src[7]) + (pair22*src[15]);
+    tmp[10] -= (pair15*src[3]) + (pair18*src[7]) + (pair23*src[15]);
+    tmp[11] = (pair17*src[3]) + (pair20*src[7]) + (pair23*src[11]);
+    tmp[11] -= (pair16*src[3]) + (pair21*src[7]) + (pair22*src[11]);
+    tmp[12] = (pair14*src[10]) + (pair17*src[14]) + (pair13*src[6]);
+    tmp[12] -= (pair16*src[14]) + (pair12*src[6]) + (pair15*src[10]);
+    tmp[13] = (pair20*src[14]) + (pair12*src[2]) + (pair19*src[10]);
+    tmp[13] -= (pair18*src[10]) + (pair21*src[14]) + (pair13*src[2]);
+    tmp[14] = (pair18*src[6]) + (pair23*src[14]) + (pair15*src[2]);
+    tmp[14] -= (pair22*src[14]) + (pair14*src[2]) + (pair19*src[6]);
+    tmp[15] = (pair22*src[10]) + (pair16*src[2]) + (pair21*src[6]);
+    tmp[15] -= (pair20*src[6]) + (pair23*src[10]) + (pair17*src[2]);
+
+    // determinent
+    det = (src[0]*tmp[0]) + (src[4]*tmp[1]) + (src[8]*tmp[2]) +
+        (src[12]*tmp[3]);
+    // adjust inverse
+    for(i = 0;i < 16; i++) 
+    {
+        tmp[i] /= det;
+    }
+#if 0
+    // check
+    {
+#  define MULV(i,j) ((src[((i)*4)]*tmp[(j)]) + (src[((i)*4)+1]*tmp[(j)+4]) + \
+        (src[((i)*4)+2]*tmp[(j)+8]) + (src[((i)*4)+3]*tmp[(j)+12]))
+        GLdouble foo[16] =
+        {
+            MULV(0,0), MULV(0,1), MULV(0,2), MULV(0,3), 
+            MULV(1,0), MULV(1,1), MULV(1,2), MULV(1,3), 
+            MULV(2,0), MULV(2,1), MULV(2,2), MULV(2,3), 
+            MULV(3,0), MULV(3,1), MULV(3,2), MULV(3,3)
+        }; 
+        fprintf(stderr,
+                "%s: --------------------------------------------\n",
+                __func__);
+        fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                __func__, src[0], src[4], src[8], src[12],
+                tmp[0], tmp[4], tmp[8], tmp[12],
+                foo[0], foo[4], foo[8], foo[12]);
+        fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf  X  "
+                "%6.2lf %6.2lf %6.2lf %6.2lf  =  "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                __func__, src[1], src[5], src[9], src[13],
+                tmp[1], tmp[5], tmp[9], tmp[13],
+                foo[1], foo[5], foo[9], foo[13]);
+        fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                __func__, src[2], src[6], src[10], src[14],
+                tmp[2], tmp[6], tmp[10], tmp[14],
+                foo[2], foo[6], foo[10], foo[14]);
+        fprintf(stderr, "%s: %6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf     "
+                "%6.2lf %6.2lf %6.2lf %6.2lf\n", 
+                __func__, src[3], src[7], src[11], src[15],
+                tmp[3], tmp[7], tmp[11], tmp[15],
+                foo[3], foo[7], foo[11], foo[15]);
+        fprintf(stderr,
+                "%s: --------------------------------------------\n",
+                __func__);
+    }
+# undef MULV
+#endif
+    memcpy(dst, tmp, 16*sizeof(GLdouble));
+    return;
+} /* invert4x4 */
+//
+// Get a box at z that can be seen though the given viewport
+//
+// (assumes viewport[0] = viewport[1] = 0)
+//
+// returns non-zero on success.
+//
+int manetGLView::visibleDrawBoxAtZ(
+        GLint *viewport,
+        GLdouble z,
+        GLdouble modelmatrix[16],
+        GLdouble projmatrix[16],
+        double maxRectAspectRatio,
+        double *xMinRet,
+        double *yMinRet,
+        double *xMaxRet,
+        double *yMaxRet)
+{
+    int ret;
+    // Set up a border in the screen between the edges and the
+    // drawing area for prettiness sake. The border goes away
+    // for width or height less then 80. It then grows as 10% of
+    // the width greater than 80 until it reaches a maximum
+    // width of 50. These values were determined via rectal
+    // extraction but the results seems pleasing to the eye.
+    int borderX = viewport[2] < 80 ? 0 : viewport[2] < 580 ? (viewport[2] - 80) / 20 : 70;
+    int borderY = viewport[3] < 80 ? 0 : viewport[3] < 580 ? (viewport[3] - 80) / 20 : 70;
+    XYWorldZToWorldXWorldY xyz[4] =
+    {
+        // corners ll, lr, ul, ur
+        { borderX, borderY, z, 0, 0 },
+        { viewport[2] - borderX, borderY, z, 0, 0 },
+        { viewport[2] - borderX, viewport[3] - borderY, z, 0, 0 },
+        { borderX, viewport[3] - borderY, z, 0, 0 },
+    };
+    // get the drawing area corners with no shifting or scaling
+    if(xyAtZForModelProjViewXY(xyz, sizeof(xyz) / sizeof(xyz[0]),
+                modelmatrix, projmatrix, viewport) ==  0)
+    {
+        Quadrangle q = 
+        { {
+              { xyz[0].worldX_ret, xyz[0].worldY_ret },
+              { xyz[1].worldX_ret, xyz[1].worldY_ret },
+              { xyz[2].worldX_ret, xyz[2].worldY_ret },
+              { xyz[3].worldX_ret, xyz[3].worldY_ret }
+          } };
+        maxRectangle(&q, maxRectAspectRatio, xMinRet, yMinRet, xMaxRet, yMaxRet);
+        ret = !0;
+    }
+    else
+    {
+        ret = 0;
+    }
+    return ret;
+} // visibleDrawBoxAtZ
+
+void manetGLView::maxRectangle(
+        Quadrangle const *q,
+        double , // maxRectAspectRatio,
+        double *xMinRet,
+        double *yMinRet,
+        double *xMaxRet,
+        double *yMaxRet)
+{
+    size_t i;
+    QuadranglePoint const *p = q->p;
+    double a01 = atan((p[1].y - p[0].y)/(p[1].x - p[0].x));
+    double a12 = atan((p[2].y - p[1].y)/(p[2].x - p[1].x));
+    double a23 = atan((p[3].y - p[2].y)/(p[3].x - p[2].x));
+    double a30 = atan((p[0].y - p[3].y)/(p[0].x - p[3].x));
+    // short circuit rectangles that are aligned with the x and y axis.
+    // (if all lines are within 10 degrees of horizontal or vertical,
+    // the rectanglish shape is assumed to be aligned enough).
+    if((a01 < (M_PI/18) && a01 > (-M_PI/18)) &&
+            (a23 < (M_PI/18) && a23 > (-M_PI/18)) &&
+            (a12 > ((M_PI/2) - (M_PI/18)) || a12 < ((-M_PI/2) + (M_PI/18))) &&
+            (a30 > ((M_PI/2) - (M_PI/18)) || a30 < ((-M_PI/2) + (M_PI/18))))
+
+    {
+        // got an aligned rectanglish shape
+        fprintf(stderr, "aligned (%g,%g,%g,%g) (%g,%g)-(%g,%g)-(%g,%g)-(%g,%g)\n",
+                round(a01*180/M_PI), round(a12*180/M_PI), round(a23*180/M_PI), round(a30*180/M_PI),
+                p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
+        if(p[0].x < p[1].x)
+        {
+            *xMinRet = p[0].x;
+            *xMaxRet = p[1].x;
+        }
+        else
+        {
+            *xMinRet = p[1].x;
+            *xMaxRet = p[0].x;
+        }
+        if(p[0].y < p[2].y)
+        {
+            *yMinRet = p[0].y;
+            *yMaxRet = p[2].y;
+        }
+        else
+        {
+            *yMinRet = p[2].y;
+            *yMaxRet = p[0].y;
+        }
+    }
+    else if((a12 < (M_PI/18) && a12 > (-M_PI/18)) &&
+            (a30 < (M_PI/18) && a30 > (-M_PI/18)) &&
+            (a01 > ((M_PI/2) - (M_PI/18)) || a01 < ((-M_PI/2) + (M_PI/18))) &&
+            (a23 > ((M_PI/2) - (M_PI/18)) || a23 < ((-M_PI/2) + (M_PI/18))))
+    {
+        // got an aligned rectanglish shape rotated 90 degrees from the
+        // one above
+        fprintf(stderr, "90deg aligned (%g,%g,%g,%g) (%g,%g)-(%g,%g)-(%g,%g)-(%g,%g)\n",
+                round(a01*180/M_PI), round(a12*180/M_PI), round(a23*180/M_PI), round(a30*180/M_PI),
+                p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
+        if(p[0].x < p[2].x)
+        {
+            *xMinRet = p[0].x;
+            *xMaxRet = p[2].x;
+        }
+        else
+        {
+            *xMinRet = p[2].x;
+            *xMaxRet = p[0].x;
+        }
+        if(p[0].y < p[1].y)
+        {
+            *yMinRet = p[0].y;
+            *yMaxRet = p[1].y;
+        }
+        else
+        {
+            *yMinRet = p[1].y;
+            *yMaxRet = p[0].y;
+        }
+    }
+    else
+    {
+        // dang, got something lopsided.
+#if 0
+        //
+        // I think there are thirty-two cases to check of which four
+        // would produce valid solutions - these solutions would then
+        // have to be simply compared to find the true maximum.
+        //
+        // Just figuring out the cases has already taken me too long so
+        // I'm punting.
+        //
+        static size_t nextClockwise[] = { 1, 2, 3, 0 };
+        static size_t nextCounterClockwise[] = { 3, 0, 1, 2 };
+        size_t *next;
+
+        // find leftmost point
+        size_t leftmost_i = 0;
+        for(i = 1; i < 4; ++i)
+        {
+            if(p[i].x < p[leftmost_i].x)
+            {
+                leftmost_i = i;
+            }
+        }
+        // find direction
+        next = (p[nextClockwise[leftmost_i]].y > p[nextCounterClockwise[leftmost_i]].y) ? nextClockwise : nextCounterClockwise;
+#else
+        // dumb but serviceable way - just make the returned rectangle
+        // half size of the enclosing rectangle.
+        double xMin = p[0].x;
+        double yMin = p[0].y;
+        double xMax = p[0].x;
+        double yMax = p[0].y;
+        fprintf(stderr, "oddball (%g,%g,%g,%g) (%g,%g)-(%g,%g)-(%g,%g)-(%g,%g)\n",
+                round(a01*180/M_PI), round(a12*180/M_PI), round(a23*180/M_PI), round(a30*180/M_PI),
+                p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
+        for(i = 1; i < 4; ++i)
+        {
+            if(p[i].x < xMin)
+            {
+                xMin = p[i].x;
+            }
+            if(p[i].y < yMin)
+            {
+                yMin = p[i].y;
+            }
+            if(p[i].x > xMax)
+            {
+                xMax = p[i].x;
+            }
+            if(p[i].y > yMax)
+            {
+                yMax = p[i].y;
+            }
+        }
+        *xMinRet = xMin + ((xMax - xMin)/4);
+        *yMinRet = yMin + ((yMax - yMin)/4);
+        *xMaxRet = xMax - ((xMax - xMin)/4);
+        *yMaxRet = yMax - ((yMax - yMin)/4);
+#endif
+    }
+    return;
+} // maxRectangle
+
 //
 // Make the (xMin,yMin)-(xMax,yMax) rectangle on the xy-plane at
 // z visible on the Manet screen
@@ -82,34 +480,34 @@ void manetGLView::scaleAndShiftToSeeOnManet(
         glPushMatrix();
         glLoadIdentity();
         glTranslatef(0.0, 0.0, -20.0);
-        glScalef(1.0, 1.0, manetAdj->scaleZ); // getting scale x and y so start with unity
-        glRotatef(manetAdj->angleX, 1.0, 0.0, 0.0);
-        glRotatef(manetAdj->angleY, 0.0, 1.0, 0.0);
-        glRotatef(manetAdj->angleZ, 0.0, 0.0, 1.0);
-        glTranslatef(0.0, 0.0, manetAdj->shiftZ + 3); // getting shift x and y so start with zero
+        glScalef(1.0, 1.0, manetAdj.scaleZ); // getting scale x and y so start with unity
+        glRotatef(manetAdj.angleX, 1.0, 0.0, 0.0);
+        glRotatef(manetAdj.angleY, 0.0, 1.0, 0.0);
+        glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
+        glTranslatef(0.0, 0.0, manetAdj.shiftZ + 3); // getting shift x and y so start with zero
         glGetDoublev(GL_MODELVIEW_MATRIX, modelmatrix);
         glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
         glPopMatrix();
         if(visibleDrawBoxAtZ(viewport, z, modelmatrix, projmatrix, nodesWidth/nodesHeight, &wXMin, &wYMin, &wXMax, &wYMax)) 
         {
-            static time_t tick = 0;
-            time_t now = time(0);
+            // static time_t tick = 0;
+            // time_t now = time(0);
             // get shift and scale
-            manetAdj->shiftX = ((wXMin + wXMax) / 2) - ((xMin + xMax) / 2);
-            manetAdj->shiftY = ((wYMin + wYMax) / 2) - ((yMin + yMax) / 2);
-            manetAdj->scaleX = (wXMax - wXMin) / nodesWidth;
-            manetAdj->scaleY = (wYMax - wYMin) / nodesHeight;
-            if(manetAdj->scaleX > manetAdj->scaleY)
-                manetAdj->scaleX = manetAdj->scaleY;
+            manetAdj.shiftX = ((wXMin + wXMax) / 2) - ((xMin + xMax) / 2);
+            manetAdj.shiftY = ((wYMin + wYMax) / 2) - ((yMin + yMax) / 2);
+            manetAdj.scaleX = (wXMax - wXMin) / nodesWidth;
+            manetAdj.scaleY = (wYMax - wYMin) / nodesHeight;
+            if(manetAdj.scaleX > manetAdj.scaleY)
+                manetAdj.scaleX = manetAdj.scaleY;
             else
-                manetAdj->scaleY = manetAdj->scaleX;
+                manetAdj.scaleY = manetAdj.scaleX;
 
             BackgroundImage &bgImage=BackgroundImage::getInstance(); 
             if (bgImage.centerImage())
             {
                 GLfloat x,y,z,w,h;
                 bgImage.getDrawingCoords(x,w,y,h,z);
-                bgImage.setDrawingCoords(manetAdj->shiftX, w, manetAdj->shiftY, h, z); 
+                bgImage.setDrawingCoords(manetAdj.shiftX, w, manetAdj.shiftY, h, z); 
                 bgImage.centerImage(false); 
             }
         }
@@ -159,12 +557,12 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
     // bool includeHierarchy = isActive(HIERARCHY_LAYER); 
 
     // find drawing extents
-    graph_traits<Graph>::vertex_iterator vi, vend;
-    for(tie(vi, vend)=vertices(theGraph); vi!=vend; ++vi)
+    WatcherGraph::vertexIterator vi, vend;
+    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
     {
-        WatcherGraphNode &n=theGraph[*vi]; 
+        WatcherGraphNode &n=wGraph.theGraph[*vi]; 
         GLdouble x, y, z; 
-        gps2OpenGLPixels(n.gpsData->x, n.gpsData->y, n.gpsData->z, x, y, z); 
+        gps2openGLPixels(n.gpsData->dataFormat, n.gpsData->x, n.gpsData->y, n.gpsData->z, x, y, z); 
 
         double r = 0;
         if(includeAntenna)
@@ -197,7 +595,6 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
 void manetGLView::getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
 {
     GLdouble z;
-    int i;
     GLdouble modelmatrix[16];
     GLdouble projmatrix[16];
     GLint viewport[4];
@@ -205,36 +602,37 @@ void manetGLView::getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, -20.0);
-    glScalef(manetAdj->scaleX, manetAdj->scaleY, manetAdj->scaleZ);
-    glRotatef(manetAdj->angleX, 1.0, 0.0, 0.0);
-    glRotatef(manetAdj->angleY, 0.0, 1.0, 0.0);
-    glRotatef(manetAdj->angleZ, 0.0, 0.0, 1.0);
-    glTranslatef(manetAdj->shiftX, manetAdj->shiftY, manetAdj->shiftZ + 3);
+    glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
+    glRotatef(manetAdj.angleX, 1.0, 0.0, 0.0);
+    glRotatef(manetAdj.angleY, 0.0, 1.0, 0.0);
+    glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
+    glTranslatef(manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ + 3);
     glGetDoublev(GL_MODELVIEW_MATRIX, modelmatrix);
     glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
     glGetIntegerv(GL_VIEWPORT, viewport);
     glPopMatrix();
 
-    if(globalManet)
-    {
-        for(i = 0; ; ++i)
-        {
-            if(i == globalManet->numnodes)
-            {
-                z = -20;
-                break;
-            }
-            if(globalGpsValidFlag[i])
-            {
-                z = globalManet->nlist[i].z;
-                break;
-            }
-        }
-    }
-    else
-    {
-        z = -20;
-    }
+    // if(globalManet)
+    // {
+    //     for(i = 0; ; ++i)
+    //     {
+    //         if(i == globalManet->numnodes)
+    //         {
+    //             z = -20;
+    //             break;
+    //         }
+    //         if(globalGpsValidFlag[i])
+    //         {
+    //             z = globalManet->nlist[i].z;
+    //             break;
+    //         }
+    //     }
+    // }
+    // else
+    // {
+    //     z = -20;
+    // }
+    z=-20;
     {
         int xmid = viewport[2] / 2;
         int ymid = viewport[3] / 2;
@@ -284,7 +682,7 @@ void manetGLView::shiftCenterRight()
 void manetGLView::shiftCenterRight(double shift)
 {
     manetAdj.shiftX -= shift;
-    globalAutoCenterNodesFlag=0;
+    autoCenterNodesFlag=false;
 } 
 
 void manetGLView::shiftCenterLeft()
@@ -296,7 +694,7 @@ void manetGLView::shiftCenterLeft()
 void manetGLView::shiftCenterLeft(double shift)
 {
     manetAdj.shiftX += shift;
-    globalAutoCenterNodesFlag=0;
+    autoCenterNodesFlag=false;
 } 
 
 void manetGLView::shiftCenterDown()
@@ -308,7 +706,7 @@ void manetGLView::shiftCenterDown()
 void manetGLView::shiftCenterDown(double shift)
 {
     manetAdj.shiftY += shift;
-    globalAutoCenterNodesFlag=0;
+    autoCenterNodesFlag=false;
 } 
 
 void manetGLView::shiftCenterUp()
@@ -320,7 +718,7 @@ void manetGLView::shiftCenterUp()
 void manetGLView::shiftCenterUp(double shift)
 {
     manetAdj.shiftY -= shift;
-    globalAutoCenterNodesFlag=0;
+    autoCenterNodesFlag=false;
 } 
 
 void manetGLView::shiftCenterIn()
@@ -332,7 +730,7 @@ void manetGLView::shiftCenterIn()
 void manetGLView::shiftCenterIn(double shift)
 {
     manetAdj.shiftZ -= shift;
-    globalAutoCenterNodesFlag=0;
+    autoCenterNodesFlag=false;
 } 
 
 void manetGLView::shiftCenterOut()
@@ -344,7 +742,7 @@ void manetGLView::shiftCenterOut()
 void manetGLView::shiftCenterOut(double shift)
 {
     manetAdj.shiftZ += shift;
-    globalAutoCenterNodesFlag=0;
+    autoCenterNodesFlag=false;
 } 
 
 void manetGLView::viewpointReset(void)
@@ -358,27 +756,23 @@ void manetGLView::zoomOut()
     if (manetAdj.scaleX < 0.001) 
         manetAdj.scaleX = 0.001;
     manetAdj.scaleY = manetAdj.scaleX;
-    globalAutoCenterNodesFlag = 0;
+    autoCenterNodesFlag = 0;
 }
 
 void manetGLView::zoomIn()
 {
     manetAdj.scaleX *= 1.05;
     manetAdj.scaleY = manetAdj.scaleX;
-    globalAutoCenterNodesFlag = 0;
+    autoCenterNodesFlag = 0;
 }
 
 void manetGLView::compressDistance()
 {
     manetAdj.scaleZ -= 0.1;
     if (manetAdj.scaleZ < 0.02)
-    {
         manetAdj.scaleZ = 0.02;
-    }
-    if(globalAutoCenterNodesFlag && globalManet)
-    {
+    if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
-    }
 } 
 
 void manetGLView::expandDistance()
@@ -392,93 +786,75 @@ void manetGLView::expandDistance()
 
 void manetGLView::textZoomReset(void)
 {
-    scaleText[NODE_DISPLAY_MANET] = 0.08;
+    scaleText= 0.08;
 }
 
 void manetGLView::textZoomIn(void)
 {
-    scaleText[NODE_DISPLAY_MANET] *= TEXT_SCALE_ZOOM_FACTOR;
+    scaleText*= TEXT_SCALE_ZOOM_FACTOR;
 }
 
 void manetGLView::textZoomOut(void)
 {
-    scaleText[NODE_DISPLAY_MANET] /= TEXT_SCALE_ZOOM_FACTOR;
+    scaleText/= TEXT_SCALE_ZOOM_FACTOR;
 }
 
 void manetGLView::arrowZoomReset(void)
 {
-    scaleLine[NODE_DISPLAY_MANET] = 1.0;
+    scaleLine= 1.0;
 }
 
 void manetGLView::arrowZoomIn(void)
 {
-    scaleLine[NODE_DISPLAY_MANET] *= ARROW_SCALE_ZOOM_FACTOR;
+    scaleLine*= ARROW_SCALE_ZOOM_FACTOR;
 }
 
 void manetGLView::arrowZoomOut(void)
 {
-    scaleLine[NODE_DISPLAY_MANET] /= ARROW_SCALE_ZOOM_FACTOR;
+    scaleLine/= ARROW_SCALE_ZOOM_FACTOR;
 }
 
 void manetGLView::rotateX(float deg)
 {
     manetAdj.angleX += deg;
     while(manetAdj.angleX >= 360.0)
-    {
         manetAdj.angleX -= 360.0;
-    }
     while(manetAdj.angleX < 0)
-    {
         manetAdj.angleX += 360.0;
-    }
-    if(globalAutoCenterNodesFlag && globalManet)
-    {
+    if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
-    }
 } 
 
 void manetGLView::rotateY(float deg)
 {
     manetAdj.angleY += deg;
     while(manetAdj.angleY >= 360.0)
-    {
         manetAdj.angleY -= 360.0;
-    }
     while(manetAdj.angleY < 0)
-    {
         manetAdj.angleY += 360.0;
-    }
-    if(globalAutoCenterNodesFlag && globalManet)
-    {
+    if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
-    }
 } 
 
 void manetGLView::rotateZ(float deg)
 {
     manetAdj.angleZ += deg;
     while(manetAdj.angleZ >= 360.0)
-    {
         manetAdj.angleZ -= 360.0;
-    }
     while(manetAdj.angleZ < 0)
-    {
         manetAdj.angleZ += 360.0;
-    }
-    if(globalAutoCenterNodesFlag && globalManet)
-    {
+    if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
-    }
 } 
 
-void manetGLView::gps2openGLPixels(const double x, const double y, const double z, GLdouble &x, GLdouble &y, GLdouble &z) 
+void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const double inx, const double iny, const double inz, GLdouble &x, GLdouble &y, GLdouble &z) 
 {
     TRACE_ENTER();
 
     // GTL - this should be done when the message is recv'd - not every time we need to 
     // compute the points - which is a whole hell of a lot of times.
 
-    if (gps->dataFormat==GPSMessage::UTM)
+    if (format==GPSMessage::UTM)
     {
         //
         // There is no UTM zone information in the UTM GPS packet, so we assume all data is in a single
@@ -487,7 +863,7 @@ void manetGLView::gps2openGLPixels(const double x, const double y, const double 
         // by the first coord we get. (Nodes are all centered around 0,0 where, 0,0 is defined 
         // by the first coord we receive. 
         //
-        if (gps->y < 91 && gps->x > 0) 
+        if (iny < 91 && inx > 0) 
             LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
 
         static double utmXOffset=0.0, utmYOffset=0.0;
@@ -495,55 +871,64 @@ void manetGLView::gps2openGLPixels(const double x, const double y, const double 
         if (utmOffInit==false)
         {
             utmOffInit=true;
-            utmXOffset=gps->x;
-            utmYOffset=gps->y; 
+            utmXOffset=inx;
+            utmYOffset=iny; 
 
             LOG_INFO("Got first UTM coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" << utmXOffset << " y=" << utmYOffset);
         }
 
-        x=gps->x-utmXOffset;
-        y=gps->y-utmYOffset;    
-        z=gps->z;
+        x=inx-utmXOffset;
+        y=iny-utmYOffset;    
+        z=inz;
 
-        LOG_DEBUG("UTM given locations: lon=" << location->lon << " lat=" << location->lat << " alt=" << location->alt);
-        LOG_DEBUG("UTM node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);
+        // LOG_DEBUG("UTM given locations: lon=" << location->lon << " lat=" << location->lat << " alt=" << location->alt);
+        // LOG_DEBUG("UTM node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);
     }
     else // default to lat/long/alt WGS84
     {
-        if (gps->x > 180)
+        if (inx > 180)
             LOG_WARN("Received GPS data that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
 
-        x=gps->x*GPSScale;
-        y=gps->y*GPSScale;
-        z=gps->z-20;
+        x=inx*gpsScale;
+        y=iny*gpsScale;
+        z=inz-20;
 
         static double xOff=0.0, yOff=0.0;
         static bool xOffInit=false;
         if (xOffInit==false)
         {
             xOffInit=true;
-            xOff=us->x;
-            yOff=us->y;
+            xOff=inx;
+            yOff=iny;
 
             LOG_INFO("Got first Lat/Long coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" 
                     << xOff << " y=" << yOff);
         }
 
-        us->x-=xOff;
-        us->y-=yOff;
+        x-=xOff;
+        y-=yOff;
 
-        LOG_DEBUG("Got GPS: long:" << location->lon << " lat:" << location->lat << " alt:" << location->alt); 
-        LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
+        // LOG_DEBUG("Got GPS: long:" << location->lon << " lat:" << location->lat << " alt:" << location->alt); 
+        // LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
     }
     TRACE_EXIT();
 }
 
-manetGLView::manetGLView(QWidget *parent) : QGLWidget(parent)
+manetGLView::manetGLView(QWidget *parent) : 
+    QGLWidget(parent),
+    autoCenterNodesFlag(false)
 {
     TRACE_ENTER();
-    showPositionFlag=true;
-    manetAdjInit = { 0.0, 0.0, 0.0, .035, .035, .03, 0.0, 0.0, 0.0 }; 
-    messageStream=MessageStream::createNewMessageStream(serverName, service); 
+    // showPositionFlag=true;
+    manetAdjInit.angleX=0.0;
+    manetAdjInit.angleY=0.0;
+    manetAdjInit.angleZ=0.0;
+    manetAdjInit.scaleX=0.035;
+    manetAdjInit.scaleY=0.035;
+    manetAdjInit.scaleZ=0.03;
+    manetAdjInit.shiftX=0.0;
+    manetAdjInit.shiftY=0.0;
+    manetAdjInit.shiftZ=0.0;
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
     TRACE_EXIT();
 }
@@ -554,7 +939,7 @@ manetGLView::~manetGLView()
     TRACE_EXIT();
 }
 
-void manetGLView::loadConfiguration()
+bool manetGLView::loadConfiguration()
 {
     TRACE_ENTER();
 
@@ -570,12 +955,21 @@ void manetGLView::loadConfiguration()
     //
     // Check configuration for GUI settings.
     //
-    singletonConfig &sc=singletonConfig::instance();
-    sc.lock();
-    libconfig::Config &cfg=sc.getConfig();
+    Config &cfg=SingletonConfig::instance();
+    SingletonConfig::lock();
     libconfig::Setting &root=cfg.getRoot();
 
-    string prop="layers";
+    string prop="server";
+    if (!root.lookupValue(prop, serverName))
+    {
+        LOG_FATAL("Please specify the server name in the cfg file");
+        LOG_FATAL("I set the default to localhost, but that may not be what you want."); 
+        root.add(prop, Setting::TypeString)="localhost"; 
+        TRACE_EXIT_RET_BOOL(false); 
+        return false;
+    }
+
+    prop="layers";
     if (!root.exists(prop))
         root.add(prop, libconfig::Setting::TypeGroup);
 
@@ -608,7 +1002,7 @@ void manetGLView::loadConfiguration()
     {
         LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
         if (layers.lookupValue(layerVals[i].prop, boolVal))
-            legacyWatcher::layerToggle(layerVals[i].layer, boolVal);
+            layerToggle(layerVals[i].layer, boolVal);
         else
             layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
         boolVal=false;
@@ -620,225 +1014,205 @@ void manetGLView::loadConfiguration()
     emit undefinedToggled(isActive(UNDEFINED_LAYER)); 
     emit neighborsToggled(isActive(PHYSICAL_LAYER)); 
     emit hierarchyToggled(isActive(HIERARCHY_LAYER));
-    emit routingToggled(isActive(ROUTING_LAYER)
-            emit routingOnehopToggled(isActive(ONE_HOP_ROUTING_LAYER));
-            emit antennaRadiusToggled(isActive(ANTENNARADIUS_LAYER));
-            emit sanityCheckToggled(isActive(SANITY_CHECK_LAYER));
-            emit anomPathsToggled(isActive(ANOMPATHS_LAYER)); 
-            emit correlationToggled(isActive(CORROLATION_LAYER)); 
-            emit alertToggled(isActive(ALERT_LAYER)); 
-            emit correlation3HopToggled(isActive(CORROLATION_3HOP_LAYER)); 
-            emit wormholeRoutingToggled(isActive(ROUTING2_LAYER)); 
-            emit wormholeRoutingOnehopToggled(isActive(ROUTING2_ONE_HOP_LAYER)); 
-            emit normPathsToggled(isActive(NORMAL_PATHS_LAYER)); 
+    emit routingToggled(isActive(ROUTING_LAYER));
+    emit routingOnehopToggled(isActive(ONE_HOP_ROUTING_LAYER));
+    emit antennaRadiusToggled(isActive(ANTENNARADIUS_LAYER));
+    emit sanityCheckToggled(isActive(SANITY_CHECK_LAYER));
+    emit anomPathsToggled(isActive(ANOMPATHS_LAYER)); 
+    emit correlationToggled(isActive(CORROLATION_LAYER)); 
+    emit alertToggled(isActive(ALERT_LAYER)); 
+    emit correlation3HopToggled(isActive(CORROLATION_3HOP_LAYER)); 
+    emit wormholeRoutingToggled(isActive(ROUTING2_LAYER)); 
+    emit wormholeRoutingOnehopToggled(isActive(ROUTING2_ONE_HOP_LAYER)); 
+    emit normPathsToggled(isActive(NORMAL_PATHS_LAYER)); 
 
-            struct 
+    struct 
+    {
+        const char *prop; 
+        bool def; 
+        bool *val; 
+    } boolVals[] = 
+    {
+        { "nodes3d", true, &threeDView },
+        { "monochrome", false, &monochromeMode }, 
+        { "displayBackgroundImage", true, &backgroundImage }
+    }; 
+    for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
+    {
+        prop=boolVals[i].prop;
+        bool boolVal=boolVals[i].def; 
+        if (root.lookupValue(prop, boolVal))
+            *boolVals[i].val=boolVal; 
+        else
+            root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+    }
+    emit threeDViewToggled(threeDView);
+    emit monochromeToggled(monochromeMode);
+    emit backgroundImageToggled(backgroundImage);
+
+    struct 
+    {
+        const char *prop; 
+        float def; 
+        float *val; 
+    } floatVals[] = 
+    {
+        { "scaleText", 1.0, &scaleText }, 
+        { "scaleLine", 1.0, &scaleLine }, 
+        { "layerPadding", 1.0, &layerPadding }, 
+        { "gpsScale", 80000.0, &gpsScale }, 
+        { "antennaRadius", 200.0, &antennaRadius } 
+    }; 
+    for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
+    {
+        prop=floatVals[i].prop;
+        float floatVal=floatVals[i].def; 
+        if (root.lookupValue(prop, floatVal))
+            *floatVals[i].val=floatVal; 
+        else
+            root.add(prop, libconfig::Setting::TypeFloat)=floatVal;
+    }
+
+    //
+    // Load background image settings
+    //
+    prop="backgroundImage";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &s=cfg.lookup(prop);
+
+    prop="imageFile"; 
+    string strVal;
+    if (!s.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
+    {
+        LOG_INFO("watcherBackground:imageFile entry not found (or it equals \"none\") in configuration file, "
+                "disabling background image functionality");
+        if (strVal.empty())
+            s.add(prop, libconfig::Setting::TypeString)="none";
+        toggleBackgroundImage(false);
+        emit enableBackgroundImage(false);
+    }
+    else
+    {
+        BackgroundImage &bgImage=BackgroundImage::getInstance(); 
+        char *ext=rindex(strVal.data(), '.');
+        if (!ext)
+        {
+            LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
+            exit(1);
+        }
+        else if (0==strncasecmp(ext+sizeof(char), "bmp", 3))
+        {
+            if (!bgImage.loadBMPFile(strVal.data()))
             {
-            const char *prop; 
-            bool default; 
-            bool *val; 
-            } boolVals[] = 
-            {
-            { "nodes3d", true, &threeDView },
-            { "monochrome", false, &monochromeMode }, 
-            { "displayBackgroundImage", true, &backgroundImage }
-            }; 
-            for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
-            {
-                prop=boolVals[i].prop;
-                bool boolVal=boolVals[i].default; 
-                if (root.lookupValue(prop, boolVal))
-                    (*val)=boolVal; 
-                else
-                    root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+                LOG_FATAL("Unable to load background BMP image in watcher from file: " << strVal); 
+                TRACE_EXIT_RET_BOOL(false);
+                return false;
             }
-            emit threeDViewToggled(threeDView);
-            emit monochromeToggled(monochromeMode);
-            emit backgroundImageToggled(backgroundImage);
-
-            struct 
+        }
+        else if (0==strncmp("ppm", ext+sizeof(char), 3))
+        {
+            if (!bgImage.loadPPMFile(strVal.data()))
             {
-                const char *prop; 
-                float default; 
-                float *val; 
-            } floatVals[] = 
-            {
-                { "scaleText", 1.0, &scaleText }, 
-                { "scaleLine", 1.0, &scaleLine }, 
-                { "layerPadding", 1.0, &layerPadding }, 
-                { "gpsScale", 80000.0, &gpsScale }, 
-                { "antennaRadius", 200.0, &antennaRadius } 
-            }; 
-            for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
-            {
-                prop=floatVals[i].prop;
-                float floatVal=floatVal[i].default; 
-                if (root.lookupValue(prop, floatVal))
-                    (*val)=floatVal; 
-                else
-                    root.add(prop, libconfig::Setting::TypeFloat)=boolVal;
+                LOG_FATAL("Unable to load background PPM image in watcher from file: " << strVal); 
+                TRACE_EXIT_RET_BOOL(false);
+                return false;
             }
+        }
+    }
+    // bg image location and size.
+    prop="coordinates";
+    float coordVals[5]={0.0, 0.0, 0.0, 0.0, 0.0};
+    if (!s.exists(prop))
+    {
+        s.add(prop, libconfig::Setting::TypeArray);
+        for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
+            s[prop].add(libconfig::Setting::TypeFloat)=coordVals[i];
+    }
+    else
+    {
+        for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
+            coordVals[i]=s[prop][i];
+        BackgroundImage &bg=BackgroundImage::getInstance();
+        bg.setDrawingCoords(coordVals[0], coordVals[1], coordVals[2], coordVals[3], coordVals[4]); 
+    }
 
-            //
-            // Load background image settings
-            //
-            prop="backgroundImage";
-            if (!root.exists(prop))
-                root.add(prop, libconfig::Setting::TypeGroup);
-            libconfig::Setting &s=cfg.lookup(prop);
+    //
+    // Load viewpoint
+    //
+    prop="viewPoint";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &vp=cfg.lookup(prop); 
 
-            prop="imageFile"; 
-            string strVal;
-            if (!s.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
-            {
-                LOG_INFO("watcherBackground:imageFile entry not found (or it equals \"none\") in configuration file, "
-                        "disabling background image functionality");
-                if (strVal.empty())
-                    s.add(prop, libconfig::Setting::TypeString)="none";
-                toggleBackgroundImage(false);
-                emit enableBackgroundImage(false);
-            }
-            else
-            {
-                BackgroundImage &bgImage=BackgroundImage::getInstance(); 
-                char *ext=rindex(strVal.data(), '.');
-                if (!ext)
-                {
-                    LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
-                    exit(1);
-                }
-                else if (0==strncasecmp(ext+sizeof(char), "bmp", 3))
-                {
-                    if (!bgImage.loadBMPFile(strVal.data()))
-                    {
-                        LOG_ERROR("Unable to load background BMP image in watcher from file: " << strVal); 
-                        exit(1); 
-                    }
-                }
-                else if (0==strncmp("ppm", ext+sizeof(char), 3))
-                {
-                    if (!bgImage.loadPPMFile(strVal.data()))
-                    {
-                        LOG_ERROR("Unable to load background PPM image in watcher from file: " << strVal); 
-                        exit(1); 
-                    }
-                }
-            }
-            // bg image location and size.
-            prop="coordinates";
-            float floatVals[5]={0.0, 0.0, 0.0, 0.0, 0.0};
-            if (!s.exists(prop))
-            {
-                s.add(prop, libconfig::Setting::TypeArray);
-                for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
-                    s[prop].add(libconfig::Setting::TypeFloat)=floatVals[i];
-            }
-            else
-            {
-                for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
-                    floatVals[i]=s[prop][i];
-                BackgroundImage &bg=BackgroundImage::getInstance();
-                bg.setDrawingCoords(floatVals[0], floatVals[1], floatVals[2], floatVals[3], floatVals[4]); 
-            }
+    struct 
+    {
+        const char *type;
+        float *data[3];
+    } viewPoints[] =
+    {
+        { "angle", { &manetAdj.angleX, &manetAdj.angleY, &manetAdj.angleZ }},
+        { "scale", { &manetAdj.scaleX, &manetAdj.scaleY, &manetAdj.scaleZ }},
+        { "shift", { &manetAdj.shiftX, &manetAdj.shiftY, &manetAdj.shiftZ }}
+    };
+    for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++)
+    {
+        if (!vp.exists(viewPoints[i].type))
+        {
+            vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
+            for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
+                vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
+        }
+        else
+        {
+            libconfig::Setting &s=vp[viewPoints[i].type];
+            for (int j=0; j<s.getLength(); j++)
+                *viewPoints[i].data[j]=s[j];
+        }
+    }
 
-            // Load GPS data format setting
-            prop="gpsDataFormat";
-            strVal="";
-            if (!root.lookupValue(prop, strVal))
-            {
-                root.add(prop, libconfig::Setting::TypeString);
-                root[prop]="lat-long-alt-WGS84"; // Default
-            }
+    LOG_INFO("Set viewpoint - angle: " << manetAdj.angleX << ", " << manetAdj.angleY << ", " << manetAdj.angleZ);
+    LOG_INFO("Set viewpoint - scale: " << manetAdj.scaleX << ", " << manetAdj.scaleY << ", " << manetAdj.scaleZ);
+    LOG_INFO("Set viewpoint - shift: " << manetAdj.shiftX << ", " << manetAdj.shiftY << ", " << manetAdj.shiftZ);
 
-            if (strVal == "UTM") 
-                legacyWatcher::setGPSDataFormat(legacyWatcher::GPS_DATA_FORMAT_UTM);
-            else if(strVal == "lat-long-alt-WGS84")
-                legacyWatcher::setGPSDataFormat(legacyWatcher::GPS_DATA_FORMAT_DEG_WGS84);
-            else
-            {
-                if (strVal.empty())
-                    LOG_INFO("There is no gpsDataFormat argument in the cfg file, setting to default: lat-long-alt-WGS84")
-                else
-                    LOG_WARN("I don't understand the gpsDataFormat argument in the cfg file, \"" << strVal << "\", setting to default: lat-long-alt-WGS84")
+    // background color
+    prop="backgroundColor";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &bgColSet=cfg.lookup(prop);
 
-                        legacyWatcher::setGPSDataFormat(legacyWatcher::GPS_DATA_FORMAT_DEG_WGS84);
-            }
+    struct 
+    {
+        const char *name;
+        float val;
+    } bgColors[] = 
+    {
+        { "r", 0.0 }, 
+        { "g", 0.0 }, 
+        { "b", 0.0 }, 
+        { "a", 255.0 }
+    };
+    for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
+        if (!bgColSet.lookupValue(bgColors[i].name, bgColors[i].val))
+            bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
 
-            //
-            // Load viewpoint
-            //
-            prop="viewPoint";
-            if (!root.exists(prop))
-                root.add(prop, libconfig::Setting::TypeGroup);
-            libconfig::Setting &vp=cfg.lookup(prop); 
+    glClearColor(bgColors[0].val, bgColors[1].val,bgColors[2].val,bgColors[3].val);
 
-            struct 
-            {
-                const char *type;
-                float *data[3];
-            } viewPoints[] =
-            {
-                { "angle", { &manetAdj.angleX, &manetAdj.angleY, &manetAdj.angleZ }},
-                { "scale", { &manetAdj.scaleX, &manetAdj.scaleY, &manetAdj.scaleZ }},
-                { "shift", { &manetAdj.shiftX, &manetAdj.shiftY, &manetAdj.shiftZ }}
-            };
-            for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++)
-            {
-                if (!vp.exists(viewPoints[i].type))
-                {
-                    vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
-                    for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
-                        vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
-                }
-                else
-                {
-                    libconfig::Setting &s=vp[viewPoints[i].type];
-                    for (int j=0; j<s.getLength(); j++)
-                        *viewPoints[i].data[j]=s[j];
-                }
-            }
+    SingletonConfig::unlock();
 
-            LOG_INFO("Set viewpoint - angle: " << manetAdj.angleX << ", " << manetAdj.angleY << ", " << manetAdj.angleZ);
-            LOG_INFO("Set viewpoint - scale: " << manetAdj.scaleX << ", " << manetAdj.scaleY << ", " << manetAdj.scaleZ);
-            LOG_INFO("Set viewpoint - shift: " << manetAdj.shiftX << ", " << manetAdj.shiftY << ", " << manetAdj.shiftZ);
+    // 
+    // Set up timer callbacks.
+    //
+    QTimer *checkIOTimer = new QTimer(this);
+    QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
+    checkIOTimer->start(100);
 
-            // background color
-            prop="backgroundColor";
-            if (!root.exists(prop))
-                root.add(prop, libconfig::Setting::TypeGroup);
-            libconfig::Setting &bgColSet=cfg.lookup(prop);
+    QTimer *watcherIdleTimer = new QTimer(this);
+    QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
+    watcherIdleTimer->start(33); // Let's shoot for 30 frames a second.
 
-            struct 
-            {
-                const char *name;
-                float val;
-            } bgColors[] = 
-            {
-                { "r", 0.0 }, 
-                { "g", 0.0 }, 
-                { "b", 0.0 }, 
-                { "a", 255.0 }
-            };
-            for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
-                if (!bgColSet.lookupValue(bgColors[i].name, bgColors[i].val))
-                    bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
-
-            glClearColor(bgColors[0].val, bgColors[1].val,bgColors[2].val,bgColors[3].val);
-
-            sc.unlock();
-
-            // 
-            // Set up timer callbacks.
-            //
-            QTimer *checkIOTimer = new QTimer(this);
-            QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
-            checkIOTimer->start(100);
-
-            QTimer *watcherIdleTimer = new QTimer(this);
-            QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-            watcherIdleTimer->start(33); // Let's shoot for 30 frames a second.
-
-            TRACE_EXIT();
+    TRACE_EXIT();
+    return true;
 }
 
 QSize manetGLView::minimumSizeHint() const
@@ -929,15 +1303,21 @@ void manetGLView::checkIO()
 {
     TRACE_ENTER();
 
-    while(messageStream->isStreamReadable())
+    if (!messageStream)
+    {
+        messageStream=MessageStream::createNewMessageStream(serverName); 
+        messageStream->startStream();
+    }
+
+    while(messageStream && messageStream->isStreamReadable())
     {
         MessagePtr message;
         messageStream->getNextMessage(message);
         LOG_DEBUG("Got message: " << *message);
-        theGraph.updateGraph(message);
+        wGraph.updateGraph(message);
     }
 
-    theGraph.doMaintanence(); // check expiration, etc. 
+    wGraph.doMaintanence(); // check expiration, etc. 
 
     updateGL();  // redraw
 
@@ -951,22 +1331,23 @@ void manetGLView::watcherIdle()
     bool update=false;
     Timestamp now=(Timestamp(time(NULL)))*1000; 
 
-    graph_traits<Graph>::vertex_iterator vi, vend;
-    for(tie(vi, vend)=vertices(theGraph); vi!=vend; ++vi)
+    // GTL - Should this code be moved into watcherGraph?
+    WatcherGraph::vertexIterator vi, vend;
+    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
     {
-        WatcherGraphNode &node=theGraph[*vi]; 
+        WatcherGraphNode &node=wGraph.theGraph[*vi]; 
 
         if (node.displayInfo->spin && now > node.displayInfo->nextSpinUpdate)
         {
             node.displayInfo->spinRotation_x+=node.displayInfo->spinIncrement;
             node.displayInfo->spinRotation_y+=node.displayInfo->spinIncrement;
             node.displayInfo->spinRotation_z+=node.displayInfo->spinIncrement;
-            node.displayInfo->nextSpinUpdate=curtime+node.displayInfo->spinTimeout;
+            node.displayInfo->nextSpinUpdate=now+node.displayInfo->spinTimeout;
             update=true;
         }
 
         // Are we flashing and do we need to invert the color?
-        if (node.displayInfo->flash && curtime > node.displayInfo->nextFlashUpdate)  
+        if (node.displayInfo->flash && now > node.displayInfo->nextFlashUpdate)  
         {
             node.displayInfo->isFlashed=node.displayInfo->isFlashed?true:false;
             node.displayInfo->nextFlashUpdate=now+node.displayInfo->flashInterval;
@@ -974,11 +1355,11 @@ void manetGLView::watcherIdle()
         }
     }
 
-    graph_traits<Graph>::edge_iterator ei, eend;
-    for(tie(ei, eend)=edges(theGraph); ei!=eend; ++ei)
+    WatcherGraph::edgeIterator ei, eend;
+    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
     {
-        WatcherGraphEdge &edge=theGraph[*ei]; 
-        if (edge.displayInfo->flash && curtime > edge.displayInfo->nextFlashUpdate)
+        WatcherGraphEdge &edge=wGraph.theGraph[*ei]; 
+        if (edge.displayInfo->flash && now > edge.displayInfo->nextFlashUpdate)
         {
             edge.displayInfo->isFlashed=edge.displayInfo->isFlashed?true:false;
             edge.displayInfo->nextFlashUpdate=now+edge.displayInfo->flashInterval;
@@ -999,6 +1380,35 @@ void manetGLView::paintGL()
     TRACE_EXIT();
 }
 
+void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth)
+{
+    int i;
+    GLfloat lineheight=- glutStrokeWidth(GLUT_STROKE_ROMAN,'W') * scale;   // TOJ: need scale arg here?  
+
+    glPushMatrix();
+
+    glPushAttrib(GL_LINE_WIDTH);
+    glLineWidth(lineWidth); 
+
+    glTranslatef(x,y,z);
+    glScaled(scale,scale,scale);
+    for (i = 0; text[i]; i++)
+        switch(text[i])
+        {
+            case '\n':
+                glPopMatrix();
+                glTranslatef(0.0,lineheight,0.0);
+                glPushMatrix();
+                glScaled(scale,scale,scale);
+                break;
+            default:
+                glutStrokeCharacter(GLUT_STROKE_ROMAN, text[i]);
+                break;
+        }
+    glPopAttrib(); 
+    glPopMatrix();
+
+}
 void manetGLView::drawManet(void)
 {
     // watcher::Skybox *sb=watcher::Skybox::getSkybox();
@@ -1012,25 +1422,26 @@ void manetGLView::drawManet(void)
 
     glPushMatrix();
 
-    GLfloat black[]={0.0,0.0,0.0,1.0};
-    GLfloat blue[]={0.0,0.0,1.0,0.6};
+    // GLfloat black[]={0.0,0.0,0.0,1.0};
+    // GLfloat blue[]={0.0,0.0,1.0,0.6};
 
     // draw timestamp at bottom of screen
-    date now(second_clock::local_time().date()); 
-    glScalef(0.02, 0.02, 0.02);
-    if (monochromeMode)
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
-    else
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-    drawText(-400, -360, 0, scaleText, now.to_simple_string_type().c_str(), 1.0);
+    // GTL - TODO
+    // ptime now(posix_time::second_clock::local_time().date()); 
+    // glScalef(0.02, 0.02, 0.02);
+    // if (monochromeMode)
+    //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    // else
+    //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
+    // drawText(-400, -360, 0, scaleText, posix_time::to_simple_string_type(now).c_str(), 1.0);
 
-    if (showPositionFlag)
-    {
-        char buff[160];
-        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f",
-                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
-        drawText(-200, -360, 0, scaleText, buff, 1.0);
-    }
+    // if (showPositionFlag)
+    // {
+    char buff[160];
+    snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f",
+            manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
+    drawText(-200, -360, 0, scaleText, buff, 1.0);
+    // }
 
     glPopMatrix();
 
@@ -1042,14 +1453,14 @@ void manetGLView::drawManet(void)
 
     for (LayerList::iterator li=knownLayers.begin(); li!=knownLayers.end(); ++li)
     {
-        if (li->active)
+        if ((*li)->active)
         {
             // each layer is 'layerPadding' above the rest. 
             // layer order is currently defined by order of appearance
             // in the cfg file. 
             glPushMatrix();
             glTranslatef(0.0, 0.0, layerPadding);  
-            drawLayer(li->layer); 
+            drawLayer((*li)->layer); 
             glPopMatrix();
 
         }
@@ -1061,17 +1472,17 @@ void manetGLView::drawManet(void)
     glFlush();
 }
 
-void manetGLView::drawEdge(const WatcherGraphEdge &edge)
+void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)
 {
     TRACE_ENTER(); 
 
     GLdouble x1, y1, z1, x2, y2, z2, width;
-    x1=edge.node1.x; 
-    y1=edge.node1.y; 
-    z1=edge.node1.z; 
-    x2=edge.node2.x; 
-    y2=edge.node2.y; 
-    z2=edge.node2.z; 
+    x1=node1.gpsData->x; 
+    y1=node1.gpsData->y; 
+    z1=node1.gpsData->z; 
+    x2=node2.gpsData->x; 
+    y2=node2.gpsData->y; 
+    z2=node2.gpsData->z; 
     width=edge.displayInfo->width;
 
     GLfloat edgeColor[]={
@@ -1125,10 +1536,13 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge)
     }
 
     // draw the edge's label, if there is one.
-    if (edge.displayInfo.label)
+    if (edge.displayInfo->label.size())
     {
         if (monochromeMode)
-            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+        {
+            const GLfloat localblack[]={0.0,0.0,0.0,1.0};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, localblack);
+        }
         else
         {
             // This color should be cfg-erable.
@@ -1136,12 +1550,12 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge)
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
         }
 
-        double lx=(x1+x2)/2.0; 
-        double ly=(y1+y2)/2.0; 
-        double lz=(z1+z2)/2.0; 
-        double a=atan2(x1-x2 , y1-y2);
-        double th=10.0;
-        drawText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, (z1+z2)/2, scaleText, edge.displayInfo.label.c_str());
+        GLdouble lx=(x1+x2)/2.0; 
+        GLdouble ly=(y1+y2)/2.0; 
+        GLdouble lz=(z1+z2)/2.0; 
+        GLdouble a=atan2(x1-x2 , y1-y2);
+        GLdouble th=10.0;
+        drawText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, scaleText, const_cast<char*>(edge.displayInfo->label.c_str()));
     }
 
     TRACE_EXIT(); 
@@ -1150,9 +1564,16 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge)
 bool manetGLView::isActive(const watcher::GUILayer &layer)
 {
     TRACE_ENTER();
-    LayerList::const_iterator li=find(layerList.begin(). layerList.end(), layer); 
-    TRACE_EXIT();
-    return li==listLayer.end() ? false : (*li)->active; 
+
+    // GTL fix this
+    // LayerList::const_iterator li=std::find(knownLayers.begin(), knownLayers.end(), layer); 
+    bool retVal=false;
+    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
+        if (llip->layer==layer)
+            retVal=llip->active;
+
+    TRACE_EXIT_RET_BOOL(retVal);
+    return retVal;
 }
 
 void manetGLView::drawNode(const WatcherGraphNode &node)
@@ -1161,36 +1582,36 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     GLfloat nodeColor[]={
-        node.diplayInfo->color.r/255.0, 
-        node.diplayInfo->color.g/255.0, 
-        node.diplayInfo->color.b/255.0, 
-        node.diplayInfo->color.a/255.0, 
+        node.displayInfo->color.r/255.0, 
+        node.displayInfo->color.g/255.0, 
+        node.displayInfo->color.b/255.0, 
+        node.displayInfo->color.a/255.0, 
     };
 
     GLdouble x, y, z; 
-    gps2openGLPixels(node.gpsData.x, node.gpsData.y, node.gpsData.z, x, y, z); 
+    gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
 
     // flashing color: if flashed, invert color. 
     for(unsigned int i=0; i<sizeof(nodeColor); i++) 
         if (node.displayInfo->flash && node.displayInfo->isFlashed)
             nodeColor[i]=1-nodeColor[i]; 
 
-    if (dispStat->monochromeMode)
+    if (monochromeMode)
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
     else
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, nodeColor);
 
-    switch(node.displayInfo.shape)
+    switch(node.displayInfo->shape)
     {
-        case NodeDisplayInfo::CIRCLE: drawCircle(x, y, z, 4); break;
-        case NodeDisplayInfo::SQUARE: drawCube(x, y, z); break;
-        case NodeDisplayInfo::TRIANGLE: drawPyramid(x, y, z); break;
-        case NodeDisplayInfo::TORUS: drawTorus(x, y, z); break;
-        case NodeDisplayInfo::TEAPOT: drawTeapot(x, y, z); break;
+        case NodeDisplayInfo::CIRCLE: drawCircle(x, y, z, 4, node.displayInfo); break;
+        case NodeDisplayInfo::SQUARE: drawCube(x, y, z, 4, node.displayInfo); break;
+        case NodeDisplayInfo::TRIANGLE: drawPyramid(x, y, z, 4, node.displayInfo); break;
+        case NodeDisplayInfo::TORUS: drawTorus(x, y, z, 4, node.displayInfo); break;
+        case NodeDisplayInfo::TEAPOT: drawTeapot(x, y, z, 4, node.displayInfo); break;
     }
 
     if (isActive(ANTENNARADIUS_LAYER))
-        drawWireframeSphere(x, y, z, antennaRadius); 
+        drawWireframeSphere(x, y, z, antennaRadius, node.displayInfo); 
 
     TRACE_EXIT(); 
 }
@@ -1201,10 +1622,10 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, const float x, con
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     const GLfloat nodeColor[]={
-        node.diplayInfo->color.r/255.0, 
-        node.diplayInfo->color.g/255.0, 
-        node.diplayInfo->color.b/255.0, 
-        node.diplayInfo->color.a/255.0, 
+        node.displayInfo->color.r/255.0, 
+        node.displayInfo->color.g/255.0, 
+        node.displayInfo->color.b/255.0, 
+        node.displayInfo->color.a/255.0, 
     };
     if (monochromeMode)
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
@@ -1214,34 +1635,39 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, const float x, con
     // a little awkward since we're mixing enums, reserved strings, and free form strings
     char buf[64]; 
     if (!node.nodeId.is_v4())
-        snprintf(buf, sizeof(buf), "%s", node.nodeId.to_string());  // punt
+        snprintf(buf, sizeof(buf), "%s", node.nodeId.to_string().c_str());  // punt
     else
     {
-        unsigned long addr=node.nodeId.to_ulong(); // host byte order. 
+        unsigned long addr=node.nodeId.to_v4().to_ulong(); // host byte order. 
 
-        if (node.displayInfo.label==NodeDisplayInfo::labelDefault2String(FOUR_OCTETS))
-            snprintf(buf, sizeof(buf), "%d.%d.%d.%d", ((addr)>>24)&0xFF,((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
-        else if (node.displayInfo.label==NodeDisplayInfo::labelDefault2String(THREE_OCTETS))
-            snprintf(buf, sizeof(buf), "%d.%d.%d", ((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
-        else if (node.displayInfo.label==NodeDisplayInfo::labelDefault2String(TWO_OCTETS))
-            snprintf(buf, sizeof(buf), "%d.%d", ((addr)>>8)&0xFF,(addr)&0xFF); 
-        else if (node.displayInfo.label==NodeDisplayInfo::labelDefault2String(LAST_OCTET))
-            snprintf(buf, sizeof(buf), "%d", (addr)&0xFF); 
-        else if (node.displayInfo.label==NodeDisplayInfo::labelDefault2String(HOSTNAME))
+        if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::FOUR_OCTETS))
+            snprintf(buf, sizeof(buf), "%lu.%lu.%lu.%lu", ((addr)>>24)&0xFF,((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
+        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::THREE_OCTETS))
+            snprintf(buf, sizeof(buf), "%lu.%lu.%lu", ((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
+        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::TWO_OCTETS))
+            snprintf(buf, sizeof(buf), "%lu.%lu", ((addr)>>8)&0xFF,(addr)&0xFF); 
+        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET))
+            snprintf(buf, sizeof(buf), "%lu", (addr)&0xFF); 
+        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::HOSTNAME))
         {
             struct in_addr saddr; 
             saddr.s_addr=htonl(addr); 
-            struct hostent *he=gethostbyaddr((const void *)saddr.s_addr, sizeof(saddr.s_addr), AF_INT); 
+            struct hostent *he=gethostbyaddr((const void *)saddr.s_addr, sizeof(saddr.s_addr), AF_INET); 
 
-            if (hostEnt) 
+            if (he) 
             {
                 snprintf(buf, sizeof(buf), "%s", he->h_name); 
                 // only do the lookup one time successfully per host. 
-                node.displayInfo.label=buf; 
+                node.displayInfo->label=buf; 
+            }
+            else
+            {
+                LOG_WARN("Unable to get hostnmae for node " << node.nodeId); 
+                node.displayInfo->label="UnableToGetHostNameSorry";
             }
         }
         else
-            snprintf(buf, sizeof(buf), "%s", node.nodeId.to_string());  // use what is ever there. 
+            snprintf(buf, sizeof(buf), "%s", node.nodeId.to_string().c_str());  // use what is ever there. 
     }        
 
     drawText(x, y+6, z+5, scaleText, buf); 
@@ -1249,7 +1675,34 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, const float x, con
     TRACE_EXIT();
 }
 
-void manetGLView::drawLabel(GLfloat x, GLfloat y, GLfloat z, const LabelDisplayInfoPtr &label)
+GLfloat manetGLView::drawTextHeight(const char *text)
+{
+	int numlines=1;
+	const char *p;
+
+	p=text;
+	while(*p)
+	{
+		switch(*p)
+		{
+			case '\n':
+				numlines++;
+			break;
+		}
+		p++;
+	}
+	if (numlines==0)
+		numlines=1;
+
+    return glutStrokeWidth(GLUT_STROKE_ROMAN,'W')*numlines;
+}
+
+GLfloat manetGLView::drawTextWidth(const char *text)
+{
+    return glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)text);
+}
+
+void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfoPtr &label)
 {
     // 
     // GTL ----
@@ -1261,8 +1714,8 @@ void manetGLView::drawLabel(GLfloat x, GLfloat y, GLfloat z, const LabelDisplayI
     TRACE_ENTER(); 
 
     GLfloat w=0.0; 
-    yOffset+=drawTextHeight(label->labelText.c_str(), scaleText); 
-    GLfloat t=drawTextWidth(label->labelText.c_str(), scaleText); 
+    GLfloat h=drawTextHeight(const_cast<char*>(label->labelText.c_str()))*scaleText; 
+    GLfloat t=drawTextWidth(const_cast<char*>(label->labelText.c_str()))*scaleText; 
     if (t>w)
         w=t;
 
@@ -1271,20 +1724,22 @@ void manetGLView::drawLabel(GLfloat x, GLfloat y, GLfloat z, const LabelDisplayI
         label->foregroundColor.g, 
         label->foregroundColor.b, 
         label->foregroundColor.a
-    }
+    };
     GLfloat bgColor[]={
-        label->backgrounColor.r, 
-        label->backgrounColor.g, 
-        label->backgrounColor.b, 
-        label->backgrounColor.a
-    }
-    GLfloat x=nodex+6;
-    GLfloat y=nodey-6;
-    GLfloat z=nodez+0.3+(0.3*(us->index & 0xFF));
+        label->backgroundColor.r, 
+        label->backgroundColor.g, 
+        label->backgroundColor.b, 
+        label->backgroundColor.a
+    };
+    GLfloat x=inx+6;
+    GLfloat y=iny-6;
+    // GTL TODO: make the lables stack based on layer ("index").
+    // GLfloat z=inz+0.3+(0.3*(us->index & 0xFF));
+    GLfloat z=inz+0.3+(0.3*1.0);
     static const GLfloat black[]={0.0,0.0,0.0,1.0};
 
 #define TEXT_SCALE 0.08
-    GLfloat border_width = 2.0*(scaleText > TEXT_SCALE ? sqrt(scaleText/TEXT_SCALE) : scaleTextTEXT_SCALE);
+    GLfloat border_width = 2.0*(scaleText > TEXT_SCALE ? sqrt(scaleText/TEXT_SCALE) : scaleText/TEXT_SCALE);
     GLfloat border_width2 = border_width + border_width;
     h+=border_width2;
     w+=border_width2;
@@ -1292,7 +1747,7 @@ void manetGLView::drawLabel(GLfloat x, GLfloat y, GLfloat z, const LabelDisplayI
     // "pointer" from node to label
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
     glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(nodex,nodey,nodez);
+    glVertex3f(inx,iny,inz);
     glVertex3f(x+w*0.03,y,z);
     glVertex3f(x,y,z);
     glVertex3f(x,y,z);
@@ -1308,16 +1763,16 @@ void manetGLView::drawLabel(GLfloat x, GLfloat y, GLfloat z, const LabelDisplayI
     glVertex3f(x,y-h,z+0.2);
     glEnd();
 
-    GLfloat localh=drawTextHeight(label->labelTtext.c_str()*scaleText); 
+    GLfloat localh=drawTextHeight(const_cast<char*>(label->labelText.c_str()))*scaleText; 
 
     if (monochromeMode)
         for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
             bgColor[i]=1.0;
     else
         for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
-            bgColor[i]=bgcolor[i]/255.0;
+            bgColor[i]=bgColor[i]/255.0;
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgcolor);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
     glBegin(GL_POLYGON);
     glVertex3f(x  ,y,z+0.1);
     glVertex3f(x+w,y,z+0.1);
@@ -1325,24 +1780,24 @@ void manetGLView::drawLabel(GLfloat x, GLfloat y, GLfloat z, const LabelDisplayI
     glVertex3f(x  ,y-localh-0.5,z+0.1);
     glEnd();
 
-    if (dispStat->monochromeMode)
+    if (monochromeMode)
     {
-        fgcolor[0]=0.0;
-        fgcolor[1]=0.0;
-        fgcolor[2]=0.0;
-        fgcolor[3]=1.0;
+        fgColor[0]=0.0;
+        fgColor[1]=0.0;
+        fgColor[2]=0.0;
+        fgColor[3]=1.0;
     }
     else
         for (unsigned int i=0; i<sizeof(fgColor)/sizeof(fgColor[0]); i++)
-            fgColor[i]=fgcolor[i]/255.0;
+            fgColor[i]=fgColor[i]/255.0;
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, fgcolor);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, fgColor);
     y-=drawTextHeight("X")*scaleText;
-    drawText(x+border_width,y-border_width,z+0.2, scaleText, label->labelText.c_str()); 
+    drawText(x+border_width,y-border_width,z+0.2, scaleText, const_cast<char*>(label->labelText.c_str())); 
     y-=localh-drawTextHeight("X")*scaleText;
 
     /* Fill in gap at the bottom of the label...  */
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgcolor);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
     glBegin(GL_POLYGON);
     glVertex3f(x  ,y,z+0.1);
     glVertex3f(x+w,y,z+0.1);
@@ -1357,47 +1812,54 @@ void manetGLView::drawLayer(const GUILayer &layer)
 {
     TRACE_ENTER();
 
-    graph_traits<Graph>::edge_iterator ei, eend;
-    for(tie(ei, eend)=edges(theGraph); ei!=eend; ++ei)
+    WatcherGraph::edgeIterator ei, eend;
+    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
     {
-        WatcherGraphEdge &edge=theGraph[*ei]; 
-        if (edge.displayInfo.layer==layer)
-            drawEdge(edge);
+        WatcherGraphEdge &edge=wGraph.theGraph[*ei]; 
+        if (edge.displayInfo->layer==layer)
+        {
+            const WatcherGraphNode &node1=wGraph.theGraph[source(*ei, wGraph.theGraph)]; 
+            const WatcherGraphNode &node2=wGraph.theGraph[target(*ei, wGraph.theGraph)]; 
+            drawEdge(edge, node1, node2); 
+        }
 
         WatcherGraphEdge::LabelList::iterator li=edge.labels.begin(); 
         WatcherGraphEdge::LabelList::iterator lend=edge.labels.end(); 
         for( ; li!=lend; ++li)
-            if ((*li)->displayInfo.layer==layer)
+            if ((*li)->layer==layer)
             {
-                graph_traits<Graph>::vertex_descriptor n1=source(ei, theGraph); 
-                graph_traits<Graph>::vertex_descriptor n2=target(ei, theGraph); 
+                const WatcherGraphNode &node1=wGraph.theGraph[source(*ei, wGraph.theGraph)]; 
+                const WatcherGraphNode &node2=wGraph.theGraph[target(*ei, wGraph.theGraph)]; 
 
-                float lx=(n1.x+n2.x)/2.0; 
-                float ly=(n1.y+n2.y)/2.0; 
-                float lz=(n1.z+n2.z)/2.0; 
+                double lx=(node1.gpsData->x+node2.gpsData->x)/2.0; 
+                double ly=(node1.gpsData->y+node2.gpsData->y)/2.0; 
+                double lz=(node1.gpsData->z+node2.gpsData->z)/2.0; 
 
-                GLfloat x, y, z; 
-                gps2openGLPixels(lx, ly, lz, x, y, z); 
-                drawLabel(*i, x, y, z);
+                GLdouble x, y, z; 
+                gps2openGLPixels(node1.gpsData->dataFormat, lx, ly, lz, x, y, z); 
+                drawLabel(x, y, z, *li);
             }
     }
 
-    graph_traits<Graph>::vertex_iterator vi, vend;
-    for(tie(vi, vend)=vertices(theGraph); vi!=vend; ++vi)
+    WatcherGraph::vertexIterator vi, vend;
+    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
     {
-        WatcherGraphNode &node=theGraph[*vi]; 
+        WatcherGraphNode &node=wGraph.theGraph[*vi]; 
 
-        if (node.displayInfo.layer==layer)
+        if (node.displayInfo->layer==layer)
             drawNode(node); 
 
         WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
         WatcherGraphEdge::LabelList::iterator lend=node.labels.end(); 
         for( ; li!=lend; ++li)
-            if ((*li)->displayInfo.layer==layer)
+            if ((*li)->layer==layer)
             {
-                GLfloat x, y, z; 
-                gps2openGLPixels(lx, ly, lz, x, y, z); 
-                drawLabel(*li, x, y, z); 
+                GLdouble x, y, z; 
+                double lx=node.gpsData->x;
+                double ly=node.gpsData->y;
+                double lz=node.gpsData->z;
+                gps2openGLPixels(node.gpsData->dataFormat, lx, ly, lz, x, y, z); 
+                drawLabel(x, y, z, *li); 
             }
     }
 
@@ -1411,10 +1873,10 @@ void manetGLView::resizeGL(int width, int height)
     // glGetIntegerv(GL_VIEWPORT, viewport);
     // fprintf(stderr, "Reshape cur (%d, %d)\n", viewport[2], viewport[3]);
     // fprintf(stderr, "Reshape given (%d, %d)\n", awidth, aheight);
-    glViewport(0, 0, awidth, aheight);
+    glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(40.0, GLfloat(awidth) / GLfloat(aheight), 1.0, 50.0);
+    gluPerspective(40.0, GLfloat(width) / GLfloat(height), 1.0, 50.0);
     if(autoCenterNodesFlag) 
         scaleAndShiftToCenter(ScaleAndShiftUpdateOnChange);
 
@@ -1436,10 +1898,6 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
     quint32 nativeKey = event->nativeVirtualKey();
     int qtKey = event->key();
 
-    if (legacyWatcher::Key(nativeKey) != 0)
-        if (nativeKey == 'B' || nativeKey == 'b')
-            emit bandwidthToggled(isActive(BANDWIDTH_LAYER)); 
-    updateGL();
     if (nativeKey=='C')
     {
         LOG_DEBUG("Got cap C in keyPressEvent - spawning color chooser for background color"); 
@@ -1464,26 +1922,29 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_S:     textZoomIn(); break;
         case Qt::Key_Z:     compressDistance(); break;
         case Qt::Key_X:     expandDistance(); break;
-
         case Qt::Key_E:     rotateX(-5.0); break;
         case Qt::Key_R:     rotateX(5.0); break;
         case Qt::Key_D:     rotateY(-5.0); break;
         case Qt::Key_F:     rotateY(5.0); break;
         case Qt::Key_C:     rotateZ(-5.0); break;
         case Qt::Key_V:     rotateZ(5.0); break;
+        case Qt::Key_B:     
+            layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
+            emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
+            break;
         case Qt::Key_Equal:
         case Qt::Key_Plus: 
-                            globalAutoCenterNodesFlag = 1; 
+                            autoCenterNodesFlag=true;
                             scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
-                            globalAutoCenterNodesFlag = 0; 
+                            autoCenterNodesFlag=false;
                             break;
         case Qt::Key_Space:
-                            globalReplay.runFlag = !globalReplay.runFlag;
-                            if (globalReplay.runFlag)
-                                messageStream.startStream();
-                            else
-                                messageStream.stopStream();
-                            break;
+                            // globalReplay.runFlag = !globalReplay.runFlag;
+                            // if (globalReplay.runFlag)
+                            //     messageStream.startStream();
+                            // else
+                            //     messageStream.stopStream();
+                            // break;
 
                             // GTL TODO: add shortcuts for ff/rew, etc. 
                             // case 't': globalReplay.step = 1000; break;
@@ -1537,11 +1998,12 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     }
     else
     {
-        unsigned int nodeId=legacyWatcher::getNodeIdAtCoords(event->x(), event->y());
-        if(nodeId)
-        {
-            emit nodeDataInGraphsToggled(nodeId);
-        }
+        // GTL - fix this.
+        // unsigned int nodeId=getNodeIdAtCoords(event->x(), event->y());
+        // if(nodeId)
+        // {
+        //     emit nodeDataInGraphsToggled(nodeId);
+        // }
     }
     TRACE_EXIT();
 }
@@ -1574,13 +2036,10 @@ void manetGLView::mousePressEvent(QMouseEvent *event)
 void manetGLView::fitToWindow()
 {
     TRACE_ENTER();
-
-    // Just use the existing keyboard shortcut in the legacy watcher
-    if (legacyWatcher::Key('+') != 0)
-    {
-        updateGL();
-    }
-
+    // GTL - could use existing key handler here...
+    autoCenterNodesFlag=true;
+    scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
+    autoCenterNodesFlag=false;
     TRACE_EXIT();
 }
 
@@ -1597,29 +2056,29 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
     if ((buttons & Qt::LeftButton) && (buttons & Qt::RightButton))
     {
         if (dy>0)
-            legacyWatcher::zoomIn();
+            zoomIn();
         if (dy<0)
-            legacyWatcher::zoomOut();
+            zoomOut();
         updateGL();
     }
     else if ((buttons & Qt::LeftButton) && !(buttons & Qt::RightButton))
     {
         if (mods & Qt::ShiftModifier)
         {
-            legacyWatcher::shiftBackgroundCenterLeft(dx);
-            legacyWatcher::shiftBackgroundCenterUp(-dy);
+            shiftBackgroundCenterLeft(dx);
+            shiftBackgroundCenterUp(-dy);
         }
         else
         {
-            legacyWatcher::shiftCenterLeft(dx);
-            legacyWatcher::shiftCenterUp(dy);
+            shiftCenterLeft(dx);
+            shiftCenterUp(dy);
         }
         updateGL();
     } 
     else if (!(buttons & Qt::LeftButton) && (buttons & Qt::RightButton))
     {
-        legacyWatcher::rotateX(dy);
-        legacyWatcher::rotateY(dx);
+        rotateX(dy);
+        rotateY(dx);
         updateGL();
     }
     lastPos = event->pos();
@@ -1630,35 +2089,27 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
 void manetGLView::wheelEvent(QWheelEvent *event)
 {
     if(event->delta()>0)
-        legacyWatcher::zoomIn();
+        zoomIn();
     else
-        legacyWatcher::zoomOut();
+        zoomOut();
 }
 
-void manetGLView::manetView()
-{
-    TRACE_ENTER();
-    setLegacyWatcherView(legacyWatcher::ManetView);
-    updateGL();
-    TRACE_EXIT();
-}
-
-void manetGLView::hierarchyView()
-{
-    TRACE_ENTER();
-    setLegacyWatcherView(legacyWatcher::HierarchyView);
-    updateGL();
-    TRACE_EXIT();
-}
-
-void manetGLView::layerToggle(const Layer layer, const bool turnOn)
+void manetGLView::layerToggle(const watcher::GUILayer &layer, const bool turnOn)
 {
     TRACE_ENTER();
 
-    LayerList::iterator li=find(layerList.begin(), layerList.end(), layer); 
-    if (li!=layerList.end())
-        (*li)->active=turnOn); 
-    else
+    // GTL - fix this.
+    // LayerList::iterator li=find(knownLayers.begin(), knownLayers.end(), findLayerFunctor(layer));
+    bool found=false;
+    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
+    {
+        if (llip->layer==layer)
+        {
+            llip->active=turnOn;
+            found=true;
+        }
+    }
+    if(!found)
         LOG_WARN("Attempt to toggle non-existent layer " << layer); 
 
     TRACE_EXIT();
@@ -1805,7 +2256,7 @@ void manetGLView::toggleBackgroundImage(bool isOn)
 {
     TRACE_ENTER();
     LOG_DEBUG("Turning background image " << (isOn==true?"on":"off")); 
-    showBackground=isOn; 
+    backgroundImage=isOn; 
     emit backgroundImageToggled(isOn); 
     updateGL();
     TRACE_EXIT();
@@ -1813,63 +2264,60 @@ void manetGLView::toggleBackgroundImage(bool isOn)
 void manetGLView::clearAllEdges()
 {
     TRACE_ENTER();
-    graph_traits<Graph>::edge_iterator ei, eend;
-    for(tie(ei, eend)=edges(theGraph); ei!=eend; ++ei)
-        remove_edge(ei, theGraph);  // GTL does this blow away the label memory as well? 
+    WatcherGraph::edgeIterator ei, eend;
+    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
+        remove_edge(*ei, wGraph.theGraph);  // GTL does this blow away the label memory as well? 
     TRACE_EXIT();
 }
 void manetGLView::clearAllLabels()
 {
     TRACE_ENTER();
-    graph_traits<Graph>::edge_iterator ei, eend;
-    for(tie(ei, eend)=edges(theGraph); ei!=eend; ++ei)
-    {
-        if (theGraph[*ei].labels.size())
-            theGraph[*ei].labels.clear()
-    }
+    WatcherGraph::edgeIterator ei, eend;
+    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
+        if (wGraph.theGraph[*ei].labels.size())
+            wGraph.theGraph[*ei].labels.clear();
 
-    graph_traits<Graph>::vertex_iterator vi, vend;
-    for(tie(vi, vend)=vertices(theGraph); vi!=vend; ++vi)
-    {
-        if (theGraph[*vi].labels.size())
-            theGraph[*vi].labels.clear()
-    }
+    WatcherGraph::vertexIterator vi, vend;
+    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
+        if (wGraph.theGraph[*vi].labels.size())
+            wGraph.theGraph[*vi].labels.clear();
+
     emit labelsCleared();
     TRACE_EXIT();
 }
 void manetGLView::playbackStart()
 {
     TRACE_ENTER();
-    messageStream.startStream(); 
+    messageStream->startStream(); 
     TRACE_EXIT();
 }
 void manetGLView::playbackStop()
 {
     TRACE_ENTER();
-    messageStream.stopStream(); 
+    messageStream->stopStream(); 
     TRACE_EXIT();
 }
 void manetGLView::playbackPause()
 {
     TRACE_ENTER();
-    messageStream.stopStream(); 
+    messageStream->stopStream(); 
     TRACE_EXIT();
 }
 void manetGLView::playbackContinue()
 {
     TRACE_ENTER();
-    messageStream.startStream(); 
+    messageStream->startStream(); 
     TRACE_EXIT();
 }
 void manetGLView::playbackSetSpeed(int x)
 {
     TRACE_ENTER();
-    messageStream.setStreamRate((float)x); 
+    messageStream->setStreamRate((float)x); 
     TRACE_EXIT();
 }
 
 // Should be called after a glTranslate()
-void manetGLView::handleSpin(int threeD, NodeDisplayInfoPtr &ndi)
+void manetGLView::handleSpin(int threeD, const NodeDisplayInfoPtr &ndi)
 {
     if (ndi->spin)
     {
@@ -1883,12 +2331,12 @@ void manetGLView::handleSpin(int threeD, NodeDisplayInfoPtr &ndi)
 }
 
 // Should be called after a glTranslate()
-void manetGLView::handleSize(NodeDisplayInfoPtr &ndi)
+void manetGLView::handleSize(const NodeDisplayInfoPtr &ndi)
 {
     glScalef(ndi->size, ndi->size, ndi->size);
 }
 
-void manetGLView::drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, NodeDisplayInfoPtr &/*ndi*/)
+void manetGLView::drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &/*ndi*/)
 {
     glPushMatrix();
 
@@ -1911,7 +2359,7 @@ void manetGLView::drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdou
     glPopMatrix();
 }
 
-void manetGLView::drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, NodeDisplayInfoPtr &ndi)
+void manetGLView::drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
 {
     glPushMatrix();
 
@@ -1984,7 +2432,7 @@ void manetGLView::drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radi
     glPopMatrix();
 }
 
-void manetGLView::drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, NodeDisplayInfoPtr &ndi)
+void manetGLView::drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
 {
     glPushMatrix();
     glTranslated(x, y, z);
@@ -2058,7 +2506,7 @@ void manetGLView::drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, 
     glPopMatrix();
 }
 
-void manetGLView::drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, NodeDisplayInfoPtr &ndi)
+void manetGLView::drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
 {
     glPushMatrix();
     glTranslated(x, y, z);
@@ -2091,7 +2539,7 @@ void manetGLView::drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius
     glPopMatrix();
 }
 
-void manetGLView::drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, NodeDisplayInfoPtr &ndi)
+void manetGLView::drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
 {
     GLUquadric* q=NULL;
 
@@ -2110,7 +2558,7 @@ void manetGLView::drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius,
 }
 
 
-void manetGLView::drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, NodeDisplayInfoPtr &ndi)
+void manetGLView::drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
 {
     GLfloat inner=radius-1;
     GLfloat outer=radius;
@@ -2142,7 +2590,7 @@ void manetGLView::drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius,
     }
 }
 
-void manetGLView::drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, NodeDisplayInfoPtr &ndi)
+void manetGLView::drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
 {
 
     if (threeDView)
@@ -2161,7 +2609,7 @@ void manetGLView::drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radiu
         drawDisk(x,y,z,radius, ndi); 
 }
 
-void manetGLView::drawCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble radius)
+void manetGLView::drawCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
 {
     glPushMatrix();
     glTranslatef(x, y, z);
@@ -2178,8 +2626,16 @@ void manetGLView::drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
 { 
     static GLfloat const dead[]={1.0,0.0,0.0,1.0}; 
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, dead); 
-    drawCircle(x, y, z, 7); 
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, dead);
+
+    // draw outsize circle
+    glTranslatef(x, y, z);
+    GLUquadric* q=NULL;
+    q=gluNewQuadric();
+    gluDisk(q, 6, 7, 36, 1);
+    gluDeleteQuadric(q);
+
+    // draw eyes and mouth
     glBegin(GL_LINES); 
     glVertex3f(x-4.0,y+3.0,z); 
     glVertex3f(x-2.0,y+1.0,z); 
@@ -2218,8 +2674,8 @@ void manetGLView::saveConfiguration()
     LOG_DEBUG("Got close event, saving modified configuration"); 
 
     Config &cfg=SingletonConfig::instance();
-    singletonConfig::lock(); 
-    libconfig::Setting &root=cfg.getRoot();
+    SingletonConfig::lock(); 
+    Setting &root=cfg.getRoot();
 
     struct 
     {
@@ -2261,11 +2717,7 @@ void manetGLView::saveConfiguration()
         { "normPaths", NORMAL_PATHS_LAYER }
     };
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
-    {
-        LayerList::const_iterator li=find(knownLayers.begin(), knownLayers.end(), layerVals[i].layer);
-        if (li!=knownLayers.end())
-            layers[layerVals[i].prop]=(*li)->active; 
-    }
+        layers[layerVals[i].prop]=isActive(layerVals[i].layer);
 
     root["viewPoint"]["angle"][0]=manetAdj.angleX;
     root["viewPoint"]["angle"][1]=manetAdj.angleY;
@@ -2286,26 +2738,18 @@ void manetGLView::saveConfiguration()
     root["backgroundImage"]["coordinates"][3]=floatVals[3];
     root["backgroundImage"]["coordinates"][4]=floatVals[4];
 
-    legacyWatcher::getBackgroundColor(floatVals[0], floatVals[1], floatVals[2], floatVals[3]);
-    root["backgroundColor"]["r"]=floatVals[0];
-    root["backgroundColor"]["g"]=floatVals[1];
-    root["backgroundColor"]["b"]=floatVals[2];
-    root["backgroundColor"]["a"]=floatVals[3];
+    GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
+    root["backgroundColor"]["r"]=cols[0];
+    root["backgroundColor"]["g"]=cols[1];
+    root["backgroundColor"]["b"]=cols[2];
+    root["backgroundColor"]["a"]=cols[3];
 
-    GPSDataFormat format=legacyWatcher::getGPSDataFormat();
-    switch(format)
-    {
-        case GPS_DATA_FORMAT_UTM: 
-            root["gpsDataFormat"]="UTM"; 
-            break;
-        case GPS_DATA_FORMAT_DEG_WGS84: 
-            root["gpsDataFormat"]="lat-long-alt-WGS84";
-            break;
-            // Don't put default case
-    }
+    SingletonConfig::unlock();
+
+    wGraph.saveConfig(); 
 
     SingletonConfig::saveConfig();
-    SingletonConfig::unlock();
 
     TRACE_EXIT();
 }

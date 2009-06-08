@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "backgroundImage.h"
 #include "bitmap.h"

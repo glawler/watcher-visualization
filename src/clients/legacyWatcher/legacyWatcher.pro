@@ -10,27 +10,30 @@ INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml
 QT += opengl 
 CONFIG += qt x11
 OBJECTS_DIR = ./objs
-DEFINES += GRAPHICS MODULE_MOBILITY ggdb
+DEFINES += GRAPHICS MODULE_MOBILITY 
 
 # log4cxx issues warnings without this. 
-QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing -O0
-QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0
-QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing
-QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing
+QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb
+QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb
+QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated
+QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated
 
-LIBS += -L../../lib -L../logger -L../util
+LIBS += -L../../lib 
+LIBS += -L../../logger 
+LIBS += -L../../util
+LIBS += -L../../libwatcher
+LIBS += -L../../watcherd
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -L/usr/local/lib -lidmef 
-LIBS += -lidsCommunications 
 LIBS += -lconfig++
 LIBS += -llog4cxx
 LIBS += -llogger
 LIBS += -lwatcherutils
-LIBS += -lwatcherd
-LIBS += -lwatcher
-LIBS += -lwatcherd
+LIBS += -lwatcherd -lwatcher -lwatcherd
 LIBS += -xml2
 LIBS += -lqwt
+# GTL - how to integrate BOOST into QT at the Makefile level?
+LIBS += -lboost_system -lboost_serialization-mt -lboost_thread-mt -lboost_system-mt -lboost_filesystem-mt -lboost_regex-mt
 
 win32 {
     error("No support for windows in watcher")
@@ -40,7 +43,6 @@ win32 {
 HEADERS += \
     backgroundImage.h \
     bitmap.h \
-    config.h \
     graphPlot.h \
     manetglview.h \
     skybox.h \
@@ -54,7 +56,6 @@ FORMS += watcher.ui
 SOURCES += \
     backgroundImage.cpp \
     bitmap.cpp  \
-    config.c \
     graphPlot.cpp   \
     main.cpp    \
     manetglview.cpp \

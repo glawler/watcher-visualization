@@ -15,17 +15,16 @@ class manetGLView : public QGLWidget
         manetGLView(QWidget *parent = 0);
         ~manetGLView();
 
-        void loadConfiguration(); 
+        bool loadConfiguration(); 
 
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
         public slots:
+
             void resetPosition();
         void fitToWindow();
         void checkIO();
-        void manetView();
-        void hierarchyView();
 
         // timeout callback for watcher to do "idle" work.
         void watcherIdle();
@@ -117,12 +116,15 @@ signals:
         void wheelEvent(QWheelEvent *event);
 
         void keyPressEvent(QKeyEvent * event);
-        void layerToggle(const watcher::event::GUILayer layer, const bool turnOn);
+        void layerToggle(const watcher::event::GUILayer &layer, const bool turnOn);
 
     private:
 
-        watcher::MessageStream messageStream;
-        watcher::WatcherGraph theGraph;
+        watcher::MessageStreamPtr messageStream;
+        watcher::WatcherGraph wGraph;
+        std::string serverName; 
+
+        watcher::event::GPSMessage gpsDataFormat;
 
         QPoint lastPos;
 
@@ -134,6 +136,7 @@ signals:
         typedef boost::shared_ptr<LayerListItem> LayerListItemPtr; 
         typedef std::list<LayerListItemPtr> LayerList;
         LayerList knownLayers; 
+
         struct DisplayStatus
         {
             float scaleText;
@@ -157,9 +160,11 @@ signals:
         }; 
 
         ManetAdj manetAdj; 
+        ManetAdj manetAdjInit;
 
         float scaleText;
         float scaleLine;
+        float gpsScale; 
         float layerPadding;
         float antennaRadius; 
 
@@ -168,10 +173,38 @@ signals:
         bool backgroundImage; 
 
         void drawNodeLabel(const watcher::WatcherGraphNode &node, const float x, const float y, const float z);
-        void gps2openGLPixels(const double x, const double y, const double z, GLdouble &x, GLdouble &y, GLdouble &z); 
+        void gps2openGLPixels(const watcher::GPSMessage::DataFormat &format, const double inx, const double iny, const double inz, GLdouble &x, GLdouble &y, GLdouble &z);
         bool isActive(const watcher::GUILayer &layer); 
 
         // drawing stuff
+        bool autoCenterNodesFlag; 
+        void drawManet(void);
+        struct QuadranglePoint
+        {
+            double x;
+            double y;
+        };
+        void drawText(GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth=1.0);
+        void drawLayer(const watcher::GUILayer &layer); 
+        void drawEdge(const watcher::WatcherGraphEdge &edge, const watcher::WatcherGraphNode &node1, const watcher::WatcherGraphNode &node2); 
+        void drawNode(const watcher::WatcherGraphNode &node);
+        struct Quadrangle
+        {
+            QuadranglePoint p[4];
+        };
+        void maxRectangle( Quadrangle const *q, double , double *xMinRet, double *yMinRet, double *xMaxRet, double *yMaxRet);
+        void invert4x4(GLdouble dst[16], GLdouble const src[16]);
+        struct XYWorldZToWorldXWorldY
+        {
+            int x;
+            int y;
+            GLdouble worldZ;
+            GLdouble worldX_ret;
+            GLdouble worldY_ret;
+        };
+        int xyAtZForModelProjViewXY( XYWorldZToWorldXWorldY *xyz, size_t xyz_count, GLdouble modelmatrix[16], GLdouble projmatrix[16], GLint viewport[4]);
+        int visibleDrawBoxAtZ(GLint *viewport, GLdouble z, GLdouble modelmatrix[16], GLdouble projmatrix[16], double maxRectAspectRatio, double *xMinRet,
+                double *yMinRet, double *xMaxRet, double *yMaxRet);
         enum ScaleAndShiftUpdate
         {
             ScaleAndShiftUpdateOnChange,
@@ -209,17 +242,20 @@ signals:
         void rotateY(float deg);
         void rotateZ(float deg);
 
-        void handleSpin(int threeD, watcher::NodeDisplayInfoPtr &ndi); 
-        void handleSize(watcher::NodeDisplayInfoPtr &ndi); 
-        void drawWireframeSphere(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
-        void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
-        void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
-        void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
-        void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
-        void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
-        void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
-        void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, watcher::NodeDisplayInfoPtr &ndi); 
+        void drawLabel(GLfloat x, GLfloat y, GLfloat z, const watcher::LabelDisplayInfoPtr &label);
+        void handleSpin(int threeD, const watcher::NodeDisplayInfoPtr &ndi); 
+        void handleSize(const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawWireframeSphere(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
         void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble); 
+        GLfloat drawTextWidth(const char *text);
+        GLfloat drawTextHeight(const char *text);
 
 };
 
