@@ -28,8 +28,7 @@ namespace watcher
             void addMessageHandler(MessageHandlerPtr messageHandler); 
             void removeMessageHandler(MessageHandlerPtr messageHandler); 
 
-            const std::string& getPeerAddr() const { return endpoint_addr_; }
-            unsigned short getPeerPort() const { return endpoint_port_; }
+            const boost::asio::ip::tcp::endpoint remoteEndpoint() const { return theSocket.remote_endpoint(); }
 
         protected:
 

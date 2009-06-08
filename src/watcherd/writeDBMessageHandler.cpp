@@ -15,15 +15,14 @@ using namespace watcher::event;
 
 INIT_LOGGER(WriteDBMessageHandler, "MessageHandler.WriteDBMessageHandler");
 
-bool WriteDBMessageHandler::handleMessageArrive(ConnectionPtr conn, const MessagePtr& msg)
+bool WriteDBMessageHandler::handleMessageArrive(ConnectionPtr, const MessagePtr& msg)
 {
     TRACE_ENTER();
 
     bool ret = false; // keep connection open
 
     assert(isFeederEvent(msg->type)); // only store feeder events
-    Database& db = get_db_handle(); // Retrive the database handle for this thread.
-    db.storeEvent(conn->getPeerAddr(), msg);
+    store_event(msg); // using the database handle for this thread.
 
     TRACE_EXIT_RET(ret);
     return ret;

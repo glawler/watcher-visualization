@@ -55,7 +55,6 @@ namespace watcher
             // 
             //
         private:
-            void start();
 
             DECLARE_LOGGER();
 
