@@ -93,6 +93,7 @@ namespace watcher {
 
         MessagePtr Message::unpack(std::istream& is)
         {
+            TRACE_ENTER();
             is >> std::setprecision(std::numeric_limits<double>::digits10 + 2); 
             boost::archive::text_iarchive ia(is);
             Message* ret = 0;
@@ -102,9 +103,11 @@ namespace watcher {
             }
             catch (boost::archive::archive_exception& e)
             {
-                LOG_WARN("Exception thrown while serializing the message: " << e.what());
+                LOG_WARN("Exception thrown while deserializing the message: " << e.what());
+                TRACE_EXIT();
                 return MessagePtr();
             }
+            TRACE_EXIT();
             return MessagePtr(ret); 
         }
 
