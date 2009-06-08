@@ -44,6 +44,9 @@ namespace watcher
             /** Can be saved to cfg file ... */
             void saveConfiguration(); 
 
+            virtual std::ostream &toStream(std::ostream &out) const;
+            std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
+
         protected:
 
         private:
@@ -52,7 +55,10 @@ namespace watcher
     };
 
     typedef boost::shared_ptr<LabelDisplayInfo> LabelDisplayInfoPtr; 
+
+    std::ostream &operator<<(std::ostream &out, const watcher::LabelDisplayInfo &obj);
 }
+
 
 #endif // LABEL_DISPLAY_INFO_H
 

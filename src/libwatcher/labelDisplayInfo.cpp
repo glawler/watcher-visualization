@@ -69,11 +69,11 @@ bool LabelDisplayInfo::loadConfiguration(const GUILayer &layer_)
         labelSettings.add(key, Setting::TypeFloat)=floatVal;
     pointSize=floatVal; 
 
-    strVal="none"; 
-    key="labelText"; 
-    if (!labelSettings.lookupValue(key, strVal))
-        labelSettings.add(key, Setting::TypeString)=strVal;
-    labelText=strVal;
+    // strVal="none"; 
+    // key="labelText"; 
+    // if (!labelSettings.lookupValue(key, strVal))
+    //     labelSettings.add(key, Setting::TypeString)=strVal;
+    // labelText=strVal;
 
     SingletonConfig::unlock(); 
 
@@ -100,10 +100,21 @@ void LabelDisplayInfo::saveConfiguration()
     TRACE_EXIT();
 }
 
+// virtual 
+ostream &LabelDisplayInfo::toStream(ostream &out) const
+{
+    TRACE_ENTER();
+    out << " text: \"" << labelText << "\" point: " << pointSize
+        << " bg: " << backgroundColor 
+        << " fg: " << foregroundColor; 
+    TRACE_EXIT();
+    return out; 
+}
+
 bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 {
     TRACE_ENTER();
-    
+
     if (mess->expiration!=Infinity)
         expiration=(Timestamp(time(NULL))*1000)+mess->expiration;
     else
@@ -119,4 +130,10 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
     return true; 
 }
 
-
+ostream& watcher::operator<<(ostream &out, const LabelDisplayInfo &obj)
+{
+    TRACE_ENTER();
+    obj.operator<<(out);
+    TRACE_EXIT();
+    return out;
+}

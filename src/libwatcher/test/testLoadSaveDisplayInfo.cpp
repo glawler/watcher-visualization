@@ -122,16 +122,16 @@ BOOST_AUTO_TEST_CASE( modify_defaults_test )
     SingletonConfig::instance().writeFile(modifiedFileName); 
 
     SingletonConfig::instance().getRoot().remove("displayOptions"); 
-    // bf::remove(modifiedFileName); 
+    bf::remove(modifiedFileName); 
 }
 
 BOOST_AUTO_TEST_CASE( layer_name_test )
 {
-    // GTL - this test was to allow layers with spaces, etc in them 
-    // but, meh - just don't allow them. 
-    // BOOST_CHECK(configConfig("test.cfg")); 
-    // NodeDisplayInfoPtr ndip(new NodeDisplayInfo);
-    // ndip->loadConfiguration("Layer with spaces in the name"); 
+    BOOST_CHECK(configConfig("test.label.space.in.name.cfg")); 
+    NodeDisplayInfoPtr ndip(new NodeDisplayInfo);
+    ndip->loadConfiguration("Layer with spaces in the name and crazy @!$#A!^&!@ in the name."); 
+    SingletonConfig::instance().writeFile("test.label.space.in.name.cfg"); 
+    bf::remove("test.label.space.in.name.cfg"); 
 }
 
 BOOST_AUTO_TEST_CASE( node_config_test )
@@ -181,4 +181,64 @@ BOOST_AUTO_TEST_CASE( bad_config_init_test )
 {
     // GTL test case for a config that hasn't been initialized. 
     // Was hanging....
+}
+
+BOOST_AUTO_TEST_CASE( label_config_test )
+{
+    char *filename="test.label.cfg"; 
+    bf::remove(filename);       // may be left over from last time. 
+    SingletonConfig::setConfigFile(filename);
+    string layer("ThisIsATestLayer"); 
+    BOOST_CHECK(configConfig(filename)); 
+
+    LabelDisplayInfoPtr ldip1(new LabelDisplayInfo); 
+    ldip1->loadConfiguration(layer); 
+    ldip1->labelText="ldip1"; 
+    ldip1->saveConfiguration(); 
+    SingletonConfig::saveConfig();
+
+    // Forget everything and reload
+    SingletonConfig::instance().getRoot().remove("displayOptions");
+    BOOST_CHECK(configConfig(filename)); 
+
+    LabelDisplayInfoPtr ldip2(new LabelDisplayInfo); 
+    ldip2->loadConfiguration(layer); 
+    ldip2->labelText="ldip2"; 
+
+    BOOST_CHECK (ldip1->backgroundColor==ldip2->backgroundColor); 
+    ldip2->backgroundColor=Color::yellow;
+    ldip2->foregroundColor=Color::green;
+    ldip2->pointSize=9.0;
+    ldip2->saveConfiguration(); 
+    BOOST_CHECK (ldip1->backgroundColor!=ldip2->backgroundColor ); 
+
+    // NodeDisplayInfoPtr ndip1(new NodeDisplayInfo);
+    // ndip1->loadConfiguration(layer);
+    // ndip1->saveConfiguration();
+
+    // EdgeDisplayInfoPtr edip(new EdgeDisplayInfo);
+    // edip->loadConfiguration(layer);
+    // edip->saveConfiguration(); 
+
+    // save and forget
+    SingletonConfig::saveConfig();
+    SingletonConfig::instance().getRoot().remove("displayOptions");
+    BOOST_CHECK(configConfig(filename)); 
+
+    LabelDisplayInfoPtr ldip3(new LabelDisplayInfo); 
+    ldip3->loadConfiguration(layer); 
+    ldip3->labelText="ldip3"; 
+
+    LOG_DEBUG("ldip1: " << *ldip1); 
+    LOG_DEBUG("ldip2: " << *ldip2); 
+    LOG_DEBUG("ldip3: " << *ldip3); 
+
+    BOOST_CHECK( ldip2->backgroundColor!=ldip1->backgroundColor ); 
+    BOOST_CHECK( ldip3->backgroundColor==ldip2->backgroundColor ); 
+
+    BOOST_CHECK( ldip3->backgroundColor==Color::yellow ); 
+    BOOST_CHECK( ldip3->foregroundColor==Color::green ); 
+
+    SingletonConfig::saveConfig(); 
+    SingletonConfig::instance().getRoot().remove("displayOptions");
 }

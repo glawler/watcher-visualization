@@ -57,7 +57,7 @@ namespace watcher {
 
         typedef boost::shared_ptr<EdgeMessage> EdgeMessagePtr; 
 
-        std::ostream &operator<<(std::ostream &out, const EdgeMessage &mess);
+        std::ostream &operator<<(std::ostream &out, const EdgeMessage &obj);
     }
 }
 #endif // WATCHER_EDGE_MESSAGE_DATA_H
