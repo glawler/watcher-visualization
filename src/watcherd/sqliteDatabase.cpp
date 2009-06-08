@@ -68,9 +68,10 @@ void SqliteDatabase::getEvents(boost::function<void(event::MessagePtr)> output,
 {
     TRACE_ENTER();
     std::ostringstream os;
-    os << "SELECT data FROM events WHERE ts" << (d == forward ? ">=" : "<=") << t <<
+    os << "SELECT data FROM events WHERE ts" << (d == forward ? ">" : "<") << t <<
         " ORDER BY ts " << (d == forward ? "ASC" : "DESC") <<
         " LIMIT " << count;
+    LOG_DEBUG(os.str());
 
     // read each serialized event from a row, unpack and pass to callback function
     Statement st(*conn_, os.str());

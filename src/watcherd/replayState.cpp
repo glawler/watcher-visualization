@@ -27,6 +27,7 @@ struct ReplayState::impl {
     std::deque<MessagePtr> events;
     boost::asio::deadline_timer timer;
     Timestamp ts; // the current effective time
+    Timestamp last_event; // timestamp of last event retrieved from db
     float speed; //< playback speed
     unsigned int bufsiz; //< number of database rows to prefetch
     Timestamp step;
@@ -39,7 +40,7 @@ struct ReplayState::impl {
     boost::mutex lock;
 
     impl(ServerConnectionPtr& ptr) :
-        conn(ptr), timer(ptr->io_service()), ts(0), bufsiz(DEFAULT_BUFFER_SIZE),
+        conn(ptr), timer(ptr->io_service()), ts(0), last_event(0), bufsiz(DEFAULT_BUFFER_SIZE),
         step(DEFAULT_STEP), state(paused)
     {
         TRACE_ENTER();
@@ -159,23 +160,30 @@ void ReplayState::run()
         // queue is empty, pre-fetch more items from the DB
 
         boost::function<void(MessagePtr)> cb = event_output(impl_->events);
+        LOG_DEBUG("fetching events > " << impl_->last_event);
         get_db_handle().getEvents(cb,
-                                  impl_->ts,
+                                  impl_->last_event,
                                   (impl_->speed >= 0) ? Database::forward : Database::reverse,
                                   impl_->bufsiz);
 
-        /* When starting to replay, assume that time T=0 is the time of the
-         * first event in the stream. */
-        if (impl_->ts == 0)
-            impl_->ts = impl_->events.front()->timestamp;
+        if (!impl_->events.empty()) {
+            /* When starting to replay, assume that time T=0 is the time of the
+             * first event in the stream. */
+            if (impl_->ts == 0)
+                impl_->ts = impl_->events.front()->timestamp;
+
+            // save timestamp of last event retrieved to avoid duplication
+            impl_->last_event = impl_->events.back()->timestamp;
+        }
     }
 
     if (! impl_->events.empty()) {
-        /* time until next event */
+        // time until next event
         Timestamp delta = impl_->events.front()->timestamp - impl_->ts;
+        LOG_DEBUG("Next event in " << delta << " ms");
 
         // update our notion of the current time after the timer expires
-        impl_->ts += delta;
+        impl_->ts = impl_->events.front()->timestamp;
 
         /* Adjust for playback speed.  Note that when playing events in reverse, both speed
          * delta will be negative, which will turn delta into a positive value for the
@@ -188,9 +196,6 @@ void ReplayState::run()
     } else {
         /*
          * FIXME what should happen when the end of the event stream is reached?
-         * Currently the object is destroyed when this function exits because no
-         * other shared pointers will exist.
-         *
          * One option would be to convert to live stream at this point.
          */
         impl_->state = impl::paused;
