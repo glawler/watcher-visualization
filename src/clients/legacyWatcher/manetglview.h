@@ -4,7 +4,7 @@
 #include <QGLWidget>
 #include "logger.h"
 #include "libwatcher/watcherGraph.h"
-#include "messageStream.h"
+#include "libwatcher/messageStream.h"
 
 class manetGLView : public QGLWidget
 {

@@ -8,7 +8,7 @@ DEPENDPATH += .
 INCLUDEPATH += . ../../../include ../../util ../../../include/qwt ../../logger ../.. ../../watcherd
 INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include /usr/include/qwt
 QT += opengl 
-CONFIG += qt x11 no_smart_library_merge
+CONFIG += qt x11 
 OBJECTS_DIR = ./objs
 DEFINES += GRAPHICS MODULE_MOBILITY ggdb
 
@@ -23,14 +23,13 @@ LIBS += -L../../logger
 LIBS += -L../../util
 LIBS += -L../../libwatcher
 LIBS += -L../../../lib
-LIBS += -L../../watcherd
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -L/usr/local/lib -lidmef 
 LIBS += -lconfig++
 LIBS += -llog4cxx
 LIBS += -llogger
 LIBS += -lwatcherutils
-LIBS += -lwatcherd -lwatcher -lwatcherd -lwatcher
+LIBS += -lwatcher
 LIBS += -xml2
 LIBS += -lqwt
 # GTL - how to integrate BOOST into QT at the Makefile level?
