@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
         LOG_FATAL("Error in cfg file, unable to continue"); 
         // write out what we have.
         SingletonConfig::saveConfig();
+        TRACE_EXIT();
+        return EXIT_FAILURE; 
     }
 
     window->show();
