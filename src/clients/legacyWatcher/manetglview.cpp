@@ -911,6 +911,7 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
         // LOG_DEBUG("Got GPS: long:" << location->lon << " lat:" << location->lat << " alt:" << location->alt); 
         // LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
     }
+    LOG_DEBUG("Converted GPS from " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
     TRACE_EXIT();
 }
 
@@ -919,7 +920,7 @@ manetGLView::manetGLView(QWidget *parent) :
     autoCenterNodesFlag(false)
 {
     TRACE_ENTER();
-    // showPositionFlag=true;
+    showPositionFlag=true;
     manetAdjInit.angleX=0.0;
     manetAdjInit.angleY=0.0;
     manetAdjInit.angleZ=0.0;
@@ -950,7 +951,7 @@ bool manetGLView::loadConfiguration()
     backgroundImage = true;
 
     // causes goodinw control buttons to show/not show.
-    emit runningGoodwin(false); 
+    emit runningGoodwin(true); 
 
     //
     // Check configuration for GUI settings.
@@ -1000,12 +1001,16 @@ bool manetGLView::loadConfiguration()
     };
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
     {
-        LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
-        if (layers.lookupValue(layerVals[i].prop, boolVal))
-            layerToggle(layerVals[i].layer, boolVal);
-        else
-            layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
         boolVal=false;
+        LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
+        if (!layers.lookupValue(layerVals[i].prop, boolVal))
+            layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
+
+        LOG_DEBUG("Adding " << (boolVal?"active":"inactive") << " layer " << layerVals[i].layer << " to list of known layers"); 
+        LayerListItemPtr item(new LayerListItem);
+        item->layer=layerVals[i].layer;
+        item->active=boolVal;
+        knownLayers.push_back(item); 
     }
 
     // Give the GUI the current toggle state of the display.
@@ -1274,11 +1279,11 @@ void manetGLView::initializeGL()
     // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     // Spec is LIGHT0
-    // GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
-    // GLfloat posSpecLight[]= { -500.0f, 500.0f, 100.0f, 1.0f };
-    // glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    // glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
-    // glEnable(GL_LIGHT0); 
+    GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
+    GLfloat posSpecLight[]= { -500.0f, 500.0f, 100.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
+    glEnable(GL_LIGHT0); 
 
     // Amb is LIGHT1
     GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };
@@ -1376,7 +1381,29 @@ void manetGLView::watcherIdle()
 void manetGLView::paintGL()
 {
     TRACE_ENTER();
+
     drawManet();
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    // QPainter painter;
+    // painter.begin(this);
+    // painter.setRenderHint(QPainter::Antialiasing);
+
+    // QString text = tr("Click and drag with the left mouse button to rotate the Qt logo.");
+    // QFontMetrics metrics = QFontMetrics(font());
+    // int border = qMax(4, metrics.leading());
+
+    // QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
+    // painter.setRenderHint(QPainter::TextAntialiasing);
+    // painter.setPen(Qt::white);
+    // painter.fillRect(QRect(0, 0, width(), rect.height() + 2*border), QColor(0, 0, 0, 127));
+    // painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignCenter | Qt::TextWordWrap, text);
+    // painter.end(); 
+
+    // glPopMatrix(); 
+
     TRACE_EXIT();
 }
 
@@ -1386,7 +1413,6 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
     GLfloat lineheight=- glutStrokeWidth(GLUT_STROKE_ROMAN,'W') * scale;   // TOJ: need scale arg here?  
 
     glPushMatrix();
-
     glPushAttrib(GL_LINE_WIDTH);
     glLineWidth(lineWidth); 
 
@@ -1422,26 +1448,24 @@ void manetGLView::drawManet(void)
 
     glPushMatrix();
 
-    // GLfloat black[]={0.0,0.0,0.0,1.0};
-    // GLfloat blue[]={0.0,0.0,1.0,0.6};
+    GLfloat black[]={0.0,0.0,0.0,1.0};
+    GLfloat blue[]={0.0,0.0,1.0,0.6};
 
-    // draw timestamp at bottom of screen
-    // GTL - TODO
-    // ptime now(posix_time::second_clock::local_time().date()); 
-    // glScalef(0.02, 0.02, 0.02);
-    // if (monochromeMode)
-    //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
-    // else
-    //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-    // drawText(-400, -360, 0, scaleText, posix_time::to_simple_string_type(now).c_str(), 1.0);
+    ptime now = from_time_t(time(NULL));
+    glScalef(0.02, 0.02, 0.02);
+    if (monochromeMode)
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    else
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
+    drawText(-600, -360, 0, scaleText, const_cast<char*>(posix_time::to_simple_string(now).c_str()), 1.0);
 
-    // if (showPositionFlag)
-    // {
-    char buff[160];
-    snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f",
-            manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
-    drawText(-200, -360, 0, scaleText, buff, 1.0);
-    // }
+    if (showPositionFlag)
+    {
+        char buff[160];
+        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f",
+                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
+        drawText(-200, -360, 0, scaleText, buff, 1.0);
+    }
 
     glPopMatrix();
 
@@ -1469,7 +1493,8 @@ void manetGLView::drawManet(void)
     if (backgroundImage)
         BackgroundImage::getInstance().drawImage(); 
 
-    glFlush();
+    glPopMatrix();
+    // glFlush();
 }
 
 void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)
@@ -1603,7 +1628,7 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
 
     switch(node.displayInfo->shape)
     {
-        case NodeDisplayInfo::CIRCLE: drawCircle(x, y, z, 4, node.displayInfo); break;
+        case NodeDisplayInfo::CIRCLE: drawSphere(x, y, z, 4, node.displayInfo); break;
         case NodeDisplayInfo::SQUARE: drawCube(x, y, z, 4, node.displayInfo); break;
         case NodeDisplayInfo::TRIANGLE: drawPyramid(x, y, z, 4, node.displayInfo); break;
         case NodeDisplayInfo::TORUS: drawTorus(x, y, z, 4, node.displayInfo); break;
@@ -2110,7 +2135,13 @@ void manetGLView::layerToggle(const watcher::GUILayer &layer, const bool turnOn)
         }
     }
     if(!found)
-        LOG_WARN("Attempt to toggle non-existent layer " << layer); 
+    {
+        LOG_DEBUG("Adding new layer to known layers: " << layer); 
+        LayerListItemPtr item(new LayerListItem);
+        item->layer=layer;
+        item->active=turnOn;
+        knownLayers.push_back(item); 
+    }
 
     TRACE_EXIT();
 }
@@ -2719,6 +2750,21 @@ void manetGLView::saveConfiguration()
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
         layers[layerVals[i].prop]=isActive(layerVals[i].layer);
 
+    struct 
+    {
+        const char *prop; 
+        float *val; 
+    } floatVals[] = 
+    {
+        { "scaleText", &scaleText }, 
+        { "scaleLine", &scaleLine }, 
+        { "layerPadding", &layerPadding }, 
+        { "gpsScale", &gpsScale }, 
+        { "antennaRadius", &antennaRadius } 
+    }; 
+    for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
+        root[floatVals[i].prop]=*floatVals[i].val;
+
     root["viewPoint"]["angle"][0]=manetAdj.angleX;
     root["viewPoint"]["angle"][1]=manetAdj.angleY;
     root["viewPoint"]["angle"][2]=manetAdj.angleZ;
@@ -2730,13 +2776,13 @@ void manetGLView::saveConfiguration()
     root["viewPoint"]["shift"][2]=manetAdj.shiftZ;
 
     BackgroundImage &bg=BackgroundImage::getInstance();
-    float floatVals[5];
-    bg.getDrawingCoords(floatVals[0], floatVals[1], floatVals[2], floatVals[3], floatVals[4]); 
-    root["backgroundImage"]["coordinates"][0]=floatVals[0];
-    root["backgroundImage"]["coordinates"][1]=floatVals[1];
-    root["backgroundImage"]["coordinates"][2]=floatVals[2];
-    root["backgroundImage"]["coordinates"][3]=floatVals[3];
-    root["backgroundImage"]["coordinates"][4]=floatVals[4];
+    float bgfloatVals[5];
+    bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
+    root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
+    root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
+    root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
+    root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
+    root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
 
     GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
     glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
