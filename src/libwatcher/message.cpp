@@ -96,6 +96,14 @@ namespace watcher {
             TRACE_ENTER();
             is >> std::setprecision(std::numeric_limits<double>::digits10 + 2); 
             boost::archive::text_iarchive ia(is);
+
+#if 0
+            ia.register_type<StartMessage>();
+            ia.register_type<SeekMessage>();
+            ia.register_type<StopMessage>();
+            ia.register_type<TestMessage>();
+#endif
+
             Message* ret = 0;
             try
             {

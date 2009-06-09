@@ -28,6 +28,7 @@ LIBS+= \
 
 LDADD=$(SRCDIR)/util/libwatcherutils.a
 LDADD+=$(SRCDIR)/libwatcher/libwatcher.a
+LDADD+=$(SRCDIR)/libwatcher/libwatchermsg.la
 LDADD+=$(SRCDIR)/logger/liblogger.a
 
 BUILT_SOURCES=connectivity2dot.cfg connectivity2dot.log.properties 

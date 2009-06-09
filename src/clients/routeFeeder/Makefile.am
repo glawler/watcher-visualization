@@ -19,6 +19,7 @@ LIBS+=-llog4cxx
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 
 LDADD = $(SRCDIR)/libwatcher/libwatcher.a 
+LDADD += $(SRCDIR)/libwatcher/libwatchermsg.la 
 LDADD += $(SRCDIR)/sqlite_wrapper/libsqlite_wrapper.a
 LDADD += $(SRCDIR)/util/libwatcherutils.a 
 LDADD += $(SRCDIR)/logger/liblogger.a

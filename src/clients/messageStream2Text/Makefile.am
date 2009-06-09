@@ -25,6 +25,7 @@ BUILT_SOURCES=messageStream2Text.cfg messageStream2Text.log.properties
 
 bin_PROGRAMS=messageStream2Text
 LDADD=$(SRCDIR)/libwatcher/libwatcher.a \
+	$(SRCDIR)/libwatcher/libwatchermsg.la \
       $(SRCDIR)/util/libwatcherutils.a
 
 messageStream2Text_SOURCES=messageStream2Text.cpp
