@@ -9,6 +9,7 @@ CPPFLAGS+=$(BOOST_CPPFLAGS)
 # watcher libs
 LDADD =  \
 	../../libwatcher/libwatcher.a \
+	../../libwatcher/libwatchermsg.la \
 	../../util/libwatcherutils.a \
 	../../logger/liblogger.a 
 	

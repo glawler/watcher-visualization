@@ -3,6 +3,7 @@ AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 
 # check for recent version of sqlite3
 AC_MSG_CHECKING([for sqlite3 >= 3.6.10])
@@ -34,7 +35,6 @@ AC_CONFIG_FILES([ \
     libwatcher/Makefile \
     libwatcher/test/Makefile \
     watcherd/Makefile 
-    watcherd/test/Makefile \
     watcherHierarchyClient/Makefile \
     clients/Makefile \
     clients/routeFeeder/Makefile \

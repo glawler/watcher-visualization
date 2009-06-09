@@ -1,8 +1,6 @@
 #include "watcherSerialize.h"
 #include "testMessage.h"
 
-using namespace std;
-
 namespace watcher {
     namespace event {
 
@@ -17,7 +15,7 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        TestMessage::TestMessage(const string &str, const vector<int>& ints) :
+        TestMessage::TestMessage(const std::string &str, const std::vector<int>& ints) :
             Message(TEST_MESSAGE_TYPE, MESSAGE_TEST_VERSION),
             stringData(str),
             intsData(ints)
@@ -71,7 +69,7 @@ namespace watcher {
             out << " stringData:\"" << stringData << "\""; 
             out << " intsData:[";
             // Compiler cant' find this: copy(intsData.begin(), intsData.end(), ostream_iterator<int>(out,","));
-            for (vector<int>::const_iterator i=intsData.begin(); i != intsData.end(); ++i)
+            for (std::vector<int>::const_iterator i=intsData.begin(); i != intsData.end(); ++i)
                 out << *i << ",";
             out << "] ";
 
@@ -79,7 +77,7 @@ namespace watcher {
             return out;
         }
 
-        ostream &operator<<(ostream &out, const TestMessage &mess)
+        std::ostream &operator<<(std::ostream &out, const TestMessage &mess)
         {
             TRACE_ENTER();
             mess.operator<<(out);
