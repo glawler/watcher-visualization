@@ -22,10 +22,9 @@ namespace watcher {
 
             /** Store an event received from a specified host into the database.
              *
-             * @param[in] addr IP address of the node from which the event was received
              * @param[in] msg the Event to store
              */
-            virtual void storeEvent(const std::string& addr, event::MessagePtr msg) = 0;
+            virtual void storeEvent(event::MessagePtr msg) = 0;
 
 
             enum Direction { forward, reverse };
@@ -48,6 +47,9 @@ namespace watcher {
      * @return handle to thread-local database handle.
      */
     Database& get_db_handle();
+
+    /** Put an event into the database. */
+    void store_event(event::MessagePtr);
 
 } //namespace
 

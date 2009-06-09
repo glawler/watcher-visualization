@@ -45,7 +45,7 @@ namespace {
     Statement& operator<< (Statement& s, MessageType t) { return s << static_cast<int>(t); }
 }
 
-void SqliteDatabase::storeEvent(const std::string& addr, MessagePtr msg)
+void SqliteDatabase::storeEvent(MessagePtr msg)
 {
     TRACE_ENTER();
 
@@ -56,7 +56,7 @@ void SqliteDatabase::storeEvent(const std::string& addr, MessagePtr msg)
     //LOG_DEBUG("serialized event: " << os.str());
 
     // bind values to prepared statement
-    *insert_stmt_ << msg->timestamp << msg->type << addr << os.str();
+    *insert_stmt_ << msg->timestamp << msg->type << msg->fromNodeID.to_string() << os.str();
 
     sqlite_wrapper::execute(*insert_stmt_);
 

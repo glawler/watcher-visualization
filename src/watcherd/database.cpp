@@ -58,3 +58,8 @@ Database& watcher::get_db_handle()
     }
     return *db;
 }
+
+void watcher::store_event(event::MessagePtr m)
+{
+    get_db_handle().storeEvent(m);
+}
