@@ -918,7 +918,7 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
 }
 
 manetGLView::manetGLView(QWidget *parent) : 
-    QGLWidget(parent),
+    QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
     streamRate(1.0),
     autoCenterNodesFlag(false)
 {
@@ -1422,11 +1422,10 @@ void manetGLView::paintGL()
 {
     TRACE_ENTER();
 
-    drawManet();
 
     glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
 
+    // glPushMatrix();
     // QPainter painter;
     // painter.begin(this);
     // painter.setRenderHint(QPainter::Antialiasing);
@@ -1441,8 +1440,9 @@ void manetGLView::paintGL()
     // painter.fillRect(QRect(0, 0, width(), rect.height() + 2*border), QColor(0, 0, 0, 127));
     // painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignCenter | Qt::TextWordWrap, text);
     // painter.end(); 
+    // glPopMatrix(); 
 
-    glPopMatrix(); 
+    drawManet();
 
     TRACE_EXIT();
 }
@@ -1977,6 +1977,17 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         rgb=QColorDialog::getRgba(rgb, &ok);
         if (ok)
             glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
+    }
+    else if (nativeKey=='F') 
+    {
+        LOG_DEBUG("Got cap F in keyPressEvent - spawning font chooser for info string"); 
+        bool ok;
+        QFont font=QFontDialog::getFont(&ok, QString("Choose font"), this); 
+        if (ok)
+        {
+            statusFontName=font.family().toStdString(); 
+            statusFontPointSize=font.pointSize(); 
+        }
     }
 
     switch(qtKey)
