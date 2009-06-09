@@ -88,7 +88,8 @@ namespace watcher
              * setStreamTimeStart()
              * Set or reset the stream's start time. 
              * @param startTime - the time to start the stream at. 
-             *      0 == give current messages - "real time" stream
+             *      SeekMessage::eof == give current messages - "real time" stream
+             *      SeekMesssage::epoch == start at beginning
              *      non-zero == start message playback at the Timestamp given
              * @return - always returns true
              */
