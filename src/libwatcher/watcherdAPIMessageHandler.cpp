@@ -31,8 +31,8 @@ bool WatcherdAPIMessageHandler::handleMessageArrive(ConnectionPtr conn, const Me
     // Log message arrival
     bool rv = MessageHandler::handleMessageArrive(conn, message); 
 
-    TRACE_EXIT_RET_BOOL(rv);
-    return true;
+    TRACE_EXIT_RET_BOOL(false);
+    return false;
 }
 
 // virtual 

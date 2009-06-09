@@ -84,6 +84,16 @@ namespace watcher {
                 return (g[e].expiration==Infinity) ? false : (t > g[e].expiration); 
             }
         };
+        struct MatchEdgeLayer
+        {
+            const WatcherGraph::Graph &g;
+            const GUILayer &layer;
+            MatchEdgeLayer(const WatcherGraph::Graph &g_, const GUILayer &l_) : g(g_), layer(l_) {}
+            bool operator()(const boost::graph_traits<WatcherGraph::Graph>::edge_descriptor &e)
+            {
+                return g[e].displayInfo->layer==layer;
+            }
+        };
 
         /** Helper class to print WatcherGraphNodes as graphviz data */
         struct WatcherNodeVertexGraphVizWriter 
@@ -163,11 +173,14 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
     //     and the set of neighbors in the message. Then make sure that 
     //     the intersection of nodes exist. 
     graph_traits<Graph>::vertex_iterator src;
-    boost::graph_traits<Graph>::out_edge_iterator i, end;
+    boost::graph_traits<Graph>::out_edge_iterator i, end, newEnd;
     findOrCreateNode(message->fromNodeID, src, message->layer); 
-    theGraph[*src].displayInfo->loadConfiguration(message->layer, message->fromNodeID); 
-    for(tie(i, end)=out_edges(*src, theGraph); i!=end; ++i)
-        remove_edge(i, theGraph);
+
+    // Remove all edges on the same layer as the message. 
+    tie(i, end)=out_edges(*src, theGraph);
+    newEnd=remove_if(i, end, GraphFunctors::MatchEdgeLayer(theGraph, message->layer)); 
+    for( ; newEnd!=end; ++newEnd)
+        remove_edge(newEnd, theGraph);
 
     // Add edges from connectivity message
     graph_traits<Graph>::vertex_iterator dest;

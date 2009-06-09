@@ -13,6 +13,8 @@
 #include "singletonConfig.h"
 #include "backgroundImage.h"
 
+#include "libwatcher/seekWatcherMessage.h"  // for epoch, eof
+
 INIT_LOGGER(manetGLView, "manetGLView");
 
 using namespace watcher;
@@ -911,6 +913,7 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
         // LOG_DEBUG("Got GPS: long:" << location->lon << " lat:" << location->lat << " alt:" << location->alt); 
         // LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
     }
+    // LOG_DEBUG("Converted GPS from " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
     TRACE_EXIT();
 }
 
@@ -919,7 +922,7 @@ manetGLView::manetGLView(QWidget *parent) :
     autoCenterNodesFlag(false)
 {
     TRACE_ENTER();
-    // showPositionFlag=true;
+    showPositionFlag=true;
     manetAdjInit.angleX=0.0;
     manetAdjInit.angleY=0.0;
     manetAdjInit.angleZ=0.0;
@@ -950,7 +953,7 @@ bool manetGLView::loadConfiguration()
     backgroundImage = true;
 
     // causes goodinw control buttons to show/not show.
-    emit runningGoodwin(false); 
+    emit runningGoodwin(true); 
 
     //
     // Check configuration for GUI settings.
@@ -1000,12 +1003,16 @@ bool manetGLView::loadConfiguration()
     };
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
     {
-        LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
-        if (layers.lookupValue(layerVals[i].prop, boolVal))
-            layerToggle(layerVals[i].layer, boolVal);
-        else
-            layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
         boolVal=false;
+        LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
+        if (!layers.lookupValue(layerVals[i].prop, boolVal))
+            layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
+
+        LOG_DEBUG("Adding " << (boolVal?"active":"inactive") << " layer " << layerVals[i].layer << " to list of known layers"); 
+        LayerListItemPtr item(new LayerListItem);
+        item->layer=layerVals[i].layer;
+        item->active=boolVal;
+        knownLayers.push_back(item); 
     }
 
     // Give the GUI the current toggle state of the display.
@@ -1274,11 +1281,11 @@ void manetGLView::initializeGL()
     // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     // Spec is LIGHT0
-    // GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
-    // GLfloat posSpecLight[]= { -500.0f, 500.0f, 100.0f, 1.0f };
-    // glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    // glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
-    // glEnable(GL_LIGHT0); 
+    GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
+    GLfloat posSpecLight[]= { -500.0f, 500.0f, 100.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
+    glEnable(GL_LIGHT0); 
 
     // Amb is LIGHT1
     GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };
@@ -1306,6 +1313,7 @@ void manetGLView::checkIO()
     if (!messageStream)
     {
         messageStream=MessageStream::createNewMessageStream(serverName); 
+        messageStream->setStreamTimeStart(SeekMessage::eof);
         messageStream->startStream();
     }
 
@@ -1349,6 +1357,7 @@ void manetGLView::watcherIdle()
         // Are we flashing and do we need to invert the color?
         if (node.displayInfo->flash && now > node.displayInfo->nextFlashUpdate)  
         {
+            LOG_DEBUG("Toggling flash for node " << node.nodeId); 
             node.displayInfo->isFlashed=node.displayInfo->isFlashed?true:false;
             node.displayInfo->nextFlashUpdate=now+node.displayInfo->flashInterval;
             update=true;
@@ -1376,7 +1385,29 @@ void manetGLView::watcherIdle()
 void manetGLView::paintGL()
 {
     TRACE_ENTER();
+
     drawManet();
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    // QPainter painter;
+    // painter.begin(this);
+    // painter.setRenderHint(QPainter::Antialiasing);
+
+    // QString text = tr("Click and drag with the left mouse button to rotate the Qt logo.");
+    // QFontMetrics metrics = QFontMetrics(font());
+    // int border = qMax(4, metrics.leading());
+
+    // QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
+    // painter.setRenderHint(QPainter::TextAntialiasing);
+    // painter.setPen(Qt::white);
+    // painter.fillRect(QRect(0, 0, width(), rect.height() + 2*border), QColor(0, 0, 0, 127));
+    // painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignCenter | Qt::TextWordWrap, text);
+    // painter.end(); 
+
+    glPopMatrix(); 
+
     TRACE_EXIT();
 }
 
@@ -1386,7 +1417,6 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
     GLfloat lineheight=- glutStrokeWidth(GLUT_STROKE_ROMAN,'W') * scale;   // TOJ: need scale arg here?  
 
     glPushMatrix();
-
     glPushAttrib(GL_LINE_WIDTH);
     glLineWidth(lineWidth); 
 
@@ -1422,26 +1452,26 @@ void manetGLView::drawManet(void)
 
     glPushMatrix();
 
-    // GLfloat black[]={0.0,0.0,0.0,1.0};
-    // GLfloat blue[]={0.0,0.0,1.0,0.6};
+    GLfloat black[]={0.0,0.0,0.0,1.0};
+    GLfloat blue[]={0.0,0.0,1.0,0.6};
 
-    // draw timestamp at bottom of screen
-    // GTL - TODO
-    // ptime now(posix_time::second_clock::local_time().date()); 
-    // glScalef(0.02, 0.02, 0.02);
-    // if (monochromeMode)
-    //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
-    // else
-    //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-    // drawText(-400, -360, 0, scaleText, posix_time::to_simple_string_type(now).c_str(), 1.0);
+    ptime now = from_time_t(time(NULL));
+    glScalef(0.02, 0.02, 0.02);
+    if (monochromeMode)
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    else
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
 
-    // if (showPositionFlag)
-    // {
-    char buff[160];
-    snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f",
-            manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
-    drawText(-200, -360, 0, scaleText, buff, 1.0);
-    // }
+    string buf;
+    if (showPositionFlag)
+    {
+        char buff[190];
+        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f  -  ",
+                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
+        buf+=string(buff); 
+    }
+    buf+=posix_time::to_simple_string(now);
+    drawText(-500, -360, 0, scaleText*2.0, const_cast<char*>(buf.c_str()), 1.0);
 
     glPopMatrix();
 
@@ -1458,8 +1488,8 @@ void manetGLView::drawManet(void)
             // each layer is 'layerPadding' above the rest. 
             // layer order is currently defined by order of appearance
             // in the cfg file. 
+            glTranslatef(0.0, 0.0, -layerPadding);  
             glPushMatrix();
-            glTranslatef(0.0, 0.0, layerPadding);  
             drawLayer((*li)->layer); 
             glPopMatrix();
 
@@ -1469,7 +1499,8 @@ void manetGLView::drawManet(void)
     if (backgroundImage)
         BackgroundImage::getInstance().drawImage(); 
 
-    glFlush();
+    glPopMatrix();
+    // glFlush();
 }
 
 void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)
@@ -1477,22 +1508,23 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
     TRACE_ENTER(); 
 
     GLdouble x1, y1, z1, x2, y2, z2, width;
-    x1=node1.gpsData->x; 
-    y1=node1.gpsData->y; 
-    z1=node1.gpsData->z; 
-    x2=node2.gpsData->x; 
-    y2=node2.gpsData->y; 
-    z2=node2.gpsData->z; 
+    gps2openGLPixels(node1.gpsData->dataFormat, node1.gpsData->x, node1.gpsData->y, node1.gpsData->z, x1, y1, z1); 
+    gps2openGLPixels(node2.gpsData->dataFormat, node2.gpsData->x, node2.gpsData->y, node2.gpsData->z, x2, y2, z2); 
+
     width=edge.displayInfo->width;
 
     GLfloat edgeColor[]={
-        edge.displayInfo->color.r, 
-        edge.displayInfo->color.g, 
-        edge.displayInfo->color.b, 
-        edge.displayInfo->color.a, 
+        edge.displayInfo->color.r/255.0, 
+        edge.displayInfo->color.g/255.0, 
+        edge.displayInfo->color.b/255.0, 
+        edge.displayInfo->color.a/255.0, 
     };
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, edgeColor); 
+    const GLfloat black[]={0.0,0.0,0.0,1.0};
+    if (monochromeMode)
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    else
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, edgeColor);
 
     if (!threeDView)
     {
@@ -1536,7 +1568,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
     }
 
     // draw the edge's label, if there is one.
-    if (edge.displayInfo->label.size())
+    if (edge.displayInfo->label!="none")
     {
         if (monochromeMode)
         {
@@ -1603,12 +1635,14 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
 
     switch(node.displayInfo->shape)
     {
-        case NodeDisplayInfo::CIRCLE: drawCircle(x, y, z, 4, node.displayInfo); break;
+        case NodeDisplayInfo::CIRCLE: drawSphere(x, y, z, 4, node.displayInfo); break;
         case NodeDisplayInfo::SQUARE: drawCube(x, y, z, 4, node.displayInfo); break;
         case NodeDisplayInfo::TRIANGLE: drawPyramid(x, y, z, 4, node.displayInfo); break;
         case NodeDisplayInfo::TORUS: drawTorus(x, y, z, 4, node.displayInfo); break;
         case NodeDisplayInfo::TEAPOT: drawTeapot(x, y, z, 4, node.displayInfo); break;
     }
+
+    drawNodeLabel(node);
 
     if (isActive(ANTENNARADIUS_LAYER))
         drawWireframeSphere(x, y, z, antennaRadius, node.displayInfo); 
@@ -1616,7 +1650,7 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
     TRACE_EXIT(); 
 }
 
-void manetGLView::drawNodeLabel(const WatcherGraphNode &node, const float x, const float y, const float z)
+void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
 {
     TRACE_ENTER();
 
@@ -1667,9 +1701,11 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, const float x, con
             }
         }
         else
-            snprintf(buf, sizeof(buf), "%s", node.nodeId.to_string().c_str());  // use what is ever there. 
+            snprintf(buf, sizeof(buf), "%s", node.displayInfo->label.c_str());  // use what is ever there. 
     }        
 
+    GLdouble x, y, z; 
+    gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
     drawText(x, y+6, z+5, scaleText, buf); 
 
     TRACE_EXIT();
@@ -2110,7 +2146,13 @@ void manetGLView::layerToggle(const watcher::GUILayer &layer, const bool turnOn)
         }
     }
     if(!found)
-        LOG_WARN("Attempt to toggle non-existent layer " << layer); 
+    {
+        LOG_DEBUG("Adding new layer to known layers: " << layer); 
+        LayerListItemPtr item(new LayerListItem);
+        item->layer=layer;
+        item->active=turnOn;
+        knownLayers.push_back(item); 
+    }
 
     TRACE_EXIT();
 }
@@ -2239,8 +2281,18 @@ void manetGLView::toggleNormPaths(bool isOn)
 void manetGLView::toggleMonochrome(bool isOn)
 {
     TRACE_ENTER();
+    static GLfloat previousBackgroundColor[4]={0.0, 0.0, 0.0, 0.0}; 
     monochromeMode=isOn;
     emit monochromeToggled(isOn); 
+    if (isOn)
+    {
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, previousBackgroundColor);
+        glClearColor(1, 1, 1, 1.0);
+    }
+    else
+    {
+        glClearColor(previousBackgroundColor[0], previousBackgroundColor[1], previousBackgroundColor[2], previousBackgroundColor[3]); 
+    }
     updateGL();
     TRACE_EXIT();
 }
@@ -2288,6 +2340,7 @@ void manetGLView::clearAllLabels()
 void manetGLView::playbackStart()
 {
     TRACE_ENTER();
+    messageStream->setStreamTimeStart(SeekMessage::epoch); 
     messageStream->startStream(); 
     TRACE_EXIT();
 }
@@ -2719,6 +2772,21 @@ void manetGLView::saveConfiguration()
     for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
         layers[layerVals[i].prop]=isActive(layerVals[i].layer);
 
+    struct 
+    {
+        const char *prop; 
+        float *val; 
+    } floatVals[] = 
+    {
+        { "scaleText", &scaleText }, 
+        { "scaleLine", &scaleLine }, 
+        { "layerPadding", &layerPadding }, 
+        { "gpsScale", &gpsScale }, 
+        { "antennaRadius", &antennaRadius } 
+    }; 
+    for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
+        root[floatVals[i].prop]=*floatVals[i].val;
+
     root["viewPoint"]["angle"][0]=manetAdj.angleX;
     root["viewPoint"]["angle"][1]=manetAdj.angleY;
     root["viewPoint"]["angle"][2]=manetAdj.angleZ;
@@ -2730,13 +2798,13 @@ void manetGLView::saveConfiguration()
     root["viewPoint"]["shift"][2]=manetAdj.shiftZ;
 
     BackgroundImage &bg=BackgroundImage::getInstance();
-    float floatVals[5];
-    bg.getDrawingCoords(floatVals[0], floatVals[1], floatVals[2], floatVals[3], floatVals[4]); 
-    root["backgroundImage"]["coordinates"][0]=floatVals[0];
-    root["backgroundImage"]["coordinates"][1]=floatVals[1];
-    root["backgroundImage"]["coordinates"][2]=floatVals[2];
-    root["backgroundImage"]["coordinates"][3]=floatVals[3];
-    root["backgroundImage"]["coordinates"][4]=floatVals[4];
+    float bgfloatVals[5];
+    bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
+    root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
+    root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
+    root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
+    root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
+    root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
 
     GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
     glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
