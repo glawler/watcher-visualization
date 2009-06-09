@@ -291,7 +291,7 @@ bool WatcherGraph::updateNodeLocation(const GPSMessagePtr &message)
     if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer)) 
     {
         LOG_DEBUG("Updating GPS information for node " << theGraph[*nodeIter].nodeId);
-        theGraph[*nodeIter].gpsData.reset(message.get()); 
+        theGraph[*nodeIter].gpsData=message; 
         retVal=true;
     }
     
