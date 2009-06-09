@@ -13,6 +13,8 @@
 #include "singletonConfig.h"
 #include "backgroundImage.h"
 
+#include "libwatcher/seekWatcherMessage.h"  // for epoch, eof
+
 INIT_LOGGER(manetGLView, "manetGLView");
 
 using namespace watcher;
@@ -911,7 +913,7 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
         // LOG_DEBUG("Got GPS: long:" << location->lon << " lat:" << location->lat << " alt:" << location->alt); 
         // LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
     }
-    LOG_DEBUG("Converted GPS from " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
+    // LOG_DEBUG("Converted GPS from " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
     TRACE_EXIT();
 }
 
@@ -1311,6 +1313,7 @@ void manetGLView::checkIO()
     if (!messageStream)
     {
         messageStream=MessageStream::createNewMessageStream(serverName); 
+        messageStream->setStreamTimeStart(SeekMessage::eof);
         messageStream->startStream();
     }
 
@@ -1354,6 +1357,7 @@ void manetGLView::watcherIdle()
         // Are we flashing and do we need to invert the color?
         if (node.displayInfo->flash && now > node.displayInfo->nextFlashUpdate)  
         {
+            LOG_DEBUG("Toggling flash for node " << node.nodeId); 
             node.displayInfo->isFlashed=node.displayInfo->isFlashed?true:false;
             node.displayInfo->nextFlashUpdate=now+node.displayInfo->flashInterval;
             update=true;
@@ -1457,15 +1461,17 @@ void manetGLView::drawManet(void)
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
     else
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-    drawText(-600, -360, 0, scaleText, const_cast<char*>(posix_time::to_simple_string(now).c_str()), 1.0);
 
+    string buf;
     if (showPositionFlag)
     {
-        char buff[160];
-        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f",
+        char buff[190];
+        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f  -  ",
                 manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
-        drawText(-200, -360, 0, scaleText, buff, 1.0);
+        buf+=string(buff); 
     }
+    buf+=posix_time::to_simple_string(now);
+    drawText(-500, -360, 0, scaleText*2.0, const_cast<char*>(buf.c_str()), 1.0);
 
     glPopMatrix();
 
@@ -1502,22 +1508,23 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
     TRACE_ENTER(); 
 
     GLdouble x1, y1, z1, x2, y2, z2, width;
-    x1=node1.gpsData->x; 
-    y1=node1.gpsData->y; 
-    z1=node1.gpsData->z; 
-    x2=node2.gpsData->x; 
-    y2=node2.gpsData->y; 
-    z2=node2.gpsData->z; 
+    gps2openGLPixels(node1.gpsData->dataFormat, node1.gpsData->x, node1.gpsData->y, node1.gpsData->z, x1, y1, z1); 
+    gps2openGLPixels(node2.gpsData->dataFormat, node2.gpsData->x, node2.gpsData->y, node2.gpsData->z, x2, y2, z2); 
+
     width=edge.displayInfo->width;
 
     GLfloat edgeColor[]={
-        edge.displayInfo->color.r, 
-        edge.displayInfo->color.g, 
-        edge.displayInfo->color.b, 
-        edge.displayInfo->color.a, 
+        edge.displayInfo->color.r/255.0, 
+        edge.displayInfo->color.g/255.0, 
+        edge.displayInfo->color.b/255.0, 
+        edge.displayInfo->color.a/255.0, 
     };
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, edgeColor); 
+    const GLfloat black[]={0.0,0.0,0.0,1.0};
+    if (monochromeMode)
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    else
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, edgeColor);
 
     if (!threeDView)
     {
@@ -1561,7 +1568,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
     }
 
     // draw the edge's label, if there is one.
-    if (edge.displayInfo->label.size())
+    if (edge.displayInfo->label!="none")
     {
         if (monochromeMode)
         {
@@ -1635,13 +1642,15 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
         case NodeDisplayInfo::TEAPOT: drawTeapot(x, y, z, 4, node.displayInfo); break;
     }
 
+    drawNodeLabel(node);
+
     if (isActive(ANTENNARADIUS_LAYER))
         drawWireframeSphere(x, y, z, antennaRadius, node.displayInfo); 
 
     TRACE_EXIT(); 
 }
 
-void manetGLView::drawNodeLabel(const WatcherGraphNode &node, const float x, const float y, const float z)
+void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
 {
     TRACE_ENTER();
 
@@ -1692,9 +1701,11 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, const float x, con
             }
         }
         else
-            snprintf(buf, sizeof(buf), "%s", node.nodeId.to_string().c_str());  // use what is ever there. 
+            snprintf(buf, sizeof(buf), "%s", node.displayInfo->label.c_str());  // use what is ever there. 
     }        
 
+    GLdouble x, y, z; 
+    gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
     drawText(x, y+6, z+5, scaleText, buf); 
 
     TRACE_EXIT();
@@ -2270,8 +2281,18 @@ void manetGLView::toggleNormPaths(bool isOn)
 void manetGLView::toggleMonochrome(bool isOn)
 {
     TRACE_ENTER();
+    static GLfloat previousBackgroundColor[4]={0.0, 0.0, 0.0, 0.0}; 
     monochromeMode=isOn;
     emit monochromeToggled(isOn); 
+    if (isOn)
+    {
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, previousBackgroundColor);
+        glClearColor(1, 1, 1, 1.0);
+    }
+    else
+    {
+        glClearColor(previousBackgroundColor[0], previousBackgroundColor[1], previousBackgroundColor[2], previousBackgroundColor[3]); 
+    }
     updateGL();
     TRACE_EXIT();
 }
@@ -2319,6 +2340,7 @@ void manetGLView::clearAllLabels()
 void manetGLView::playbackStart()
 {
     TRACE_ENTER();
+    messageStream->setStreamTimeStart(SeekMessage::epoch); 
     messageStream->startStream(); 
     TRACE_EXIT();
 }

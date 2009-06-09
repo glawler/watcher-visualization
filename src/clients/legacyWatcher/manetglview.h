@@ -173,7 +173,7 @@ signals:
         bool threeDView;
         bool backgroundImage; 
 
-        void drawNodeLabel(const watcher::WatcherGraphNode &node, const float x, const float y, const float z);
+        void drawNodeLabel(const watcher::WatcherGraphNode &node);
         void gps2openGLPixels(const watcher::GPSMessage::DataFormat &format, const double inx, const double iny, const double inz, GLdouble &x, GLdouble &y, GLdouble &z);
         bool isActive(const watcher::GUILayer &layer); 
 
