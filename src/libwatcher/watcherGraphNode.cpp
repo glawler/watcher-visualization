@@ -18,7 +18,7 @@ INIT_LOGGER(WatcherGraphNode, "WatcherGraphNode");
 WatcherGraphNode::WatcherGraphNode() : 
     displayInfo(new NodeDisplayInfo),
     nodeId(), 
-    gpsData(), 
+    gpsData(new GPSMessage), 
     connected(false), 
     labels()
 {

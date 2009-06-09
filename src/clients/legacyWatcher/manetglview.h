@@ -161,6 +161,7 @@ signals:
 
         ManetAdj manetAdj; 
         ManetAdj manetAdjInit;
+        bool showPositionFlag;
 
         float scaleText;
         float scaleLine;
