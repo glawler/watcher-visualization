@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "messageHandler.h"
+#include "libwatcher/messageHandler.h"
 
 namespace watcher
 {

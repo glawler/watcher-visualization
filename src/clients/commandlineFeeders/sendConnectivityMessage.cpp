@@ -5,8 +5,8 @@
 #include <boost/asio/ip/address.hpp>
 
 #include <libwatcher/connectivityMessage.h>
+#include <libwatcher/client.h>
 #include "logger.h"
-#include "client.h"
 #include "sendMessageHandler.h"
 
 using namespace std;

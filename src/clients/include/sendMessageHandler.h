@@ -3,7 +3,7 @@
  * @date 2009-05-30
  */
 
-#include "messageHandler.h"
+#include "libwatcher/messageHandler.h"
 
 namespace watcher {
     /** A handler to use in the case where a single message is sent to the server

@@ -12,9 +12,6 @@ CPPFLAGS += -I$(SRCDIR)/logger
 CPPFLAGS += -I$(TOPDIR)/include
 CPPFLAGS += $(BOOST_CPPFLAGS)
 
-LDFLAGS+=-L$(SRCDIR)/watcherd
-LDFLAGS+=-L$(SRCDIR)/libwatcher
-LDFLAGS+=-L$(SRCDIR)/util
 LDFLAGS+=-L$(SRCDIR)/logger
 LDFLAGS+=-L$(TOPDIR)/lib
 LDFLAGS += $(BOOST_LDFLAGS)
@@ -30,9 +27,7 @@ LIBS+= \
 	$(BOOST_REGEX_LIB)
 
 LDADD=$(SRCDIR)/util/libwatcherutils.a
-LDADD+=$(SRCDIR)/watcherd/libwatcherd.a
 LDADD+=$(SRCDIR)/libwatcher/libwatcher.a
-LDADD+=$(SRCDIR)/watcherd/libwatcherd.a
 LDADD+=$(SRCDIR)/logger/liblogger.a
 
 BUILT_SOURCES=connectivity2dot.cfg connectivity2dot.log.properties 

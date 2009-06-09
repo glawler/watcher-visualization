@@ -9,7 +9,6 @@
 #include <libwatcher/speedWatcherMessage.h>
 #include <libwatcher/nodeStatusMessage.h>
 
-#include "dataMarshaller.h"
 #include "watcherd.h"
 #include "writeDBMessageHandler.h"
 #include "watcherdConfig.h"

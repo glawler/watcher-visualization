@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "libwatcher/message.h"
-#include "connection_fwd.h"
+#include "libwatcher/connection_fwd.h"
 
 namespace watcher 
 {

@@ -5,7 +5,7 @@
 
 #include "initConfig.h"
 #include "singletonConfig.h"
-#include "messageStream.h"
+#include "libwatcher/messageStream.h"
 #include "logger.h"
 
 using namespace std;

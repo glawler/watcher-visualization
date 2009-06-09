@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include <client.h>                         // we are a client of the watcher.
+#include <libwatcher/client.h>                         // we are a client of the watcher.
 #include <libwatcher/edgeMessage.h>         // we may send edgeMessages to the watcher. 
 #include <libwatcher/connectivityMessage.h> // we may send connectivityMessages to the watcher. 
 #include <logger.h>

@@ -19,9 +19,9 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include "libwatcher/message.h"
+#include "libwatcher/connection.h"
+#include "libwatcher/dataMarshaller.h"
 
-#include "dataMarshaller.h"
-#include "connection.h"
 #include "watcherd_fwd.h"
 #include "serverConnectionFwd.h"
 #include "replayState.h"

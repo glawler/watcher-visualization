@@ -2,7 +2,7 @@
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "client.h"
+#include "libwatcher/client.h"
 #include <libwatcher/testMessage.h>
 
 #include "initConfig.h"

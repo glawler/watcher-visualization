@@ -6,26 +6,22 @@ SRCDIR=$(TOPDIR)/src
 CPPFLAGS += -fno-strict-aliasing
 
 CPPFLAGS += -I$(SRCDIR)
-CPPFLAGS += -I$(SRCDIR)/watcherd
 CPPFLAGS += -I$(SRCDIR)/util
 CPPFLAGS += -I$(SRCDIR)/logger
 CPPFLAGS += -I$(TOPDIR)/include
 CPPFLAGS += $(BOOST_CPPFLAGS)
 
-LDFLAGS+=-L$(SRCDIR)/watcherd
-LDFLAGS+=-L$(SRCDIR)/libwatcher
-LDFLAGS+=-L$(SRCDIR)/util
-LDFLAGS+=-L$(SRCDIR)/logger
 LDFLAGS+=-L$(TOPDIR)/lib
 LDFLAGS += $(BOOST_LDFLAGS)
 
 LIBS+=-lconfig++
-LIBS+=-llogger
 LIBS+=-llog4cxx
-LIBS+=-lwatcherutils
-LIBS+=-lwatcherd
-LIBS+=-lwatcher
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
+
+LDADD = $(SRCDIR)/libwatcher/libwatcher.a 
+LDADD += $(SRCDIR)/sqlite_wrapper/libsqlite_wrapper.a
+LDADD += $(SRCDIR)/util/libwatcherutils.a 
+LDADD += $(SRCDIR)/logger/liblogger.a
 
 BUILT_SOURCES=routeFeeder.cfg routeFeeder.log.properties 
 

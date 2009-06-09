@@ -5,7 +5,7 @@
 
 #include "initConfig.h"
 #include "singletonConfig.h"
-#include "messageStream.h"
+#include "libwatcher/messageStream.h"
 #include "libwatcher/watcherGraph.h"
 #include "logger.h"
 
