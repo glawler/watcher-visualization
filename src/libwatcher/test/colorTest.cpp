@@ -31,14 +31,14 @@ BOOST_AUTO_TEST_CASE( ctors_test )
     BOOST_CHECK_EQUAL( c1, c2 );
 
     c1=Color::blue;
-    c2=Color(0x0000ff00); 
+    c2=Color(0x0000ffff); 
     BOOST_CHECK_EQUAL( c1, c2 );
 
     c1=Color::gold;
     c2=c1;
     BOOST_CHECK_EQUAL( c1, c2 );
 
-    c1=Color(0x00, 0x80, 0x00, 0x00);
+    c1=Color(0x00, 0x80, 0x00, 0xff);
     c2=Color::green;
     BOOST_CHECK_EQUAL( c1, c2 );
 
