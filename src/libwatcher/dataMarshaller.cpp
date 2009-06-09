@@ -12,6 +12,7 @@ using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 
+#if 0
 /**
  * GTL ERASE START
  * preinitailize the archiving mechanism. This is a hack and should be 
@@ -45,6 +46,8 @@ static MessagePtr unused_J_Ptr=MessagePtr(new StopMessage);
 static MessagePtr unused_K_Ptr=MessagePtr(new SpeedMessage); 
 static MessagePtr unused_L_Ptr=MessagePtr(new NodeStatusMessage); 
 static MessagePtr unused_M_Ptr=MessagePtr(new ConnectivityMessage); 
+#endif
+
 /** 
  * GTL ERASE END 
  *

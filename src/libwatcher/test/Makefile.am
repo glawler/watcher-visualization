@@ -18,6 +18,7 @@ LDFLAGS += -lconfig++
 
 # apparently order is important for g++, libwatcherd has things that libwatcher needs. 
 LDADD = $(SRCDIR)/libwatcher/libwatcher.a
+LDADD += $(SRCDIR)/libwatcher/libwatchermsg.la
 LDADD += $(SRCDIR)/util/libwatcherutils.a
 LDADD += $(SRCDIR)/logger/liblogger.a
 LDADD += \

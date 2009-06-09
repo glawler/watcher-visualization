@@ -74,6 +74,7 @@ int main(int argc, char **argv)
             }
             LOG_INFO("Sending message number " << i); 
             c.sendMessage(shared_ptr<TestMessage>(new TestMessage(strVal, ints))); 
+            sleep(1);
         }
 
         // This will quickly break things as the packet gets to be too large. 
