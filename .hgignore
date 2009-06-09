@@ -89,6 +89,7 @@ share/info/dir
 ^src/clients/legacyWatcher/moc_*
 ^src/clients/legacyWatcher/watcher
 ^src/clients/legacyWatcher/ui_watcher.h
+^src/clients/legacyWatcher/qrc_watcherResources.cpp
 
 # ignore libconfig files
 ^src/libconfig-1.3.1/*
