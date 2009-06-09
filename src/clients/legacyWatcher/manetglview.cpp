@@ -782,13 +782,13 @@ void manetGLView::expandDistance()
     manetAdj.scaleZ += 0.1;
 } 
 
-#define TEXT_SCALE 0.08
+#define TEXT_SCALE 0.105996646
 #define TEXT_SCALE_ZOOM_FACTOR 1.05
 #define ARROW_SCALE_ZOOM_FACTOR 1.05
 
 void manetGLView::textZoomReset(void)
 {
-    scaleText= 0.08;
+    scaleText= TEXT_SCALE;
 }
 
 void manetGLView::textZoomIn(void)
@@ -947,7 +947,7 @@ bool manetGLView::loadConfiguration()
 {
     TRACE_ENTER();
 
-    scaleText=0.08;
+    scaleText=TEXT_SCALE;
     scaleLine=1.0;
     monochromeMode = false;
     threeDView = true;
@@ -1046,10 +1046,10 @@ bool manetGLView::loadConfiguration()
     {
         prop=boolVals[i].prop;
         bool boolVal=boolVals[i].def; 
-        if (root.lookupValue(prop, boolVal))
-            *boolVals[i].val=boolVal; 
-        else
+        if (!root.lookupValue(prop, boolVal))
             root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+        LOG_DEBUG("Setting " << boolVals[i].prop << " to " << (boolVal?"true":"false")); 
+        *boolVals[i].val=boolVal; 
     }
     emit threeDViewToggled(threeDView);
     emit monochromeToggled(monochromeMode);
@@ -1072,10 +1072,10 @@ bool manetGLView::loadConfiguration()
     {
         prop=floatVals[i].prop;
         float floatVal=floatVals[i].def; 
-        if (root.lookupValue(prop, floatVal))
-            *floatVals[i].val=floatVal; 
-        else
+        if (!root.lookupValue(prop, floatVal))
             root.add(prop, libconfig::Setting::TypeFloat)=floatVal;
+        *floatVals[i].val=floatVal; 
+        LOG_DEBUG("Setting " << floatVals[i].prop << " to " << floatVal);
     }
 
     //
@@ -1291,8 +1291,8 @@ void manetGLView::initializeGL()
     glEnable(GL_LIGHT1);
 
     // or use the ambient light model
-    // GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-    // glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+    GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
     // Diffuse is LIGHT2
     GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
@@ -1469,7 +1469,8 @@ void manetGLView::drawManet(void)
         buf+=string(buff); 
     }
     buf+=posix_time::to_simple_string(now);
-    drawText(-500, -360, 0, scaleText*2.0, const_cast<char*>(buf.c_str()), 1.0);
+    qglColor(QColor("blue")); 
+    renderText(12, height()-12, QString(buf.c_str())); 
 
     glPopMatrix();
 
@@ -1585,7 +1586,8 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         GLdouble lz=(z1+z2)/2.0; 
         GLdouble a=atan2(x1-x2 , y1-y2);
         GLdouble th=10.0;
-        drawText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, scaleText, const_cast<char*>(edge.displayInfo->label.c_str()));
+        // drawText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, scaleText, const_cast<char*>(edge.displayInfo->label.c_str()));
+        renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, QString(edge.displayInfo->label.c_str())); 
     }
 
     TRACE_EXIT(); 
@@ -1704,7 +1706,8 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
 
     GLdouble x, y, z; 
     gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
-    drawText(x, y+6, z+5, scaleText, buf); 
+    // drawText(x, y+6, z+5, scaleText, buf); 
+    renderText(x, y+6, z+5, QString(buf)); 
 
     TRACE_EXIT();
 }
@@ -1772,7 +1775,6 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     GLfloat z=inz+0.3+(0.3*1.0);
     static const GLfloat black[]={0.0,0.0,0.0,1.0};
 
-#define TEXT_SCALE 0.08
     GLfloat border_width = 2.0*(scaleText > TEXT_SCALE ? sqrt(scaleText/TEXT_SCALE) : scaleText/TEXT_SCALE);
     GLfloat border_width2 = border_width + border_width;
     h+=border_width2;
