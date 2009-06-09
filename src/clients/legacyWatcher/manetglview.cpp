@@ -1406,7 +1406,7 @@ void manetGLView::paintGL()
     // painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignCenter | Qt::TextWordWrap, text);
     // painter.end(); 
 
-    // glPopMatrix(); 
+    glPopMatrix(); 
 
     TRACE_EXIT();
 }
@@ -1488,8 +1488,8 @@ void manetGLView::drawManet(void)
             // each layer is 'layerPadding' above the rest. 
             // layer order is currently defined by order of appearance
             // in the cfg file. 
+            glTranslatef(0.0, 0.0, -layerPadding);  
             glPushMatrix();
-            glTranslatef(0.0, 0.0, layerPadding);  
             drawLayer((*li)->layer); 
             glPopMatrix();
 
