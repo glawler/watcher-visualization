@@ -18,9 +18,9 @@ namespace watcher {
         class SeekMessage : public Message {
             public:
                 /** constat referring to first element in the database */
-                static const Timestamp epoch;
+                static Timestamp const epoch=0;
                 /** constant refering to last event in the database, or live playback */
-                static const Timestamp eof;
+                static Timestamp const eof=-1;
 
                 /** Type representing how to interpet an offset */
                 enum whence {

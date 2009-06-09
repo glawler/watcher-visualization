@@ -9,8 +9,8 @@ namespace watcher {
     namespace event {
         INIT_LOGGER(SeekMessage, "Message.SeekMessage");
 
-        const Timestamp SeekMessage::epoch=0;
-        const Timestamp SeekMessage::eof=-1;
+        Timestamp const SeekMessage::epoch;
+        Timestamp const SeekMessage::eof;
 
         /**
          * Seek to a particular point in time in the event stream.
