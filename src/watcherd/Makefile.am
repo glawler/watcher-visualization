@@ -2,8 +2,7 @@
 -include ../Makefile.local
 
 TOPDIR=../..
-
-SUBDIRS=. test
+SRCDIR=$(TOPDIR)/src
 
 # "Fixes" warning in log4cxx about type punning. 
 CPPFLAGS += -fno-strict-aliasing
@@ -31,28 +30,9 @@ BUILT_SOURCES= \
 	watcherd.cfg \
 	watcherd.log.properties 
 
-noinst_LIBRARIES=libwatcherd.a
-
-libwatcherd_a_SOURCES= \
-	clientConnection.cpp \
-	client.cpp \
-	connection.cpp \
-	dataMarshaller.cpp \
-	messageHandler.cpp \
-	messageStream.cpp \
-	messageStreamFilter.cpp \
-	feederAPIMessageHandler.cpp \
-	watcherdAPIMessageHandler.cpp \
-	watcherRegion.cpp
-
-bin_PROGRAMS= \
-	watcherd 
+bin_PROGRAMS=watcherd 
 
 watcherd_SOURCES=\
-	clientConnection.cpp \
-	client.cpp \
-	connection.cpp \
-	dataMarshaller.cpp \
 	watcherdMain.cpp \
 	watcherd.cpp \
 	server.cpp \
@@ -60,7 +40,6 @@ watcherd_SOURCES=\
 	serverMessageHandler.cpp \
 	writeDBMessageHandler.cpp \
 	writeDBMessageHandler.h \
-	messageHandler.cpp \
 	database.h \
 	database.cpp \
 	sqliteDatabase.h \
@@ -74,7 +53,6 @@ watcherd_LDADD = ../libwatcher/libwatcher.a
 watcherd_LDADD += ../sqlite_wrapper/libsqlite_wrapper.a
 watcherd_LDADD += ../util/libwatcherutils.a 
 watcherd_LDADD += ../logger/liblogger.a
-
 
 ctags:
 	ctags -R $(TOPDIR)
@@ -91,5 +69,3 @@ ctags:
 	cp -v $(TOPDIR)/etc/watcherd.log.properties.sample ./$*.log.properties
 	@ echo This is probably a bad idea - attempting to set the correct output log file in log.properties.
 	@ perl -pi -e 's/watcherd.log/$*.log/g' ./$*.log.properties
-
-

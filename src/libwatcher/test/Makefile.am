@@ -1,3 +1,5 @@
+TOPDIR=../../..
+SRCDIR=$(TOPDIR)/src
 
 CPPFLAGS += -Wno-deprecated
 
@@ -5,7 +7,6 @@ CPPFLAGS += -I../..
 CPPFLAGS += -I../../../include
 CPPFLAGS += -I../../logger
 CPPFLAGS += -I../../util
-CPPFLAGS += -I../../watcherd
 CPPFLAGS += $(BOOST_CPPFLAGS)
 
 DEFS += -DBOOST_TEST_DYN_LINK
@@ -16,11 +17,9 @@ LDFLAGS += -llog4cxx
 LDFLAGS += -lconfig++
 
 # apparently order is important for g++, libwatcherd has things that libwatcher needs. 
-LDADD = ../../watcherd/libwatcherd.a
-LDADD += ../libwatcher.a
-LDADD += ../../watcherd/libwatcherd.a
-LDADD += ../../util/libwatcherutils.a
-LDADD += ../../logger/liblogger.a
+LDADD = $(SRCDIR)/libwatcher/libwatcher.a
+LDADD += $(SRCDIR)/util/libwatcherutils.a
+LDADD += $(SRCDIR)/logger/liblogger.a
 LDADD += \
 	$(BOOST_ASIO_LIB) \
 	$(BOOST_SERIALIZATION_LIB) \
@@ -32,6 +31,8 @@ LDADD += \
 
 BUILT_SOURCES=\
 	test.log.properties 
+
+bin_PROGRAMS=testCC
 
 check_PROGRAMS=\
 	testStartMessage \
@@ -46,7 +47,8 @@ check_PROGRAMS=\
 	testWatcherGraph \
 	testWatcherGraphNode \
 	testWatcherGraphEdge \
-	testLoadSaveDisplayInfo
+	testLoadSaveDisplayInfo \
+	testMessageStream
 
 TESTS=$(check_PROGRAMS)
 
@@ -68,7 +70,6 @@ testLoadSaveDisplayInfo_SOURCES=testLoadSaveDisplayInfo.cpp
 #
 # Copy sample cfg and log.properties files from $(TOPDIR)/etc
 #
-TOPDIR=../../..
 %.cfg : 
 	@ echo Creating $*.cfg from sample configuration at $(TOPDIR)/etc/$*.cfg.sample
 	cp -v $(TOPDIR)/etc/$*.cfg.sample ./$*.cfg

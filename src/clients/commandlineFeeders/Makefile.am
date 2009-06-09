@@ -1,5 +1,4 @@
 
-CPPFLAGS+=-I../../watcherd
 CPPFLAGS+=-I../.. 				# libwatcher
 CPPFLAGS+=-I../../../include 	# log4cxx, etc.
 CPPFLAGS+=-I../../util
@@ -9,7 +8,6 @@ CPPFLAGS+=$(BOOST_CPPFLAGS)
 
 # watcher libs
 LDADD =  \
-	../../watcherd/libwatcherd.a \
 	../../libwatcher/libwatcher.a \
 	../../util/libwatcherutils.a \
 	../../logger/liblogger.a 

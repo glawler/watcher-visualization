@@ -6,7 +6,7 @@
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include "logger.h"
-#include "client.h"
+#include <libwatcher/client.h>
 #include <libwatcher/edgeMessage.h>
 #include <libwatcher/messageTypesAndVersions.h>    // for GUILayer
 #include "sendMessageHandler.h"

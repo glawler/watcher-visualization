@@ -4,7 +4,7 @@
 
 #include <boost/asio.hpp>
 #include "logger.h"
-#include "client.h"
+#include <libwatcher/client.h>
 #include <libwatcher/gpsMessage.h>
 #include <libwatcher/watcherTypes.h> // for NodeIdentifer
 #include "sendMessageHandler.h"

@@ -5,10 +5,9 @@
 
 #include <boost/foreach.hpp>
 
-#include "messageHandler.h"
 #include "writeDBMessageHandler.h"
 #include "database.h"
-#include "connection.h"
+#include "libwatcher/connection.h"
 
 using namespace watcher;
 using namespace watcher::event;

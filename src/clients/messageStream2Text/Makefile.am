@@ -6,14 +6,11 @@ SRCDIR=$(TOPDIR)/src
 CPPFLAGS += -fno-strict-aliasing
 
 CPPFLAGS += -I$(SRCDIR)
-CPPFLAGS += -I$(SRCDIR)/watcherd
 CPPFLAGS += -I$(SRCDIR)/util
 CPPFLAGS += -I$(SRCDIR)/logger
 CPPFLAGS += -I$(TOPDIR)/include
 CPPFLAGS += $(BOOST_CPPFLAGS)
 
-LDFLAGS+=-L$(SRCDIR)/watcherd
-LDFLAGS+=-L$(SRCDIR)/libwatcher
 LDFLAGS+=-L$(SRCDIR)/util
 LDFLAGS+=-L$(SRCDIR)/logger
 LDFLAGS+=-L$(TOPDIR)/lib
@@ -22,14 +19,13 @@ LDFLAGS += $(BOOST_LDFLAGS)
 LIBS+=-lconfig++
 LIBS+=-llogger
 LIBS+=-llog4cxx
-LIBS+=-lwatcherutils
-LIBS+=-lwatcherd
-LIBS+=-lwatcher
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB)
 
 BUILT_SOURCES=messageStream2Text.cfg messageStream2Text.log.properties 
 
 bin_PROGRAMS=messageStream2Text
+LDADD=$(SRCDIR)/libwatcher/libwatcher.a \
+      $(SRCDIR)/util/libwatcherutils.a
 
 messageStream2Text_SOURCES=messageStream2Text.cpp
 

@@ -4,7 +4,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "logger.h"
-#include "messageStream.h"
+#include "libwatcher/messageStream.h"
 
 using namespace std;
 using namespace boost;
