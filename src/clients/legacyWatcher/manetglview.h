@@ -51,10 +51,12 @@ class manetGLView : public QGLWidget
         void clearAllLabels();
         void clearAllEdges();
 
-        void playbackStart();
-        void playbackStop();
-        void playbackPause();
-        void playbackContinue();
+        void startPlayback();
+        void pausePlayback();
+        void rewindPlayback();
+        void forwardPlayback();
+        void rewindToStartOfPlayback();
+        void forwardToEndOfPlayback();
         void playbackSetSpeed(int speed);
 
         void toggleNodeSelectedForGraph(unsigned int nodeId);
@@ -87,13 +89,6 @@ signals:
         void labelsCleared();
         void edgesCleared(); 
 
-        void startedGoodwin();
-        void stoppedGoodwin();
-        void pausedGoodwin(); 
-        void continuedGoodwin();
-
-        void runningGoodwin(bool usingGoodwin);
-
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
 
@@ -123,6 +118,8 @@ signals:
         watcher::MessageStreamPtr messageStream;
         watcher::WatcherGraph wGraph;
         std::string serverName; 
+
+        float streamRate; 
 
         watcher::event::GPSMessage gpsDataFormat;
 

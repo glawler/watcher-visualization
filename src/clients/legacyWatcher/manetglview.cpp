@@ -919,6 +919,7 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
 
 manetGLView::manetGLView(QWidget *parent) : 
     QGLWidget(parent),
+    streamRate(1.0),
     autoCenterNodesFlag(false)
 {
     TRACE_ENTER();
@@ -951,9 +952,6 @@ bool manetGLView::loadConfiguration()
     monochromeMode = false;
     threeDView = true;
     backgroundImage = true;
-
-    // causes goodinw control buttons to show/not show.
-    emit runningGoodwin(true); 
 
     //
     // Check configuration for GUI settings.
@@ -2337,37 +2335,6 @@ void manetGLView::clearAllLabels()
     emit labelsCleared();
     TRACE_EXIT();
 }
-void manetGLView::playbackStart()
-{
-    TRACE_ENTER();
-    messageStream->setStreamTimeStart(SeekMessage::epoch); 
-    messageStream->startStream(); 
-    TRACE_EXIT();
-}
-void manetGLView::playbackStop()
-{
-    TRACE_ENTER();
-    messageStream->stopStream(); 
-    TRACE_EXIT();
-}
-void manetGLView::playbackPause()
-{
-    TRACE_ENTER();
-    messageStream->stopStream(); 
-    TRACE_EXIT();
-}
-void manetGLView::playbackContinue()
-{
-    TRACE_ENTER();
-    messageStream->startStream(); 
-    TRACE_EXIT();
-}
-void manetGLView::playbackSetSpeed(int x)
-{
-    TRACE_ENTER();
-    messageStream->setStreamRate((float)x); 
-    TRACE_EXIT();
-}
 
 // Should be called after a glTranslate()
 void manetGLView::handleSpin(int threeD, const NodeDisplayInfoPtr &ndi)
@@ -2819,6 +2786,54 @@ void manetGLView::saveConfiguration()
 
     SingletonConfig::saveConfig();
 
+    TRACE_EXIT();
+}
+
+void manetGLView::startPlayback()
+{
+    TRACE_ENTER();
+    messageStream->startStream(); 
+    TRACE_EXIT();
+}
+void manetGLView::pausePlayback()
+{
+    TRACE_ENTER();
+    messageStream->stopStream(); 
+    TRACE_EXIT();
+}
+void manetGLView::rewindPlayback()
+{
+    TRACE_ENTER();
+    messageStream->setStreamRate(-streamRate); 
+    messageStream->startStream();
+    TRACE_EXIT();
+}
+void manetGLView::forwardPlayback()
+{
+    TRACE_ENTER();
+    messageStream->setStreamRate(streamRate); 
+    messageStream->startStream();
+    TRACE_EXIT();
+}
+void manetGLView::rewindToStartOfPlayback()
+{
+    TRACE_ENTER();
+    messageStream->setStreamTimeStart(SeekMessage::epoch); 
+    messageStream->startStream();
+    TRACE_EXIT();
+}
+void manetGLView::forwardToEndOfPlayback()
+{
+    TRACE_ENTER();
+    messageStream->setStreamTimeStart(SeekMessage::eof); 
+    messageStream->startStream();
+    TRACE_EXIT();
+}
+
+void manetGLView::playbackSetSpeed(int x)
+{
+    TRACE_ENTER();
+    messageStream->setStreamRate((float)x); 
     TRACE_EXIT();
 }
 
