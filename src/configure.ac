@@ -5,6 +5,30 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
+AC_DEFUN([AX_PATH_LIB],
+	[AC_MSG_CHECKING(for $1)
+	ac_cv_sqlite_path=false
+	# check std locations
+	for d in /usr/local /usr; do
+		if test -e $d/include/$1; then
+			ac_cv_sqlite_path=$d
+		fi
+	done
+	# if not found try in $(TOPDIR)/{include,lib}
+	if test $ac_cv_sqlite_path = false; then
+		if test -e "include/$1"; then
+			ac_cv_sqlite_path='$(TOPDIR)'
+			LDFLAGS="$LDFLAGS -L${ac_cv_sqlite_path}/lib"
+			CPPFLAGS="$CPPFLAGS -I${ac_cv_sqlite_path}/include"
+		else
+			AC_MSG_ERROR(could not locate $1)
+		fi
+	fi
+	AC_MSG_RESULT($ac_cv_sqlite_path)])
+AX_PATH_LIB(sqlite3.h)
+AX_PATH_LIB(log4cxx)
+AX_PATH_LIB(libconfig.h)
+
 # check for recent version of sqlite3
 AC_MSG_CHECKING([for sqlite3 >= 3.6.10])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <sqlite3.h>

@@ -1,13 +1,6 @@
 SUBDIRS=. test
 
-# "Fixes" warning in log4cxx about type punning. 
-CXXFLAGS += -fno-strict-aliasing
-
-CPPFLAGS += -I../../include 		# lob4cxx, libconfig++
-CPPFLAGS += -I../util				# watcherutils
-CPPFLAGS += -I../logger				# logger
-CPPFLAGS += -I..
-CPPFLAGS += @BOOST_CPPFLAGS@
+include $(top_srcdir)/Makefile.top
 
 noinst_LIBRARIES=libwatcher.a
 lib_LTLIBRARIES=libwatchermsg.la
