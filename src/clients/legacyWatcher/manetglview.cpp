@@ -1975,8 +1975,8 @@ void manetGLView::showKeyboardShortcuts()
         "F   - change information text font\n"
         "k/l - increase/decrease gps scale\n"
         "a/s - increase/decrease node label font size\n"
+        "t/y - increase/decrease padding between layers\n" 
         "n/m - shift center in/out\n"
-        "q/w - zoom in/out\n"
         "z/x - compress/decompress field distance\n"
         "e/r - rotate x axis\n"
         "d/f - rotate y axis\n"
@@ -2048,6 +2048,8 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_V:     rotateZ(5.0); break;
         case Qt::Key_K:     gpsScale+=10; break;
         case Qt::Key_L:     gpsScale-=10; break;
+        case Qt::Key_T:     layerPadding+=2; break;
+        case Qt::Key_Y:     layerPadding-=2; break;
         case Qt::Key_B:     
             layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
             emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
