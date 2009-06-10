@@ -1,0 +1,7 @@
+
+#ifndef NODE_ACTOR_PROXY_H
+#define NODE_ACTOR_PROXY_H
+
+
+
+#endif // NODE_ACTOR_PROXY_H
