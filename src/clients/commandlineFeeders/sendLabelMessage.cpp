@@ -93,7 +93,7 @@ int main(int argc, char **argv)
             case 'p': logProps=optarg; break;
             case 't': fontSize=lexical_cast<unsigned int>(optarg); break;
             case 'f': { bool val=fg.fromString(optarg); if (!val) { printf("\nBad argument for fg color\n\n"); usage(argv[0]); } break; }
-            case 'g': { bool val=bg.fromString(optarg); if (!val) { printf("\nBad argument for bg color\n\n"); usage(argv[0]); } break; }
+            case 'b': { bool val=bg.fromString(optarg); if (!val) { printf("\nBad argument for bg color\n\n"); usage(argv[0]); } break; }
             case 'e': expiration=lexical_cast<uint32_t>(optarg); break;
             case 'n': 
                       {
