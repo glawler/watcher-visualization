@@ -1,34 +1,13 @@
-TOPDIR=../../..
-SRCDIR=$(TOPDIR)/src
+include $(top_srcdir)/Makefile.top
 
-CPPFLAGS += -Wno-deprecated
-
-CPPFLAGS += -I../..
-CPPFLAGS += -I../../../include
-CPPFLAGS += -I../../logger
-CPPFLAGS += -I../../util
-CPPFLAGS += $(BOOST_CPPFLAGS)
+CXXFLAGS += -Wno-deprecated
 
 DEFS += -DBOOST_TEST_DYN_LINK
 
-LDFLAGS += -L../../../lib
-LDFLAGS += $(BOOST_LDFLAGS)
-LDFLAGS += -llog4cxx
-LDFLAGS += -lconfig++
-
-# apparently order is important for g++, libwatcherd has things that libwatcher needs. 
-LDADD = $(SRCDIR)/libwatcher/libwatcher.a
-LDADD += $(SRCDIR)/libwatcher/libwatchermsg.la
-LDADD += $(SRCDIR)/util/libwatcherutils.a
-LDADD += $(SRCDIR)/logger/liblogger.a
-LDADD += \
-	$(BOOST_ASIO_LIB) \
-	$(BOOST_SERIALIZATION_LIB) \
-	$(BOOST_THREAD_LIB) \
-	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
-	$(BOOST_SYSTEM_LIB) \
-	$(BOOST_FILESYSTEM_LIB) \
-	$(BOOST_REGEX_LIB)
+LDADD = $(top_srcdir)/libwatcher/libwatcher.a
+LDADD += $(top_srcdir)/libwatcher/libwatchermsg.la
+LDADD += $(top_srcdir)/util/libwatcherutils.a
+LDADD += $(top_srcdir)/logger/liblogger.a
 
 BUILT_SOURCES=\
 	test.log.properties 
@@ -67,16 +46,3 @@ testWatcherGraph_SOURCES=testWatcherGraph.cpp
 testWatcherGraphNode_SOURCES=testWatcherGraphNode.cpp
 testWatcherGraphEdge_SOURCES=testWatcherGraphEdge.cpp
 testLoadSaveDisplayInfo_SOURCES=testLoadSaveDisplayInfo.cpp
-
-#
-# Copy sample cfg and log.properties files from $(TOPDIR)/etc
-#
-%.cfg : 
-	@ echo Creating $*.cfg from sample configuration at $(TOPDIR)/etc/$*.cfg.sample
-	cp -v $(TOPDIR)/etc/$*.cfg.sample ./$*.cfg
-
-%.log.properties: 
-	@ echo Creating $*.log.properties from sample configuration at ../etc/watcher.log.properties.sample
-	cp -v $(TOPDIR)/etc/watcherd.log.properties.sample ./$*.log.properties
-	@ echo This is probably a bad idea - attempting to set the correct output log file in log.properties.
-	@ perl -pi -e 's/watcherd.log/$*.log/g' ./$*.log.properties
