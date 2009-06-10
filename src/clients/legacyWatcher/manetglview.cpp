@@ -2017,7 +2017,8 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
     {
         LOG_DEBUG("Got cap F in keyPressEvent - spawning font chooser for info string"); 
         bool ok;
-        QFont font=QFontDialog::getFont(&ok, QString("Choose font"), this); 
+        QFont initial(statusFontName.c_str(), statusFontPointSize); 
+        QFont font=QFontDialog::getFont(&ok, initial, this); 
         if (ok)
         {
             statusFontName=font.family().toStdString(); 
