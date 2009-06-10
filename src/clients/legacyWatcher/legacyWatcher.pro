@@ -30,11 +30,12 @@ LIBS += -llog4cxx
 LIBS += -llogger
 LIBS += -lwatcherutils
 LIBS += -lwatcher
+LIBS += -lwatchermsg
 LIBS += -xml2
 LIBS += -lqwt
 # GTL - how to integrate BOOST into QT at the Makefile level?
-# LIBS += -lboost_system -lboost_serialization-mt -lboost_thread-mt -lboost_system-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_date_time-mt
-LIBS += -lboost_serialization-gcc41-mt-1_38 -lboost_thread-gcc41-mt-1_38 -lboost_unit_test_framework-gcc41-mt-1_38 -lboost_system-gcc41-mt-1_38 -lboost_filesystem-gcc41-mt-1_38 -lboost_regex-gcc41-mt-1_38 -lboost_date_time-gcc41-mt-1_38
+LIBS += -lboost_system -lboost_serialization-mt -lboost_thread-mt -lboost_system-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_date_time-mt
+# LIBS += -lboost_serialization-gcc41-mt-1_38 -lboost_thread-gcc41-mt-1_38 -lboost_unit_test_framework-gcc41-mt-1_38 -lboost_system-gcc41-mt-1_38 -lboost_filesystem-gcc41-mt-1_38 -lboost_regex-gcc41-mt-1_38 -lboost_date_time-gcc41-mt-1_38
 
 win32 {
     error("No support for windows in watcher")

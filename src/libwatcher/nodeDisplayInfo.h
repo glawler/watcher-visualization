@@ -73,6 +73,9 @@ namespace watcher
             enum LabelDefault { FOUR_OCTETS, THREE_OCTETS, TWO_OCTETS, LAST_OCTET, HOSTNAME, FREE_FORM }; 
             static std::string labelDefault2String(const NodeDisplayInfo::LabelDefault &labDef);
             std::string label;
+            std::string labelFont;
+            int labelPointSize;
+            watcher::event::Color labelColor;
 
             watcher::event::Color color; 
 

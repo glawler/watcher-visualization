@@ -1624,7 +1624,9 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         GLdouble lz=(z1+z2)/2.0; 
         GLdouble a=atan2(x1-x2 , y1-y2);
         GLdouble th=10.0;
-        renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, QString(edge.displayInfo->label.c_str())); 
+        renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, 
+                QString(edge.displayInfo->label.c_str()),
+                QFont(QString(edge.displayInfo->labelFont.c_str()), edge.displayInfo->labelPointSize+scaleText)); 
     }
 
     TRACE_EXIT(); 
@@ -1743,7 +1745,8 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
 
     GLdouble x, y, z; 
     gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
-    renderText(x, y+6, z+5, QString(buf)); 
+    renderText(x, y+6, z+5, QString(buf),
+                QFont(QString(node.displayInfo->labelFont.c_str()), node.displayInfo->labelPointSize+scaleText)); 
 
     TRACE_EXIT();
 }
@@ -2010,6 +2013,8 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_F:     rotateY(5.0); break;
         case Qt::Key_C:     rotateZ(-5.0); break;
         case Qt::Key_V:     rotateZ(5.0); break;
+        case Qt::Key_K:     gpsScale+=10; break;
+        case Qt::Key_L:     gpsScale-=10; break;
         case Qt::Key_B:     
             layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
             emit bandwidthToggled(isActive(BANDWIDTH_LAYER));

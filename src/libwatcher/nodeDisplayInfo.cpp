@@ -31,6 +31,9 @@ NodeDisplayInfo::NodeDisplayInfo() :
     flashInterval(500),
     isFlashed(false),
     label(NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET)),
+    labelFont("Helvetica"), 
+    labelPointSize(20),
+    labelColor(Color::blue),
     color(Color::red)
 {
     TRACE_ENTER();
@@ -163,6 +166,24 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         nodeSetting.add(key, Setting::TypeFloat)=floatVal;
     else
         size=floatVal;
+
+    strVal=labelFont;
+    key="labelFont";
+    if (!nodeSetting.lookupValue(key, strVal))
+        nodeSetting.add(key, Setting::TypeString)=strVal;
+    labelFont=strVal;
+
+    intVal=labelPointSize;
+    key="labelPointSize"; 
+    if (!nodeSetting.lookupValue(key, intVal))
+        nodeSetting.add(key, Setting::TypeInt)=intVal;
+    labelPointSize=intVal;
+
+    strVal=Color::blue.toString(); 
+    key="labelColor"; 
+    if (!nodeSetting.lookupValue(key, strVal))
+        nodeSetting.add(key, Setting::TypeString)=strVal;
+    labelColor.fromString(strVal); 
 
     SingletonConfig::unlock(); 
 

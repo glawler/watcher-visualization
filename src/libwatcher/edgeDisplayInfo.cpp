@@ -16,7 +16,10 @@ EdgeDisplayInfo::EdgeDisplayInfo() :
     flash(false), 
     flashInterval(500),
     isFlashed(false),
-    label("none")
+    label("none"),
+    labelFont("Helvetica"),
+    labelPointSize(20),
+    labelColor(Color::blue)
 {
     TRACE_ENTER();
 
@@ -74,6 +77,24 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
     if (!edgeSetting.lookupValue(key, intVal))
         edgeSetting.add(key, Setting::TypeInt)=intVal;
     flashInterval=intVal;
+
+    strVal=labelFont;
+    key="labelFont";
+    if (!edgeSetting.lookupValue(key, strVal))
+        edgeSetting.add(key, Setting::TypeString)=strVal;
+    labelFont=strVal;
+
+    intVal=labelPointSize;
+    key="labelPointSize"; 
+    if (!edgeSetting.lookupValue(key, intVal))
+        edgeSetting.add(key, Setting::TypeInt)=intVal;
+    labelPointSize=intVal;
+
+    strVal=Color::blue.toString(); 
+    key="labelColor"; 
+    if (!edgeSetting.lookupValue(key, strVal))
+        edgeSetting.add(key, Setting::TypeString)=strVal;
+    labelColor.fromString(strVal); 
 
     SingletonConfig::unlock();
 
