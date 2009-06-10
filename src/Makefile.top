@@ -8,7 +8,8 @@ CPPFLAGS += -I$(top_srcdir)/util
 CPPFLAGS += -I$(top_srcdir)/logger
 CPPFLAGS += $(BOOST_CPPFLAGS)
 
-TOPDIR=$(top_srcdir)/../etc
+# root of the watcher tree, one directory up from the srcdir
+TOPDIR=$(top_srcdir)/..
 
 LIBS += -lconfig++
 LIBS += -llog4cxx
