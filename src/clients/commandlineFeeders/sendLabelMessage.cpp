@@ -112,7 +112,7 @@ int main(int argc, char **argv)
             case 'y': lng=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
             case 'z': alt=lexical_cast<float>(optarg); break; // GTL should try{}catch{} here for invalid values.
             case 'r': remove=true; break;
-            case 'L': label=optarg; break;
+            case 'L': layer=optarg; break;
             case 'h':
             case 'H':
             case '?':
