@@ -1418,32 +1418,33 @@ void manetGLView::watcherIdle()
     TRACE_EXIT();
 }
 
-void manetGLView::paintGL()
+void manetGLView::paintOverlayGL()
 {
     TRACE_ENTER();
 
+    QPainter painter;
+    painter.begin(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
+    QString text = tr("Click and drag with the left mouse button to rotate the Qt logo.");
+    QFontMetrics metrics = QFontMetrics(font());
+    int border = qMax(4, metrics.leading());
+
+    QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setPen(Qt::white);
+    painter.fillRect(QRect(0, 0, width(), rect.height() + 2*border), QColor(0, 0, 0, 127));
+    painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignCenter | Qt::TextWordWrap, text);
+    painter.end(); 
+
+    TRACE_EXIT();
+}
+
+void manetGLView::paintGL()
+{
+    TRACE_ENTER();
     glMatrixMode(GL_MODELVIEW);
-
-    // glPushMatrix();
-    // QPainter painter;
-    // painter.begin(this);
-    // painter.setRenderHint(QPainter::Antialiasing);
-
-    // QString text = tr("Click and drag with the left mouse button to rotate the Qt logo.");
-    // QFontMetrics metrics = QFontMetrics(font());
-    // int border = qMax(4, metrics.leading());
-
-    // QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
-    // painter.setRenderHint(QPainter::TextAntialiasing);
-    // painter.setPen(Qt::white);
-    // painter.fillRect(QRect(0, 0, width(), rect.height() + 2*border), QColor(0, 0, 0, 127));
-    // painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignCenter | Qt::TextWordWrap, text);
-    // painter.end(); 
-    // glPopMatrix(); 
-
     drawManet();
-
     TRACE_EXIT();
 }
 
@@ -1965,6 +1966,37 @@ void manetGLView::resetPosition()
     TRACE_EXIT();
 }
 
+void manetGLView::showKeyboardShortcuts()
+{
+    TRACE_ENTER();
+    const char *help=
+        "Keyboard shortcuts:\n"
+        "C   - change background color\n"
+        "F   - change information text font\n"
+        "k/l - increase/decrease gps scale\n"
+        "a/s - increase/decrease node label font size\n"
+        "n/m - shift center in/out\n"
+        "q/w - zoom in/out\n"
+        "z/x - compress/decompress field distance\n"
+        "e/r - rotate x axis\n"
+        "d/f - rotate y axis\n"
+        "c/v - rotate z axis\n"
+        "left arrow  - shift field right\n"
+        "right arrow - shift field left\n"
+        "up arrow    - shift field down\n"
+        "down arrow  - shift field up\n"
+        "=/+ - auto center nodes\n"
+        "space - pause playback\n"
+        "?/h - show this dialog\n"; 
+    // QMessageBox info;
+    // info.addButton(QMessageBox::Ok);
+    // info.setWindowModality(Qt::NonModal);
+    // info.setText(QString(help)); 
+    // info.show();
+    QMessageBox::information(this, tr("Keyboard Shortcuts()"), help);
+    TRACE_EXIT();
+}
+
 void manetGLView::keyPressEvent(QKeyEvent * event)
 {
     TRACE_ENTER();
@@ -2026,6 +2058,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             autoCenterNodesFlag=false;
                             break;
         case Qt::Key_Space:
+                            break;
                             // globalReplay.runFlag = !globalReplay.runFlag;
                             // if (globalReplay.runFlag)
                             //     messageStream.startStream();
@@ -2038,6 +2071,10 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             // case 'a' - 'a' + 1: arrowZoomOut(); break;
                             // case 's' - 'a' + 1: arrowZoomIn(); break;
                             // case 'r' - 'a' + 1: textZoomReset(); arrowZoomReset(); viewpointReset(); break;
+        case Qt::Key_Question:
+        case Qt::Key_H:
+                                showKeyboardShortcuts();
+                                break;
 
         default:
                             event->ignore();

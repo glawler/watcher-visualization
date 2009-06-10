@@ -103,8 +103,10 @@ signals:
 
         void initializeGL();
         void paintGL();
-        void resizeGL(int width, int height);
+        void paintOverlayGL();
 
+        void resizeGL(int width, int height);
+        
         void mouseDoubleClickEvent(QMouseEvent *event);
         void mousePressEvent(QMouseEvent *event);
         void mouseMoveEvent(QMouseEvent *event);
@@ -112,6 +114,8 @@ signals:
 
         void keyPressEvent(QKeyEvent * event);
         void layerToggle(const watcher::event::GUILayer &layer, const bool turnOn);
+
+        void showKeyboardShortcuts(); 
 
     private:
 

@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
     LOG_INFO("Although the legacy watcher code does not use it, so it is not overly valuable");
 
+    QApplication::setColorSpec(QApplication::CustomColor);
     QApplication app(argc, argv);
     WatcherMainWindow *window = new WatcherMainWindow;
     Ui::MainWindow ui;
