@@ -1483,15 +1483,8 @@ void manetGLView::drawManet(void)
 
     glPushMatrix();
 
-    GLfloat black[]={0.0,0.0,0.0,1.0};
-    GLfloat blue[]={0.0,0.0,1.0,0.6};
-
     ptime now = from_time_t(time(NULL));
     glScalef(0.02, 0.02, 0.02);
-    if (monochromeMode)
-        glColor4fv(black);
-    else
-        glColor4fv(blue);
 
     string buf;
     if (showPositionFlag)
@@ -1502,7 +1495,7 @@ void manetGLView::drawManet(void)
         buf+=string(buff); 
     }
     buf+=posix_time::to_simple_string(now);
-    qglColor(QColor("blue")); 
+    qglColor(QColor(monochromeMode ? "black" : "blue")); 
     renderText(12, height()-12, QString(buf.c_str()), QFont(statusFontName.c_str(), statusFontPointSize)); 
 
     glPopMatrix();
@@ -1836,8 +1829,7 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     glEnd();
 
     glDisable(GL_LIGHTING); 
-    // glColor4fv(fgColor);
-    qglColor(QColor(label->foregroundColor.r, label->foregroundColor.g, label->foregroundColor.b, label->foregroundColor.a)); 
+    qglColor(QColor(int(fgColor[0]*255), int(fgColor[1]*255), int(fgColor[2]*255), int(fgColor[3]*255))); 
     renderText(GLdouble(0.0), GLdouble(0.0), GLdouble(1.0), QString(label->labelText.c_str()), font); 
     glEnable(GL_LIGHTING); 
     glPopMatrix(); 
