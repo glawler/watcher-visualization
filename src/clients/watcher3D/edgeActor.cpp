@@ -10,9 +10,14 @@
 #include <dtCore/transform.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
-EdgeActor::EdgeActor()
+EdgeActor::EdgeActor() :
+geode(NULL)
 {
-    DrawEdge();
+    SetName("Edge");
+    osg::Geometry *geometry = new osg::Geometry;
+    geode = new osg::Geode;
+    geode->addDrawable(geometry);
+    GetMatrixNode()->addChild(geode);
 }
 
 EdgeActor::~EdgeActor()
@@ -21,10 +26,9 @@ EdgeActor::~EdgeActor()
 
 void EdgeActor::DrawEdge()
 {
-    std::cout << "Ok, we're drawing an edge here." << std::endl;
-
     if(geode && geode->getDrawable(0))
         geode->removeDrawable(geode->getDrawable(0));
+
     osg::Geometry *g = new osg::Geometry;
     osg::Vec3Array *v = new osg::Vec3Array;
 

@@ -18,12 +18,12 @@ class EdgeActor : public dtCore::Transformable
         void DrawEdge();
 
         // Accessors
-        inline osg::Vec3 GetHead() { return headPos; }
-        inline osg::Vec3 GetTail() { return tailPos; }
+        inline osg::Vec3 GetHeadPos() { return headPos; }
+        inline osg::Vec3 GetTailPos() { return tailPos; }
 
         // Mutators
-        inline void SetHead(const osg::Vec3& newHeadPos) { headPos = newHeadPos; DrawEdge(); }
-        inline void SetTail(const osg::Vec3& newTailPos) { tailPos = newTailPos; DrawEdge(); }
+        inline void SetHeadPos(const osg::Vec3& newHeadPos) { headPos = newHeadPos; DrawEdge(); }
+        inline void SetTailPos(const osg::Vec3& newTailPos) { tailPos = newTailPos; DrawEdge(); }
 
     private:
         osg::Geode *geode;
