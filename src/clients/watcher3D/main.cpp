@@ -4,13 +4,27 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#include "logger.h"
 #include "initConfig.h"
 #include "singletonConfig.h"
-#include "messageStream.h"
-#include "logger.h"
+#include "libwatcher/messageStream.h"
 
 #include "watcher3D.h"
+// Undefine possibly defined LOG macros defined by logger
+#undef LOG_DEBUG
+#undef LOG_INFO
+#undef LOG_WARN
+#undef LOG_ERROR
 #include <dtCore/globals.h>
+// Undefine possibly defined LOG macros defined by delta3d
+#undef LOG_DEBUG
+#undef LOG_INFO
+#undef LOG_WARN
+#undef LOG_ERROR
+// redefine LOG macros using logger.h
+#undef WATCHER_LOGGER_H
+#include "logger.h" 
+
 
 using namespace std;
 using namespace watcher;
@@ -84,7 +98,11 @@ int main(int argc, char** argv)
         config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
     }
 
-    LOAD_LOG_PROPS(logConf); 
+    LOAD_LOG_PROPS(logConf);
+
+// #undef LOG_INFO
+// #define LOG_INFO(message, ...)
+
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
 
     string serverName("127.0.0.1");

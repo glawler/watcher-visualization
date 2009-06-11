@@ -6,6 +6,7 @@
 
 #include <dtABC/application.h>
 #include <dtCore/refptr.h>
+#include <dtGame/gamemanager.h>
 
 // Forward declarations to keep compile-time down
 namespace dtCore
@@ -25,7 +26,7 @@ class Watcher3D : public dtABC::Application
         virtual void Config();
 
     private:
-        dtCore::RefPtr<dtCore::Object> mText;
+        dtCore::RefPtr<dtGame::GameManager> mGM;
         dtCore::RefPtr<dtCore::FlyMotionModel> mFlyMotionModel;
         DECLARE_LOGGER();
 };

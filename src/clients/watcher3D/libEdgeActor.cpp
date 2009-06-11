@@ -1,3 +1,3 @@
 
-#include "LibEdgeActor.h"
-#include "EdgeActorProxy.h"
+#include "libEdgeActor.h"
+#include "edgeActorProxy.h"

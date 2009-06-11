@@ -65,6 +65,7 @@ AC_CONFIG_FILES([ \
     clients/messageStream2Text/Makefile \
     clients/connectivity2dot/Makefile \
     clients/commandlineFeeders/Makefile \
+    clients/watcher3D/Makefile \
 ])
 
 #override default $CXXFLAGS
