@@ -6,6 +6,7 @@
 #include <dtCore/flymotionmodel.h>
 #include <dtCore/transform.h>
 #include <dtDAL/project.h>
+#include <dtDAL/actortype.h>
 #include <osgDB/FileUtils>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
@@ -21,10 +22,8 @@ Watcher3D::Watcher3D(const std::string& configFilename) :
 {
     TRACE_ENTER();
 
-    std::cout << "c2" << std::endl;
     Config();
     mGM = new dtGame::GameManager(*GetScene());
-    std::cout << "c3" << std::endl;
 
     // Generating a default config file if the one passed in is not there.
     if(osgDB::findDataFile(configFilename).empty())
@@ -32,7 +31,7 @@ Watcher3D::Watcher3D(const std::string& configFilename) :
         GenerateDefaultConfigFile();
     }
 
-    std::cout << "c4" << std::endl;
+    // Setup the camera
     dtCore::Transform camPos;
     camPos.SetTranslation(0.0f, -100.0f, 20.0f);
     GetCamera()->SetTransform(camPos);
@@ -43,12 +42,26 @@ Watcher3D::Watcher3D(const std::string& configFilename) :
     // dtDAL::Map &myMap = dtDAL::Project::GetInstance().GetMap("Watcher3D");
     // dtDAL::Project::GetInstance().LoadMapIntoScene(myMap, *GetScene());
 
-    std::cout << "c5" << std::endl;
-    dtCore::RefPtr<NodeActorProxy> nodeActorProxy;
-    std::cout << "c6" << std::endl;
-    mGM->AddActor(nodeActorProxy,false,true);
-    std::cout << "c7" << std::endl;
-  
+    // Load actor libraries (e.g., libNodeActor.so and libEdgeActor.so.)
+    mGM->LoadActorRegistry("NodeActor");
+    mGM->LoadActorRegistry("EdgeActor");
+
+    // Print all known actor types
+    /*
+    std::vector<const dtDAL::ActorType*> actorTypes;
+    mGM->GetActorTypes(actorTypes);
+    for(int i = 0; i < actorTypes.size(); i++)
+      std::cout << actorTypes[i]->GetCategory() << " " << actorTypes[i]->GetName() << std::endl;
+    */
+
+    // Add a node and an edge
+    dtCore::RefPtr<const dtDAL::ActorType> nodeActorType = mGM->FindActorType("Watcher3D Actors", "Node");
+    dtCore::RefPtr<const dtDAL::ActorType> edgeActorType = mGM->FindActorType("Watcher3D Actors", "Node");
+    dtCore::RefPtr<dtDAL::ActorProxy> edgeActorProxy = dynamic_cast<dtDAL::ActorProxy*>(mGM->CreateActor(*edgeActorType).get());
+    dtCore::RefPtr<dtDAL::ActorProxy> nodeActorProxy = dynamic_cast<dtDAL::ActorProxy*>(mGM->CreateActor(*nodeActorType).get());
+    mGM->AddActor(*nodeActorProxy);
+    mGM->AddActor(*edgeActorProxy);
+
     TRACE_EXIT();
 }
 

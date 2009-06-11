@@ -12,6 +12,12 @@ EdgeActorProxy::~EdgeActorProxy()
 
 void EdgeActorProxy::BuildPropertyMap()
 {
+    TransformableActorProxy::BuildPropertyMap();
+}
+
+void EdgeActorProxy::CreateActor()
+{
+    SetActor(*new EdgeActor);
 }
 
 void SetTextureFile(const std::string &fileName)

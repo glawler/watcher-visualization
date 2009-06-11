@@ -115,13 +115,9 @@ int main(int argc, char** argv)
     // My Code (the rest of the code is borrowed from messageStream2Text.cpp)
     //
     dtCore::SetDataFilePathList(".;" + dtCore::GetDeltaDataPathList());
-    cout << "b1" << endl;
     dtCore::RefPtr<Watcher3D> app = new Watcher3D("config.xml");
-    cout << "b2" << endl;
     app->Config();
-    cout << "b3" << endl;
     app->Run();
-    cout << "b4" << endl;
 
     LOG_INFO("Saving last known configuration to " << configFilename); 
     SingletonConfig::lock();

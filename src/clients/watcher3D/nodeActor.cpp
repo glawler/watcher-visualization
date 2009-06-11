@@ -4,6 +4,7 @@
 
 NodeActor::NodeActor()
 {
+    SetName("Node");
 }
 
 NodeActor::~NodeActor()

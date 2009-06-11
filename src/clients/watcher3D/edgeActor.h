@@ -26,6 +26,7 @@ class EdgeActor : public dtCore::Transformable
         inline void SetTail(const osg::Vec3& newTailPos) { tailPos = newTailPos; DrawEdge(); }
 
     private:
+        osg::Geode *geode;
         osg::Vec3 headPos;
         osg::Vec3 tailPos;
 };
