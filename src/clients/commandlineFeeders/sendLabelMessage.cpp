@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     string label;
     string server;
     string logProps("sendMessage.log.properties");
-    unsigned int fontSize=10;
+    unsigned int fontSize=0;
     asio::ip::address address;
     Color fg=Color::black;
     Color bg=Color::white;

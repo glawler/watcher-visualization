@@ -125,7 +125,8 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 
     backgroundColor=mess->background;
     foregroundColor=mess->foreground;
-    pointSize=mess->fontSize; 
+    if (mess->fontSize)
+        pointSize=mess->fontSize; 
     layer=mess->layer; 
     labelText=mess->label;
 

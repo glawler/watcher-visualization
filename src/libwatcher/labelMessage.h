@@ -24,14 +24,30 @@ namespace watcher {
 
                 float lat, lng, alt; 
 
-                // Attach a label to this node.
-                LabelMessage(const std::string &label="", const int fontSize=10); 
+                /**
+                 * Attach a label to this node.
+                 * @param label - the text to display on the label.
+                 * @param fontSize - the size of the font, if 0 use the GUI default size.
+                 */
+                LabelMessage(const std::string &label="", const int fontSize=0); 
 
-                // Attach a label to an arbitrary node.
-                LabelMessage(const std::string &label, const boost::asio::ip::address &address, const int fontSize=10);
+                /**
+                 * Attach a label to an arbitrary node.
+                 * @param label - the text to display on the label.
+                 * @param nodeId - the ID of the node to attach the label to.
+                 * @param fontSize - the size of the font, if 0 use the GUI default size.
+                 */
+                LabelMessage(const std::string &label, const NodeIdentifier &address, const int fontSize=0);
 
-                // Float a label in space
-                LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const int fontSize=10);
+                /**
+                 * Float a label in space. 
+                 * @param label - the text to display on the label.
+                 * @param lat - the latitude of the label
+                 * @param long - the longitude of the label
+                 * @param alt - the altitude of the label
+                 * @param fontSize - the size of the font, if 0 use the GUI default size.
+                 */
+                LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const int fontSize=0);
 
                 LabelMessage(const LabelMessage &other);
 
