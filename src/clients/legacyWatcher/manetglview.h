@@ -239,8 +239,6 @@ signals:
         void compressDistance();
         void expandDistance();
         void textZoomReset(void);
-        void textZoomIn(void);
-        void textZoomOut(void);
         void arrowZoomReset(void);
         void arrowZoomIn(void);
         void arrowZoomOut(void);
@@ -260,8 +258,6 @@ signals:
         void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
         void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
         void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble); 
-        GLfloat drawTextWidth(const char *text);
-        GLfloat drawTextHeight(const char *text);
 
 };
 

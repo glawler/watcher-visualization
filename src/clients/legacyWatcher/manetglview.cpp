@@ -783,22 +783,11 @@ void manetGLView::expandDistance()
 } 
 
 #define TEXT_SCALE 0.105996646
-#define TEXT_SCALE_ZOOM_FACTOR 1.05
 #define ARROW_SCALE_ZOOM_FACTOR 1.05
 
 void manetGLView::textZoomReset(void)
 {
     scaleText= TEXT_SCALE;
-}
-
-void manetGLView::textZoomIn(void)
-{
-    scaleText*= TEXT_SCALE_ZOOM_FACTOR;
-}
-
-void manetGLView::textZoomOut(void)
-{
-    scaleText/= TEXT_SCALE_ZOOM_FACTOR;
 }
 
 void manetGLView::arrowZoomReset(void)
@@ -1312,7 +1301,7 @@ void manetGLView::initializeGL()
     glShadeModel(GL_SMOOTH); 
 
     // Uncomment these if you want to use glColor(c) instead of 
-    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, c);
+    // glColor4fv(c);
     // glEnable(GL_COLOR_MATERIAL);
     // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
@@ -1338,6 +1327,11 @@ void manetGLView::initializeGL()
     GLfloat posDiffLight[]= { 500.0, 500.0f, 100.0f, 1.0f };
     glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
     glEnable(GL_LIGHT2);
+
+    // enable color tracking
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
 
     TRACE_EXIT();
 }
@@ -1495,9 +1489,9 @@ void manetGLView::drawManet(void)
     ptime now = from_time_t(time(NULL));
     glScalef(0.02, 0.02, 0.02);
     if (monochromeMode)
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+        glColor4fv(black);
     else
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
+        glColor4fv(blue);
 
     string buf;
     if (showPositionFlag)
@@ -1560,9 +1554,9 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     if (monochromeMode)
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+        glColor4fv(black);
     else
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, edgeColor);
+        glColor4fv(edgeColor);
 
     if (!threeDView)
     {
@@ -1611,13 +1605,18 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         if (monochromeMode)
         {
             const GLfloat localblack[]={0.0,0.0,0.0,1.0};
-            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, localblack);
+            glColor4fv(localblack);
         }
         else
         {
             // This color should be cfg-erable.
-            const GLfloat blue[]={0.0,0.0,1.0,0.6};
-            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
+            const GLfloat clr[]={
+                edge.displayInfo->color.r/255.0, 
+                edge.displayInfo->color.g/255.0, 
+                edge.displayInfo->color.b/255.0, 
+                edge.displayInfo->color.a/255.0
+            };
+            glColor4fv(clr);
         }
 
         GLdouble lx=(x1+x2)/2.0; 
@@ -1669,9 +1668,9 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
             nodeColor[i]=1-nodeColor[i]; 
 
     if (monochromeMode)
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+        glColor4fv(black);
     else
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, nodeColor);
+        glColor4fv(nodeColor);
 
     switch(node.displayInfo->shape)
     {
@@ -1702,9 +1701,9 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
         node.displayInfo->color.a/255.0, 
     };
     if (monochromeMode)
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+        glColor4fv(black);
     else
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, nodeColor);
+        glColor4fv(nodeColor);
 
     // a little awkward since we're mixing enums, reserved strings, and free form strings
     char buf[64]; 
@@ -1752,42 +1751,15 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
     TRACE_EXIT();
 }
 
-GLfloat manetGLView::drawTextHeight(const char *text)
-{
-	int numlines=1;
-	const char *p;
-
-	p=text;
-	while(*p)
-	{
-		switch(*p)
-		{
-			case '\n':
-				numlines++;
-			break;
-		}
-		p++;
-	}
-	if (numlines==0)
-		numlines=1;
-
-    return glutStrokeWidth(GLUT_STROKE_ROMAN,'W')*numlines;
-}
-
-GLfloat manetGLView::drawTextWidth(const char *text)
-{
-    return glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)text);
-}
-
 void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfoPtr &label)
 {
     TRACE_ENTER(); 
 
     QFont font(label->fontName.c_str(), (int)label->pointSize); 
     QFontMetrics fontMetric(font); 
-    QRect textRect=fontMetric.boundingRect(QString(label->labelText.c_str()));
+    // QRect textRect=fontMetric.boundingRect(QString(label->labelText.c_str()));
+    QRect textRect=fontMetric.boundingRect((int)inx, (int)iny, 10, 10, 0, QString(label->labelText.c_str()));
     GLfloat textPadding=5.0; 
-
 
     GLfloat fgColor[]={
         label->foregroundColor.r/255.0, 
@@ -1802,72 +1774,75 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
         label->backgroundColor.a/255.0
     };
 
-    // "pointer" from node to label
-    GLfloat black[]={0.0,0.0,0.0,1.0};
-    GLfloat blue[]={0.0,0.0,1.0,0.6};
-
-    GLfloat labelOffX=3.0, labelOffY=3.0, labelOffZ=0.0; 
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(inx,iny,inz);
-    glVertex3f(inx+(2.0*labelOffX), iny+(1.0*labelOffY), inz+labelOffZ);  
-    glVertex3f(inx+(1.0*labelOffX), iny+(1.0*labelOffY), inz+labelOffZ);  
-    glVertex3f(inx+(1.0*labelOffX), iny+(2.0*labelOffY), inz+labelOffZ);  
-    glVertex3f(inx, iny, inz); 
-    glEnd();
-
-    glPushMatrix(); 
-    // border around label
-    glTranslatef(inx+labelOffX+textPadding, iny+labelOffY+textPadding, inz+labelOffZ); 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(                      -textPadding,                        -textPadding, 0.0); 
-    glVertex3f(                      -textPadding, textRect.height()+(2.0*textPadding), 0.0); 
-    glVertex3f(textRect.width()+(2.0*textPadding), textRect.height()+(2.0*textPadding), 0.0);
-    glVertex3f(textRect.width()+(2.0*textPadding),                        -textPadding, 0.0); 
-    glEnd();
-
     if (monochromeMode)
         for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
             bgColor[i]=1.0;
-    else
+    if (monochromeMode)
         for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
-            bgColor[i]=bgColor[i]/255.0;
+            if (i==3)
+                fgColor[i]=1.0;
+            else
+                fgColor[i]=0.0;
 
-    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
-    // glBegin(GL_POLYGON);
-    // glVertex3f(x  ,y,z+0.1);
-    // glVertex3f(x+w,y,z+0.1);
-    // glVertex3f(x+w,y-h-0.5,z+0.1);
-    // glVertex3f(x  ,y-h-0.5,z+0.1);
-    // glEnd();
+    GLfloat labelOffX=6.0, labelOffY=6.0, labelOffZ=0.0; 
 
-    // if (monochromeMode)
-    // {
-    //     fgColor[0]=0.0;
-    //     fgColor[1]=0.0;
-    //     fgColor[2]=0.0;
-    //     fgColor[3]=1.0;
-    // }
-    // else
-    //     for (unsigned int i=0; i<sizeof(fgColor)/sizeof(fgColor[0]); i++)
-    //         fgColor[i]=fgColor[i]/255.0;
+    // Begin billboard
+    glPushMatrix();
+    glTranslatef(inx, iny, inz); 
+    float modelview[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX , modelview);
+    for (int i=0; i<3; i++)
+        for (int j=0; j<3; j++)
+            if (i==j)
+                modelview[i*4+j]=1.0;
+            else
+                modelview[i*4+j]=0.0;
+    glLoadMatrixf(modelview);
+    glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
 
-    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, fgColor);
+    glColor4fv(fgColor);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(4.0*labelOffX, 1.0*labelOffY, labelOffZ);  
+    glVertex3f(1.0*labelOffX, 1.0*labelOffY, labelOffZ);  
+    glVertex3f(1.0*labelOffX, 4.0*labelOffY, labelOffZ);  
+    glVertex3f(0.0, 0.0, 0.0); 
+    glEnd();
 
+    glPushMatrix(); 
+
+    glTranslatef(labelOffX+textPadding, labelOffY+textPadding, labelOffZ); 
+    // border around label
+    GLfloat rect[][3]={
+        {                       -textPadding,                        -textPadding, 0.0 },
+        {                       -textPadding, textRect.height()+(2.0*textPadding), 0.0 }, 
+        { textRect.width()+(2.0*textPadding), textRect.height()+(2.0*textPadding), 0.0 }, 
+        { textRect.width()+(2.0*textPadding),                        -textPadding, 0.0 } 
+    };
+    glColor4fv(fgColor);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(rect[0][0], rect[0][1], rect[0][2]); 
+    glVertex3f(rect[1][0], rect[1][1], rect[1][2]); 
+    glVertex3f(rect[2][0], rect[2][1], rect[2][2]); 
+    glVertex3f(rect[3][0], rect[3][1], rect[3][2]); 
+    glEnd();
+
+    glColor4fv(bgColor);
+    glBegin(GL_POLYGON);
+    glVertex3f(rect[0][0], rect[0][1], rect[0][2]); 
+    glVertex3f(rect[1][0], rect[1][1], rect[1][2]); 
+    glVertex3f(rect[2][0], rect[2][1], rect[2][2]); 
+    glVertex3f(rect[3][0], rect[3][1], rect[3][2]); 
+    glEnd();
+
+    glDisable(GL_LIGHTING); 
+    // glColor4fv(fgColor);
     qglColor(QColor(label->foregroundColor.r, label->foregroundColor.g, label->foregroundColor.b, label->foregroundColor.a)); 
     renderText(GLdouble(0.0), GLdouble(0.0), GLdouble(1.0), QString(label->labelText.c_str()), font); 
+    glEnable(GL_LIGHTING); 
+    glPopMatrix(); 
 
-    // /* Fill in gap at the bottom of the label...  */
-    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
-    // glBegin(GL_POLYGON);
-    // glVertex3f(x  ,y,z+0.1);
-    // glVertex3f(x+w,y,z+0.1);
-    // glVertex3f(x+w,y-border_width2,z+0.1);
-    // glVertex3f(x  ,y-border_width2,z+0.1);
-    // glEnd();
-    
+    // end billboard
     glPopMatrix(); 
 
     TRACE_EXIT(); 
@@ -1963,6 +1938,7 @@ void manetGLView::showKeyboardShortcuts()
         "Keyboard shortcuts:\n"
         "C   - change background color\n"
         "F   - change information text font\n"
+        "T   - reset layer padding to 0\n"
         "k/l - increase/decrease gps scale\n"
         "a/s - increase/decrease node label font size\n"
         "t/y - increase/decrease padding between layers\n" 
@@ -1994,26 +1970,34 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
     quint32 nativeKey = event->nativeVirtualKey();
     int qtKey = event->key();
 
-    if (nativeKey=='C')
+    switch (nativeKey)
     {
-        LOG_DEBUG("Got cap C in keyPressEvent - spawning color chooser for background color"); 
-        QRgb rgb=0xffffffff;
-        bool ok=false;
-        rgb=QColorDialog::getRgba(rgb, &ok);
-        if (ok)
-            glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
-    }
-    else if (nativeKey=='F') 
-    {
-        LOG_DEBUG("Got cap F in keyPressEvent - spawning font chooser for info string"); 
-        bool ok;
-        QFont initial(statusFontName.c_str(), statusFontPointSize); 
-        QFont font=QFontDialog::getFont(&ok, initial, this); 
-        if (ok)
-        {
-            statusFontName=font.family().toStdString(); 
-            statusFontPointSize=font.pointSize(); 
-        }
+        case 'C':
+            {
+                LOG_DEBUG("Got cap C in keyPressEvent - spawning color chooser for background color"); 
+                QRgb rgb=0xffffffff;
+                bool ok=false;
+                rgb=QColorDialog::getRgba(rgb, &ok);
+                if (ok)
+                    glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
+            }
+            break;
+        case 'F': 
+            {
+                LOG_DEBUG("Got cap F in keyPressEvent - spawning font chooser for info string"); 
+                bool ok;
+                QFont initial(statusFontName.c_str(), statusFontPointSize); 
+                QFont font=QFontDialog::getFont(&ok, initial, this); 
+                if (ok)
+                {
+                    statusFontName=font.family().toStdString(); 
+                    statusFontPointSize=font.pointSize(); 
+                }
+            }
+            break;
+        case 'T':
+            layerPadding=0;
+            break;
     }
 
     switch(qtKey)
@@ -2026,8 +2010,8 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_M:     shiftCenterOut(); break;
         case Qt::Key_Q:     zoomOut(); break;
         case Qt::Key_W:     zoomIn(); break;
-        case Qt::Key_A:     textZoomOut(); break;
-        case Qt::Key_S:     textZoomIn(); break;
+        case Qt::Key_A:     scaleText++; break;
+        case Qt::Key_S:     scaleText--; break;
         case Qt::Key_Z:     compressDistance(); break;
         case Qt::Key_X:     expandDistance(); break;
         case Qt::Key_E:     rotateX(-5.0); break;
@@ -2729,7 +2713,7 @@ void manetGLView::drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
 { 
     static GLfloat const dead[]={1.0,0.0,0.0,1.0}; 
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, dead);
+    glColor4fv(dead);
 
     // draw outsize circle
     glTranslatef(x, y, z);
