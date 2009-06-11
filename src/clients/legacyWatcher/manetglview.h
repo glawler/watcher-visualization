@@ -140,7 +140,7 @@ signals:
 
         struct DisplayStatus
         {
-            float scaleText;
+            int scaleText;
             float scaleLine;
             int monochromeMode;
             int threeDView;

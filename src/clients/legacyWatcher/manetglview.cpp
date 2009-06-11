@@ -782,12 +782,12 @@ void manetGLView::expandDistance()
     manetAdj.scaleZ += 0.1;
 } 
 
-#define TEXT_SCALE 0.105996646
+#define TEXT_SCALE 20
 #define ARROW_SCALE_ZOOM_FACTOR 1.05
 
 void manetGLView::textZoomReset(void)
 {
-    scaleText= TEXT_SCALE;
+    scaleText=TEXT_SCALE;
 }
 
 void manetGLView::arrowZoomReset(void)
@@ -1489,9 +1489,11 @@ void manetGLView::drawManet(void)
     string buf;
     if (showPositionFlag)
     {
-        char buff[190];
-        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f scale %f  -  ",
-                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, manetAdj.scaleX);
+        char buff[256];
+        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f,  textscale %f -  ",
+                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
+                manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
+                scaleText); 
         buf+=string(buff); 
     }
     buf+=posix_time::to_simple_string(now);
@@ -1619,7 +1621,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         GLdouble th=10.0;
         renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, 
                 QString(edge.displayInfo->label.c_str()),
-                QFont(QString(edge.displayInfo->labelFont.c_str()), (int)(edge.displayInfo->labelPointSize+scaleText))); 
+                QFont(QString(edge.displayInfo->labelFont.c_str()), (int)(edge.displayInfo->labelPointSize*manetAdj.scaleX*scaleText)));
     }
 
     TRACE_EXIT(); 
@@ -1739,7 +1741,8 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
     GLdouble x, y, z; 
     gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
     renderText(x, y+6, z+5, QString(buf),
-                QFont(QString(node.displayInfo->labelFont.c_str()), (int)(node.displayInfo->labelPointSize+scaleText))); 
+                QFont(node.displayInfo->labelFont.c_str(), 
+                     (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
 
     TRACE_EXIT();
 }
@@ -1747,12 +1750,6 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
 void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfoPtr &label)
 {
     TRACE_ENTER(); 
-
-    QFont font(label->fontName.c_str(), (int)label->pointSize); 
-    QFontMetrics fontMetric(font); 
-    // QRect textRect=fontMetric.boundingRect(QString(label->labelText.c_str()));
-    QRect textRect=fontMetric.boundingRect((int)inx, (int)iny, 10, 10, 0, QString(label->labelText.c_str()));
-    GLfloat textPadding=5.0; 
 
     GLfloat fgColor[]={
         label->foregroundColor.r/255.0, 
@@ -1777,9 +1774,9 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
             else
                 fgColor[i]=0.0;
 
-    GLfloat labelOffX=6.0, labelOffY=6.0, labelOffZ=0.0; 
+    GLfloat labelOffX=6.0, labelOffY=6.0, labelOffZ=0.0, arrowWidthRatio=1.5;
 
-    // Begin billboard
+    // Enter "billboard" view mode. 
     glPushMatrix();
     glTranslatef(inx, iny, inz); 
     float modelview[16];
@@ -1796,21 +1793,27 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     glColor4fv(fgColor);
     glBegin(GL_TRIANGLE_FAN);
     glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(4.0*labelOffX, 1.0*labelOffY, labelOffZ);  
-    glVertex3f(1.0*labelOffX, 1.0*labelOffY, labelOffZ);  
-    glVertex3f(1.0*labelOffX, 4.0*labelOffY, labelOffZ);  
+    glVertex3f(arrowWidthRatio*labelOffX, labelOffY, labelOffZ);  
+    glVertex3f(labelOffX, labelOffY, labelOffZ);  
+    glVertex3f(labelOffX, arrowWidthRatio*labelOffY, labelOffZ);  
     glVertex3f(0.0, 0.0, 0.0); 
     glEnd();
 
     glPushMatrix(); 
 
+    GLfloat textPadding=2.0; 
+    QFont font(label->fontName.c_str(), (int)label->pointSize*manetAdj.scaleX*scaleText); 
+    QFontMetrics fontMetric(font); 
+    int width=fontMetric.width(label->labelText.c_str()); 
+    int height=fontMetric.height();
+
     glTranslatef(labelOffX+textPadding, labelOffY+textPadding, labelOffZ); 
-    // border around label
+
     GLfloat rect[][3]={
-        {                       -textPadding,                        -textPadding, 0.0 },
-        {                       -textPadding, textRect.height()+(2.0*textPadding), 0.0 }, 
-        { textRect.width()+(2.0*textPadding), textRect.height()+(2.0*textPadding), 0.0 }, 
-        { textRect.width()+(2.0*textPadding),                        -textPadding, 0.0 } 
+        {   0.0,    0.0, 0.0 },
+        {   0.0, height, 0.0 }, 
+        { width, height, 0.0 }, 
+        { width,    0.0, 0.0 } 
     };
     glColor4fv(fgColor);
     glBegin(GL_LINE_LOOP);
@@ -1830,11 +1833,11 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     glDisable(GL_LIGHTING); 
     qglColor(QColor(int(fgColor[0]*255), int(fgColor[1]*255), int(fgColor[2]*255), int(fgColor[3]*255))); 
-    renderText(GLdouble(0.0), GLdouble(0.0), GLdouble(1.0), QString(label->labelText.c_str()), font); 
+    renderText(textPadding, textPadding, GLdouble(1.0), label->labelText.c_str(), font); 
     glEnable(GL_LIGHTING); 
     glPopMatrix(); 
 
-    // end billboard
+    // exit "billboard" viewmode. 
     glPopMatrix(); 
 
     TRACE_EXIT(); 
