@@ -120,6 +120,9 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
     else
         expiration=Infinity;
 
+    // load defaults, then modify 'em 
+    loadConfiguration(mess->layer); 
+
     backgroundColor=mess->background;
     foregroundColor=mess->foreground;
     pointSize=mess->fontSize; 

@@ -365,8 +365,6 @@ bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
         }
         else
         {
-            // GTL - this is some ugly ass code. Compact, but very very ugly. 
-            // See http://www.sgi.com/tech/stl/remove_if.html for details
             WatcherGraphNode::LabelList::iterator b=theGraph[*nodeIter].labels.begin();
             WatcherGraphNode::LabelList::iterator e=theGraph[*nodeIter].labels.end();
             WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message));
