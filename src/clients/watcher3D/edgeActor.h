@@ -2,9 +2,12 @@
 #ifndef EDGE_ACTOR_H
 #define EDGE_ACTOR_H
 
+// Delta3D includes
+#include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtCore/transformable.h>
 #include <osg/Geode>
 #include <osg/Vec3>
+#include <enable_watcher_logging.h> /* redef watcher logging macros */
 
 class EdgeActor : public dtCore::Transformable
 {

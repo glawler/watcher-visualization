@@ -1,0 +1,3 @@
+logPropertiesFile = "watcher3D.log.properties";
+server = "glory";
+service = "watcherd";

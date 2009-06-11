@@ -1,4 +1,5 @@
 
+// Watcher3D includes
 #include "edgeActorProxy.h"
 
 EdgeActorProxy::EdgeActorProxy()
