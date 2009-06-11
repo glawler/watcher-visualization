@@ -2,7 +2,12 @@
 #ifndef NODE_ACTOR_PROXY_H
 #define NODE_ACTOR_PROXY_H
 
+// Delta3D includes
+#include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtDAL/transformableactorproxy.h>
+#include <enable_watcher_logging.h> /* redef watcher logging macros */
+
+// Watcher3D includes
 #include "nodeActor.h"
 
 class NodeActorProxy : public dtDAL::TransformableActorProxy
