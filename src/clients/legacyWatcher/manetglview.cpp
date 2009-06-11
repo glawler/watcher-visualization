@@ -1627,7 +1627,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         GLdouble th=10.0;
         renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, 
                 QString(edge.displayInfo->label.c_str()),
-                QFont(QString(edge.displayInfo->labelFont.c_str()), edge.displayInfo->labelPointSize+scaleText)); 
+                QFont(QString(edge.displayInfo->labelFont.c_str()), (int)(edge.displayInfo->labelPointSize+scaleText))); 
     }
 
     TRACE_EXIT(); 
@@ -1747,7 +1747,7 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
     GLdouble x, y, z; 
     gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
     renderText(x, y+6, z+5, QString(buf),
-                QFont(QString(node.displayInfo->labelFont.c_str()), node.displayInfo->labelPointSize+scaleText)); 
+                QFont(QString(node.displayInfo->labelFont.c_str()), (int)(node.displayInfo->labelPointSize+scaleText))); 
 
     TRACE_EXIT();
 }
@@ -1781,20 +1781,13 @@ GLfloat manetGLView::drawTextWidth(const char *text)
 
 void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfoPtr &label)
 {
-    // 
-    // GTL ----
-    // This code is fundementally broken for more than one label. 
-    // Look at nodeDrawLabel in graphics.cpp. 
-    // You need to know *all* the labels that will be drawn to 
-    // get everything to line up properly. 
-    //
     TRACE_ENTER(); 
-    QFont font(label->fontName.c_str(), (int)label->pointSize); 
-    QFontMetrics metrics(font); 
 
-    const char *str=label->labelText.c_str(); 
-    GLfloat w=metrics.width(str); 
-    GLfloat h=metrics.height(); 
+    QFont font(label->fontName.c_str(), (int)label->pointSize); 
+    QFontMetrics fontMetric(font); 
+    QRect textRect=fontMetric.boundingRect(QString(label->labelText.c_str()));
+    GLfloat textPadding=5.0; 
+
 
     GLfloat fgColor[]={
         label->foregroundColor.r/255.0, 
@@ -1809,35 +1802,30 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
         label->backgroundColor.a/255.0
     };
 
-    GLfloat x=inx+6;
-    GLfloat y=iny-6;
-    // GTL TODO: make the lables stack based on layer ("index").
-    // GLfloat z=inz+0.3+(0.3*(us->index & 0xFF));
-    GLfloat z=inz+0.3+(0.3*1.0);
-    static const GLfloat black[]={0.0,0.0,0.0,1.0};
-
-    GLfloat border_width = 2.0*(scaleText > TEXT_SCALE ? sqrt(scaleText/TEXT_SCALE) : scaleText/TEXT_SCALE);
-    GLfloat border_width2 = border_width + border_width;
-    h+=border_width2;
-    w+=border_width2;
-
     // "pointer" from node to label
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    GLfloat black[]={0.0,0.0,0.0,1.0};
+    GLfloat blue[]={0.0,0.0,1.0,0.6};
+
+    GLfloat labelOffX=3.0, labelOffY=3.0, labelOffZ=0.0; 
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
     glBegin(GL_TRIANGLE_FAN);
     glVertex3f(inx,iny,inz);
-    glVertex3f(x+w*0.03,y,z);
-    glVertex3f(x,y,z);
-    glVertex3f(x,y,z);
-    glVertex3f(x,y-h*0.03,z);
+    glVertex3f(inx+(2.0*labelOffX), iny+(1.0*labelOffY), inz+labelOffZ);  
+    glVertex3f(inx+(1.0*labelOffX), iny+(1.0*labelOffY), inz+labelOffZ);  
+    glVertex3f(inx+(1.0*labelOffX), iny+(2.0*labelOffY), inz+labelOffZ);  
+    glVertex3f(inx, iny, inz); 
     glEnd();
 
+    glPushMatrix(); 
     // border around label
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, black);
+    glTranslatef(inx+labelOffX+textPadding, iny+labelOffY+textPadding, inz+labelOffZ); 
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
     glBegin(GL_LINE_LOOP);
-    glVertex3f(x,y,z+0.2);
-    glVertex3f(x+w,y,z+0.2);
-    glVertex3f(x+w,y-h,z+0.2);
-    glVertex3f(x,y-h,z+0.2);
+    glVertex3f(                      -textPadding,                        -textPadding, 0.0); 
+    glVertex3f(                      -textPadding, textRect.height()+(2.0*textPadding), 0.0); 
+    glVertex3f(textRect.width()+(2.0*textPadding), textRect.height()+(2.0*textPadding), 0.0);
+    glVertex3f(textRect.width()+(2.0*textPadding),                        -textPadding, 0.0); 
     glEnd();
 
     if (monochromeMode)
@@ -1847,38 +1835,40 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
         for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
             bgColor[i]=bgColor[i]/255.0;
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
-    glBegin(GL_POLYGON);
-    glVertex3f(x  ,y,z+0.1);
-    glVertex3f(x+w,y,z+0.1);
-    glVertex3f(x+w,y-h-0.5,z+0.1);
-    glVertex3f(x  ,y-h-0.5,z+0.1);
-    glEnd();
+    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
+    // glBegin(GL_POLYGON);
+    // glVertex3f(x  ,y,z+0.1);
+    // glVertex3f(x+w,y,z+0.1);
+    // glVertex3f(x+w,y-h-0.5,z+0.1);
+    // glVertex3f(x  ,y-h-0.5,z+0.1);
+    // glEnd();
 
-    if (monochromeMode)
-    {
-        fgColor[0]=0.0;
-        fgColor[1]=0.0;
-        fgColor[2]=0.0;
-        fgColor[3]=1.0;
-    }
-    else
-        for (unsigned int i=0; i<sizeof(fgColor)/sizeof(fgColor[0]); i++)
-            fgColor[i]=fgColor[i]/255.0;
+    // if (monochromeMode)
+    // {
+    //     fgColor[0]=0.0;
+    //     fgColor[1]=0.0;
+    //     fgColor[2]=0.0;
+    //     fgColor[3]=1.0;
+    // }
+    // else
+    //     for (unsigned int i=0; i<sizeof(fgColor)/sizeof(fgColor[0]); i++)
+    //         fgColor[i]=fgColor[i]/255.0;
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, fgColor);
-    y-=drawTextHeight("X")*scaleText;
-    renderText(x+border_width, y-border_width,z+0.2, QString(label->labelText.c_str()),  font);
-    y-=h-metrics.xHeight()*scaleText;
+    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, fgColor);
 
-    /* Fill in gap at the bottom of the label...  */
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
-    glBegin(GL_POLYGON);
-    glVertex3f(x  ,y,z+0.1);
-    glVertex3f(x+w,y,z+0.1);
-    glVertex3f(x+w,y-border_width2,z+0.1);
-    glVertex3f(x  ,y-border_width2,z+0.1);
-    glEnd();
+    qglColor(QColor(label->foregroundColor.r, label->foregroundColor.g, label->foregroundColor.b, label->foregroundColor.a)); 
+    renderText(GLdouble(0.0), GLdouble(0.0), GLdouble(1.0), QString(label->labelText.c_str()), font); 
+
+    // /* Fill in gap at the bottom of the label...  */
+    // glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, bgColor);
+    // glBegin(GL_POLYGON);
+    // glVertex3f(x  ,y,z+0.1);
+    // glVertex3f(x+w,y,z+0.1);
+    // glVertex3f(x+w,y-border_width2,z+0.1);
+    // glVertex3f(x  ,y-border_width2,z+0.1);
+    // glEnd();
+    
+    glPopMatrix(); 
 
     TRACE_EXIT(); 
 }
