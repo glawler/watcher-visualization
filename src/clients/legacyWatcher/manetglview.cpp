@@ -1774,7 +1774,6 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
             else
                 fgColor[i]=0.0;
 
-    GLfloat labelOffX=6.0, labelOffY=6.0, labelOffZ=0.0, arrowWidthRatio=1.5;
 
     // Enter "billboard" view mode. 
     glPushMatrix();
@@ -1790,24 +1789,24 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     glLoadMatrixf(modelview);
     glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
 
+    GLfloat labelOffSet=6.0, arrowWidthRatio=1.5;
+
     glColor4fv(fgColor);
     glBegin(GL_TRIANGLE_FAN);
     glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(arrowWidthRatio*labelOffX, labelOffY, labelOffZ);  
-    glVertex3f(labelOffX, labelOffY, labelOffZ);  
-    glVertex3f(labelOffX, arrowWidthRatio*labelOffY, labelOffZ);  
+    glVertex3f(arrowWidthRatio*labelOffSet, labelOffSet, 0.0);  
+    glVertex3f(labelOffSet, labelOffSet, 0.0);  
+    glVertex3f(labelOffSet, arrowWidthRatio*labelOffSet, 0.0);  
     glVertex3f(0.0, 0.0, 0.0); 
     glEnd();
 
     glPushMatrix(); 
+    glTranslatef(labelOffSet, labelOffSet, 0.0); 
 
-    GLfloat textPadding=2.0; 
     QFont font(label->fontName.c_str(), (int)label->pointSize*manetAdj.scaleX*scaleText); 
     QFontMetrics fontMetric(font); 
     int width=fontMetric.width(label->labelText.c_str()); 
     int height=fontMetric.height();
-
-    glTranslatef(labelOffX+textPadding, labelOffY+textPadding, labelOffZ); 
 
     GLfloat rect[][3]={
         {   0.0,    0.0, 0.0 },
@@ -1833,7 +1832,7 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     glDisable(GL_LIGHTING); 
     qglColor(QColor(int(fgColor[0]*255), int(fgColor[1]*255), int(fgColor[2]*255), int(fgColor[3]*255))); 
-    renderText(textPadding, textPadding, GLdouble(1.0), label->labelText.c_str(), font); 
+    renderText(2.0, 2.0, 1.0, label->labelText.c_str(), font); 
     glEnable(GL_LIGHTING); 
     glPopMatrix(); 
 
