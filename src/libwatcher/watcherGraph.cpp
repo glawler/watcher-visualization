@@ -329,23 +329,25 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
     return retVal;
 }
 
-bool WatcherGraph::updateNodeColor(const ColorMessagePtr & /*message*/)
+bool WatcherGraph::updateNodeColor(const ColorMessagePtr &message)
 {
     TRACE_ENTER();
-    TRACE_EXIT_RET_BOOL(false);
-    return false; 
-
-    // bool retVal;
-    // boost::graph_traits<Graph>::vertex_iterator nodeIter;
-    // if(findOrCreateNode(message->fromNodeID, nodeIter))
-    // {
-    //     LOG_DEBUG("Updating color information for node " << theGraph[*nodeIter].nodeId);
-    //     theGraph[*nodeIter].color.reset(new ColorMessage(*message)); 
-    //     retVal=true;
-    // }
-    // 
-    // TRACE_EXIT_RET(retVal);
-    // return retVal;
+    bool retVal;
+    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
+    {
+        LOG_DEBUG("Updating color information for node " << theGraph[*nodeIter].nodeId);
+        theGraph[*nodeIter].displayInfo->color=message->color; 
+        if (message->flashPeriod)
+        {
+            theGraph[*nodeIter].displayInfo->flash=true; 
+            theGraph[*nodeIter].displayInfo->flashInterval=message->flashPeriod; 
+        }
+        retVal=true;
+    }
+    
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
 
 bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
@@ -524,7 +526,12 @@ bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_trait
             LOG_ERROR("Unable to create new node for id " << id << " in watcherGraph");
             retVal=false;
         }
-        theGraph[*retIter].displayInfo->loadConfiguration(layer, id); 
+        // GTL - force nodes to be on the physcial layer - otherwise we are at the whim of 
+        // whatever layer is referenced first. Say a label is attached to a node. If the 
+        // label is on lyer "foobar", the commented out line will create the node on a layer other
+        // than the physical. 
+        // theGraph[*retIter].displayInfo->loadConfiguration(layer, id); 
+        theGraph[*retIter].displayInfo->loadConfiguration(PHYSICAL_LAYER, id); 
     }
 
     TRACE_EXIT_RET(retVal);
