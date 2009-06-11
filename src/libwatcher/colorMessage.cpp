@@ -13,7 +13,8 @@ namespace watcher {
             Message(COLOR_MESSAGE_TYPE, COLOR_MESSAGE_VERSION),
             color(Color::black),
             flashPeriod(0),
-            expiration(0)
+            expiration(0),
+            layer(PHYSICAL_LAYER)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -28,7 +29,8 @@ namespace watcher {
             Message(COLOR_MESSAGE_TYPE, COLOR_MESSAGE_VERSION),
             color(c), 
             flashPeriod(e),
-            expiration(f)
+            expiration(f),
+            layer(PHYSICAL_LAYER)
         {
             TRACE_ENTER();
             fromNodeID=address;
@@ -39,7 +41,8 @@ namespace watcher {
             Message(other.type, other.version),
             color(other.color), 
             flashPeriod(other.flashPeriod),
-            expiration(other.expiration)
+            expiration(other.expiration),
+            layer(other.layer)
         {
             TRACE_ENTER();
             (*this)=other;
@@ -52,7 +55,8 @@ namespace watcher {
 
             bool retVal = 
                 Message::operator==(other) && 
-                color == other.color;
+                color == other.color && 
+                layer == other.layer;
 
             TRACE_EXIT_RET(retVal);
             return retVal;
@@ -66,6 +70,7 @@ namespace watcher {
             color = other.color;
             flashPeriod = other.flashPeriod;
             expiration = other.expiration;
+            layer = other.layer; 
 
             TRACE_EXIT();
             return *this;
@@ -80,6 +85,7 @@ namespace watcher {
             out << " color: " << color; 
             out << " flashPeriod: " << flashPeriod;
             out << " expiration: " << expiration;
+            out << " layer: " << layer; 
             TRACE_EXIT();
             return out;
         }
@@ -99,6 +105,7 @@ namespace watcher {
             ar & color;
             ar & flashPeriod;
             ar & expiration;
+            ar & layer; 
             TRACE_EXIT();
         }
     }

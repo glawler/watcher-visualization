@@ -17,6 +17,8 @@ namespace watcher {
                 Timestamp flashPeriod; 
                 Timestamp expiration;  
 
+                GUILayer layer; 
+
                 ColorMessage();  // default: black, 127.0.0.1, no expire, no flash
                 ColorMessage(
                              const Color &c, 
