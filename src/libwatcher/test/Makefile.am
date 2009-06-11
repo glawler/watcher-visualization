@@ -9,6 +9,8 @@ LDADD += $(top_srcdir)/libwatcher/libwatchermsg.la
 LDADD += $(top_srcdir)/util/libwatcherutils.a
 LDADD += $(top_srcdir)/logger/liblogger.a
 
+LIBS += $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
+
 BUILT_SOURCES=\
 	test.log.properties 
 
