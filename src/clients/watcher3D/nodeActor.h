@@ -18,11 +18,10 @@ class NodeActor : public dtCore::Transformable
         inline osg::Vec3 GetPos() { return pos; }
 
         // Mutators
-        inline void SetPos(const osg::Vec3& newPos) { pos = newHeadPos; DrawNode(); }
+        inline void SetPos(const osg::Vec3& newPos) { pos = newPos; DrawNode(); }
 
     private:
-        osg::Vec3 headPos;
-        osg::Vec3 tailPos;
+        osg::Vec3 pos;
 };
 
 #endif // NODE_ACTOR_H
