@@ -31,6 +31,9 @@ core
 depend
 *.cfg 
 *.properties
+*.lo
+*.Po
+*.la
 
 # ignore databases
 *.db
