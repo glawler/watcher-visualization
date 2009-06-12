@@ -2,6 +2,9 @@
 #ifndef EDGE_ACTOR_H
 #define EDGE_ACTOR_H
 
+// Watcher includes
+#include "logger.h"
+
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtCore/transformable.h>
@@ -29,6 +32,7 @@ class EdgeActor : public dtCore::Transformable
         osg::Geode *geode;
         osg::Vec3 headPos;
         osg::Vec3 tailPos;
+        DECLARE_LOGGER();
 };
 
 #endif // EDGE_ACTOR_H

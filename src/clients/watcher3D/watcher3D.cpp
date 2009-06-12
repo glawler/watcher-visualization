@@ -1,4 +1,7 @@
 
+// Watcher includes
+#include "logger.h"
+
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtCore/globals.h>

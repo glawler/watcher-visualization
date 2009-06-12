@@ -1,31 +1,42 @@
 
 #include <iostream>
 
-// Watcher3D includes
-#include "edgeActor.h"
+// Watcher includes
+#include "logger.h"
 
+// Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
 #include <dtCore/transform.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
+// Watcher3D includes
+#include "edgeActor.h"
+
+INIT_LOGGER(EdgeActor, "EdgeActor");
+
 EdgeActor::EdgeActor() :
 geode(NULL)
 {
+    TRACE_ENTER();
     SetName("Edge");
     osg::Geometry *geometry = new osg::Geometry;
     geode = new osg::Geode;
     geode->addDrawable(geometry);
     GetMatrixNode()->addChild(geode);
+    TRACE_EXIT();
 }
 
 EdgeActor::~EdgeActor()
 {
+    TRACE_ENTER();
+    TRACE_EXIT();
 }
 
 void EdgeActor::DrawEdge()
 {
+    TRACE_ENTER();
     if(geode && geode->getDrawable(0))
         geode->removeDrawable(geode->getDrawable(0));
 
@@ -50,4 +61,5 @@ void EdgeActor::DrawEdge()
     geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
 
     GetMatrixNode()->addChild(geode);
+    TRACE_EXIT();
 }

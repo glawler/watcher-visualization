@@ -2,6 +2,9 @@
 #ifndef LIB_EDGE_ACTOR_H
 #define LIB_EDGE_ACTOR_H
 
+// Watcher includes
+#include "logger.h"
+
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtDAL/plugin_export.h>
@@ -18,8 +21,9 @@ class DT_PLUGIN_EXPORT LibEdgeActor : public dtDAL::ActorPluginRegistry
         // virtual void RegisterActorTypes();
         void RegisterActorTypes();
 
-   private:
-       dtCore::RefPtr<dtDAL::ActorType> mEdgeActorType;
+    private:
+        dtCore::RefPtr<dtDAL::ActorType> mEdgeActorType;
+        DECLARE_LOGGER();
 };
 
 #endif // LIB_EDGE_ACTOR_H

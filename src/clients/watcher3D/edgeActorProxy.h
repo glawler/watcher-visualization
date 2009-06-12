@@ -2,6 +2,9 @@
 #ifndef EDGE_ACTOR_PROXY_H
 #define EDGE_ACTOR_PROXY_H
 
+// Watcher includes
+#include "logger.h"
+
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtDAL/transformableactorproxy.h>
@@ -19,6 +22,8 @@ class EdgeActorProxy : public dtDAL::TransformableActorProxy
 
         void BuildPropertyMap();
         void SetTextureFile(const std::string &fileName);
+    private:
+        DECLARE_LOGGER();
 };
 
 #endif // EDGE_ACTOR_PROXY_H

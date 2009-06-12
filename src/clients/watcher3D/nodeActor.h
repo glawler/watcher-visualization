@@ -2,6 +2,9 @@
 #ifndef NODE_ACTOR_H
 #define NODE_ACTOR_H
 
+// Watcher includes
+#include "logger.h"
+
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtCore/transformable.h>
@@ -25,6 +28,7 @@ class NodeActor : public dtCore::Transformable
 
     private:
         osg::Vec3 pos;
+        DECLARE_LOGGER();
 };
 
 #endif // NODE_ACTOR_H
