@@ -11,9 +11,6 @@
 #include <dtDAL/actorpluginregistry.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
-// Watcher3D includes
-#include "libNodeActor.h"
-
 class DT_PLUGIN_EXPORT LibActors : public dtDAL::ActorPluginRegistry
 {
     public:
@@ -26,6 +23,7 @@ class DT_PLUGIN_EXPORT LibActors : public dtDAL::ActorPluginRegistry
 
     private:
         dtCore::RefPtr<dtDAL::ActorType> mNodeActorType;
+        dtCore::RefPtr<dtDAL::ActorType> mEdgeActorType;
         DECLARE_LOGGER();
 };
 
