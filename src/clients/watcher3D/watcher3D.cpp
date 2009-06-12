@@ -10,6 +10,7 @@
 #include <dtCore/transform.h>
 #include <dtDAL/actorproperty.h>
 #include <dtDAL/actortype.h>
+#include <dtDAL/enginepropertytypes.h>
 #include <osgDB/FileUtils>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
@@ -51,6 +52,8 @@ Watcher3D::Watcher3D(const std::string& configFilename) :
     dtCore::RefPtr<dtDAL::ActorProxy> proxy = mGM->CreateActor("dtcore.Terrain", "Infinite Terrain");
     mGM->AddActor(*proxy);
 
+    std::cout << "This is the latest version 4:36" << std::endl;
+
     // Setup the camera
     dtCore::Transform camPos;
     camPos.SetTranslation(0.0f, -100.0f, 20.0f);
@@ -62,9 +65,8 @@ Watcher3D::Watcher3D(const std::string& configFilename) :
     // dtDAL::Map &myMap = dtDAL::Project::GetInstance().GetMap("Watcher3D");
     // dtDAL::Project::GetInstance().LoadMapIntoScene(myMap, *GetScene());
 
-    // Load actor libraries (e.g., libNodeActor.so and libEdgeActor.so.)
-    mGM->LoadActorRegistry("NodeActor");
-    mGM->LoadActorRegistry("EdgeActor");
+    // Load actors library (i.e., libActors.so)
+    mGM->LoadActorRegistry("Actors");
 
     // Print all known actor types
     std::vector<const dtDAL::ActorType*> actorTypes;
@@ -89,8 +91,9 @@ Watcher3D::Watcher3D(const std::string& configFilename) :
     */
 
     // Change some properties
-    edgeActorProxy->GetProperty("HeadPos")->FromString(GetPosition(nodeActorProxy));
-    // edgeActorProxy->GetProperty("EndPoint")->FromString(GetPosition(mTankProxy2));
+    dtDAL::Vec3ActorProperty* nodePos = static_cast<dtDAL::Vec3ActorProperty*>(nodeActorProxy->GetProperty("pos"));
+    dtDAL::Vec3ActorProperty* edgeHeadPos = static_cast<dtDAL::Vec3ActorProperty*>(edgeActorProxy->GetProperty("headPos"));
+    edgeHeadPos->SetValue(nodePos->GetValue());
 
     TRACE_EXIT();
 }

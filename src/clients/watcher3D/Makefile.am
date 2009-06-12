@@ -3,20 +3,13 @@ include $(srcdir)/../Makefile.clients
 CPPFLAGS += -I$(DELTA_ROOT)/inc # for Delta3D
 LDFLAGS += -L$(DELTA_ROOT)/lib # for Delta3D
 LIBS+=-losgDB -ldtABC -ldtCore -ldtTerrain -ldtActors -ldtGame # for Delta3D
-LDADD+=./libNodeActor.la 
-# LDADD+=./libEdgeActor.la
+LDADD+=./libActors.la 
 
 BUILT_SOURCES=watcher3D.cfg watcher3D.log.properties 
 
-lib_LTLIBRARIES=libEdgeActor.la libNodeActor.la # libWatcher3DGameEntryPoint.la
+lib_LTLIBRARIES=libActors.la
 
-# EdgeActor - represents an edge.
-libEdgeActor_la_SOURCES=libEdgeActor.cpp edgeActor.cpp edgeActorProxy.cpp
-# NodeActor - represents a node.
-libNodeActor_la_SOURCES=libNodeActor.cpp nodeActor.cpp nodeActorProxy.cpp
-
-# Watcher3DGameEntryPoint - standard game executable. 
-# libWatcher3DGameEntryPoint_la_SOURCES=watcher3DGameEntryPoint.cpp
+libActors_la_SOURCES=libActors.cpp nodeActor.cpp nodeActorProxy.cpp edgeActor.cpp edgeActorProxy.cpp
 
 # watcher3D - non-standard game executable.
 bin_PROGRAMS=watcher3D
