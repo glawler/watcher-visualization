@@ -7,21 +7,24 @@
 
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
-#include <dtDAL/transformableactorproxy.h>
+#include <dtGame/gameactor.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
 // Watcher3D includes
 #include "edgeActor.h"
 
-class EdgeActorProxy : public dtDAL::TransformableActorProxy
+class EdgeActorProxy : public dtGame::GameActorProxy
 {
     public:
         EdgeActorProxy(void);
-        virtual ~EdgeActorProxy(void);
-        void CreateActor();
 
-        void BuildPropertyMap();
-        void SetTextureFile(const std::string &fileName);
+        virtual void BuildPropertyMap();
+        virtual void CreateActor();
+        virtual void OnEnteredWorld();
+
+    protected:
+        virtual ~EdgeActorProxy(void);
+
     private:
         DECLARE_LOGGER();
 };

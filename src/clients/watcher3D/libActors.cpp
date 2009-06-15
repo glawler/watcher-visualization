@@ -18,10 +18,11 @@ extern "C" DT_PLUGIN_EXPORT dtDAL::ActorPluginRegistry* CreatePluginRegistry()
 
 extern "C" DT_PLUGIN_EXPORT void DestroyPluginRegistry(dtDAL::ActorPluginRegistry *registry)
 {
-    TRACE_ENTER();
+    // The trace macros cause a segmentation fault on program exit.
+    // TRACE_ENTER();
     if(registry)
         delete registry;
-    TRACE_EXIT();
+    // TRACE_EXIT();
 }
 
 LibActors::LibActors() : dtDAL::ActorPluginRegistry("Watcher3D Actors Library")

@@ -7,27 +7,28 @@
 
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
-#include <dtCore/transformable.h>
+#include <dtActors/gamemeshactor.h>
+#include <dtGame/gameactor.h>
 #include <osg/Geode>
 #include <osg/Vec3>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
-class NodeActor : public dtCore::Transformable
+class NodeActor : public dtActors::GameMeshActor
 {
     public:
-        NodeActor();
-        virtual ~NodeActor();
+        NodeActor(dtGame::GameActorProxy& gameActorProxy);
 
+        virtual void TickRemote(const dtGame::Message &tickMessage);
+        virtual void TickLocal(const dtGame::Message &tickMessage);
         void DrawNode();
 
-        // Accessors
-        inline osg::Vec3 GetPos() { return pos; }
+        osg::Vec3 GetPos();
+        void SetPos(const osg::Vec3& newPos);
 
-        // Mutators
-        inline void SetPos(const osg::Vec3& newPos) { pos = newPos; DrawNode(); }
+    protected:
+        virtual ~NodeActor(void);
 
     private:
-        osg::Vec3 pos;
         DECLARE_LOGGER();
 };
 

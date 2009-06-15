@@ -112,10 +112,10 @@ int main(int argc, char** argv)
     }
 
     //
-    // My Code (the rest of the code is borrowed from messageStream2Text.cpp)
+    // My code (the rest of the code is borrowed from messageStream2Text.cpp)
     //
-    dtCore::SetDataFilePathList(".;" + dtCore::GetDeltaDataPathList());
-    dtCore::RefPtr<Watcher3D> app = new Watcher3D("config.xml");
+    dtCore::RefPtr<dtGame::GameApplication> app = new dtGame::GameApplication(argc, argv, "config.xml");
+    app->SetGameLibraryName("Watcher3D"); // (libWatcher3D.so)
     app->Config();
     app->Run();
 

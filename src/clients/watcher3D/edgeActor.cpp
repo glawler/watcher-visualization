@@ -8,6 +8,7 @@
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
+#include <dtGame/gameactor.h>
 #include <dtCore/transform.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
@@ -16,7 +17,8 @@
 
 INIT_LOGGER(EdgeActor, "EdgeActor");
 
-EdgeActor::EdgeActor() :
+EdgeActor::EdgeActor(dtGame::GameActorProxy& gameActorProxy) :
+dtGame::GameActor(gameActorProxy),
 geode(NULL)
 {
     TRACE_ENTER();
@@ -34,6 +36,16 @@ EdgeActor::~EdgeActor()
     TRACE_EXIT();
 }
 
+void EdgeActor::TickLocal(const dtGame::Message &tickMessage)
+{
+    DrawEdge();
+}
+
+void EdgeActor::TickRemote(const dtGame::Message &tickMessage)
+{
+    DrawEdge();
+}
+
 void EdgeActor::DrawEdge()
 {
     TRACE_ENTER();
@@ -48,12 +60,8 @@ void EdgeActor::DrawEdge()
     GetTransform(edgeActorTrans);
     osg::Vec3 edgeActorPos = edgeActorTrans.GetTranslation();
 
-    // v->push_back(headPos-edgeActorPos);
-    // v->push_back(tailPos-edgeActorPos);
-    osg::Vec3 a(0.0f,0.0f,500.0f);
-    osg::Vec3 b(0.0f,50.0f,-50.0f);
-    v->push_back(a);
-    v->push_back(b);
+    v->push_back(headPos-edgeActorPos);
+    v->push_back(tailPos-edgeActorPos);
     osg::DrawArrays *da = new osg::DrawArrays(osg::PrimitiveSet::LINES,0,v->size());
     g->setVertexArray(v);
     g->addPrimitiveSet(da);

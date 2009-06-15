@@ -6,6 +6,8 @@
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtDAL/enginepropertytypes.h>
 #include <dtDAL/datatype.h>
+#include <dtGame/gameactor.h>
+#include <dtGame/messagetype.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
 // Watcher3D includes
@@ -46,15 +48,24 @@ void EdgeActorProxy::BuildPropertyMap()
     TRACE_EXIT();
 }
 
+void EdgeActorProxy::OnEnteredWorld()
+{
+   // Register for game events
+   RegisterForMessages(dtGame::MessageType::INFO_GAME_EVENT);
+
+   // Register for ticks
+   if (IsRemote())
+      RegisterForMessages(dtGame::MessageType::TICK_REMOTE, dtGame::GameActorProxy::TICK_REMOTE_INVOKABLE);
+   else
+      RegisterForMessages(dtGame::MessageType::TICK_LOCAL, dtGame::GameActorProxy::TICK_LOCAL_INVOKABLE);
+
+   dtGame::GameActorProxy::OnEnteredWorld();
+}
+
 void EdgeActorProxy::CreateActor()
 {
     TRACE_ENTER();
-    SetActor(*new EdgeActor);
+    SetActor(*new EdgeActor(*this));
     TRACE_EXIT();
 }
 
-void SetTextureFile(const std::string &fileName)
-{
-    TRACE_ENTER();
-    TRACE_EXIT();
-}

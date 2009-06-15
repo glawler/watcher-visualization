@@ -2,9 +2,9 @@
 CPPFLAGS += -fno-strict-aliasing
 CXXFLAGS += -I../../include
 
-lib_LIBRARIES=liblogger.a
+lib_LTLIBRARIES=liblogger.la
 
-liblogger_a_SOURCES=logger.cpp logger.h
-liblogger_a_includedir=$(includedir)
-liblogger_a_include_HEADERS=logger.h
+liblogger_la_SOURCES=logger.cpp logger.h
+liblogger_la_includedir=$(includedir)
+liblogger_la_include_HEADERS=logger.h
 
