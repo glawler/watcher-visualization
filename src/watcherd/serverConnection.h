@@ -24,10 +24,11 @@
 
 #include "watcherd_fwd.h"
 #include "serverConnectionFwd.h"
-#include "replayState.h"
 
 namespace watcher 
 {
+    class ReplayState; //fwd decl
+
     /// Represents a single connection from a client.
     class ServerConnection : 
         public Connection,
@@ -51,9 +52,6 @@ namespace watcher
             /** Get the Watcherd instance associated with this connection. */
             Watcherd& watcherd() { return watcher; }
 
-        protected:
-            // 
-            //
         private:
 
             DECLARE_LOGGER();
@@ -73,6 +71,12 @@ namespace watcher
 
             void read_error(const boost::system::error_code &e);
 
+            bool dispatch_gui_event(event::MessagePtr &);
+            void seek(event::MessagePtr& m);
+            void start(event::MessagePtr& m);
+            void stop(event::MessagePtr& m);
+            void speed(event::MessagePtr& m);
+
             Watcherd& watcher;
             boost::asio::io_service& io_service_;
 
@@ -90,9 +94,9 @@ namespace watcher
             connection_type conn_type;
 
             /// state variables for Live and Replay tracking
-            boost::shared_ptr<ReplayState> replay;
             bool isPlaying_;
             bool isLive_;
+            boost::shared_ptr<ReplayState> replay;
     };
 
 } // namespace http

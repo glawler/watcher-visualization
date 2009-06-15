@@ -54,6 +54,7 @@ ReplayState::ReplayState(ServerConnectionPtr ptr, Timestamp t, float playback_sp
     TRACE_ENTER();
     Assert<Bad_arg>(t >= 0);
     impl_->ts = t;
+    impl_->last_event = t;
 
     speed(playback_speed);
     TRACE_EXIT();
@@ -78,7 +79,6 @@ ReplayState& ReplayState::pause()
 ReplayState& ReplayState::seek(Timestamp t)
 {
     TRACE_ENTER();
-    Assert<Bad_arg>(t >= 0);
 
     impl::run_state oldstate;
     {
@@ -87,6 +87,10 @@ ReplayState& ReplayState::seek(Timestamp t)
         pause();
         impl_->events.clear();
         impl_->ts = t;
+        if (t == -1)
+            impl_->last_event = std::numeric_limits<Timestamp>::max();
+        else
+            impl_->last_event = t;
     }
     if (oldstate == impl::running)
         run();
@@ -108,13 +112,23 @@ ReplayState& ReplayState::speed(float f)
 
             oldstate = impl_->state;
             pause();
+
             impl_->events.clear();
+
+            /*
+             * Avoid setting .last_event when SpeedMessage is received
+             * prior to the first StartMessage.
+             */
+            if (impl_->ts != 0 && impl_->ts != -1)
+                impl_->last_event = impl_->ts;
+
             impl_->speed = f;
         }
         if (oldstate == impl::running)
             run();
     } else
         impl_->speed = f;
+    LOG_DEBUG("ts=" << impl_->ts << " last_event=" << impl_->last_event);
     TRACE_EXIT();
     return *this;
 }
@@ -159,8 +173,8 @@ void ReplayState::run()
     if (impl_->events.empty()) {
         // queue is empty, pre-fetch more items from the DB
 
-        boost::function<void(MessagePtr)> cb = event_output(impl_->events);
-        LOG_DEBUG("fetching events > " << impl_->last_event);
+        boost::function<void(MessagePtr)> cb(event_output(impl_->events));
+        LOG_DEBUG("fetching events " << (impl_->speed > 0 ? "> " : "< ") << impl_->last_event);
         get_db_handle().getEvents(cb,
                                   impl_->last_event,
                                   (impl_->speed >= 0) ? Database::forward : Database::reverse,
@@ -168,8 +182,13 @@ void ReplayState::run()
 
         if (!impl_->events.empty()) {
             /* When starting to replay, assume that time T=0 is the time of the
-             * first event in the stream. */
-            if (impl_->ts == 0)
+             * first event in the stream.
+             * T= -1 is EOF.
+             * Convert to timestamp of first item in the returned events.
+             *
+             * When playing in reverse, the first item in the list is the last event in the database.
+             */
+            if (impl_->ts == 0 || impl_->ts == -1)
                 impl_->ts = impl_->events.front()->timestamp;
 
             // save timestamp of last event retrieved to avoid duplication
@@ -246,4 +265,9 @@ ReplayState::~ReplayState()
 {
     TRACE_ENTER();
     TRACE_EXIT();
+}
+
+float ReplayState::speed() const
+{
+    return impl_->speed;
 }

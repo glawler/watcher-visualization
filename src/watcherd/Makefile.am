@@ -27,12 +27,12 @@ watcherd_SOURCES=\
 	writeDBMessageHandler.h \
 	database.h \
 	database.cpp \
+	replayState.h \
+	replayState.cpp \
 	sqliteDatabase.h \
 	sqliteDatabase.cpp \
 	watcherdConfig.h \
-	watcherdConfig.cpp \
-	replayState.h \
-	replayState.cpp
+	watcherdConfig.cpp
 
 watcherd_LDADD = ../libwatcher/libwatcher.a 
 watcherd_LDADD += ../libwatcher/libwatchermsg.la 

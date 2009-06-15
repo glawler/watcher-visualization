@@ -12,6 +12,7 @@
 #include "watcherd.h"
 #include "writeDBMessageHandler.h"
 #include "watcherdConfig.h"
+#include "replayState.h"
 
 using namespace std; 
 using namespace boost::asio;
@@ -131,6 +132,118 @@ namespace watcher {
         TRACE_EXIT();
     }
 
+    void ServerConnection::seek(event::MessagePtr& m)
+    {
+        TRACE_ENTER();
+        SeekMessagePtr p = boost::dynamic_pointer_cast<SeekMessage>(m);
+        if (p) {
+            if (p->offset == SeekMessage::eof) {
+                if (isLive_) {
+                    // nothing to do
+                } else if (replay->speed() >= 0) {
+                    // switch to live stream
+                    isLive_ = true;
+                    replay->pause();
+                    if (isPlaying_)
+                        watcher.subscribe(shared_from_this());
+                } else {
+                    replay->seek( SeekMessage::eof );
+                }
+            } else {
+                replay->seek(p->offset);
+
+                // when switching from live to replay while playing, kick off the replay strand
+                if (isLive_ && isPlaying_)
+                    replay->run();
+                isLive_ = false;
+            }
+        } else {
+            LOG_WARN("unable to dynamic_pointer_cast to SeekMessage!");
+        }
+        TRACE_EXIT();
+    }
+
+    void ServerConnection::start(event::MessagePtr&)
+    {
+        TRACE_ENTER();
+        if (!isPlaying_) {
+            isPlaying_ = true;
+            if (isLive_)
+                watcher.subscribe(shared_from_this());
+            else
+                replay->run();
+        }
+        TRACE_EXIT();
+    }
+
+    void ServerConnection::stop(event::MessagePtr&)
+    {
+        TRACE_ENTER();
+        if (isPlaying_) {
+            if (isLive_)
+                watcher.unsubscribe(shared_from_this());
+            else
+                replay->pause();
+            isPlaying_ = false;
+        }
+        TRACE_EXIT();
+    }
+
+    void ServerConnection::speed(event::MessagePtr& m)
+    {
+        TRACE_ENTER();
+        SpeedMessagePtr p = boost::dynamic_pointer_cast<SpeedMessage>(m);
+        if (p) {
+            if (isLive_ && p->speed >= 1.0f) {
+                // ignore, can't predict the future
+            } else {
+                replay->speed(p->speed);
+                if (isLive_) {
+                    isLive_ = false;
+                    /* when transitioning from live playback, automatically
+                     * seek to the end of the database.
+                     */
+                    replay->seek( SeekMessage::eof );
+                    if (isPlaying_)
+                        replay->run();
+                }
+            }
+        } else {
+            LOG_WARN("unable to dynamic_pointer_cast to SpeedMessage!");
+        }
+        TRACE_EXIT();
+    }
+
+    bool ServerConnection::dispatch_gui_event(MessagePtr& m)
+    {
+        static const struct {
+            MessageType type;
+            void (ServerConnection::*fn)(event::MessagePtr&);
+        } dispatch[] = {
+            { START_MESSAGE_TYPE, &ServerConnection::start },
+            { STOP_MESSAGE_TYPE, &ServerConnection::stop },
+            { SEEK_MESSAGE_TYPE, &ServerConnection::seek },
+            { SPEED_MESSAGE_TYPE, &ServerConnection::speed },
+            { UNKNOWN_MESSAGE_TYPE, 0 }
+        };
+
+        TRACE_ENTER();
+
+        for (size_t i = 0; dispatch[i].type != UNKNOWN_MESSAGE_TYPE; ++i) {
+            if (m->type == dispatch[i].type) {
+                if (conn_type == unknown) {
+                    conn_type = gui;
+                    replay.reset(new ReplayState(shared_from_this()));
+                }
+                (this->*(dispatch[i].fn)) (m);
+                TRACE_EXIT_RET_BOOL(true);
+                return true;
+            }
+        }
+        TRACE_EXIT_RET_BOOL(false);
+        return false;
+    }
+
     void ServerConnection::handle_read_payload(const boost::system::error_code& e, size_t bytes_transferred, unsigned short numOfMessages)
     {
         TRACE_ENTER();
@@ -164,64 +277,9 @@ namespace watcher {
                  */
                 if (conn_type == unknown || conn_type == gui) {
                     BOOST_FOREACH(MessagePtr& i, arrivedMessages) {
-                        if (i->type == START_MESSAGE_TYPE) {
-                            /* Client is requesting the live stream of events. */
-                            if (conn_type == unknown) {
-                                conn_type = gui;
-                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
-                            }
-                            if (!isPlaying_) {
-                                isPlaying_ = true;
-                                if (isLive_)
-                                    watcher.subscribe(shared_from_this());
-                                else
-                                    replay->run();
-                            }
-                        } else if (i->type == SEEK_MESSAGE_TYPE) {
-                            if (conn_type == unknown) {
-                                conn_type = gui;
-                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
-                            }
-                            SeekMessagePtr p = boost::dynamic_pointer_cast<SeekMessage>(i);
-                            if (p) {
-                                if (p->offset == SeekMessage::eof) {
-                                    // switch to live stream
-                                    if (!isLive_) {
-                                        isLive_ = true;
-                                        replay->pause();
-                                        if (isPlaying_)
-                                            watcher.subscribe(shared_from_this());
-                                    }
-                                } else {
-                                    replay->seek(p->offset);
-
-                                    // when switching from live to replay while playing, kick off the replay strand
-                                    if (isLive_ && isPlaying_)
-                                        replay->run();
-                                    isLive_ = false;
-                                }
-                            }
-                        } else if (i->type == SPEED_MESSAGE_TYPE) {
-                            if (conn_type == unknown) {
-                                conn_type = gui;
-                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
-                            }
-                            SpeedMessagePtr p = boost::dynamic_pointer_cast<SpeedMessage>(i);
-                            if (p)
-                                replay->speed(p->speed);
-                        } else if (i->type == STOP_MESSAGE_TYPE) {
-                            if (conn_type == unknown) {
-                                conn_type = gui;
-                                replay = boost::shared_ptr<ReplayState>(new ReplayState(shared_from_this()));
-                            }
-                            if (isPlaying_) {
-                                if (isLive_)
-                                    watcher.unsubscribe(shared_from_this());
-                                else
-                                    replay->pause();
-                                isPlaying_ = false;
-                            }
-                        } else if (isFeederEvent(i->type)) {
+                        if (dispatch_gui_event(i)) {
+                            //empty
+                       } else if (isFeederEvent(i->type)) {
                             conn_type = feeder;
 
                             /*

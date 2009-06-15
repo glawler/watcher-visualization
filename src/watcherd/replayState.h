@@ -74,6 +74,9 @@ namespace watcher {
              */
             ReplayState& speed(float f);
 
+            /** Return the current playback speed. */
+            float speed() const;
+
             /** Adjust the number of events prefetched from the database.
              *
              * @param[in] n positive integer representing the number of events to prefetch
