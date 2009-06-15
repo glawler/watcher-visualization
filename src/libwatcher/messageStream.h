@@ -152,6 +152,13 @@ namespace watcher
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            /**
+             * Perform a synchronous connection attempt to the server.
+             * @retval true connection was established
+             * @retval false connection failed
+             */
+            bool connect();
+
         protected:
 
             /**

@@ -73,3 +73,11 @@ void Client::wait()
 
     TRACE_EXIT(); 
 }
+
+bool Client::connect()
+{
+    TRACE_ENTER();
+    bool rv = clientConnection->connect();
+    TRACE_EXIT_RET_BOOL(rv);
+    return rv;
+}

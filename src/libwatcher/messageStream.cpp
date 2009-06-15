@@ -254,3 +254,11 @@ std::ostream &watcher::operator<<(std::ostream &out, const MessageStream & /*mes
     TRACE_EXIT();
     return out;
 }
+
+bool MessageStream::connect()
+{
+    TRACE_ENTER();
+    bool rv = connection->connect();
+    TRACE_EXIT_RET_BOOL(rv);
+    return rv;
+}

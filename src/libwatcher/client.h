@@ -50,6 +50,13 @@ namespace watcher
              */
             void wait();
 
+            /**
+             * Perform a synchronous connection attempt to the server.
+             * @retval true connection succeeded
+             * @retval false connection failed
+             */
+            bool connect();
+
         protected:
         private:
 

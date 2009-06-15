@@ -39,6 +39,13 @@ namespace watcher
             bool sendMessages(const std::vector<event::MessagePtr> &message);
 
             /**
+             * Perform a synchronous connection attempt to the server.
+             * @retval true connection succeeded
+             * @retval false connection failed
+             */
+            bool connect();
+
+            /**
              * close()
              * close the connection to the server.
              */

@@ -133,6 +133,16 @@ bool ClientConnection::tryConnect()
     return connected;
 }
 
+bool ClientConnection::connect()
+{
+    TRACE_ENTER();
+    bool retVal = true;
+    if (!connected)
+        retVal = tryConnect();
+    TRACE_EXIT_RET_BOOL(retVal);
+    return retVal;
+}
+
 bool ClientConnection::sendMessage(const MessagePtr message)
 {
     TRACE_ENTER();
