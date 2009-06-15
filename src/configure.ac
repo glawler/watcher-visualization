@@ -51,6 +51,13 @@ AX_BOOST_SERIALIZATION
 AX_BOOST_REGEX
 AX_BOOST_THREAD
 AX_BOOST_UNIT_TEST_FRAMEWORK
+
+# allow optional disabling of watcher3d
+AC_ARG_ENABLE(watcher3d,
+	      [AS_HELP_STRING([--disable-watcher3d],[disable compilation of watcher3d])],
+	      [want_watcher3d=$enableval])
+AM_CONDITIONAL([WANT_WATCHER3D], [test x$want_watcher3d != xno])
+
 AC_CONFIG_FILES([ \
     Makefile \
     logger/Makefile \
