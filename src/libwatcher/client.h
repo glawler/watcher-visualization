@@ -22,10 +22,14 @@ namespace watcher
             /**
              * Construct the Client to connect to the specified TCP address and service.
              * to send messages. Default service is "watcherd" - a watcherd running somewhere.
+             * @param[in] server the host to connect to
+             * @param[in] service the service/port on the server
+             * @param[in] reconnect when true, attempt to reconnect to server when connection is lost
              */
             explicit Client(
                     const std::string& server, 
-                    const std::string& service="watcherd");
+                    const std::string& service="watcherd",
+                    bool reconnect = false);
 
             virtual ~Client();
 

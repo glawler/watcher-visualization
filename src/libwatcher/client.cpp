@@ -7,11 +7,12 @@ INIT_LOGGER(Client, "Client");
 
 Client::Client(
         const std::string& server_, 
-        const std::string& service_) :
+        const std::string& service_,
+        bool reconnect_) :
     ioService(),
     server(server_),
     service(service_),
-    clientConnection(new ClientConnection(ioService, server, service))
+    clientConnection(new ClientConnection(ioService, server, service, reconnect_))
 {
     TRACE_ENTER();
     

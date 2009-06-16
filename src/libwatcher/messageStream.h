@@ -55,15 +55,17 @@ namespace watcher
             static MessageStreamPtr createNewMessageStream(
                     const std::string &serverName, 
                     const Timestamp &startTime=0, 
-                    const float streamRate=1.0);
+                    const float streamRate=1.0,
+                    bool reconnect=false);
 
             static MessageStreamPtr createNewMessageStream(
                     const std::string &serverName, 
                     const std::string &portNumber,  // Connect on a non-standard port (different port than watcherd service)
                     const Timestamp &startTime=0, 
-                    const float streamRate=1.0);
+                    const float streamRate=1.0,
+                    bool reconnect=false);
 
-            void initConnection();
+            void initConnection(bool reconnect);
 
             /**
              * Death to all humans

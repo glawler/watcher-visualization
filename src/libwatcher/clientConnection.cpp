@@ -21,14 +21,16 @@ INIT_LOGGER(ClientConnection, "Connection.ClientConnection");
 ClientConnection::ClientConnection(
         boost::asio::io_service& io_service, 
         const std::string &server_, 
-        const std::string &service_) : 
+        const std::string &service_,
+        bool reconnect_) : 
     Connection(io_service),
     connected(false),
     ioService(io_service),
     theStrand(io_service),
     writeStrand(io_service),
     server(server_),
-    service(service_)
+    service(service_),
+    reconnect(reconnect_)
 {
     TRACE_ENTER(); 
     TRACE_EXIT();
@@ -46,6 +48,8 @@ void ClientConnection::doClose()
     TRACE_ENTER();
     LOG_DEBUG("Closing the socket"); 
     getSocket().close();
+    if (reconnect)
+        connected = false;
     TRACE_EXIT();
 }
 

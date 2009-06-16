@@ -25,7 +25,8 @@ namespace watcher
             ClientConnection(
                     boost::asio::io_service& io_service, 
                     const std::string &server, 
-                    const std::string &service);
+                    const std::string &service,
+                    bool reconnect = false);
 
             virtual ~ClientConnection(); 
 
@@ -85,6 +86,7 @@ namespace watcher
 
             std::string server;
             std::string service;
+            bool reconnect;
     };
 
     typedef boost::shared_ptr<ClientConnection> ClientConnectionPtr;

@@ -35,11 +35,14 @@ MessageStream::MessageStream(
 }
 
 // static 
-MessageStreamPtr MessageStream::createNewMessageStream(const string &serverName_, const Timestamp &startTime_, const float streamRate_)
+MessageStreamPtr MessageStream::createNewMessageStream(const string &serverName_,
+                                                       const Timestamp &startTime_,
+                                                       const float streamRate_,
+                                                       bool reconnect_)
 {
     TRACE_ENTER();
     MessageStreamPtr retVal(new MessageStream(serverName_,"watcherd",startTime_,streamRate_));
-    retVal->initConnection(); 
+    retVal->initConnection(reconnect_); 
     TRACE_EXIT();
     return retVal;
 }
@@ -49,19 +52,20 @@ MessageStreamPtr MessageStream::createNewMessageStream(
                     const std::string &serverName, 
                     const std::string &portNum,  // Connect on a non-standard port (different port than watcherd service)
                     const Timestamp &startTime, 
-                    const float streamRate)
+                    const float streamRate,
+                    bool reconnect_)
 {
     TRACE_ENTER();
     MessageStreamPtr retVal(new MessageStream(serverName, portNum, startTime, streamRate));
-    retVal->initConnection(); 
+    retVal->initConnection(reconnect_); 
     TRACE_EXIT();
     return retVal;
 }
 
-void MessageStream::initConnection() 
+void MessageStream::initConnection(bool reconnect_) 
 {
     TRACE_ENTER();
-    connection=ClientPtr(new Client(serverName, serviceName)); 
+    connection=ClientPtr(new Client(serverName, serviceName, reconnect_)); 
     connection->addMessageHandler(shared_from_this()); 
     setStreamTimeStart(streamStartTime);
     setStreamRate(streamRate);
