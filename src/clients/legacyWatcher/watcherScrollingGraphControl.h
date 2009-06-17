@@ -29,7 +29,7 @@ namespace watcher
             // unsigned int datanum;
             // unsigned int data[datanum], where data[i] is a (int)(float(x)/1000000.0)
             //
-            void unmarshalWatcherGraphMessage(const unsigned int nodeId, const unsigned char *payload); 
+            // void unmarshalWatcherGraphMessage(const unsigned int nodeId, const unsigned char *payload); 
 
 
             public slots:

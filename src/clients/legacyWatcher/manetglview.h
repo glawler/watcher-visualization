@@ -103,7 +103,9 @@ signals:
 
         void initializeGL();
         void paintGL();
-        void paintOverlayGL();
+        // virtual void paintEvent(QPaintEvent *event);
+        // void paintOverlayGL();
+        // void PaintEvent(QPaintEvent *event);
 
         void resizeGL(int width, int height);
         

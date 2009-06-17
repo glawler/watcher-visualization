@@ -750,6 +750,7 @@ void manetGLView::shiftCenterOut(double shift)
 void manetGLView::viewpointReset(void)
 {
     manetAdj = manetAdjInit;
+    update();
 }
 
 void manetGLView::zoomOut()
@@ -923,6 +924,9 @@ manetGLView::manetGLView(QWidget *parent) :
     manetAdjInit.shiftY=0.0;
     manetAdjInit.shiftZ=0.0;
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
+
+    // Don't oeverwrite QPAinter...
+    setAutoFillBackground(false);
     TRACE_EXIT();
 }
 
@@ -1047,7 +1051,7 @@ bool manetGLView::loadConfiguration()
     struct 
     {
         const char *prop; 
-        char *def; 
+        const char *def; 
         string *val; 
     } strVals[] = 
     {
@@ -1412,33 +1416,62 @@ void manetGLView::watcherIdle()
     TRACE_EXIT();
 }
 
-void manetGLView::paintOverlayGL()
+void manetGLView::paintGL() 
 {
     TRACE_ENTER();
 
-    QPainter painter;
-    painter.begin(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    // Save current OpenGL state
+    // glPushAttrib(GL_ALL_ATTRIB_BITS);
+    // glMatrixMode(GL_PROJECTION);
+    // glPushMatrix();
+    // glMatrixMode(GL_MODELVIEW);
+    // glPushMatrix();
 
-    QString text = tr("Click and drag with the left mouse button to rotate the Qt logo.");
-    QFontMetrics metrics = QFontMetrics(font());
-    int border = qMax(4, metrics.leading());
+    // // Reset OpenGL parameters
+    // glShadeModel(GL_SMOOTH);
+    // glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_CULL_FACE);
+    // glEnable(GL_LIGHTING);
+    // glEnable(GL_LIGHT0);
+    // glEnable(GL_MULTISAMPLE);
+    // static GLfloat lightPosition[4] = { 1.0, 5.0, 5.0, 1.0 };
+    // glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+    // glEnable(GL_COLOR_MATERIAL);
+    // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    // // qglClearColor(Qt::black);
+    // 
+    // // resizeGL() start
+    // glViewport(0, 0, width(), height());
+    // glMatrixMode(GL_PROJECTION);
+    // glLoadIdentity();
+    // gluPerspective(40.0, GLfloat(width()) / GLfloat(height()), 1.0, 50.0);
+    // if(autoCenterNodesFlag) 
+    //     scaleAndShiftToCenter(ScaleAndShiftUpdateOnChange);
+    // // resizeGL() end
 
-    QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
-    painter.setRenderHint(QPainter::TextAntialiasing);
-    painter.setPen(Qt::white);
-    painter.fillRect(QRect(0, 0, width(), rect.height() + 2*border), QColor(0, 0, 0, 127));
-    painter.drawText((width() - rect.width())/2, border, rect.width(), rect.height(), Qt::AlignCenter | Qt::TextWordWrap, text);
-    painter.end(); 
-
-    TRACE_EXIT();
-}
-
-void manetGLView::paintGL()
-{
-    TRACE_ENTER();
-    glMatrixMode(GL_MODELVIEW);
     drawManet();
+
+    // // Restore OpenGL state
+    // glMatrixMode(GL_MODELVIEW);
+    // glPopMatrix();
+    // glMatrixMode(GL_PROJECTION);
+    // glPopMatrix();
+    // glPopAttrib();
+
+    // // QPainter painter;
+    // // painter.begin(this);
+    // // painter.setRenderHint(QPainter::Antialiasing);
+    // // painter.save();
+    // // painter.translate(width()/2, height()/2);
+    // // QRadialGradient radialGrad(QPointF(-40, -40), 100);
+    // // radialGrad.setColorAt(0, QColor(255, 255, 255, 100));
+    // // radialGrad.setColorAt(1, QColor(200, 200, 0, 100)); 
+    // // painter.setBrush(QBrush(radialGrad));
+    // // painter.drawRoundRect(-100, -100, 200, 200);
+    // // painter.restore();
+
+    // // painter.end();
+
     TRACE_EXIT();
 }
 
@@ -1527,7 +1560,6 @@ void manetGLView::drawManet(void)
         BackgroundImage::getInstance().drawImage(); 
 
     glPopMatrix();
-    // glFlush();
 }
 
 void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)
@@ -1750,94 +1782,41 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
 void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfoPtr &label)
 {
     TRACE_ENTER(); 
-
-    GLfloat fgColor[]={
-        label->foregroundColor.r/255.0, 
-        label->foregroundColor.g/255.0, 
-        label->foregroundColor.b/255.0, 
-        label->foregroundColor.a/255.0
+    // 
+    int fgColor[]={
+        label->foregroundColor.r, 
+        label->foregroundColor.g, 
+        label->foregroundColor.b, 
+        label->foregroundColor.a
     };
-    GLfloat bgColor[]={
-        label->backgroundColor.r/255.0, 
-        label->backgroundColor.g/255.0, 
-        label->backgroundColor.b/255.0, 
-        label->backgroundColor.a/255.0
+    int bgColor[]={
+        label->backgroundColor.r, 
+        label->backgroundColor.g, 
+        label->backgroundColor.b, 
+        label->backgroundColor.a
     };
 
-    if (monochromeMode)
-        for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
-            bgColor[i]=1.0;
     if (monochromeMode)
         for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
             if (i==3)
-                fgColor[i]=1.0;
+                fgColor[i]=255;
             else
-                fgColor[i]=0.0;
+                fgColor[i]=0; 
 
+    float offset=4.0;
 
-    // Enter "billboard" view mode. 
-    glPushMatrix();
-    glTranslatef(inx, iny, inz); 
-    float modelview[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX , modelview);
-    for (int i=0; i<3; i++)
-        for (int j=0; j<3; j++)
-            if (i==j)
-                modelview[i*4+j]=1.0;
-            else
-                modelview[i*4+j]=0.0;
-    glLoadMatrixf(modelview);
-    glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
+    QFont f(label->fontName.c_str(), (int)(label->pointSize*manetAdj.scaleX*scaleText)); 
 
-    GLfloat labelOffSet=6.0, arrowWidthRatio=1.5;
+    // Do cheesy shadow effect as I can't get a proper bounding box around the text as
+    // QFontMetric lisea bout how wide/tall the bounding box is. 
+    if (!monochromeMode)
+    {
+        qglColor(QColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])); 
+        renderText(inx+offset+1, iny+offset+1, inz+1.0, label->labelText.c_str(), f); 
+    }
 
-    glColor4fv(fgColor);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(arrowWidthRatio*labelOffSet, labelOffSet, 0.0);  
-    glVertex3f(labelOffSet, labelOffSet, 0.0);  
-    glVertex3f(labelOffSet, arrowWidthRatio*labelOffSet, 0.0);  
-    glVertex3f(0.0, 0.0, 0.0); 
-    glEnd();
-
-    glPushMatrix(); 
-    glTranslatef(labelOffSet, labelOffSet, 0.0); 
-
-    QFont font(label->fontName.c_str(), (int)label->pointSize*manetAdj.scaleX*scaleText); 
-    QFontMetrics fontMetric(font); 
-    int width=fontMetric.width(label->labelText.c_str()); 
-    int height=fontMetric.height();
-
-    GLfloat rect[][3]={
-        {   0.0,    0.0, 0.0 },
-        {   0.0, height, 0.0 }, 
-        { width, height, 0.0 }, 
-        { width,    0.0, 0.0 } 
-    };
-    glColor4fv(fgColor);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(rect[0][0], rect[0][1], rect[0][2]); 
-    glVertex3f(rect[1][0], rect[1][1], rect[1][2]); 
-    glVertex3f(rect[2][0], rect[2][1], rect[2][2]); 
-    glVertex3f(rect[3][0], rect[3][1], rect[3][2]); 
-    glEnd();
-
-    glColor4fv(bgColor);
-    glBegin(GL_POLYGON);
-    glVertex3f(rect[0][0], rect[0][1], rect[0][2]); 
-    glVertex3f(rect[1][0], rect[1][1], rect[1][2]); 
-    glVertex3f(rect[2][0], rect[2][1], rect[2][2]); 
-    glVertex3f(rect[3][0], rect[3][1], rect[3][2]); 
-    glEnd();
-
-    glDisable(GL_LIGHTING); 
-    qglColor(QColor(int(fgColor[0]*255), int(fgColor[1]*255), int(fgColor[2]*255), int(fgColor[3]*255))); 
-    renderText(2.0, 2.0, 1.0, label->labelText.c_str(), font); 
-    glEnable(GL_LIGHTING); 
-    glPopMatrix(); 
-
-    // exit "billboard" viewmode. 
-    glPopMatrix(); 
+    qglColor(QColor(fgColor[0], fgColor[1], fgColor[2], fgColor[3])); 
+    renderText(inx+offset, iny+offset, inz+1.0, label->labelText.c_str(), f); 
 
     TRACE_EXIT(); 
 }
@@ -2051,7 +2030,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             event->ignore();
     }
 
-    updateGL();
+    update();
 
     TRACE_EXIT();
 }
@@ -2100,6 +2079,7 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
         //     emit nodeDataInGraphsToggled(nodeId);
         // }
     }
+    update();
     TRACE_EXIT();
 }
 
@@ -2125,6 +2105,7 @@ void manetGLView::mousePressEvent(QMouseEvent *event)
 {
     TRACE_ENTER();
     lastPos = event->pos();
+    update();
     TRACE_EXIT();
 }
 
@@ -2178,6 +2159,8 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
     }
     lastPos = event->pos();
 
+    update();
+
     TRACE_EXIT();
 }
 
@@ -2187,6 +2170,7 @@ void manetGLView::wheelEvent(QWheelEvent *event)
         zoomIn();
     else
         zoomOut();
+    update();
 }
 
 void manetGLView::layerToggle(const watcher::GUILayer &layer, const bool turnOn)
