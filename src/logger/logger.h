@@ -62,18 +62,19 @@ extern LoggerPtr logger;
 //
 // Logging disabled 
 //
-#define DECLARE_LOGGER() 
-#define INIT_LOGGER(class,name)
-#define LOG_TRACE(message, ...)     
-#define LOG_DEBUG(message, ...)     
-#define LOG_INFO(message, ...)      
-#define LOG_WARN(message, ...)      
-#define LOG_ERROR(message, ...)     
-#define LOG_FATAL(message, ...)    
+#define DECLARE_LOGGER() static LoggerPtr logger
+#define INIT_LOGGER(class,name) LoggerPtr class::logger(Logger::getLogger(name))
+#define LOG_TRACE(message, ...) do { } while(0)
+#define LOG_DEBUG(message, ...) do { } while(0)
+#define LOG_INFO(message, ...) do { } while(0)
+#define LOG_WARN(message, ...) do { } while(0)
+#define LOG_ERROR(message, ...) do { } while(0)
+#define LOG_FATAL(message, ...) do { } while(0)
 
-#define TRACE_ENTER() 
-#define TRACE_EXIT() 
-#define TRACE_EXIT_RET(val)
+#define TRACE_ENTER()  do { } while(0)
+#define TRACE_EXIT()  do { } while(0)
+#define TRACE_EXIT_RET(val) do { } while(0)
+#define TRACE_EXIT_RET_BOOL(val) do { } while(0)
 
 #define LOAD_LOG_PROPS(file) 
 
