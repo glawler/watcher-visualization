@@ -6,7 +6,6 @@
 #include <boost/utility.hpp>
 #include <boost/thread.hpp>
 
-#include "libwatcher/dataRequestMessage.h"
 #include "libwatcher/message_fwd.h"
 
 #include "watcherd_fwd.h"
