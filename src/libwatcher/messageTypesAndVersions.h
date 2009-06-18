@@ -18,16 +18,15 @@ namespace watcher {
             LABEL_MESSAGE_TYPE        = 0x4,
             EDGE_MESSAGE_TYPE         = 0x5,
             COLOR_MESSAGE_TYPE        = 0x6,
-            DATA_REQUEST_MESSAGE_TYPE = 0x7,
-            CONNECTIVITY_MESSAGE_TYPE = 0x8,
-            NODE_STATUS_MESSAGE_TYPE  = 0x9,
-            DATA_POINT_MESSAGE_TYPE   = 0xA,
+            CONNECTIVITY_MESSAGE_TYPE = 0x7,
+            NODE_STATUS_MESSAGE_TYPE  = 0x8,
+            DATA_POINT_MESSAGE_TYPE   = 0x9,
 
             // watcherdAPI messages
-            SEEK_MESSAGE_TYPE         = 0xB, // DO NOT REORDER THIS WITHOUT CHANGING isFeederEvent
-            START_MESSAGE_TYPE        = 0xC,
-            STOP_MESSAGE_TYPE         = 0xD,
-            SPEED_MESSAGE_TYPE        = 0xE,
+            SEEK_MESSAGE_TYPE         = 0xA, // DO NOT REORDER THIS WITHOUT CHANGING isFeederEvent
+            START_MESSAGE_TYPE        = 0xB,
+            STOP_MESSAGE_TYPE         = 0xC,
+            SPEED_MESSAGE_TYPE        = 0xD,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
@@ -45,7 +44,6 @@ namespace watcher {
         const unsigned int LABEL_MESSAGE_VERSION        = 1;
         const unsigned int EDGE_MESSAGE_VERSION         = 1;
         const unsigned int COLOR_MESSAGE_VERSION        = 1;
-        const unsigned int DATA_REQUEST_MESSAGE_VERSION = 1;
         const unsigned int CONNECTIVITY_MESSAGE_VERSION = 1;
         const unsigned int DATA_POINT_MESSAGE_VERSION   = 1;
 

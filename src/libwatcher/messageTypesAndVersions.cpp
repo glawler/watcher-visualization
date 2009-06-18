@@ -33,11 +33,11 @@ namespace watcher {
                 case COLOR_MESSAGE_TYPE:
                     out << static_cast<int>(COLOR_MESSAGE_TYPE) << " (color)";
                     break;
-                case DATA_REQUEST_MESSAGE_TYPE:
-                    out << static_cast<int>(DATA_REQUEST_MESSAGE_TYPE) << " (data request)";
-                    break;
                 case CONNECTIVITY_MESSAGE_TYPE:
                     out << static_cast<int>(CONNECTIVITY_MESSAGE_TYPE) << " (connectivity)";
+                    break;
+                case DATA_POINT_MESSAGE_TYPE:
+                    out << static_cast<int>(DATA_POINT_MESSAGE_TYPE) << " (data point)";
                     break;
 
                 case SEEK_MESSAGE_TYPE:
