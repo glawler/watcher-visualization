@@ -11,6 +11,7 @@ QT += opengl
 CONFIG += qt x11 
 OBJECTS_DIR = ./objs
 DEFINES += GRAPHICS MODULE_MOBILITY ggdb
+# DEFINES += GRAPHICS MODULE_MOBILITY DISABLE_LOGGING
 
 # log4cxx issues warnings without this. 
 QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb
