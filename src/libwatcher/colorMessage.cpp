@@ -24,8 +24,8 @@ namespace watcher {
         ColorMessage::ColorMessage(
                                    const Color &c, 
                                    const boost::asio::ip::address &address,
-                                   const uint32_t &e,
-                                   const uint32_t &f) : 
+                                   const Timestamp &e,
+                                   const Timestamp &f) : 
             Message(COLOR_MESSAGE_TYPE, COLOR_MESSAGE_VERSION),
             color(c), 
             flashPeriod(e),

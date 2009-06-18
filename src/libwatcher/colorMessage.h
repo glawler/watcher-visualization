@@ -23,8 +23,8 @@ namespace watcher {
                 ColorMessage(
                              const Color &c, 
                              const boost::asio::ip::address &address=boost::asio::ip::address::from_string("127.0.0.1"),
-                             const uint32_t &expiration=0,
-                             const uint32_t &flashPeriod=0);
+                             const Timestamp &expiration=0,
+                             const Timestamp &flashPeriod=0);
                 ColorMessage(const ColorMessage &other);
 
                 bool operator==(const ColorMessage &other) const;
