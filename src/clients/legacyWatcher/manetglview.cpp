@@ -910,10 +910,13 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
 manetGLView::manetGLView(QWidget *parent) : 
     QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
     streamRate(1.0),
+    newestMessageTimestamp(0),
+    showWallTimeinStatusString(true),
+    showPlaybackTimeInStatusString(true),
+    showVerboseStatusString(false),
     autoCenterNodesFlag(false)
 {
     TRACE_ENTER();
-    showPositionFlag=true;
     manetAdjInit.angleX=0.0;
     manetAdjInit.angleY=0.0;
     manetAdjInit.angleZ=0.0;
@@ -1033,7 +1036,10 @@ bool manetGLView::loadConfiguration()
     {
         { "nodes3d", true, &threeDView },
         { "monochrome", false, &monochromeMode }, 
-        { "displayBackgroundImage", true, &backgroundImage }
+        { "displayBackgroundImage", true, &backgroundImage },
+        { "showVerboseStatusString", false, &showVerboseStatusString }, 
+        { "showWallTime", true, &showWallTimeinStatusString }, 
+        { "showPlaybackTime", true, &showPlaybackTimeInStatusString }
     }; 
     for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
     {
@@ -1245,7 +1251,7 @@ bool manetGLView::loadConfiguration()
 
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-    watcherIdleTimer->start(33); // Let's shoot for 30 frames a second.
+    watcherIdleTimer->start(30); // Let's shoot for 30 frames a second.
 
     TRACE_EXIT();
     return true;
@@ -1359,6 +1365,8 @@ void manetGLView::checkIO()
             WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
             sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
         }
+
+        newestMessageTimestamp=message->timestamp;
 
     }
 
@@ -1482,16 +1490,27 @@ void manetGLView::drawManet(void)
     glScalef(0.02, 0.02, 0.02);
 
     string buf;
-    if (showPositionFlag)
+
+    if (showWallTimeinStatusString)
+    {
+        buf+="Wall Time:";
+        buf+=posix_time::to_iso_extended_string(now);
+    }
+    if (showPlaybackTimeInStatusString)
+    {
+        buf+=" Play Time: ";
+        buf+=posix_time::to_iso_extended_string(from_time_t(newestMessageTimestamp/1000));
+    }
+
+    if (showVerboseStatusString)
     {
         char buff[256];
-        snprintf(buff, sizeof(buff), "Location: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f,  textscale %f -  ",
+        snprintf(buff, sizeof(buff), " Loc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, textscale %f - ",
                 manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
                 manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
                 scaleText); 
         buf+=string(buff); 
     }
-    buf+=posix_time::to_simple_string(now);
     qglColor(QColor(monochromeMode ? "black" : "blue")); 
     renderText(12, height()-12, QString(buf.c_str()), QFont(statusFontName.c_str(), statusFontPointSize)); 
 
@@ -2792,7 +2811,10 @@ void manetGLView::saveConfiguration()
     {
         { "nodes3d",        threeDView },
         { "monochrome",     monochromeMode },
-        { "displayBackgroundImage", backgroundImage }
+        { "displayBackgroundImage", backgroundImage },
+        { "showVerboseStatusString", showVerboseStatusString }, 
+        { "showWallTime", showWallTimeinStatusString }, 
+        { "showPlaybackTime", showPlaybackTimeInStatusString }
     };
 
     for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)

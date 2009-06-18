@@ -132,8 +132,10 @@ signals:
         float streamRate; 
 
         watcher::event::GPSMessage gpsDataFormat;
-
+        
         QPoint lastPos;
+
+        watcher::Timestamp newestMessageTimestamp;
 
         /** 
          * Layer list is an ordered list of known layers. If the layer is currently
@@ -168,7 +170,9 @@ signals:
 
         ManetAdj manetAdj; 
         ManetAdj manetAdjInit;
-        bool showPositionFlag;
+        bool showWallTimeinStatusString;
+        bool showPlaybackTimeInStatusString;
+        bool showVerboseStatusString;
 
         float scaleText;
         float scaleLine;
