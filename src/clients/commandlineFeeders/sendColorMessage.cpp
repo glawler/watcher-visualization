@@ -42,8 +42,8 @@ int main(int argc, char **argv)
     Color color(Color::red);
     string server;
     asio::ip::address nodeAddr=boost::asio::ip::address::from_string("127.0.0.1"); 
-    uint32_t flashTime=0;
-    uint32_t expiration=0; 
+    Timestamp flashTime=0;
+    Timestamp expiration=0; 
     string logProps("sendMessage.log.properties");
 
     bool colorSet=false;
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
             case 'f': {
                           try
                           {
-                              flashTime=lexical_cast<uint32_t>(optarg); break;
+                              flashTime=lexical_cast<Timestamp>(optarg); break;
                           }
                           catch (const boost::bad_lexical_cast &e)
                           {
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
             case 'x': {
                           try
                           {
-                              expiration=lexical_cast<uint32_t>(optarg); break;
+                              expiration=lexical_cast<Timestamp>(optarg); break;
                           }
                           catch (const boost::bad_lexical_cast &e)
                           {
