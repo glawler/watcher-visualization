@@ -8,7 +8,6 @@ lib_LTLIBRARIES=libwatchermsg.la
 libwatchermsg_la_SOURCES=message.h message.cpp \
 	colorMessage.cpp \
 	connectivityMessage.cpp \
-	dataRequestMessage.cpp \
 	dataPointMessage.cpp \
 	edgeMessage.cpp \
 	gpsMessage.cpp \
