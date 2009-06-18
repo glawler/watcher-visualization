@@ -7,7 +7,6 @@ bin_PROGRAMS= \
 	sendLabelMessage \
 	sendEdgeMessage \
 	sendColorMessage \
-	sendDataRequestMessage \
 	sendConnectivityMessage \
 	sendDataPointMessage
 
@@ -16,7 +15,6 @@ sendGPSMessage_SOURCES=sendGPSMessage.cpp
 sendLabelMessage_SOURCES=sendLabelMessage.cpp
 sendEdgeMessage_SOURCES=sendEdgeMessage.cpp
 sendColorMessage_SOURCES=sendColorMessage.cpp
-sendDataRequestMessage_SOURCES=sendDataRequestMessage.cpp
 sendConnectivityMessage_SOURCES=sendConnectivityMessage.cpp
 sendDataPointMessage_SOURCES=sendDataPointMessage.cpp
 
