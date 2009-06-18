@@ -81,14 +81,14 @@ int main(int argc, char* argv[])
     if (!config.lookupValue("serverThreadNum", numThreads))
     {
         LOG_INFO("'serverThreadNum' not found in the configuration file, using default: " << numThreads 
-                << " and adding this to the configuration file.")
+                << " and adding this to the configuration file.");
            config.getRoot().add("serverThreadNum", libconfig::Setting::TypeInt)=static_cast<int>(numThreads);
     }
 
     if (!config.lookupValue("databasePath", dbPath))
     {
         LOG_INFO("'databasePath' not found in the configuration file, using default: " << dbPath
-                << " and adding this to the configuration file.")
+                << " and adding this to the configuration file.");
            config.getRoot().add("databasePath", libconfig::Setting::TypeString)=dbPath;
     }
 
