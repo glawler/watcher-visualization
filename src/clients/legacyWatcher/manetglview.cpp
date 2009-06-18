@@ -1304,17 +1304,12 @@ void manetGLView::initializeGL()
     // Set the shading model
     glShadeModel(GL_SMOOTH); 
 
-    // Uncomment these if you want to use glColor(c) instead of 
-    // glColor4fv(c);
-    // glEnable(GL_COLOR_MATERIAL);
-    // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
     // Spec is LIGHT0
-    GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
-    GLfloat posSpecLight[]= { -500.0f, 500.0f, 100.0f, 1.0f };
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
-    glEnable(GL_LIGHT0); 
+    // GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
+    // GLfloat posSpecLight[]= { -500.0f, 500.0f, 100.0f, 1.0f };
+    // glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    // glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
+    // glEnable(GL_LIGHT0); 
 
     // Amb is LIGHT1
     GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };
@@ -1326,11 +1321,11 @@ void manetGLView::initializeGL()
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
     // Diffuse is LIGHT2
-    GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
-    glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
-    GLfloat posDiffLight[]= { 500.0, 500.0f, 100.0f, 1.0f };
-    glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
-    glEnable(GL_LIGHT2);
+    // GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
+    // glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
+    // GLfloat posDiffLight[]= { 500.0, 500.0f, 100.0f, 1.0f };
+    // glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
+    // glEnable(GL_LIGHT2);
 
     // enable color tracking
     glEnable(GL_COLOR_MATERIAL);
@@ -1367,8 +1362,6 @@ void manetGLView::checkIO()
 
     }
 
-    wGraph.doMaintanence(); // check expiration, etc. 
-
     updateGL();  // redraw
 
     TRACE_EXIT();
@@ -1378,48 +1371,8 @@ void manetGLView::watcherIdle()
 {
     TRACE_ENTER();
 
-    bool update=false;
-    Timestamp now=(Timestamp(time(NULL)))*1000; 
-
-    // GTL - Should this code be moved into watcherGraph?
-    WatcherGraph::vertexIterator vi, vend;
-    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
-    {
-        WatcherGraphNode &node=wGraph.theGraph[*vi]; 
-
-        if (node.displayInfo->spin && now > node.displayInfo->nextSpinUpdate)
-        {
-            node.displayInfo->spinRotation_x+=node.displayInfo->spinIncrement;
-            node.displayInfo->spinRotation_y+=node.displayInfo->spinIncrement;
-            node.displayInfo->spinRotation_z+=node.displayInfo->spinIncrement;
-            node.displayInfo->nextSpinUpdate=now+node.displayInfo->spinTimeout;
-            update=true;
-        }
-
-        // Are we flashing and do we need to invert the color?
-        if (node.displayInfo->flash && now > node.displayInfo->nextFlashUpdate)  
-        {
-            LOG_DEBUG("Toggling flash for node " << node.nodeId); 
-            node.displayInfo->isFlashed=node.displayInfo->isFlashed?true:false;
-            node.displayInfo->nextFlashUpdate=now+node.displayInfo->flashInterval;
-            update=true;
-        }
-    }
-
-    WatcherGraph::edgeIterator ei, eend;
-    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
-    {
-        WatcherGraphEdge &edge=wGraph.theGraph[*ei]; 
-        if (edge.displayInfo->flash && now > edge.displayInfo->nextFlashUpdate)
-        {
-            edge.displayInfo->isFlashed=edge.displayInfo->isFlashed?true:false;
-            edge.displayInfo->nextFlashUpdate=now+edge.displayInfo->flashInterval;
-            update=true;
-        }
-    }
-
-    if (update)
-        updateGL();
+    wGraph.doMaintanence(); // check expiration, etc. 
+    update(); 
 
     TRACE_EXIT();
 }
@@ -1647,10 +1600,10 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         {
             // This color should be cfg-erable.
             const GLfloat clr[]={
-                edge.displayInfo->color.r/255.0, 
-                edge.displayInfo->color.g/255.0, 
-                edge.displayInfo->color.b/255.0, 
-                edge.displayInfo->color.a/255.0
+                edge.displayInfo->labelColor.r/255.0, 
+                edge.displayInfo->labelColor.g/255.0, 
+                edge.displayInfo->labelColor.b/255.0, 
+                edge.displayInfo->labelColor.a/255.0
             };
             glColor4fv(clr);
         }
@@ -1699,9 +1652,10 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
     gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
 
     // flashing color: if flashed, invert color. 
-    for(unsigned int i=0; i<sizeof(nodeColor); i++) 
-        if (node.displayInfo->flash && node.displayInfo->isFlashed)
-            nodeColor[i]=1-nodeColor[i]; 
+    if (node.displayInfo->flash && node.displayInfo->isFlashed)
+        for(unsigned int i=0; i<sizeof(nodeColor); i++) 
+            // nodeColor[i]=1-nodeColor[i]; 
+            nodeColor[i]=1.0; 
 
     if (monochromeMode)
         glColor4fv(black);
@@ -1731,10 +1685,10 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     const GLfloat nodeColor[]={
-        node.displayInfo->color.r/255.0, 
-        node.displayInfo->color.g/255.0, 
-        node.displayInfo->color.b/255.0, 
-        node.displayInfo->color.a/255.0, 
+        node.displayInfo->labelColor.r/255.0, 
+        node.displayInfo->labelColor.g/255.0, 
+        node.displayInfo->labelColor.b/255.0, 
+        node.displayInfo->labelColor.a/255.0, 
     };
     if (monochromeMode)
         glColor4fv(black);

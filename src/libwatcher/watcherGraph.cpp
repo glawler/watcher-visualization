@@ -272,24 +272,48 @@ void WatcherGraph::doMaintanence()
     // remove edges that have expired
     remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
 
-    // Remove expired edge labels
     graph_traits<Graph>::edge_iterator ei, eEnd;
     for(tie(ei, eEnd)=edges(theGraph); ei!=eEnd; ++ei)
     {
-        WatcherGraphEdge::LabelList::iterator b=theGraph[*ei].labels.begin();
-        WatcherGraphEdge::LabelList::iterator e=theGraph[*ei].labels.end();
+        WatcherGraphEdge &edge=theGraph[*ei]; 
+        if (edge.displayInfo->flash && now > edge.displayInfo->nextFlashUpdate)
+        {
+            edge.displayInfo->isFlashed=!edge.displayInfo->isFlashed;
+            edge.displayInfo->nextFlashUpdate=now+edge.displayInfo->flashInterval;
+        }
+
+        WatcherGraphEdge::LabelList::iterator b=edge.labels.begin();
+        WatcherGraphEdge::LabelList::iterator e=edge.labels.end();
         WatcherGraphEdge::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now));
-        theGraph[*ei].labels.erase(newEnd, e);
+        edge.labels.erase(newEnd, e);
     }
 
-    // remove expired node labels
     graph_traits<Graph>::vertex_iterator vi, vEnd;
     for(tie(vi, vEnd)=vertices(theGraph); vi!=vEnd; ++vi)
     {
-        WatcherGraphNode::LabelList::iterator b=theGraph[*vi].labels.begin();
-        WatcherGraphNode::LabelList::iterator e=theGraph[*vi].labels.end();
+        WatcherGraphNode &node=theGraph[*vi]; 
+
+        // Are we spinning?
+        if (node.displayInfo->spin && now > node.displayInfo->nextSpinUpdate)
+        {
+            node.displayInfo->spinRotation_x+=node.displayInfo->spinIncrement;
+            node.displayInfo->spinRotation_y+=node.displayInfo->spinIncrement;
+            node.displayInfo->spinRotation_z+=node.displayInfo->spinIncrement;
+            node.displayInfo->nextSpinUpdate=now+node.displayInfo->spinTimeout;
+        }
+
+        // Are we flashing and do we need to invert the color?
+        if (node.displayInfo->flash && now > node.displayInfo->nextFlashUpdate)  
+        {
+            node.displayInfo->isFlashed=!node.displayInfo->isFlashed;
+            node.displayInfo->nextFlashUpdate=now+node.displayInfo->flashInterval;
+            LOG_DEBUG("Toggling flash for node " << node.nodeId << " isFlashed: " << node.displayInfo->isFlashed << " nextUpdate: " << node.displayInfo->nextFlashUpdate); 
+        }
+
+        WatcherGraphNode::LabelList::iterator b=node.labels.begin();
+        WatcherGraphNode::LabelList::iterator e=node.labels.end();
         WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now));
-        theGraph[*vi].labels.erase(newEnd, e);
+        node.labels.erase(newEnd, e);
     }
 
     TRACE_EXIT();
