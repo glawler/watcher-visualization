@@ -5,6 +5,7 @@
 #include <QWidget>
 
 #include "watcherGraphDialog.h"
+#include "libwatcher/dataPointMessage.h"
 #include "logger.h"
 
 namespace watcher
@@ -23,14 +24,9 @@ namespace watcher
             // Add the data in the incoming watcherGraph message into the appropriate
             // place. Create a new scrolling grpah dialog if needed. 
             //
-            // The WatcherGraph message has to be of the form:
-            // byte labelsize;
-            // char label[labelsize]
-            // unsigned int datanum;
-            // unsigned int data[datanum], where data[i] is a (int)(float(x)/1000000.0)
-            //
-            // void unmarshalWatcherGraphMessage(const unsigned int nodeId, const unsigned char *payload); 
+            void handleDataPointMessage(const event::DataPointMessagePtr &message); 
 
+            void setComboBox(QComboBox *cb) { comboBox=cb; }
 
             public slots:
 
@@ -65,6 +61,9 @@ namespace watcher
             void createDialog(const std::string &label);
 
         private:
+
+            // The combo box is where the user chooses which graphs to display.
+            QComboBox *comboBox; 
 
             // Oor own private idaho^Wlogger
             DECLARE_LOGGER(); 

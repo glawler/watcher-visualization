@@ -8,7 +8,8 @@ bin_PROGRAMS= \
 	sendEdgeMessage \
 	sendColorMessage \
 	sendDataRequestMessage \
-	sendConnectivityMessage 
+	sendConnectivityMessage \
+	sendDataPointMessage
 
 # How do we tell the make system that the default foo_PROGRAM file is foo.cpp instead of foo.c? 
 sendGPSMessage_SOURCES=sendGPSMessage.cpp
@@ -17,3 +18,5 @@ sendEdgeMessage_SOURCES=sendEdgeMessage.cpp
 sendColorMessage_SOURCES=sendColorMessage.cpp
 sendDataRequestMessage_SOURCES=sendDataRequestMessage.cpp
 sendConnectivityMessage_SOURCES=sendConnectivityMessage.cpp
+sendDataPointMessage_SOURCES=sendDataPointMessage.cpp
+

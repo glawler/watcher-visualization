@@ -62,6 +62,8 @@ int main(int argc, char *argv[])
     {
         WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
 
+        sgc->setComboBox(ui.scrollingGraphComboBox); 
+
         QObject::connect(ui.actionGraphBandwidth, SIGNAL(toggled(bool)), sgc, SLOT(showBandwidthGraphDialog(bool)));
         QObject::connect(sgc, SIGNAL(bandwidthDialogShowed(bool)), ui.actionGraphBandwidth, SLOT(setChecked(bool)));
 

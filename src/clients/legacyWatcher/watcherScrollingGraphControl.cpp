@@ -4,6 +4,7 @@
 #include <deque>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "watcherScrollingGraphControl.h"
@@ -12,6 +13,7 @@
 
 using namespace std;
 using namespace watcher;
+using namespace watcher::event;
 
 INIT_LOGGER(WatcherScrollingGraphControl, "WatcherScrollingGraphControl"); 
 
@@ -40,12 +42,32 @@ WatcherScrollingGraphControl::~WatcherScrollingGraphControl()
     TRACE_EXIT();
 }
 
-// void WatcherScrollingGraphControl::handleWatcherGraphMessage(const WatcherGrpahMessges)
-// {
-//     TRACE_ENTER();
-// 
-//     TRACE_EXIT();
-// }
+void WatcherScrollingGraphControl::handleDataPointMessage(const DataPointMessagePtr &message)
+{
+    TRACE_ENTER();
+
+    LOG_DEBUG("Got Watcher graph message from node " << message->fromNodeID << " with "  
+            <<  message->dataPoints.size() << " data points."); 
+
+    bool newPlot=false;
+    GraphPlotMap::iterator gp=graphPlotMap.find(message->dataName);
+    if (gp==graphPlotMap.end())
+    {
+        createDialog(message->dataName);
+        newPlot=true;
+    }
+
+    unsigned long curveId=message->fromNodeID.to_v4().to_ulong();
+    BOOST_FOREACH(double point, message->dataPoints)
+    {
+        graphPlotMap[message->dataName]->addDataPoint(curveId, point);
+    }
+
+    if (newPlot)
+        graphPlotMap[message->dataName]->curveAndLegendVisible(curveId, false);  // new plots are invisible until clicked in the GUI
+
+    TRACE_EXIT();
+}
 
 void WatcherScrollingGraphControl::createDialog(const std::string &label)
 {

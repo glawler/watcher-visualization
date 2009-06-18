@@ -62,6 +62,8 @@ class manetGLView : public QGLWidget
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
 
+        void scrollingGraphActivated(QString graphName);
+
         void saveConfiguration();
 
 signals:

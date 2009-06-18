@@ -1357,6 +1357,14 @@ void manetGLView::checkIO()
         messageStream->getNextMessage(message);
         LOG_DEBUG("Got message: " << *message);
         wGraph.updateGraph(message);
+
+        // DataPoint data is handled directly by the scrolling graph thing.
+        if (message->type==DATA_POINT_MESSAGE_TYPE)
+        {
+            WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
+            sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
+        }
+
     }
 
     wGraph.doMaintanence(); // check expiration, etc. 
@@ -2099,6 +2107,13 @@ void manetGLView::toggleNodeSelectedForGraph(unsigned int)
     // graph dialogs somehow. Add a little "G" or a little graph representation
     // above the node? 
     TRACE_EXIT();
+}
+
+void manetGLView::scrollingGraphActivated(QString graphName)
+{
+    TRACE_ENTER();
+    LOG_DEBUG("Got activate signal for graph name \"" << graphName.toStdString() << "\""); 
+    TRACE_EXIT(); 
 }
 
 void manetGLView::mousePressEvent(QMouseEvent *event)

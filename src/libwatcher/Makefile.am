@@ -9,6 +9,7 @@ libwatchermsg_la_SOURCES=message.h message.cpp \
 	colorMessage.cpp \
 	connectivityMessage.cpp \
 	dataRequestMessage.cpp \
+	dataPointMessage.cpp \
 	edgeMessage.cpp \
 	gpsMessage.cpp \
 	labelMessage.cpp \
@@ -22,8 +23,8 @@ libwatchermsg_la_SOURCES=message.h message.cpp \
 	watcherColors.cpp
 
 libwatcher_a_SOURCES= \
-		      client.h client.cpp \
-		      clientConnection.h clientConnection.cpp \
+	client.h client.cpp \
+	clientConnection.h clientConnection.cpp \
 	connection.cpp \
 	connection_fwd.h \
 	connection.h \

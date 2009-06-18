@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>928</width>
-    <height>687</height>
+    <width>930</width>
+    <height>779</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -16,6 +16,12 @@
    <layout class="QVBoxLayout" >
     <item>
      <widget class="manetGLView" native="1" name="manetGLViewWindow" >
+      <property name="minimumSize" >
+       <size>
+        <width>50</width>
+        <height>50</height>
+       </size>
+      </property>
       <property name="focusPolicy" >
        <enum>Qt::StrongFocus</enum>
       </property>
@@ -175,27 +181,20 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QProgressBar" name="streamProgressBar" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="value" >
-         <number>24</number>
-        </property>
-       </widget>
-      </item>
-      <item>
        <spacer>
         <property name="orientation" >
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" >
          <size>
-          <width>40</width>
+          <width>20</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QComboBox" name="scrollingGraphComboBox" />
       </item>
       <item>
        <widget class="QPushButton" name="fitToWindowButton" >
@@ -220,6 +219,13 @@ p, li { white-space: pre-wrap; }
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QSlider" name="playbackSlider" >
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar" >
@@ -227,7 +233,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>928</width>
+     <width>930</width>
      <height>31</height>
     </rect>
    </property>
@@ -459,6 +465,20 @@ p, li { white-space: pre-wrap; }
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>rewindToStartButton</tabstop>
+  <tabstop>rewindButton</tabstop>
+  <tabstop>startButton</tabstop>
+  <tabstop>pauseButton</tabstop>
+  <tabstop>forwardButton</tabstop>
+  <tabstop>forwardToEndButton</tabstop>
+  <tabstop>streamRateSpinBox</tabstop>
+  <tabstop>fitToWindowButton</tabstop>
+  <tabstop>resetPositionButton</tabstop>
+  <tabstop>quitButton</tabstop>
+  <tabstop>playbackSlider</tabstop>
+  <tabstop>manetGLViewWindow</tabstop>
+ </tabstops>
  <resources>
   <include location="watcherResources.qrc" />
  </resources>
@@ -1116,6 +1136,22 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel" >
      <x>463</x>
      <y>340</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scrollingGraphComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>scrollingGraphActivated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>566</x>
+     <y>732</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>464</x>
+     <y>375</y>
     </hint>
    </hints>
   </connection>
