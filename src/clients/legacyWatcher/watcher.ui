@@ -271,19 +271,8 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionMonochrome" />
     <addaction name="actionBackgroundImage" />
    </widget>
-   <widget class="QMenu" name="menuGraphs" >
-    <property name="enabled" >
-     <bool>true</bool>
-    </property>
-    <property name="title" >
-     <string>&amp;Graphs</string>
-    </property>
-    <addaction name="actionGraphLoadAverage" />
-    <addaction name="actionGraphBandwidth" />
-   </widget>
    <addaction name="menuLayers" />
    <addaction name="menuView" />
-   <addaction name="menuGraphs" />
   </widget>
   <action name="actionAntennaRadius" >
    <property name="checkable" >
@@ -435,25 +424,6 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text" >
     <string>&amp;Background Image</string>
-   </property>
-  </action>
-  <action name="actionGraphLoadAverage" >
-   <property name="checkable" >
-    <bool>true</bool>
-   </property>
-   <property name="enabled" >
-    <bool>true</bool>
-   </property>
-   <property name="text" >
-    <string>Load Average</string>
-   </property>
-  </action>
-  <action name="actionGraphBandwidth" >
-   <property name="checkable" >
-    <bool>true</bool>
-   </property>
-   <property name="text" >
-    <string>Bandwidth</string>
    </property>
   </action>
  </widget>
@@ -1136,22 +1106,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel" >
      <x>463</x>
      <y>340</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>scrollingGraphComboBox</sender>
-   <signal>activated(QString)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>scrollingGraphActivated(QString)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>566</x>
-     <y>732</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>464</x>
-     <y>375</y>
     </hint>
    </hints>
   </connection>

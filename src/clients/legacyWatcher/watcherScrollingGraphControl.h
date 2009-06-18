@@ -37,6 +37,8 @@ namespace watcher
                 void showBandwidthGraphDialog(bool show);
                 void showLoadAverageGraphDialog(bool show);
 
+                void showScrollingGraph(QString graphName);
+
                 void showNodeDataInGraphs(unsigned int nodeId, bool show);
                 void toggleNodeDataInGraphs(unsigned int nodeId);
 

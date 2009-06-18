@@ -64,24 +64,13 @@ int main(int argc, char *argv[])
 
         sgc->setComboBox(ui.scrollingGraphComboBox); 
 
-        QObject::connect(ui.actionGraphBandwidth, SIGNAL(toggled(bool)), sgc, SLOT(showBandwidthGraphDialog(bool)));
-        QObject::connect(sgc, SIGNAL(bandwidthDialogShowed(bool)), ui.actionGraphBandwidth, SLOT(setChecked(bool)));
+        QObject::connect(ui.scrollingGraphComboBox, SIGNAL(activated(QString)), sgc, SLOT(showScrollingGraph(QString)));
 
-        QObject::connect(ui.actionGraphLoadAverage, SIGNAL(toggled(bool)), sgc, SLOT(showLoadAverageGraphDialog(bool)));
-        QObject::connect(sgc, SIGNAL(loadAverageDialogShowed(bool)), ui.actionGraphLoadAverage, SLOT(setChecked(bool)));
+        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsToggled(unsigned int)), sgc, SLOT(toggleNodeDataInGraphs(unsigned int)));
+        QObject::connect(sgc, SIGNAL(nodeDataInGraphsToggled(unsigned int)), ui.manetGLViewWindow, SLOT(toggleNodeSelectedForGraph(unsigned int)));
 
-        // Support for generic graph-name-based dialogs is not yet supported by the main GUI window
-        // Need to figure out how to do dynamic menus (or somesuch). 
-
-        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsToggled(unsigned int)), 
-                          sgc, SLOT(toggleNodeDataInGraphs(unsigned int)));
-        QObject::connect(sgc, SIGNAL(nodeDataInGraphsToggled(unsigned int)), 
-                          ui.manetGLViewWindow, SLOT(toggleNodeSelectedForGraph(unsigned int)));
-
-        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), 
-                          sgc, SLOT(showNodeDataInGraphs(unsigned int, bool)));
-        QObject::connect(sgc, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), 
-                          ui.manetGLViewWindow, SLOT(showNodeSelectedForGraph(unsigned int, bool)));
+        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), sgc, SLOT(showNodeDataInGraphs(unsigned int, bool)));
+        QObject::connect(sgc, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), ui.manetGLViewWindow, SLOT(showNodeSelectedForGraph(unsigned int, bool)));
     }
 
     glutInit(&argc, argv); 

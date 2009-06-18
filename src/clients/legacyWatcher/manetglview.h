@@ -121,6 +121,8 @@ signals:
 
         void showKeyboardShortcuts(); 
 
+        unsigned int getNodeIdAtCoords(const int x, const int y);
+
     private:
 
         watcher::MessageStreamPtr messageStream;

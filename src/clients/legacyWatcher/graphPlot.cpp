@@ -142,7 +142,7 @@ void GraphPlot::showCurve(QwtPlotItem *curve, bool on)
 {
     TRACE_ENTER();
 
-    LOG_DEBUG("Setting curve " << (on?"":"in") << "visible.")
+    LOG_DEBUG("Setting curve " << (on?"":"in") << "visible.");
 
     curve->setVisible(on);
 

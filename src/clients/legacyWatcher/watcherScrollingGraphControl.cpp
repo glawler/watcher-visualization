@@ -64,7 +64,13 @@ void WatcherScrollingGraphControl::handleDataPointMessage(const DataPointMessage
     }
 
     if (newPlot)
+    {
         graphPlotMap[message->dataName]->curveAndLegendVisible(curveId, false);  // new plots are invisible until clicked in the GUI
+        if (comboBox)
+            comboBox->addItem(QString::fromStdString(message->dataName));
+        else
+            LOG_WARN("Got data point for graph " << message->dataName << " but am unable to add it to the graph combobox, so it'll never be selected"); 
+    }
 
     TRACE_EXIT();
 }
@@ -125,6 +131,13 @@ void WatcherScrollingGraphControl::showLoadAverageGraphDialog(bool show)
 {
     TRACE_ENTER();
     showGraphDialog("Load Average", show); 
+    TRACE_EXIT();
+}
+
+void WatcherScrollingGraphControl::showScrollingGraph(QString graphName)
+{
+    TRACE_ENTER();
+    showGraphDialog(graphName, true); 
     TRACE_EXIT();
 }
 

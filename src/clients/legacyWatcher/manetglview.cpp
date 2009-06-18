@@ -1511,6 +1511,7 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
     glPopMatrix();
 
 }
+
 void manetGLView::drawManet(void)
 {
     // watcher::Skybox *sb=watcher::Skybox::getSkybox();
@@ -2080,15 +2081,87 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     }
     else
     {
-        // GTL - fix this.
-        // unsigned int nodeId=getNodeIdAtCoords(event->x(), event->y());
-        // if(nodeId)
-        // {
-        //     emit nodeDataInGraphsToggled(nodeId);
-        // }
+        unsigned int nodeId=getNodeIdAtCoords(event->x(), event->y());
+        if(nodeId)
+        {
+            emit nodeDataInGraphsToggled(nodeId);
+        }
     }
     update();
     TRACE_EXIT();
+}
+
+unsigned int manetGLView::getNodeIdAtCoords(const int x, const int y)
+{
+    TRACE_ENTER();
+
+    if (!num_vertices(wGraph.theGraph))
+    {
+        TRACE_EXIT_RET(0);
+        return 0;
+    }
+
+    unsigned int retVal=0;
+    unsigned long min_dist = ULONG_MAX; // distance squared to closest
+    unsigned r=15;      // Shrug, seems to do the trick
+    unsigned long r2 = r*r;
+    size_t found = 0;    // index of closest
+    GLdouble modelmatrix[16];
+    GLdouble projmatrix[16];
+    GLint viewport[4];
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelmatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // convert y-from-top to y-from-bottom
+    int convy = viewport[3] - y;
+
+    WatcherGraph::vertexIterator vi, vend;
+    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
+    {
+        WatcherGraphNode &node=wGraph.theGraph[*vi]; 
+
+        unsigned int dist;
+
+        // Convert from GPS to 3d pixels
+        GLdouble gx, gy, gz;
+        gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, gx, gy, gz);
+
+        // Convert from 3d pixels to screen coords
+        GLdouble sx, sy, sz;
+        if(gluProject(gx, gy, gz, modelmatrix, projmatrix, viewport, &sx, &sy, &sz) == GL_TRUE)
+        {
+            long dx = x - (long)sx;
+            long dy = convy - (long)sy;
+            dist = (dx*dx) + (dy*dy);
+
+            if (dist<min_dist)
+                min_dist=dist;
+        }
+        else
+        {
+            LOG_ERROR("getNodeId: Unable to compute screen coords from gl coords."); 
+            continue;
+        }
+
+        LOG_DEBUG("getNodeId: gx, gy, gz: " << gx << ", " << gy << ", " << gz); 
+        LOG_DEBUG("getNodeId: sx, sy, sz: " << sx << ", " << sy << ", " << sz); 
+        LOG_DEBUG("getNodeId: x, convy, y, dist, min_dist: " << x << ", " << convy << ", " << y << ", " << dist << ", " << min_dist); 
+
+        dist=dist>r2 ? dist-r2 : 0; 
+        if (dist < min_dist)
+            found=(unsigned int)node.nodeId.to_v4().to_ulong();
+    }
+    if (min_dist < ULONG_MAX)
+        retVal=found;
+
+    if (retVal)
+        LOG_INFO("getNodeId: Found node " << retVal << " at double click location " << x << ", " << y); 
+    else
+        LOG_INFO("getNodeId: Found no node at double click location " << x << ", " << y); 
+
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
 
 void manetGLView::showNodeSelectedForGraph(unsigned int, bool)
