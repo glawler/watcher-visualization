@@ -15,6 +15,7 @@ EdgeDisplayInfo::EdgeDisplayInfo() :
     width(30),
     flash(false), 
     flashInterval(500),
+    nextFlashUpdate(0), 
     isFlashed(false),
     label("none"),
     labelFont("Helvetica"),

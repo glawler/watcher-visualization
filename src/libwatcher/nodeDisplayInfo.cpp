@@ -29,6 +29,7 @@ NodeDisplayInfo::NodeDisplayInfo() :
     spinRotation_y(0.0),
     spinRotation_z(0.0),
     flashInterval(500),
+    nextFlashUpdate(0),
     isFlashed(false),
     label(NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET)),
     labelFont("Helvetica"), 
