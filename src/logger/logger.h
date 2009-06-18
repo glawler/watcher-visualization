@@ -41,19 +41,19 @@ extern LoggerPtr logger;
 #define INIT_LOGGER(class,name)     LoggerPtr class::logger(Logger::getLogger(name))
 
 // Log4cxx is crashing, so these are wrapped in try/catch blocks. Which is really annoying. 
-#define LOG_TRACE(message, ...)     { try{ LOG4CXX_TRACE(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define LOG_DEBUG(message, ...)     { try{ LOG4CXX_DEBUG(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define LOG_INFO(message, ...)      { try{ LOG4CXX_INFO(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define LOG_WARN(message, ...)      { try{ LOG4CXX_WARN(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define LOG_ERROR(message, ...)     { try{ LOG4CXX_ERROR(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define LOG_FATAL(message, ...)     { try{ LOG4CXX_FATAL(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
+#define LOG_TRACE(message, ...)     do { try{ LOG4CXX_TRACE(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
+#define LOG_DEBUG(message, ...)     do { try{ LOG4CXX_DEBUG(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
+#define LOG_INFO(message, ...)      do { try{ LOG4CXX_INFO(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0) 
+#define LOG_WARN(message, ...)      do { try{ LOG4CXX_WARN(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
+#define LOG_ERROR(message, ...)     do { try{ LOG4CXX_ERROR(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
+#define LOG_FATAL(message, ...)     do { try{ LOG4CXX_FATAL(logger, message ## __VA_ARGS__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
 
 #define LOG_ASSERT(condition, message, ...) LOG4CXX_ASSERT(this->logger, condition, message ## __VA_ARGS)
 
-#define TRACE_ENTER()       { try{ LOG_TRACE("Enter: " << __PRETTY_FUNCTION__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define TRACE_EXIT()        { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define TRACE_EXIT_RET(val) { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__ << ": Returned --> " << val); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
-#define TRACE_EXIT_RET_BOOL(val) { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__ << ": Returned --> " << (val ? "true":"false")); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } }
+#define TRACE_ENTER()       do { try{ LOG_TRACE("Enter: " << __PRETTY_FUNCTION__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
+#define TRACE_EXIT()        do { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
+#define TRACE_EXIT_RET(val) do { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__ << ": Returned --> " << val); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
+#define TRACE_EXIT_RET_BOOL(val) do { try{ LOG_TRACE("Exit: "  << __PRETTY_FUNCTION__ << ": Returned --> " << (val ? "true":"false")); } catch(std::exception &e) { std::cerr << "Exception in logging: " << e.what() << std::endl; } } while(0)
 
 #define LOAD_LOG_PROPS(file) { try{ log4cxx::PropertyConfigurator::configure(file); } catch(std::exception &e) { std::cerr << "Exception while loding log properties: " << e.what() << std::endl; } }
 
