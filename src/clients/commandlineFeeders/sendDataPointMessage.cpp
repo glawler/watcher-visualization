@@ -10,6 +10,9 @@
 #include <libwatcher/watcherTypes.h>
 #include <libwatcher/client.h>
 #include <libwatcher/dataPointMessage.h>
+#include <sendMessageHandler.h>
+
+#include "logger.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -23,7 +26,8 @@ void usage(const char *name)
             "-s IPaddr - watcherd server to connect to\n"
             "-n IPaddr - node to affect - if not given, effect the local node\n"
             "-g string (graph name)\n"
-            "-d double (data point), this argument can be given multiple times for multiple data points, if needed\n", 
+            "-d double (data point), this argument can be given multiple times for multiple data points, if needed\n"
+            "-l file - the log.property file. If not given, looks  for \"sendMessage.log.properties\"\n",
             basename(name)); 
 }
 
@@ -31,9 +35,10 @@ int main(int argc, char *argv[])
 {
     string serverName;
     DataPointMessagePtr message(new DataPointMessage);
+    string logPropsFile("sendMessage.log.properties");
     int ch;
 
-	while ((ch = getopt(argc, argv, "s:g:d:n:hH?")) != -1)
+	while ((ch = getopt(argc, argv, "s:g:d:n:l:hH?")) != -1)
 		switch (ch)
         {
             case 's':
@@ -56,6 +61,9 @@ int main(int argc, char *argv[])
                 break;
             case 'n': 
                 message->fromNodeID=NodeIdentifier::from_string(optarg);
+                break;
+            case 'l':
+                logPropsFile=optarg;
                 break;
             default:
             case '?':
@@ -80,7 +88,10 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    LOAD_LOG_PROPS(logPropsFile.c_str());
+
     watcher::Client client(serverName);
+    client.addMessageHandler(SendMessageHandler::create());
 
     printf("Connecting to %s and sending message.\n", serverName.c_str());
 
