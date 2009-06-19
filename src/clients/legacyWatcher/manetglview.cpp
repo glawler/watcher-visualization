@@ -1085,6 +1085,7 @@ bool manetGLView::loadConfiguration()
         { "layerPadding", 1.0, &layerPadding }, 
         { "gpsScale", 80000.0, &gpsScale }, 
         { "antennaRadius", 200.0, &antennaRadius },
+        { "ghostLayerTransparency", 0.15, &ghostLayerTransparency }
     }; 
     for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
     {
@@ -1251,7 +1252,7 @@ bool manetGLView::loadConfiguration()
 
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-    watcherIdleTimer->start(30); // Let's shoot for 30 frames a second.
+    watcherIdleTimer->start(200); 
 
     TRACE_EXIT();
     return true;
@@ -1664,7 +1665,7 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
         node.displayInfo->color.r/255.0, 
         node.displayInfo->color.g/255.0, 
         node.displayInfo->color.b/255.0, 
-        physical ? node.displayInfo->color.a/255.0 : 0.1
+        physical ? node.displayInfo->color.a/255.0 : ghostLayerTransparency
     };
 
     GLdouble x, y, z; 
@@ -1701,7 +1702,7 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
         node.displayInfo->labelColor.r/255.0, 
         node.displayInfo->labelColor.g/255.0, 
         node.displayInfo->labelColor.b/255.0, 
-        physical ? node.displayInfo->labelColor.a/255.0 : 0.1
+        physical ? node.displayInfo->labelColor.a/255.0 : ghostLayerTransparency
     };
 
     if (monochromeMode)
@@ -2856,7 +2857,8 @@ void manetGLView::saveConfiguration()
         { "scaleLine", &scaleLine }, 
         { "layerPadding", &layerPadding }, 
         { "gpsScale", &gpsScale }, 
-        { "antennaRadius", &antennaRadius }
+        { "antennaRadius", &antennaRadius },
+        { "ghostLayerTransparency", &ghostLayerTransparency }
     }; 
     for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
         root[floatVals[i].prop]=*floatVals[i].val;
@@ -2878,7 +2880,7 @@ void manetGLView::saveConfiguration()
         int *val; 
     } intVals[] = 
     {
-        { "statusFontPointSize", &statusFontPointSize } 
+        { "statusFontPointSize", &statusFontPointSize }
     }; 
     for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
         root[intVals[i].prop]=*intVals[i].val;
