@@ -1300,7 +1300,6 @@ void manetGLView::initializeGL()
     // enable lighting
     glEnable(GL_LIGHTING); 
 
-    // enable objects behind one another
     glEnable(GL_DEPTH_TEST);
 
     // Allow colors to bleed through by alpha (orange edges when nieghor and one hop routing draw the same link).
@@ -1336,7 +1335,6 @@ void manetGLView::initializeGL()
     // enable color tracking
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
 
     TRACE_EXIT();
 }
@@ -1505,10 +1503,10 @@ void manetGLView::drawManet(void)
     if (showVerboseStatusString)
     {
         char buff[256];
-        snprintf(buff, sizeof(buff), " Loc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, textscale %f - ",
+        snprintf(buff, sizeof(buff), " Loc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, text: %f lpad: %f",
                 manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
                 manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
-                scaleText); 
+                scaleText, layerPadding); 
         buf+=string(buff); 
     }
     qglColor(QColor(monochromeMode ? "black" : "blue")); 
@@ -1531,6 +1529,7 @@ void manetGLView::drawManet(void)
             // in the cfg file. 
             glTranslatef(0.0, 0.0, -layerPadding);  
             glPushMatrix();
+            LOG_DEBUG("Drawing layer: " << (*li)->layer); 
             drawLayer((*li)->layer); 
             glPopMatrix();
 
@@ -1655,26 +1654,22 @@ bool manetGLView::isActive(const watcher::GUILayer &layer)
     return retVal;
 }
 
-void manetGLView::drawNode(const WatcherGraphNode &node)
+void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
 {
     TRACE_ENTER(); 
+
+    LOG_DEBUG("Drawing node on " << (physical?"non":"") << "physical layer."); 
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     GLfloat nodeColor[]={
         node.displayInfo->color.r/255.0, 
         node.displayInfo->color.g/255.0, 
         node.displayInfo->color.b/255.0, 
-        node.displayInfo->color.a/255.0, 
+        physical ? node.displayInfo->color.a/255.0 : 0.1
     };
 
     GLdouble x, y, z; 
     gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
-
-    // flashing color: if flashed, invert color. 
-    if (node.displayInfo->flash && node.displayInfo->isFlashed)
-        for(unsigned int i=0; i<sizeof(nodeColor); i++) 
-            // nodeColor[i]=1-nodeColor[i]; 
-            nodeColor[i]=1.0; 
 
     if (monochromeMode)
         glColor4fv(black);
@@ -1690,7 +1685,7 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
         case NodeDisplayInfo::TEAPOT: drawTeapot(x, y, z, 4, node.displayInfo); break;
     }
 
-    drawNodeLabel(node);
+    drawNodeLabel(node, physical);
 
     if (isActive(ANTENNARADIUS_LAYER))
         drawWireframeSphere(x, y, z, antennaRadius, node.displayInfo); 
@@ -1698,17 +1693,18 @@ void manetGLView::drawNode(const WatcherGraphNode &node)
     TRACE_EXIT(); 
 }
 
-void manetGLView::drawNodeLabel(const WatcherGraphNode &node)
+void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
 {
     TRACE_ENTER();
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
-    const GLfloat nodeColor[]={
+    GLfloat nodeColor[]={
         node.displayInfo->labelColor.r/255.0, 
         node.displayInfo->labelColor.g/255.0, 
         node.displayInfo->labelColor.b/255.0, 
-        node.displayInfo->labelColor.a/255.0, 
+        physical ? node.displayInfo->labelColor.a/255.0 : 0.1
     };
+
     if (monochromeMode)
         glColor4fv(black);
     else
@@ -1841,8 +1837,11 @@ void manetGLView::drawLayer(const GUILayer &layer)
     {
         WatcherGraphNode &node=wGraph.theGraph[*vi]; 
 
-        if (node.displayInfo->layer==layer)
-            drawNode(node); 
+        if (layer==PHYSICAL_LAYER)
+            drawNode(node, true); 
+        else
+            if (abs(layerPadding)>6)
+                drawNode(node, false); 
 
         WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
         WatcherGraphEdge::LabelList::iterator lend=node.labels.end(); 

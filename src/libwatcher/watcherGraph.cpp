@@ -278,6 +278,12 @@ void WatcherGraph::doMaintanence()
         WatcherGraphEdge &edge=theGraph[*ei]; 
         if (edge.displayInfo->flash && now > edge.displayInfo->nextFlashUpdate)
         {
+            if (edge.displayInfo->isFlashed)
+            {
+                edge.displayInfo->color.r=255-edge.displayInfo->color.r;
+                edge.displayInfo->color.g=255-edge.displayInfo->color.g;
+                edge.displayInfo->color.b=255-edge.displayInfo->color.b;
+            }
             edge.displayInfo->isFlashed=!edge.displayInfo->isFlashed;
             edge.displayInfo->nextFlashUpdate=now+edge.displayInfo->flashInterval;
         }
@@ -305,6 +311,12 @@ void WatcherGraph::doMaintanence()
         // Are we flashing and do we need to invert the color?
         if (node.displayInfo->flash && now > node.displayInfo->nextFlashUpdate)  
         {
+            if (node.displayInfo->isFlashed)
+            {
+                node.displayInfo->color.r=255-node.displayInfo->color.r;
+                node.displayInfo->color.g=255-node.displayInfo->color.g;
+                node.displayInfo->color.b=255-node.displayInfo->color.b;
+            }
             node.displayInfo->isFlashed=!node.displayInfo->isFlashed;
             node.displayInfo->nextFlashUpdate=now+node.displayInfo->flashInterval;
             LOG_DEBUG("Toggling flash for node " << node.nodeId << " isFlashed: " << node.displayInfo->isFlashed << " nextUpdate: " << node.displayInfo->nextFlashUpdate); 
@@ -545,17 +557,19 @@ bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_trait
     bool retVal=true;
     if(!findNode(id, retIter))
     {
+        // Make sure there is always a PHYSICAL node for every layer
+        if (layer!=PHYSICAL_LAYER)
+        {
+            boost::graph_traits<Graph>::vertex_iterator unused;
+            findOrCreateNode(id, unused, PHYSICAL_LAYER); 
+        }
+
         if(!createNode(id, retIter))
         {
             LOG_ERROR("Unable to create new node for id " << id << " in watcherGraph");
             retVal=false;
         }
-        // GTL - force nodes to be on the physcial layer - otherwise we are at the whim of 
-        // whatever layer is referenced first. Say a label is attached to a node. If the 
-        // label is on lyer "foobar", the commented out line will create the node on a layer other
-        // than the physical. 
-        // theGraph[*retIter].displayInfo->loadConfiguration(layer, id); 
-        theGraph[*retIter].displayInfo->loadConfiguration(PHYSICAL_LAYER, id); 
+        theGraph[*retIter].displayInfo->loadConfiguration(layer, id); 
     }
 
     TRACE_EXIT_RET(retVal);
@@ -587,10 +601,13 @@ bool WatcherGraph::saveConfig() const
     graph_traits<Graph>::vertex_iterator vi, vEnd;
     for(tie(vi, vEnd)=vertices(theGraph); vi!=vEnd; ++vi)
     {
-        theGraph[*vi].displayInfo->saveConfiguration();
+        if (theGraph[*vi].displayInfo->layer==PHYSICAL_LAYER)
+        {
+            theGraph[*vi].displayInfo->saveConfiguration();
 
-        BOOST_FOREACH(const LabelDisplayInfoPtr &ldip, theGraph[*vi].labels)
-            ldip->saveConfiguration();
+            BOOST_FOREACH(const LabelDisplayInfoPtr &ldip, theGraph[*vi].labels)
+                ldip->saveConfiguration();
+        }
     }
 
     TRACE_EXIT_RET_BOOL(true); 

@@ -188,7 +188,7 @@ signals:
 
         std::string statusFontName;
 
-        void drawNodeLabel(const watcher::WatcherGraphNode &node);
+        void drawNodeLabel(const watcher::WatcherGraphNode &node, bool physical);
         void gps2openGLPixels(const watcher::GPSMessage::DataFormat &format, const double inx, const double iny, const double inz, GLdouble &x, GLdouble &y, GLdouble &z);
         bool isActive(const watcher::GUILayer &layer); 
 
@@ -203,7 +203,7 @@ signals:
         void drawText(GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth=1.0);
         void drawLayer(const watcher::GUILayer &layer); 
         void drawEdge(const watcher::WatcherGraphEdge &edge, const watcher::WatcherGraphNode &node1, const watcher::WatcherGraphNode &node2); 
-        void drawNode(const watcher::WatcherGraphNode &node);
+        void drawNode(const watcher::WatcherGraphNode &node, bool physical);
         struct Quadrangle
         {
             QuadranglePoint p[4];
