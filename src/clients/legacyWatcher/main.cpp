@@ -72,6 +72,8 @@ int main(int argc, char *argv[])
         QObject::connect(sgc, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), ui.manetGLViewWindow, SLOT(showNodeSelectedForGraph(unsigned int, bool)));
     }
 
+    srand(time(NULL));
+
     glutInit(&argc, argv); 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
