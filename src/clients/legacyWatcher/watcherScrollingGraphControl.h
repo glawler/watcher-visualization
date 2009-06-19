@@ -12,6 +12,23 @@ namespace watcher
 {
     class GraphPlot; 
 
+    class GraphMenuItem : public QObject
+    {
+        Q_OBJECT
+
+        public: 
+            GraphMenuItem(const QString &str_);
+
+       public slots:
+                void showGraph(bool b) { emit showGraph(str, b); }
+
+       signals:
+            void showGraph(QString str, bool show); 
+
+        private:
+            const QString str;
+    };
+
     class WatcherScrollingGraphControl : public QWidget
     {
         Q_OBJECT 
@@ -26,30 +43,31 @@ namespace watcher
             //
             void handleDataPointMessage(const event::DataPointMessagePtr &message); 
 
-            void setComboBox(QComboBox *cb) { comboBox=cb; }
+            // Give the control a menu on which it can add actions. 
+            void setMenu(QMenu *m) { menu=m; }
 
-            public slots:
+       public slots:
 
                 // General case of show dialog.
                 void showGraphDialog(QString graphName, bool show);
 
-                // Specific case of showDialog, just calls the general case with the appropriate string.
-                void showBandwidthGraphDialog(bool show);
-                void showLoadAverageGraphDialog(bool show);
+            // Specific case of showDialog, just calls the general case with the appropriate string.
+            void showBandwidthGraphDialog(bool show);
+            void showLoadAverageGraphDialog(bool show);
 
-                void showScrollingGraph(QString graphName);
+            void showScrollingGraph(QString graphName);
 
-                void showNodeDataInGraphs(unsigned int nodeId, bool show);
-                void toggleNodeDataInGraphs(unsigned int nodeId);
+            void showNodeDataInGraphs(unsigned int nodeId, bool show);
+            void toggleNodeDataInGraphs(unsigned int nodeId);
 
-            signals:
+        signals:
 
-                void bandwidthDialogShowed(bool show);
-                void loadAverageDialogShowed(bool show);
-                void graphDialogShowed(QString graphName, bool show);
+            void bandwidthDialogShowed(bool show);
+            void loadAverageDialogShowed(bool show);
+            void graphDialogShowed(QString graphName, bool show);
 
-                void nodeDataInGraphsShowed(unsigned int nodeId, bool show);
-                void nodeDataInGraphsToggled(unsigned int nodeId); 
+            void nodeDataInGraphsShowed(unsigned int nodeId, bool show);
+            void nodeDataInGraphsToggled(unsigned int nodeId); 
 
         protected:
 
@@ -64,8 +82,12 @@ namespace watcher
 
         private:
 
-            // The combo box is where the user chooses which graphs to display.
-            QComboBox *comboBox; 
+            // Where we put our graph actions.
+            QMenu *menu; 
+
+            // A place to store graphMeny items. Wee just have to 
+            // keep them alive until dtor is called.
+            std::vector<GraphMenuItem*> graphMenuItems;
 
             // Oor own private idaho^Wlogger
             DECLARE_LOGGER(); 

@@ -62,9 +62,8 @@ int main(int argc, char *argv[])
     {
         WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
 
-        sgc->setComboBox(ui.scrollingGraphComboBox); 
-
-        QObject::connect(ui.scrollingGraphComboBox, SIGNAL(activated(QString)), sgc, SLOT(showScrollingGraph(QString)));
+        // Add the dyanmic graphs to this menu.
+        sgc->setMenu(ui.menuGraph);
 
         QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsToggled(unsigned int)), sgc, SLOT(toggleNodeDataInGraphs(unsigned int)));
         QObject::connect(sgc, SIGNAL(nodeDataInGraphsToggled(unsigned int)), ui.manetGLViewWindow, SLOT(toggleNodeSelectedForGraph(unsigned int)));

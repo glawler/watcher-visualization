@@ -17,6 +17,9 @@ using namespace watcher::event;
 
 INIT_LOGGER(WatcherScrollingGraphControl, "WatcherScrollingGraphControl"); 
 
+GraphMenuItem::GraphMenuItem(const QString &str_) : str(str_) { }
+
+
 //static 
 WatcherScrollingGraphControl *WatcherScrollingGraphControl::getWatcherScrollingGraphControl()
 {
@@ -35,10 +38,15 @@ WatcherScrollingGraphControl::WatcherScrollingGraphControl()
 WatcherScrollingGraphControl::~WatcherScrollingGraphControl()
 {
     TRACE_ENTER();
+    
     // for (GraphDialogMap::iterator g=graphDialogMap.begin(); g!=graphDialogMap.end();g++)
     //     delete g->second;
     // for (GraphPlotMap::iterator p=graphPlotMap.begin(); p!=graphPlotMap.end(); p++)
     //     delete p->second;
+    
+    for (vector<GraphMenuItem*>::iterator i=graphMenuItems.begin(); i!=graphMenuItems.end(); ++i)
+        delete *i;
+
     TRACE_EXIT();
 }
 
@@ -66,10 +74,20 @@ void WatcherScrollingGraphControl::handleDataPointMessage(const DataPointMessage
     if (newPlot)
     {
         graphPlotMap[message->dataName]->curveAndLegendVisible(curveId, false);  // new plots are invisible until clicked in the GUI
-        if (comboBox)
-            comboBox->addItem(QString::fromStdString(message->dataName));
-        else
-            LOG_WARN("Got data point for graph " << message->dataName << " but am unable to add it to the graph combobox, so it'll never be selected"); 
+        if (menu)
+        {
+            QAction *action=new QAction(QString::fromStdString(message->dataName), (QObject*)this);
+            action->setCheckable(true);
+
+            // There is probably a better way to do this.
+            // We create a class that just stores the string. Then we chain the signals bool->string->string.
+            GraphMenuItem *item = new GraphMenuItem(QString::fromStdString(message->dataName)); 
+            connect(action, SIGNAL(triggered(bool)), item, SLOT(showGraph(bool)));
+            connect(item, SIGNAL(showGraph(QString, bool)), this, SLOT(showGraphDialog(QString, bool)));
+            graphMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
+
+            menu->addAction(action); 
+        }
     }
 
     TRACE_EXIT();

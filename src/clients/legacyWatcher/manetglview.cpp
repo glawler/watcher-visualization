@@ -1529,10 +1529,9 @@ void manetGLView::drawManet(void)
             // in the cfg file. 
             glTranslatef(0.0, 0.0, -layerPadding);  
             glPushMatrix();
-            LOG_DEBUG("Drawing layer: " << (*li)->layer); 
+            // LOG_DEBUG("Drawing layer: " << (*li)->layer); 
             drawLayer((*li)->layer); 
             glPopMatrix();
-
         }
     }
 
@@ -1658,7 +1657,7 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
 {
     TRACE_ENTER(); 
 
-    LOG_DEBUG("Drawing node on " << (physical?"non":"") << "physical layer."); 
+    // LOG_DEBUG("Drawing node on " << (physical?"non":"") << "physical layer."); 
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     GLfloat nodeColor[]={
