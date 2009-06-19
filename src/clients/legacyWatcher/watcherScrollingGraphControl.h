@@ -6,28 +6,12 @@
 
 #include "watcherGraphDialog.h"
 #include "libwatcher/dataPointMessage.h"
+#include "stringIndexedMenuItem.h"
 #include "logger.h"
 
 namespace watcher
 {
     class GraphPlot; 
-
-    class GraphMenuItem : public QObject
-    {
-        Q_OBJECT
-
-        public: 
-            GraphMenuItem(const QString &str_);
-
-       public slots:
-                void showGraph(bool b) { emit showGraph(str, b); }
-
-       signals:
-            void showGraph(QString str, bool show); 
-
-        private:
-            const QString str;
-    };
 
     class WatcherScrollingGraphControl : public QWidget
     {
@@ -87,7 +71,7 @@ namespace watcher
 
             // A place to store graphMeny items. Wee just have to 
             // keep them alive until dtor is called.
-            std::vector<GraphMenuItem*> graphMenuItems;
+            std::vector<StringIndexedMenuItem*> menuItems;
 
             // Oor own private idaho^Wlogger
             DECLARE_LOGGER(); 

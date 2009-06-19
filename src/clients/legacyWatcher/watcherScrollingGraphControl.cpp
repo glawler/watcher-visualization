@@ -17,9 +17,6 @@ using namespace watcher::event;
 
 INIT_LOGGER(WatcherScrollingGraphControl, "WatcherScrollingGraphControl"); 
 
-GraphMenuItem::GraphMenuItem(const QString &str_) : str(str_) { }
-
-
 //static 
 WatcherScrollingGraphControl *WatcherScrollingGraphControl::getWatcherScrollingGraphControl()
 {
@@ -44,7 +41,7 @@ WatcherScrollingGraphControl::~WatcherScrollingGraphControl()
     // for (GraphPlotMap::iterator p=graphPlotMap.begin(); p!=graphPlotMap.end(); p++)
     //     delete p->second;
     
-    for (vector<GraphMenuItem*>::iterator i=graphMenuItems.begin(); i!=graphMenuItems.end(); ++i)
+    for (vector<StringIndexedMenuItem*>::iterator i=menuItems.begin(); i!=menuItems.end(); ++i)
         delete *i;
 
     TRACE_EXIT();
@@ -81,10 +78,10 @@ void WatcherScrollingGraphControl::handleDataPointMessage(const DataPointMessage
 
             // There is probably a better way to do this.
             // We create a class that just stores the string. Then we chain the signals bool->string->string.
-            GraphMenuItem *item = new GraphMenuItem(QString::fromStdString(message->dataName)); 
-            connect(action, SIGNAL(triggered(bool)), item, SLOT(showGraph(bool)));
-            connect(item, SIGNAL(showGraph(QString, bool)), this, SLOT(showGraphDialog(QString, bool)));
-            graphMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
+            StringIndexedMenuItem *item = new StringIndexedMenuItem(QString::fromStdString(message->dataName)); 
+            connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
+            connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(showGraphDialog(QString, bool)));
+            menuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
 
             menu->addAction(action); 
         }
