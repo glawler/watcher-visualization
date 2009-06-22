@@ -1277,63 +1277,31 @@ QSize manetGLView::sizeHint() const
 void manetGLView::initializeGL()
 {
     TRACE_ENTER();
-    // glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_BLEND);
-    // // glEnable(GL_LINE_SMOOTH);
-    // // glEnable(GL_CULL_FACE); 
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glShadeModel(GL_SMOOTH);
-
-    // glEnable(GL_LIGHTING);
-
-    // // GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };    // Ambient light is not full strength, but white
-    // // glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
-    // // glLightfv(GL_LIGHT1, GL_SPECULAR, ambLight);
-
-    // // GLfloat diffLight[]= { 1.0f, 1.0f, 1.0f, 1.0f };    // diffuse light is full strength
-    // // glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight);
-
-    // // GLfloat posLight[]= { 200.0f, 200.0f, 200.0f, 1.0f }; // light is over right shoulder
-    // // glLightfv(GL_LIGHT1, GL_POSITION, posLight);
-
-    // // glEnable(GL_LIGHT1);
-
-    // enable lighting
-    glEnable(GL_LIGHTING); 
 
     glEnable(GL_DEPTH_TEST);
-
-    // Allow colors to bleed through by alpha (orange edges when nieghor and one hop routing draw the same link).
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Set the shading model
     glShadeModel(GL_SMOOTH); 
 
-    // Spec is LIGHT0
-    // GLfloat specular[]={0.5, 0.5, 0.5, 1.0};
-    // GLfloat posSpecLight[]= { -500.0f, 500.0f, 100.0f, 1.0f };
-    // glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    // glLightfv(GL_LIGHT0, GL_POSITION, posSpecLight);
-    // glEnable(GL_LIGHT0); 
+    // LIGHT0
+    GLfloat posLight0[]={ 50.0f, 50.0f, 000.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, posLight0);
 
-    // Amb is LIGHT1
-    GLfloat ambLight[] = { 0.25, 0.25, 0.25, 1.0 };
-    glLightfv(GL_LIGHT1, GL_AMBIENT, ambLight);
-    glEnable(GL_LIGHT1);
+    GLfloat ambLight0[]={ 0.0, 0.0, 0.0, 1.0 };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambLight0); 
+    
+    GLfloat specLight0[]={ 1.0, 1.0, 1.0, 1.0 };
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specLight0);
+    
+    GLfloat diffLight0[]= { 1.0, 1.0, 1.0, 1.0 }; 
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight0);
 
-    // or use the ambient light model
-    GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+    GLfloat ambLightDef[]={0.2,0.2,0.2,1}; // This is opengl's default anyway...
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambLightDef); 
+    
+    glEnable(GL_LIGHTING); 
+    glEnable(GL_LIGHT0); 
 
-    // Diffuse is LIGHT2
-    // GLfloat diffLight[]= { 0.5, 0.5, 0.5, 1.0f };    
-    // glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
-    // GLfloat posDiffLight[]= { 500.0, 500.0f, 100.0f, 1.0f };
-    // glLightfv(GL_LIGHT2, GL_POSITION, posDiffLight); 
-    // glEnable(GL_LIGHT2);
-
-    // enable color tracking
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
