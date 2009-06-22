@@ -106,7 +106,8 @@ ostream &LabelDisplayInfo::toStream(ostream &out) const
     TRACE_ENTER();
     out << " text: \"" << labelText << "\" point: " << pointSize
         << " bg: " << backgroundColor 
-        << " fg: " << foregroundColor; 
+        << " fg: " << foregroundColor 
+        << " exp: " << expiration;
     TRACE_EXIT();
     return out; 
 }
@@ -115,13 +116,17 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 {
     TRACE_ENTER();
 
-    if (mess->expiration!=Infinity)
-        expiration=(Timestamp(time(NULL))*1000)+mess->expiration;
-    else
-        expiration=Infinity;
-
     // load defaults, then modify 'em 
     loadConfiguration(mess->layer); 
+
+    if (mess->expiration!=Infinity)
+    {
+        Timestamp now=getCurrentTime();
+        expiration=now+mess->expiration;
+        LOG_DEBUG("now: " << now << " New label expires in " << mess->expiration << " ms: " << *this);
+    }
+    else
+        expiration=Infinity;
 
     backgroundColor=mess->background;
     foregroundColor=mess->foreground;

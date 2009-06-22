@@ -15,8 +15,7 @@
 #include "colorMessage.h"
 
 #include "watcherGraph.h"
-
-// #include "watcherSerialize.h"
+#include "watcherTypes.h"
 
 using namespace std;
 using namespace boost;
@@ -162,8 +161,9 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
 {
     TRACE_ENTER();
 
-    LOG_DEBUG("Adding neighbors from message: " << *message); 
-    LOG_DEBUG("Graph before adding: " << *this); 
+    // THis is expensive.
+    // LOG_DEBUG("Adding neighbors from message: " << *message); 
+    // LOG_DEBUG("Graph before adding: " << *this); 
 
     bool retVal=true;
 
@@ -191,7 +191,8 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
         theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
     }
     
-    LOG_DEBUG("Graph after adding: " << *this); 
+    // THis is expensive.
+    // LOG_DEBUG("Graph after adding: " << *this); 
 
     TRACE_EXIT_RET(retVal);
     return retVal;
@@ -215,7 +216,7 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         return false;
     }
 
-    Timestamp now=Timestamp(time(NULL))*1000; 
+    Timestamp now=getCurrentTime();
 
     // Set expiration on this edge if needed. 
     if (message->expiration!=Infinity)
@@ -267,7 +268,7 @@ void WatcherGraph::doMaintanence()
 {
     TRACE_ENTER();
 
-    Timestamp now=Timestamp(time(NULL))*1000; 
+    Timestamp now(getCurrentTime());
 
     // remove edges that have expired
     remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
@@ -280,9 +281,9 @@ void WatcherGraph::doMaintanence()
         {
             if (edge.displayInfo->isFlashed)
             {
-                edge.displayInfo->color.r=255-edge.displayInfo->color.r;
-                edge.displayInfo->color.g=255-edge.displayInfo->color.g;
-                edge.displayInfo->color.b=255-edge.displayInfo->color.b;
+                edge.displayInfo->color.r=~edge.displayInfo->color.r;
+                edge.displayInfo->color.g=~edge.displayInfo->color.g;
+                edge.displayInfo->color.b=~edge.displayInfo->color.b;
             }
             edge.displayInfo->isFlashed=!edge.displayInfo->isFlashed;
             edge.displayInfo->nextFlashUpdate=now+edge.displayInfo->flashInterval;
@@ -313,9 +314,9 @@ void WatcherGraph::doMaintanence()
         {
             if (node.displayInfo->isFlashed)
             {
-                node.displayInfo->color.r=255-node.displayInfo->color.r;
-                node.displayInfo->color.g=255-node.displayInfo->color.g;
-                node.displayInfo->color.b=255-node.displayInfo->color.b;
+                node.displayInfo->color.r=~node.displayInfo->color.r;
+                node.displayInfo->color.g=~node.displayInfo->color.g;
+                node.displayInfo->color.b=~node.displayInfo->color.b;
             }
             node.displayInfo->isFlashed=!node.displayInfo->isFlashed;
             node.displayInfo->nextFlashUpdate=now+node.displayInfo->flashInterval;
@@ -406,6 +407,7 @@ bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
             WatcherGraphNode::LabelList::iterator b=theGraph[*nodeIter].labels.begin();
             WatcherGraphNode::LabelList::iterator e=theGraph[*nodeIter].labels.end();
             WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message));
+            LOG_DEBUG("Told to remove labels."); 
             theGraph[*nodeIter].labels.erase(newEnd, e);
         }
         retVal=true;

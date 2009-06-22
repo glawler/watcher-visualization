@@ -158,6 +158,10 @@ namespace watcher
               */
              // WatcherGraphPtr unpack(std::istream& is);
 
+            /**
+             * Get current time in milliseconds
+             */
+
         protected:
 
         private:

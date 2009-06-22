@@ -41,4 +41,5 @@ libwatcher_a_SOURCES= \
 	watcherGraphEdge.cpp \
 	watcherGraphNode.cpp \
 	watcherRegion.h watcherRegion.cpp \
-	watcherdAPIMessageHandler.h watcherdAPIMessageHandler.cpp
+	watcherdAPIMessageHandler.h watcherdAPIMessageHandler.cpp \
+	watcherTypes.cpp

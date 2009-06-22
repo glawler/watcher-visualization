@@ -17,6 +17,12 @@ namespace watcher
     typedef long long int Timestamp;    // in Epoch milliseconds
 
     const Timestamp Infinity = -1;
+
+    /**
+     * Return the current time in milliseconds, using typedef type.
+     * @return current time in milliseconds
+     */
+    Timestamp getCurrentTime();
 }
 
 #endif // WATCHER_TYPES_HELLO_THERE_H
