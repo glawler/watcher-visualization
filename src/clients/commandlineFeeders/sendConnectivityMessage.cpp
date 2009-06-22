@@ -15,7 +15,7 @@ using namespace watcher::event;
 
 void usage(const char *progName)
 {
-    fprintf(stderr, "Usage: %s -s|--servername server [-l|--logProps log.propertiesFile] [-f|--fromNode fromNodeAddr] nbr1 nbr2 ... nbrN\n", basename(progName)); 
+    fprintf(stderr, "Usage: %s -s|--servername server [-l|--layer=layer -p|--logProps=log.propertiesFile] [-f|--fromNode=fromNodeAddr] nbr1 nbr2 ... nbrN\n", basename(progName)); 
     fprintf(stderr, "Where:\n"); 
     fprintf(stderr, "\tnbr1 nbr2 ... nbrN is a list of ip addresses that the node is connected to.\n");
     fprintf(stderr, "\tserver is the server address or hostname\n"); 

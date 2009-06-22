@@ -1281,7 +1281,7 @@ void manetGLView::initializeGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glShadeModel(GL_SMOOTH); 
+    // glShadeModel(GL_SMOOTH); 
 
     // LIGHT0
     GLfloat posLight0[]={ 50.0f, 50.0f, 000.0f, 1.0f };
@@ -1334,6 +1334,9 @@ void manetGLView::checkIO()
         }
 
         newestMessageTimestamp=message->timestamp;
+
+        if (knownLayers.end()==find(knownLayers.begin(), knownLayers.end(), message->layer));
+            knownLayers.push_back(message->layer)
     }
 
     updateGL();  // redraw
