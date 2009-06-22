@@ -8,19 +8,9 @@
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtGame/gameactor.h>
-#include <osg/Vec3>
-#include <dtDAL/enginepropertytypes.h>
-#include <dtDAL/actorproxyicon.h>
-#include <dtCore/loadable.h>
 #include <dtCore/isector.h>
-#include <dtGame/gamemanager.h>
-#include <dtGame/actorupdatemessage.h>
-#include <dtGame/basemessages.h>
-#include <dtABC/application.h>
-#include <dtCore/camera.h>
-#include <dtCore/keyboard.h>
 #include <dtCore/transform.h>
-#include <dtCore/particlesystem.h>
+#include <dtGame/gamemanager.h>
 #include <osg/Vec3>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 

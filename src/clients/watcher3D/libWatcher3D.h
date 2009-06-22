@@ -20,7 +20,7 @@ class DT_PLUGIN_EXPORT LibWatcher3D : public dtGame::GameEntryPoint
         virtual void Initialize(dtGame::GameApplication& app, int argc, char** argv);
         virtual void OnStartup(dtGame::GameApplication& app);
     private:
-        dtCore::RefPtr<dtCore::MotionModel> mMotionModel;
+        dtCore::RefPtr<dtCore::MotionModel> motionModel;
 };
 
 #endif // LIB_WATCHER_3D_H

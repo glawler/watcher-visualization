@@ -13,10 +13,9 @@
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtCore/globals.h>
+#include <dtGame/gamemanager.h>
+#include <dtGame/gameapplication.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
-
-// Watcher3D includes
-#include "watcher3D.h"
 
 using namespace std;
 using namespace watcher;
@@ -114,10 +113,18 @@ int main(int argc, char** argv)
     //
     // My code (the rest of the code is borrowed from messageStream2Text.cpp)
     //
+
+    // Setup path
+    std::string dataPath = dtCore::GetDeltaDataPathList();
+    dtCore::SetDataFilePathList(dataPath + ";" + dtCore::GetDeltaRootPath() +
+        "data" + ";" + dtCore::GetDeltaRootPath() + "data/models");
+
+    // Create application
     dtCore::RefPtr<dtGame::GameApplication> app = new dtGame::GameApplication(argc, argv, "config.xml");
     app->SetGameLibraryName("Watcher3D"); // (libWatcher3D.so)
     app->Config();
     app->Run();
+    dtCore::RefPtr<dtGame::GameManager> gameManager = app->GetGameManager();
 
     LOG_INFO("Saving last known configuration to " << configFilename); 
     SingletonConfig::lock();
