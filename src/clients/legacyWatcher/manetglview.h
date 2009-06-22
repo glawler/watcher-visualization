@@ -179,6 +179,7 @@ signals:
         float gpsScale; 
         float layerPadding;
         float antennaRadius; 
+        float ghostLayerTransparency;
 
         int statusFontPointSize; 
 

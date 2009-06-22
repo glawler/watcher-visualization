@@ -49,6 +49,7 @@ HEADERS += \
     graphPlot.h \
     manetglview.h \
     skybox.h \
+    stringIndexedMenuItem.h \
     watcherGraphDialog.h \
     watcherMainWindow.h \
     watcherScrollingGraphControl.h
@@ -62,8 +63,9 @@ SOURCES += \
     main.cpp    \
     manetglview.cpp \
     skybox.cpp  \
+    stringIndexedMenuItem.cpp \
     watcherGraphDialog.cpp  \
     watcherMainWindow.cpp   \
-    watcherScrollingGraphControl.cpp
+    watcherScrollingGraphControl.cpp 
 
 RESOURCES += watcherResources.qrc

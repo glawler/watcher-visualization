@@ -35,10 +35,15 @@ WatcherScrollingGraphControl::WatcherScrollingGraphControl()
 WatcherScrollingGraphControl::~WatcherScrollingGraphControl()
 {
     TRACE_ENTER();
+    
     // for (GraphDialogMap::iterator g=graphDialogMap.begin(); g!=graphDialogMap.end();g++)
     //     delete g->second;
     // for (GraphPlotMap::iterator p=graphPlotMap.begin(); p!=graphPlotMap.end(); p++)
     //     delete p->second;
+    
+    for (vector<StringIndexedMenuItem*>::iterator i=menuItems.begin(); i!=menuItems.end(); ++i)
+        delete *i;
+
     TRACE_EXIT();
 }
 
@@ -66,10 +71,20 @@ void WatcherScrollingGraphControl::handleDataPointMessage(const DataPointMessage
     if (newPlot)
     {
         graphPlotMap[message->dataName]->curveAndLegendVisible(curveId, false);  // new plots are invisible until clicked in the GUI
-        if (comboBox)
-            comboBox->addItem(QString::fromStdString(message->dataName));
-        else
-            LOG_WARN("Got data point for graph " << message->dataName << " but am unable to add it to the graph combobox, so it'll never be selected"); 
+        if (menu)
+        {
+            QAction *action=new QAction(QString::fromStdString(message->dataName), (QObject*)this);
+            action->setCheckable(true);
+
+            // There is probably a better way to do this.
+            // We create a class that just stores the string. Then we chain the signals bool->string->string.
+            StringIndexedMenuItem *item = new StringIndexedMenuItem(QString::fromStdString(message->dataName)); 
+            connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
+            connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(showGraphDialog(QString, bool)));
+            menuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
+
+            menu->addAction(action); 
+        }
     }
 
     TRACE_EXIT();

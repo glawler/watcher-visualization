@@ -224,22 +224,7 @@ void GraphPlot::addCurve(unsigned int curveId)
     string curveTitle=boost::lexical_cast<string>((unsigned int)(0xFF & curveId));
     data->curve=boost::shared_ptr<GraphCurve>(new GraphCurve(curveTitle.c_str()));
 
-    // A simple hash function to map the id to the same color each time. Hash == Corman's multiplication method
-    unsigned int hash=0;
-    string key=boost::lexical_cast<string>(curveId*4); // 4 chosen by fair dice roll. 
-    for (unsigned int i=0; i<key.length(); ++i)
-    {
-        hash += key[i];
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-    }
-    hash += (hash << 3);
-    hash ^= (hash >> 11);
-    hash += (hash << 15);
-
-    LOG_DEBUG("Got color hash value: " << hash << " from curveId " << curveId << " mapped to color: " << hash%256); 
-
-    data->curve->setColor(QColor::fromHsv(hash % 256, 255, 180)); 
+    data->curve->setColor(QColor::fromHsv(random() % 360, 255, 180)); 
     data->curve->setStyle(QwtPlotCurve::Lines);
     data->curve->attach(this);
 

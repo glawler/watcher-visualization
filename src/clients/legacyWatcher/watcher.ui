@@ -194,9 +194,6 @@ p, li { white-space: pre-wrap; }
        </spacer>
       </item>
       <item>
-       <widget class="QComboBox" name="scrollingGraphComboBox" />
-      </item>
-      <item>
        <widget class="QPushButton" name="fitToWindowButton" >
         <property name="text" >
          <string>&amp;Fit to Window</string>
@@ -271,8 +268,14 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionMonochrome" />
     <addaction name="actionBackgroundImage" />
    </widget>
+   <widget class="QMenu" name="menuGraph" >
+    <property name="title" >
+     <string>&amp;Graph</string>
+    </property>
+   </widget>
    <addaction name="menuLayers" />
    <addaction name="menuView" />
+   <addaction name="menuGraph" />
   </widget>
   <action name="actionAntennaRadius" >
    <property name="checkable" >
