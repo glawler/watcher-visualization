@@ -3,6 +3,9 @@
 # "Fixes" warning in log4cxx about type punning. 
 CPPFLAGS += -fno-strict-aliasing
 
+# "Fixes" warning about old headers
+CPPFLAGS += -Wno-deprecated
+
 CPPFLAGS += -I$(top_srcdir)
 CPPFLAGS += -I$(top_srcdir)/util
 CPPFLAGS += -I$(top_srcdir)/logger
