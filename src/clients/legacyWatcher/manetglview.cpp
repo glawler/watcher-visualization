@@ -1248,11 +1248,11 @@ bool manetGLView::loadConfiguration()
     //
     QTimer *checkIOTimer = new QTimer(this);
     QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
-    checkIOTimer->start(100);
+    checkIOTimer->start(60);
 
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-    watcherIdleTimer->start(200); 
+    watcherIdleTimer->start(30); 
 
     TRACE_EXIT();
     return true;
@@ -1366,7 +1366,6 @@ void manetGLView::checkIO()
         }
 
         newestMessageTimestamp=message->timestamp;
-
     }
 
     updateGL();  // redraw
@@ -1377,10 +1376,6 @@ void manetGLView::checkIO()
 void manetGLView::watcherIdle()
 {
     TRACE_ENTER();
-
-    wGraph.doMaintanence(); // check expiration, etc. 
-    update(); 
-
     TRACE_EXIT();
 }
 
@@ -1388,57 +1383,8 @@ void manetGLView::paintGL()
 {
     TRACE_ENTER();
 
-    // Save current OpenGL state
-    // glPushAttrib(GL_ALL_ATTRIB_BITS);
-    // glMatrixMode(GL_PROJECTION);
-    // glPushMatrix();
-    // glMatrixMode(GL_MODELVIEW);
-    // glPushMatrix();
-
-    // // Reset OpenGL parameters
-    // glShadeModel(GL_SMOOTH);
-    // glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
-    // glEnable(GL_LIGHTING);
-    // glEnable(GL_LIGHT0);
-    // glEnable(GL_MULTISAMPLE);
-    // static GLfloat lightPosition[4] = { 1.0, 5.0, 5.0, 1.0 };
-    // glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-    // glEnable(GL_COLOR_MATERIAL);
-    // glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    // // qglClearColor(Qt::black);
-    // 
-    // // resizeGL() start
-    // glViewport(0, 0, width(), height());
-    // glMatrixMode(GL_PROJECTION);
-    // glLoadIdentity();
-    // gluPerspective(40.0, GLfloat(width()) / GLfloat(height()), 1.0, 50.0);
-    // if(autoCenterNodesFlag) 
-    //     scaleAndShiftToCenter(ScaleAndShiftUpdateOnChange);
-    // // resizeGL() end
-
+    wGraph.doMaintanence(); // check expiration, etc. 
     drawManet();
-
-    // // Restore OpenGL state
-    // glMatrixMode(GL_MODELVIEW);
-    // glPopMatrix();
-    // glMatrixMode(GL_PROJECTION);
-    // glPopMatrix();
-    // glPopAttrib();
-
-    // // QPainter painter;
-    // // painter.begin(this);
-    // // painter.setRenderHint(QPainter::Antialiasing);
-    // // painter.save();
-    // // painter.translate(width()/2, height()/2);
-    // // QRadialGradient radialGrad(QPointF(-40, -40), 100);
-    // // radialGrad.setColorAt(0, QColor(255, 255, 255, 100));
-    // // radialGrad.setColorAt(1, QColor(200, 200, 0, 100)); 
-    // // painter.setBrush(QBrush(radialGrad));
-    // // painter.drawRoundRect(-100, -100, 200, 200);
-    // // painter.restore();
-
-    // // painter.end();
 
     TRACE_EXIT();
 }
