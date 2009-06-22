@@ -162,8 +162,8 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
 {
     TRACE_ENTER();
 
-    LOG_DEBUG("Adding neighbors from message: " << *message); 
-    LOG_DEBUG("Graph before adding: " << *this); 
+    // LOG_DEBUG("Adding neighbors from message: " << *message); 
+    // LOG_DEBUG("Graph before adding: " << *this); 
 
     bool retVal=true;
 
@@ -176,22 +176,43 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
     boost::graph_traits<Graph>::out_edge_iterator i, end, newEnd;
     findOrCreateNode(message->fromNodeID, src, message->layer); 
 
-    // Remove all edges on the same layer as the message. 
-    tie(i, end)=out_edges(*src, theGraph);
-    newEnd=remove_if(i, end, GraphFunctors::MatchEdgeLayer(theGraph, message->layer)); 
-    for( ; newEnd!=end; ++newEnd)
-        remove_edge(newEnd, theGraph);
 
-    // Add edges from connectivity message
-    graph_traits<Graph>::vertex_iterator dest;
+    // // Remove all edges on the same layer as the message. 
+    // tie(i, end)=out_edges(*src, theGraph);
+    // newEnd=remove_if(i, end, GraphFunctors::MatchEdgeLayer(theGraph, message->layer)); 
+    // for( ; newEnd!=end; ++newEnd)
+    //     remove_edge(newEnd, theGraph);
+
+    // Add edges in message not in out_edges
     BOOST_FOREACH(NodeIdentifier nid, message->neighbors)
     {
-        findOrCreateNode(nid, dest, message->layer); 
-        std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
-        theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
+        tie(i, end)=out_edges(*src, theGraph);
+        for ( ; i!=end; ++i)
+        {
+            const WatcherGraphNode &node=theGraph[target(*i, theGraph)];
+            if (node.nodeId==nid)
+                continue;
+        }
+        if (i==end)  // not found
+        {
+            graph_traits<Graph>::vertex_iterator dest;
+            findOrCreateNode(nid, dest, message->layer); 
+            std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
+            theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
+        }
+    }
+
+    // remove edges in out_edges not in message
+    tie(i, end)=out_edges(*src, theGraph);
+    for ( ; i!=end; ++i)
+    {
+        WatcherGraphNode &node=theGraph[target(*i, theGraph)];
+        std::vector<watcher::NodeIdentifier>::const_iterator n;
+        if (message->neighbors.end()==find(message->neighbors.begin(), message->neighbors.end(), node.nodeId))
+            remove_edge(i, theGraph);
     }
     
-    LOG_DEBUG("Graph after adding: " << *this); 
+    // LOG_DEBUG("Graph after adding: " << *this); 
 
     TRACE_EXIT_RET(retVal);
     return retVal;
