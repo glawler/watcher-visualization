@@ -1782,7 +1782,7 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
                 fgColor[i]=0; 
 
     float offset=4.0;
-
+        
     QFont f(label->fontName.c_str(), (int)(label->pointSize*manetAdj.scaleX*scaleText)); 
 
     // Do cheesy shadow effect as I can't get a proper bounding box around the text as
@@ -1790,7 +1790,9 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     if (!monochromeMode)
     {
         qglColor(QColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])); 
-        renderText(inx+offset+1, iny+offset+1, inz+1.0, label->labelText.c_str(), f); 
+        QFontMetrics fm(f);
+        double shadowOffset=fm.height()*.01;
+        renderText(inx+offset+shadowOffset, iny+offset+shadowOffset, inz+1.0, label->labelText.c_str(), f); 
     }
 
     qglColor(QColor(fgColor[0], fgColor[1], fgColor[2], fgColor[3])); 
