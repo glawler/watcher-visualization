@@ -173,10 +173,10 @@ share/info/dir
 ^src/clients/commandlineFeeders/Makefile
 ^src/clients/commandlineFeeders/sendColorMessage
 ^src/clients/commandlineFeeders/sendConnectivityMessage
-^src/clients/commandlineFeeders/sendDataRequestMessage
 ^src/clients/commandlineFeeders/sendEdgeMessage
 ^src/clients/commandlineFeeders/sendGPSMessage
 ^src/clients/commandlineFeeders/sendLabelMessage
+^src/clients/commandlineFeeders/sendDataPointMessage
 ^src/clients/messageStream2Text/Makefile
 ^src/clients/messageStream2Text/messageStream2Text
 ^src/clients/routeFeeder/Makefile
@@ -184,7 +184,10 @@ share/info/dir
 ^src/clients/connectivity2dot/Makefile
 ^src/clients/connectivity2dot/connectivity2dot
 
+^src/clients/watcher3D/Makefile
 
+^src/clients/watcherHierarchyClient/Makefile
+^src/clients/watcherHierarchyClient/watcherHierarchyClient
 
 ^src/util/Makefile
 ^src/logger/Makefile
