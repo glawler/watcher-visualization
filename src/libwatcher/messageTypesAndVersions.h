@@ -69,17 +69,17 @@ namespace watcher {
         static const GUILayer HIERARCHY_LAYER = "Hierarchy"; 
         static const GUILayer BANDWIDTH_LAYER = "Bandwidth"; 
         static const GUILayer ROUTING_LAYER = "Routing"; 
-        static const GUILayer ONE_HOP_ROUTING_LAYER = "One Hop Routing"; 
-        static const GUILayer ANTENNARADIUS_LAYER = "Antenna Radius"; 
-        static const GUILayer SANITY_CHECK_LAYER = "Sanity Check"; 
-        static const GUILayer ANOMPATHS_LAYER = "Anomolus Paths"; 
+        static const GUILayer ONE_HOP_ROUTING_LAYER = "One_Hop_Routing"; 
+        static const GUILayer ANTENNARADIUS_LAYER = "Antenna_Radius"; 
+        static const GUILayer SANITY_CHECK_LAYER = "Sanity_Check"; 
+        static const GUILayer ANOMPATHS_LAYER = "Anomolus_Paths"; 
         static const GUILayer CORROLATION_LAYER = "Correlation"; 
         static const GUILayer ALERT_LAYER = "Alerts"; 
-        static const GUILayer CORROLATION_3HOP_LAYER = "Three Hop Correlation"; 
+        static const GUILayer CORROLATION_3HOP_LAYER = "Three_Hop_Correlation"; 
         static const GUILayer ROUTING2_LAYER = "Wormhole Routing"; 
-        static const GUILayer ROUTING2_ONE_HOP_LAYER = "Wormhole One Hop Routing"; 
-        static const GUILayer FLOATING_GRAPH_LAYER = "Floating Graph"; 
-        static const GUILayer NORMAL_PATHS_LAYER = "Normal Paths"; 
+        static const GUILayer ROUTING2_ONE_HOP_LAYER = "Wormhole_One_Hop_Routing"; 
+        static const GUILayer FLOATING_GRAPH_LAYER = "Floating_Graph"; 
+        static const GUILayer NORMAL_PATHS_LAYER = "Normal_Paths"; 
 
         /** Determine if the specified message type is a feeder API event.
          * @retval true if the message type is a feeder api event
