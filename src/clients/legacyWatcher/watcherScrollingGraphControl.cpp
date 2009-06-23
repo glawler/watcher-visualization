@@ -81,6 +81,8 @@ void WatcherScrollingGraphControl::handleDataPointMessage(const DataPointMessage
             StringIndexedMenuItem *item = new StringIndexedMenuItem(QString::fromStdString(message->dataName)); 
             connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
             connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(showGraphDialog(QString, bool)));
+            // GTL - how can I link the close of the window to the menu item checkbox?
+            connect(this, SIGNAL(destroyed()), action, SLOT(setChecked(false)));
             menuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
 
             menu->addAction(action); 

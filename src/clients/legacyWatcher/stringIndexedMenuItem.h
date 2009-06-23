@@ -1,3 +1,5 @@
+#ifndef STRINGINDEXEDMENUITEM_H
+#define STRINGINDEXEDMENUITEM_H
 /**
  * @file stringBasedMenuItem.h
  * @author Geoff Lawler <geoff.lawler@cobham.com>
@@ -28,13 +30,16 @@ namespace watcher
             StringIndexedMenuItem(const QString &str_) : str(str_) {} 
 
        public slots:
-                void showMenuItem(bool b) { emit showMenuItem(str, b); }
+            void showMenuItem(bool b) { emit showMenuItem(str, b); }
+            void setChecked(const QString &str_, bool b) { if (str==str_) emit setChecked(b); }
 
        signals:
-            void showMenuItem(QString str, bool show); 
+            void showMenuItem(const QString &str, bool show); 
+            void setChecked(bool b); 
 
         private:
             const QString str;
     };
 }
 
+#endif // STRINGINDEXEDMENUITEM_H

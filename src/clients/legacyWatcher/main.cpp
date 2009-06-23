@@ -56,6 +56,9 @@ int main(int argc, char *argv[])
     QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
     QObject::connect(&app, SIGNAL(aboutToQuit()), ui.manetGLViewWindow, SLOT(saveConfiguration()));
 
+    // Is there a way to get this from within manetGLView via theApp or something?
+    ui.manetGLViewWindow->setLayerMenu(ui.menuLayers);
+
     // 
     // Connect the scrolling graph dialog controller to other bits.
     //

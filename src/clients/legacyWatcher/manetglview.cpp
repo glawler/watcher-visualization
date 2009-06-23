@@ -2,6 +2,7 @@
 #include <QtOpenGL>
 #include <math.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/regex.hpp>
 #include <boost/foreach.hpp>
 #include <values.h>  // DBL_MAX
 #include <GL/glut.h>
@@ -936,6 +937,38 @@ manetGLView::manetGLView(QWidget *parent) :
 manetGLView::~manetGLView()
 {
     TRACE_ENTER();
+    for (vector<StringIndexedMenuItem*>::iterator i=layerMenuItems.begin(); i!=layerMenuItems.end(); ++i)
+        delete *i;
+    TRACE_EXIT();
+}
+
+void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
+{
+    TRACE_ENTER();
+    LayerListItemPtr item(new LayerListItem);
+    item->layer=layer;
+    item->active=active;
+    knownLayers.push_back(item);
+
+    if (layerMenu)
+    {
+        QAction *action=new QAction(QString::fromStdString(layer), (QObject*)this);
+        action->setCheckable(true);
+
+        StringIndexedMenuItem *item = new StringIndexedMenuItem(QString::fromStdString(layer)); 
+        connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
+        connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(layerToggle(QString, bool)));
+        connect(this, SIGNAL(layerToggled(QString, bool)), item, SLOT(setChecked(QString, bool)));
+        connect(item, SIGNAL(setChecked(bool)), action, SLOT(setChecked(bool)));
+
+        layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
+
+        layerMenu->addAction(action); 
+    }
+
+    // Could use a few more type conversions for string here...
+    emit layerToggled(QString::fromStdString(string(item->layer)), item->active);
+
     TRACE_EXIT();
 }
 
@@ -970,62 +1003,23 @@ bool manetGLView::loadConfiguration()
     if (!root.exists(prop))
         root.add(prop, libconfig::Setting::TypeGroup);
 
-    bool boolVal=false;
     libconfig::Setting &layers=cfg.lookup(prop);
 
-    struct 
-    {
-        const char *prop;
-        GUILayer layer;
-    } layerVals[] =
-    {
-        { "bandwidth", BANDWIDTH_LAYER },
-        { "undefined", UNDEFINED_LAYER },
-        { "neighbors", PHYSICAL_LAYER },
-        { "hierarchy", HIERARCHY_LAYER },
-        { "routing", ROUTING_LAYER },
-        { "routingOneHop", ONE_HOP_ROUTING_LAYER },
-        { "antennaRadius", ANTENNARADIUS_LAYER },
-        { "sanityCheck", SANITY_CHECK_LAYER },
-        { "anomPaths", ANOMPATHS_LAYER }, 
-        { "correlation", CORROLATION_LAYER },
-        { "alert", ALERT_LAYER }, 
-        { "correlation3Hop", CORROLATION_3HOP_LAYER },
-        { "wormholeRouting", ROUTING2_LAYER },
-        { "wormholeRoutingOnehop", ROUTING2_ONE_HOP_LAYER },
-        { "normPaths", NORMAL_PATHS_LAYER }
-    };
-    for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
-    {
-        boolVal=false;
-        LOG_DEBUG("Looking up layer " << layerVals[i].prop); 
-        if (!layers.lookupValue(layerVals[i].prop, boolVal))
-            layers.add(layerVals[i].prop, libconfig::Setting::TypeBoolean)=boolVal;
+    // We cheat a little here and always make sure there's an antenna radius "layer"
+    if (!layers.exists(ANTENNARADIUS_LAYER))
+        layers.add(ANTENNARADIUS_LAYER, Setting::TypeBoolean)=false;
 
-        LOG_DEBUG("Adding " << (boolVal?"active":"inactive") << " layer " << layerVals[i].layer << " to list of known layers"); 
-        LayerListItemPtr item(new LayerListItem);
-        item->layer=layerVals[i].layer;
-        item->active=boolVal;
-        knownLayers.push_back(item); 
+    LOG_INFO("Reading layer states from cfg file");
+    int layerNum=layers.getLength();
+    for (int i=0; i<layerNum; i++)
+    {
+        string name(layers[i].getName());
+        LOG_DEBUG("Reading layer menu config for " << name); 
+        bool val=true;
+        if (!layers.lookupValue(name, val))
+            layers.add(name, Setting::TypeBoolean)=val;  // Shouldn't happen unless misformed cfg file. 
+        addLayerMenuItem(name, val);
     }
-
-    // Give the GUI the current toggle state of the display.
-    // GTL: to do - make all this stuff dynamic
-    emit bandwidthToggled(isActive(BANDWIDTH_LAYER)); 
-    emit undefinedToggled(isActive(UNDEFINED_LAYER)); 
-    emit neighborsToggled(isActive(PHYSICAL_LAYER)); 
-    emit hierarchyToggled(isActive(HIERARCHY_LAYER));
-    emit routingToggled(isActive(ROUTING_LAYER));
-    emit routingOnehopToggled(isActive(ONE_HOP_ROUTING_LAYER));
-    emit antennaRadiusToggled(isActive(ANTENNARADIUS_LAYER));
-    emit sanityCheckToggled(isActive(SANITY_CHECK_LAYER));
-    emit anomPathsToggled(isActive(ANOMPATHS_LAYER)); 
-    emit correlationToggled(isActive(CORROLATION_LAYER)); 
-    emit alertToggled(isActive(ALERT_LAYER)); 
-    emit correlation3HopToggled(isActive(CORROLATION_3HOP_LAYER)); 
-    emit wormholeRoutingToggled(isActive(ROUTING2_LAYER)); 
-    emit wormholeRoutingOnehopToggled(isActive(ROUTING2_ONE_HOP_LAYER)); 
-    emit normPathsToggled(isActive(NORMAL_PATHS_LAYER)); 
 
     struct 
     {
@@ -1296,7 +1290,7 @@ void manetGLView::initializeGL()
     GLfloat diffLight0[]= { 1.0, 1.0, 1.0, 1.0 }; 
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight0);
 
-    GLfloat ambLightDef[]={0.2,0.2,0.2,1}; // This is opengl's default anyway...
+    GLfloat ambLightDef[]={0.1,0.1,0.1,1.0}; // OPenGL's default is: 0.2,0.2,0.2,1
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambLightDef); 
     
     glEnable(GL_LIGHTING); 
@@ -1335,12 +1329,38 @@ void manetGLView::checkIO()
 
         newestMessageTimestamp=message->timestamp;
 
-        if (knownLayers.end()==find(knownLayers.begin(), knownLayers.end(), message->layer));
-            knownLayers.push_back(message->layer)
+        // Really need to make layers a member of a base class...
+        GUILayer layer;
+        switch (message->type)
+        {
+            case LABEL_MESSAGE_TYPE: layer=(dynamic_pointer_cast<LabelMessage>(message))->layer; break;
+            case EDGE_MESSAGE_TYPE: layer=(dynamic_pointer_cast<EdgeMessage>(message))->layer; break;
+            case COLOR_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ColorMessage>(message))->layer; break;
+            case CONNECTIVITY_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ConnectivityMessage>(message))->layer; break;
+            default: break;
+        }
+
+        if (!layer.empty())
+        {
+            LOG_DEBUG("Seeing if " << layer << " is known to us or not."); 
+            bool found=false;
+            BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
+            {
+                if (llip->layer==layer)
+                {
+                    found=true;
+                    break;
+                }
+            }
+            if(!found)
+            {
+                LOG_DEBUG("Adding new layer to known layers: " << layer); 
+                addLayerMenuItem(layer, true); 
+            }
+        }
     }
 
     updateGL();  // redraw
-
     TRACE_EXIT();
 }
 
@@ -1440,6 +1460,9 @@ void manetGLView::drawManet(void)
 
     for (LayerList::iterator li=knownLayers.begin(); li!=knownLayers.end(); ++li)
     {
+        if ((*li)->layer==ANTENNARADIUS_LAYER)
+            continue;
+
         if ((*li)->active)
         {
             // each layer is 'layerPadding' above the rest. 
@@ -1897,10 +1920,10 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_L:     gpsScale-=10; break;
         case Qt::Key_T:     layerPadding+=2; break;
         case Qt::Key_Y:     layerPadding-=2; break;
-        case Qt::Key_B:     
-            layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
-            emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
-            break;
+        // case Qt::Key_B:     
+        //     layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
+        //     emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
+        //     break;
         case Qt::Key_Equal:
         case Qt::Key_Plus: 
                             autoCenterNodesFlag=true;
@@ -2152,12 +2175,12 @@ void manetGLView::wheelEvent(QWheelEvent *event)
     update();
 }
 
-void manetGLView::layerToggle(const watcher::GUILayer &layer, const bool turnOn)
+void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
 {
     TRACE_ENTER();
 
-    // GTL - fix this.
-    // LayerList::iterator li=find(knownLayers.begin(), knownLayers.end(), findLayerFunctor(layer));
+    GUILayer layer=layerName.toStdString();
+
     bool found=false;
     BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
     {
@@ -2179,127 +2202,6 @@ void manetGLView::layerToggle(const watcher::GUILayer &layer, const bool turnOn)
     TRACE_EXIT();
 }
 
-void manetGLView::toggleBandwidth(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(BANDWIDTH_LAYER, isOn); 
-    emit bandwidthToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-
-void manetGLView::toggleUndefined(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(UNDEFINED_LAYER, isOn); 
-    emit undefinedToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleNeighbors(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(PHYSICAL_LAYER, isOn); 
-    emit neighborsToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleHierarchy(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(HIERARCHY_LAYER, isOn); 
-    emit hierarchyToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleRouting(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(ROUTING_LAYER, isOn); 
-    emit routingToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleRoutingOnehop(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(ONE_HOP_ROUTING_LAYER, isOn); 
-    emit routingOnehopToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleAntennaRadius(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(ANTENNARADIUS_LAYER, isOn); 
-    emit antennaRadiusToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleSanityCheck(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(SANITY_CHECK_LAYER, isOn); 
-    emit sanityCheckToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleAnomPaths(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(ANOMPATHS_LAYER, isOn); 
-    emit anomPathsToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleCorrelation(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(CORROLATION_LAYER, isOn); 
-    emit correlationToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleAlert(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(ALERT_LAYER, isOn); 
-    emit alertToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleCorrelation3Hop(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(CORROLATION_3HOP_LAYER, isOn); 
-    emit correlation3HopToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleWormholeRouting(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(ROUTING2_LAYER, isOn); 
-    emit wormholeRoutingToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleWormholeRoutingOnehop(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(ROUTING2_ONE_HOP_LAYER, isOn); 
-    emit wormholeRoutingOnehopToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleNormPaths(bool isOn)
-{
-    TRACE_ENTER();
-    layerToggle(NORMAL_PATHS_LAYER, isOn); 
-    emit normPathsToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
 void manetGLView::toggleMonochrome(bool isOn)
 {
     TRACE_ENTER();
@@ -2741,30 +2643,27 @@ void manetGLView::saveConfiguration()
     string prop="layers";
     libconfig::Setting &layers=cfg.lookup(prop);
 
-    struct 
+    // We have to create cfg layers here as we may've gotten new dynamic layers while we were running.
+    // I am beginning (ha!) to dislike libconfig...
+    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
     {
-        const char *prop;
-        GUILayer layer;
-    } layerVals[] =
-    {
-        { "bandwidth", BANDWIDTH_LAYER },
-        { "undefined", UNDEFINED_LAYER },
-        { "neighbors", PHYSICAL_LAYER },
-        { "hierarchy", HIERARCHY_LAYER },
-        { "routing", ROUTING_LAYER },
-        { "routingOneHop", ONE_HOP_ROUTING_LAYER },
-        { "antennaRadius", ANTENNARADIUS_LAYER },
-        { "sanityCheck", SANITY_CHECK_LAYER },
-        { "anomPaths", ANOMPATHS_LAYER }, 
-        { "correlation", CORROLATION_LAYER },
-        { "alert", ALERT_LAYER }, 
-        { "correlation3Hop", CORROLATION_3HOP_LAYER },
-        { "wormholeRouting", ROUTING2_LAYER },
-        { "wormholeRoutingOnehop", ROUTING2_ONE_HOP_LAYER },
-        { "normPaths", NORMAL_PATHS_LAYER }
-    };
-    for (size_t i=0; i<sizeof(layerVals)/sizeof(layerVals[0]); i++)
-        layers[layerVals[i].prop]=isActive(layerVals[i].layer);
+        int i, numCfgLayers=layers.getLength();
+        LOG_DEBUG("numCfgLayers=" << numCfgLayers);
+        for (i=0; i<numCfgLayers; i++)
+        {
+            string layerName=string(layers[i].getName());
+            if (layerName==llip->layer)
+            {
+                layers[i]=llip->active;
+                break;
+            }
+        }
+        if (i==numCfgLayers) 
+        {
+            LOG_DEBUG("Adding layer " << llip->layer << " with value " << llip->active << " to " << layers.getName() << " cfg"); 
+            layers.add(string(llip->layer), Setting::TypeBoolean)=llip->active;
+        }
+    }
 
     struct 
     {

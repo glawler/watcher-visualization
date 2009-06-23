@@ -10,7 +10,7 @@ INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml
 QT += opengl 
 CONFIG += qt x11 
 OBJECTS_DIR = ./objs
-DEFINES += GRAPHICS MODULE_MOBILITY ggdb
+DEFINES += GRAPHICS MODULE_MOBILITY 
 # DEFINES += GRAPHICS MODULE_MOBILITY DISABLE_LOGGING
 
 # log4cxx issues warnings without this. 

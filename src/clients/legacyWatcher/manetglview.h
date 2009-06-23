@@ -2,9 +2,12 @@
 #define MANETGLVIEW_H
 
 #include <QGLWidget>
+#include <QMenu>
 #include "logger.h"
 #include "libwatcher/watcherGraph.h"
 #include "libwatcher/messageStream.h"
+
+#include "stringIndexedMenuItem.h"
 
 class manetGLView : public QGLWidget
 {
@@ -20,36 +23,26 @@ class manetGLView : public QGLWidget
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
-        public slots:
+        void setLayerMenu(QMenu *m) { layerMenu=m; }
 
-            void resetPosition();
+public slots:
+
+        void resetPosition();
         void fitToWindow();
         void checkIO();
 
         // timeout callback for watcher to do "idle" work.
         void watcherIdle();
 
-        void toggleBandwidth(bool isOn);
-        void toggleUndefined(bool isOn);
-        void toggleNeighbors(bool isOn);
-        void toggleHierarchy(bool isOn);
-        void toggleRouting(bool isOn);
-        void toggleRoutingOnehop(bool isOn);
-        void toggleAntennaRadius(bool isOn);
-        void toggleSanityCheck(bool isOn);
-        void toggleAnomPaths(bool isOn);
-        void toggleCorrelation(bool isOn);
-        void toggleAlert(bool isOn);
-        void toggleCorrelation3Hop(bool isOn);
-        void toggleWormholeRouting(bool isOn);
-        void toggleWormholeRoutingOnehop(bool isOn);
-        void toggleNormPaths(bool isOn);
-        void toggleMonochrome(bool isOn);
-        void toggleThreeDView(bool isOn);
-        void toggleBackgroundImage(bool isOn);
+        // void layerToggled(QString, bool);
+        void layerToggle(const QString &layer, const bool turnOn);
 
         void clearAllLabels();
         void clearAllEdges();
+
+        void toggleMonochrome(bool isOn);
+        void toggleThreeDView(bool isOn);
+        void toggleBackgroundImage(bool isOn);
 
         void startPlayback();
         void pausePlayback();
@@ -69,27 +62,14 @@ class manetGLView : public QGLWidget
 signals:
         void positionReset();
 
-        void bandwidthToggled(bool isOn);
-        void undefinedToggled(bool isOn);
-        void neighborsToggled(bool isOn);
-        void hierarchyToggled(bool isOn);
-        void routingToggled(bool isOn);
-        void routingOnehopToggled(bool isOn);
-        void antennaRadiusToggled(bool isOn);
-        void sanityCheckToggled(bool isOn);
-        void anomPathsToggled(bool isOn);
-        void correlationToggled(bool isOn);
-        void alertToggled(bool isOn);
-        void correlation3HopToggled(bool isOn);
-        void wormholeRoutingToggled(bool isOn);
-        void wormholeRoutingOnehopToggled(bool isOn);
-        void normPathsToggled(bool isOn);
-        void monochromeToggled(bool isOn);
-        void threeDViewToggled(bool isOn); 
-        void backgroundImageToggled(bool isOn); 
+        void layerToggled(const QString &, bool);
 
         void labelsCleared();
         void edgesCleared(); 
+
+        void monochromeToggled(bool isOn);
+        void threeDViewToggled(bool isOn); 
+        void backgroundImageToggled(bool isOn); 
 
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
@@ -117,13 +97,17 @@ signals:
         void wheelEvent(QWheelEvent *event);
 
         void keyPressEvent(QKeyEvent * event);
-        void layerToggle(const watcher::event::GUILayer &layer, const bool turnOn);
 
         void showKeyboardShortcuts(); 
 
         unsigned int getNodeIdAtCoords(const int x, const int y);
 
     private:
+
+        /** Where we keep our dynamic layers in the GUI */
+        QMenu *layerMenu;
+        std::vector<watcher::StringIndexedMenuItem*> layerMenuItems;
+        void addLayerMenuItem(const watcher::GUILayer &layer, bool active);
 
         watcher::MessageStreamPtr messageStream;
         watcher::WatcherGraph wGraph;
