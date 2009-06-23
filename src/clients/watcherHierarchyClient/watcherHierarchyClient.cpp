@@ -24,6 +24,7 @@ using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost;
+using namespace boost::asio;
 
 /*  Copyright (C) 2004  Networks Associates Technology, Inc.
  *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO
@@ -88,7 +89,7 @@ void sendLabel(void *messageHandlerData, const struct MessageInfo *mi, bool addL
 
     lm->label=lab.text;
     lm->fontSize=12;        // not in NodeLabel
-    lm->address=asio::ip::address_v4(lab.node); 
+    lm->fromNodeID=ip::address_v4(htonl(lab.node));     
     lm->foreground=Color(lab.fgcolor[0], lab.fgcolor[1], lab.fgcolor[2], lab.fgcolor[3]);
     lm->background=Color(lab.bgcolor[0], lab.bgcolor[1], lab.bgcolor[2], lab.bgcolor[3]);
     lm->expiration=lab.expiration;
@@ -154,8 +155,8 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
     EdgeMessagePtr em(new EdgeMessage);
 
     // Add the basics.
-    em->node1=boost::asio::ip::address_v4(ne->head);
-    em->node2=boost::asio::ip::address_v4(ne->tail);
+    em->node1=ip::address_v4(htonl(ne->head));
+    em->node2=ip::address_v4(htonl(ne->tail));
     em->edgeColor=Color(ne->color[0], ne->color[1], ne->color[2], ne->color[3]); 
     em->expiration=ne->expiration;
     em->layer=legacyFamilyValue2GUILayer(ne->family); 
@@ -177,7 +178,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
             // cheating a little
             if (i==0)  // head
             {
-                mlp->address=asio::ip::address_v4(ne->head);
+                mlp->fromNodeID=ip::address_v4(htonl(ne->head));
                 em->setNode1Label(mlp);
             }
             else if (i==1)  // middle
@@ -186,7 +187,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
             }
             else if (i==2)  // tail
             {
-                mlp->address=asio::ip::address_v4(ne->tail);
+                mlp->fromNodeID=ip::address_v4(htonl(ne->tail));
                 em->setNode2Label(mlp);
             }
             else break; // Shouldn't happen
@@ -250,7 +251,7 @@ void sendWatcherColor(void *messageHandlerData, const struct MessageInfo *mi)
     watcherColorUnMarshal(payload, &nodeAddr, color);
 
     ColorMessagePtr cm(new ColorMessage); 
-    cm->nodeAddr=boost::asio::ip::address_v4(nodeAddr);
+    cm->fromNodeID=ip::address_v4(nodeAddr);
     cm->color=Color(color[0], color[1], color[2], color[3]);
 
     st->client->sendMessage(cm);

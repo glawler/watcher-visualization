@@ -110,14 +110,14 @@ PROTECTION_INCLUDES=
 
 ###################################
 # uncomment this block for userland packet encryption in the daemon
-LIVEOBJ+=packetProtection.o
-LIVEOBJ+=../protection/libnnpprotection.a
-PROTECTIONLIB=../protection/libnnpprotection.a
-PROTECTION_INCLUDES+=-I../protection
-COMPFLAGS+=-DUSE_PACKETPROTECTION
-COMPFLAGS+=-DNNP
-BINS+=testPacketProtection
-PACKETPROTECTIONOBJ=packetProtection.o
+# LIVEOBJ+=packetProtection.o
+# LIVEOBJ+=../protection/libnnpprotection.a
+# PROTECTIONLIB=../protection/libnnpprotection.a
+# PROTECTION_INCLUDES+=-I../protection
+# COMPFLAGS+=-DUSE_PACKETPROTECTION
+# COMPFLAGS+=-DNNP
+# BINS+=testPacketProtection
+# PACKETPROTECTIONOBJ=packetProtection.o
 ###################################
 
 # GTL - experimental automatic use of multiprocessor systems to speed up make
@@ -419,7 +419,6 @@ testPacketProtection: ${BASEOBJ}
 
 clean:
 	rm -f $(BINS) *.o *.uto *.core core testhello libidsCommunications.a depend;
-	$(MAKE) -C ../protection clean; 
 
 install: $(BINS)
 	cp -f $(BINS) $(HOME)/bin

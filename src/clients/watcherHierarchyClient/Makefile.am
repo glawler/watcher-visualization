@@ -8,24 +8,29 @@ LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_S
 
 # We have to get our build/include stuff sorted out.
 CXXFLAGS+=-I../../include 
-CXXFLAGS+=-I../libwatcher 
-CXXFLAGS+=-I../watcherd
-CXXFLAGS+=-I../logger
-CXXFLAGS+=-I..
+CXXFLAGS+=-I../../libwatcher 
+CXXFLAGS+=-I../../watcherd
+CXXFLAGS+=-I../../logger
+CXXFLAGS+=-I../../idsCommunications
+CXXFLAGS+=-I../..
 
-CFLAGS+=-I../../include
+CFLAGS+=-I../../../include
 CFLAGS+=-I/usr/include/libxml2
 
-LDFLAGS+=-L../libwatcher
-LDFLAGS+=-L../watcherd
-LDFLAGS+=-L../../lib
-LDFLAGS+=-L../logger
+LDFLAGS+=-L/usr/local/lib/
+LDFLAGS+=-L../../libwatcher
+LDFLAGS+=-L../../watcherd
+LDFLAGS+=-L../../../lib
+LDFLAGS+=-L../../logger
+LDFLAGS+=-L../../idsCommunications
 
 LIBS+=-lidsCommunications
 LIBS+=-llog4cxx
 LIBS+=-llogger
-LIBS+=-lfeeder
 LIBS+=-lwatcher
+LIBS+=-lwatchermsg
+LIBS+=-lwatcher
+LIBS+=-lidsCommunications
 
 bin_PROGRAMS=watcherHierarchyClient
 

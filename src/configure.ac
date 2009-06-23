@@ -58,6 +58,12 @@ AC_ARG_ENABLE(watcher3d,
 	      [want_watcher3d=$enableval])
 AM_CONDITIONAL([WANT_WATCHER3D], [test x$want_watcher3d != xno])
 
+# allow optional disabling of watcherHierarchyClient
+AC_ARG_ENABLE(hierarchy_client,
+	      [AS_HELP_STRING([--disable-hierarchy_client],[disable compilation of hierarchy_client])],
+	      [want_hierarchy_client=$enableval])
+AM_CONDITIONAL([WANT_HIERARCHY_CLIENT], [test x$want_hierarchy_client != xno])
+
 AC_CONFIG_FILES([ \
     Makefile \
     logger/Makefile \
@@ -66,12 +72,12 @@ AC_CONFIG_FILES([ \
     libwatcher/Makefile \
     libwatcher/test/Makefile \
     watcherd/Makefile 
-    watcherHierarchyClient/Makefile \
     clients/Makefile \
     clients/routeFeeder/Makefile \
     clients/messageStream2Text/Makefile \
     clients/connectivity2dot/Makefile \
     clients/commandlineFeeders/Makefile \
+    clients/watcherHierarchyClient/Makefile \
     clients/watcher3D/Makefile \
 ])
 
