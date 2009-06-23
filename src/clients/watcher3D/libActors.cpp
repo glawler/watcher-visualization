@@ -35,12 +35,12 @@ LibActors::LibActors() : dtDAL::ActorPluginRegistry("Watcher3D Actors Library")
 void LibActors::RegisterActorTypes()
 {
     TRACE_ENTER();
-    dtDAL::ActorType *mNodeActorType = new dtDAL::ActorType("Node", "Watcher3D Actors", 
+    dtDAL::ActorType *nodeActorType = new dtDAL::ActorType("Node", "Watcher3D Actors", 
         "This actor represents a node.");
-    mActorFactory->RegisterType<NodeActorProxy> (mNodeActorType);
-    dtDAL::ActorType *mEdgeActorType = new dtDAL::ActorType("Edge", "Watcher3D Actors", 
+    mActorFactory->RegisterType<NodeActorProxy> (nodeActorType);
+    dtDAL::ActorType *edgeActorType = new dtDAL::ActorType("Edge", "Watcher3D Actors", 
         "This actor represents an edge.");
-    mActorFactory->RegisterType<EdgeActorProxy> (mEdgeActorType);
+    mActorFactory->RegisterType<EdgeActorProxy> (edgeActorType);
     TRACE_EXIT();
 }
 

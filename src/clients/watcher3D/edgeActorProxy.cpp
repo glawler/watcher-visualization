@@ -5,8 +5,6 @@
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
 #include <dtDAL/enginepropertytypes.h>
-#include <dtDAL/datatype.h>
-#include <dtGame/gameactor.h>
 #include <dtGame/messagetype.h>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 

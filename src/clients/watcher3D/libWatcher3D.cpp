@@ -1,22 +1,11 @@
 
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */
-#include <dtActors/gamemeshactor.h>
-#include <dtActors/staticmeshactorproxy.h>
+#include <dtDAL/enginepropertytypes.h>
 #include <dtCore/flymotionmodel.h>
 #include <dtCore/globals.h>
-#include <dtCore/object.h>
-#include <dtCore/scene.h>
 #include <dtCore/transform.h>
-#include <dtCore/transformable.h>
-#include <dtDAL/actorproperty.h>
-#include <dtDAL/actortype.h>
-#include <dtDAL/enginepropertytypes.h>
-#include <dtDAL/project.h>
-#include <dtGame/defaultgroundclamper.h>
 #include <dtGame/gameactor.h>
-#include <dtGame/gamemanager.h>
-#include <osgDB/FileUtils>
 #include <enable_watcher_logging.h> /* redef watcher logging macros */
 
 // Watcher3D includes
@@ -34,7 +23,7 @@ extern "C" DT_PLUGIN_EXPORT void DestroyGameEntryPoint(dtGame::GameEntryPoint* e
 }
 
 LibWatcher3D::LibWatcher3D()
- : dtGame::GameEntryPoint(), mMotionModel(NULL)
+ : dtGame::GameEntryPoint(), motionModel(NULL)
 {
 }
 
@@ -43,10 +32,6 @@ LibWatcher3D::~LibWatcher3D()
 }
 
 void LibWatcher3D::Initialize(dtGame::GameApplication& app, int argc, char** argv)
-{
-}
-
-void LibWatcher3D::OnStartup(dtGame::GameApplication &app)
 {
     dtGame::GameManager* gameManager = app.GetGameManager();
 
@@ -64,8 +49,8 @@ void LibWatcher3D::OnStartup(dtGame::GameApplication &app)
     dtCore::Transform camPos;
     camPos.SetTranslation(0.0f, -100.0f, 20.0f);
     app.GetCamera()->SetTransform(camPos);
-    mMotionModel = new dtCore::FlyMotionModel(app.GetKeyboard(), app.GetMouse());
-    mMotionModel->SetTarget(app.GetCamera());
+    motionModel = new dtCore::FlyMotionModel(app.GetKeyboard(), app.GetMouse());
+    motionModel->SetTarget(app.GetCamera());
 
     // Load actor registry
     gameManager->LoadActorRegistry("Actors"); // (libActors.so)
@@ -77,6 +62,11 @@ void LibWatcher3D::OnStartup(dtGame::GameApplication &app)
     for(unsigned int i = 0; i < actorTypes.size(); i++)
       std::cout << actorTypes[i]->GetCategory() << " " << actorTypes[i]->GetName() << std::endl;
     */
+}
+
+void LibWatcher3D::OnStartup(dtGame::GameApplication &app)
+{
+    dtGame::GameManager* gameManager = app.GetGameManager();
 
     // Add some nodes and edges
     dtCore::RefPtr<dtGame::GameActorProxy> nodeActorProxy1;
@@ -92,14 +82,13 @@ void LibWatcher3D::OnStartup(dtGame::GameApplication &app)
     // Change some properties
     dtDAL::Vec3ActorProperty* node1Pos = static_cast<dtDAL::Vec3ActorProperty*>(nodeActorProxy1->GetProperty("pos"));
     dtDAL::Vec3ActorProperty* node2Pos = static_cast<dtDAL::Vec3ActorProperty*>(nodeActorProxy2->GetProperty("pos"));
-    osg::Vec3 pos1(0.0, -100.0f, 50.0f);
-    osg::Vec3 pos2(0.0, 100.0f, -50.0f);
+    osg::Vec3 pos1(0.0, -100.0f, 5.0f);
+    osg::Vec3 pos2(0.0, 100.0f, 25.0f);
     node1Pos->SetValue(pos1);
     node2Pos->SetValue(pos2);
     dtDAL::Vec3ActorProperty* edge1HeadPos = static_cast<dtDAL::Vec3ActorProperty*>(edgeActorProxy1->GetProperty("headPos"));
     dtDAL::Vec3ActorProperty* edge1TailPos = static_cast<dtDAL::Vec3ActorProperty*>(edgeActorProxy1->GetProperty("tailPos"));
     edge1HeadPos->SetValue(node1Pos->GetValue());
     edge1TailPos->SetValue(node2Pos->GetValue());
-    std::cout << node1Pos->GetValue() << std::endl;
-    std::cout << node2Pos->GetValue() << std::endl;
 }
+

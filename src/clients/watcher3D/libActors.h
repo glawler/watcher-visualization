@@ -22,8 +22,8 @@ class DT_PLUGIN_EXPORT LibActors : public dtDAL::ActorPluginRegistry
         void RegisterActorTypes();
 
     private:
-        dtCore::RefPtr<dtDAL::ActorType> mNodeActorType;
-        dtCore::RefPtr<dtDAL::ActorType> mEdgeActorType;
+        dtCore::RefPtr<dtDAL::ActorType> nodeActorType;
+        dtCore::RefPtr<dtDAL::ActorType> edgeActorType;
         DECLARE_LOGGER();
 };
 
