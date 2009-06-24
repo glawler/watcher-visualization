@@ -221,9 +221,9 @@ void manetGLView::runLegacyWatcherMain(int argc, char **argv)
     else
     {
         if (strVal.empty())
-            LOG_INFO("There is no gpsDataFormat argument in the cfg file, setting to default: lat-long-alt-WGS84")
+            LOG_INFO("There is no gpsDataFormat argument in the cfg file, setting to default: lat-long-alt-WGS84");
         else
-            LOG_WARN("I don't understand the gpsDataFormat argument in the cfg file, \"" << strVal << "\", setting to default: lat-long-alt-WGS84")
+            LOG_WARN("I don't understand the gpsDataFormat argument in the cfg file, \"" << strVal << "\", setting to default: lat-long-alt-WGS84");
 
         legacyWatcher::setGPSDataFormat(legacyWatcher::GPS_DATA_FORMAT_DEG_WGS84);
     }
