@@ -10,8 +10,8 @@ INIT_LOGGER(LabelDisplayInfo, "DisplayInfo.LabelDisplayInfo");
 
 LabelDisplayInfo::LabelDisplayInfo() : 
     DisplayInfo("label"),
-    backgroundColor(Color::white),
-    foregroundColor(Color::black),
+    backgroundColor(Color::black),
+    foregroundColor(Color::white),
     fontName("Times New Roman"),
     pointSize(20), 
     labelText(""),
@@ -45,29 +45,30 @@ bool LabelDisplayInfo::loadConfiguration(const GUILayer &layer_)
 
     SingletonConfig::lock();
 
-    string strVal=Color::white.toString(); 
+    string strVal;
     string key="foregroundColor"; 
     if (!labelSettings.lookupValue(key, strVal))
-        labelSettings.add(key, Setting::TypeString)=strVal;
+        labelSettings.add(key, Setting::TypeString)=foregroundColor.toString();
     foregroundColor.fromString(strVal); 
 
-    strVal=Color::black.toString(); 
     key="backgroundColor"; 
     if (!labelSettings.lookupValue(key, strVal))
-        labelSettings.add(key, Setting::TypeString)=strVal;
-    backgroundColor.fromString(strVal); 
+        labelSettings.add(key, Setting::TypeString)=backgroundColor.toString();
+    else
+        backgroundColor.fromString(strVal); 
 
-    strVal="Times New Roman"; 
     key="font"; 
     if (!labelSettings.lookupValue(key, strVal))
-        labelSettings.add(key, Setting::TypeString)=strVal;
-    fontName=strVal;
+        labelSettings.add(key, Setting::TypeString)=fontName;
+    else
+        fontName=strVal;
 
-    float floatVal=12.5;
+    float floatVal;
     key="pointSize"; 
     if (!labelSettings.lookupValue(key, floatVal))
-        labelSettings.add(key, Setting::TypeFloat)=floatVal;
-    pointSize=floatVal; 
+        labelSettings.add(key, Setting::TypeFloat)=pointSize;
+    else
+        pointSize=floatVal; 
 
     // strVal="none"; 
     // key="labelText"; 

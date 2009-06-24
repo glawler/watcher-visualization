@@ -1275,7 +1275,9 @@ void manetGLView::initializeGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glShadeModel(GL_SMOOTH); 
+    // glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE); 
+
+    glShadeModel(GL_SMOOTH); 
 
     // LIGHT0
     GLfloat posLight0[]={ 50.0f, 50.0f, 000.0f, 1.0f };
@@ -1733,12 +1735,12 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     {
         qglColor(QColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])); 
         QFontMetrics fm(f);
-        double shadowOffset=fm.height()*.01;
+        double shadowOffset=fm.height()*.02;
         renderText(inx+offset+shadowOffset, iny+offset+shadowOffset, inz+1.0, label->labelText.c_str(), f); 
     }
 
     qglColor(QColor(fgColor[0], fgColor[1], fgColor[2], fgColor[3])); 
-    renderText(inx+offset, iny+offset, inz+1.0, label->labelText.c_str(), f); 
+    renderText(inx+offset, iny+offset, inz+2.0, label->labelText.c_str(), f); 
 
     TRACE_EXIT(); 
 }
@@ -2756,36 +2758,45 @@ void manetGLView::pausePlayback()
 void manetGLView::rewindPlayback()
 {
     TRACE_ENTER();
-    messageStream->setStreamRate(-streamRate); 
+    LOG_DEBUG("Setting stream rate to " << -streamRate); 
+    if (streamRate==0)
+        messageStream->stopStream();
+    else
+        messageStream->setStreamRate(-streamRate); 
     TRACE_EXIT();
 }
 void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
-    messageStream->setStreamRate(streamRate); 
+    LOG_DEBUG("Setting stream rate to " << -streamRate); 
+    if (streamRate==0)
+        messageStream->stopStream();
+    else
+        messageStream->setStreamRate(streamRate); 
     TRACE_EXIT();
 }
 void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
-    pausePlayback();
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
-    startPlayback();
     TRACE_EXIT();
 }
 void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
-    pausePlayback();
     messageStream->setStreamTimeStart(SeekMessage::eof); 
-    startPlayback();
     TRACE_EXIT();
 }
 
-void manetGLView::playbackSetSpeed(int x)
+void manetGLView::playbackSetSpeed(double x)
 {
     TRACE_ENTER();
-    messageStream->setStreamRate((float)x); 
+    LOG_DEBUG("Setting stream rate to " << x); 
+    streamRate=x;
+    if (streamRate==0)
+        messageStream->stopStream();
+    else
+        messageStream->setStreamRate(x); 
     TRACE_EXIT();
 }
 

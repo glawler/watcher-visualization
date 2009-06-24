@@ -50,7 +50,7 @@ public slots:
         void forwardPlayback();
         void rewindToStartOfPlayback();
         void forwardToEndOfPlayback();
-        void playbackSetSpeed(int speed);
+        void playbackSetSpeed(double speed);
 
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
