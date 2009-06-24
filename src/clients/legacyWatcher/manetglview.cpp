@@ -1666,6 +1666,8 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
             snprintf(buf, sizeof(buf), "%lu.%lu", ((addr)>>8)&0xFF,(addr)&0xFF); 
         else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET))
             snprintf(buf, sizeof(buf), "%lu", (addr)&0xFF); 
+        else if (node.displayInfo->label=="none")
+            buf[0]='\0';
         else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::HOSTNAME))
         {
             struct in_addr saddr; 
@@ -1782,7 +1784,7 @@ void manetGLView::drawLayer(const GUILayer &layer)
         if (layer==PHYSICAL_LAYER)
             drawNode(node, true); 
         else
-            if (abs(layerPadding)>6)
+            if (abs(layerPadding)>6 || !isActive(PHYSICAL_LAYER))
                 drawNode(node, false); 
 
         WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
@@ -2755,28 +2757,28 @@ void manetGLView::rewindPlayback()
 {
     TRACE_ENTER();
     messageStream->setStreamRate(-streamRate); 
-    // messageStream->startStream();
     TRACE_EXIT();
 }
 void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
     messageStream->setStreamRate(streamRate); 
-    // messageStream->startStream();
     TRACE_EXIT();
 }
 void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
+    pausePlayback();
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
-    // messageStream->startStream();
+    startPlayback();
     TRACE_EXIT();
 }
 void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
+    pausePlayback();
     messageStream->setStreamTimeStart(SeekMessage::eof); 
-    // messageStream->startStream();
+    startPlayback();
     TRACE_EXIT();
 }
 
