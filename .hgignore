@@ -177,6 +177,7 @@ share/info/dir
 ^src/clients/commandlineFeeders/sendGPSMessage
 ^src/clients/commandlineFeeders/sendLabelMessage
 ^src/clients/commandlineFeeders/sendDataPointMessage
+^src/clients/commandlineFeeders/showClock
 ^src/clients/messageStream2Text/Makefile
 ^src/clients/messageStream2Text/messageStream2Text
 ^src/clients/routeFeeder/Makefile

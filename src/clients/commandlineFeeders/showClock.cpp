@@ -137,7 +137,7 @@ int main(int argc, char **argv)
             time_t nowInSecs=time(NULL);
             struct tm *now=localtime(&nowInSecs);
             if (*nodeData[i].id==hourId)
-                nodeData[i].theta=step*(now->tm_hour*(60/12));
+                nodeData[i].theta=step*((now->tm_hour*(60/12))+(now->tm_min/12));
             else if(*nodeData[i].id==minId)
                 nodeData[i].theta=step*now->tm_min;
             else if(*nodeData[i].id==secId)
