@@ -2114,6 +2114,7 @@ void manetGLView::mousePressEvent(QMouseEvent *event)
 void manetGLView::fitToWindow()
 {
     TRACE_ENTER();
+    resetPosition();
     // GTL - could use existing key handler here...
     autoCenterNodesFlag=true;
     scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
@@ -2754,28 +2755,28 @@ void manetGLView::rewindPlayback()
 {
     TRACE_ENTER();
     messageStream->setStreamRate(-streamRate); 
-    messageStream->startStream();
+    // messageStream->startStream();
     TRACE_EXIT();
 }
 void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
     messageStream->setStreamRate(streamRate); 
-    messageStream->startStream();
+    // messageStream->startStream();
     TRACE_EXIT();
 }
 void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
-    messageStream->startStream();
+    // messageStream->startStream();
     TRACE_EXIT();
 }
 void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
     messageStream->setStreamTimeStart(SeekMessage::eof); 
-    messageStream->startStream();
+    // messageStream->startStream();
     TRACE_EXIT();
 }
 
