@@ -238,7 +238,7 @@ NodeDisplayInfo::NodeShape NodeDisplayInfo::stringToNodeShape(const string &shap
     if (iequals(shape, "circle")) retVal=CIRCLE;
     else if (iequals(shape,"square")) retVal=SQUARE;
     else if (iequals(shape,"triangle")) retVal=TRIANGLE;
-    else if (iequals(shape,"torue")) retVal=TORUS;
+    else if (iequals(shape,"torus")) retVal=TORUS;
     else if (iequals(shape,"teapot")) retVal=TEAPOT;
     else
         LOG_ERROR("I don't know what shape " << shape << " represents, guessing circle"); 
