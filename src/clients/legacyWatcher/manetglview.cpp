@@ -1859,7 +1859,7 @@ void manetGLView::showKeyboardShortcuts()
     // info.setWindowModality(Qt::NonModal);
     // info.setText(QString(help)); 
     // info.show();
-    QMessageBox::information(this, tr("Keyboard Shortcuts()"), help);
+    QMessageBox::information(this, tr("Keyboard Shortcuts"), help);
     TRACE_EXIT();
 }
 
