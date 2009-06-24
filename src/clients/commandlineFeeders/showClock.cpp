@@ -144,7 +144,7 @@ int main(int argc, char **argv)
                 nodeData[i].theta=step*now->tm_sec;
 
             // Move hour. min, and sec nodes to appropriate locations. 
-            GPSMessagePtr gpsMess(new GPSMessage((sin(nodeData[i].theta)*radius)+radius, (cos(nodeData[i].theta)*radius)+radius, 0.0));
+            GPSMessagePtr gpsMess(new GPSMessage((sin(nodeData[i].theta)*radius)+radius, (cos(nodeData[i].theta)*radius)+radius, (double)i));
             gpsMess->layer=layer;
             gpsMess->fromNodeID=*nodeData[i].id;
             if(!client.sendMessage(gpsMess))
