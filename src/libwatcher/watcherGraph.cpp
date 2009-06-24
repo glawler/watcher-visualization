@@ -560,18 +560,19 @@ bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_trait
     if(!findNode(id, retIter))
     {
         // Make sure there is always a PHYSICAL node for every layer
-        if (layer!=PHYSICAL_LAYER)
-        {
-            boost::graph_traits<Graph>::vertex_iterator unused;
-            findOrCreateNode(id, unused, PHYSICAL_LAYER); 
-        }
+        // if (layer!=PHYSICAL_LAYER)
+        // {
+        //     boost::graph_traits<Graph>::vertex_iterator unused;
+        //     findOrCreateNode(id, unused, PHYSICAL_LAYER); 
+        // }
 
         if(!createNode(id, retIter))
         {
             LOG_ERROR("Unable to create new node for id " << id << " in watcherGraph");
             retVal=false;
         }
-        theGraph[*retIter].displayInfo->loadConfiguration(layer, id); 
+        // theGraph[*retIter].displayInfo->loadConfiguration(layer, id); 
+        theGraph[*retIter].displayInfo->loadConfiguration(PHYSICAL_LAYER, id); 
     }
 
     TRACE_EXIT_RET(retVal);
