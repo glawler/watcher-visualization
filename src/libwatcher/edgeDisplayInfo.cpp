@@ -19,7 +19,7 @@ EdgeDisplayInfo::EdgeDisplayInfo() :
     isFlashed(false),
     label("none"),
     labelFont("Helvetica"),
-    labelPointSize(20),
+    labelPointSize(12.5),
     labelColor(Color::blue)
 {
     TRACE_ENTER();

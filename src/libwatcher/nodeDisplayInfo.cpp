@@ -33,7 +33,7 @@ NodeDisplayInfo::NodeDisplayInfo() :
     isFlashed(false),
     label(NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET)),
     labelFont("Helvetica"), 
-    labelPointSize(20),
+    labelPointSize(12.5),
     labelColor(Color::blue),
     color(Color::red)
 {

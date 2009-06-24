@@ -13,7 +13,7 @@ LabelDisplayInfo::LabelDisplayInfo() :
     backgroundColor(Color::white),
     foregroundColor(Color::black),
     fontName("Times New Roman"),
-    pointSize(12.5), 
+    pointSize(20), 
     labelText(""),
     expiration(Infinity) 
 {
