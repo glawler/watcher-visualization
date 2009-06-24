@@ -27,6 +27,7 @@ namespace watcher {
             START_MESSAGE_TYPE        = 0xB,
             STOP_MESSAGE_TYPE         = 0xC,
             SPEED_MESSAGE_TYPE        = 0xD,
+            PLAYBACK_TIME_RANGE_MESSAGE_TYPE = 0xE,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
@@ -52,6 +53,7 @@ namespace watcher {
         const unsigned int STOP_MESSAGE_VERSION         = 1;
         const unsigned int SPEED_MESSAGE_VERSION        = 1;
         const unsigned int NODE_STATUS_MESSAGE_VERSION  = 1;
+        const unsigned int PLAYBACK_TIME_RANGE_MESSAGE_VERSION = 1;
 
         /**
          * GUI bits in the watcher have a concept of a layer which can be turned on or off.

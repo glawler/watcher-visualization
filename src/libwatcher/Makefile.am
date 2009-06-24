@@ -14,6 +14,7 @@ libwatchermsg_la_SOURCES=message.h message.cpp \
 	labelMessage.cpp \
 	messageTypesAndVersions.cpp \
 	nodeStatusMessage.cpp \
+	playbackTimeRange.cpp \
 	seekWatcherMessage.cpp \
 	speedWatcherMessage.cpp \
 	startWatcherMessage.cpp \
