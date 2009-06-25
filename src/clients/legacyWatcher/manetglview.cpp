@@ -1242,7 +1242,7 @@ bool manetGLView::loadConfiguration()
     //
     QTimer *checkIOTimer = new QTimer(this);
     QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
-    checkIOTimer->start(60);
+    checkIOTimer->start(20);
 
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
