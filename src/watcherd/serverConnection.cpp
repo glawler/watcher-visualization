@@ -166,6 +166,7 @@ namespace watcher {
     void ServerConnection::start(event::MessagePtr&)
     {
         TRACE_ENTER();
+        LOG_DEBUG("in: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         if (!isPlaying_) {
             isPlaying_ = true;
             if (isLive_)
@@ -173,12 +174,14 @@ namespace watcher {
             else
                 replay->run();
         }
+        LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         TRACE_EXIT();
     }
 
     void ServerConnection::stop(event::MessagePtr&)
     {
         TRACE_ENTER();
+        LOG_DEBUG("isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         if (isPlaying_) {
             LOG_DEBUG("stopping playback");
             if (isLive_)
@@ -188,12 +191,14 @@ namespace watcher {
             isPlaying_ = false;
         } else
             LOG_DEBUG("stop message received, but playback is stopped");
+        LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         TRACE_EXIT();
     }
 
     void ServerConnection::speed(event::MessagePtr& m)
     {
         TRACE_ENTER();
+        LOG_DEBUG("isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         SpeedMessagePtr p = boost::dynamic_pointer_cast<SpeedMessage>(m);
         if (p) {
             if (isLive_ && p->speed >= 1.0f) {
@@ -213,6 +218,7 @@ namespace watcher {
         } else {
             LOG_WARN("unable to dynamic_pointer_cast to SpeedMessage!");
         }
+        LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         TRACE_EXIT();
     }
 
