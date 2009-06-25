@@ -218,6 +218,7 @@ void ReplayState::run()
          * FIXME what should happen when the end of the event stream is reached?
          * One option would be to convert to live stream at this point.
          */
+        LOG_DEBUG("reached end of database, pausing playback");
         impl_->state = impl::paused;
     }
     TRACE_EXIT();
