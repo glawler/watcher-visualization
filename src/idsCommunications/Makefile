@@ -420,7 +420,7 @@ clean:
 	rm -f $(BINS) *.o *.uto *.core core testhello libidsCommunications.a depend;
 
 install: $(BINS)
-	cp -f $(BINS) $(HOME)/bin
+#	cp -f $(BINS) $(HOME)/bin
 
 infrasniff: infrasniff.o packetstats.o $(PROTECTIONLIB) $(PACKETPROTECTIONOBJ) $(MODULEOBJ) $(BASEOBJ) libidsCommunications.a
 	$(CXX) -o infrasniff infrasniff.o packetstats.o $(PACKETPROTECTIONOBJ) $(MODULEOBJ) $(BASEOBJ) \

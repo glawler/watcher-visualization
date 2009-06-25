@@ -18,7 +18,7 @@ QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0
 QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing
 QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing
 
-LIBS += -L../../lib -L../logger -L../util
+LIBS += -L../../lib -L../logger -L../util -L../idsCommunications
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -L/usr/local/lib -lidmef 
 LIBS += -lidsCommunications 
