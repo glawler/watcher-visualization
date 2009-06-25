@@ -70,6 +70,7 @@ Timestamp ReplayState::tell() const
 ReplayState& ReplayState::pause()
 {
     TRACE_ENTER();
+    LOG_DEBUG("cancelling timer");
     impl_->timer.cancel();
     impl_->state = impl::paused;
     TRACE_EXIT();
@@ -230,30 +231,35 @@ void ReplayState::run()
  * last time slice.  The task is then rescheduled when the next most recent
  * event needs to be transmitted.
  */
-void ReplayState::timer_handler(const boost::system::error_code&)
+void ReplayState::timer_handler(const boost::system::error_code& ec)
 {
     TRACE_ENTER();
-    std::vector<MessagePtr> msgs;
+    if (ec == boost::asio::error::operation_aborted)
+        LOG_DEBUG("timer was cancelled");
+    else if (impl_->state == impl::paused) {
+        LOG_DEBUG("timer expired but state is paused!");
+    } else {
+        std::vector<MessagePtr> msgs;
+        {
+            boost::mutex::scoped_lock L(impl_->lock);
 
-    {
-        boost::mutex::scoped_lock L(impl_->lock);
-
-        while (! impl_->events.empty()) {
-            MessagePtr m = impl_->events.front();
-            /* Replay all events in the current time step.  Use the absolute value
-             * of the difference in order for forward and reverse replay to work
-             * properly. */
-            if (abs(m->timestamp - impl_->ts) >= impl_->step)
-                break;
-            msgs.push_back(m);
-            impl_->events.pop_front();
+            while (! impl_->events.empty()) {
+                MessagePtr m = impl_->events.front();
+                /* Replay all events in the current time step.  Use the absolute value
+                 * of the difference in order for forward and reverse replay to work
+                 * properly. */
+                if (abs(m->timestamp - impl_->ts) >= impl_->step)
+                    break;
+                msgs.push_back(m);
+                impl_->events.pop_front();
+            }
         }
-    }
 
-    ServerConnectionPtr srv = impl_->conn.lock();
-    if (srv) { /* connection is still alive */
-        srv->sendMessage(msgs);
-        run(); // reschedule this task
+        ServerConnectionPtr srv = impl_->conn.lock();
+        if (srv) { /* connection is still alive */
+            srv->sendMessage(msgs);
+            run(); // reschedule this task
+        }
     }
     TRACE_EXIT();
 }

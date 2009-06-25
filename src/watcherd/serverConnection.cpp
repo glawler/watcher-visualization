@@ -180,12 +180,14 @@ namespace watcher {
     {
         TRACE_ENTER();
         if (isPlaying_) {
+            LOG_DEBUG("stopping playback");
             if (isLive_)
                 watcher.unsubscribe(shared_from_this());
             else
                 replay->pause();
             isPlaying_ = false;
-        }
+        } else
+            LOG_DEBUG("stop message received, but playback is stopped");
         TRACE_EXIT();
     }
 
