@@ -176,13 +176,13 @@ LDFLAGS+=-lpcap
 %.x : %.c
 	splint +posixlib +matchanyintegral +boolint -compdestroy -mustfreeonly -dependenttrans -kepttrans -branchstate -compmempass $(INCLUDES) $<
 
-GRAPHICSLIBS=-L/usr/X11R6/lib -lGL -lGLU -lglut
+#GRAPHICSLIBS=-L/usr/X11R6/lib -lGL -lGLU -lglut
 
 # Uncomment the following three lines to enable graphics
 #
-COMPFLAGS+=-DGRAPHICS
-BASEOBJ+=graphics.o
-LDFLAGS+=$(GRAPHICSLIBS) 
+#COMPFLAGS+=-DGRAPHICS
+#BASEOBJ+=graphics.o
+#LDFLAGS+=$(GRAPHICSLIBS) 
 
 # # The simulator binaries:
 # BINS+=interim2
@@ -246,7 +246,7 @@ CFLAGS += $(COMPFLAGS)
 
 # GTL - only ever make libidsCommunications.a 
 # all: $(BINS)
-all: libidsCommunications.a
+all: libidsCommunications.a liveinterim
 
 amroute:	$(SIMOBJ) $(AMROUTEOBJ)
 		$(CXX) -o amroute $(SIMOBJ) $(AMROUTEOBJ) $(LDFLAGS)
