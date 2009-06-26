@@ -81,6 +81,8 @@ elif test -d /usr/include/qt; then
     AC_MSG_RESULT(/usr/include/qt)
 #    QT4_INCLUDES="/usr/include/qt4"
 #    ac_cv_qt_dir=/usr/lib
+elif test -d /usr/include/Qt; then
+    AC_MSG_RESULT(/usr/include)
 else
     AC_MSG_ERROR(not found)
 fi
@@ -94,23 +96,21 @@ AC_MSG_CHECKING(for qwt)
 if test -d include/qwt; then
     AC_MSG_RESULT(./include/qwt)
     QWT_INCLUDES="../../../include/qwt"
-    QWT_LIBS="-L../../../lib -lqwt"
+    QWT_LIB="-L../../../lib -lqwt"
 elif test -d /usr/local/include/qwt; then
     AC_MSG_RESULT(/usr/local/include/qt)
     QWT_INCLUDES="/usr/local/include/qwt"
-    QWT_LIBS="-L/usr/local/lib -lqwt"
+    QWT_LIB="-L/usr/local/lib -lqwt"
 elif test -d /usr/include/qwt${ac_cv_qt}; then
     AC_MSG_RESULT(/usr/include/qwt${ac_cv_qt})
     QWT_INCLUDES="/usr/include/qwt${ac_cv_qt}"
-    QWT_LIBS="-lqwt${ac_cv_qt}"
+    QWT_LIB="-lqwt${ac_cv_qt}"
 else
     AC_MSG_ERROR(not found)
 fi
 
-AC_SUBST(QT4_INCLUDES)
-AC_SUBST(QT4_LIBS)
 AC_SUBST(QWT_INCLUDES)
-AC_SUBST(QWT_LIBS)
+AC_SUBST(QWT_LIB)
 
 AC_CONFIG_FILES([ \
     Makefile \
@@ -127,7 +127,7 @@ AC_CONFIG_FILES([ \
     clients/commandlineFeeders/Makefile \
     clients/watcherHierarchyClient/Makefile \
     clients/watcher3D/Makefile \
-    clients/legacyWatcher/Makefile.config
+    clients/legacyWatcher/legacyWatcher.pro
 ])
 
 #override default $CXXFLAGS

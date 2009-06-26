@@ -7,6 +7,7 @@ TARGET = watcher
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include ../../util ../../logger ../.. ../../watcherd
 INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include
+INCLUDEPATH += @QWT_INCLUDES@
 QT += opengl 
 CONFIG += qt x11 
 OBJECTS_DIR = ./objs
@@ -19,10 +20,16 @@ QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb
 QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated
 QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated
 
+QMAKE_CFLAGS_DEBUG += @BOOST_CPPFLAGS@
+QMAKE_CXXFLAGS_DEBUG += @BOOST_CPPFLAGS@
+QMAKE_CFLAGS_RELEASE += @BOOST_CPPFLAGS@
+QMAKE_CXXFLAGS_RELEASE += @BOOST_CPPFLAGS@
+
 LIBS += -L../../lib 
 LIBS += -L../../logger 
 LIBS += -L../../util
-LIBS += -L../../libwatcher
+LIBS += -L../../libwatcher -lwatcher
+LIBS += -L../../libwatcher/.libs -lwatchermsg
 LIBS += -L../../../lib
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -L/usr/local/lib -lidmef 
@@ -30,11 +37,9 @@ LIBS += -lconfig++
 LIBS += -llog4cxx
 LIBS += -llogger
 LIBS += -lwatcherutils
-LIBS += -lwatcher
-LIBS += -lwatchermsg
 LIBS += -lxml2
+LIBS += @QWT_LIB@ @BOOST_FILESYSTEM_LIB@
 
-include(Makefile.config)
 include(Makefile.local)
 
 win32 {
