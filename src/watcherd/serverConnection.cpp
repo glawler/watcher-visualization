@@ -184,9 +184,12 @@ namespace watcher {
         LOG_DEBUG("isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         if (isPlaying_) {
             LOG_DEBUG("stopping playback");
-            if (isLive_)
+            if (isLive_) {
                 watcher.unsubscribe(shared_from_this());
-            else
+                /* save current Timestamp so we can resume from the database */
+                isLive_ = false;
+                replay->seek( getCurrentTime() );
+            } else
                 replay->pause();
             isPlaying_ = false;
         } else
