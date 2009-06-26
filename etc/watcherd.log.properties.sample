@@ -33,6 +33,7 @@ log4j.rootLogger=debug, flog, stdout
 # log4j.logger.NodeDisplayInfo=trace
 # log4j.logger.EdgeDisplayInfo=trace
 # log4j.logger.LabelDisplayInfo=trace
+# log4j.logger.Database.SqliteDatabase=info
 
 #
 # set levels for libwatcher module
