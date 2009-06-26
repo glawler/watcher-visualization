@@ -1024,6 +1024,14 @@ bool manetGLView::loadConfiguration()
         addLayerMenuItem(name, val);
     }
 
+    // Force a PHYSICAL_LAYER to at least be an option in the menu.
+    bool foundPhy=false;
+    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
+        if (llip->layer==PHYSICAL_LAYER)
+            foundPhy=true;
+    if (!foundPhy)
+        addLayerMenuItem(PHYSICAL_LAYER, true);
+
     struct 
     {
         const char *prop; 
@@ -1483,12 +1491,12 @@ void manetGLView::drawManet(void)
         if (showWallTimeinStatusString)
         {
             buf+="Wall Time:";
-            buf+=posix_time::to_iso_string(now);
+            buf+=posix_time::to_simple_string(now);
         }
         if (showPlaybackTimeInStatusString)
         {
             buf+=" Play Time: ";
-            buf+=posix_time::to_iso_string(from_time_t(newestMessageTimestamp/1000));
+            buf+=posix_time::to_simple_string(from_time_t(newestMessageTimestamp/1000));
         }
 
         if (nowTS-2500.0<newestMessageTimestamp)
