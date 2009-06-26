@@ -204,7 +204,12 @@ namespace watcher {
         LOG_DEBUG("isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         SpeedMessagePtr p = boost::dynamic_pointer_cast<SpeedMessage>(m);
         if (p) {
-            if (isLive_ && p->speed >= 1.0f) {
+            if (p->speed == 0) {
+                /* special case, speed==0 means StopMessage.  This is to avoid
+                 * a Bad_arg exception from ReplayState. */
+                LOG_INFO("got speed==0, emulating StopMessage");
+                stop(m);
+            } else if (isLive_ && p->speed >= 1.0f) {
                 // ignore, can't predict the future
             } else {
                 replay->speed(p->speed);
