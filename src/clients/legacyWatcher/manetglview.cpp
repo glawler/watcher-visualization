@@ -911,10 +911,13 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
 manetGLView::manetGLView(QWidget *parent) : 
     QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
     streamRate(1.0),
+    playbackPaused(false),
     newestMessageTimestamp(0),
     showWallTimeinStatusString(true),
     showPlaybackTimeInStatusString(true),
     showVerboseStatusString(false),
+    statusFontPointSize(10),
+    statusFontName("Helvetica"),
     autoCenterNodesFlag(false)
 {
     TRACE_ENTER();
@@ -1460,6 +1463,7 @@ void manetGLView::drawManet(void)
         }
     }
 
+    // draw status string
     {
         glPushMatrix();
 
@@ -1468,16 +1472,29 @@ void manetGLView::drawManet(void)
 
         string buf;
 
+        Timestamp nowTS=getCurrentTime();
+        if (playbackPaused)
+            buf="(paused) ";
+        else if (nowTS-2500.0<newestMessageTimestamp)
+            buf="(live) ";
+        else
+            buf="(playback) ";
+
         if (showWallTimeinStatusString)
         {
             buf+="Wall Time:";
-            buf+=posix_time::to_iso_extended_string(now);
+            buf+=posix_time::to_iso_string(now);
         }
         if (showPlaybackTimeInStatusString)
         {
             buf+=" Play Time: ";
-            buf+=posix_time::to_iso_extended_string(from_time_t(newestMessageTimestamp/1000));
+            buf+=posix_time::to_iso_string(from_time_t(newestMessageTimestamp/1000));
         }
+
+        if (nowTS-2500.0<newestMessageTimestamp)
+            qglColor(QColor(monochromeMode ? "black" : "green")); 
+        else
+            qglColor(QColor(monochromeMode ? "black" : "red")); 
 
         if (showVerboseStatusString)
         {
@@ -1488,11 +1505,11 @@ void manetGLView::drawManet(void)
                     scaleText, layerPadding); 
             buf+=string(buff); 
         }
-        qglColor(QColor(monochromeMode ? "black" : "blue")); 
         renderText(12, height()-12, QString(buf.c_str()), QFont(statusFontName.c_str(), statusFontPointSize)); 
 
         glPopMatrix();
     }
+
 }
 
 void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)
@@ -2757,13 +2774,14 @@ void manetGLView::saveConfiguration()
 void manetGLView::pausePlayback()
 {
     TRACE_ENTER();
+    playbackPaused=true;
     messageStream->stopStream(); 
     TRACE_EXIT();
 }
 void manetGLView::normalPlayback()
 {
     TRACE_ENTER();
-    messageStream->stopStream(); 
+    playbackPaused=false;
     playbackSetSpeed(1.0);
     messageStream->startStream(); 
     TRACE_EXIT();
@@ -2778,6 +2796,7 @@ void manetGLView::reversePlayback()
             playbackSetSpeed(-abs(streamRate*2));
         else
             playbackSetSpeed(-abs(streamRate));
+        playbackPaused=false;
         messageStream->startStream(); 
     }
     TRACE_EXIT();
@@ -2792,6 +2811,7 @@ void manetGLView::forwardPlayback()
             playbackSetSpeed(abs(streamRate*2));
         else
             playbackSetSpeed(abs(streamRate));
+        playbackPaused=false;
         messageStream->startStream(); 
     }
     TRACE_EXIT();
@@ -2805,6 +2825,7 @@ void manetGLView::rewindToStartOfPlayback()
         normalPlayback();
     else
         messageStream->startStream(); 
+    playbackPaused=false;
     TRACE_EXIT();
 }
 void manetGLView::forwardToEndOfPlayback()
@@ -2812,6 +2833,7 @@ void manetGLView::forwardToEndOfPlayback()
     TRACE_ENTER();
     pausePlayback(); 
     messageStream->setStreamTimeStart(SeekMessage::eof); 
+    playbackPaused=false;
     messageStream->startStream(); 
     TRACE_EXIT();
 }

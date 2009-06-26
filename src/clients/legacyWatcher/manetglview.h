@@ -117,6 +117,7 @@ signals:
         std::string serverName; 
 
         float streamRate; 
+        bool playbackPaused;
 
         watcher::event::GPSMessage gpsDataFormat;
         
