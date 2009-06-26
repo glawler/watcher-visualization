@@ -112,11 +112,12 @@ int main(int argc, char **argv)
         NodeIdentifier *id;
         const char *label;
         Color color;
+        double length;
     } nodeData[]=
     {
-        { 0,   &hourId, "hour", Color::red }, 
-        { 0,    &minId,  "min", Color::blue }, 
-        { 0,    &secId,  "sec", Color::green }, 
+        { 0,   &hourId, "hour", Color::red,   radius }, 
+        { 0,    &minId,  "min", Color::blue,  radius*.8 }, 
+        { 0,    &secId,  "sec", Color::green, radius}, 
     };
     while (true)  // draw everything all the time as we don't know when watcher will start
     {
@@ -144,7 +145,10 @@ int main(int argc, char **argv)
                 nodeData[i].theta=step*now->tm_sec;
 
             // Move hour. min, and sec nodes to appropriate locations. 
-            GPSMessagePtr gpsMess(new GPSMessage((sin(nodeData[i].theta)*radius)+radius, (cos(nodeData[i].theta)*radius)+radius, (double)i));
+            GPSMessagePtr gpsMess(new GPSMessage(
+                        (sin(nodeData[i].theta)*nodeData[i].length)+radius, 
+                        (cos(nodeData[i].theta)*nodeData[i].length)+radius, 
+                        (double)i));
             gpsMess->layer=layer;
             gpsMess->fromNodeID=*nodeData[i].id;
             if(!client.sendMessage(gpsMess))
@@ -172,8 +176,7 @@ int main(int argc, char **argv)
         for (unsigned int i=0; i<12; i++, theta+=(2*PI)/12)
         {
             NodeIdentifier thisId=NodeIdentifier::from_string("192.168.2." + lexical_cast<string>(i+1));
-            double faceRad=radius*1.15;
-            GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*faceRad)+radius, (cos(theta)*faceRad)+radius, 0.0)); 
+            GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*radius)+radius, (cos(theta)*radius)+radius, 0.0)); 
             gpsMess->layer=layer;
             gpsMess->fromNodeID=thisId;
             if(!client.sendMessage(gpsMess))
@@ -189,7 +192,7 @@ int main(int argc, char **argv)
         for (unsigned int i=0; i<60; i++, theta+=(2*PI)/60)
         {
             NodeIdentifier thisId=NodeIdentifier::from_string("192.168.3." + lexical_cast<string>(i+1));
-            double faceRad=radius*1.35;
+            double faceRad=radius*1.15;
             GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*faceRad)+radius, (cos(theta)*faceRad)+radius, 0.0)); 
             gpsMess->layer=layer;
             gpsMess->fromNodeID=thisId;
