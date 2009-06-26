@@ -2801,7 +2801,10 @@ void manetGLView::rewindToStartOfPlayback()
     TRACE_ENTER();
     pausePlayback(); 
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
-    messageStream->startStream(); 
+    if (streamRate<0.0)
+        normalPlayback();
+    else
+        messageStream->startStream(); 
     TRACE_EXIT();
 }
 void manetGLView::forwardToEndOfPlayback()
