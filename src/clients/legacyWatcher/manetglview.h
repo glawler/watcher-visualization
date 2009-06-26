@@ -43,10 +43,11 @@ public slots:
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);
         void toggleBackgroundImage(bool isOn);
+        void showKeyboardShortcuts(); 
 
-        void startPlayback();
         void pausePlayback();
-        void rewindPlayback();
+        void normalPlayback();
+        void reversePlayback();
         void forwardPlayback();
         void rewindToStartOfPlayback();
         void forwardToEndOfPlayback();
@@ -74,6 +75,9 @@ signals:
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
 
+        // Emitted when the rate of the stream is changed.
+        void streamRateSet(double); 
+
         // Emitted when view->backgroun image should be enabled/disabled.
         void enableBackgroundImage(bool);
 
@@ -98,7 +102,6 @@ signals:
 
         void keyPressEvent(QKeyEvent * event);
 
-        void showKeyboardShortcuts(); 
 
         unsigned int getNodeIdAtCoords(const int x, const int y);
 

@@ -1298,8 +1298,8 @@ void manetGLView::initializeGL()
     glEnable(GL_LIGHTING); 
     glEnable(GL_LIGHT0); 
 
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     TRACE_EXIT();
 }
@@ -1422,44 +1422,23 @@ void manetGLView::drawManet(void)
     glLoadIdentity();
     glTranslatef(0.0, 0.0, -20.0);
 
-    glPushMatrix();
-
-    ptime now = from_time_t(time(NULL));
-    glScalef(0.02, 0.02, 0.02);
-
-    string buf;
-
-    if (showWallTimeinStatusString)
-    {
-        buf+="Wall Time:";
-        buf+=posix_time::to_iso_extended_string(now);
-    }
-    if (showPlaybackTimeInStatusString)
-    {
-        buf+=" Play Time: ";
-        buf+=posix_time::to_iso_extended_string(from_time_t(newestMessageTimestamp/1000));
-    }
-
-    if (showVerboseStatusString)
-    {
-        char buff[256];
-        snprintf(buff, sizeof(buff), " Loc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, text: %f lpad: %f",
-                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
-                manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
-                scaleText, layerPadding); 
-        buf+=string(buff); 
-    }
-    qglColor(QColor(monochromeMode ? "black" : "blue")); 
-    renderText(12, height()-12, QString(buf.c_str()), QFont(statusFontName.c_str(), statusFontPointSize)); 
-
-    glPopMatrix();
-
     glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
     glRotatef(manetAdj.angleX, 1.0, 0.0, 0.0);
     glRotatef(manetAdj.angleY, 0.0, 1.0, 0.0);
     glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
     glTranslatef(manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ);
 
+    if (backgroundImage)        // need to draw this fisrt for transparency to work properly. 
+    {
+        BackgroundImage &bgi=BackgroundImage::getInstance();
+        GLfloat minx, width, miny, height, z;
+        bgi.getDrawingCoords(minx, width, miny, height, z); 
+        if (z>-25)
+            bgi.setDrawingCoords(minx, width, miny, height, -25); 
+        bgi.drawImage(); 
+    }
+
+    bool first=true;
     for (LayerList::iterator li=knownLayers.begin(); li!=knownLayers.end(); ++li)
     {
         if ((*li)->layer==ANTENNARADIUS_LAYER)
@@ -1469,8 +1448,11 @@ void manetGLView::drawManet(void)
         {
             // each layer is 'layerPadding' above the rest. 
             // layer order is currently defined by order of appearance
-            // in the cfg file. 
-            glTranslatef(0.0, 0.0, -layerPadding);  
+            // in the cfg file. Only offset after the first layer.
+            if (!first)
+                glTranslatef(0.0, 0.0, layerPadding);  
+            else
+                first=false;
             glPushMatrix();
             // LOG_DEBUG("Drawing layer: " << (*li)->layer); 
             drawLayer((*li)->layer); 
@@ -1478,10 +1460,39 @@ void manetGLView::drawManet(void)
         }
     }
 
-    if (backgroundImage)
-        BackgroundImage::getInstance().drawImage(); 
+    {
+        glPushMatrix();
 
-    glPopMatrix();
+        ptime now = from_time_t(time(NULL));
+        glScalef(0.02, 0.02, 0.02);
+
+        string buf;
+
+        if (showWallTimeinStatusString)
+        {
+            buf+="Wall Time:";
+            buf+=posix_time::to_iso_extended_string(now);
+        }
+        if (showPlaybackTimeInStatusString)
+        {
+            buf+=" Play Time: ";
+            buf+=posix_time::to_iso_extended_string(from_time_t(newestMessageTimestamp/1000));
+        }
+
+        if (showVerboseStatusString)
+        {
+            char buff[256];
+            snprintf(buff, sizeof(buff), " Loc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, text: %f lpad: %f",
+                    manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
+                    manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
+                    scaleText, layerPadding); 
+            buf+=string(buff); 
+        }
+        qglColor(QColor(monochromeMode ? "black" : "blue")); 
+        renderText(12, height()-12, QString(buf.c_str()), QFont(statusFontName.c_str(), statusFontPointSize)); 
+
+        glPopMatrix();
+    }
 }
 
 void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)
@@ -1786,7 +1797,7 @@ void manetGLView::drawLayer(const GUILayer &layer)
         if (layer==PHYSICAL_LAYER)
             drawNode(node, true); 
         else
-            if (abs(layerPadding)>6 || !isActive(PHYSICAL_LAYER))
+            if (layerPadding>6 || !isActive(PHYSICAL_LAYER))
                 drawNode(node, false); 
 
         WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
@@ -1923,7 +1934,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_K:     gpsScale+=10; break;
         case Qt::Key_L:     gpsScale-=10; break;
         case Qt::Key_T:     layerPadding+=2; break;
-        case Qt::Key_Y:     layerPadding-=2; break;
+        case Qt::Key_Y:     layerPadding-=2; if (layerPadding<=0) layerPadding=0; break;
         // case Qt::Key_B:     
         //     layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
         //     emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
@@ -2743,48 +2754,62 @@ void manetGLView::saveConfiguration()
     TRACE_EXIT();
 }
 
-void manetGLView::startPlayback()
-{
-    TRACE_ENTER();
-    messageStream->startStream(); 
-    TRACE_EXIT();
-}
 void manetGLView::pausePlayback()
 {
     TRACE_ENTER();
     messageStream->stopStream(); 
     TRACE_EXIT();
 }
-void manetGLView::rewindPlayback()
+void manetGLView::normalPlayback()
 {
     TRACE_ENTER();
-    LOG_DEBUG("Setting stream rate to " << -streamRate); 
-    if (streamRate==0)
-        messageStream->stopStream();
-    else
-        messageStream->setStreamRate(-streamRate); 
+    messageStream->stopStream(); 
+    playbackSetSpeed(1.0);
+    messageStream->startStream(); 
+    TRACE_EXIT();
+}
+void manetGLView::reversePlayback()
+{
+    TRACE_ENTER();
+    pausePlayback(); 
+    if (streamRate!=0.0)
+    {
+        if (streamRate<0.0)
+            playbackSetSpeed(-abs(streamRate*2));
+        else
+            playbackSetSpeed(-abs(streamRate));
+        messageStream->startStream(); 
+    }
     TRACE_EXIT();
 }
 void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
-    LOG_DEBUG("Setting stream rate to " << -streamRate); 
-    if (streamRate==0)
-        messageStream->stopStream();
-    else
-        messageStream->setStreamRate(streamRate); 
+    pausePlayback(); 
+    if (streamRate!=0.0)
+    {
+        if (streamRate>0.0)
+            playbackSetSpeed(abs(streamRate*2));
+        else
+            playbackSetSpeed(abs(streamRate));
+        messageStream->startStream(); 
+    }
     TRACE_EXIT();
 }
 void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
+    pausePlayback(); 
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
+    messageStream->startStream(); 
     TRACE_EXIT();
 }
 void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
+    pausePlayback(); 
     messageStream->setStreamTimeStart(SeekMessage::eof); 
+    messageStream->startStream(); 
     TRACE_EXIT();
 }
 
@@ -2793,10 +2818,8 @@ void manetGLView::playbackSetSpeed(double x)
     TRACE_ENTER();
     LOG_DEBUG("Setting stream rate to " << x); 
     streamRate=x;
-    if (streamRate==0)
-        messageStream->stopStream();
-    else
-        messageStream->setStreamRate(x); 
+    messageStream->setStreamRate(streamRate);
+    emit streamRateSet(streamRate);
     TRACE_EXIT();
 }
 

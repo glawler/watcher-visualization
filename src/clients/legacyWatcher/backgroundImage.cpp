@@ -83,7 +83,6 @@ bool BackgroundImage::loadBMPFile(const char *filename)
     xoffset=imageWidth;
     yoffset=imageHeight;
 
-    // imageFormat=GL_BGR_EXT;
     imageFormat=GL_RGB;
     imageType=GL_UNSIGNED_BYTE;
 
@@ -183,29 +182,47 @@ void BackgroundImage::setupTexture()
 {
     TRACE_ENTER();
 
-    // if ppm
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    // glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColor);
-    // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glPushMatrix();
+    {
+        // if ppm
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        // glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColor);
+        // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-    // else BMP
-    glPixelStorei(GL_UNPACK_ALIGNMENT,4);
-    static GLuint textureInt=1;
-    glBindTexture(GL_TEXTURE_2D, textureInt); 
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+        // else BMP
+        // glPixelStorei(GL_UNPACK_ALIGNMENT,4);
+        // static GLuint textureInt;
+        // glGenTextures(1, &textureInt); 
+        // glBindTexture(GL_TEXTURE_2D, textureInt); 
+        // glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        // glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+        // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imageWidth, imageHeight, imageFormat, imageType, imageData);
+        // gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imageWidth, imageHeight, imageFormat, imageType, imageData);
 
-    free(imageData);
-    imageData=NULL;
+        // glDeleteTextures(1, &textureInt);
 
-    imageLoaded=true;
+        static GLuint textureIntID;
+        glGenTextures(1, &textureIntID);
+        glBindTexture(GL_TEXTURE_2D, textureIntID);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);    //The flag is set to TRUE
+        // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, imageWidth, imageHeight, 0, imageFormat, imageType, imageData);  //When this is called, the GPU generates all mipmaps
+
+        free(imageData);
+        imageData=NULL;
+
+        imageLoaded=true;
+    }
+    glPopMatrix();
 
     TRACE_EXIT();
 }
@@ -221,18 +238,24 @@ void BackgroundImage::drawImage()
     }
 
     glPushMatrix();
-    glTranslatef(0, 0, z);
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glEnable(GL_TEXTURE_2D); 
-    glDisable(GL_LIGHTING);
-    glDisable(GL_BLEND); 
-    glBegin(GL_QUADS);
-        glTexCoord2f(0,0); glVertex2f(minx        ,miny);
-        glTexCoord2f(1,0); glVertex2f(minx+xoffset,miny);
-        glTexCoord2f(1,1); glVertex2f(minx+xoffset,miny+yoffset);
-        glTexCoord2f(0,1); glVertex2f(minx        ,miny+yoffset);
-    glEnd();
-    glPopAttrib();
+    {
+        glTranslatef(0, 0, z);
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        {
+            glEnable(GL_TEXTURE_2D); 
+            glDisable(GL_LIGHTING);
+            glDisable(GL_BLEND); 
+            glBegin(GL_QUADS);
+            {
+                glTexCoord2f(0,0); glVertex2f(minx        ,miny);
+                glTexCoord2f(1,0); glVertex2f(minx+xoffset,miny);
+                glTexCoord2f(1,1); glVertex2f(minx+xoffset,miny+yoffset);
+                glTexCoord2f(0,1); glVertex2f(minx        ,miny+yoffset);
+            }
+            glEnd();
+        }
+        glPopAttrib();
+    }
     glPopMatrix();
 
     TRACE_EXIT();

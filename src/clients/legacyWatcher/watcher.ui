@@ -54,38 +54,29 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="rewindButton" >
         <property name="toolTip" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Rewind&lt;/p>&lt;/body>&lt;/html></string>
+         <string>View stream in reverse direction at current rate</string>
         </property>
         <property name="whatsThis" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Rewind playback at current rate&lt;/p>&lt;/body>&lt;/html></string>
+         <string>Go backward in time at current rate</string>
         </property>
         <property name="text" >
          <string/>
         </property>
         <property name="icon" >
-         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-rewind-ltr.png</iconset>
+         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-forward-rtl.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="startButton" >
+       <widget class="QPushButton" name="playButton" >
         <property name="toolTip" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Play&lt;/p>&lt;/body>&lt;/html></string>
+         <string>Play in forward direction at normal rate</string>
+        </property>
+        <property name="statusTip" >
+         <string>Play in forward direction at normal rate</string>
         </property>
         <property name="whatsThis" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Start Playback at current time&lt;/p>&lt;/body>&lt;/html></string>
+         <string>Play in forward direction at normal rate</string>
         </property>
         <property name="text" >
          <string/>
@@ -98,16 +89,10 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="pauseButton" >
         <property name="toolTip" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Pause&lt;/p>&lt;/body>&lt;/html></string>
+         <string>Pause playback</string>
         </property>
         <property name="whatsThis" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Pause Playback&lt;/p>&lt;/body>&lt;/html></string>
+         <string>Pause playback</string>
         </property>
         <property name="text" >
          <string/>
@@ -120,16 +105,10 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="forwardButton" >
         <property name="toolTip" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Fast Forward&lt;/p>&lt;/body>&lt;/html></string>
+         <string>View stream in forward direction at current rate</string>
         </property>
         <property name="whatsThis" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Fast Forward Playback&lt;/p>&lt;/body>&lt;/html></string>
+         <string>Go forward in time at current rate</string>
         </property>
         <property name="text" >
          <string/>
@@ -163,11 +142,29 @@ p, li { white-space: pre-wrap; }
       </item>
       <item>
        <widget class="QDoubleSpinBox" name="streamRateSpinBox" >
+        <property name="toolTip" >
+         <string>Set playback rate</string>
+        </property>
+        <property name="whatsThis" >
+         <string>Set playback rate</string>
+        </property>
+        <property name="accelerated" >
+         <bool>true</bool>
+        </property>
+        <property name="correctionMode" >
+         <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+        </property>
+        <property name="keyboardTracking" >
+         <bool>false</bool>
+        </property>
         <property name="minimum" >
-         <double>0.000000000000000</double>
+         <double>-100.000000000000000</double>
+        </property>
+        <property name="maximum" >
+         <double>100.000000000000000</double>
         </property>
         <property name="singleStep" >
-         <double>0.250000000000000</double>
+         <double>0.500000000000000</double>
         </property>
         <property name="value" >
          <double>1.000000000000000</double>
@@ -212,6 +209,9 @@ p, li { white-space: pre-wrap; }
     </item>
     <item>
      <widget class="QSlider" name="playbackSlider" >
+      <property name="enabled" >
+       <bool>false</bool>
+      </property>
       <property name="orientation" >
        <enum>Qt::Horizontal</enum>
       </property>
@@ -241,6 +241,8 @@ p, li { white-space: pre-wrap; }
     </property>
     <addaction name="actionFullscreen" />
     <addaction name="actionNormalscreen" />
+    <addaction name="actionKeyboardShortcuts" />
+    <addaction name="separator" />
     <addaction name="action3DNodes" />
     <addaction name="actionMonochrome" />
     <addaction name="actionBackgroundImage" />
@@ -310,6 +312,11 @@ p, li { white-space: pre-wrap; }
     <string>&amp;Background Image</string>
    </property>
   </action>
+  <action name="actionKeyboardShortcuts" >
+   <property name="text" >
+    <string>&amp;Keyboard Shortcuts</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -322,7 +329,6 @@ p, li { white-space: pre-wrap; }
  <tabstops>
   <tabstop>rewindToStartButton</tabstop>
   <tabstop>rewindButton</tabstop>
-  <tabstop>startButton</tabstop>
   <tabstop>pauseButton</tabstop>
   <tabstop>forwardButton</tabstop>
   <tabstop>forwardToEndButton</tabstop>
@@ -548,26 +554,10 @@ p, li { white-space: pre-wrap; }
    <sender>rewindButton</sender>
    <signal>clicked()</signal>
    <receiver>manetGLViewWindow</receiver>
-   <slot>rewindPlayback()</slot>
+   <slot>reversePlayback()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>64</x>
-     <y>661</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>463</x>
-     <y>340</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>startButton</sender>
-   <signal>clicked()</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>startPlayback()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>104</x>
      <y>661</y>
     </hint>
     <hint type="destinationlabel" >
@@ -633,6 +623,54 @@ p, li { white-space: pre-wrap; }
     <hint type="sourcelabel" >
      <x>280</x>
      <y>732</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>464</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>playButton</sender>
+   <signal>clicked()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>normalPlayback()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>104</x>
+     <y>731</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>464</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>streamRateSet(double)</signal>
+   <receiver>streamRateSpinBox</receiver>
+   <slot>setValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>464</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>280</x>
+     <y>732</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionKeyboardShortcuts</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>showKeyboardShortcuts()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel" >
      <x>464</x>
