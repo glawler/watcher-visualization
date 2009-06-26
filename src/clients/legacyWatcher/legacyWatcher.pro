@@ -5,9 +5,8 @@
 TEMPLATE = app
 TARGET = watcher
 DEPENDPATH += .
-INCLUDEPATH += . ../../../include ../../util ../../../include/qwt ../../logger ../.. ../../watcherd
-INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include /usr/local/qwt/include
-INCLUDEPATH += /usr/include/qwt
+INCLUDEPATH += . ../../../include ../../util ../../logger ../.. ../../watcherd
+INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include
 QT += opengl 
 CONFIG += qt x11 
 OBJECTS_DIR = ./objs
@@ -25,7 +24,6 @@ LIBS += -L../../logger
 LIBS += -L../../util
 LIBS += -L../../libwatcher
 LIBS += -L../../../lib
-LIBS += -L/usr/local/qwt/lib
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -L/usr/local/lib -lidmef 
 LIBS += -lconfig++
@@ -34,9 +32,9 @@ LIBS += -llogger
 LIBS += -lwatcherutils
 LIBS += -lwatcher
 LIBS += -lwatchermsg
-LIBS += -xml2
-LIBS += -lqwt
+LIBS += -lxml2
 
+include(Makefile.config)
 include(Makefile.local)
 
 win32 {

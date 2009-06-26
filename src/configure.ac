@@ -64,6 +64,54 @@ AC_ARG_ENABLE(hierarchy_client,
 	      [want_hierarchy_client=$enableval])
 AM_CONDITIONAL([WANT_HIERARCHY_CLIENT], [test x$want_hierarchy_client != xno])
 
+# qmake-qt4 seems to set the correct includes and libs, we just need to determine where it is for the QWT detection
+AC_MSG_CHECKING(for qt4)
+ac_cv_qt=
+if test -d /usr/local/include/qt; then
+    AC_MSG_RESULT(/usr/local/include/qt)
+#    QT4_INCLUDES="/usr/local/include/qt"
+#    QT4_LIBS="-L/usr/local/lib"
+#    ac_cv_qt_dir=/usr/local/lib
+elif test -d /usr/include/qt4; then
+    AC_MSG_RESULT(/usr/include/qt4)
+#    QT4_INCLUDES="/usr/include/qt4"
+    ac_cv_qt='-qt4'
+#    ac_cv_qt_dir=/usr/lib
+elif test -d /usr/include/qt; then
+    AC_MSG_RESULT(/usr/include/qt)
+#    QT4_INCLUDES="/usr/include/qt4"
+#    ac_cv_qt_dir=/usr/lib
+else
+    AC_MSG_ERROR(not found)
+fi
+#if test -f ${ac_cv_qt_dir}/libqt-mt.so; then
+#    QT4_LIBS="$QT4_LIBS -lqt-mt"
+#else
+#    QT4_LIBS="$QT4_LIBS -lqt"
+#fi
+
+AC_MSG_CHECKING(for qwt)
+if test -d include/qwt; then
+    AC_MSG_RESULT(./include/qwt)
+    QWT_INCLUDES="../../../include/qwt"
+    QWT_LIBS="-L../../../lib -lqwt"
+elif test -d /usr/local/include/qwt; then
+    AC_MSG_RESULT(/usr/local/include/qt)
+    QWT_INCLUDES="/usr/local/include/qwt"
+    QWT_LIBS="-L/usr/local/lib -lqwt"
+elif test -d /usr/include/qwt${ac_cv_qt}; then
+    AC_MSG_RESULT(/usr/include/qwt${ac_cv_qt})
+    QWT_INCLUDES="/usr/include/qwt${ac_cv_qt}"
+    QWT_LIBS="-lqwt${ac_cv_qt}"
+else
+    AC_MSG_ERROR(not found)
+fi
+
+AC_SUBST(QT4_INCLUDES)
+AC_SUBST(QT4_LIBS)
+AC_SUBST(QWT_INCLUDES)
+AC_SUBST(QWT_LIBS)
+
 AC_CONFIG_FILES([ \
     Makefile \
     logger/Makefile \
@@ -79,6 +127,7 @@ AC_CONFIG_FILES([ \
     clients/commandlineFeeders/Makefile \
     clients/watcherHierarchyClient/Makefile \
     clients/watcher3D/Makefile \
+    clients/legacyWatcher/Makefile.config
 ])
 
 #override default $CXXFLAGS
