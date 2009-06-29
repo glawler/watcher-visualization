@@ -14,6 +14,8 @@
 #include "libwatcher/watcherTypes.h"
 
 namespace watcher {
+    typedef std::pair<Timestamp, Timestamp> TimeRange;
+
     /** Abstract class used to provide an interface to a database backend for
      * storing event streams. */
     class Database : private boost::noncopyable {
@@ -37,6 +39,8 @@ namespace watcher {
              */
             virtual void getEvents( boost::function<void(event::MessagePtr)> output, Timestamp t, Direction d, unsigned int count ) = 0;
 
+            virtual TimeRange eventRange() = 0;
+
             virtual ~Database() = 0;
     };
 
@@ -50,6 +54,10 @@ namespace watcher {
 
     /** Put an event into the database. */
     void store_event(event::MessagePtr);
+
+    
+    /** Return the Timestamps for the first and last event in the database. */
+    TimeRange event_range();
 
 } //namespace
 

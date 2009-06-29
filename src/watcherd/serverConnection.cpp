@@ -8,11 +8,13 @@
 #include <libwatcher/seekWatcherMessage.h>
 #include <libwatcher/speedWatcherMessage.h>
 #include <libwatcher/nodeStatusMessage.h>
+#include <libwatcher/playbackTimeRange.h>
 
 #include "watcherd.h"
 #include "writeDBMessageHandler.h"
 #include "watcherdConfig.h"
 #include "replayState.h"
+#include "database.h"
 
 using namespace std; 
 using namespace boost::asio;
@@ -230,6 +232,21 @@ namespace watcher {
         TRACE_EXIT();
     }
 
+    /** Returns a PlaybackTimeRange event to the sender with the timestamps of
+     * the first and last event in the database.
+     */
+    void ServerConnection::range(event::MessagePtr& m)
+    {
+        PlaybackTimeRangePtr p (boost::dynamic_pointer_cast<PlaybackTimeRange>(m));
+        if (p) {
+            TimeRange r(event_range());
+            p->min_ = r.first;
+            p->max_ = r.second;
+            sendMessage(p);
+        } else
+            LOG_WARN("unable to cast to PlaybackTimeRange");
+    }
+
     bool ServerConnection::dispatch_gui_event(MessagePtr& m)
     {
         static const struct {
@@ -240,6 +257,7 @@ namespace watcher {
             { STOP_MESSAGE_TYPE, &ServerConnection::stop },
             { SEEK_MESSAGE_TYPE, &ServerConnection::seek },
             { SPEED_MESSAGE_TYPE, &ServerConnection::speed },
+            { PLAYBACK_TIME_RANGE_MESSAGE_TYPE, &ServerConnection::range },
             { UNKNOWN_MESSAGE_TYPE, 0 }
         };
 

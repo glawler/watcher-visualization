@@ -85,3 +85,30 @@ void SqliteDatabase::getEvents(boost::function<void(event::MessagePtr)> output,
     }
     TRACE_EXIT();
 }
+
+TimeRange SqliteDatabase::eventRange()
+{
+    Timestamp begin = 0, end = 0;
+
+    TRACE_ENTER();
+
+    {
+        Statement s1(*conn_, "SELECT ts FROM events ORDER BY ts ASC LIMIT 1");
+        Row r1(s1.rows());
+        Column c1(r1.columns());
+        c1 >> begin;
+    }
+
+    {
+        Statement s2(*conn_, "SELECT ts FROM events ORDER BY ts DESC LIMIT 1");
+        Row r2(s2.rows());
+        Column c2(r2.columns());
+        c2 >> end;
+    }
+
+    LOG_DEBUG("begin=" << begin << " end=" << end);
+
+    TRACE_EXIT();
+
+    return TimeRange(begin, end);
+}

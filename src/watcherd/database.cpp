@@ -63,3 +63,8 @@ void watcher::store_event(event::MessagePtr m)
 {
     get_db_handle().storeEvent(m);
 }
+
+TimeRange watcher::event_range()
+{
+    return get_db_handle().eventRange();
+}

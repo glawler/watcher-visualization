@@ -21,6 +21,7 @@ namespace watcher {
 
             void storeEvent(event::MessagePtr msg);
             void getEvents( boost::function<void(event::MessagePtr)> output, Timestamp t, Direction d, unsigned int count );
+            TimeRange eventRange();
 
         private:
             /** Pointer to the sqlite implementation backing this connection. */

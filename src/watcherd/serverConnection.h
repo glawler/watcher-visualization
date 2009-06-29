@@ -76,6 +76,7 @@ namespace watcher
             void start(event::MessagePtr& m);
             void stop(event::MessagePtr& m);
             void speed(event::MessagePtr& m);
+            void range(event::MessagePtr& m);
 
             Watcherd& watcher;
             boost::asio::io_service& io_service_;
