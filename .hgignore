@@ -53,6 +53,7 @@ config.sub
 depcomp
 install-sh
 autom4te.cache
+ltmain.sh
 
 tags
 
@@ -135,14 +136,10 @@ share/info/dir
 ^src/configure
 ^src/Makefile
 
-^src/watcherd/client
 ^src/watcherd/watcherd$
 ^src/watcherd/depend
 ^src/watcherd/Makefile
 ^src/watcherd/Makefile.local
-^src/watcherd/test/Makefile
-^src/watcherd/test/testCC
-^src/watcherd/test/testMessageStream
 
 ^src/libwatcher/Makefile
 ^src/libwatcher/Makefile.local
