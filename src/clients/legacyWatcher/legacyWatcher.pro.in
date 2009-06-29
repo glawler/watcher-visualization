@@ -38,7 +38,7 @@ LIBS += -llog4cxx
 LIBS += -llogger
 LIBS += -lwatcherutils
 LIBS += -lxml2
-LIBS += @QWT_LIB@ @BOOST_FILESYSTEM_LIB@
+LIBS += @QWT_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_DATE_TIME_LIB@
 
 include(Makefile.local)
 
