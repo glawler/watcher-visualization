@@ -30,6 +30,8 @@ void usage(const char *progName)
     fprintf(stderr, "Optional args:\n");
     fprintf(stderr, "   -p, --logProps              log.properties file, which controls logging for this program\n");
     fprintf(stderr, "   -r, --radius                The radius of the circle in some unknown unit\n"); 
+    fprintf(stderr, "   -S, --hideSecondRing        Don't send message to draw the outer, second hand ring\n");
+    fprintf(stderr, "   -H, --hideHourRing          Don't send message to draw the inner, hour hand ring\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "   -h, --help                  Show this message\n"); 
 
@@ -44,6 +46,7 @@ int main(int argc, char **argv)
     string server;
     string logProps(string(basename(argv[0]))+string(".log.properties"));
     double radius=50.0; 
+    bool showSecondRing=true, showHourRing=true;
 
     while (true) 
     {
@@ -51,12 +54,14 @@ int main(int argc, char **argv)
         static struct option long_options[] = {
             {"server", required_argument, 0, 's'},
             {"logProps", required_argument, 0, 'p'},
-            {"radius", required_argument, 0, 'r'},
+            {"radius", no_argument, 0, 'r'},
+            {"hideSecondRing", required_argument, 0, 'S'},
+            {"hideHourRing", required_argument, 0, 'H'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "r:s:p:hH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "r:s:p:SHh?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -72,8 +77,13 @@ int main(int argc, char **argv)
             case 'r':
                 radius=lexical_cast<double>(optarg);
                 break;
-            case 'h':
+            case 'S':
+                showSecondRing=false;
+                break;
             case 'H':
+                showHourRing=false;
+                break;
+            case 'h':
             case '?':
             default:
                 usage(argv[0]); 
@@ -171,36 +181,42 @@ int main(int argc, char **argv)
             }
         }
 
-        // add nodes at clock face number locations.
-        double theta=(2*PI)/12;
-        for (unsigned int i=0; i<12; i++, theta+=(2*PI)/12)
+        if (showHourRing)
         {
-            NodeIdentifier thisId=NodeIdentifier::from_string("192.168.2." + lexical_cast<string>(i+1));
-            GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*radius)+radius, (cos(theta)*radius)+radius, 0.0)); 
-            gpsMess->layer=layer;
-            gpsMess->fromNodeID=thisId;
-            if(!client.sendMessage(gpsMess))
+            // add nodes at clock face number locations.
+            double theta=(2*PI)/12;
+            for (unsigned int i=0; i<12; i++, theta+=(2*PI)/12)
             {
-                LOG_ERROR("Error sending gps message: " << *gpsMess);
-                TRACE_EXIT_RET(EXIT_FAILURE);
-                return EXIT_FAILURE;
+                NodeIdentifier thisId=NodeIdentifier::from_string("192.168.2." + lexical_cast<string>(i+1));
+                GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*radius)+radius, (cos(theta)*radius)+radius, 0.0)); 
+                gpsMess->layer=layer;
+                gpsMess->fromNodeID=thisId;
+                if(!client.sendMessage(gpsMess))
+                {
+                    LOG_ERROR("Error sending gps message: " << *gpsMess);
+                    TRACE_EXIT_RET(EXIT_FAILURE);
+                    return EXIT_FAILURE;
+                }
             }
         }
 
-        // add nodes at clock face second locations.
-        theta=(2*PI)/60;
-        for (unsigned int i=0; i<60; i++, theta+=(2*PI)/60)
+        if (showSecondRing)
         {
-            NodeIdentifier thisId=NodeIdentifier::from_string("192.168.3." + lexical_cast<string>(i+1));
-            double faceRad=radius*1.15;
-            GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*faceRad)+radius, (cos(theta)*faceRad)+radius, 0.0)); 
-            gpsMess->layer=layer;
-            gpsMess->fromNodeID=thisId;
-            if(!client.sendMessage(gpsMess))
+            // add nodes at clock face second locations.
+            double theta=(2*PI)/60;
+            for (unsigned int i=0; i<60; i++, theta+=(2*PI)/60)
             {
-                LOG_ERROR("Error sending gps message: " << *gpsMess);
-                TRACE_EXIT_RET(EXIT_FAILURE);
-                return EXIT_FAILURE;
+                NodeIdentifier thisId=NodeIdentifier::from_string("192.168.3." + lexical_cast<string>(i+1));
+                double faceRad=radius*1.15;
+                GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*faceRad)+radius, (cos(theta)*faceRad)+radius, 0.0)); 
+                gpsMess->layer=layer;
+                gpsMess->fromNodeID=thisId;
+                if(!client.sendMessage(gpsMess))
+                {
+                    LOG_ERROR("Error sending gps message: " << *gpsMess);
+                    TRACE_EXIT_RET(EXIT_FAILURE);
+                    return EXIT_FAILURE;
+                }
             }
         }
         sleep(loopTime); 
