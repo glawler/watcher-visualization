@@ -15,7 +15,7 @@ using namespace watcher;
 using namespace watcher::event;
 
 //< default value for number of events to prefetch from the database
-const unsigned int DEFAULT_BUFFER_SIZE = 10U; /* db rows */
+const unsigned int DEFAULT_BUFFER_SIZE = 20U; /* db rows */
 const unsigned int DEFAULT_STEP = 250U /* ms */;
 
 /** Internal structure used for implementing the class.  Used to avoid
@@ -32,6 +32,8 @@ struct ReplayState::impl {
     unsigned int bufsiz; //< number of database rows to prefetch
     Timestamp step;
     enum run_state { paused, running } state;
+    timeval wall_time; //< used to correct for clock skew
+    Timestamp delta;
 
     /*
      * Lock used for event queue.  This is required due to the seek() member
@@ -41,9 +43,11 @@ struct ReplayState::impl {
 
     impl(ServerConnectionPtr& ptr) :
         conn(ptr), timer(ptr->io_service()), ts(0), last_event(0), bufsiz(DEFAULT_BUFFER_SIZE),
-        step(DEFAULT_STEP), state(paused)
+        step(DEFAULT_STEP), state(paused), delta(0)
     {
         TRACE_ENTER();
+        wall_time.tv_sec = 0;
+        wall_time.tv_usec = 0;
         TRACE_EXIT();
     }
 };
@@ -182,6 +186,7 @@ void ReplayState::run()
                                   impl_->bufsiz);
 
         if (!impl_->events.empty()) {
+            LOG_DEBUG("got " << impl_->events.size() << "events from the db query");
             /* When starting to replay, assume that time T=0 is the time of the
              * first event in the stream.
              * T= -1 is EOF.
@@ -198,9 +203,20 @@ void ReplayState::run()
     }
 
     if (! impl_->events.empty()) {
+        /*
+         * Calculate for the skew introduced by the time required to process the events.  Skew is calculated
+         * as the difference between the actual time taken and the expected time.  This gets 
+         * subtracted from the wait for the next event to catch up.
+         */
+        timeval tv;
+        gettimeofday(&tv, 0);
+        Timestamp skew = (tv.tv_sec - impl_->wall_time.tv_sec) * 1000 + (tv.tv_usec - impl_->wall_time.tv_usec) / 1000;
+        skew -= impl_->delta;
+        LOG_DEBUG("calculated skew of " << skew << " ms");
+        memcpy(&impl_->wall_time, &tv, sizeof(tv));
+
         // time until next event
-        Timestamp delta = impl_->events.front()->timestamp - impl_->ts;
-        LOG_DEBUG("Next event in " << delta << " ms");
+        impl_->delta = impl_->events.front()->timestamp - impl_->ts;
 
         // update our notion of the current time after the timer expires
         impl_->ts = impl_->events.front()->timestamp;
@@ -208,9 +224,15 @@ void ReplayState::run()
         /* Adjust for playback speed.  Note that when playing events in reverse, both speed
          * delta will be negative, which will turn delta into a positive value for the
          * async_wait() call, which is exactly what is required.  */
-        delta /= impl_->speed;
+        impl_->delta /= impl_->speed;
 
-        impl_->timer.expires_from_now(boost::posix_time::millisec(delta));
+        /* Correct for skew */
+        impl_->delta -= skew;
+        if (impl_->delta < 0)
+            impl_->delta = 0;
+
+        LOG_DEBUG("Next event in " << impl_->delta << " ms");
+        impl_->timer.expires_from_now(boost::posix_time::millisec(impl_->delta));
         impl_->timer.async_wait(boost::bind(&ReplayState::timer_handler, shared_from_this(), boost::asio::placeholders::error));
         impl_->state = impl::running;
     } else {
