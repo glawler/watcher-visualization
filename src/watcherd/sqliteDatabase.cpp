@@ -92,19 +92,14 @@ TimeRange SqliteDatabase::eventRange()
 
     TRACE_ENTER();
 
-    {
-        Statement s1(*conn_, "SELECT ts FROM events ORDER BY ts ASC LIMIT 1");
-        Row r1(s1.rows());
-        Column c1(r1.columns());
-        c1 >> begin;
-    }
-
-    {
-        Statement s2(*conn_, "SELECT ts FROM events ORDER BY ts DESC LIMIT 1");
-        Row r2(s2.rows());
-        Column c2(r2.columns());
-        c2 >> end;
-    }
+    Statement s(*conn_,
+                "SELECT * FROM"
+                "(SELECT ts from events ORDER BY ts ASC LIMIT 1)"
+                "JOIN"
+                "(SELECT ts from events ORDER BY ts DESC LIMIT 1)");
+    Row r(s.rows());
+    Column c(r.columns());
+    c >> begin >> end;
 
     LOG_DEBUG("begin=" << begin << " end=" << end);
 
