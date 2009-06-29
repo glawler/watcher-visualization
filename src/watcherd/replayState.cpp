@@ -186,7 +186,7 @@ void ReplayState::run()
                                   impl_->bufsiz);
 
         if (!impl_->events.empty()) {
-            LOG_DEBUG("got " << impl_->events.size() << "events from the db query");
+            LOG_DEBUG("got " << impl_->events.size() << " events from the db query");
             /* When starting to replay, assume that time T=0 is the time of the
              * first event in the stream.
              * T= -1 is EOF.
