@@ -125,8 +125,8 @@ int main(int argc, char **argv)
         double length;
     } nodeData[]=
     {
-        { 0,   &hourId, "hour", Color::red,   radius }, 
-        { 0,    &minId,  "min", Color::blue,  radius*.8 }, 
+        { 0,   &hourId, "hour", Color::red,   radius*0.7 }, 
+        { 0,    &minId,  "min", Color::blue,  radius }, 
         { 0,    &secId,  "sec", Color::green, radius}, 
     };
     while (true)  // draw everything all the time as we don't know when watcher will start
