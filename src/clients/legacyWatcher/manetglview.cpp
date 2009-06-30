@@ -1344,7 +1344,7 @@ void manetGLView::checkIO()
         }
         else if (message->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE)
         {
-            PlaybackTimeRangePtr trm(dynamic_pointer_cast<PlaybackTimeRange>(message));
+            PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
             playbackRangeEnd=trm->max_;
             playbackRangeStart=trm->min_;
             updatePlaybackSliderRange();
