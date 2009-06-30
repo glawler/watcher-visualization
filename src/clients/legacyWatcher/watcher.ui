@@ -54,7 +54,7 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="rewindButton" >
         <property name="toolTip" >
-         <string>View stream in reverse direction at current rate</string>
+         <string>View stream in reverse direction at current rate  (or click again to double current rate)</string>
         </property>
         <property name="whatsThis" >
          <string>Go backward in time at current rate</string>
@@ -105,7 +105,7 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="forwardButton" >
         <property name="toolTip" >
-         <string>View stream in forward direction at current rate</string>
+         <string>View stream in forward direction at current rate (or click again to double current rate)</string>
         </property>
         <property name="whatsThis" >
          <string>Go forward in time at current rate</string>
