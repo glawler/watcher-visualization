@@ -15,9 +15,9 @@ namespace watcher {
          * @author Michael Elkins <michael.elkins@cobham.com>
          * @date 2009-06-24
          */
-        class PlaybackTimeRange : public Message {
+        class PlaybackTimeRangeMessage : public Message {
             public:
-                PlaybackTimeRange(); 
+                PlaybackTimeRangeMessage(); 
 
                 Timestamp min_;
                 Timestamp max_;
@@ -27,11 +27,11 @@ namespace watcher {
                 DECLARE_LOGGER();
         };
 
-        std::ostream& operator<< (std::ostream&, const PlaybackTimeRange&);
+        std::ostream& operator<< (std::ostream&, const PlaybackTimeRangeMessage&);
 
-        typedef boost::shared_ptr<PlaybackTimeRange> PlaybackTimeRangePtr;
+        typedef boost::shared_ptr<PlaybackTimeRangeMessage> PlaybackTimeRangeMessagePtr;
 
-        bool operator== (const PlaybackTimeRange& lhs, const PlaybackTimeRange& rhs);
+        bool operator== (const PlaybackTimeRangeMessage& lhs, const PlaybackTimeRangeMessage& rhs);
     }
 }
 #endif

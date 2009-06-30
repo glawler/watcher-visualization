@@ -7,9 +7,9 @@
 
 namespace watcher {
     namespace event {
-        INIT_LOGGER(PlaybackTimeRange, "Message.PlaybackTimeRange");
+        INIT_LOGGER(PlaybackTimeRangeMessage, "Message.PlaybackTimeRangeMessage");
 
-        PlaybackTimeRange::PlaybackTimeRange()
+        PlaybackTimeRangeMessage::PlaybackTimeRangeMessage()
             : Message(PLAYBACK_TIME_RANGE_MESSAGE_TYPE, PLAYBACK_TIME_RANGE_MESSAGE_VERSION),
             min_(0), max_(0)
         {
@@ -17,16 +17,16 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        std::ostream& operator<< (std::ostream& os, const PlaybackTimeRange& m)
+        std::ostream& operator<< (std::ostream& os, const PlaybackTimeRangeMessage& m)
         {
-            return os << "PlaybackTimeRange(" << m.min_ << ',' << m.max_ << ')';
+            return os << "PlaybackTimeRangeMessage(" << m.min_ << ',' << m.max_ << ')';
         }
 
-        bool operator== (const PlaybackTimeRange& lhs , const PlaybackTimeRange& rhs) {
+        bool operator== (const PlaybackTimeRangeMessage& lhs , const PlaybackTimeRangeMessage& rhs) {
             return lhs.min_ == rhs.min_ && lhs.max_ == rhs.max_;
         };
 
-        template <typename Archive> void PlaybackTimeRange::serialize(Archive & ar, const unsigned int /* version */)
+        template <typename Archive> void PlaybackTimeRangeMessage::serialize(Archive & ar, const unsigned int /* version */)
         {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);
@@ -38,4 +38,4 @@ namespace watcher {
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::PlaybackTimeRange);
+BOOST_CLASS_EXPORT(watcher::event::PlaybackTimeRangeMessage);

@@ -232,19 +232,19 @@ namespace watcher {
         TRACE_EXIT();
     }
 
-    /** Returns a PlaybackTimeRange event to the sender with the timestamps of
+    /** Returns a PlaybackTimeRangeMessage event to the sender with the timestamps of
      * the first and last event in the database.
      */
     void ServerConnection::range(event::MessagePtr& m)
     {
-        PlaybackTimeRangePtr p (boost::dynamic_pointer_cast<PlaybackTimeRange>(m));
+        PlaybackTimeRangeMessagePtr p (boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(m));
         if (p) {
             TimeRange r(event_range());
             p->min_ = r.first;
             p->max_ = r.second;
             sendMessage(p);
         } else
-            LOG_WARN("unable to cast to PlaybackTimeRange");
+            LOG_WARN("unable to cast to PlaybackTimeRangeMessage");
     }
 
     bool ServerConnection::dispatch_gui_event(MessagePtr& m)

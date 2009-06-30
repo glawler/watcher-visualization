@@ -147,7 +147,7 @@ bool MessageStream::addMessageFilter(const MessageStreamFilter & /*filter*/)
 bool MessageStream::getMessageTimeRange() const
 {
     TRACE_ENTER();
-    PlaybackTimeRangePtr mess(new PlaybackTimeRange);
+    PlaybackTimeRangeMessagePtr mess(new PlaybackTimeRangeMessage);
     bool retVal=connection->sendMessage(mess);
     TRACE_EXIT_RET(retVal);
     return retVal;
