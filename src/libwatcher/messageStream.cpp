@@ -5,6 +5,7 @@
 #include "libwatcher/stopWatcherMessage.h"
 #include "libwatcher/seekWatcherMessage.h"
 #include "libwatcher/speedWatcherMessage.h"
+#include "libwatcher/playbackTimeRange.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -143,20 +144,13 @@ bool MessageStream::addMessageFilter(const MessageStreamFilter & /*filter*/)
     return true;
 }
 
-bool MessageStream::getMessageTimeRange(Timestamp &startTime, Timestamp endTime)
+bool MessageStream::getMessageTimeRange() const
 {
     TRACE_ENTER();
-
-    startTime=0;
-    endTime=0;
-
-    // query watcherd for the least and greatest time here.
-    assert(0); // not yet supported - goodbye.
-
-    LOG_DEBUG("Got message time range from server. Start:" << startTime << " End:" << endTime); 
-
-    TRACE_EXIT_RET("true");
-    return true;
+    PlaybackTimeRangePtr mess(new PlaybackTimeRange);
+    bool retVal=connection->sendMessage(mess);
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }
 
 //virtual 

@@ -135,13 +135,13 @@ namespace watcher
              bool addMessageFilter(const MessageStreamFilter &filter);
 
             /**
-             * getTimeRange()
-             * This function queries the server and returns the earliest and latest (most recent)  
-             * timestamps for all messages known by the server.
-             * @param Timestamp earliest - earliest (least recent) message time known.
-             * @param Timestamp latest - latest (most recent)  message time known.
+             * getMessageTimeRange()
+             *
+             * Causes the server to respond with a PlaybackTimeRange message at some point in the 
+             * near future. 
+             *
              */
-            bool getMessageTimeRange(Timestamp &startTime, Timestamp endTime); 
+            bool getMessageTimeRange() const;
 
             /**
              * Write an instance of this class as a human readable stream to the otream given
