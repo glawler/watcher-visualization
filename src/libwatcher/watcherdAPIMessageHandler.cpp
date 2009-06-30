@@ -29,7 +29,7 @@ bool WatcherdAPIMessageHandler::handleMessageArrive(ConnectionPtr conn, const Me
     TRACE_ENTER();
 
     // Log message arrival
-    bool rv = MessageHandler::handleMessageArrive(conn, message); 
+    MessageHandler::handleMessageArrive(conn, message); 
 
     TRACE_EXIT_RET_BOOL(false);
     return false;

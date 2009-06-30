@@ -34,7 +34,7 @@ namespace watcher
 
             std::string label;                  // written next to the edge, not used often
             std::string labelFont; 
-            int labelPointSize; 
+            double labelPointSize; 
             watcher::event::Color labelColor;
 
             /** Can be loaded from cfg file ... */

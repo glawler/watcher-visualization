@@ -1057,7 +1057,7 @@ static void apiReadable(manetNode *us, void *data)
 			mi->originApi=NULL;
 			mi->chainApi=NULL;
 			messageNextChain(us, ac->type, mi);
-#warning does this message have a valid demon ID?  It should  What if its origin client was deleted?
+// #warning does this message have a valid demon ID?  It should  What if its origin client was deleted?
 
 		}
 		break;
@@ -2367,7 +2367,7 @@ packet *packetApiMarshal(manetNode *us, const PacketApi *pa,int doCompression)
 	p->type=PACKET_API_RECEIVE;
 	p->ttl=pa->origdest.ttl;
 
-#warning how to avoid compression when sending to local?
+// #warning how to avoid compression when sending to local?
 	/* Compress the payload for transmission on the wire...  */
 	if (doCompression)
 	{

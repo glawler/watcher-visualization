@@ -553,7 +553,7 @@ bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>
     return retVal;
 }
 
-bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter, const GUILayer &layer)
+bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter, const GUILayer & /* layer */)
 {
     TRACE_ENTER();
     bool retVal=true;

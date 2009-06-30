@@ -55,6 +55,9 @@ namespace watcher {
                 case NODE_STATUS_MESSAGE_TYPE:
                     out << static_cast<int>(NODE_STATUS_MESSAGE_TYPE) << " (node status)";
                     break;
+                case PLAYBACK_TIME_RANGE_MESSAGE_TYPE:
+                    out << static_cast<int>(PLAYBACK_TIME_RANGE_MESSAGE_TYPE) << " (playback time range)";
+                    break;
 
 
                 case USER_DEFINED_MESSAGE_TYPE: 

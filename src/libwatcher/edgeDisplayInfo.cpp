@@ -85,11 +85,11 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         edgeSetting.add(key, Setting::TypeString)=strVal;
     labelFont=strVal;
 
-    intVal=labelPointSize;
+    floatVal=labelPointSize;
     key="labelPointSize"; 
-    if (!edgeSetting.lookupValue(key, intVal))
-        edgeSetting.add(key, Setting::TypeInt)=intVal;
-    labelPointSize=intVal;
+    if (!edgeSetting.lookupValue(key, floatVal))
+        edgeSetting.add(key, Setting::TypeFloat)=floatVal;
+    labelPointSize=floatVal;
 
     strVal=Color::blue.toString(); 
     key="labelColor"; 

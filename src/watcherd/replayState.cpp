@@ -224,7 +224,7 @@ void ReplayState::run()
         /* Adjust for playback speed.  Note that when playing events in reverse, both speed
          * delta will be negative, which will turn delta into a positive value for the
          * async_wait() call, which is exactly what is required.  */
-        impl_->delta /= impl_->speed;
+        impl_->delta /= (Timestamp)impl_->speed;
 
         /* Correct for skew */
         impl_->delta -= skew;

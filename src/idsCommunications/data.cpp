@@ -521,7 +521,7 @@ static void dataData(manetNode *us, packet *p)
 #endif
 
 //			intDataSend(us,ack,pd->routetype);
-#warning how to send ACKs back with ambient, with fallback to flood or route?
+// #warning how to send ACKs back with ambient, with fallback to flood or route?
 			packetSend(us,ack, PACKET_ORIGIN);
 
 			packetFree(ack);
@@ -819,7 +819,7 @@ PacketData *packetDataUnmarshal(const packet *p)
 	UNMARSHALLONGREV(hp,pd->id);
 	UNMARSHALBYTEREV(hp,pd->origtype);
 	UNMARSHALBYTEREV(hp,i);
-#warning not enough bits for route type
+// #warning not enough bits for route type
 	pd->routetype = (DataRoute)(i & 0x03);
 	pd->acktype = (DataAckType)((i >> 2) & 0x03);
 	UNMARSHALBYTEREV(hp,pd->xmitnum);

@@ -57,7 +57,7 @@ static void defaultLogFunction(char const *fmt, ...)
 /* FIXME: globals are Very Bad.  The API is intended to be able to have multiple
  * instances.  See any of the watcher programs.
  */
-#warning The API has globals
+// #warning The API has globals
 static CommunicationsErrorFunction defaultErrorLog = defaultLogFunction;
 static CommunicationsErrorFunction defaultWarnLog = defaultLogFunction;
 static CommunicationsErrorFunction defaultDebugLog = defaultLogFunction;

@@ -174,11 +174,11 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         nodeSetting.add(key, Setting::TypeString)=strVal;
     labelFont=strVal;
 
-    intVal=labelPointSize;
+    floatVal=labelPointSize;
     key="labelPointSize"; 
-    if (!nodeSetting.lookupValue(key, intVal))
-        nodeSetting.add(key, Setting::TypeInt)=intVal;
-    labelPointSize=intVal;
+    if (!nodeSetting.lookupValue(key, floatVal))
+        nodeSetting.add(key, Setting::TypeFloat)=floatVal;
+    labelPointSize=floatVal;
 
     strVal=Color::blue.toString(); 
     key="labelColor"; 

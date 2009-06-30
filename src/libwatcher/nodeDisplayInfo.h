@@ -74,7 +74,7 @@ namespace watcher
             static std::string labelDefault2String(const NodeDisplayInfo::LabelDefault &labDef);
             std::string label;
             std::string labelFont;
-            int labelPointSize;
+            double labelPointSize;
             watcher::event::Color labelColor;
 
             watcher::event::Color color; 
