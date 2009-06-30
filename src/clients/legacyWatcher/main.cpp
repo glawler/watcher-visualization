@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 
     // Is there a way to get this from within manetGLView via theApp or something?
     ui.manetGLViewWindow->setLayerMenu(ui.menuLayers);
+    ui.manetGLViewWindow->setPlaybackSlider(ui.playbackSlider);
 
     // 
     // Connect the scrolling graph dialog controller to other bits.

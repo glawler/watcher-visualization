@@ -7,14 +7,14 @@
 #include <values.h>  // DBL_MAX
 #include <GL/glut.h>
 
-#include "libwatcher/watcherGraph.h"
+#include <libwatcher/watcherGraph.h>
+#include <libwatcher/seekWatcherMessage.h>  // for epoch, eof
+#include <libwatcher/playbackTimeRange.h>  // for epoch, eof
 
 #include "manetglview.h"
 #include "watcherScrollingGraphControl.h"
 #include "singletonConfig.h"
 #include "backgroundImage.h"
-
-#include "libwatcher/seekWatcherMessage.h"  // for epoch, eof
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -912,7 +912,9 @@ manetGLView::manetGLView(QWidget *parent) :
     QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
     streamRate(1.0),
     playbackPaused(false),
-    newestMessageTimestamp(0),
+    currentMessageTimestamp(0),
+    playbackRangeEnd(0),
+    playbackRangeStart(0),
     showWallTimeinStatusString(true),
     showPlaybackTimeInStatusString(true),
     showVerboseStatusString(false),
@@ -1324,6 +1326,7 @@ void manetGLView::checkIO()
         messageStream=MessageStream::createNewMessageStream(serverName); 
         messageStream->setStreamTimeStart(SeekMessage::eof);
         messageStream->startStream();
+        messageStream->getMessageTimeRange();
     }
 
     while(messageStream && messageStream->isStreamReadable())
@@ -1339,8 +1342,17 @@ void manetGLView::checkIO()
             WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
             sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
         }
+        else if (message->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE)
+        {
+            PlaybackTimeRangePtr trm(dynamic_pointer_cast<PlaybackTimeRange>(message));
+            playbackRangeEnd=trm->max_;
+            playbackRangeStart=trm->min_;
+            updatePlaybackSliderRange();
+        }
 
-        newestMessageTimestamp=message->timestamp;
+        currentMessageTimestamp=message->timestamp;
+        if (currentMessageTimestamp>playbackRangeEnd)
+            updatePlaybackSliderRange();
 
         // Really need to make layers a member of a base class...
         GUILayer layer;
@@ -1374,6 +1386,19 @@ void manetGLView::checkIO()
     }
 
     updateGL();  // redraw
+    TRACE_EXIT();
+}
+
+void manetGLView::updatePlaybackSliderRange()
+{
+    TRACE_ENTER();
+    if (playbackSlider)
+    {
+        if (currentMessageTimestamp>playbackRangeEnd)
+            playbackRangeEnd=currentMessageTimestamp;
+        playbackSlider->setRange(0, (playbackRangeEnd-playbackRangeStart)/1000);
+        playbackSlider->setValue((currentMessageTimestamp-playbackRangeStart)/1000); 
+    }
     TRACE_EXIT();
 }
 
@@ -1483,7 +1508,7 @@ void manetGLView::drawManet(void)
         Timestamp nowTS=getCurrentTime();
         if (playbackPaused)
             buf="(paused) ";
-        else if (nowTS-2500.0<newestMessageTimestamp)
+        else if (nowTS-2500.0<currentMessageTimestamp)
             buf="(live) ";
         else
             buf="(playback) ";
@@ -1496,10 +1521,10 @@ void manetGLView::drawManet(void)
         if (showPlaybackTimeInStatusString)
         {
             buf+=" Play Time: ";
-            buf+=posix_time::to_simple_string(from_time_t(newestMessageTimestamp/1000));
+            buf+=posix_time::to_simple_string(from_time_t(currentMessageTimestamp/1000));
         }
 
-        if (nowTS-2500.0<newestMessageTimestamp)
+        if (nowTS-2500.0<currentMessageTimestamp)
             qglColor(QColor(monochromeMode ? "black" : "green")); 
         else
             qglColor(QColor(monochromeMode ? "black" : "red")); 
@@ -1518,6 +1543,36 @@ void manetGLView::drawManet(void)
         glPopMatrix();
     }
 
+}
+
+void manetGLView::setPlaybackSlider(QSlider *s)
+{
+    TRACE_ENTER();
+    if (!s)
+    {
+        LOG_WARN("Passed a null pointer to setPlaybackSlider() - that can't be good."); 
+        TRACE_EXIT();
+        return;
+    }
+
+    playbackSlider=s;
+    connect(playbackSlider, SIGNAL(sliderReleased()), this, SLOT(updatePlaybackSliderFromGUI()));
+}
+
+void manetGLView::updatePlaybackSliderFromGUI()
+{
+    TRACE_ENTER();
+    if (!messageStream || !playbackSlider)
+    {
+        TRACE_EXIT();
+        return;
+    }
+   
+    messageStream->setStreamTimeStart(playbackRangeStart+(playbackSlider->value()*1000));
+    // no need to set range or current message timestamp, they'll be updated when 
+    // we get the first message at the new timestamp
+
+    TRACE_EXIT();
 }
 
 void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)

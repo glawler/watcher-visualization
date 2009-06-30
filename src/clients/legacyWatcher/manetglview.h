@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include <QMenu>
+#include <QSlider>
 #include "logger.h"
 #include "libwatcher/watcherGraph.h"
 #include "libwatcher/messageStream.h"
@@ -24,6 +25,10 @@ class manetGLView : public QGLWidget
         QSize sizeHint() const;
 
         void setLayerMenu(QMenu *m) { layerMenu=m; }
+        void setPlaybackSlider(QSlider *s);
+
+        /** Update the slider based on current values */
+        void updatePlaybackSliderRange();
 
 public slots:
 
@@ -57,6 +62,8 @@ public slots:
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
 
         void scrollingGraphActivated(QString graphName);
+
+        void updatePlaybackSliderFromGUI();
 
         void saveConfiguration();
 
@@ -109,6 +116,10 @@ signals:
 
         /** Where we keep our dynamic layers in the GUI */
         QMenu *layerMenu;
+
+        /** The GUI slider which shows and controls backback location */
+        QSlider *playbackSlider;
+
         std::vector<watcher::StringIndexedMenuItem*> layerMenuItems;
         void addLayerMenuItem(const watcher::GUILayer &layer, bool active);
 
@@ -123,7 +134,9 @@ signals:
         
         QPoint lastPos;
 
-        watcher::Timestamp newestMessageTimestamp;
+        watcher::Timestamp currentMessageTimestamp;
+        watcher::Timestamp playbackRangeEnd;
+        watcher::Timestamp playbackRangeStart;
 
         /** 
          * Layer list is an ordered list of known layers. If the layer is currently

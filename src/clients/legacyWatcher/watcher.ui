@@ -212,6 +212,15 @@ p, li { white-space: pre-wrap; }
       <property name="enabled" >
        <bool>false</bool>
       </property>
+      <property name="toolTip" >
+       <string>Currently disabled - playback slider TBD</string>
+      </property>
+      <property name="statusTip" >
+       <string>Currently disabled - playback slider TBD</string>
+      </property>
+      <property name="whatsThis" >
+       <string>Currently disabled - playback slider TBD</string>
+      </property>
       <property name="orientation" >
        <enum>Qt::Horizontal</enum>
       </property>
