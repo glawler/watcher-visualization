@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,174 +10,180 @@
     <height>779</height>
    </rect>
   </property>
-  <property name="windowTitle" >
-   <string comment="Who watches the watcher?" >Watcher</string>
+  <property name="windowTitle">
+   <string comment="Who watches the watcher?">Watcher</string>
   </property>
-  <widget class="QWidget" name="centralwidget" >
-   <layout class="QVBoxLayout" >
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout">
     <item>
-     <widget class="manetGLView" native="1" name="manetGLViewWindow" >
-      <property name="minimumSize" >
+     <widget class="manetGLView" name="manetGLViewWindow" native="true">
+      <property name="minimumSize">
        <size>
         <width>50</width>
         <height>50</height>
        </size>
       </property>
-      <property name="focusPolicy" >
+      <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" >
+     <layout class="QHBoxLayout">
       <item>
-       <widget class="QPushButton" name="rewindToStartButton" >
-        <property name="toolTip" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+       <widget class="QPushButton" name="rewindToStartButton">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Rewind to start&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Rewind to start&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="whatsThis" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+        <property name="whatsThis">
+         <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Go to start of playback&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Go to start of playback&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="icon" >
-         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-previous-ltr.png</iconset>
+        <property name="icon">
+         <iconset resource="watcherResources.qrc">
+          <normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="rewindButton" >
-        <property name="toolTip" >
+       <widget class="QPushButton" name="rewindButton">
+        <property name="toolTip">
          <string>View stream in reverse direction at current rate  (or click again to double current rate)</string>
         </property>
-        <property name="whatsThis" >
+        <property name="whatsThis">
          <string>Go backward in time at current rate</string>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="icon" >
-         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-forward-rtl.png</iconset>
+        <property name="icon">
+         <iconset resource="watcherResources.qrc">
+          <normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="playButton" >
-        <property name="toolTip" >
+       <widget class="QPushButton" name="playButton">
+        <property name="toolTip">
          <string>Play in forward direction at normal rate</string>
         </property>
-        <property name="statusTip" >
+        <property name="statusTip">
          <string>Play in forward direction at normal rate</string>
         </property>
-        <property name="whatsThis" >
+        <property name="whatsThis">
          <string>Play in forward direction at normal rate</string>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="icon" >
-         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-play-ltr.png</iconset>
+        <property name="icon">
+         <iconset resource="watcherResources.qrc">
+          <normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pauseButton" >
-        <property name="toolTip" >
+       <widget class="QPushButton" name="pauseButton">
+        <property name="toolTip">
          <string>Pause playback</string>
         </property>
-        <property name="whatsThis" >
+        <property name="whatsThis">
          <string>Pause playback</string>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="icon" >
-         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-pause.png</iconset>
+        <property name="icon">
+         <iconset resource="watcherResources.qrc">
+          <normaloff>:/buttonImages/resources/gtk-media-pause.png</normaloff>:/buttonImages/resources/gtk-media-pause.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="forwardButton" >
-        <property name="toolTip" >
+       <widget class="QPushButton" name="forwardButton">
+        <property name="toolTip">
          <string>View stream in forward direction at current rate (or click again to double current rate)</string>
         </property>
-        <property name="whatsThis" >
+        <property name="whatsThis">
          <string>Go forward in time at current rate</string>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="icon" >
-         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-forward-ltr.png</iconset>
+        <property name="icon">
+         <iconset resource="watcherResources.qrc">
+          <normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="forwardToEndButton" >
-        <property name="toolTip" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+       <widget class="QPushButton" name="forwardToEndButton">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Forward to end&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Forward to end&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="whatsThis" >
-         <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+        <property name="whatsThis">
+         <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Forward to end of playback (go to live view)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Forward to end of playback (go to live view)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="icon" >
-         <iconset resource="watcherResources.qrc" >:/buttonImages/resources/gtk-media-next-ltr.png</iconset>
+        <property name="icon">
+         <iconset resource="watcherResources.qrc">
+          <normaloff>:/buttonImages/resources/gtk-media-next-ltr.png</normaloff>:/buttonImages/resources/gtk-media-next-ltr.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="streamRateSpinBox" >
-        <property name="toolTip" >
+       <widget class="QDoubleSpinBox" name="streamRateSpinBox">
+        <property name="toolTip">
          <string>Set playback rate</string>
         </property>
-        <property name="whatsThis" >
+        <property name="whatsThis">
          <string>Set playback rate</string>
         </property>
-        <property name="accelerated" >
+        <property name="accelerated">
          <bool>true</bool>
         </property>
-        <property name="correctionMode" >
+        <property name="correctionMode">
          <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
         </property>
-        <property name="keyboardTracking" >
+        <property name="keyboardTracking">
          <bool>false</bool>
         </property>
-        <property name="minimum" >
+        <property name="minimum">
          <double>-100.000000000000000</double>
         </property>
-        <property name="maximum" >
+        <property name="maximum">
          <double>100.000000000000000</double>
         </property>
-        <property name="singleStep" >
+        <property name="singleStep">
          <double>0.500000000000000</double>
         </property>
-        <property name="value" >
+        <property name="value">
          <double>1.000000000000000</double>
         </property>
        </widget>
       </item>
       <item>
        <spacer>
-        <property name="orientation" >
+        <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-        <property name="sizeHint" >
+        <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
           <height>20</height>
@@ -185,22 +192,22 @@ p, li { white-space: pre-wrap; }
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="fitToWindowButton" >
-        <property name="text" >
+       <widget class="QPushButton" name="fitToWindowButton">
+        <property name="text">
          <string>&amp;Fit to Window</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="resetPositionButton" >
-        <property name="text" >
+       <widget class="QPushButton" name="resetPositionButton">
+        <property name="text">
          <string>&amp;Reset Postition</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="quitButton" >
-        <property name="text" >
+       <widget class="QPushButton" name="quitButton">
+        <property name="text">
          <string>&amp;Quit</string>
         </property>
        </widget>
@@ -208,122 +215,150 @@ p, li { white-space: pre-wrap; }
      </layout>
     </item>
     <item>
-     <widget class="QSlider" name="playbackSlider" >
-      <property name="enabled" >
+     <widget class="QSlider" name="playbackSlider">
+      <property name="enabled">
        <bool>false</bool>
       </property>
-      <property name="toolTip" >
+      <property name="toolTip">
        <string>Currently disabled - playback slider TBD</string>
       </property>
-      <property name="statusTip" >
+      <property name="statusTip">
        <string>Currently disabled - playback slider TBD</string>
       </property>
-      <property name="whatsThis" >
+      <property name="whatsThis">
        <string>Currently disabled - playback slider TBD</string>
       </property>
-      <property name="orientation" >
+      <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar" >
-   <property name="geometry" >
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>930</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuLayers" >
-    <property name="title" >
+   <widget class="QMenu" name="menuLayers">
+    <property name="title">
      <string>&amp;Layers</string>
     </property>
-    <addaction name="actionClearAllLabels" />
-    <addaction name="actionClearAllEdges" />
+    <addaction name="actionClearAllLabels"/>
+    <addaction name="actionClearAllEdges"/>
    </widget>
-   <widget class="QMenu" name="menuView" >
-    <property name="title" >
+   <widget class="QMenu" name="menuView">
+    <property name="title">
      <string>&amp;View</string>
     </property>
-    <addaction name="actionFullscreen" />
-    <addaction name="actionNormalscreen" />
-    <addaction name="actionKeyboardShortcuts" />
-    <addaction name="separator" />
-    <addaction name="action3DNodes" />
-    <addaction name="actionMonochrome" />
-    <addaction name="actionBackgroundImage" />
+    <addaction name="actionFullscreen"/>
+    <addaction name="actionNormalscreen"/>
+    <addaction name="actionKeyboardShortcuts"/>
+    <addaction name="separator"/>
+    <addaction name="action3DNodes"/>
+    <addaction name="actionMonochrome"/>
+    <addaction name="actionBackgroundImage"/>
+    <addaction name="separator"/>
+    <addaction name="actionWallTime"/>
+    <addaction name="actionPlaybackTime"/>
+    <addaction name="actionPlaybackRange"/>
    </widget>
-   <widget class="QMenu" name="menuGraph" >
-    <property name="title" >
+   <widget class="QMenu" name="menuGraph">
+    <property name="title">
      <string>&amp;Graph</string>
     </property>
    </widget>
-   <addaction name="menuLayers" />
-   <addaction name="menuView" />
-   <addaction name="menuGraph" />
+   <addaction name="menuLayers"/>
+   <addaction name="menuView"/>
+   <addaction name="menuGraph"/>
   </widget>
-  <action name="actionFullscreen" >
-   <property name="checkable" >
+  <action name="actionFullscreen">
+   <property name="checkable">
     <bool>false</bool>
    </property>
-   <property name="checked" >
+   <property name="checked">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Full Screen</string>
    </property>
   </action>
-  <action name="action3DNodes" >
-   <property name="checkable" >
+  <action name="action3DNodes">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked" >
+   <property name="checked">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;3D Nodes</string>
    </property>
   </action>
-  <action name="actionMonochrome" >
-   <property name="checkable" >
+  <action name="actionMonochrome">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Monochrome</string>
    </property>
   </action>
-  <action name="actionNormalscreen" >
-   <property name="text" >
-    <string>Normal Screen</string>
+  <action name="actionNormalscreen">
+   <property name="text">
+    <string>&amp;Normal Screen</string>
    </property>
   </action>
-  <action name="actionClearAllLabels" >
-   <property name="text" >
+  <action name="actionClearAllLabels">
+   <property name="text">
     <string>Clear &amp;All Labels</string>
    </property>
   </action>
-  <action name="actionClearAllEdges" >
-   <property name="text" >
+  <action name="actionClearAllEdges">
+   <property name="text">
     <string>Clear All &amp;Edges</string>
    </property>
   </action>
-  <action name="actionBackgroundImage" >
-   <property name="checkable" >
+  <action name="actionBackgroundImage">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked" >
+   <property name="checked">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Background Image</string>
    </property>
   </action>
-  <action name="actionKeyboardShortcuts" >
-   <property name="text" >
+  <action name="actionKeyboardShortcuts">
+   <property name="text">
     <string>&amp;Keyboard Shortcuts</string>
+   </property>
+  </action>
+  <action name="actionWallTime">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Wall Time</string>
+   </property>
+  </action>
+  <action name="actionPlaybackTime">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Playback Time</string>
+   </property>
+  </action>
+  <action name="actionPlaybackRange">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Playback &amp;Range</string>
    </property>
   </action>
  </widget>
@@ -331,7 +366,7 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>manetGLView</class>
    <extends>QWidget</extends>
-   <header location="global" >manetglview.h</header>
+   <header location="global">manetglview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -348,7 +383,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>manetGLViewWindow</tabstop>
  </tabstops>
  <resources>
-  <include location="watcherResources.qrc" />
+  <include location="watcherResources.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -357,11 +392,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>resetPosition()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>760</x>
      <y>572</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>454</x>
      <y>295</y>
     </hint>
@@ -373,11 +408,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>fitToWindow()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>647</x>
      <y>572</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>454</x>
      <y>295</y>
     </hint>
@@ -389,11 +424,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>toggleThreeDView(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>382</x>
      <y>295</y>
     </hint>
@@ -405,11 +440,11 @@ p, li { white-space: pre-wrap; }
    <receiver>action3DNodes</receiver>
    <slot>setChecked(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>382</x>
      <y>295</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
@@ -421,11 +456,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>toggleMonochrome(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>382</x>
      <y>295</y>
     </hint>
@@ -437,11 +472,11 @@ p, li { white-space: pre-wrap; }
    <receiver>MainWindow</receiver>
    <slot>showFullScreen()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>382</x>
      <y>298</y>
     </hint>
@@ -453,11 +488,11 @@ p, li { white-space: pre-wrap; }
    <receiver>MainWindow</receiver>
    <slot>showNormal()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>382</x>
      <y>298</y>
     </hint>
@@ -469,11 +504,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>clearAllEdges()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>382</x>
      <y>295</y>
     </hint>
@@ -485,11 +520,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>clearAllLabels()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>382</x>
      <y>295</y>
     </hint>
@@ -501,11 +536,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>toggleBackgroundImage(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>382</x>
      <y>295</y>
     </hint>
@@ -517,11 +552,11 @@ p, li { white-space: pre-wrap; }
    <receiver>actionBackgroundImage</receiver>
    <slot>setChecked(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>382</x>
      <y>295</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
@@ -533,11 +568,11 @@ p, li { white-space: pre-wrap; }
    <receiver>actionBackgroundImage</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>382</x>
      <y>295</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
@@ -549,11 +584,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>rewindToStartOfPlayback()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>24</x>
      <y>661</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>463</x>
      <y>340</y>
     </hint>
@@ -565,11 +600,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>reversePlayback()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>64</x>
      <y>661</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>463</x>
      <y>340</y>
     </hint>
@@ -581,11 +616,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>pausePlayback()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>144</x>
      <y>661</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>463</x>
      <y>340</y>
     </hint>
@@ -597,11 +632,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>forwardPlayback()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>184</x>
      <y>661</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>463</x>
      <y>340</y>
     </hint>
@@ -613,11 +648,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>forwardToEndOfPlayback()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>224</x>
      <y>661</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>463</x>
      <y>340</y>
     </hint>
@@ -629,11 +664,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>playbackSetSpeed(double)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>280</x>
      <y>732</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>464</x>
      <y>375</y>
     </hint>
@@ -645,11 +680,11 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>normalPlayback()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>104</x>
      <y>731</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>464</x>
      <y>375</y>
     </hint>
@@ -661,11 +696,11 @@ p, li { white-space: pre-wrap; }
    <receiver>streamRateSpinBox</receiver>
    <slot>setValue(double)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>464</x>
      <y>375</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>280</x>
      <y>732</y>
     </hint>
@@ -677,13 +712,109 @@ p, li { white-space: pre-wrap; }
    <receiver>manetGLViewWindow</receiver>
    <slot>showKeyboardShortcuts()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>464</x>
      <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPlaybackRange</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>showPlaybackRange(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>207</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWallTime</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>showWallTime(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>207</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPlaybackTime</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>showPlaybackTime(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>207</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>checkPlaybackRange(bool)</signal>
+   <receiver>actionPlaybackRange</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>checkPlaybackTime(bool)</signal>
+   <receiver>actionPlaybackTime</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>manetGLViewWindow</sender>
+   <signal>checkWallTime(bool)</signal>
+   <receiver>actionWallTime</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>402</y>
     </hint>
    </hints>
   </connection>

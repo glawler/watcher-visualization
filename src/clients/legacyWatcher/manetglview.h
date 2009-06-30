@@ -50,6 +50,10 @@ public slots:
         void toggleBackgroundImage(bool isOn);
         void showKeyboardShortcuts(); 
 
+        void showPlaybackTime(bool isOn);
+        void showPlaybackRange(bool isOn);
+        void showWallTime(bool isOn);
+
         void pausePlayback();
         void normalPlayback();
         void reversePlayback();
@@ -78,6 +82,11 @@ signals:
         void monochromeToggled(bool isOn);
         void threeDViewToggled(bool isOn); 
         void backgroundImageToggled(bool isOn); 
+
+        void checkPlaybackTime(bool isOn);
+        void checkPlaybackRange(bool isOn);
+        void checkWallTime(bool isOn);
+
 
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
@@ -173,6 +182,7 @@ signals:
         ManetAdj manetAdjInit;
         bool showWallTimeinStatusString;
         bool showPlaybackTimeInStatusString;
+        bool showPlaybackRangeString;
         bool showVerboseStatusString;
 
         float scaleText;

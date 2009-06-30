@@ -917,6 +917,7 @@ manetGLView::manetGLView(QWidget *parent) :
     playbackRangeStart(0),
     showWallTimeinStatusString(true),
     showPlaybackTimeInStatusString(true),
+    showPlaybackRangeString(true),
     showVerboseStatusString(false),
     statusFontPointSize(10),
     statusFontName("Helvetica"),
@@ -974,6 +975,25 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
     // Could use a few more type conversions for string here...
     emit layerToggled(QString::fromStdString(string(item->layer)), item->active);
 
+    TRACE_EXIT();
+}
+
+void manetGLView::showPlaybackTime(bool isOn)
+{
+    TRACE_ENTER();
+    showPlaybackTimeInStatusString=isOn;
+    TRACE_EXIT();
+}
+void manetGLView::showPlaybackRange(bool isOn)
+{
+    TRACE_ENTER();
+    showPlaybackRangeString=isOn;
+    TRACE_EXIT();
+}
+void manetGLView::showWallTime(bool isOn)
+{
+    TRACE_ENTER();
+    showWallTimeinStatusString=isOn;
     TRACE_EXIT();
 }
 
@@ -1046,7 +1066,8 @@ bool manetGLView::loadConfiguration()
         { "displayBackgroundImage", true, &backgroundImage },
         { "showVerboseStatusString", false, &showVerboseStatusString }, 
         { "showWallTime", true, &showWallTimeinStatusString }, 
-        { "showPlaybackTime", true, &showPlaybackTimeInStatusString }
+        { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
+        { "showPlaybackRange", true, &showPlaybackRangeString }
     }; 
     for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
     {
@@ -1060,6 +1081,9 @@ bool manetGLView::loadConfiguration()
     emit threeDViewToggled(threeDView);
     emit monochromeToggled(monochromeMode);
     emit backgroundImageToggled(backgroundImage);
+    emit checkPlaybackTime(showPlaybackTimeInStatusString);
+    emit checkPlaybackRange(showPlaybackRangeString);
+    emit checkWallTime(showWallTimeinStatusString);
 
     struct 
     {
@@ -1510,6 +1534,8 @@ void manetGLView::drawManet(void)
             buf="(paused) ";
         else if (nowTS-2500.0<currentMessageTimestamp)
             buf="(live) ";
+        else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
+            buf="(end of data) ";
         else
             buf="(playback) ";
 
@@ -1520,12 +1546,21 @@ void manetGLView::drawManet(void)
         }
         if (showPlaybackTimeInStatusString)
         {
-            buf+=" Play Time: ";
+            buf+="Play Time: ";
             buf+=posix_time::to_simple_string(from_time_t(currentMessageTimestamp/1000));
+        }
+        if (showPlaybackRangeString)
+        {
+            buf+="Time Range: ";
+            buf+=posix_time::to_simple_string(from_time_t(playbackRangeStart/1000));
+            buf+=" to ";
+            buf+=posix_time::to_simple_string(from_time_t(playbackRangeEnd/1000));
         }
 
         if (nowTS-2500.0<currentMessageTimestamp)
             qglColor(QColor(monochromeMode ? "black" : "green")); 
+        else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
+            qglColor(QColor(monochromeMode ? "black" : "blue")); 
         else
             qglColor(QColor(monochromeMode ? "black" : "red")); 
 
@@ -2730,7 +2765,8 @@ void manetGLView::saveConfiguration()
         { "displayBackgroundImage", backgroundImage },
         { "showVerboseStatusString", showVerboseStatusString }, 
         { "showWallTime", showWallTimeinStatusString }, 
-        { "showPlaybackTime", showPlaybackTimeInStatusString }
+        { "showPlaybackTime", showPlaybackTimeInStatusString },
+        { "showPlaybackRange", showPlaybackRangeString }
     };
 
     for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
@@ -2898,6 +2934,7 @@ void manetGLView::forwardToEndOfPlayback()
     messageStream->setStreamTimeStart(SeekMessage::eof); 
     playbackPaused=false;
     messageStream->startStream(); 
+    currentMessageTimestamp=playbackRangeEnd;
     TRACE_EXIT();
 }
 
