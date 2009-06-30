@@ -88,6 +88,8 @@ share/info/dir
 ^bin/floatinglabeltest
 ^bin/gpsMessageTest
 
+^idsCommunications/liveinterim
+
 #
 ^src/clients/legacyWatcher/Makefile
 ^src/clients/legacyWatcher/moc_*
