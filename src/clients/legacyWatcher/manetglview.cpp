@@ -1374,9 +1374,11 @@ void manetGLView::checkIO()
             updatePlaybackSliderRange();
         }
 
-        currentMessageTimestamp=message->timestamp;
-        if (currentMessageTimestamp>playbackRangeEnd)
+        if (isFeederEvent(message->type))
+        {
+            currentMessageTimestamp=message->timestamp;
             updatePlaybackSliderRange();
+        }
 
         // Really need to make layers a member of a base class...
         GUILayer layer;
@@ -1531,27 +1533,27 @@ void manetGLView::drawManet(void)
 
         Timestamp nowTS=getCurrentTime();
         if (playbackPaused)
-            buf="(paused) ";
+            buf="(paused)";
         else if (nowTS-2500.0<currentMessageTimestamp)
-            buf="(live) ";
+            buf="(live)";
         else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
-            buf="(end of data) ";
+            buf="(end of data)";
         else
-            buf="(playback) ";
+            buf="(playback)";
 
         if (showWallTimeinStatusString)
         {
-            buf+="Wall Time:";
+            buf+=" Wall Time: ";
             buf+=posix_time::to_simple_string(now);
         }
         if (showPlaybackTimeInStatusString)
         {
-            buf+="Play Time: ";
+            buf+=" Play Time: ";
             buf+=posix_time::to_simple_string(from_time_t(currentMessageTimestamp/1000));
         }
         if (showPlaybackRangeString)
         {
-            buf+="Time Range: ";
+            buf+=" Time Range: ";
             buf+=posix_time::to_simple_string(from_time_t(playbackRangeStart/1000));
             buf+=" to ";
             buf+=posix_time::to_simple_string(from_time_t(playbackRangeEnd/1000));
@@ -2037,7 +2039,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_Q:     zoomOut(); break;
         case Qt::Key_W:     zoomIn(); break;
         case Qt::Key_A:     scaleText++; break;
-        case Qt::Key_S:     scaleText--; break;
+        case Qt::Key_S:     scaleText--; if (scaleText<1) scaleText=1; break;
         case Qt::Key_Z:     compressDistance(); break;
         case Qt::Key_X:     expandDistance(); break;
         case Qt::Key_E:     rotateX(-5.0); break;
@@ -2875,6 +2877,7 @@ void manetGLView::pausePlayback()
     TRACE_ENTER();
     playbackPaused=true;
     messageStream->stopStream(); 
+    messageStream->getMessageTimeRange();
     TRACE_EXIT();
 }
 void manetGLView::normalPlayback()
@@ -2883,6 +2886,7 @@ void manetGLView::normalPlayback()
     playbackPaused=false;
     playbackSetSpeed(1.0);
     messageStream->startStream(); 
+    messageStream->getMessageTimeRange();
     TRACE_EXIT();
 }
 void manetGLView::reversePlayback()
@@ -2913,6 +2917,7 @@ void manetGLView::forwardPlayback()
         playbackPaused=false;
         messageStream->startStream(); 
     }
+    messageStream->getMessageTimeRange();
     TRACE_EXIT();
 }
 void manetGLView::rewindToStartOfPlayback()
@@ -2935,6 +2940,7 @@ void manetGLView::forwardToEndOfPlayback()
     playbackPaused=false;
     messageStream->startStream(); 
     currentMessageTimestamp=playbackRangeEnd;
+    messageStream->getMessageTimeRange();
     TRACE_EXIT();
 }
 
