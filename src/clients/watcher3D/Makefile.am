@@ -6,7 +6,9 @@ LIBS+=-losgDB -ldtABC -ldtCore -ldtTerrain -ldtActors -ldtGame # for Delta3D
 
 BUILT_SOURCES=watcher3D.cfg watcher3D.log.properties 
 
-lib_LTLIBRARIES=libActors.la libWatcher3D.la
+lib_LTLIBRARIES=\
+	libActors.la \
+	libWatcher3D.la
 
 libActors_la_SOURCES=libActors.cpp nodeActor.cpp nodeActorProxy.cpp edgeActor.cpp edgeActorProxy.cpp
 libActors_la_LIBADD = ../../logger/liblogger.la

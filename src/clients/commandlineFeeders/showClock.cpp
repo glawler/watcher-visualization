@@ -173,6 +173,7 @@ int main(int argc, char **argv)
             labMess->expiration=loopTime*2000;  // 2000 to stop blinking
             EdgeMessagePtr edgeMess(new EdgeMessage(centerId, *nodeData[i].id, layer, nodeData[i].color, 2));
             edgeMess->middleLabel=labMess;
+            edgeMess->expiration=loopTime*2000;
             if(!client.sendMessage(edgeMess))
             {
                 LOG_ERROR("Error sending edge message: " << *edgeMess);
