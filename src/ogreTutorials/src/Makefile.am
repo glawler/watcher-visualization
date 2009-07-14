@@ -18,7 +18,8 @@ bin_PROGRAMS= \
 	bufferedInput \
 	ogreStartupSequence \
 	ceguiAndOgre \
-	multipleSceneManagers 
+	multipleSceneManagers \
+	walkingBetweenPointsBasicQuaternions
 
 SampleApp_SOURCES=SampleApp.cpp
 tutorial_1_SOURCES=tutorial_1.cpp
@@ -29,5 +30,6 @@ bufferedInput_SOURCES=bufferedInput.cpp
 ogreStartupSequence_SOURCES=ogreStartupSequence.cpp
 ceguiAndOgre_SOURCES=ceguiAndOgre.cpp
 multipleSceneManagers_SOURCES=multipleSceneManagers.cpp
+walkingBetweenPointsBasicQuaternions_SOURCES=walkingBetweenPointsBasicQuaternions.cpp
 
 
