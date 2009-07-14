@@ -12,22 +12,22 @@ LDADD+=-lCEGUIBase -lCEGUIOgreRenderer
 bin_PROGRAMS= \
 	SampleApp \
 	tutorial_1 \
-	tutorial_2 \
-	tutorial_3 \
-	tutorial_4 \
-	tutorial_5 \
-	tutorial_6 \
-	tutorial_7 \
-	tutorial_8 
+	camerasLightsShadows \
+	skyFogRootObject \
+	frameListenersUnbufferedInput \
+	bufferedInput \
+	ogreStartupSequence \
+	ceguiAndOgre \
+	multipleSceneManagers 
 
 SampleApp_SOURCES=SampleApp.cpp
 tutorial_1_SOURCES=tutorial_1.cpp
-tutorial_2_SOURCES=tutorial_2.cpp
-tutorial_3_SOURCES=tutorial_3.cpp
-tutorial_4_SOURCES=tutorial_4.cpp
-tutorial_5_SOURCES=tutorial_5.cpp
-tutorial_6_SOURCES=tutorial_6.cpp
-tutorial_7_SOURCES=tutorial_7.cpp
-tutorial_8_SOURCES=tutorial_8.cpp
+camerasLightsShadows_SOURCES=camerasLightsShadows.cpp
+skyFogRootObject_SOURCES=skyFogRootObject.cpp
+frameListenersUnbufferedInput_SOURCES=frameListenersUnbufferedInput.cpp
+bufferedInput_SOURCES=bufferedInput.cpp
+ogreStartupSequence_SOURCES=ogreStartupSequence.cpp
+ceguiAndOgre_SOURCES=ceguiAndOgre.cpp
+multipleSceneManagers_SOURCES=multipleSceneManagers.cpp
 
 
