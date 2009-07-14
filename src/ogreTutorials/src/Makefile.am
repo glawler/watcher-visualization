@@ -19,7 +19,8 @@ bin_PROGRAMS= \
 	ogreStartupSequence \
 	ceguiAndOgre \
 	multipleSceneManagers \
-	walkingBetweenPointsBasicQuaternions
+	walkingBetweenPointsBasicQuaternions \
+	raySceneQueriesAndMouseUsage
 
 SampleApp_SOURCES=SampleApp.cpp
 tutorial_1_SOURCES=tutorial_1.cpp
@@ -31,5 +32,7 @@ ogreStartupSequence_SOURCES=ogreStartupSequence.cpp
 ceguiAndOgre_SOURCES=ceguiAndOgre.cpp
 multipleSceneManagers_SOURCES=multipleSceneManagers.cpp
 walkingBetweenPointsBasicQuaternions_SOURCES=walkingBetweenPointsBasicQuaternions.cpp
+raySceneQueriesAndMouseUsage_SOURCES=raySceneQueriesAndMouseUsage.cpp
+
 
 

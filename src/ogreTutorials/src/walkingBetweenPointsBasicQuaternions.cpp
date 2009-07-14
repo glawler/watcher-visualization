@@ -122,7 +122,7 @@ protected:
         // Create the walking list
         mWalkList.push_back(Vector3(550.0f,  0.0f,  50.0f));
         mWalkList.push_back(Vector3(-100.0f,  0.0f, -100.0f));
-        mWalkList.push_back(Vector3(-100.0f,  0.0f, 0f));
+        mWalkList.push_back(Vector3(-100.0f,  0.0f, 0.0f));
         mWalkList.push_back(Vector3(100.0f,  0.0f, -75.0f));
 
         // Create objects so we can see movement
