@@ -22,6 +22,8 @@ namespace watcher
          * 
          * @author Geoff Lawler <Geoff.Lawler@cobham.com>
          * @date 2009-05-06
+         *
+         * Command line executable for this message: @ref sendConnectivityMessage
          */
         class ConnectivityMessage : public Message
         {

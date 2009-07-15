@@ -1,6 +1,6 @@
 /**
- * @file connectivityMessage.h
- * @author Geoff Lawler <Geoff.Lawler@cobham.com>
+ * @file connectivityMessage.cpp
+ * @author geoff lawler <geoff.lawler@cobham.com>
  * @date 2009-05-06
  */
 #include <boost/asio.hpp>

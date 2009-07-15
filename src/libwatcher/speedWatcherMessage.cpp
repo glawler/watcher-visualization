@@ -1,5 +1,5 @@
-/** @file
- * @author Michael Elkins <michael.elkins@sparta.com>
+/** @file speedWatcherMessage.cpp
+ * @author Michael Elkins <michael.elkins@cobham.com>
  * @date 2009-03-20
  */
 #include "watcherSerialize.h"

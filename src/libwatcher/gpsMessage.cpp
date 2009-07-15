@@ -1,8 +1,12 @@
+/**
+ * @file gpsMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #include "watcherSerialize.h"
 #include "gpsMessage.h"
 
 using namespace std;
-
 
 namespace watcher {
     namespace event {
@@ -67,7 +71,7 @@ namespace watcher {
         std::ostream &GPSMessage::toStream(std::ostream &out) const
         {
             TRACE_ENTER();
-            
+
             out << std::setprecision(std::numeric_limits<double>::digits10 + 2); 
             Message::toStream(out);
             out << " x: " << x;
@@ -99,7 +103,7 @@ namespace watcher {
             ar & layer; 
             TRACE_EXIT();
         }
-    }
-}
+    } // ns event
+} // ns watcher
 
 BOOST_CLASS_EXPORT(watcher::event::GPSMessage);

@@ -1,6 +1,6 @@
 /** 
- * @file
- * @author Geoff Lawler <geoff.lawler@sparta.com>
+ * @file nodeStatusMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
  * @date 2009-03-23
  */
 #include "watcherSerialize.h"
