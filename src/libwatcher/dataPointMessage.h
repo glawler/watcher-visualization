@@ -11,6 +11,11 @@
 
 namespace watcher {
     namespace event {
+        /** 
+         * @class DataPointMessage
+         *
+         * Command line executable for this message: @ref sendDataPointMessage
+         */
         class DataPointMessage : public Message {
             public:
 

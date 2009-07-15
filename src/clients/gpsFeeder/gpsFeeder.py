@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# @file gpsFeeder.py
+# @author Geoff Lawler <geoff.lawler@cobham.com> 
+# @date 2009-07-15
+
 import gps, os, time, socket, subprocess
 
 def connect():

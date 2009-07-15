@@ -16,17 +16,39 @@
 
 namespace watcher {
     namespace event {
+        /**
+         * @class LabelMessage
+         *
+         * This class encapsulates a message containing a text label for a node. This message is sent to a watcherd instance. The GUI(s) 
+         * attached to that watcherd instance then draw a label with the given text and attributes on the node.
+         *
+         * Command line executable for this message: @ref sendLabelMessage
+         */
         class LabelMessage : public Message {
             public:
-                // The data
+
+                /** The text of the label */
                 std::string label;
+
+                /** The fontsize of the text drawn */
                 float fontSize;
+
+                /** The forground color of the label */
                 Color foreground;
+
+                /** The background color of the label */
                 Color background;
-                Timestamp  expiration;    // this should be a float
+
+                /** How long the label lasts in milliseconds */
+                Timestamp  expiration;   
+
+                /** Whether or not to add or remove a label */
                 bool addLabel;              // add or remove the label depending on true or false here.
+
+                /** Layer the label should be on */
                 GUILayer layer;             // which layer to put the label on 
 
+                /** The coordinates of the label, if free floating */
                 float lat, lng, alt; 
 
                 /**
@@ -54,12 +76,33 @@ namespace watcher {
                  */
                 LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const int fontSize=0);
 
+                /** copy a the message 
+                 * @param other, the message to copy 
+                 */
                 LabelMessage(const LabelMessage &other);
 
+                /** Compare this message against another.
+                 * @param other, the message to compare to
+                 * @returns bool, true if equal, false otherwise
+                 */
                 bool operator==(const LabelMessage &other) const;
+
+                /** Set this message equal to another
+                 * @param other, the message to set this message equal to
+                 * @ret ColorMessage, a reference to this instance
+                 */
                 LabelMessage &operator=(const LabelMessage &other);
 
+                /** Write this message to <b>out</b> in human readable format 
+                 * @param out, the stream to write to
+                 * @return the stream that was written to
+                 */
                 virtual std::ostream &toStream(std::ostream &out) const;
+
+                /** Write this message to <b>out</b> in human readable format 
+                 * @param out, the stream to write to
+                 * @return the stream that was written to
+                 */
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
             private:

@@ -1,3 +1,26 @@
+/** 
+ * @file watcherHierarchyClient.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
+/**
+ * @page watcherHierarchyClient 
+ *
+ * watcherHierarchyClient is the glue between hierachy land and watcher land. watcherHierarchyClient, when started, connects
+ * to a running hierarchy daemon and subscribes to all watcher related messages. When it receives a watcher related
+ * messages, it converts the message into something the watcher system can understand and sends it to the watcher daemon
+ * that it is connected to. watcherHierarchyClient is meant to offer backward compatibility to all "old style" watcher 
+ * clients. It acts as a go-between between old hierarchy messages and the new watcher messages. 
+ *
+ * Usage: 
+ * @{
+ * <b>watcherHierarchyClient -s watcher_daemon_name_or_address -u hierachy_daemon_node_address</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s, --server=address|name</b>, The address or name of the node running watcherd
+ * @}
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

@@ -1,3 +1,8 @@
+/** 
+ * @file watcherGraphDialog.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef WATCHER_GRAPH_DIALOG_H_YOU_BETCHA
 #define WATCHER_GRAPH_DIALOG_H_YOU_BETCHA
 

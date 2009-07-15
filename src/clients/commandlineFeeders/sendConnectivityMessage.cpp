@@ -1,3 +1,46 @@
+/**
+ * @file sendConnectivityMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15
+ *
+ * @page sendConnectivityMessage 
+ *
+ * sendConnectivityMessage is a test node command line program that sends a watcher::event::ConnectivityMessage message to the watcher daemon, specifying the current list of neighbors that the node has. 
+ * The GUI(s) that are listening to that daemon, then draw the neighbors somehow. 
+ *
+ * Usage: 
+ * @{
+ * <b>showColor -s server [optional args] nbr1 nbr2 nbr3 ... nbrN</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s, --server=address</b>, The addres of the node running watcherd
+ * @arg <b>nbr1 nbr2 nbr3 ... nbrN</b> - the list if neighbors by ipaddress
+ * @}
+ * Optional args:
+ * @arg <b>-l, --layer=layer</b>, the layer that these neighbors should show up on when displayed in the GUI(s)
+ * @arg <b>-p, --logProps=log.propertiesFile</b>, the log properties file to use
+ * @arg <b>-f, --fromNode=fromNodeAddr</b>, the node that has these neighbors, if not given the local node is assumed.
+ *
+ * @{
+ *
+ * Examples:
+ * @{
+ *
+ * This tells the GUI(s) that are listening to the daemon running on 'glory' the local test node has neighbors 192.168.1.101 and 192.168.1.102
+ * @code 
+ * sendConnectivityMessage -s glory 192.168.1.101 192.168.1.102
+ * @endcode
+ *
+ * This tells the GUI(s) that are listening to the daemon running on 'glory' the local test node 192.168.1.101 has neighbor nodes 192.168.1.110-192.168.1.115 and 
+ * they should be displayed on the "children" layer. (Note that 192.168.1.11{0..5} is a bashism which expands to the sequenctial list of nodes 192.168.1.110-192.168.1.115.) 
+ * @code 
+ * sendConnectivityMessage -s glory -l children -f 192.168.1.101 192.168.1.11{0..5}
+ * @endcode
+ *
+ * @}
+ */
+
 #include <errno.h>
 #include <stdlib.h>
 #include <getopt.h>

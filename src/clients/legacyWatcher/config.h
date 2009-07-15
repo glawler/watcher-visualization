@@ -1,3 +1,8 @@
+/** 
+ * @file config.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef CONFIG_H
 #define CONFIG_H
 

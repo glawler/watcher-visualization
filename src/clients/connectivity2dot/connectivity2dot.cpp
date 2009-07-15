@@ -1,3 +1,64 @@
+/** 
+ * @file connectivity2dot.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
+/**
+ * @page connectivity2dot 
+ *
+ *
+ * <b>connectivity2dot</b> is a command line program that generates a dot file of the current test node connectivity graph. To use, start the 
+ * program then send it a USR1 signal. When it gets the signal, it will dump the dot-ready graph represenation into an output file. 'dot' is a
+ * program that can generate images/PDF files for graphs. See @ref www.graphviz.org for more details.
+ *
+ * Usage: 
+ * @{
+ * <b>connectivity2dot -s server [optional args]</b>
+ *
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s, --server=address|name</b>, The address or name of the node running watcherd
+ * @}
+ * Optional args:
+ * @arg <b>-c, --config=file</b>, The cfg file for connectivity2dot. If not given <i>connectivity2dot.cfg</i> is assumed.
+ * @arg <b>-h, --help</b>, Show help message
+ *
+ * Here is a sample cfg file:
+ * @code 
+ * logPropertiesFile = "connectivity2dot.log.properties";
+ * server = "glory";
+ * service = "watcherd";
+ * outfile = "connectivity.dot";
+ * @endcode
+ *
+ * Here's an example of a dot generated graph: 
+ * @dot 
+ * digraph G {
+ * 0[label="nodeId: 192.168.1.100\ngps: 10,10,0" color=red];
+ * 1[label="nodeId: 192.168.1.101\ngps: 15.6631,14.1145,0" color=blue];
+ * 2[label="nodeId: 192.168.1.102\ngps: 0.864545,14.0674,1" color=red];
+ * 3[label="nodeId: 192.168.1.103\ngps: 2.822545,15.0271,1" color=purple];
+ * 0->1 [ color=red];
+ * 0->2 [ color=blue];
+ * 0->3 [ color=green];
+ * 2->3 [ color=black];
+ * 3->0 
+ * 3->1
+ * }
+ * @enddot
+ *
+ * Here is a bash script that will dump a new pdf of the test bed every 5 seconds (it assumes connectivity2dot is already running):
+ * @code
+ * #!/usr/bin/env bash
+ *
+ * while true; do 
+ *      pkill -USR1 connectivity2 && dot -Tpdf < connectivity.dot > connectivity.$(date +%Y%m%d_%H%M%S).pdf
+ *      sleep 5
+ * done
+ * @endcode
+ *
+ */
 #include <iostream>
 #include <fstream>
 #include <csignal>
@@ -14,6 +75,7 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace libconfig;
 
+/** A place to keep things that connectivity2dot uses from polluting the global namespace */
 namespace connectivity2dot
 {
     sig_atomic_t dumpGraph;

@@ -1,3 +1,8 @@
+/** 
+ * @file colorTest.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #include <stdlib.h>
 
 #define BOOST_TEST_MODULE watcher::Color test

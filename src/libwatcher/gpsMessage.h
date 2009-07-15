@@ -14,13 +14,11 @@
 namespace watcher {
     namespace event {
         /** 
-         *
+         * @class GPSMessage
          * This class encapsulates a message containing current coordinates for a node. This message is sent to a watcherd instance. The GUI(s) 
          * attached to that watcherd instance then use this information to update the location of the node that this message references. 
          *
          * This class supports lat/long/alt and UTM coordinates. 
-         *
-         * @class GPSMessage
          *
          * Command line executable for this message: @ref sendGPSMessage
          */
@@ -57,14 +55,14 @@ namespace watcher {
                 GUILayer layer; 
 
                 /** Create a GPSMessage 
-                 * @arg x, the x coordinate
-                 * @arg y, the y coordinate
-                 * @arg z, the z coordinate
+                 * @param x, the x coordinate
+                 * @param y, the y coordinate
+                 * @param z, the z coordinate
                  */
                 GPSMessage(const double &x=0.0, const double &y=0.0, const double &z=0.0);
 
                 /** Copy a GPSMessage
-                 * @arg other, the message to copy 
+                 * @param other, the message to copy 
                  */
                 GPSMessage(const GPSMessage &other);
 
@@ -72,17 +70,17 @@ namespace watcher {
                 bool operator==(const GPSMessage &other) const;
 
                 /** Set a GPSMessage equal to another 
-                 * @arg other, the GPSMessage to set this instance to be equal to
+                 * @param other, the GPSMessage to set this instance to be equal to
                  */
                 GPSMessage &operator=(const GPSMessage &other);
 
                 /** Write the GPS message to <b>out</b> in human readable format 
-                 * @arg out, the stream to write to
+                 * @param out, the stream to write to
                  * @return the stream that was written to
                  */
                 virtual std::ostream &toStream(std::ostream &out) const;
                 /** Write the GPS message to <b>out</b> in human readable format 
-                 * @arg out, the stream to write to
+                 * @param out, the stream to write to
                  * @return the stream that was written to
                  */
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }

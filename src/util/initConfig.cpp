@@ -7,10 +7,10 @@
 #include "getopt.h"
 
 using namespace watcher;
-using namespace libconfig;
 using namespace std;
 namespace bf=boost::filesystem;
 
+using namespace libconfig;
 static bool readConfig(libconfig::Config &config, const string &filename)
 {
     try

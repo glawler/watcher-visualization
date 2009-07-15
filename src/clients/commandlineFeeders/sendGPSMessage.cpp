@@ -1,3 +1,44 @@
+/**
+ * @file sendGPSMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ *
+ * @page sendGPSMessage 
+ *
+ * sendGPSMessage is a test node command line program that sends a watcher::event::GPSMessage message to a watcher daemon, specifing a node's current GPS coordinates.
+ *
+ * Usage: 
+ * @{
+ * <b>sendGPSMessage -s server -x value -y value -z value [optional args]</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s, --server=address</b>, The address or name of the node running watcherd to which the message is sent.
+ * @arg <b>-x, --latitude=value</b>, The latitude of the node.
+ * @arg <b>-y, --longitude=value</b>, The longitude of the node.
+ * @arg <b>-z, --altitude=value</b>, The altitude of the node.
+ * @}
+ * Optional args:
+ * @arg <b>-n, --fromNode=address|name</b>, The node that the coordinates refer to. If not given, assume the local node. 
+ * @arg <b>-l, --logProps</b>, log.properties file, which controls logging for this program
+ * @arg <b>-h, --help</b>, Show help message
+ *
+ * @{
+ * Examples:
+ * @{
+ *
+ * This tells the GUI(s) attached to the watcherd on glory that node 192.168.1.101 is now at 79.23123123, 43.123123123, 20
+ * @code 
+ * sendGPSMessage -s glory -n 192.168.1.101 -x 79.23123123 -y 43.123123123 -z 20
+ * @endcode
+ *
+ * This tells the GUI(s) attached to the watcherd on glory that the local node is at 0.0123123 0.123123123 123
+ * @code 
+ * sendGPSMessage --server glory -n 192.168.1.101 -x 0.0123123 -y 0.123123123 -z 123
+ * @endcode
+ * @}
+ * @}
+ */
 #include <errno.h>
 #include <stdlib.h>
 #include <getopt.h>

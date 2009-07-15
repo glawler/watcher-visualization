@@ -1,6 +1,7 @@
 /**
  * @file messageStream.h
- * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @author Geoff Lawler <geoff.lawler@sparta.com>
+ * @date 2009-04-03
  * @date 2009-07-15
  */
 #ifndef WATCHER_MESSAGE_STREAM_H
@@ -28,207 +29,208 @@ namespace watcher
 
     /** 
      * @class MessageStream
-     * @author Geoff Lawler <geoff.lawler@sparta.com>
-     * @date 2009-04-03
+     *
+     *
+     * The MessageStream class can be tested using the command line based client @ref messageStream2Text. 
      */
     class MessageStream : 
         public WatcherdAPIMessageHandler, 
         public boost::enable_shared_from_this<MessageStream>
     {
-            /** 
-             * MessageStream()
-             * Create a message stream. 
-             * @param serverName - the machine name running the message server. 
-             * @param (optional) startTime - the time to start the stream at. 
-             *      0 == give current messages - "real time" stream
-             *      non-zero == start message playback at the Timestamp given
-             *      default value is 0
-             * @param (optional) streamRate - If positive, stream goes forward in time. If negative, then backwards. 
-             *      1.0 -- "realtime"
-             *      < 1.0 -- slower than "real time" by factor given
-             *      > 1.0 -- faster than "real time" by factor given
-             *      default value is 1.0
-             */
-             MessageStream(
-                     const std::string &serverName, 
-                     const std::string &service="watcherd",  // can be port num or service name
-                     const Timestamp &startTime=0, 
-                     const float streamRate=1.0); 
+        /** 
+         * MessageStream()
+         * Create a message stream. 
+         * @param serverName - the machine name running the message server. 
+         * @param (optional) startTime - the time to start the stream at. 
+         *      0 == give current messages - "real time" stream
+         *      non-zero == start message playback at the Timestamp given
+         *      default value is 0
+         * @param (optional) streamRate - If positive, stream goes forward in time. If negative, then backwards. 
+         *      1.0 -- "realtime"
+         *      < 1.0 -- slower than "real time" by factor given
+         *      > 1.0 -- faster than "real time" by factor given
+         *      default value is 1.0
+         */
+        MessageStream(
+                const std::string &serverName, 
+                const std::string &service="watcherd",  // can be port num or service name
+                const Timestamp &startTime=0, 
+                const float streamRate=1.0); 
 
         public:
 
-            static MessageStreamPtr createNewMessageStream(
-                    const std::string &serverName, 
-                    const Timestamp &startTime=0, 
-                    const float streamRate=1.0,
-                    bool reconnect=false);
+        static MessageStreamPtr createNewMessageStream(
+                const std::string &serverName, 
+                const Timestamp &startTime=0, 
+                const float streamRate=1.0,
+                bool reconnect=false);
 
-            static MessageStreamPtr createNewMessageStream(
-                    const std::string &serverName, 
-                    const std::string &portNumber,  // Connect on a non-standard port (different port than watcherd service)
-                    const Timestamp &startTime=0, 
-                    const float streamRate=1.0,
-                    bool reconnect=false);
+        static MessageStreamPtr createNewMessageStream(
+                const std::string &serverName, 
+                const std::string &portNumber,  // Connect on a non-standard port (different port than watcherd service)
+                const Timestamp &startTime=0, 
+                const float streamRate=1.0,
+                bool reconnect=false);
 
-            void initConnection(bool reconnect);
+        void initConnection(bool reconnect);
 
-            /**
-             * Death to all humans
-             */
-            virtual ~MessageStream();
+        /**
+         * Death to all humans
+         */
+        virtual ~MessageStream();
 
-            /**
-             * startStream()
-             * Start the stream of messages from the message server.
-             * @return bool: true if started, false if not (connection error, stream already started).
-             */
-            bool startStream();
+        /**
+         * startStream()
+         * Start the stream of messages from the message server.
+         * @return bool: true if started, false if not (connection error, stream already started).
+         */
+        bool startStream();
 
-            /**
-             * stopStream()
-             * Stop the stream of messages from the message server.
-             * @return bool: true if stopped, false if not (connection error, stream already stopped).
-             */
-            bool stopStream();
+        /**
+         * stopStream()
+         * Stop the stream of messages from the message server.
+         * @return bool: true if stopped, false if not (connection error, stream already stopped).
+         */
+        bool stopStream();
 
-            /**
-             * setStreamTimeStart()
-             * Set or reset the stream's start time. 
-             * @param startTime - the time to start the stream at. 
-             *      SeekMessage::eof == give current messages - "real time" stream
-             *      SeekMesssage::epoch == start at beginning
-             *      non-zero == start message playback at the Timestamp given
-             * @return - always returns true
-             */
-             bool setStreamTimeStart(const Timestamp &startTime); 
+        /**
+         * setStreamTimeStart()
+         * Set or reset the stream's start time. 
+         * @param startTime - the time to start the stream at. 
+         *      SeekMessage::eof == give current messages - "real time" stream
+         *      SeekMesssage::epoch == start at beginning
+         *      non-zero == start message playback at the Timestamp given
+         * @return - always returns true
+         */
+        bool setStreamTimeStart(const Timestamp &startTime); 
 
-            /**
-             * setStreamRate()
-             * Set or reset the message streams playback rate.
-             * @param streamRate - If positive, stream goes forward in time. If negative, then backwards. 
-             *                     1.0 -- "realtime"
-             *                     < 1.0 -- slower than "real time" by factor given
-             *                     > 1.0 -- faster than "real time" by factor given
-             * @return - always returns true
-             */
-            bool setStreamRate(const float &messageStreamRate);
+        /**
+         * setStreamRate()
+         * Set or reset the message streams playback rate.
+         * @param streamRate - If positive, stream goes forward in time. If negative, then backwards. 
+         *                     1.0 -- "realtime"
+         *                     < 1.0 -- slower than "real time" by factor given
+         *                     > 1.0 -- faster than "real time" by factor given
+         * @return - always returns true
+         */
+        bool setStreamRate(const float &messageStreamRate);
 
-            /**
-             * getNextMessage(MessagePtr &newMessage)
-             * This function blocks until the next message arrives from the watcherd instance connected to. 
-             * isStreamReadable() can be used to see if the call to getNextMessage() would block or not.
-             * @param MessagePtr& - the next message in the message stream
-             * @return - returns false on read message error - watcherd disconnect
-             */
-            bool getNextMessage(MessagePtr &newMessage);
+        /**
+         * getNextMessage(MessagePtr &newMessage)
+         * This function blocks until the next message arrives from the watcherd instance connected to. 
+         * isStreamReadable() can be used to see if the call to getNextMessage() would block or not.
+         * @param MessagePtr& - the next message in the message stream
+         * @return - returns false on read message error - watcherd disconnect
+         */
+        bool getNextMessage(MessagePtr &newMessage);
 
-            /**
-             * isStreamReadable()
-             * Returns true if a call to getNextMessage() would return immediately.
-             * @return a boolean: true if getNextMessage() would not block, false otherwise
-             */
-            bool isStreamReadable() const;
+        /**
+         * isStreamReadable()
+         * Returns true if a call to getNextMessage() would return immediately.
+         * @return a boolean: true if getNextMessage() would not block, false otherwise
+         */
+        bool isStreamReadable() const;
 
-            /**
-             * bool filterMessageStream(const MessageStreamFilter &filter)
-             * This method filters the existing message stream by the filter given.
-             * Once set, the stream will only contist of messages which pass the filter. More than
-             * one filter can be added and the filters are additive. 
-             * @param - MessageStreamFilter - the filter to apply to the stream. 
-             * @return - always returns true
-             */
-             bool addMessageFilter(const MessageStreamFilter &filter);
+        /**
+         * bool filterMessageStream(const MessageStreamFilter &filter)
+         * This method filters the existing message stream by the filter given.
+         * Once set, the stream will only contist of messages which pass the filter. More than
+         * one filter can be added and the filters are additive. 
+         * @param - MessageStreamFilter - the filter to apply to the stream. 
+         * @return - always returns true
+         */
+        bool addMessageFilter(const MessageStreamFilter &filter);
 
-            /**
-             * getMessageTimeRange()
-             *
-             * Causes the server to respond with a PlaybackTimeRange message at some point in the 
-             * near future. 
-             *
-             */
-            bool getMessageTimeRange() const;
+        /**
+         * getMessageTimeRange()
+         *
+         * Causes the server to respond with a PlaybackTimeRange message at some point in the 
+         * near future. 
+         *
+         */
+        bool getMessageTimeRange() const;
 
-            /**
-             * Write an instance of this class as a human readable stream to the otream given
-             */
-            virtual std::ostream &toStream(std::ostream &out) const;
+        /**
+         * Write an instance of this class as a human readable stream to the otream given
+         */
+        virtual std::ostream &toStream(std::ostream &out) const;
 
-            /**
-             * Write an instance of this class as a human readable stream to the otream given.
-             * Just calls MessageStream::toStream().
-             */
-            std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
+        /**
+         * Write an instance of this class as a human readable stream to the otream given.
+         * Just calls MessageStream::toStream().
+         */
+        std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
-            /**
-             * Perform a synchronous connection attempt to the server.
-             * @retval true connection was established
-             * @retval false connection failed
-             */
-            bool connect();
+        /**
+         * Perform a synchronous connection attempt to the server.
+         * @retval true connection was established
+         * @retval false connection failed
+         */
+        bool connect();
 
         protected:
 
-            /**
-             * Handle the arrival of a message. Overridden from base class.
-             * It is invoked by a thread in a Client instance. 
-             */
-            virtual bool handleMessageArrive(ConnectionPtr, const MessagePtr &message);
+        /**
+         * Handle the arrival of a message. Overridden from base class.
+         * It is invoked by a thread in a Client instance. 
+         */
+        virtual bool handleMessageArrive(ConnectionPtr, const MessagePtr &message);
 
-            /**
-             * Handle the arrival of mulitple messages. Overridden from base class.
-             * It is invoked by a thread in a Client instance. 
-             */
-            virtual bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr> &messages); 
+        /**
+         * Handle the arrival of mulitple messages. Overridden from base class.
+         * It is invoked by a thread in a Client instance. 
+         */
+        virtual bool handleMessagesArrive(ConnectionPtr, const std::vector<event::MessagePtr> &messages); 
 
-            /**
-             * Notification that a message has been successfully sent.
-             *
-             * @param[in] - the message that was sent
-             * @return - boolean. If true, expect a response, else, close connection.
-             */
-            virtual bool handleMessageSent(const event::MessagePtr &message); 
-            virtual bool handleMessagesSent(const std::vector<event::MessagePtr> &messages);
+        /**
+         * Notification that a message has been successfully sent.
+         *
+         * @param[in] - the message that was sent
+         * @return - boolean. If true, expect a response, else, close connection.
+         */
+        virtual bool handleMessageSent(const event::MessagePtr &message); 
+        virtual bool handleMessagesSent(const std::vector<event::MessagePtr> &messages);
 
-            // Bookkeeping
-            unsigned int messagesSent;
-            unsigned int messagesArrived;
+        // Bookkeeping
+        unsigned int messagesSent;
+        unsigned int messagesArrived;
 
         private:
-            DECLARE_LOGGER();
+        DECLARE_LOGGER();
 
-            /** 
-             * private data 
-             **/
-            typedef std::vector<MessageStreamFilterPtr> MessageStreamFilterList;
-            typedef MessageStreamFilterList::iterator MessageStreamFilterListIterator;
-            typedef MessageStreamFilterList::const_iterator MessageStreamFilterListConstIterator;
-            MessageStreamFilterList messageStreamFilters;
+        /** 
+         * private data 
+         **/
+        typedef std::vector<MessageStreamFilterPtr> MessageStreamFilterList;
+        typedef MessageStreamFilterList::iterator MessageStreamFilterListIterator;
+        typedef MessageStreamFilterList::const_iterator MessageStreamFilterListConstIterator;
+        MessageStreamFilterList messageStreamFilters;
 
-            float streamRate;
-            Timestamp streamStartTime;
-            std::string serverName;
-            std::string serviceName;
+        float streamRate;
+        Timestamp streamStartTime;
+        std::string serverName;
+        std::string serviceName;
 
-            /** This is the connection to the message server (watcherd instance) used to send/recv messages */
-            ClientPtr connection;
+        /** This is the connection to the message server (watcherd instance) used to send/recv messages */
+        ClientPtr connection;
 
-            /** Incoming messages are stored in a cache until getNextMessage() is called. */
-            typedef std::deque<watcher::event::MessagePtr> MessageCache;
-            MessageCache messageCache; 
+        /** Incoming messages are stored in a cache until getNextMessage() is called. */
+        typedef std::deque<watcher::event::MessagePtr> MessageCache;
+        MessageCache messageCache; 
 
-            /** 
-             * Single-writer, multiple-reader around messageCache access as it will be filled 
-             * and emptied by different threads.
-             **/
-            boost::mutex messageCacheMutex;
-            boost::condition_variable messageCacheCond;
-            bool readReady;
+        /** 
+         * Single-writer, multiple-reader around messageCache access as it will be filled 
+         * and emptied by different threads.
+         **/
+        boost::mutex messageCacheMutex;
+        boost::condition_variable messageCacheCond;
+        bool readReady;
 
-            /** 
-             * private methods 
-             **/
-            MessageStream(const MessageStream &ms); /// No copies allowed though I don't know why.
-            MessageStream &operator=(const MessageStream &ms); /// No operator = allowed.
+        /** 
+         * private methods 
+         **/
+        MessageStream(const MessageStream &ms); /// No copies allowed though I don't know why.
+        MessageStream &operator=(const MessageStream &ms); /// No operator = allowed.
 
     }; // like a fired school teacher.
 
@@ -238,7 +240,7 @@ namespace watcher
     typedef boost::shared_ptr<MessageStream> MessageStreamPtr;
 
     /** write a human readable version of the MessageStream class to the ostream given
-     */
+    */
     std::ostream &operator<<(std::ostream &out, const MessageStream &messStream);
 
 }

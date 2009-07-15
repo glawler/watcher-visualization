@@ -1,3 +1,8 @@
+/** 
+ * @file backgroundImage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef WATCHER_BG_IMAGRE_H
 #define WATCHER_BG_IMAGRE_H
 

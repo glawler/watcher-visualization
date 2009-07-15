@@ -1,3 +1,44 @@
+/** 
+ * @file messageStream2Text.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
+/**
+ * @page messageStream2Text 
+ *
+ * messageStream2Text is a command line program for logging/testing the watcher::MessageStream mechanism in the watcher API. 
+ * When started, messageStream2Text attaches to the watcher daemon at the host given and requests a messge stream. This stream 
+ * is then logged according to logging configuration in the log.properties file. (This is usually just to standard out a file.) 
+ *
+ * Usage: 
+ * @{
+ * <b>messageStream2Text -s server [optional args]</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s, --server=address|name</b>, The address or name of the node running watcherd
+ * @}
+ * Optional args:
+ * @arg <b>-c, --config</b>, the configuration file. If not given messageStream2Text.cfg is assumed. 
+ * @arg <b>-s, --speed=FLOAT</b> - specify the event playback speed.
+ * @arg <b>-S, --seek=INT</b> - specify the offset in milliseconds to start event playback (default: live playback).
+ * @arg <b>-h, --help</b>, Show help message
+ *
+ * If a configuration file is not found on startup, a default one will be created, used, and saved on program exit.
+ *
+ * Config file settings:
+ * @arg <b>logPropertiesFile</b> - the log.properties file. 
+ * @arg <b>server</b> - name or ipaddress of the server to connect to.
+ * @arg <b>service</b> - name of service (usaully \"watcherd\") or port number on which the server is listening.
+ *
+ * Sample config file:
+ * @code
+ * logPropertiesFile = "messageStream2Text.log.properties";
+ * server = "glory";
+ * service = "watcherd";
+ * @endcode
+ *
+ */
 #include <iostream>
 #include <cstdlib>     // for EXIT_SUCCESS/FAILURE
 #include <unistd.h>

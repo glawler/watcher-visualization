@@ -1,3 +1,8 @@
+/** 
+ * @file testCC.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>

@@ -1,3 +1,51 @@
+/** 
+ * @file sendLabelMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
+/**
+ * @page sendLabelMessage 
+ *
+ * sendLabelMessage is a test node command line program that sends a watcher::event::LabelMessage message to the watcher daemon, specifing that a label should be
+ * attached to the specified node (or float if given coords).
+ *
+ * If address is specified, the label will attach to the node with that address. If cooridinates are
+ * specified, the label will float at those coordinates. The node address takes precedence. If neither
+ * option is specified, the label will attach to the node from which the message saw sent.
+ *
+ * Usage: 
+ * @{
+ * <b>sendLabelMessage -s server -l label [optional args]</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-l, --label=text</b>, The text of the label
+ * @arg <b>-s, --server=address</b>, The address|name of the node running watcherd, the server.
+ * @}
+ * Optional args:
+ * @arg <b>-n, --node=address</b>, The node to change color, if empty the local node's address is used
+ * @arg <b>-x, --latitude=coord</b>        The latitude to float the node at.
+ * @arg <b>-y, --longitude=coord</b>       The longitude to float the node at.
+ * @arg <b>-z, --altitiude=coord</b>       The altitude to float the node at.
+ * @arg <b>-t, --fontSize=size</b>         The font size of the label
+ * @arg <b>-f, --foreground=color</b>      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.
+ * @arg <b>-b, --background=color</b>      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.
+ * @arg <b>-e, --expiration=seconds</b>    How long in millisecond to diplay the label
+ * @arg <b>-r, --remove</b>                Remove the label if it is attached
+ * @arg <b>-L, --layer=layer</b>           Which layer the label is part of. Default is "Physcial".
+ * @arg <b>-x, --expiration=seconds</b>, How long in seconds to change the color. 0==forever
+ * @arg <b>-p, --logProps</b>, log.properties file, which controls logging for this program
+ * @arg <b>-h, --help</b>, Show help message
+ *
+ * Examples:
+ * @{
+ * @code 
+ * sendLabelMessage -s glory -n 192.168.1.102 -l "Correlation Layer" -e 1500 -f red -b green -L Correlation
+ * sendLabelMessage -s glory -n 192.168.1.102 -l "Physical Layer" -e 1500 -L Physical
+ * sendLabelMessage -s glory -n 192.168.1.104 -l "Create a node with a label" -e 1500 -f yellow -b blue -L Physical 
+ * @endcode
+ * @}
+ */
 #include <errno.h>
 #include <stdlib.h>
 #include <getopt.h>

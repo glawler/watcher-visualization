@@ -1,3 +1,46 @@
+/** 
+ * @file sendEdgeMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
+/**
+ * @page sendEdgeMessage 
+ *
+ * sendEdgeMessage is a test node command line program that sends a watcher::event::GPSMessage message to a watcher daemon, specifing a node's current GPS coordinates.
+ *
+ * Usage: 
+ * @{
+ * <b>sendEdgeMessage -s server -t tail [optional args]</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s, --server=address</b>, The address or name of the node running watcherd to which the message is sent.
+ * @arg <b>-t, --tail=address</b>       The node to attach the tail of the edge to. If no head is given, the local node is used.
+ * @}
+ * Optional args:
+ * @arg <b>-h, --head=address</b>       The node to attach the head of the edge to.
+ * @arg <b>-c, --color=color</b>        The color of the edge. Can be ROYGBIV or RGBA format, string or hex value. Supports transparent colors.
+ * @arg <b>-w, --width=width</b>        The width of the edge in some arbitrary, unknown unit.
+ * @arg <b>-y, --layer=layer</b>        Which layer the edge is on in the GUI.
+ * @arg <b>-d, --bidirectional=bool</b> Is this edge bidirectional or unidirectional. Use 'true' for true, anything else for false.
+ * @arg <b>-l, --label=label</b>        The text to put in the middle label (This program only supports creating a middle label, although the message supports labels on node1 and node2 as well. May add that later)
+ * @arg <b>-f, --labelfg=color</b>      The foreground color of the middle label. Can be ROYGBIV or RGBA format, string or hex value. Supports transparent colors.
+ * @arg <b>-b, --labelbg=color</b>      The background color of the middle label. Can be ROYGBIV or RGBA format, string or hex value. Supports transparent colors.
+ * @arg <b>-z, --fontSize=size</b>      The font size of the middle label
+ * @arg <b>-x, --expiration=seconds</b> How long in milliseconds to diplay the edge
+ * @arg <b>-p, --logProps</b>           log.properties file, which controls logging for this program
+ *
+ * @{
+ * Examples:
+ * @{
+ *
+ * Draw an edge between node 101 and node 102 on the "QoS" layer and make the color a translucent red.
+ * @code 
+ * sendEdgeMessage -s glory -h 192.168.1.101 -t 192.168.1.102 -l QoS -c 255.0.0.64
+ * @endcode
+ * @}
+ * @}
+ */
 #include <errno.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -41,7 +84,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -b, --labelbg=color      The background color of the middle label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
     fprintf(stderr, "   -z, --fontSize=size      The font size of the middle label\n");
     fprintf(stderr, "\n");
-    fprintf(stderr, "   -x, --expiration=seconds How long in seconds to diplay the edge\n");
+    fprintf(stderr, "   -x, --expiration=milliseconds How long in milliseconds to diplay the edge\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "   -p, --logProps           log.properties file, which controls logging for this program\n");
 

@@ -1,3 +1,30 @@
+/** 
+ * @file showClock.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
+/**
+ * @page showClock 
+ *
+ * showClock is a test node command line program that "draws" a clock by arranging a set of nodes and edges into the shape of an 
+ * analog clock.  The "clock" is updated once a second to move "the hands" of the clock around. This program is mostly
+ * used to test the "TiVO" functionality built into the watcher system. 
+ *
+ * Usage: 
+ * @{
+ * <b>showClock -s server [optional args]</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s, --server=address|name</b>, The address or name of the node running watcherd
+ * @}
+ * Optional args:
+ * @arg <b>-r, --radius</b>, The radius of the clock face in some unknown unit
+ * @arg <b>-S, --hideSecondRing</b>        Don't send message to draw the outer, second hand ring.
+ * @arg <b>-H, --hideHourRing</b>          Don't send message to draw the inner, hour hand ring.
+ * @arg <b>-p, --logProps=file</b>, log.properties file, which controls logging for this program
+ * @arg <b>-h, --help</b>, Show help message
+ */
 #include <getopt.h>
 #include <string>
 #include <math.h>

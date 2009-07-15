@@ -38,7 +38,8 @@
  *
  */
 
-/** 
- * @namespace libconfig 
+/** @namespace libconfig 
  * The libconfig namespace is the namespace in the third party library libconfig++, which the watcher system uses for reading and writing cfg files 
  */
+/** @namespace log4cxx
+ * The namespace for the third party library log4cxx which the watcher uses to do all its logging. */
