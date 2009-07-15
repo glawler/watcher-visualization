@@ -1,3 +1,13 @@
+/**
+ * @file clientConnection.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
+/**
+ * @file message.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef WATCHERD_CLIENT_CONECTION_HPP
 #define WATCHERD_CLIENT_CONECTION_HPP
 

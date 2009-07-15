@@ -1,3 +1,8 @@
+/** 
+ * @file manetglview.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #include <QtGui>
 #include <QtOpenGL>
 #include <math.h>
@@ -1371,14 +1376,12 @@ void manetGLView::checkIO()
             PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
             playbackRangeEnd=trm->max_;
             playbackRangeStart=trm->min_;
-            updatePlaybackSliderRange();
+            // updatePlaybackSliderRange();
         }
 
-        if (isFeederEvent(message->type))
-        {
-            currentMessageTimestamp=message->timestamp;
+        currentMessageTimestamp=message->timestamp;
+        // if (currentMessageTimestamp>playbackRangeEnd)
             updatePlaybackSliderRange();
-        }
 
         // Really need to make layers a member of a base class...
         GUILayer layer;
@@ -1594,7 +1597,19 @@ void manetGLView::setPlaybackSlider(QSlider *s)
 
     playbackSlider=s;
     connect(playbackSlider, SIGNAL(sliderReleased()), this, SLOT(updatePlaybackSliderFromGUI()));
+    connect(playbackSlider, SIGNAL(sliderMoved()), this, SLOT(sliderMovedInGUI()));
 }
+
+void manetGLView::sliderMovedInGUI()
+{
+    TRACE_ENTER();
+    if (!playbackSlider)
+        return;
+    // GTL - This does not appear to do anything.
+    playbackSlider->setStatusTip(QString(playbackSlider->value()));
+    TRACE_EXIT();
+}
+
 
 void manetGLView::updatePlaybackSliderFromGUI()
 {
@@ -1605,7 +1620,9 @@ void manetGLView::updatePlaybackSliderFromGUI()
         return;
     }
    
+    pausePlayback(); 
     messageStream->setStreamTimeStart(playbackRangeStart+(playbackSlider->value()*1000));
+    messageStream->startStream(); 
     // no need to set range or current message timestamp, they'll be updated when 
     // we get the first message at the new timestamp
 

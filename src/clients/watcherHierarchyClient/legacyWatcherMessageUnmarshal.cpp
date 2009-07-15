@@ -1,3 +1,8 @@
+/** 
+ * @file legacyWatcherMessageUnmarshal.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #include "legacyWatcherMessageUnmarshal.h"
 #include "marshal.h"
 #include "logger.h"

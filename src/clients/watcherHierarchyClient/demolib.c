@@ -1,3 +1,8 @@
+/** 
+ * @file demolib.c
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

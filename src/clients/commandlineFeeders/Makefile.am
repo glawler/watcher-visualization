@@ -20,3 +20,4 @@ sendConnectivityMessage_SOURCES=sendConnectivityMessage.cpp
 sendDataPointMessage_SOURCES=sendDataPointMessage.cpp
 showClock_SOURCES=showClock.cpp
 
+

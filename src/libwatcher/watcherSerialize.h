@@ -1,7 +1,7 @@
 #ifndef watcher_serialize_h
 #define watcher_serialize_h
 
-/** @file
+/** @file watcherSerialize.h
  *
  * This file contains the appropriate Boost header files required to serialize
  * message.  It should be included in all .cpp files that include

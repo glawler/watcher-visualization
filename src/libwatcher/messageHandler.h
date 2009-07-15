@@ -1,3 +1,8 @@
+/**
+ * @file messageHandler.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef MESSSAGE_HADNERLS_H
 #define MESSSAGE_HADNERLS_H
 

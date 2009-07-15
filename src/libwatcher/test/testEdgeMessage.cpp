@@ -1,3 +1,8 @@
+/** 
+ * @file testEdgeMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #define BOOST_TEST_MODULE watcher::Message.LabelMessage test
 #include <boost/test/unit_test.hpp>
 

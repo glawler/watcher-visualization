@@ -234,5 +234,23 @@ share/info/dir
 ^src/watcherHierarchyClient/Makefile$
 ^src/feeders/routeFeeder/routeFeeder$
 
+#
+# OGRE tutorials
+# 
+^src/ogreTutorials/Makefile
+^src/ogreTutorials/config.h
+^src/ogreTutorials/configure
+^src/ogreTutorials/include/Makefile
+^src/ogreTutorials/libtool
+^src/ogreTutorials/src/Makefile
+^src/ogreTutorials/src/SampleApp
+^src/ogreTutorials/src/bufferedInput
+^src/ogreTutorials/src/camerasLightsShadows
+^src/ogreTutorials/src/ceguiAndOgre
+^src/ogreTutorials/src/frameListenersUnbufferedInput
+^src/ogreTutorials/src/multipleSceneManagers
+^src/ogreTutorials/src/ogreStartupSequence
+^src/ogreTutorials/src/skyFogRootObject
+^src/ogreTutorials/src/tutorial_1
 
 

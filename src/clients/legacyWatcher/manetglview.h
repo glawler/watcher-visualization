@@ -1,3 +1,8 @@
+/** 
+ * @file manetglview.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef MANETGLVIEW_H
 #define MANETGLVIEW_H
 
@@ -68,6 +73,7 @@ public slots:
         void scrollingGraphActivated(QString graphName);
 
         void updatePlaybackSliderFromGUI();
+        void sliderMovedInGUI();
 
         void saveConfiguration();
 

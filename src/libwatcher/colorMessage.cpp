@@ -1,3 +1,8 @@
+/**
+ * @file colorMessage.cpp
+ * @author Geoff Lawler <geoff.lawer@cobham.com>
+ * @date 2009-07-15
+ */
 #include "watcherSerialize.h"
 #include "watcherGlobalFunctions.h" // for address serialization
 #include "colorMessage.h"

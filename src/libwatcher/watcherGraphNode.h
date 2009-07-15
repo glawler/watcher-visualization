@@ -1,11 +1,11 @@
+/**
+ * @file watcherGraphNode.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef THIS_IS_NOT_THE_DISCRETE_MASS_OF_ONE_KIND_OF_TISSUE_ENCLOSED_IN_TISSUE_OF_A_DIFFERENT_KIND_OF_NODE_ITS_THE_OTHER_ONE
 #define THIS_IS_NOT_THE_DISCRETE_MASS_OF_ONE_KIND_OF_TISSUE_ENCLOSED_IN_TISSUE_OF_A_DIFFERENT_KIND_OF_NODE_ITS_THE_OTHER_ONE
 
-/**
- * @file
- * @author Geoff.Lawler@cobham.com
- * @date 2009-05-19
- */
 #include <boost/serialization/access.hpp>
 #include <list>
 #include <string>

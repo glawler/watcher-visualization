@@ -1,3 +1,8 @@
+/**
+ * @file messageStreamFilter.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef THIS_ONE_TIME_AT_BAND_CAMP____H
 #define THIS_ONE_TIME_AT_BAND_CAMP____H
 

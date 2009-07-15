@@ -1,3 +1,8 @@
+/**
+ * @file edgeMessage.h
+ * @author Geoff Lawler <geoff.lawer@cobham.com>
+ * @date 2009-07-15
+ */
 #include <boost/asio.hpp>
 
 #include "watcherGlobalFunctions.h"

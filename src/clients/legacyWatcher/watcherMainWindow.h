@@ -1,3 +1,8 @@
+/** 
+ * @file watcherMainWindow.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
 #define WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
 

@@ -1,9 +1,11 @@
+/** 
+ * @file stringIndexedMenuItem.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef STRINGINDEXEDMENUITEM_H
 #define STRINGINDEXEDMENUITEM_H
-/**
- * @file stringBasedMenuItem.h
- * @author Geoff Lawler <geoff.lawler@cobham.com>
- */
+
 #include <QObject>
 namespace watcher 
 {

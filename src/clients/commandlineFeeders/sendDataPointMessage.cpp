@@ -1,3 +1,39 @@
+/**
+ * @file sendDataPointMessage.cpp
+ *
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15
+ *
+ * @page sendDataPointMessage 
+ *
+ * sendDataPointMessage is a test node command line program that sends a watcher::event::DataPointMessage message to the watcher daemon, specifing a set of timestamped data point(s)
+ * for the node. The data point is labeled with a string saying what the data points represent. 
+ *
+ * Usage: 
+ * @{
+ * <b>sendDataPointMessage -s server -g name [optional args] -d dp1 -d dp2 ... -d dpN</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-s address|name</b>, The address or name of the node running watcherd
+ * @arg <b>-g name</b>, the "graphname" of the data - what the data is measuring
+ * @arg <b>-d datapoint</b>, a single data point measuring something
+ * @}
+ * Optional args:
+ * @arg <b>-n, --node=address</b>, the node the data is from 
+ * @arg <b>-h, --help</b>, Show help message
+ *
+ * Examples:
+ * @{
+ *
+ * @code 
+ * sendDataPointMessage -s glory -g "CPU Usage" -n 192.168.1.105 -d .45432
+ * sendDataPointMessage -s glory -g "Logged In Users" -n 192.168.1.105 -d 23
+ *
+ * @endcode
+ *
+ * @}
+ */
 #include <stdio.h>
 #include <string>
 #include <boost/lexical_cast.hpp>

@@ -1,3 +1,8 @@
+/** 
+ * @file graphPlot.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef CRAZYGRAPHPLOT_THINGY_THAT_PALS_AROUND_WITH_TERRORISTS_YOU_BETCHA_H
 #define CRAZYGRAPHPLOT_THINGY_THAT_PALS_AROUND_WITH_TERRORISTS_YOU_BETCHA_H
 

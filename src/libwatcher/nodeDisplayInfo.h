@@ -1,3 +1,8 @@
+/**
+ * @file nodeDisplayInfo.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef NODE_DISPLAY_INFO_H
 #define NODE_DISPLAY_INFO_H
 

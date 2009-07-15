@@ -1,3 +1,57 @@
+/**
+ * @file sendColorMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15
+ */
+
+/**
+ * @page sendColorMessage 
+ *
+ * sendColorMessage is a test node command line program that sends a watcher::event::ColorMessage message to the watcher daemon, specifing that a node should change it's color. 
+ *
+ * Usage: 
+ * @{
+ * <b>sendColorMessage -s server -c color [optional args]</b>
+ * @}
+ * @{
+ * Args:
+ * @arg <b>-c, --color=color</b>, The color of the node. Can be ROYGBIV or RGBA format, string or hex value. Supports transparency. 
+ * @arg <b>-s, --server=address</b>, The addres of the node running watcherd
+ * @}
+ * Optional args:
+ * @arg <b>-n, --node=address</b>, The node to change color, if empty the local node's address is used
+ * @arg <b>-f, --flash=milliseconds</b>, Flash between the new color and the orginal color every milliseconds seconds, 0 for no flash.
+ * @arg <b>-x, --expiration=seconds</b>, How long in seconds to change the color. 0==forever
+ * @arg <b>-p, --logProps</b>, log.properties file, which controls logging for this program
+ * @arg <b>-h, --help</b>, Show help message
+ *
+ * Examples:
+ * @{
+ *
+ * This tells the GUI(s) that are listening to the daemon running no 'glory' the node at 192.168.1.101 should be drawn in blue. 
+ * @code 
+ * showColor -s glory -c blue -n 192.168.1.101
+ * @endcode
+ *
+ * This tells the GUI(s) that are listening to the daemon running no 'glory' the node at 192.168.1.101 should be drawn in a transparent blue. 
+ * Transparent format is R.G.B.A, where "A" is alpha transparency.
+ * @code 
+ * showColor -s glory -c 0.0.255.64 -n 192.168.1.101
+ * @endcode
+ *
+ * This tells the GUI(s) that are listening to the daemon running no 'glory' the node at 192.168.1.107 should be drawn in green for 5 seconds.
+ * @code 
+ * showColor -s glory -c green -n 192.168.1.107 --expiration 5000
+ * @endcode
+ *
+ * This tells the GUI(s) that are listening to the daemon running no 'glory' the node at 192.168.1.104 should flash for 10 seconds.
+ * @code 
+ * showColor --server glory --color green --node 192.168.1.104 --flash --expiration 10000
+ * @endcode
+ *
+ * @}
+ */
+
 #include <errno.h>
 #include <stdlib.h>
 #include <getopt.h>

@@ -1,3 +1,8 @@
+/**
+ * @file dataPointMessage.cpp
+ * @author Geoff Lawler <geoff.lawer@cobham.com>
+ * @date 2009-07-15
+ */
 #include <boost/foreach.hpp>
 
 #include "watcherSerialize.h"

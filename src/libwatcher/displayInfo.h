@@ -1,3 +1,8 @@
+/**
+ * @file displayInfo.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef DISPLAY_INFO_H
 #define DISPLAY_INFO_H
 

@@ -1,3 +1,8 @@
+/**
+ * @file dataMarshaller.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef THERES_A_NEW_DATA_MARHSAL_IN_TOWN_H
 #define THERES_A_NEW_DATA_MARHSAL_IN_TOWN_H
 

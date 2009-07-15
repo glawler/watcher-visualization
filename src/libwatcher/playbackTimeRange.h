@@ -1,3 +1,8 @@
+/**
+ * @file playbackTimeRange.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 /** @file
  * @author Michael Elkins <michael.elkins@cobham.com>
  * @date 2009-06-24

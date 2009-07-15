@@ -1,3 +1,8 @@
+/**
+ * @file dataPointMessage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef WATCHER_DATA_POINT_MESSAGE
 #define WATCHER_DATA_POINT_MESSAGE
 
@@ -6,6 +11,11 @@
 
 namespace watcher {
     namespace event {
+        /** 
+         * @class DataPointMessage
+         *
+         * Command line executable for this message: @ref sendDataPointMessage
+         */
         class DataPointMessage : public Message {
             public:
 

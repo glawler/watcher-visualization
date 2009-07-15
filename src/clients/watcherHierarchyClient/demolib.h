@@ -1,3 +1,8 @@
+/** 
+ * @file demolib.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #ifndef DEMOLIB_H
 #define DEMOLIB_H
 

@@ -1,3 +1,8 @@
+/**
+ * @file nodeStatusMessage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 /** 
  * @file
  * @author Geoff Lawler <geoff.lawler@sparta.com>

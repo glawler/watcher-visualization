@@ -1,3 +1,8 @@
+/**
+ * @file watcherColors.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef WATCHER_COLORS_H
 #define WATCHER_COLORS_H
 

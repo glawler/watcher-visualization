@@ -1,3 +1,8 @@
+/** 
+ * @file testStartMessage.cpp
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 #define BOOST_TEST_MODULE testStartMessage
 #include <boost/test/unit_test.hpp>
 #include <boost/archive/text_oarchive.hpp>

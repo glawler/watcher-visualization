@@ -1,3 +1,8 @@
+/** 
+ * @file watcherGPS.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com>
+ * @date 2009-07-15 
+ */
 /* $Id: watcherGPS.h,v 1.4 2007/07/11 03:50:45 dkindred Exp $
  *
  *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO

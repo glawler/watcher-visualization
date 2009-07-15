@@ -29,6 +29,10 @@ INIT_LOGGER(WatcherGraph, "WatcherGraph");
 //
 namespace watcher {
 
+    /** 
+     * The GraphFunctors namespace holds a small collection of auxilary structs used a std:: functors when 
+     * manipulating the WatcherGraph
+     */
     namespace GraphFunctors
     {
         /** Helper class to find nodes by their nodeIds */
