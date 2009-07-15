@@ -1,7 +1,7 @@
 /**
  * @file connectivityMessage.h
- * @author Geoff Lawler <Geoff.Lawler@cobham.com>
- * @date 2009-05-06
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
  */
 #ifndef CONNNECTIVITY_MESSAGE_DATA_H
 #define CONNNECTIVITY_MESSAGE_DATA_H

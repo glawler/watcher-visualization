@@ -1,3 +1,8 @@
+/**
+ * @file watcherdAPIMessageHandler.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef CLIENT_MESSAGE_HANDLER_H
 #define CLIENT_MESSAGE_HANDLER_H
 

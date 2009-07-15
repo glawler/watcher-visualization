@@ -1,3 +1,8 @@
+/**
+ * @file messageStatus.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef STATUS_MESSAGE_H
 #define STATUS_MESSAGE_H
 

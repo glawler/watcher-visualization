@@ -2,7 +2,7 @@
 #define WGNODE_HASANYBODY_SEEN_MY_GAL
 
 /**
- * @file
+ * @file watcherGraphEdge.h
  * @author Geoff.Lawler@cobham.com
  * @date 2009-05-19
  */

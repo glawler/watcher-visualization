@@ -1,3 +1,8 @@
+/**
+ * @file edgeMessage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef WATCHER_EDGE_MESSAGE_DATA_H
 #define WATCHER_EDGE_MESSAGE_DATA_H
 

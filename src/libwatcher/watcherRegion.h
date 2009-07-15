@@ -1,3 +1,8 @@
+/**
+ * @file watcherRegion.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef YOUDONTTOUCHTHEQUEENEVENIFYOUAREMICHELLEOBAMBA_H
 #define YOUDONTTOUCHTHEQUEENEVENIFYOUAREMICHELLEOBAMBA_H
 

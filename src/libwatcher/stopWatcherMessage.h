@@ -1,5 +1,5 @@
-/** @file
- * @author Michael Elkins <michael.elkins@sparta.com>
+/** @file stopWatcherMessage.h
+ * @author Michael Elkins <michael.elkins@cobham.com>
  * @date 2009-03-20
  */
 #ifndef STOP_WATCHER_MESSAGE_H
@@ -12,7 +12,7 @@ namespace watcher {
 
         /**
          * Stop playback of event stream.
-         * @author Michael Elkins <michael.elkins@sparta.com>
+         * @author Michael Elkins <michael.elkins@cobham.com>
          * @date 2009-03-20
          */
         class StopMessage : public Message {

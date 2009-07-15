@@ -1,3 +1,8 @@
+/**
+ * @file messageTypesAndVersions.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef MESSAGETYPES_AND_VERSIONS_H
 #define MESSAGETYPES_AND_VERSIONS_H
 

@@ -1,3 +1,8 @@
+/**
+ * @file testMessage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef TEST_MESSAGE_DATA_H
 #define TEST_MESSAGE_DATA_H
 

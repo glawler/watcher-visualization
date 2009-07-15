@@ -1,3 +1,8 @@
+/**
+ * @file watcherTypes.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef WATCHER_TYPES_HELLO_THERE_H
 #define WATCHER_TYPES_HELLO_THERE_H
 

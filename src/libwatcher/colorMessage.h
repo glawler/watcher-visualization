@@ -1,3 +1,8 @@
+/**
+ * @file colorMessage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef WATCHER_COLOR__MESSAGE_DATA_H
 #define WATCHER_COLOR__MESSAGE_DATA_H
 

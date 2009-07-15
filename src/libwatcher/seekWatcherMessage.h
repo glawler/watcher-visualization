@@ -1,3 +1,8 @@
+/**
+ * @file seekWatcherMessage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 /** @file
  * @author Michael Elkins <michael.elkins@sparta.com>
  * @date 2009-03-20

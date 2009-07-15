@@ -1,4 +1,9 @@
 /**
+ * @file client.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
+/**
  * @file message.h
  * @author Geoff Lawler <geoff.lawler@cobham.com> 
  * @date 2009-07-15

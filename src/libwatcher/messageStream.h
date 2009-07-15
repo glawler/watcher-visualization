@@ -1,3 +1,8 @@
+/**
+ * @file messageStream.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
 #ifndef WATCHER_MESSAGE_STREAM_H
 #define WATCHER_MESSAGE_STREAM_H
 
