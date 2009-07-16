@@ -12,13 +12,11 @@ class MouseQueryListener : public ExampleFrameListener, public OIS::MouseListene
             : ExampleFrameListener(win, cam, false, true), mGUIRenderer(renderer)
         {
             // Setup default variables
+            mCount = 0;
+            mCurrentObject = NULL;
             mLMouseDown = false;
             mRMouseDown = false;
             mSceneMgr = sceneManager;
-
-            mRobotNode=NULL;
-            mWalkSpeed=35.0f;
-            mRobotMoving=false;
 
             // Reduce move speed
             mMoveSpeed = 50;
@@ -41,71 +39,21 @@ class MouseQueryListener : public ExampleFrameListener, public OIS::MouseListene
             if (!ExampleFrameListener::frameStarted(evt))
                 return false;
 
-            { // GTL todo - only do this if the camera moves 
-                // Setup the scene query
-                Vector3 camPos = mCamera->getPosition();
-                Ray cameraRay(Vector3(camPos.x, 5000.0f, camPos.z), Vector3::NEGATIVE_UNIT_Y);
-                mRaySceneQuery->setRay(cameraRay);
+            // Setup the scene query
+            Vector3 camPos = mCamera->getPosition();
+            Ray cameraRay(Vector3(camPos.x, 5000.0f, camPos.z), Vector3::NEGATIVE_UNIT_Y);
+            mRaySceneQuery->setRay(cameraRay);
 
-                // Perform the scene query
-                RaySceneQueryResult &result = mRaySceneQuery->execute();
-                RaySceneQueryResult::iterator itr = result.begin();
+            // Perform the scene query
+            RaySceneQueryResult &result = mRaySceneQuery->execute();
+            RaySceneQueryResult::iterator itr = result.begin();
 
-                if (itr!=result.end() && itr->worldFragment)
-                {
-                    Real terrainHgt=itr->worldFragment->singleIntersection.y;
-                    if ((terrainHgt+10.0)>camPos.y)
-                        mCamera->setPosition(camPos.x, terrainHgt+10.0, camPos.z);
-                }
-            }
-           
-            if (mRobotNode)
+            if (itr!=result.end() && itr->worldFragment)
             {
-                if (mToLocation!=Vector3::ZERO && mDistance!=Vector3::ZERO) {
-                    Real move=mWalkSpeed*evt.timeSinceLastFrame;
-                    mDistance-=move;
-                    if (mDistance<=0.0) {
-                        mNode->setPosition(mToLocation);
-                        mDirection=Vector3::ZERO;
-                        mAnimationState=mEntity->getAnimationState("Die");
-                        mAnimationState->setLoop(true);
-                        mAnimationState->setEnabled(true);
-                    }
-                    else {
-                        mAnimationState = ent->getAnimationState("Walk");
-                        mAnimationState->setLoop(true);
-                        mAnimationState->setEnabled(true);
-
-                        // Make sure the robot remains on the ground
-                        Vector3 roborPos=mRobotNode->getPosition();
-                        Ray robotRay(Vector3(roborPos.x, 5000.0f, roborPos.z), Vector3::NEGATIVE_UNIT_Y);
-                        mRaySceneQuery->getRay(RobotRay);
-                        RaySceneQueryResult &result = mRaySceneQuery->execute();
-                        RaySceneQueryResult::iterator itr = result.begin();
-
-                        if (itr!=result.end() && itr->worldFragment)
-                        {
-                            Real terrainHgt=itr->worldFragment->singleIntersection.y;
-                            if ((terrainHgt+10.0)>camPos.y)
-                                mCamera->setPosition(robotPos.x, terrainHgt+1.0, robotPos.z);
-                        }
-
-                        Vector3 src=mRobotNode->getOrientation*Vector3::UNIT_X;
-                        mRobotNode->rotate(src.getRotationTo(mToLocation));
-                        mRobotNode->translate(mDirection*move);
-                    }
-                }
-                else {
-                    mAnimationState = ent->getAnimationState("Idle");
-                    mAnimationState->setLoop(true);
-                    mAnimationState->setEnabled(true);
-                }
+                Real terrainHgt=itr->worldFragment->singleIntersection.y;
+                if ((terrainHgt+10.0)>camPos.y)
+                    mCamera->setPosition(camPos.x, terrainHgt+10.0, camPos.z);
             }
-
-            
-
-
-            mAnimationState->addTime(evt.timeSinceLastFrame);
 
             return true;
         }
@@ -116,7 +64,18 @@ class MouseQueryListener : public ExampleFrameListener, public OIS::MouseListene
             // Tell CEGUI where the mouse is.
             CEGUI::System::getSingleton().injectMouseMove(arg.state.X.rel, arg.state.Y.rel);
 
-            if (mRMouseDown) {
+            if (mLMouseDown) {
+                CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
+                Ray mouseRay = mCamera->getCameraToViewportRay(mousePos.d_x/float(arg.state.width),mousePos.d_y/float(arg.state.height));
+                mRaySceneQuery->setRay(mouseRay);
+
+                RaySceneQueryResult &result = mRaySceneQuery->execute();
+                RaySceneQueryResult::iterator itr = result.begin();
+
+                if (itr != result.end() && itr->worldFragment)
+                    mCurrentObject->setPosition(itr->worldFragment->singleIntersection);
+            }
+            else if (mRMouseDown) {
                 mCamera->yaw(Degree(-arg.state.X.rel*mRotateSpeed));
                 mCamera->pitch(Degree(-arg.state.Y.rel*mRotateSpeed));
             }
@@ -134,17 +93,12 @@ class MouseQueryListener : public ExampleFrameListener, public OIS::MouseListene
                 RaySceneQueryResult &result=mRaySceneQuery->execute();
                 RaySceneQueryResult::iterator itr=result.begin();
                 if (itr!=result.end() && itr->worldFragment) {
-
-                    if (!mRobotNode) {      // create robot on first click
-                        Entity *ent=mSceneMgr->createEntity("RobotEntity", "robot.mesh");
-                        mRobotNode=mSceneMgr->getRootSceneNode()->createChildSceneNode("RobotNode", itr->worldFragment->singleIntersection);
-                        mRobotNode->attachObject(ent);
-                        mRobotNode->setScale(.1, .1, .1);
-                    }
-                    else { 
-                        mToLocation=itr->worldFragment->singleIntersection;
-                        mDistance=mToLocation.normalise();
-                    }
+                    char name[16];
+                    sprintf(name, "Robot%d", mCount++);
+                    Entity *ent=mSceneMgr->createEntity(String(name), "robot.mesh");
+                    mCurrentObject = mSceneMgr->getRootSceneNode()->createChildSceneNode(String(name) + "Node", itr->worldFragment->singleIntersection);
+                    mCurrentObject->attachObject(ent);
+                    mCurrentObject->setScale(.1, .1, .1);
                 }
 
                 mLMouseDown=true;
@@ -158,9 +112,8 @@ class MouseQueryListener : public ExampleFrameListener, public OIS::MouseListene
 
         bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
         {
-            if (id==OIS::MB_Left) {
+            if (id==OIS::MB_Left)
                 mLMouseDown=false;
-            }
             else if (id==OIS::MB_Right) {
                 CEGUI::MouseCursor::getSingleton().show();
                 mRMouseDown=false;
@@ -172,12 +125,10 @@ class MouseQueryListener : public ExampleFrameListener, public OIS::MouseListene
     protected:
         RaySceneQuery *mRaySceneQuery;     // The ray scene query pointer
         bool mLMouseDown, mRMouseDown;     // True if the mouse buttons are down
+        int mCount;                        // The number of robots on the screen
         SceneManager *mSceneMgr;           // A pointer to the scene manager
-        SceneNode *mRobotNode;             // The one and only robot
+        SceneNode *mCurrentObject;         // The newly created object
         CEGUI::Renderer *mGUIRenderer;     // CEGUI renderer
-        Vector3 mToLocation;               // Where the robot is going.
-        Vector3 mDistance;                 // Distance until robot gets to where he's going.
-        AnimationState *mAnimationState;   // The current animation state of the robot
 };
 
 class MouseQueryApplication : public ExampleApplication
