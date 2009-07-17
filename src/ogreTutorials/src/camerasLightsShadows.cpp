@@ -1,4 +1,5 @@
 #include "ExampleApplication.h"
+#include <OgreSimpleSpline.h>
 
 class TutorialApplication : public ExampleApplication
 {
@@ -35,12 +36,49 @@ class TutorialApplication : public ExampleApplication
             Entity *ent=NULL;
             Light *light;
 
+            Vector3 n1pos(0,0,0), n2pos(500,0,500);
+
             mSceneMgr->setAmbientLight(ColourValue(0.0, 0.0, 0.0));
             mSceneMgr->setShadowTechnique(SHADOWTYPE_STENCIL_ADDITIVE);
 
-            ent=mSceneMgr->createEntity("Ninja", "ninja.mesh");
+            ent=mSceneMgr->createEntity("Ninja1", "ninja.mesh");
             ent->setCastShadows(true);
-            mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(ent);
+            SceneNode *node=mSceneMgr->getRootSceneNode()->createChildSceneNode("Ninja1Node");
+            node->yaw(Math::ATan2(n1pos.x-n2pos.z, n1pos.y-n2pos.z)); 
+            node->attachObject(ent);
+
+            ent=mSceneMgr->createEntity("Ninja2", "ninja.mesh");
+            ent->setCastShadows(true);
+            node=mSceneMgr->getRootSceneNode()->createChildSceneNode("Ninja2Node"); 
+            node->setPosition(n2pos);
+            node->yaw(Math::ATan2(n2pos.x-n1pos.z, n2pos.x-n1pos.z)); 
+            node->attachObject(ent); 
+
+            // Create a glowing green line
+            ManualObject* myManualObject =  mSceneMgr->createManualObject("manual1"); 
+            SceneNode* myManualObjectNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("manual1_node"); 
+
+            MaterialPtr myManualObjectMaterial = MaterialManager::getSingleton().create("manual1Material","debugger"); 
+            myManualObjectMaterial->setReceiveShadows(false); 
+            myManualObjectMaterial->getTechnique(0)->setLightingEnabled(true); 
+            myManualObjectMaterial->getTechnique(0)->getPass(0)->setDiffuse(0,0,1,0); 
+            myManualObjectMaterial->getTechnique(0)->getPass(0)->setAmbient(0,0,1); 
+            myManualObjectMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(0,1,0); 
+
+            // Create spline between them and draw it.
+            SimpleSpline spline;
+            spline.addPoint(Vector3(0, 150, 0));
+            spline.addPoint(Vector3(166, 150, 333));
+            spline.addPoint(Vector3(333, 150, 166));
+            spline.addPoint(Vector3(500, 150, 500));
+            const int numPts=100;
+            myManualObject->begin("manual1Material", Ogre::RenderOperation::OT_LINE_STRIP); 
+            for (int i=0; i<numPts; i++)
+                myManualObject->position(spline.interpolate(Real(i)/numPts));
+            myManualObject->position(spline.getPoint(spline.getNumPoints()-1));
+            myManualObject->end(); 
+
+            myManualObjectNode->attachObject(myManualObject);
 
             Plane plane(Vector3::UNIT_Y, 0);
             MeshManager::getSingleton().createPlane("ground", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane, 1500,1500,20,20,true,1,5,5,Vector3::UNIT_Z);
