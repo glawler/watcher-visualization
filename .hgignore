@@ -252,5 +252,13 @@ share/info/dir
 ^src/ogreTutorials/src/ogreStartupSequence
 ^src/ogreTutorials/src/skyFogRootObject
 ^src/ogreTutorials/src/tutorial_1
+^src/ogreTutorials/src/mousePickingSceneQueryMasks
+^src/ogreTutorials/src/projectiveDecals
+^src/ogreTutorials/src/raySceneQueriesAndMouseUsage
+^src/ogreTutorials/src/renderToTexture
+^src/ogreTutorials/src/staticGeometry
+^src/ogreTutorials/src/volumeSelectionBasicManualObjects
+# ^src/ogreTutorials/src/walkingBetweenPointsBasicQuaternions&
+
 
 

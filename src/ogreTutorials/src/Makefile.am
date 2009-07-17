@@ -21,7 +21,11 @@ bin_PROGRAMS= \
 	multipleSceneManagers \
 	walkingBetweenPointsBasicQuaternions \
 	raySceneQueriesAndMouseUsage \
-	mousePickingSceneQueryMasks
+	mousePickingSceneQueryMasks \
+	volumeSelectionBasicManualObjects \
+	staticGeometry \
+	projectiveDecals \
+	renderToTexture
 
 SampleApp_SOURCES=SampleApp.cpp
 tutorial_1_SOURCES=tutorial_1.cpp
@@ -35,6 +39,11 @@ multipleSceneManagers_SOURCES=multipleSceneManagers.cpp
 walkingBetweenPointsBasicQuaternions_SOURCES=walkingBetweenPointsBasicQuaternions.cpp
 raySceneQueriesAndMouseUsage_SOURCES=raySceneQueriesAndMouseUsage.cpp
 mousePickingSceneQueryMasks_SOURCES=mousePickingSceneQueryMasks.cpp
+volumeSelectionBasicManualObjects_SOURCES=volumeSelectionBasicManualObjects.cpp
+staticGeometry_SOURCES=staticGeometry.cpp
+projectiveDecals_SOURCES=projectiveDecals.cpp
+renderToTexture_SOURCES=renderToTexture.cpp
+
 
 
 
