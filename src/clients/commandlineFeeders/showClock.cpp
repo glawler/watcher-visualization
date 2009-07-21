@@ -23,6 +23,7 @@
  * @arg <b>-S, --hideSecondRing</b>        Don't send message to draw the outer, second hand ring.
  * @arg <b>-H, --hideHourRing</b>          Don't send message to draw the inner, hour hand ring.
  * @arg <b>-p, --logProps=file</b>, log.properties file, which controls logging for this program
+ * @arg <b>-e, --expireHands</b>           When drawing the hands, set them to expire after a short time.
  * @arg <b>-h, --help</b>, Show help message
  */
 #include <getopt.h>
@@ -59,6 +60,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -r, --radius                The radius of the circle in some unknown unit\n"); 
     fprintf(stderr, "   -S, --hideSecondRing        Don't send message to draw the outer, second hand ring\n");
     fprintf(stderr, "   -H, --hideHourRing          Don't send message to draw the inner, hour hand ring\n");
+    fprintf(stderr, "   -e, --expireHands           When drawing edges for the hands, set an expiration on the edges.\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "   -h, --help                  Show this message\n"); 
 
@@ -73,7 +75,7 @@ int main(int argc, char **argv)
     string server;
     string logProps(string(basename(argv[0]))+string(".log.properties"));
     double radius=50.0; 
-    bool showSecondRing=true, showHourRing=true;
+    bool showSecondRing=true, showHourRing=true, expireHands=false;
 
     while (true) 
     {
@@ -82,8 +84,9 @@ int main(int argc, char **argv)
             {"server", required_argument, 0, 's'},
             {"logProps", required_argument, 0, 'p'},
             {"radius", no_argument, 0, 'r'},
-            {"hideSecondRing", required_argument, 0, 'S'},
-            {"hideHourRing", required_argument, 0, 'H'},
+            {"hideSecondRing", no_argument, 0, 'S'},
+            {"hideHourRing", no_argument, 0, 'H'},
+            {"expireHands", no_argument, 0, 'e'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
@@ -109,6 +112,9 @@ int main(int argc, char **argv)
                 break;
             case 'H':
                 showHourRing=false;
+                break;
+            case 'e':
+                expireHands=true;
                 break;
             case 'h':
             case '?':
@@ -197,10 +203,10 @@ int main(int argc, char **argv)
 
             LabelMessagePtr labMess(new LabelMessage(nodeData[i].label));
             labMess->layer=layer;
-            labMess->expiration=loopTime*2000;  // 2000 to stop blinking
+            labMess->expiration=expireHands?loopTime*2000:0; 
             EdgeMessagePtr edgeMess(new EdgeMessage(centerId, *nodeData[i].id, layer, nodeData[i].color, 2));
             edgeMess->middleLabel=labMess;
-            edgeMess->expiration=loopTime*2000;
+            edgeMess->expiration=expireHands?loopTime*2000:0;
             if(!client.sendMessage(edgeMess))
             {
                 LOG_ERROR("Error sending edge message: " << *edgeMess);
