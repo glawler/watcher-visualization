@@ -1,0 +1,3 @@
+logPropertiesFile = "ogreWatcher.log.properties";
+server = "glory";
+port = "8095";

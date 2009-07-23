@@ -8,7 +8,7 @@
 
  @section Introduction
 
- The watcher system is awesome. 
+ The watcher system is composed of three components: a number of test node daemons, a watcher daemon instance, 
 
  @section Build
  @subsection Dependencies
@@ -79,6 +79,10 @@
  * @li qt 4.3
  *
  * Used in the GUI for window frames, GUI widgets, mouse and keyboard handling, etc. 
+ *
+ * @li sqlite 3
+ *
+ * This is the database used in the watcher daemon. 
  *
  * @li qwt-5.1.1
  *

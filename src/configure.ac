@@ -65,6 +65,29 @@ AC_ARG_ENABLE(hierarchy_client,
 	      [want_hierarchy_client=$enableval])
 AM_CONDITIONAL([WANT_HIERARCHY_CLIENT], [test x$want_hierarchy_client != xno])
 
+# allow optional disabling of ogreWatcher
+AC_ARG_ENABLE(ogreWatcher,
+	      [AS_HELP_STRING([--disable-ogreWatcher],[disable compilation of ogreWatcher])],
+	      [want_ogreWatcher=$enableval])
+AM_CONDITIONAL([WANT_OGREWATCHER], [test x$want_ogreWatcher != xno])
+
+# OGRE, OIS, and CEGUI
+PKG_CHECK_MODULES(OGRE, [OGRE >= 1.2])
+AC_SUBST(OGRE_CFLAGS)
+AC_SUBST(OGRE_LIBS)
+
+PKG_CHECK_MODULES(OIS, [OIS >= 1.0])
+AC_SUBST(OIS_CFLAGS)
+AC_SUBST(OIS_LIBS)
+
+PKG_CHECK_MODULES(CEGUI, [CEGUI >= 0.5.0])
+AC_SUBST(CEGUI_CFLAGS)
+AC_SUBST(CEGUI_LIBS)
+
+# PKG_CHECK_MODULES(CEGUI-OGRE, [CEGUI-OGRE >= 1.4.5])
+# AC_SUBST(CEGUI-OGRE_CFLAGS)
+# AC_SUBST(CEGUI-OGRE_LIBS)
+
 # qmake-qt4 seems to set the correct includes and libs, we just need to determine where it is for the QWT detection
 AC_MSG_CHECKING(for qt4)
 ac_cv_qt=
@@ -128,10 +151,8 @@ AC_CONFIG_FILES([ \
     clients/commandlineFeeders/Makefile \
     clients/watcherHierarchyClient/Makefile \
     clients/watcher3D/Makefile \
+    clients/ogreWatcher/Makefile \
     clients/legacyWatcher/legacyWatcher.pro
 ])
-
-#override default $CXXFLAGS
-CXXFLAGS="-Wall -Wextra -pthread -ggdb -O0"
 
 AC_OUTPUT

@@ -43,7 +43,7 @@ class TutorialApplication : public ExampleApplication
 
             ent=mSceneMgr->createEntity("Ninja1", "ninja.mesh");
             ent->setCastShadows(true);
-            SceneNode *node=mSceneMgr->getRootSceneNode()->createChildSceneNode("Ninja1Node");
+            SceneNode *node=mSceneMgr->getRootSceneNode()->createChildSceneNode("Ninja3Node");
             node->yaw(Math::ATan2(n1pos.x-n2pos.z, n1pos.y-n2pos.z)); 
             node->attachObject(ent);
 

@@ -260,5 +260,8 @@ share/info/dir
 ^src/ogreTutorials/src/volumeSelectionBasicManualObjects
 # ^src/ogreTutorials/src/walkingBetweenPointsBasicQuaternions&
 
-
-
+#
+# OGRE based watcher
+#
+^src/clients/ogreWatcher/Makefile
+^src/clients/ogreWatcher/ogreWatcher

@@ -8,7 +8,10 @@ if WANT_WATCHER3D
 SUBDIRS += watcher3D 
 endif
 
-
 if WANT_HIERARCHY_CLIENT
 SUBDIRS += watcherHierarchyClient
 endif 
+
+if WANT_OGREWATCHER
+SUBDIRS += ogreWatcher 
+endif
