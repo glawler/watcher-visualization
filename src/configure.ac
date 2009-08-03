@@ -60,7 +60,7 @@ AC_ARG_ENABLE(watcher3d,
 	      [enable_watcher3d=$enableval],
           [enable_watcher3d="no"])
 AC_MSG_RESULT($enable_watcher3d)
-AM_CONDITIONAL([ENABLE_WATCHER3D], [test x$want_watcher3d != xno])
+AM_CONDITIONAL([ENABLE_WATCHER3D], [test x$enable_watcher3d != xno])
 
 # allow optional disabling of watcherHierarchyClient
 AC_MSG_CHECKING(--enable-hierarchy_client)
@@ -68,7 +68,7 @@ AC_ARG_ENABLE(hierarchy_client,
 	      [AS_HELP_STRING([--enable-hierarchy_client],[enable compilation of hierarchy_client])],
 	      [enable_hierarchy_client=$enableval],
           [enable_hierarchy_client="no"])
-AM_CONDITIONAL([ENABLE_HIERARCHY_CLIENT], [test x$want_hierarchy_client != xno])
+AM_CONDITIONAL([ENABLE_HIERARCHY_CLIENT], [test x$enable_hierarchy_client != xno])
 AC_MSG_RESULT($enable_hierarchy_client)
 
 # allow optional disabling of ogreWatcher
@@ -78,7 +78,7 @@ AC_ARG_ENABLE(ogreWatcher,
 	      [enable_ogreWatcher=$enableval],
           [enable_ogreWatcher="no"])
 AC_MSG_RESULT($enable_ogreWatcher)
-AM_CONDITIONAL([ENABLE_OGREWATCHER], [test x$want_ogreWatcher != xno])
+AM_CONDITIONAL([ENABLE_OGREWATCHER], [test x$enable_ogreWatcher != xno])
 
 # OGRE, OIS, and CEGUI
 if test x$enable_ogreWatcher != xno; then
