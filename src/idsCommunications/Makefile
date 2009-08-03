@@ -416,6 +416,9 @@ testPacketProtection: ${BASEOBJ}
 ../protection/libnnpprotection.a: 
 	$(MAKE) -C ../protection
 
+distclean:
+	$(MAKE) clean
+
 clean:
 	rm -f $(BINS) *.o *.uto *.core core testhello libidsCommunications.a depend;
 

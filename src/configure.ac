@@ -57,28 +57,28 @@ AX_BOOST_DATE_TIME
 AC_MSG_CHECKING(--enable-watcher3d)
 AC_ARG_ENABLE(watcher3d,
 	      [AS_HELP_STRING([--enable-watcher3d],[enable compilation of watcher3d GUI])],
-	      [want_watcher3d=$enableval],
+	      [enable_watcher3d=$enableval],
           [enable_watcher3d="no"])
 AC_MSG_RESULT($enable_watcher3d)
-AM_CONDITIONAL([WANT_WATCHER3D], [test x$want_watcher3d != xno])
+AM_CONDITIONAL([ENABLE_WATCHER3D], [test x$want_watcher3d != xno])
 
 # allow optional disabling of watcherHierarchyClient
 AC_MSG_CHECKING(--enable-hierarchy_client)
 AC_ARG_ENABLE(hierarchy_client,
 	      [AS_HELP_STRING([--enable-hierarchy_client],[enable compilation of hierarchy_client])],
-	      [want_hierarchy_client=$enableval],
+	      [enable_hierarchy_client=$enableval],
           [enable_hierarchy_client="no"])
-AM_CONDITIONAL([WANT_HIERARCHY_CLIENT], [test x$want_hierarchy_client != xno])
+AM_CONDITIONAL([ENABLE_HIERARCHY_CLIENT], [test x$want_hierarchy_client != xno])
 AC_MSG_RESULT($enable_hierarchy_client)
 
 # allow optional disabling of ogreWatcher
 AC_MSG_CHECKING(--enable-ogreWatcher)
 AC_ARG_ENABLE(ogreWatcher,
 	      [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
-	      [want_ogreWatcher=$enableval],
+	      [enable_ogreWatcher=$enableval],
           [enable_ogreWatcher="no"])
 AC_MSG_RESULT($enable_ogreWatcher)
-AM_CONDITIONAL([WANT_OGREWATCHER], [test x$want_ogreWatcher != xno])
+AM_CONDITIONAL([ENABLE_OGREWATCHER], [test x$want_ogreWatcher != xno])
 
 # OGRE, OIS, and CEGUI
 if test x$enable_ogreWatcher != xno; then
@@ -162,10 +162,19 @@ AC_CONFIG_FILES([ \
     clients/messageStream2Text/Makefile \
     clients/connectivity2dot/Makefile \
     clients/commandlineFeeders/Makefile \
-    clients/watcherHierarchyClient/Makefile \
-    clients/watcher3D/Makefile \
-    clients/ogreWatcher/Makefile \
     clients/legacyWatcher/legacyWatcher.pro
 ])
+
+if test x$enable_watcher3d != xno; then
+    AC_CONFIG_FILES([clients/watcher3D/Makefile])
+fi
+
+if test x$enable_ogreWatcher != xno; then
+    AC_CONFIG_FILES([clients/ogreWatcher/Makefile])
+fi
+
+if test x$enable_hierarchy_client != xno; then
+    AC_CONFIG_FILES([clients/watcherHierarchyClient/Makefile])
+fi
 
 AC_OUTPUT
