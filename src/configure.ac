@@ -54,39 +54,54 @@ AX_BOOST_UNIT_TEST_FRAMEWORK
 AX_BOOST_DATE_TIME
 
 # allow optional disabling of watcher3d
+AC_MSG_CHECKING(--enable-watcher3d)
 AC_ARG_ENABLE(watcher3d,
 	      [AS_HELP_STRING([--disable-watcher3d],[disable compilation of watcher3d])],
-	      [want_watcher3d=$enableval])
+	      [want_watcher3d=$enableval],
+          [enable_watcher3d="no"])
+AC_MSG_RESULT($enable_watcher3d)
 AM_CONDITIONAL([WANT_WATCHER3D], [test x$want_watcher3d != xno])
 
 # allow optional disabling of watcherHierarchyClient
+AC_MSG_CHECKING(--enable-hierarchy_client)
 AC_ARG_ENABLE(hierarchy_client,
 	      [AS_HELP_STRING([--disable-hierarchy_client],[disable compilation of hierarchy_client])],
-	      [want_hierarchy_client=$enableval])
+	      [want_hierarchy_client=$enableval],
+          [enable_hierarchy_client="no"])
 AM_CONDITIONAL([WANT_HIERARCHY_CLIENT], [test x$want_hierarchy_client != xno])
+AC_MSG_RESULT($enable_hierarchy_client)
 
 # allow optional disabling of ogreWatcher
+AC_MSG_CHECKING(--enable-ogreWatcher)
 AC_ARG_ENABLE(ogreWatcher,
 	      [AS_HELP_STRING([--disable-ogreWatcher],[disable compilation of ogreWatcher])],
-	      [want_ogreWatcher=$enableval])
+	      [want_ogreWatcher=$enableval],
+          [enable_ogreWatcher="no"])
+AC_MSG_RESULT($enable_ogreWatcher)
 AM_CONDITIONAL([WANT_OGREWATCHER], [test x$want_ogreWatcher != xno])
 
 # OGRE, OIS, and CEGUI
-PKG_CHECK_MODULES(OGRE, [OGRE >= 1.2])
-AC_SUBST(OGRE_CFLAGS)
-AC_SUBST(OGRE_LIBS)
+if test x$enable_ogreWatcher != xno; then
+    AC_DEFINE(FEAT_OGREWATCHER)
 
-PKG_CHECK_MODULES(OIS, [OIS >= 1.0])
-AC_SUBST(OIS_CFLAGS)
-AC_SUBST(OIS_LIBS)
+    echo "Checking for OGRE"
 
-PKG_CHECK_MODULES(CEGUI, [CEGUI >= 0.5.0])
-AC_SUBST(CEGUI_CFLAGS)
-AC_SUBST(CEGUI_LIBS)
+    PKG_CHECK_MODULES(OGRE, [OGRE >= 1.2])
+    AC_SUBST(OGRE_CFLAGS)
+    AC_SUBST(OGRE_LIBS)
 
-# PKG_CHECK_MODULES(CEGUI-OGRE, [CEGUI-OGRE >= 1.4.5])
-# AC_SUBST(CEGUI-OGRE_CFLAGS)
-# AC_SUBST(CEGUI-OGRE_LIBS)
+    PKG_CHECK_MODULES(OIS, [OIS >= 1.0])
+    AC_SUBST(OIS_CFLAGS)
+    AC_SUBST(OIS_LIBS)
+
+    PKG_CHECK_MODULES(CEGUI, [CEGUI >= 0.5.0])
+    AC_SUBST(CEGUI_CFLAGS)
+    AC_SUBST(CEGUI_LIBS)
+
+    # PKG_CHECK_MODULES(CEGUI-OGRE, [CEGUI-OGRE >= 1.4.5])
+    # AC_SUBST(CEGUI-OGRE_CFLAGS)
+    # AC_SUBST(CEGUI-OGRE_LIBS)
+fi
 
 # qmake-qt4 seems to set the correct includes and libs, we just need to determine where it is for the QWT detection
 AC_MSG_CHECKING(for qt4)
