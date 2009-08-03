@@ -156,7 +156,7 @@ namespace sqlite_wrapper {
             Column& operator>> (const setcol& c) { return this[c.pos]; }
 
             Column& operator>> (int& i);
-            Column& operator>> (int64_t& i);
+            Column& operator>> (long long int& i);
             Column& operator>> (double& d);
             Column& operator>> (std::string& s);
             template <typename T> Column& operator>> (std::vector<T>& v);

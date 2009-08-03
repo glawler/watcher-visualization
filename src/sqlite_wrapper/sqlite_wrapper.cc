@@ -193,7 +193,7 @@ Column& Column::operator>> (int& i)
 }
 
 /** read the next column as an INTEGER */
-Column& Column::operator>> (int64_t& i)
+Column& Column::operator>> (long long int& i)
 {
     if (!flags_) {
         boost::shared_ptr<sqlite3_stmt> p = impl_->stmt.lock();
