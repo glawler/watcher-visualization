@@ -38,7 +38,8 @@ namespace watcher {
      */
     class ReplayState : public boost::enable_shared_from_this<ReplayState> {
         public:
-            struct Bad_arg {}; // invalid argument exception
+            /// invalid argument exception
+            struct Bad_arg {};
 
             /** Create an object for replaying events from the database to a specific client
              * connection of watcherd.

@@ -24,10 +24,10 @@
  *  @ref sendColorMessage
  *
  *  @ref sendConnectivityMessage
- *
  *  @ref sendGPSMessage 
  *
- * @subsection Watcher Daemon (watcherd)
+ * @subpage watcherd "Watcher Daemon"
+ *
  * @subsection GUIs
  * @subsubsection Legacy Watcher
  * @subsubsection Watcher3d

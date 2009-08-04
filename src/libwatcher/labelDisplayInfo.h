@@ -15,11 +15,8 @@
 namespace watcher
 {
     /** 
-     * @class LabelDisplayInfo
-     * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
-     *
      * Keep track of display information for a Label.
-     *
+     * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
      */
     class LabelDisplayInfo : 
         public DisplayInfo
@@ -31,7 +28,7 @@ namespace watcher
             watcher::event::Color backgroundColor;
             watcher::event::Color foregroundColor;
 
-            std::string fontName; // not really supported
+            std::string fontName; ///< not really supported
             float pointSize;
 
             /** The text in the label */
@@ -40,13 +37,14 @@ namespace watcher
             /** This doesn't really belong here, but I've nowhere else to put it. */
             Timestamp expiration; 
 
-            /** Can be loaded from a LabelMessage */
+            /** load configuration from a LabelMessage.
+             * @retval true configuration succeeded
+             * @retval false failed
+             */
             bool loadConfiguration(const watcher::event::LabelMessagePtr &labelMessage); 
 
-            /** Can be loaded from cfg file ... */
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 
-            /** Can be saved to cfg file ... */
             void saveConfiguration(); 
 
             virtual std::ostream &toStream(std::ostream &out) const;

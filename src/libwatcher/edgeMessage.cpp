@@ -24,8 +24,8 @@ namespace watcher {
         INIT_LOGGER(EdgeMessage, "Message.EdgeMessage");
 
         EdgeMessage::EdgeMessage(
-                                 const asio::ip::address &node1_,        
-                                 const asio::ip::address &node2_,        
+                                 const NodeIdentifier &node1_,        
+                                 const NodeIdentifier &node2_,        
                                  const GUILayer &layer_,                 
                                  const Color &c_,
                                  const unsigned int &width_,

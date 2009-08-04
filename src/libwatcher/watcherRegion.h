@@ -13,15 +13,12 @@
 namespace watcher
 {
     /**
-     * @class WatcherRegion. This class defines a region that exists in the watcher environment.
+     * This class defines a region that exists in the watcher environment.
      * It is meant to be used as a filter to narrow the messages that are sent to an watcherd attached GUI.
      */
     class WatcherRegion
     {
         public: 
-            /**
-             * Contstructor
-             */
             WatcherRegion();
 
             /**
@@ -31,12 +28,16 @@ namespace watcher
 
             /**
              * Write an instance of this class as a human readable stream to the otream given
+             * @param out the output stream
+             * @return reference to output stream
              */
             virtual std::ostream &toStream(std::ostream &out) const;
 
             /**
              * Write an instance of this class as a human readable stream to the otream given.
              * Just calls toStream().
+             * @param out the output stream
+             * @return reference to output stream
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 

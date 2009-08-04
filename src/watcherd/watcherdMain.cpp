@@ -21,6 +21,7 @@
 
 #include <pthread.h>
 #include <signal.h>
+#include <getopt.h>
 
 #include "logger.h"
 #include "libconfig.h++"
@@ -32,9 +33,44 @@ using namespace std;
 using namespace watcher;
 using namespace libconfig; 
 
+option Options[] = {
+    { "help", 0, NULL, 'h' },
+    { "config", 1, NULL, 'c' },
+    { "read-only", 1, NULL, 'r' },
+    { 0, 0, NULL, 0 }
+};
+
+void usage(const char *progName, bool exitp)
+{
+    cout << "Usage: " << basename(progName) << " [-c config filename]" << endl;
+    cout << "Args: " << endl; 
+    cout << "   -h, show this messsage and exit." << endl; 
+    cout << "   -c configfile - If not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
+    cout << "   -r, --read-only - do not write events to the database." << endl;
+    cout << "If a configuration file is not found on startup, a default one will be created, used, and saved on program exit." << endl;
+
+    if (exitp)
+        exit(EXIT_FAILURE); 
+}
+
 int main(int argc, char* argv[])
 {
     TRACE_ENTER();
+
+    int i;
+    bool readOnly = false;
+    while ((i = getopt_long(argc, argv, "hc:r", Options, NULL)) != -1) {
+        switch (i) {
+            case 'c':
+                //handled below
+                break;
+            case 'r':
+                readOnly = true;
+                break;
+            default:
+                usage(argv[0], true); 
+        }
+    }
 
     string configFilename;
     Config &config=SingletonConfig::instance();
@@ -92,7 +128,7 @@ int main(int argc, char* argv[])
            config.getRoot().add("databasePath", libconfig::Setting::TypeString)=dbPath;
     }
 
-    WatcherdPtr theWatcherDaemon(new Watcherd);
+    WatcherdPtr theWatcherDaemon(new Watcherd(readOnly));
     try
     {
         theWatcherDaemon->run(address, port, (int)numThreads);

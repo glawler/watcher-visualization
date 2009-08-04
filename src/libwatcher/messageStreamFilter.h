@@ -17,7 +17,7 @@ namespace watcher
     using namespace event; 
     
     /** 
-     * @class MessageStreamFilter
+      Create a filter which filters a message stream.
      * @author Geoff Lawler <geoff.lawler@sparta.com>
      * @date 2009-04-03
      */
@@ -25,7 +25,6 @@ namespace watcher
     {
         public:
             /**
-             * MessageStreamFilter
              * Create a filter which filters a message stream.
              */
             MessageStreamFilter();
@@ -36,49 +35,47 @@ namespace watcher
             virtual ~MessageStreamFilter();
 
             /**
-             m getLayer()
-             * @return Returns the current layer of this filter
+             * Returns the current layer of this filter
              */
             GUILayer getLayer() const; 
 
             /**
-             * setLayer()
-             * @param layer - set the layer of this filter to be the value passed in.
+             * @param layer set the layer of this filter to be the value passed in.
              */
             void setLayer(const GUILayer &layer); 
 
             /**
-             * getMessageType()
              * @return Returns the current message type of this filter
              */
             unsigned int getMessageType() const; 
 
             /**
-             * setMessageType()
-             * @param type - set the messageType of this filter to be the value passed in.
+             * @param type set the messageType of this filter to be the value passed in.
              */
             void setMessageType(const unsigned int &type); 
 
             /**
-             * getRegion()
-             * @return Returns the current region of this filter
+             * @return the current region of this filter
              */
             WatcherRegion getRegion() const; 
 
             /**
-             * setRegion()
-             * @param region - set the region of this filter to be the value passed in.
+             * @param region set the region of this filter to be the value passed in.
              */
-            void setRegion(const WatcherRegion &layer); 
+            void setRegion(const WatcherRegion &region); 
 
             /**
              * Write an instance of this class as a human readable stream to the otream given
+             * @param out the output stream
+             * @return reference to the output stream
              */
             virtual std::ostream &toStream(std::ostream &out) const;
 
             /**
              * Write an instance of this class as a human readable stream to the otream given.
              * Just calls MessageStream::toStream().
+             * @param out the output stream
+             * @return reference to the output stream
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
@@ -95,12 +92,13 @@ namespace watcher
 
     }; // like a graduating senior
 
-    /**
-     * @typedef a MessageStream shared pointer type
-     */
+    /// a MessageStream shared pointer type
     typedef boost::shared_ptr<MessageStreamFilter> MessageStreamFilterPtr;
 
     /** write a human readable version of the MessageStreamFilter class to the ostream given
+     * @param out the output stream
+     * @param messStreamFilter the filter to display
+     * @return reference to the output stream
      */
     std::ostream &operator<<(std::ostream &out, const MessageStreamFilter &messStreamFilter);
 

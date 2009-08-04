@@ -82,18 +82,16 @@ namespace watcher
 
 
             /**
-             * updateGraph()
              * updateGraph takes a message, and if it the message applicable to the state of the 
              * watcherGraph, will update the internal graph state and execute the graphUpdated
              * callback (if it exists).
              * 
-             * @param MessagePtr - the newly arrived data
-             * @return bool - if the graph was updated then true, else false.
+             * @param message  the newly arrived data
+             * @return if the graph was updated then true, else false.
              */
             bool updateGraph(const MessagePtr &message);
 
             /**
-             * updateGraph(filter)
              * Applies the passed filter to the in-memory graph. Read details below. 
              *
              * When a filter is applied to the MessageStream feeding the graph, 
@@ -120,6 +118,9 @@ namespace watcher
              *
              * It's a whole thing, you see? 
              *
+             * @param filter the filter to apply to the stream
+             * @retval true the graph was updated
+             * @retval false the graph was unchanged
              */
              bool updateGraph(const MessageStreamFilter &filter); 
 
@@ -130,26 +131,32 @@ namespace watcher
             void doMaintanence();
 
             /** Find a node in the graph based on a NodeIdentifier 
-             * @param[in] id - the id of the node you want to find. 
-             * @param[out] retIter - an iterator that points to the found node.
-             * @return bool - true if successful, false otherwise
+             * @param[in] id the id of the node you want to find. 
+             * @param[out] retVal an iterator that points to the found node.
+             * @retval true if successful
+             * @retval false otherwise
              */
             bool findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retVal);
 
             /**
              * Save current configuration of all labels, nodes, and edges to the SingletonCconfig 
              * instance. Call this before saving system configuration to a cfg file. 
+             * @retval true
              */
             bool saveConfig() const; 
 
 
             /**
              * Write an instance of this class as a human readable stream to the otream given
+             * @param out the output stream
+             * @return reference to output stream passed in
              */
             virtual std::ostream &toStream(std::ostream &out) const;
 
             /**
              * Write an instance of this class as a human readable stream to the otream given.
+             * @param out the output stream
+             * @return reference to output stream passed in
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 

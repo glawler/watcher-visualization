@@ -14,11 +14,9 @@
 namespace watcher
 {
     /** 
-     * @class EdgeDisplayInfo
-     * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
-     *
      * Keep track of display information for an edge. 
-     *
+     * Created from an edge related message.
+     * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
      */
     class EdgeDisplayInfo : 
         public DisplayInfo
@@ -27,25 +25,21 @@ namespace watcher
             EdgeDisplayInfo();
             virtual ~EdgeDisplayInfo(); 
 
-            /** created from an edge related message */
-
-            watcher::event::Color color;
-            float width; 
+            watcher::event::Color color;        ///< Color of the edge line
+            float width;                        ///< width of the edge line
            
-            bool flash;                         // To flash or not to flash, that is the question
-            Timestamp flashInterval;            // flash every flashRate milliseconds
-            Timestamp nextFlashUpdate;          // Next time to invert the colors. 
-            bool isFlashed;                     // true if color is currently inverted.
+            bool flash;                         ///< To flash or not to flash, that is the question
+            Timestamp flashInterval;            ///< flash every flashRate milliseconds
+            Timestamp nextFlashUpdate;          ///< Next time to invert the colors. 
+            bool isFlashed;                     ///< true if color is currently inverted.
 
-            std::string label;                  // written next to the edge, not used often
+            std::string label;                  ///< written next to the edge, not used often
             std::string labelFont; 
             double labelPointSize; 
             watcher::event::Color labelColor;
 
-            /** Can be loaded from cfg file ... */
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 
-            /** Can be saved to cfg file ... */
             void saveConfiguration(); 
 
         protected:

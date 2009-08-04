@@ -10,11 +10,9 @@
 namespace watcher
 {
     /**
-     * @class SingletonConfig
+     * A class that wraps a libconfig Config object.
      * @author Geoff Lawler <geoff.lawler@sparta.com>
      * @date 2009-05-15
-     *
-     * A class that wraps a libconfig Config object.
      */
     class SingletonConfig
     {

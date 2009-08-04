@@ -23,9 +23,7 @@
 
 namespace watcher 
 {
-    //
-    // Currently it's just a thin wrapper around the clientConnection class. 
-    //
+    /// Currently it's just a thin wrapper around the clientConnection class. 
     class Client : private boost::noncopyable
     {
         public:
@@ -46,10 +44,17 @@ namespace watcher
             /**
              * Send a messsage to the server.
              * 
-             * @param - message - the message to be sent. 
-             * @return - boolean - true on success, false otherwise
+             * @param message the message to be sent. 
+             * @return boolean true on success, false otherwise
              */
             bool sendMessage(const event::MessagePtr message);
+
+            /**
+             * Send messsages to the server.
+             * 
+             * @param messages the messages to be sent. 
+             * @return boolean true on success, false otherwise
+             */
             bool sendMessages(const std::vector<event::MessagePtr> &messages);
 
             /**

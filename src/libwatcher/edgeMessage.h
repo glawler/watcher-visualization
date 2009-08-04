@@ -16,6 +16,7 @@
 
 namespace watcher {
     namespace event {
+        /// annotate a connection between two nodes
         class EdgeMessage : public Message {
             public:
                 // The data

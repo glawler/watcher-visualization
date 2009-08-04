@@ -22,24 +22,24 @@ namespace watcher
      * exit(EXIT_FAILURE) is called as it is assumed that bad/unreadable input 
      * to a program is a FATAL error. 
      *
-     * @param[in/out] config - the config object to initialize.
-     * @param[in] argc - number of args in argv
-     * @param[in] argv - strings on the command line
-     * @param[out] configFilename - The name of the configuration file, if found.
-     * @param[in] commandLineShort - the short form of the command line arg that contains the 
+     * @param[in,out] config the config object to initialize.
+     * @param[in] argc number of args in argv
+     * @param[in] argv strings on the command line
+     * @param[out] configFilename The name of the configuration file, if found.
+     * @param[in] commandLineShort the short form of the command line arg that contains the 
      *  configuration filename. (ex: "-c foobar.cfg", the value is 'c')
-     * @param[in] commandLineLong - The long form of the command line arguement that 
+     * @param[in] commandLineLong The long form of the command line arguement that 
      *  points to the configuration file arguement. (ex: "--configFile foobar.cfg", the value is "configFile")
      *
-     * Returns false if the argument or default file name was not found, true otherwise.
-     *
+     * @retval false if the argument or default file name was not found
+     * @retval true otherwise
      */
     bool initConfig(
             libconfig::Config &config, 
             int argc, 
             char **argv, 
             std::string &configFilename,
-            const char commandLineiShort='c',
+            const char commandLineShort='c',
             const char *commandLineLong="configFile");
 }
 

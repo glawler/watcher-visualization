@@ -316,13 +316,15 @@ namespace watcher {
                        } else if (isFeederEvent(i->type)) {
                             conn_type = feeder;
 
-                            /*
-                             * This connection is a watcher test daemon.
-                             * Add a message handler to write its event
-                             * stream to the database.
-                             */
-                            addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
-                        }
+                            if (! watcher.readOnly()) {
+                                /*
+                                 * This connection is a watcher test daemon.
+                                 * Add a message handler to write its event
+                                 * stream to the database.
+                                 */
+                                addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
+                            }
+                       }
                     }
                 }
 

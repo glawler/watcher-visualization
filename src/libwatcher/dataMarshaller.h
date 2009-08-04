@@ -15,11 +15,11 @@
 
 namespace watcher 
 {
-    // A reference-counted non-modifiable buffer class.
+    /// A reference-counted non-modifiable buffer class.
     class shared_const_buffer
     {
         public:
-            // Construct from a std::string.
+            /// Construct from a std::string.
             explicit shared_const_buffer(const std::string& data)
                 : data_(new std::vector<char>(data.begin(), data.end())),
                 buffer_(boost::asio::buffer(*data_))
@@ -50,9 +50,8 @@ namespace watcher
     {
         public:
 
-            /** 
-             * @typedef a sequence of buffers used to write to the network.
-             */
+            
+            ///  a sequence of buffers used to write to the network.
             typedef shared_const_buffer NetworkMarshalBuffer;
             // typedef std::vector<NetworkMarshalBuffer> NetworkMarshalBuffers;
             typedef std::deque<NetworkMarshalBuffer> NetworkMarshalBuffers;
@@ -60,11 +59,11 @@ namespace watcher
 
             /**
              * Unmarshal a header, returning the length of the payload which follows. 
-             * @param[in] - buffer, the buffer which contains the header data
-             * @param[in] - bufferSize, the size of 'buffer'
-             * @param[out] - payloadSize, the size of the payload that the header is attached to.
-             * @param[out] - messageNum, the number of messages in the payload.
-             * @return - true on success, false otherwise.
+             * @param[in] buffer the buffer which contains the header data
+             * @param[in] bufferSize the size of 'buffer'
+             * @param[out] payloadSize the size of the payload that the header is attached to.
+             * @param[out] messageNum the number of messages in the payload.
+             * @return true on success, false otherwise.
              */
             static bool unmarshalHeader(
                     const char *buffer, 
@@ -74,10 +73,11 @@ namespace watcher
 
             /**
              * Unmarshal a single Message instance into the base class MessagePtr passed in.
-             * @param[out] - message, the pointer into which the Message is unmarshalled.
-             * @param[in] - buffer, holds the data to unmarshal
-             * @param[in] - bufferSize, the size of the buffer passed in.
-             * @return - true on success, false otherwise.
+             * @param[out] message the pointer into which the Message is unmarshalled.
+             * @param[in] buffer holds the data to unmarshal
+             * @param[in] bufferSize the size of the buffer passed in.
+             * @retval true on success
+             * @retval false otherwise
              */
             static bool unmarshalPayload(
                     event::MessagePtr &message, 
@@ -86,12 +86,13 @@ namespace watcher
 
             /**
              * Unmarshal a vector of Messages into the vector reference passed in.
-             * @param[out] - message, the pointer into which the Message is unmarshalled.
-             * @param[in,out] - numMessages, in: the number of messages in the buffer, out: the number of 
+             * @param[out] messages the pointer into which the Messages are unmarshalled.
+             * @param[in,out] numOfMessages in: the number of messages in the buffer, out: the number of 
              *  messages unmarshaled. 
-             * @param[in] - buffer, holds the data to unmarshal
-             * @param[in] - bufferSize, the size of the buffer passed in.
-             * @return - true on successfully unmarshaling all messages, false otherwise (numMessages will contain
+             * @param[in] buffer holds the data to unmarshal
+             * @param[in] bufferSize the size of the buffer passed in.
+             * @retval true on successfully unmarshaling all messages,
+             * @retval false otherwise (numMessages will contain
              *  the number of messages sucessfully unmarshalled on false). 
              */
             static bool unmarshalPayload(
@@ -102,9 +103,9 @@ namespace watcher
 
             /**
              * Marshal a single Message into a NetworkMarshalBuffer. 
-             * @param[in] - Message, the Message to marshal.
-             * @param[out] - outbuffers, the seraialized instance of message. 
-             * @return - true on success, false otherwise.
+             * @param[in] message the Message to marshal.
+             * @param[out] outBuffers the seraialized instance of message. 
+             * @return true on success, false otherwise.
              */
             static bool marshalPayload(
                     const event::MessagePtr &message, 
@@ -112,9 +113,9 @@ namespace watcher
 
             /**
              * Marshal some number of Messages into a NetworkMarshalBuffer. 
-             * @param[in] - Message, the Message to marshal.
-             * @param[out] - outbuffers, the seraialized instance of message. 
-             * @return - true on success, false otherwise.
+             * @param[in] message the Message to marshal.
+             * @param[out] outBuffers the seraialized instance of message. 
+             * @return true on success, false otherwise.
              */
             static bool marshalPayload(
                     const std::vector<event::MessagePtr> &message, 
