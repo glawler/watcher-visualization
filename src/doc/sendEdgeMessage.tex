@@ -1,0 +1,35 @@
+\newpage
+\label{sendEdgeMessage}
+\subsubsection{sendEdgeMessage}
+
+{\bf sendEdgeMessage} is a test node command line program that sends a GPSMessage message to a watcher daemon, specifing a node's current GPS coordinates.
+\\\\
+Usage: 
+{\tt sendEdgeMessage -s server -t tail [optional args]}
+\\\\
+Required Arguments:
+\begin{itemize}
+\item {\tt -s, --server=address}, The address or name of the node running watcherd to which the message is sent.
+\item {\tt -t, --tail=address}       The node to attach the tail of the edge to. If no head is given, the local node is used.
+\end{itemize}
+Optional Arguments:
+\begin{itemize}
+\item {\tt -h, --head=address}       The node to attach the head of the edge to.
+\item {\tt -c, --color=color}        The color of the edge. Can be ROYGBIV or RGBA format, string or hex value. Supports transparent colors.
+\item {\tt -w, --width=width}        The width of the edge in some arbitrary, unknown unit.
+\item {\tt -y, --layer=layer}        Which layer the edge is on in the GUI.
+\item {\tt -d, --bidirectional=bool} Is this edge bidirectional or unidirectional. Use 'true' for true, anything else for false.
+\item {\tt -l, --label=label}        The text to put in the middle label (This program only supports creating a middle label, although the message supports labels on node1 and node2 as well. May add that later)
+\item {\tt -f, --labelfg=color}      The foreground color of the middle label. Can be ROYGBIV or RGBA format, string or hex value. Supports transparent colors.
+\item {\tt -b, --labelbg=color}      The background color of the middle label. Can be ROYGBIV or RGBA format, string or hex value. Supports transparent colors.
+\item {\tt -z, --fontSize=size}      The font size of the middle label
+\item {\tt -x, --expiration=seconds} How long in milliseconds to diplay the edge
+\item {\tt -p, --logProps}           log.properties file, which controls logging for this program
+\end{itemize}
+Examples:
+\begin{itemize}
+\item Draw an edge between node 101 and node 102 on the "QoS" layer and make the color a translucent red.
+
+{\tt sendEdgeMessage -s glory -h 192.168.1.101 -t 192.168.1.102 -l QoS -c 255.0.0.64}
+\end{itemize}
+

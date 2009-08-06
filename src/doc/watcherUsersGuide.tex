@@ -1,0 +1,111 @@
+\documentclass{article}
+
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+
+% \setlength\topmargin{0in}
+% \setlength\headheight{0in}
+% \setlength\headsep{0in}
+% \setlength\textheight{7.7in}
+\setlength\textwidth{6.5in}
+\setlength\oddsidemargin{0in}
+\setlength\evensidemargin{0in}
+% \setlength\parindent{0.25in}
+% \setlength\parskip{0.25in} 
+
+\usepackage{makeidx}
+\makeindex
+\usepackage[dvips]{graphicx}
+
+\usepackage{url}
+
+\pagestyle{headings}
+
+\author{Geoff Lawler \url{<geoff.lawler@cobham.com>} \and {Michael Elkins \url{<michael.elkins@cobham.com>}}}
+
+\title{Watcher User's Guide}
+
+\begin{document}
+\maketitle
+\newpage 
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+This is the introduction. 
+
+\section{General Watcher Information}
+\subsection{Watcher Architecture and Communications}
+Give info about the watcher arch here: test node connect to daemon. GUIs connect to daemons and request message streams. Explain what message
+streams are. 
+
+\subsection{Obtaining and Building Watcher}
+Mention GPL'd-ness of the watcher. Give reference to repo location. 
+
+Give list of dependencies.
+
+Give simple build instructions: ./autogen.sh, ./configure, make, sudo make install, cd clients/legacyWatcher, make, make install \ldots.
+
+\subsection{Log Property Files}
+Give general intro with examples of the standard format and workings of the log.properties file. (Just like Java if peeps know that.)
+
+\subsection{Configuration (cfg) Files} 
+explain layout of standard config files and arguments that most (all?) watcher modules understand (-f cfg). 
+
+\subsection{Command Line Arguments}
+Most binaries take a {\tt -c} (or {\tt -f}) arugment which gives the location of the {\tt cfg} file. Mention this. Also note that most binaries 
+just take that option and nothing else. 
+
+\section{Test Node Components}
+\subsection{Watcher API}
+Mention watcher messages and give types. Mention something else that's interesting and useful. 
+
+\subsection{Scripting Interface}
+For each watcher message there is a command line binary to send that message. These binaries can be used directly in shell scripts or invoked via a system call from most scripting languages to send 
+an instance of that message to a running watcher daemon instance. Each binary allows the user to specify the content of the message and the daemon instance to send the message to. 
+
+In many cases, the 
+node that the message ``comes from'' can be set as well. This allows a user on any machine that can connect to a watcher daemon, the ability to modify nodes, edges, lables, etc of any 
+test node. This is useful for debugging or real time modification of an aspect of the test bed. For instance a single machine could monitor traffic rates between nodes and update 
+the edges between those nodes with the current traffic rate. 
+\\\\
+The available commands are:
+\begin{itemize}
+\item sendColorMessage (page \pageref{sendColorMessage})
+\item sendEdgeMessage (page \pageref{sendEdgeMessage})
+\end{itemize}
+The following pages give details for each command.
+\include{sendColorMessage}
+\include{sendEdgeMessage}
+
+\section{The Watcher Daemon}
+\subsection{Live Mode}
+\subsection{Playback Mode}
+
+\section{Watcher GUIs}
+
+Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just barely started proof of concept.
+
+\subsection{Legacy Watcher}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{legWatcherGUI.eps}
+\caption{The legacy watcher showing a running instance of showClock.}
+\end{figure}
+
+\subsection{ogreWatcher}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{ogreWatcherGUI.eps}
+\caption{The ogreWatcher showing a running instance of showClock.}
+\end{figure}
+
+Built with watcher.
+\subsubsection{Watcher3d}
+Built with Delta-3d.
+
+\printindex
+
+\end{document}

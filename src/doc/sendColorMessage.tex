@@ -1,0 +1,41 @@
+\newpage
+\label{sendColorMessage}
+\subsubsection{sendColorMessage}
+{\bf sendColorMessage} is a test node command line program that sends a ColorMessage message to the watcher daemon, specifing that a node should change it's color. 
+\\\\
+Usage: 
+{\tt sendColorMessage -s server -c color [optional args]}
+\\\\
+Required Arguments:
+\begin{itemize}
+\item {\tt -c, --color=color}, The color of the node. Can be ROYGBIV or RGBA format, string or hex value. Supports transparency. 
+\item {\tt -s, --server=address}, The addres of the node running watcherd
+\end{itemize}
+Optional Arguments:
+\begin{itemize}
+\item {\tt -n, --node=address}, The node to change color, if empty the local node's address is used
+\item {\tt -f, --flash=milliseconds}, Flash between the new color and the orginal color every milliseconds seconds, 0 for no flash.
+\item {\tt -x, --expiration=seconds}, How long in seconds to change the color. 0==forever
+\item {\tt -p, --logProps}, log.properties file, which controls logging for this program
+\item {\tt -h, --help}, Show help message
+\end{itemize}
+Examples:
+\begin{itemize}
+\item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.101 should be drawn in blue:
+
+{\tt showColor -s glory -c blue -n 192.168.1.101}
+
+\item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.101 should be drawn in a transparent blue. 
+Transparent format is R.G.B.A, where {\em A} is alpha transparency:
+
+{\tt showColor -s glory -c 0.0.255.64 -n 192.168.1.101}
+  
+\item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.107 should be drawn in green for 5 seconds:
+ 
+{\tt showColor -s glory -c green -n 192.168.1.107 --expiration 5000}
+ 
+\item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.104 should flash for 10 seconds:
+ 
+{\tt showColor --server glory --color green --node 192.168.1.104 --flash --expiration 10000}
+
+\end{itemize}
