@@ -81,8 +81,44 @@ The following pages give details for each command.
 \include{sendEdgeMessage}
 
 \section{The Watcher Daemon}
+
+The Watcher Daemon is responsible for collecting events from the Test Nodes and
+sending event streams to the Watcher GUIs.  Events from the Test Nodes are
+stored in an SQLite databased (named "event.db" by default).  The Watcher Daemon
+determines whether a connection is a Test Node or GUI by the type of the first
+event received.
+
+When recording events from the Test Nodes into the database, events are
+appended to the existing database, or a new database is created if it does not
+exist.  The Watcher Daemon may also be invoked in read-only database mode using
+the command line option -r or --read-only, in which case events are not stored
+in the database.  Read-only mode is useful particularly when replaying events
+from a database from some time in the past.  In this case, it may not make
+sense to append any current event stream from the Test Nodes when a large time
+gap exists between past and present runs.
+
 \subsection{Live Mode}
+
+When a GUI connects to the Watcher Daemon, it will by default subscribe to the
+live event stream coming from the Test Nodes.  In this case, the Watcher Daemon
+is simply retransmitting received events to all listening GUIs rather than
+fetching events from the database.  The events are also stored in the database
+for later replay.
+
+If a GUI pauses, rewinds, or slows playback, it will switch to Playback mode.
+
 \subsection{Playback Mode}
+
+In Playback Mode, the Watcher Daemon fetches events from the database and sends
+them to the GUI.  Each GUI connection has an independent notion of the current
+playback time offset, direction and speed.  Stopping playback in one GUI will
+not cause playback to stop in another GUI.
+
+The Watcher Daemon will automatically pause Playback when the last event from
+the database has been sent to the GUI.  Thus, if a GUI were playing at a time
+offset near the end of the database, and faster than real time, the GUI will be
+paused when the last event is sent, even if additional events arrive from Test
+Nodes.
 
 \section{Watcher GUIs}
 
