@@ -13,13 +13,10 @@
 namespace watcher
 {
     /** 
-     * @class DisplayInfo
-     * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
-     *
      * Base class for keeping track of display information. Derived classes
      * will be read in their own display configuration and use it to keep 
      * track of the state of the display of the object. 
-     *
+     * @author Geoff Lawler <Geoff.Lawler@cobham.com> 
      */
     class DisplayInfo : 
         public boost::noncopyable   // for now, may change later
@@ -27,19 +24,18 @@ namespace watcher
         public:
 
             /** 
-             * DisplayInfo()
-             *
-             * @param category - the category or name of the resource in this layer. 
-             * 
              * Creates default settings in the constructor. 
+             * @param category - the category or name of the resource in this layer. 
              */
             DisplayInfo(const std::string &category); 
+
             virtual ~DisplayInfo(); 
 
             /** 
              * Make sure the lower level of the cfg structure exists 
              * and pass back a path to it. Uses layerName and current 
              * value in categoryName to build the path. 
+             * @param[in] layerName the target layer name
              */
             const std::string getBasePath(const watcher::event::GUILayer &layerName); 
 
@@ -47,13 +43,13 @@ namespace watcher
              * Given a layer, load the configuration found there. Search is by 
              * member variable categoryName, so that must be set. 
              *
-             * @param layer - layer data of the categoryName to load. 
-             * @return bool - true if config loadded, false otherwise. 
+             * @param layer data of the categoryName to load. 
+             * @retval  true if config loaded
+             * @retval false otherwise
              */
             virtual bool loadConfiguration(const watcher::event::GUILayer &layer) = 0; 
 
             /**
-             * saveConfiguration()
              * This saves the current state of the display information to the 
              * singleton config instance. If you want the changes saved for this layer  
              * when the cfg file is written out, make sure to call this prior to doing so. 

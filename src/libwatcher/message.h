@@ -49,8 +49,8 @@ namespace watcher {
                 Message();
 
                 /** Create a Message 
-                 * @arg t, the type of the message
-                 * @arg version, the message's version
+                 * @param t the type of the message
+                 * @param version the message's version
                  */
                 Message(const MessageType &t, const unsigned int version);
 
@@ -61,25 +61,25 @@ namespace watcher {
                 virtual ~Message();
 
                 /** Compare this message against another to see if they are equal.
-                 * @arg other, the other message
-                 * @returns bool, true is equal, false otherwise.
+                 * @param other the other message
+                 * @return bool true is equal, false otherwise.
                  */
                 bool operator==(const Message &other) const;
 
                 /** Set this message equal to another
-                 * @arg other, the message to set this message equal to
-                 * @ret Message, a reference to this instance
+                 * @param other the message to set this message equal to
+                 * @return a reference to this instance
                  */
                 Message &operator=(const Message &other);
 
                 /** Write this message to <b>out</b> in human readable format 
-                 * @arg out, the stream to write to
+                 * @param out the stream to write to
                  * @return the stream that was written to
                  */
                 virtual std::ostream &toStream(std::ostream &out) const;
 
                 /** Write this message to <b>out</b> in human readable format 
-                 * @arg out, the stream to write to
+                 * @param out the stream to write to
                  * @return the stream that was written to
                  */
                 inline std::ostream &operator<<(std::ostream &out) const { return toStream(out); }

@@ -9,7 +9,7 @@
  *
  * <b>connectivity2dot</b> is a command line program that generates a dot file of the current test node connectivity graph. To use, start the 
  * program then send it a USR1 signal. When it gets the signal, it will dump the dot-ready graph represenation into an output file. 'dot' is a
- * program that can generate images/PDF files for graphs. See @ref www.graphviz.org for more details.
+ * program that can generate images/PDF files for graphs. See http://www.graphviz.org for more details.
  *
  * Usage: 
  * @{

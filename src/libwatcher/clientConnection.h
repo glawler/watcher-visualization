@@ -31,7 +31,12 @@ namespace watcher
         public boost::enable_shared_from_this<ClientConnection>
     {
         public:
-            // Connect to the service service on server server using the boost::io_service given.
+            /** Connect to the service service on server server using the boost::io_service given.
+             * @param io_service io_service for the application
+             * @param server DNS name or IP address of server
+             * @param service port or service name
+             * @param reconnect attempt to reconnect if the connection terminates
+             */
             ClientConnection(
                     boost::asio::io_service& io_service, 
                     const std::string &server, 
@@ -41,12 +46,18 @@ namespace watcher
             virtual ~ClientConnection(); 
 
             /**
-             * sendMessage() will send a packet to the server which contains the message. 
+             * send a packet to the server which contains the message. 
              *
-             * @param message - The message to send.
-             * @return a bool - currently ignored. 
+             * @param message The message to send.
+             * @return a bool currently ignored. 
              */
             bool sendMessage(const event::MessagePtr message);
+
+            /**
+             * send a packet to the server which contains messages. 
+             * @param message The messages to send.
+             * @return a bool currently ignored. 
+             */
             bool sendMessages(const std::vector<event::MessagePtr> &message);
 
             /**
@@ -57,7 +68,6 @@ namespace watcher
             bool connect();
 
             /**
-             * close()
              * close the connection to the server.
              */
             void close(); 

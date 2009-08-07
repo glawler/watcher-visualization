@@ -10,9 +10,10 @@ using namespace boost;
 
 INIT_LOGGER(Watcherd, "Watcherd"); 
 
-Watcherd::Watcherd() : 
+Watcherd::Watcherd(bool ro) : 
     config_(SingletonConfig::instance()),
-    serverMessageHandlerPtr(new ServerMessageHandler)
+    serverMessageHandlerPtr(new ServerMessageHandler),
+    readOnly_(ro)
 {
     TRACE_ENTER();
     pthread_rwlock_init(&messageRequestorsLock, 0);

@@ -53,54 +53,54 @@ namespace watcher {
 
                 /**
                  * Attach a label to this node.
-                 * @param label - the text to display on the label.
-                 * @param fontSize - the size of the font, if 0 use the GUI default size.
+                 * @param label the text to display on the label.
+                 * @param fontSize the size of the font, if 0 use the GUI default size.
                  */
                 LabelMessage(const std::string &label="", const int fontSize=0); 
 
                 /**
                  * Attach a label to an arbitrary node.
-                 * @param label - the text to display on the label.
-                 * @param nodeId - the ID of the node to attach the label to.
-                 * @param fontSize - the size of the font, if 0 use the GUI default size.
+                 * @param label the text to display on the label.
+                 * @param address the ID of the node to attach the label to.
+                 * @param fontSize the size of the font, if 0 use the GUI default size.
                  */
                 LabelMessage(const std::string &label, const NodeIdentifier &address, const int fontSize=0);
 
                 /**
                  * Float a label in space. 
-                 * @param label - the text to display on the label.
-                 * @param lat - the latitude of the label
-                 * @param long - the longitude of the label
-                 * @param alt - the altitude of the label
-                 * @param fontSize - the size of the font, if 0 use the GUI default size.
+                 * @param label the text to display on the label.
+                 * @param lat the latitude of the label
+                 * @param lng the longitude of the label
+                 * @param alt the altitude of the label
+                 * @param fontSize the size of the font, if 0 use the GUI default size.
                  */
                 LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const int fontSize=0);
 
                 /** copy a the message 
-                 * @param other, the message to copy 
+                 * @param other the message to copy 
                  */
                 LabelMessage(const LabelMessage &other);
 
                 /** Compare this message against another.
-                 * @param other, the message to compare to
-                 * @returns bool, true if equal, false otherwise
+                 * @param other the message to compare to
+                 * @return bool, true if equal, false otherwise
                  */
                 bool operator==(const LabelMessage &other) const;
 
                 /** Set this message equal to another
-                 * @param other, the message to set this message equal to
-                 * @ret ColorMessage, a reference to this instance
+                 * @param other the message to set this message equal to
+                 * @return a reference to this instance
                  */
                 LabelMessage &operator=(const LabelMessage &other);
 
                 /** Write this message to <b>out</b> in human readable format 
-                 * @param out, the stream to write to
+                 * @param out the stream to write to
                  * @return the stream that was written to
                  */
                 virtual std::ostream &toStream(std::ostream &out) const;
 
                 /** Write this message to <b>out</b> in human readable format 
-                 * @param out, the stream to write to
+                 * @param out the stream to write to
                  * @return the stream that was written to
                  */
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }

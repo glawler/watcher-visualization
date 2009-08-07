@@ -59,11 +59,11 @@ namespace watcher
             /// Handle completion of a read operation.
             void handle_read_header(
                     const boost::system::error_code& e, 
-                    std::size_t bytes_transferred);
+                    size_t bytes_transferred);
 
             void handle_read_payload(
                     const boost::system::error_code& e, 
-                    std::size_t bytes_transferred, 
+                    size_t bytes_transferred, 
                     unsigned short messageNum); 
 
             /// Handle completion of a write operation.

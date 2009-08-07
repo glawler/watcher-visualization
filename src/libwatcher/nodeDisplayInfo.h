@@ -16,59 +16,48 @@
 namespace watcher
 {
     /** 
-     * @class NodeDisplayInfo
-     * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
-     *
      * Keep track of display information for a specific or default node.
+     * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
      */
     class NodeDisplayInfo : 
         public DisplayInfo
     {
         public:
-            /**
-             * 
-             */
             NodeDisplayInfo();
 
-            /**
-             *
-             */
             virtual ~NodeDisplayInfo(); 
 
             /** The node's ID. */
             NodeIdentifier nodeId;
             
-            /** Item's shape */
             enum NodeShape { CIRCLE=0, SQUARE, TRIANGLE, TORUS, TEAPOT };
             static std::string nodeShapeToString(const NodeDisplayInfo::NodeShape &shape);
             static NodeShape stringToNodeShape(const std::string &shape);
+            /** Item's shape */
             NodeShape shape;
 
-            /** display effects for a node - may not all be supported in GUI */
-            bool sparkle;
-            bool spin;
-            bool flash;
+            bool sparkle; ///< display effects for a node - may not all be supported in GUI
+            bool spin; ///< display effects for a node - may not all be supported in GUI
+            bool flash; ///< display effects for a node - may not all be supported in GUI
 
             /** how big is the node from "normal" */
             float size;
 
-            /**
-             * Spin data. Used when spin is enabled (spin==true)
-             */
-            int spinTimeout;                // update rotatation every spinTimeout milliseconds
-            float spinIncrement;            // Amount of spin per timeout period
-            long long int nextSpinUpdate;   // epoch milliseconds, same as destime.
-            float spinRotation_x;           // cur rotation for x plane
-            float spinRotation_y;           // cur rotation for y plane
-            float spinRotation_z;           // cur rotation for d plane, no, wait z plane.
+            /* Spin data. Used when spin is enabled (spin==true) */
+            int spinTimeout;                ///< update rotatation every spinTimeout milliseconds
+            float spinIncrement;            ///< Amount of spin per timeout period
+            long long int nextSpinUpdate;   ///< epoch milliseconds, same as destime.
+            float spinRotation_x;           ///< cur rotation for x plane
+            float spinRotation_y;           ///< cur rotation for y plane
+            float spinRotation_z;           ///< cur rotation for d plane, no, wait z plane.
 
-            /**
+            /*
              * Flash data. Flash is done by inverting the color of the thing every
              * x milliseconds.
              */
-            long long int flashInterval;        // flash every flashRate milliseconds
-            long long int nextFlashUpdate;      // Next time to invert the colors. 
-            bool isFlashed;                     // true if color is currently inverted.
+            long long int flashInterval;        ///< flash every flashRate milliseconds
+            long long int nextFlashUpdate;      ///< Next time to invert the colors. 
+            bool isFlashed;                     ///< true if color is currently inverted.
 
             /** 
              * Allow for different types of default labels.  
@@ -84,27 +73,26 @@ namespace watcher
 
             watcher::event::Color color; 
 
-            /**The configuration interface. */
+            /* The configuration interface. */
+
             /**
              * Given a Config path, load the Node found there. 
              *
-             * @param basePath - the "path" to the node to load, given in libconfig's 
-             * dotted format, e.g. "foo.bar.baz". 
+             * @param layer target Watcher layer
              *
-             * @ param nid, if given the configuration for that specific node, if found, 
+             * @param nid if given the configuration for that specific node, if found, 
              * will be loaded. If not found, the default node config for this layer will be loaded. 
              * (Note - this will overwrite any existing configuration this instance may have, including
              * resetting the nodeId). If this parameter is not specfied, the default configuration will 
              * be loaded. 
              *
-             * @return bool - true if config loadded, false otherwise. 
+             * @retval bool true if config loadded
+             * @retval false otherwise. 
              */
             bool loadConfiguration(const watcher::event::GUILayer &layer, const NodeIdentifier &nid); 
 
-            /** Load the default node settings */
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 
-            /** Save this instance to the singleton config */
             void saveConfiguration(); 
 
         protected:

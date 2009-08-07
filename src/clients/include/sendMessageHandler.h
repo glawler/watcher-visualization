@@ -11,7 +11,12 @@ namespace watcher {
      */
     class SendMessageHandler : public MessageHandler {
         public:
-            bool handleMessageSent(const event::MessagePtr &) { return true; }
+            /** Callback to cause the connection to terminate after sending a single
+             * message to the server.
+             * @param message the message that was sent
+             * @retval true always returns true
+             */
+            bool handleMessageSent(const event::MessagePtr &message) { return true; }
 
             static MessageHandlerPtr create();
     };

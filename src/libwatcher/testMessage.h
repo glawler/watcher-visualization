@@ -10,9 +10,9 @@
 
 #include "message.h"
 
-namespace watcher 
-{
+namespace watcher {
     namespace event {
+        /// a no-op event for system testing
         class TestMessage : public Message
         {
             public:
@@ -21,6 +21,11 @@ namespace watcher
                 std::vector<int> intsData;
 
                 TestMessage();
+                /** Construct a test message consisting of a string and a vector of integers.
+                 * Useful for generating distinct messages.
+                 * @param[in] str string to include in the event
+                 * @param[in] ints vector of integers to include in the event
+                 */
                 TestMessage(const std::string &str, const std::vector<int>& ints);
                 TestMessage(const TestMessage &other);
 
@@ -38,6 +43,11 @@ namespace watcher
 
         typedef boost::shared_ptr<TestMessage> TestMessagePtr; 
 
+        /** Write human readable version of a TestMessage to the output stream.
+         * @param out the output stream
+         * @param[in] mess the test message
+         * @return reference to the output stream.
+         */
         std::ostream &operator<<(std::ostream &out, const TestMessage &mess);
     }
 }

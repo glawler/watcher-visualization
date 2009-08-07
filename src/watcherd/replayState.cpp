@@ -156,12 +156,14 @@ ReplayState& ReplayState::time_step(unsigned int n)
     return *this;
 }
 
-/* function object for accepting events output from Database::getEvents() */
-struct event_output {
-    std::deque<MessagePtr>& q;
-    event_output(std::deque<MessagePtr>& qq) : q(qq) {}
-    void operator() (MessagePtr m) { q.push_back(m); }
-};
+namespace {
+    /* function object for accepting events output from Database::getEvents() */
+    struct event_output {
+        std::deque<MessagePtr>& q;
+        event_output(std::deque<MessagePtr>& qq) : q(qq) {}
+        void operator() (MessagePtr m) { q.push_back(m); }
+    };
+}
 
 /** Schedule an asynchronous task to replay events from the database to a GUI
  * client.  If the local cache of upcoming events is empty, prefetch a block of
