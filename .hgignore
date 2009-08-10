@@ -267,7 +267,8 @@ share/info/dir
 #
 # ignore latex temp files.
 #
-^src/doc/.*\.eps   # this may not be what we want if eps files are used later
+^src/doc/legWatcherGUI.eps   # these two eps files are generated from png files.
+^src/doc/ogreWatcherGUI.eps
 ^src/doc/.*\.aux
 ^src/doc/.*\.make
 ^src/doc/.*\.d

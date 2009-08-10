@@ -54,7 +54,9 @@ includes.tex		?= \
 	sendGPSMessage.tex \
 	sendDataPointMessage.tex \
 	sendLabelMessage.tex \
-	showClock.tex
+	showClock.tex \
+	gpsFeeder.tex \
+	watcherHierarchyClient.tex
 #includes.tex.sh	?=
 #includes.rst		?=
 #includes.fig		?=

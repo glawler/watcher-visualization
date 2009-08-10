@@ -1,7 +1,7 @@
 \subsubsection{GPS Feeder}
 \label{GPSFeeder}
 The GPS Feeder, {\it gpsFeeder.py}, updates the watcher daemon on the current location of a single node on the test bed. It is usually run on the test node itself, thus 
-every test node updates its own location. The GPS is read from a locally running {\it gpsd} process. (See {\verb http://gpsd.berlios.de} for 
+every test node updates its own location. The GPS is read from a locally running {\it gpsd} process. (See http://gpsd.berlios.de for 
 details of {\it gpsd}.) The watcher GPS Feeder can be found at ./src/clients/gpsFeeder. It consists of a python script that uses the 
 python interface exported by {\it gpsd}. Once a second, it retrieves the curent GPS location of the local node and makes a system call via the shell to sendGPSMessage ~\ref{sendGPSMessage}. (Since it
 calls {\it sendGPSMessage}, {\it sendGPSMessage} must be in the PATH of the shell in which gpsFeeder is launched. 

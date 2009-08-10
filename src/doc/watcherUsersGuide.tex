@@ -41,6 +41,13 @@ This is the introduction.
 Give info about the watcher arch here: test node connect to daemon. GUIs connect to daemons and request message streams. Explain what message
 streams are. 
 
+\begin{figure}[here]
+\label{fig:watcherArch}
+\centering
+\includegraphics[width=0.8\textwidth]{watcherArch.eps}
+\caption{The basic architecture of the watcher system.}
+\end{figure}
+
 \subsection{Obtaining and Building Watcher}
 Mention GPL'd-ness of the watcher. Give reference to repo location. 
 
@@ -88,6 +95,11 @@ The following pages give details for each command.
 \include{sendDataPointMessage}
 \include{sendLabelMessage}
 \include{showClock}
+
+\subsection{Test Node Daemons}
+These daemons are run on the test nodes and feed information about the test nodes to the watcher daemon. This information is then streamed to GUI(s) attached to the daemon, which display it.
+\include{gpsFeeder}
+\include{watcherHierarchyClient}
 
 \section{The Watcher Daemon}
 
