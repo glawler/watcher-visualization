@@ -47,7 +47,12 @@ onlysources.tex	?= watcherUsersGuide.tex
 #
 # If you list files here, they will be treated as _include_ files
 #includes.tex		?= file1.tex file2.tex
-includes.tex		?= sendColorMessage.tex sendEdgeMessage.tex
+includes.tex		?= \
+	sendColorMessage.tex \
+	sendEdgeMessage.tex \
+	sendConnectivityMessage.tex \
+	sendGPSMessage.tex \
+	sendDataPointMessage.tex
 #includes.tex.sh	?=
 #includes.rst		?=
 #includes.fig		?=

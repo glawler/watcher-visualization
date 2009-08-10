@@ -1,0 +1,34 @@
+\newpage
+\label{sendDataPointMessage}
+\subsubsection{sendDataPointMessage}
+{\bf sendDataPointMessage} is a test node command line program that sends a DataPointMessage message to the watcher daemon, specifing a set of timestamped data point(s) for the node. The data point is labeled with a string saying what the data points represent.  The GUI(s) then display this information is some way. In the case of the legacy watcher [\ref{LegacyWatcher}], 2D scrolling graphs are displayed showing past data points. The legacy watcher assumes that data points are given once a second.
+\\\\
+Usage: 
+{\tt sendDataPointMessage -s server -g name [optional args] -d dp1 -d dp2 ... -d dpN}
+\\\\
+Required Arguments:
+\begin{itemize}
+\item {\tt -s address|name}, The address or name of the node running watcherd.
+\item {\tt -g name}, the "graphname" of the data - what the data is measuring.
+\item {\tt -d datapoint}, a single data point measuring something.
+\end{itemize}
+Optional args:
+\begin{itemize}
+\item {\tt -n, --node=address}, the node the data is from 
+\item {\tt -h, --help}, Show help message
+\end{itemize}
+Examples:
+\begin{itemize}
+\item Update the watcher about the current CPU usage on the machine 192.168.1.105.  
+    
+{\tt sendDataPointMessage -s glory -g "CPUUsage" -n 192.168.1.105 -d .45432}
+
+\item Update the watcher about the current number of user's logged in to the local machine.   
+
+{\tt sendDataPointMessage -s glory -g "LoggedInUsers" -d 23}
+
+\item Update the watcher about the local node's current level of self satisifation.
+
+{\tt sendDataPointMessage -s glory -g "BoyAmIGreatLevel" -d 23}
+
+\end{itemize}
