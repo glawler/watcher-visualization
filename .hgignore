@@ -227,8 +227,6 @@ share/info/dir
 ^share/idmef-message.dtd
 ^share/idmef-messages/*
 
-^src/doc/*
-
 ^src/feeders/Makefile$
 ^src/feeders/routeFeeder/Makefile$
 ^src/watcherHierarchyClient/Makefile$
@@ -258,10 +256,27 @@ share/info/dir
 ^src/ogreTutorials/src/renderToTexture
 ^src/ogreTutorials/src/staticGeometry
 ^src/ogreTutorials/src/volumeSelectionBasicManualObjects
-# ^src/ogreTutorials/src/walkingBetweenPointsBasicQuaternions&
+^src/ogreTutorials/src/walkingBetweenPointsBasicQuaternions
 
 #
 # OGRE based watcher
 #
 ^src/clients/ogreWatcher/Makefile
 ^src/clients/ogreWatcher/ogreWatcher
+
+#
+# ignore latex temp files.
+#
+^src/doc/.*\.eps   # this may not be what we want if eps files are used later
+^src/doc/.*\.aux
+^src/doc/.*\.make
+^src/doc/.*\.d
+^src/doc/.*\.dvi
+^src/doc/.*\.fls
+^src/doc/.*\.idx
+^src/doc/.*\.ilg
+^src/doc/.*\.ind
+^src/doc/.*\.pdf
+^src/doc/.*\.ps
+^src/doc/.*\.toc
+
