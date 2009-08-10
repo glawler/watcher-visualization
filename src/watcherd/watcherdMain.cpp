@@ -16,31 +16,11 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//
-// posix_main.cpp
-// ~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-// Modifed by Geoff Lawler, SPARTA, inc. 2008.
-//
-
 #include <iostream>
 #include <string>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
-#include "server.h"
-
-#if !defined(_WIN32)
-
-#include <pthread.h>
-#include <signal.h>
 #include <getopt.h>
 
+#include "server.h"
 #include "logger.h"
 #include "libconfig.h++"
 #include "initConfig.h"
@@ -164,6 +144,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
-
-#endif // !defined(_WIN32)
