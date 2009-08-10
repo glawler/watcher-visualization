@@ -1,0 +1,32 @@
+\newpage
+\label{sendGPSMessage}
+\subsubsection{sendGPSMessage}
+{\bf sendGPSMessage} is a test node command line program that sends a GPSMessage message to a watcher daemon, specifing a node's current GPS coordinates.
+\\\\
+Usage: 
+{\tt sendGPSMessage -s server -x value -y value -z value [optional args]}
+\\\\
+Required Arguments:
+\begin{itemize}
+\item {\tt -s, --server=address}, The address or name of the node running watcherd to which the message is sent.
+\item {\tt -x, --latitude=value}, The latitude of the node.
+\item {\tt -y, --longitude=value}, The longitude of the node.
+\item {\tt -z, --altitude=value}, The altitude of the node.
+\end{itemize}
+Optional Arguments:
+\begin{itemize}
+\item {\tt -n, --fromNode=address|name}, The node that the coordinates refer to. If not given, assume the local node. 
+\item {\tt -l, --logProps}, log.properties file, which controls logging for this program
+\item {\tt -h, --help}, Show help message
+\end{itemize}
+Examples:
+\begin{itemize}
+\item This tells the GUI(s) attached to the watcherd on glory that node 192.168.1.101 is now at 79.23123123, 43.123123123, 20
+
+{\tt sendGPSMessage -s glory -n 192.168.1.101 -x 79.23123123 -y 43.123123123 -z 20}
+
+\item This tells the GUI(s) attached to the watcherd on glory that the local node is at 0.0123123 0.123123123 123
+
+{\tt sendGPSMessage --server glory -n 192.168.1.101 -x 0.0123123 -y 0.123123123 -z 123}
+
+\end{itemize}
