@@ -66,8 +66,7 @@ Mention watcher messages and give types. Mention something else that's interesti
 For each watcher message there is a command line binary to send that message. These binaries can be used directly in shell scripts or invoked via a system call from most scripting languages to send 
 an instance of that message to a running watcher daemon instance. Each binary allows the user to specify the content of the message and the daemon instance to send the message to. 
 
-In many cases, the 
-node that the message ``comes from'' can be set as well. This allows a user on any machine that can connect to a watcher daemon, the ability to modify nodes, edges, lables, etc of any 
+In many cases, the node that the message ``comes from'' can be set as well. This allows a user on any machine that can connect to a watcher daemon, the ability to modify nodes, edges, lables, etc of any 
 test node. This is useful for debugging or real time modification of an aspect of the test bed. For instance a single machine could monitor traffic rates between nodes and update 
 the edges between those nodes with the current traffic rate. 
 \\\\
@@ -75,10 +74,18 @@ The available commands are:
 \begin{itemize}
 \item sendColorMessage (page \pageref{sendColorMessage})
 \item sendEdgeMessage (page \pageref{sendEdgeMessage})
+\item sendGPSMessage (page \pageref{sendGPSMessage})
+\item sendConnectivityMessage (page \pageref{sendConnectivityMessage})
+\item sendDataPointMessage (page \pageref{sendDataPointMessage})
+\item sendLabelMessage (page \pageref{sendLabelMessage})
 \end{itemize}
 The following pages give details for each command.
 \include{sendColorMessage}
 \include{sendEdgeMessage}
+\include{sendGPSMessage}
+\include{sendConnectivityMessage}
+\include{sendDataPointMessage}
+\include{sendLabelMessage}
 
 \section{The Watcher Daemon}
 
@@ -125,6 +132,7 @@ Nodes.
 Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just barely started proof of concept.
 
 \subsection{Legacy Watcher}
+\label{LegacyWatcher}
 \begin{figure}
 \centering
 \includegraphics[width=0.8\textwidth]{legWatcherGUI.eps}
@@ -138,8 +146,8 @@ Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just
 \caption{The ogreWatcher showing a running instance of showClock.}
 \end{figure}
 
-Built with watcher.
-\subsubsection{Watcher3d}
+Built with OGRE.
+\subsection{Watcher3d}
 Built with Delta-3d.
 
 \printindex

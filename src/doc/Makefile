@@ -52,7 +52,8 @@ includes.tex		?= \
 	sendEdgeMessage.tex \
 	sendConnectivityMessage.tex \
 	sendGPSMessage.tex \
-	sendDataPointMessage.tex
+	sendDataPointMessage.tex \
+	sendLabelMessage.tex
 #includes.tex.sh	?=
 #includes.rst		?=
 #includes.fig		?=

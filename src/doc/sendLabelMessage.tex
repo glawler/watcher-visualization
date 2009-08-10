@@ -1,0 +1,43 @@
+\newpage
+\label{sendLabelMessage}
+\subsubsection{sendLabelMessage}
+{\bf sendLabelMessage} is a test node command line program that sends a watcher::event::LabelMessage message to the watcher daemon, specifing that a label should be attached to the specified node (or float if given coords).
+
+If address is specified, the label will attach to the node with that address. If cooridinates are
+specified, the label will float at those coordinates. The node address takes precedence. If neither
+option is specified, the label will attach to the node from which the message saw sent.
+\\\\
+Usage: 
+{\tt sendLabelMessage -s server -l label [optional args]}
+\\\\
+Required Arguments:
+\begin{itemize}
+\item {\tt -l, --label=text}, The text of the label
+\item {\tt -s, --server=address}, The address|name of the node running watcherd, the server.
+\end{itemize}
+Optional args:
+\begin{itemize}
+\item {\tt -n, --node=address}, The node to change color, if empty the local node's address is used
+\item {\tt -x, --latitude=coord}        The latitude to float the node at.
+\item {\tt -y, --longitude=coord}       The longitude to float the node at.
+\item {\tt -z, --altitiude=coord}       The altitude to float the node at.
+\item {\tt -t, --fontSize=size}         The font size of the label
+\item {\tt -f, --foreground=color}      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.
+\item {\tt -b, --background=color}      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.
+\item {\tt -e, --expiration=seconds}    How long in millisecond to diplay the label
+\item {\tt -r, --remove}                Remove the label if it is attached
+\item {\tt -L, --layer=layer}           Which layer the label is part of. Default is "Physcial".
+\item {\tt -x, --expiration=seconds}, How long in seconds to change the color. 0==forever
+\item {\tt -p, --logProps}, log.properties file, which controls logging for this program
+\item {\tt -h, --help}, Show help message
+\end{itemize}
+
+Examples:
+\begin{itemize}
+
+\item sendLabelMessage -s glory -n 192.168.1.102 -l "Correlation Layer" -e 1500 -f red -b green -L Correlation
+\item sendLabelMessage -s glory -n 192.168.1.102 -l "Physical Layer" -e 1500 -L Physical
+\item sendLabelMessage -s glory -n 192.168.1.104 -l "Attack Detected" -f yellow -b blue -L Physical 
+
+\end{itemize}
+
