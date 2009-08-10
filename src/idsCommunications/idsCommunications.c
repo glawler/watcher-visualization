@@ -1,3 +1,21 @@
+/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+ * 
+ * This file is part of WATCHER.
+ * 
+ *     WATCHER is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     WATCHER is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -22,16 +40,12 @@
 #include "idsCommunications.h"
 #include "marshal.h"
 
-/*  Copyright (C) 2005  McAfee Inc. 
- *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO
- *
+/*
  * This will implement the API for talking to the hierarchy process.
  *
  * It is intended to be linked into other processes, and to exist in a
  * select loop
  */
-
-static const char *rcsid __attribute__ ((unused)) = "$Id: idsCommunications.c,v 1.101 2007/08/19 04:01:19 dkindred Exp $";
 
 static void messageInfoInsert(MessageInfo *mi);
 static MessageInfo* messageInfoRemove(CommunicationsStatePtr cs, 

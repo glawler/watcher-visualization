@@ -1,15 +1,25 @@
+/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+ * 
+ * This file is part of WATCHER.
+ * 
+ *     WATCHER is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     WATCHER is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef HELLO_H
 #define HELLO_H
 
 #include "des.h"
-
-/*  Copyright (C) 2005  McAfee Inc. 
- *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO
- *  All rights reserved.
- */
-
-/* $Id: hello.h,v 1.8 2007/04/25 14:20:05 dkindred Exp $
- */
 
 #ifdef MODULE_HELLO
 

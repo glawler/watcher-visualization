@@ -1,3 +1,21 @@
+/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+ * 
+ * This file is part of WATCHER.
+ * 
+ *     WATCHER is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     WATCHER is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -12,19 +30,12 @@
 #include "node.h"
 #include "marshal.h"
 
-/*  Copyright (C) 2005  McAfee Inc. 
- *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO
- *  All rights reserved.
- */
-
 /* Time we wait before makeing a selection after a new neighbor arrives
 */
 #define HELLO_SELECTTIME 3000
 /* Time we must not be desired by any node before we cease to be a coordinator
 */
 #define HELLO_UNDESIREDTIME 6000
-
-static const char *rcsid __attribute__ ((unused)) = "$Id: hello.cpp,v 1.22 2007/06/10 02:08:34 dkindred Exp $";
 
 typedef struct helloState
 {
