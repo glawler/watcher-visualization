@@ -23,19 +23,19 @@ Examples:
 \begin{itemize}
 \item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.101 should be drawn in blue:
 
-{\tt showColor -s glory -c blue -n 192.168.1.101}
+{\tt sendColorMessage -s glory -c blue -n 192.168.1.101}
 
 \item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.101 should be drawn in a transparent blue. 
 Transparent format is R.G.B.A, where {\em A} is alpha transparency:
 
-{\tt showColor -s glory -c 0.0.255.64 -n 192.168.1.101}
+{\tt sendColorMessage -s glory -c 0.0.255.64 -n 192.168.1.101}
   
 \item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.107 should be drawn in green for 5 seconds:
  
-{\tt showColor -s glory -c green -n 192.168.1.107 --expiration 5000}
+{\tt sendColorMessage -s glory -c green -n 192.168.1.107 --expiration 5000}
  
 \item This tells the GUI(s) that are listening to the daemon running node {\em glory} the node at 192.168.1.104 should flash for 10 seconds:
  
-{\tt showColor --server glory --color green --node 192.168.1.104 --flash --expiration 10000}
+{\tt sendColorMessage --server glory --color green --node 192.168.1.104 --flash --expiration 10000}
 
 \end{itemize}

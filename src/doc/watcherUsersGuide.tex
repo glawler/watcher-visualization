@@ -78,6 +78,7 @@ The available commands are:
 \item sendConnectivityMessage (page \pageref{sendConnectivityMessage})
 \item sendDataPointMessage (page \pageref{sendDataPointMessage})
 \item sendLabelMessage (page \pageref{sendLabelMessage})
+\item showClock (page \pageref{showClock})
 \end{itemize}
 The following pages give details for each command.
 \include{sendColorMessage}
@@ -86,6 +87,7 @@ The following pages give details for each command.
 \include{sendConnectivityMessage}
 \include{sendDataPointMessage}
 \include{sendLabelMessage}
+\include{showClock}
 
 \section{The Watcher Daemon}
 
@@ -133,7 +135,8 @@ Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just
 
 \subsection{Legacy Watcher}
 \label{LegacyWatcher}
-\begin{figure}
+\begin{figure}[here]
+\label{fig:LegacyWatcherClock}
 \centering
 \includegraphics[width=0.8\textwidth]{legWatcherGUI.eps}
 \caption{The legacy watcher showing a running instance of showClock.}

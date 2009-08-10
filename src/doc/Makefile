@@ -53,7 +53,8 @@ includes.tex		?= \
 	sendConnectivityMessage.tex \
 	sendGPSMessage.tex \
 	sendDataPointMessage.tex \
-	sendLabelMessage.tex
+	sendLabelMessage.tex \
+	showClock.tex
 #includes.tex.sh	?=
 #includes.rst		?=
 #includes.fig		?=

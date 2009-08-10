@@ -1,0 +1,35 @@
+\newpage
+\label{showClock}
+\subsubsection{showClock}
+
+{\bf showClock} is a command line program that ``draws'' a clock by arranging a set of nodes and edges into the shape of an 
+analog clock.  The ``clock'' is updated once a second to move ``the hands'' of the clock around. This program is mostly
+used to test the TiVO-like functionality built into the watcher system. But it can also be used to simply test if the watcher system is working properly. It does not need to be run on a test node - it is generally run on the same machine as the watcher daemon is running, but of course does not have to be. An example can be seen in Figure ~\ref{fig:LegacyWatcherClock} on page \pageref{LegacyWatcher}.
+\\\\
+Usage: 
+{\tt showClock -s server [optional args]}
+\\\\
+Required Arguments:
+\begin{itemize}
+\item {\tt -s, --server=address|name}, The address or name of the node running watcherd
+\end{itemize}
+Optional Arguments:
+\begin{itemize}
+\item {\tt -r, --radius}, The radius of the clock face in some unknown unit
+\item {\tt -S, --hideSecondRing}        Don't send message to draw the outer, second hand ring.
+\item {\tt -H, --hideHourRing}          Don't send message to draw the inner, hour hand ring.
+\item {\tt -p, --logProps=file}, log.properties file, which controls logging for this program
+\item {\tt -e, --expireHands}           When drawing the hands, set them to expire after a short time.
+\item {\tt -h, --help}, Show help message
+\end{itemize}
+Examples:
+\begin{itemize}
+\item This shows a clock with a radius or 10 units.
+
+{\tt showClock -s glory -r 10}
+
+\item This shows a clock with a radius or 10 units, but no outside minute ring and the edges which make up the hands are refreshed every second.
+
+{\tt showClock --server glory --radius 10 --hideHourRing --expireHands}
+
+\end{itemize}
