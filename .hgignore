@@ -267,8 +267,9 @@ share/info/dir
 #
 # ignore latex temp files.
 #
-^src/doc/legWatcherGUI.eps   # these two eps files are generated from png files.
+^src/doc/legWatcherGUI.eps   # these eps files are generated from other files.
 ^src/doc/ogreWatcherGUI.eps
+^src/doc/watcherArch.eps
 ^src/doc/.*\.aux
 ^src/doc/.*\.make
 ^src/doc/.*\.d
