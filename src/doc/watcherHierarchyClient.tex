@@ -1,0 +1,24 @@
+\subsubsection{watcherHierarchyClient}
+
+The {\it watcherHierarchyClient} daemon is used to support a test bed running the the dynamic hierarchy software. 
+The watcher was orgininally written with the hieracht daemons as a transport layer and as part of a 
+dynamic hierarchy MANET platform. Thus the {\it watcherHierarchyClient} daemon is used for backwards compatibility. 
+The basic idea of the {\tt watcherHierarchyClient} is that it connects to a hierarchy instance, subscribes
+to all the messages that a watcher GUI may care about and when it receives such a message it translates it 
+into something that the (new) watcher system can understand. 
+
+{\it watcherHierarchyClient} is the glue between hierachy land and watcher land. {\it watcherHierarchyClient}, when started, connects
+to a running hierarchy daemon and subscribes to all watcher related messages. When it receives a watcher related
+messages, it converts the message into something the watcher system can understand and sends it to the watcher daemon
+that it is connected to. {\it watcherHierarchyClient} is meant to offer backward compatibility to all "old style" watcher 
+clients. It acts as a go-between between old hierarchy messages and the new watcher messages.
+\\\\
+Usage:
+{\tt watcherHierarchyClient -s watcher\_daemon\_name\_or\_address -u hierachy\_daemon\_node\_address}
+\\\\
+Arguments:
+\begin{itemize}
+\item {\tt -s}, The address or name of the node running the watcher daemon, watcherd.
+\item {\tt -u}, The address of the node running the hierachy daemon.
+\end{itemize}
+

@@ -1,0 +1,29 @@
+\subsubsection{GPS Feeder}
+\label{GPSFeeder}
+The GPS Feeder, {\it gpsFeeder.py}, updates the watcher daemon on the current location of a single node on the test bed. It is usually run on the test node itself, thus 
+every test node updates its own location. The GPS is read from a locally running {\it gpsd} process. (See {\verb http://gpsd.berlios.de} for 
+details of {\it gpsd}.) The watcher GPS Feeder can be found at ./src/clients/gpsFeeder. It consists of a python script that uses the 
+python interface exported by {\it gpsd}. Once a second, it retrieves the curent GPS location of the local node and makes a system call via the shell to sendGPSMessage ~\ref{sendGPSMessage}. (Since it
+calls {\it sendGPSMessage}, {\it sendGPSMessage} must be in the PATH of the shell in which gpsFeeder is launched. 
+\\\\
+Usage: 
+{\tt gpsFeeder -s server}
+\\\\
+Required Arguments:
+\begin{itemize}
+\item {\tt -s,--server=address|name}, The address or name of the node running watcherd.
+\end{itemize}
+Example:
+\begin{itemize}
+\item Run the gpsFeeder to give current location information to the watcher daemon once a second and save the output as a log to {\tt /var/log/gpsFeeder.log}.
+    
+{\tt gpsFeeder.py -s glory 2>\&1 /var/log/gpsFeeder.log}
+\end{itemize}
+
+Note: the {\it emane} system uses the gpsd from gpsd.berlios.de and this is the daemon that the gps feeder supports. There is an older {\it gpsDaemon} that supports a {\it MANE} environment, but that 
+is not supported directly by this watcher system release. Use the unsupported {\it gpsDaemon} and the auxillary program {\it watcherHierarchyClient} (see page \pageref{watcherHierarchyClient}) for {\it MANE} support in this release 
+of the watcher system.
+
+There are plans to create a global GPS Feeder that would feed all location information to the watcher daemon directly in order to cut down on network traffic, which 
+would be very useful once the watcher is run on a system with hundreds or thousands of nodes. But these are still just plans. 
+
