@@ -63,7 +63,8 @@ includes.tex		?= \
 #includes.gpi		?=
 #includes.dot		?=
 #includes.xvg		?=
-#includes.eps.gz	?=
+includes.eps.gz	?= \
+	watcherArch.eps.gz
 #includes.eps		?= 
 #
 # If you list files or wildcards here, they will *not* be cleaned - default is
