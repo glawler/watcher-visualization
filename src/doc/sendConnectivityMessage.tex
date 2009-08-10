@@ -1,0 +1,32 @@
+\newpage
+\label{sendConnectivityMessage}
+\subsubsection{sendConnectivityMessage}
+{\bf sendConnectivityMessage} is a test node command line program that sends a watcher::event::ConnectivityMessage message to the watcher daemon, specifying the current list of neighbors that the node has. 
+The GUI(s) that are listening to that daemon, then draw the neighbors in a way that is relevent for that particular GUI.
+\\\\
+Usage: 
+{\tt showColor -s server [optional args] nbr1 nbr2 nbr3 ... nbrN}
+\\\\
+Required Arguments: 
+\begin{itemize}
+\item {\tt -s, --server=address}, The addres of the node running watcherd.
+\item {\tt nbr1 nbr2 nbr3 ... nbrN} - the list if neighbors by ipaddress.
+\end{itemize}
+Optional args:
+\begin{itemize}
+\item {\tt -l, --layer=layer}, the layer that these neighbors should show up on when displayed in the GUI(s).
+\item {\tt -p, --logProps=log.propertiesFile}, the log properties file to use.
+\item {\tt -f, --fromNode=fromNodeAddr}, the node that has these neighbors, if not given the local node is assumed.
+\end{itemize}
+Examples:
+\begin{itemize}
+
+\item This tells the GUI(s) that are listening to the daemon running on 'glory' the local test node has neighbors 192.168.1.101 and 192.168.1.102
+
+{\tt sendConnectivityMessage -s glory 192.168.1.101 192.168.1.102}
+
+\item This tells the GUI(s) that are listening to the daemon running on 'glory' the local test node 192.168.1.101 has neighbor nodes 192.168.1.110-192.168.1.115 and they should be displayed on the "children" layer. (Note that 192.168.1.11\{0..5\} is a bashism which expands to the sequenctial list of nodes 192.168.1.110-192.168.1.115.) 
+
+{\tt sendConnectivityMessage -s glory -l children -f 192.168.1.101 192.168.1.11\{0..5\}i}
+
+\end{itemize}
