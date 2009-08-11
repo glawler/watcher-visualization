@@ -1,19 +1,20 @@
-SUBDIRS= \
-	routeFeeder \
-	commandlineFeeders 
 
 if ENABLE_HIERARCHY_CLIENT
-	SUBDIRS += watcherHierarchyClient
+WHC_DIR = watcherHierarchyClient
 endif 
 
 if !ENABLE_TESTNODEONLY
-	SUBDIRS+=messageStream2Text connectivity2dot
-	if ENABLE_WATCHER3D
-		SUBDIRS += watcher3D 
-	endif
+FULL_DIRS = messageStream2Text connectivity2dot
+endif 
 
-	if ENABLE_OGREWATCHER
-		SUBDIRS += ogreWatcher 
-	endif
+if ENABLE_WATCHER3D
+W3D_DIR = watcher3D 
 endif
+
+if ENABLE_OGREWATCHER
+ORGE_DIR = ogreWatcher 
+endif
+
+SUBDIRS=routeFeeder commandlineFeeders $(WHC_DIR) $(FULL_DIRS) $(W3D_DIR) $(ORGE_DIR)
+
 

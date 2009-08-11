@@ -2,15 +2,15 @@ ACLOCAL_AMFLAGS=-I aclocal
 
 include $(srcdir)/Makefile.top
 
-SUBDIRS=logger util libwatcher clients
-
 if !ENABLE_TESTNODEONLY
-	SUBDIRS += sqlite_wrapper watcherd 
+FULL_BUILD_DIRS = sqlite_wrapper watcherd 
 endif
 
 if ENABLE_HIERARCHY_CLIENT
-	SUBDIRS += idsCommunications
+IDS_COMMS_DIR = idsCommunications
 endif
+
+SUBDIRS=logger util libwatcher clients $(FULL_BUILD_DIRS) $(IDS_COMMS_DIR)
 
 .PHONY: doc
 
