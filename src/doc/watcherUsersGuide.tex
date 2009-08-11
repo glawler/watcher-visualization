@@ -34,12 +34,40 @@
 
 \section{Introduction}
 
-This is the introduction. 
+The {\it watcher}, or {\it watcher system} allows users to visualize emulated Mobile As-Hoc Networks. 
 
 \section{General Watcher Information}
 \subsection{Watcher Architecture and Communications}
-Give info about the watcher arch here: test node connect to daemon. GUIs connect to daemons and request message streams. Explain what message
-streams are. 
+
+Figure \ref{fig:watcherArch} shows the three main components in the watcher system: test node daemons (or ``feeders''), a watcher
+daemon, and a number of graphical user interfaces (or ``GUIs''). The basic operation is this: the test nodes feed state 
+information to a running instance of the watcher daemon, {\it watcherd}. The watcher daemon saves all the state information
+locally to a database. A GUI connects to a running watcher daemon and requests a stream of state information, then displays it
+using some (most likely) graphical mechanism. The daemon acts as a message cache and demulitplexer, streaming multiple
+message streams from multiple test nodes into a single stream of messages. 
+
+The interface between the watcher daemon and the test node is a simple message interface. The test node daemon connects
+to a daemon, sends one or more messages, then disconnects. Some messages contain abstract state information about that test node
+such as current set of neighbors, current location, etc. Other messages contain lower-level graphical display commands like ``change
+color'' or ``draw an egde between these two nodes''.  For a list of all supported message, see the {\it watcher::event::Message} class 
+documentation in the watcher developer documention. 
+
+The interface between the GUI(s) and the watcher daemon is also message based, but also includes the concept of a message
+stream. The stream is composed of messages and has an interface that manipulates the stream content, time, direction, and rate. A message
+stream can start at any time {\it t} for which there is data. The stream rate can be set as a multipler of real time. For instance
+a GUI can request that the stream go 10x the speed at which the messages were received. (This only will work od course if there is 
+a cache of messages that can be sent at 10x - once the message cache is exhausted, the stream is sent at the rate the messages
+are recieved, 1x real time.) 
+
+There are three modes the system can be run in, ``record mode,'' ``live mode,'' and ``playback mode''. In ``record'' mode, These modes
+can be moved into and out of in real time depending on the needs of the user. In record mode, the test nodes and a watcher daemon are
+run. The test nodes send state data to the daemon, the the daemon writes those messages to a local database. In live mode, the test 
+nodes are feeding data to the daemon (which writes the information to a database) and some number of GUIs connect to the 
+daemon and request a message stream. Note that the GUIs can request messages from the start of the test run - thay are not
+contrained to ``live'' messages; live mode simply means that there are, at that moment, new messages arriving at the daemon
+and being recorded. The last mode os playback mode and does not involve test node daemons. In this mode, the watcher daemon
+is started with an existing database full of messages and it just waits for connections from a GUI. When a GUI connects, the 
+watcher daemon streams it the requested messages, this ``playing back'' a ``recorded'' test run. 
 
 \begin{figure}[here]
 \label{fig:watcherArch}
@@ -101,7 +129,7 @@ These daemons are run on the test nodes and feed information about the test node
 \input{gpsFeeder}
 \input{watcherHierarchyClient}
 
-\include{watcherd}
+\input{watcherd}
 
 \section{Watcher GUIs}
 
