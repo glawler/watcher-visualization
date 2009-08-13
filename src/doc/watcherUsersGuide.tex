@@ -40,10 +40,10 @@ The {\it watcher}, or {\it watcher system} allows users to visualize emulated Mo
 \subsection{Watcher Architecture, Communications, and Component Interactions}
 
 \begin{figure}[here]
-\label{fig:watcherArch}
 \centering
 \includegraphics[width=0.8\textwidth]{watcherArch.eps}
 \caption{The basic architecture of the watcher system.}
+\label{fig:watcherArch}
 \end{figure}
 
 Figure \ref{fig:watcherArch} shows the three main components in the watcher system: test node daemons (or ``feeders''), a watcher
@@ -185,7 +185,6 @@ Figure \ref{fig:logPropsFile} gives a sample log.properties file. This file sets
 log output goes to both the console (stdout) and a local file. The file is overwritten everytime the component restarts. 
 
 \begin{figure}[here]
-\label{fig:logPropsFile}
 \framebox[\textwidth]{%
     \tt{%
 \# Global logging level. Create two loggers: stdout and flog\\
@@ -209,6 +208,7 @@ log4j.appender.flog.layout.ConversionPattern=%-4r [\%t] \%-5p \%c (\%-12F:\%-4L)
     }%
 }%
 \caption{Sample {\tt log.properties} file}
+\label{fig:logPropsFile}
 \end{figure}
 
 \subsection{Configuration (cfg) Files} 
@@ -263,10 +263,10 @@ Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just
 \subsection{Legacy Watcher}
 \label{LegacyWatcher}
 \begin{figure}[here]
-\label{fig:LegacyWatcherClock}
 \centering
 \includegraphics[width=0.8\textwidth]{legWatcherGUI.eps}
 \caption{The legacy watcher showing a running instance of showClock.}
+\label{fig:LegacyWatcherClock}
 \end{figure}
 
 \subsection{ogreWatcher}
@@ -274,6 +274,7 @@ Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just
 \centering
 \includegraphics[width=0.8\textwidth]{ogreWatcherGUI.eps}
 \caption{The ogreWatcher showing a running instance of showClock.}
+\label{ogreWatcher}
 \end{figure}
 
 Built with OGRE.

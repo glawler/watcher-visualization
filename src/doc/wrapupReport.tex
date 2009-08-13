@@ -27,16 +27,27 @@
 
 \section{Introduction}
 
-``The Watcher'' is a MANET visualization tool that allows researchers to visualize the locations and states of nodes in an emulated MANET environment. 
-Figure \ref{fig:oldWatcher} (page \pageref{fig:oldWatcher}) shows the watcher tool at the start of the improvements project. Figures \ref{fig:legWatcherGUI} (page \pageref{fig:legWatcherGUI}) and \ref{fig:watcherWithBackground}
-(page \pageref{fig:watcherWithBackground}) show the watcher towards the end of the contract. Note that the GUI is now in a window and contains user interface elements such as buttons, menus, and playback
-mechanism. Because of the work done on the watcher architecture, it is now possible to have multiple distinct GUIs displaying the same (live or recorded) data 
+``The Watcher'' is a MANET visualization tool that allows researchers to visualize the locations and states of nodes in an emulated MANET environment. The watcher was originally written 
+as a quick and dirty debugging tool used to verify that the MANET emulation tools were working properly. By being able to visualize the locations of the nodes, it was easy to 
+tell if the mobility scenario was working and the node connectivty appeared correct. Quickly after this the ability to display text labels on nodes and edges of the connectivity 
+graph was added to enable researchers to debug the inner workings of the MANET security tools they were developing on their MANET emulation test beds. The ability to display labels
+allowed the state of any node to be seen at a glance. The watcher was found to be a useful tool and was used by a fair number of reasearchers in the community. 
+
+In the summer of 2007, ARL approached SPARTA with the of funding a small project not only to enhance the watcher in order to make it a better tool for research, but enhance 
+its graphics for use in demos. The contract and statement of work was finalized and a kickoff meeting was had in August of 2008. Now in August of 2009 the contract is ending and 
+this report hopes to briefly summarize the work done, findings, and possible future directions for watcher improvements. 
+
+Figure \ref{fig:oldWatcher} shows the watcher tool at the start of the improvements project. Figures \ref{fig:legWatcherGUI} and \ref{fig:watcherWithBackground}
+show the watcher towards the end of the improvments contract. Note that the GUI is now in a window and contains user interface elements such as buttons, menus, and playback
+mechanism, a background image,  etc. Because of updates to the watcher architecture, it is now possible to have multiple distinct GUIs displaying the same (live or recorded) data. So in addition to improving
+work on the original watcher GUI, some work was done exploring more advanced graphical development environments and writing new watcher GUIs from scratch. (This is why the original
+GUI is sometimes refered to as the ``legacy watcher''.) A proof of concept using an advanced game-engine can be seen in figure \ref{fig:ogreWatcherGUI}. 
 
 \begin{figure}[htb]
-\label{fig:oldWatcher}
 \centering
 \includegraphics[width=0.5\textwidth]{oldWatcher.eps}
 \caption{Watcher at start of project}
+\label{fig:oldWatcher}
 \end{figure}
 
 \begin{figure}[htb]
@@ -46,10 +57,6 @@ mechanism. Because of the work done on the watcher architecture, it is now possi
 \caption{``Legacy Watcher'' at end of project. Note user interface widgets.}
 \end{figure}
 
-set at the same time. Figure \ref{fig:ogreWatcherGUI} (page \pageref{fig:ogreWatcherGUI}) shows the first cut of a new game-engine based GUI that can be used alone or in tandem with the original watcher GUI. 
-\\\\
-{\bf something about the old watcher, ARL wanting to improve it, etc. }
-\\\\
 Below are three sections that give an overview of the work done in the last year on the watcher improvements project. First
 is the work accomplished - what was done and why. This is followed by a section on lessons learned from the work done. What is now known 
 that was not known then? What would be done differently if given the chance? The final section gives a recommendation on future directions
