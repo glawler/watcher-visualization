@@ -37,7 +37,14 @@
 The {\it watcher}, or {\it watcher system} allows users to visualize emulated Mobile As-Hoc Networks. 
 
 \section{General Watcher Information}
-\subsection{Watcher Architecture and Communications}
+\subsection{Watcher Architecture, Communications, and Component Interactions}
+
+\begin{figure}[here]
+\label{fig:watcherArch}
+\centering
+\includegraphics[width=0.8\textwidth]{watcherArch.eps}
+\caption{The basic architecture of the watcher system.}
+\end{figure}
 
 Figure \ref{fig:watcherArch} shows the three main components in the watcher system: test node daemons (or ``feeders''), a watcher
 daemon, and a number of graphical user interfaces (or ``GUIs''). The basic operation is this: the test nodes feed state 
@@ -49,48 +56,166 @@ message streams from multiple test nodes into a single stream of messages.
 The interface between the watcher daemon and the test node is a simple message interface. The test node daemon connects
 to a daemon, sends one or more messages, then disconnects. Some messages contain abstract state information about that test node
 such as current set of neighbors, current location, etc. Other messages contain lower-level graphical display commands like ``change
-color'' or ``draw an egde between these two nodes''.  For a list of all supported message, see the {\it watcher::event::Message} class 
-documentation in the watcher developer documention. 
+color'' or ``draw an edge between these two nodes''.  For a list of all supported message, see the {\it watcher::event::Message} class 
+documentation in the watcher developer documentation. 
 
 The interface between the GUI(s) and the watcher daemon is also message based, but also includes the concept of a message
 stream. The stream is composed of messages and has an interface that manipulates the stream content, time, direction, and rate. A message
-stream can start at any time {\it t} for which there is data. The stream rate can be set as a multipler of real time. For instance
-a GUI can request that the stream go 10x the speed at which the messages were received. (This only will work od course if there is 
+stream can start at any time {\it t} for which there is data. The stream rate can be set as a multiplier of real time. For instance
+a GUI can request that the stream go 10x the speed at which the messages were received. (This only will work of course if there is 
 a cache of messages that can be sent at 10x - once the message cache is exhausted, the stream is sent at the rate the messages
-are recieved, 1x real time.) 
+are received, 1x real time.) The concept of manipulating a message stream by rate and time allows GUIs to act as test bed "TiVO"s, playing 
+back an arbitrary stream of test node data in reverse, forward, jumping around the stream as the user requests. 
 
-There are three modes the system can be run in, ``record mode,'' ``live mode,'' and ``playback mode''. In ``record'' mode, These modes
+Depending on which components are running and how they are started, the watcher system can be said to be running in different modes: a ``live'' mode, 
+a ``playback'' mode, and a ``record'' mode. In all modes, a {\it watcherd} instance must be running.  These modes
 can be moved into and out of in real time depending on the needs of the user. In record mode, the test nodes and a watcher daemon are
 run. The test nodes send state data to the daemon, the the daemon writes those messages to a local database. In live mode, the test 
 nodes are feeding data to the daemon (which writes the information to a database) and some number of GUIs connect to the 
-daemon and request a message stream. Note that the GUIs can request messages from the start of the test run - thay are not
-contrained to ``live'' messages; live mode simply means that there are, at that moment, new messages arriving at the daemon
-and being recorded. The last mode os playback mode and does not involve test node daemons. In this mode, the watcher daemon
+daemon and request a message stream. Note that the GUIs can request messages from the start of the test run - they are not
+constrained to ``live'' messages; live mode simply means that there are, at that moment, new messages arriving at the daemon
+and being recorded. The last mode is playback mode and does not involve test node daemons. In this mode, the watcher daemon
 is started with an existing database full of messages and it just waits for connections from a GUI. When a GUI connects, the 
 watcher daemon streams it the requested messages, this ``playing back'' a ``recorded'' test run. 
 
-\begin{figure}[here]
-\label{fig:watcherArch}
-\centering
-\includegraphics[width=0.8\textwidth]{watcherArch.eps}
-\caption{The basic architecture of the watcher system.}
-\end{figure}
-
 \subsection{Obtaining and Building Watcher}
-Mention GPL'd-ness of the watcher. Give reference to repo location. 
+\subsubsection{Obtaining}
+The watcher is GPL'd software although it is not currently publically available. This will change in the near future. Future versions of this 
+document will be updated after the watcher is publically released giving the download location. In the meantime please contact the authors 
+of this document to obtain instructions on getting the watcher. 
 
-Give list of dependencies.
+The watcher system os written in C++. 
 
-Give simple build instructions: ./autogen.sh, ./configure, make, sudo make install, cd clients/legacyWatcher, make, make install \ldots.
+\subsubsection{Repository Structure}
+The watcher system uses the GNU autotools build system for most components. (GUIs are an exception as the GUI libraries used, generally have 
+thier own build systems, qmake for QT, etc).  The source code for all watcher components is in .\slash src. The basic layout of the source tree is given
+below. Note that only the ``important'' directories are listed to minimize clutter. 
+
+\begin{description}
+\item[.\slash src] Holds all watcher system source code. 
+\begin{description}
+\item[.\slash src\slash clients] Anything that is a client of the watcher daemon, including GUIs and test node daemons, is in here. 
+\item[.\slash src\slash doc] Holds the \LaTeX{} code for generating Doxygen based watcher documention including the Watcher User's Guide.
+\item[.\slash src\slash idsCommunications] Holds the code for building the (optional) hierarchy communications library which the watcher uses to talk to hierarchy software running on the test nodes. 
+Ssee section \ref{watcherHierarchyClient} for details.
+\item[.\slash src\slash libwatcher] Holds the source code for two libraries used in the wacher system: libwatcher, which is a generic communications mechanism used by watcher components
+to talk to one another, and libwatchermessage, which contains the code for all watcher messages and a mechanism to parse them. 
+\item[.\slash src\slash logger] The code the watcher system uses for logging. This is a small wrapper around calls to log4cxx, a standard logging library from the good people at Apache. 
+\item[.\slash src\slash util] Code for a utility library used by some watcher components. 
+\item[.\slash src\slash watcherd] The code for the watcher daemon, {\it watcherd}. 
+\end{description}
+\item[.\slash doc] Watcher documentation, including basic architecture documents and the location where the Doxygen generated developer's guide is when it is built. 
+\begin{description}
+\item[.\slash doc\slash html] The html based developer's guide. (Must be built - \vbox{{\tt make -C .\slash src doc}} to do so.)
+\item[.\slash doc\slash man] If configured, this is the location of the man pages built by \vbox{{\tt make -C .\slash src doc}}.
+\item[.\slash doc\slash latex] If configured, this is the location of the latex-based developer's guide built by 
+\vbox{{\tt make -C ./src doc}}.
+\end{description}
+\item[.\slash tars] Some source code (tar'd up) for third party libraries used by the watcher system including {\bf log4cxx} (and its required libraries \bf{apr} and
+\bf{apr-util}), \bf{libconfig}, \bf{libidmef}, and \bf{libqwt}. 
+\end{description}
+
+\subsubsection{Dependencies}
+The watcher system has the following dependencies:
+\begin{description}
+\item[Third Party] Watcher uses a number of third party libraries. 
+\begin{description}
+\item[sqlite 3] The watcher daemon uses sqllite for all database operations. 
+\item[libconfig 1.3.1] The system uses this for creating, reading, and writing to configuration ("cfg") files. 
+\item[log4cxx 0.10.0] (This depends on lib apr 1.3.3 and lib apr util 1.3.4). This is used for all logging in the watcher.  It is a clone of Java's log4j logging package. 
+\item[boost 1.38] The watcher makes extensive use of Boost. This C++ library used more many things: serialization, network code, regular expressions, etc. 
+\item[Legacy Watcher] The ``legacy watcher'' is the Qt\slash OpenGL based GUI. If not building the legacy watcher, these libraries are not needed. 
+\begin{description}
+\item[Qt 4.3] Qt is used by the legacy watcher to supply the GUI widgets (windows, frames, menus, buttons, etc) and to wrap the OpenGL which displays the MANET. If not building the legacy watcher, 
+    Qt is not needed. 
+\item[qwt-5.1.1] A small Qt-based library used to draw the 2d scrolling graphs in the legacy watcher. If not building the legacy watcher, Qwt is not needed.
+\end{description}
+\item[OGRE Watcher] The OGRE watcher is an OGRE-based GUI. If not building the OGRE watcher GUI, these libraries are not needed. 
+\begin{description}
+\item[OGRE] The ogreWatcher uses the Object-Oriented Graphics Rendering Engine (OGRE) for graphics. 
+\item[OIS] The ogreWatcher uses the Object Oriented Input System (OIS) for mouse and keyboard input. 
+\item[CEGUI] The ogreWatcher uses Crazy Eddie's Graphical User Inteface (CEGUI) for GUI widgets. 
+\end{description}
+\item[Watcher3D] The Delta-3D based watcher GUI. If not building the watcher3d, these libraries are not needed. 
+\begin{description}
+\item[delta 3d] Delta 3d is used for graphics rendering in watcher3d. 
+\end{description}
+\end{description}
+\item[Internal] These are the libraries that watcher uses internally. 
+\begin{description}
+\item[libwatcherutil] Holds a few things that most components need, like parsing command line args to get to the cfg file.
+\item[liblogger] A small wrapper around log4cxx to abstract which logging library we use. 
+\item[libwatcher] The core of the watcher messaging system, the watcher APIs between test node daemons, a watcher daemon, and the GUI(s)s.
+\end{description}
+\end{description}
+
+\subsubsection{Building}
+
+First make sure that the dependenices above are built and installed on the build machine. For most depenencies you can use the package management system to install 
+the dependencies. For example, on Fedora 11, the command {\tt yum install boost-devel boost qt qt-devel log4cxx log4cxx-devel libconfig libconfig-devel ...} will install the 
+required dependencies. Some libraries may not be widely available (like libidmef), in these cases check in the {\tt tars} directory. The source code may be there. 
+
+Once the required dependencies are installed, build the core watcher componets (libwatcher, watcherd, and test node binaries). These are autotools based. It should be as easy 
+as the canonical. It should be as easy as the canonical {\tt .\slash configure \&\& make \&\& sudo make install}. (If .\slash configure does not exist, run {\tt .\slash autogen.sh} to generate it. 
+\\\\
+.\slash configure does have a few watcher-specific arguments:
+\begin{description}
+\item[--enable-testnodeonly]   Only configure and build test node components. Do not build the watcher daemon.
+\item[--enable-ogreWatcher]    Enable compilation of ogreWatcher.
+\item[--enable-watcher3d]      Enable compilation of watcher3d GUI.
+\item[--enable-hierarchy\_client] Enable compilation of the wacher hierarchy client (both libidsCommunications and watcherHierachyClient). 
+\end{description}
+
+Both the {\tt ogreWatcher} and {\tt watcher3d} are built as part of the normal build if the appropriate arguments, {\tt --enable-ogreWatcher} and {\tt --enable-watcher3d} respectively are passed to 
+.\slash configure at configure time. 
+
+The legacy watcher is built using Qt's make system, {\tt qmake}, to generate normal Makefiles. So it is not part of a normal build. To build it, change
+directories to .\slash src\slash clients\slash legacyWatcher and type {\tt qmake \&\& make \&\& sudo make install}. 
 
 \subsection{Log Property Files}
-Give general intro with examples of the standard format and workings of the log.properties file. (Just like Java if peeps know that.)
+Most components in the watcher system use log properties files, usually named {\tt log.properties}. These files control the amount, location, and even format of logging in the 
+watcher system. They are based on standard Apache log4j logging properties files. There are sample log properties files in .\slash etc. As part of the build process {\tt log.properties} 
+will be created in most directories where they are needed. A full explanation of all logging options in a {\tt log.properties} file is beyond the scope of this document. See {\tt
+http://logging.apache.org/log4j} for more information. 
+
+The watcher system supports the following log levels: {\tt trace}, {\tt debug}, {\tt info}, {\tt warn}, {\tt error}, and {\tt fatal}. All functions in the watcher system
+log a trace message when they enter and exit the function, so a full execution trace is possible. 
+
+Figure \ref{fig:logPropsFile} gives a sample log.properties file. This file sets the default log level to {\tt debug} and the level to {\tt trace} for the ClientConnection class. The 
+log output goes to both the console (stdout) and a local file. The file is overwritten everytime the component restarts. 
+
+\begin{figure}[here]
+\label{fig:logPropsFile}
+\framebox[\textwidth]{%
+    \tt{%
+\# Global logging level. Create two loggers: stdout and flog\\
+log4j.rootLogger=debug, flog, stdout\\
+\\
+\# trace the Client Connection for debugging. \\
+log4j.logger.ClientConnection=trace\\
+\\
+\# stdout is set to be a ConsoleAppender, i.e. append to the console.\\
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender\\
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout\\
+log4j.appender.stdout.layout.ConversionPattern=[\%-5p] (\%F:\%L) - \%m\%n\\
+\\
+\# flog is set to be a non-appending file at ./watcherd.log\\
+\# don't append to the log file.\\
+log4j.appender.flog=org.apache.log4j.FileAppender\\
+log4j.appender.flog.layout=org.apache.log4j.PatternLayout\\
+log4j.appender.flog.file=watcherd.log\\
+log4j.appender.flog.append=false\\
+log4j.appender.flog.layout.ConversionPattern=%-4r [\%t] \%-5p \%c (\%-12F:\%-4L) - \%m\%n\\
+    }%
+}%
+\caption{Sample {\tt log.properties} file}
+\end{figure}
 
 \subsection{Configuration (cfg) Files} 
 explain layout of standard config files and arguments that most (all?) watcher modules understand (-f cfg). 
 
 \subsection{Command Line Arguments}
-Most binaries take a {\tt -c} (or {\tt -f}) arugment which gives the location of the {\tt cfg} file. Mention this. Also note that most binaries 
+Most binaries take a {\tt -c} (or {\tt -f}) argument which gives the location of the {\tt cfg} file. Mention this. Also note that most binaries 
 just take that option and nothing else. 
 
 \section{Test Node Components}
@@ -101,7 +226,7 @@ Mention watcher messages and give types. Mention something else that's interesti
 For each watcher message there is a command line binary to send that message. These binaries can be used directly in shell scripts or invoked via a system call from most scripting languages to send 
 an instance of that message to a running watcher daemon instance. Each binary allows the user to specify the content of the message and the daemon instance to send the message to. 
 
-In many cases, the node that the message ``comes from'' can be set as well. This allows a user on any machine that can connect to a watcher daemon, the ability to modify nodes, edges, lables, etc of any 
+In many cases, the node that the message ``comes from'' can be set as well. This allows a user on any machine that can connect to a watcher daemon, the ability to modify nodes, edges, labels, etc of any 
 test node. This is useful for debugging or real time modification of an aspect of the test bed. For instance a single machine could monitor traffic rates between nodes and update 
 the edges between those nodes with the current traffic rate. 
 \\\\
