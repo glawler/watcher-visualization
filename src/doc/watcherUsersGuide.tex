@@ -39,7 +39,7 @@ The {\it watcher}, or {\it watcher system} allows users to visualize emulated Mo
 \section{General Watcher Information}
 \subsection{Watcher Architecture, Communications, and Component Interactions}
 
-\begin{figure}[here]
+\begin{figure}[htb]
 \centering
 \includegraphics[width=0.8\textwidth]{watcherArch.eps}
 \caption{The basic architecture of the watcher system.}
@@ -80,25 +80,25 @@ watcher daemon streams it the requested messages, this ``playing back'' a ``reco
 
 \subsection{Obtaining and Building Watcher}
 \subsubsection{Obtaining}
-The watcher is GPL'd software although it is not currently publically available. This will change in the near future. Future versions of this 
-document will be updated after the watcher is publically released giving the download location. In the meantime please contact the authors 
+The watcher is GPL'd software although it is not currently public-ally available. This will change in the near future. Future versions of this 
+document will be updated after the watcher is public-ally released giving the download location. In the meantime please contact the authors 
 of this document to obtain instructions on getting the watcher. 
 
-The watcher system os written in C++. 
+The watcher system is written in C++. 
 
 \subsubsection{Repository Structure}
-The watcher system uses the GNU autotools build system for most components. (GUIs are an exception as the GUI libraries used, generally have 
-thier own build systems, qmake for QT, etc).  The source code for all watcher components is in .\slash src. The basic layout of the source tree is given
+The watcher system uses the GNU auto-tools build system for most components. (GUIs are an exception as the GUI libraries used, generally have 
+their own build systems, qmake for QT, etc).  The source code for all watcher components is in .\slash src. The basic layout of the source tree is given
 below. Note that only the ``important'' directories are listed to minimize clutter. 
 
 \begin{description}
 \item[.\slash src] Holds all watcher system source code. 
 \begin{description}
 \item[.\slash src\slash clients] Anything that is a client of the watcher daemon, including GUIs and test node daemons, is in here. 
-\item[.\slash src\slash doc] Holds the \LaTeX{} code for generating Doxygen based watcher documention including the Watcher User's Guide.
+\item[.\slash src\slash doc] Holds the \LaTeX{} code for generating Doxygen based watcher documentation including the Watcher User's Guide.
 \item[.\slash src\slash idsCommunications] Holds the code for building the (optional) hierarchy communications library which the watcher uses to talk to hierarchy software running on the test nodes. 
-Ssee section \ref{watcherHierarchyClient} for details.
-\item[.\slash src\slash libwatcher] Holds the source code for two libraries used in the wacher system: libwatcher, which is a generic communications mechanism used by watcher components
+See section \ref{watcherHierarchyClient} for details.
+\item[.\slash src\slash libwatcher] Holds the source code for two libraries used in the watcher system: libwatcher, which is a generic communications mechanism used by watcher components
 to talk to one another, and libwatchermessage, which contains the code for all watcher messages and a mechanism to parse them. 
 \item[.\slash src\slash logger] The code the watcher system uses for logging. This is a small wrapper around calls to log4cxx, a standard logging library from the good people at Apache. 
 \item[.\slash src\slash util] Code for a utility library used by some watcher components. 
@@ -134,7 +134,7 @@ The watcher system has the following dependencies:
 \begin{description}
 \item[OGRE] The ogreWatcher uses the Object-Oriented Graphics Rendering Engine (OGRE) for graphics. 
 \item[OIS] The ogreWatcher uses the Object Oriented Input System (OIS) for mouse and keyboard input. 
-\item[CEGUI] The ogreWatcher uses Crazy Eddie's Graphical User Inteface (CEGUI) for GUI widgets. 
+\item[CEGUI] The ogreWatcher uses Crazy Eddie's Graphical User Interface (CEGUI) for GUI widgets. 
 \end{description}
 \item[Watcher3D] The Delta-3D based watcher GUI. If not building the watcher3d, these libraries are not needed. 
 \begin{description}
@@ -151,11 +151,11 @@ The watcher system has the following dependencies:
 
 \subsubsection{Building}
 
-First make sure that the dependenices above are built and installed on the build machine. For most depenencies you can use the package management system to install 
+First make sure that the dependencies above are built and installed on the build machine. For most dependencies you can use the package management system to install 
 the dependencies. For example, on Fedora 11, the command {\tt yum install boost-devel boost qt qt-devel log4cxx log4cxx-devel libconfig libconfig-devel ...} will install the 
 required dependencies. Some libraries may not be widely available (like libidmef), in these cases check in the {\tt tars} directory. The source code may be there. 
 
-Once the required dependencies are installed, build the core watcher componets (libwatcher, watcherd, and test node binaries). These are autotools based. It should be as easy 
+Once the required dependencies are installed, build the core watcher components (libwatcher, watcherd, and test node binaries). These are auto-tools based. It should be as easy 
 as the canonical. It should be as easy as the canonical {\tt .\slash configure \&\& make \&\& sudo make install}. (If .\slash configure does not exist, run {\tt .\slash autogen.sh} to generate it. 
 \\\\
 .\slash configure does have a few watcher-specific arguments:
@@ -163,7 +163,7 @@ as the canonical. It should be as easy as the canonical {\tt .\slash configure \
 \item[--enable-testnodeonly]   Only configure and build test node components. Do not build the watcher daemon.
 \item[--enable-ogreWatcher]    Enable compilation of ogreWatcher.
 \item[--enable-watcher3d]      Enable compilation of watcher3d GUI.
-\item[--enable-hierarchy\_client] Enable compilation of the wacher hierarchy client (both libidsCommunications and watcherHierachyClient). 
+\item[--enable-hierarchy\_client] Enable compilation of the watcher hierarchy client (both libidsCommunications and watcherHierachyClient). 
 \end{description}
 
 Both the {\tt ogreWatcher} and {\tt watcher3d} are built as part of the normal build if the appropriate arguments, {\tt --enable-ogreWatcher} and {\tt --enable-watcher3d} respectively are passed to 
@@ -182,12 +182,13 @@ The watcher system supports the following log levels: {\tt trace}, {\tt debug}, 
 log a trace message when they enter and exit the function, so a full execution trace is possible. 
 
 Figure \ref{fig:logPropsFile} gives a sample log.properties file. This file sets the default log level to {\tt debug} and the level to {\tt trace} for the ClientConnection class. The 
-log output goes to both the console (stdout) and a local file. The file is overwritten everytime the component restarts. 
+log output goes to both the console (stdout) and a local file. The file is overwritten every time the component restarts. 
 
-\begin{figure}[here]
-\framebox[\textwidth]{%
-    \tt{%
-\# Global logging level. Create two loggers: stdout and flog\\
+% Getting text aligned properly in a box in a figure is a pain. 
+\begin{figure}[htb]
+\framebox[0.99\textwidth][l]{%
+    \parbox{0.99\textwidth}{
+\# Global logging level. Create two loggers: stdout and flog
 log4j.rootLogger=debug, flog, stdout\\
 \\
 \# trace the Client Connection for debugging. \\
@@ -204,15 +205,46 @@ log4j.appender.flog=org.apache.log4j.FileAppender\\
 log4j.appender.flog.layout=org.apache.log4j.PatternLayout\\
 log4j.appender.flog.file=watcherd.log\\
 log4j.appender.flog.append=false\\
-log4j.appender.flog.layout.ConversionPattern=%-4r [\%t] \%-5p \%c (\%-12F:\%-4L) - \%m\%n\\
-    }%
-}%
+log4j.appender.flog.layout.ConversionPattern=\%-4r [\%t] \%-5p \%c (\%-12F:\%-4L) - \%m\%n\\
+    }%parbox
+}%fbox
 \caption{Sample {\tt log.properties} file}
 \label{fig:logPropsFile}
 \end{figure}
 
 \subsection{Configuration (cfg) Files} 
-explain layout of standard config files and arguments that most (all?) watcher modules understand (-f cfg). 
+Most watcher components store their configurable parameters in configuration files. While the content of the configuration files varies, the format is 
+basically the same across the components as they all use the same library, {\it libconfig}.  system users. The library used is libconfig. 
+See http://www.hyperrealm.com/libconfig for complete documentation about the format syntax of the configuration 
+files.  The files are human readable and are designed to be easily edited by watcher system users. Most components only have a few parameters that
+can be set, address of the server, etc. For these simple cases the syntax is a basic {\tt name = ``value''} pair. See figure \ref{fig:watcherdCfg} for a
+sample configuration for the watcher daemon. 
+
+Most components in the system take the location of the configuration file on the command line given with a {\tt -c} or {\tt -f} option. If you're unsure
+which to use, all components support {\tt --help}, which will show a usage statement. By convention watcher configuration files follow the form {\it program-name.cfg}. 
+So the configuration for the ogreWatcher binary would be called {\tt ogreWatcher.cfg}. This is not enforced, it's just a convention - ``cfg'' files can be called anything. 
+The build process will copy sample ``cfg'' files from .\slash etc into the local directory. Also, most watcher components will create a default configuration file
+if they find an empty or non-existent one when they start up. So if you don't have a configuration file when you need one, you may just be able to run the component, then stop it and 
+a default configuration file will be created in the current working directory.  Note though that sometime the defaults are not what you want, so you'll have to modify the defaults by hand.
+
+\begin{figure}[htb]
+\framebox[0.99\textwidth][l]{%
+    \parbox{0.99\textwidth}{
+        {\tt 
+logPropertiesFile = "watcherd.log.properties";\\
+server = "glory";\\
+port = "8095";\\
+serverThreadNum = 8;\\
+databaseName = "event.db";\\
+databasePath = "event.db";\\
+        }
+    }%parbox
+}%fbox
+\caption{Sample {\tt watcherd.cfg} file}
+\label{fig:watcherdCfg}
+\end{figure}
+
+For the specific settings in a component's configuration file, see the section in this document on that component. 
 
 \subsection{Command Line Arguments}
 Most binaries take a {\tt -c} (or {\tt -f}) argument which gives the location of the {\tt cfg} file. Mention this. Also note that most binaries 
@@ -261,8 +293,11 @@ These daemons are run on the test nodes and feed information about the test node
 Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just barely started proof of concept.
 
 \subsection{Legacy Watcher}
+
+Talk about how the legacy watcher's cfg file is different - both in format and creation (its self-created). 
+
 \label{LegacyWatcher}
-\begin{figure}[here]
+\begin{figure}[htb]
 \centering
 \includegraphics[width=0.8\textwidth]{legWatcherGUI.eps}
 \caption{The legacy watcher showing a running instance of showClock.}
