@@ -2,25 +2,28 @@
 \label{watcherd}
 \section{The Watcher Daemon}
 
-The Watcher Daemon is responsible for collecting events from the Test Nodes and
-sending event streams to the Watcher GUIs.  Events from the Test Nodes are
+The watcher daemon is responsible for collecting events from the test nodes and
+sending event streams to the Watcher GUIs.  Events from the test nodes are
 stored in an SQLite databased (named "event.db" by default).  The Watcher Daemon
-determines whether a connection is a Test Node or GUI by the type of the first
+determines whether a connection is a test node or GUI by the type of the first
 event received.
 
-When recording events from the Test Nodes into the database, events are
+When recording events from the test nodes into the database, events are
 appended to the existing database, or a new database is created if it does not
 exist.  The Watcher Daemon may also be invoked in read-only database mode using
 the command line option {\tt -r} or {\tt --read-only}, in which case events are not stored
 in the database.  Read-only mode is useful particularly when replaying events
 from a database from some time in the past.  In this case, it may not make
-sense to append any current event stream from the Test Nodes when a large time
+sense to append any current event stream from the test nodes when a large time
 gap exists between past and present runs.
+
+The watcher daemon source code can be found in {\tt .\slash src\slash watcherd}. The binary produced after building is 
+named {\tt watcherd}. 
 
 \subsection{Live Mode}
 
 When a GUI connects to the Watcher Daemon, it will by default subscribe to the
-live event stream coming from the Test Nodes.  In this case, the Watcher Daemon
+live event stream coming from the test nodes.  In this case, the Watcher Daemon
 is simply retransmitting received events to all listening GUIs rather than
 fetching events from the database.  The events are also stored in the database
 for later replay.
@@ -37,8 +40,8 @@ not cause playback to stop in another GUI.
 The Watcher Daemon will automatically pause Playback when the last event from
 the database has been sent to the GUI.  Thus, if a GUI were playing at a time
 offset near the end of the database, and faster than real time, the GUI will be
-paused when the last event is sent, even if additional events arrive from Test
-Nodes.
+paused when the last event is sent, even if additional events arrive from test
+nodes.
 
 \subsection{Configuration}
 
@@ -62,7 +65,7 @@ connections
 \item {\tt -c} or {\tt --config}, specify an alternate configuration file (default: {\tt
 watcherd.cfg})
 \item {\tt -r} or {\tt --read-only}, mark the event database Read Only so that no
-new events from Test Nodes will be written
+new events from test nodes will be written
 \item {\tt -h} or {\tt --help}, display a list of all supported command line
 options
 \end{itemize}
