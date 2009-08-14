@@ -148,15 +148,15 @@ This means that old Watcher-aware daemons do not have to be updated to support t
 \item Wrote new Watcher GPS daemon that supports the new GPS daemon that {\it eMANE} uses (gpsd). 
 \end{itemize}
 
-\subsection{New Architecture}
-\label{newArch}
-
-\begin{figure}[htb]
+\begin{figure}[!b]
 \centering
 \includegraphics[width=0.8\textwidth]{watcherArch.eps}
 \caption{New Watcher system architecture. Is much more scalable and extensible. Supports multiple GUIs, database oriented record and playback, ``TiVo'' like message streaming APR.} 
 \label{fig:watcherArch}
 \end{figure}
+
+\subsection{New Architecture}
+\label{newArch}
 
 The Watcher architecture was redesigned and abstracted to promote flexibility, extensibility, and scalability.  Divorcing the record 
 capability from the display mechanism allowed us to easily add full ``TiVo'' capability (pause\slash fast-forward\slash rewind) and the ability to have multiple 
