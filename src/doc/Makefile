@@ -56,7 +56,12 @@ includes.tex		?= \
 	sendLabelMessage.tex \
 	showClock.tex \
 	gpsFeeder.tex \
-	watcherHierarchyClient.tex
+	watcherHierarchyClient.tex \
+	watcherd.tex \
+	messageStream2Text.tex \
+	legacyWatcher.tex \
+	ogreWatcher.tex \
+	watcher3d.tex 
 #includes.tex.sh	?=
 #includes.rst		?=
 #includes.fig		?=

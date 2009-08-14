@@ -57,7 +57,7 @@ The interface between the watcher daemon and the test node is a simple message i
 to a daemon, sends one or more messages, then disconnects. Some messages contain abstract state information about that test node
 such as current set of neighbors, current location, etc. Other messages contain lower-level graphical display commands like ``change
 color'' or ``draw an edge between these two nodes''.  For a list of all supported message, see the {\it watcher::event::Message} class 
-documentation in the watcher developer documentation. 
+in the watcher developer documentation. 
 
 The interface between the GUI(s) and the watcher daemon is also message based, but also includes the concept of a message
 stream. The stream is composed of messages and has an interface that manipulates the stream content, time, direction, and rate. A message
@@ -188,6 +188,7 @@ log output goes to both the console (stdout) and a local file. The file is overw
 \begin{figure}[htb]
 \framebox[0.99\textwidth][l]{%
     \parbox{0.99\textwidth}{
+        {\tt
 \# Global logging level. Create two loggers: stdout and flog
 log4j.rootLogger=debug, flog, stdout\\
 \\
@@ -206,6 +207,7 @@ log4j.appender.flog.layout=org.apache.log4j.PatternLayout\\
 log4j.appender.flog.file=watcherd.log\\
 log4j.appender.flog.append=false\\
 log4j.appender.flog.layout.ConversionPattern=\%-4r [\%t] \%-5p \%c (\%-12F:\%-4L) - \%m\%n\\
+        }%tt
     }%parbox
 }%fbox
 \caption{Sample {\tt log.properties} file}
@@ -223,7 +225,9 @@ sample configuration for the watcher daemon.
 Most components in the system take the location of the configuration file on the command line given with a {\tt -c} or {\tt -f} option. If you're unsure
 which to use, all components support {\tt --help}, which will show a usage statement. By convention watcher configuration files follow the form {\it program-name.cfg}. 
 So the configuration for the ogreWatcher binary would be called {\tt ogreWatcher.cfg}. This is not enforced, it's just a convention - ``cfg'' files can be called anything. 
-The build process will copy sample ``cfg'' files from .\slash etc into the local directory. Also, most watcher components will create a default configuration file
+
+
+The config files are created two ways. The build process will copy sample ``cfg'' files from .\slash etc into the local directory. Also, most watcher components will create a default configuration file
 if they find an empty or non-existent one when they start up. So if you don't have a configuration file when you need one, you may just be able to run the component, then stop it and 
 a default configuration file will be created in the current working directory.  Note though that sometime the defaults are not what you want, so you'll have to modify the defaults by hand.
 
@@ -240,19 +244,13 @@ databasePath = "event.db";\\
         }
     }%parbox
 }%fbox
-\caption{Sample {\tt watcherd.cfg} file}
+\caption{Sample {\tt cfg} file}
 \label{fig:watcherdCfg}
 \end{figure}
 
 For the specific settings in a component's configuration file, see the section in this document on that component. 
 
-\subsection{Command Line Arguments}
-Most binaries take a {\tt -c} (or {\tt -f}) argument which gives the location of the {\tt cfg} file. Mention this. Also note that most binaries 
-just take that option and nothing else. 
-
 \section{Test Node Components}
-\subsection{Watcher API}
-Mention watcher messages and give types. Mention something else that's interesting and useful. 
 
 \subsection{Scripting Interface}
 For each watcher message there is a command line binary to send that message. These binaries can be used directly in shell scripts or invoked via a system call from most scripting languages to send 
@@ -286,36 +284,24 @@ These daemons are run on the test nodes and feed information about the test node
 \input{gpsFeeder}
 \input{watcherHierarchyClient}
 
+% the watcherd.tex file contains its own \section
 \input{watcherd}
 
 \section{Watcher GUIs}
 
-Talk about GUIs here. Legacy watcher is OpenGL, others are engine based and just barely started proof of concept.
+The watcher daemon exports a message streaming interface that supports any number of clients. This means that multiple GUIs can connect
+to a running watcher daemon and request a stream of data. One GUI can be viewing a single node at the start of the run while another 
+can be viewing the whole field in live mode. This gives us the ability to write different GUIs to support different ends. The standard GUI 
+is usually just called ``the watcher''. Or due the fact that there are now multiple GUIs and they have the potential to become the 
+go-to GUI, the orginal GUI is sometimes called the ``legacy watcher'' - its the GUI that's been around since the start. There are 
+currently three other GUIs, one of which is not yet hooked into the watcher API (so it cannot send or receive watcher messsages). Details
+about these GUIs are found below. 
 
-\subsection{Legacy Watcher}
-
-Talk about how the legacy watcher's cfg file is different - both in format and creation (its self-created). 
-
-\label{LegacyWatcher}
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.8\textwidth]{legWatcherGUI.eps}
-\caption{The legacy watcher showing a running instance of showClock.}
-\label{fig:LegacyWatcherClock}
-\end{figure}
-
-\subsection{ogreWatcher}
-\begin{figure}
-\centering
-\includegraphics[width=0.8\textwidth]{ogreWatcherGUI.eps}
-\caption{The ogreWatcher showing a running instance of showClock.}
-\label{ogreWatcher}
-\end{figure}
-
-Built with OGRE.
-\subsection{Watcher3d}
-Built with Delta-3d.
+% tex files that document the GUIs are kept in separate files. 
+\input{legacyWatcher}
+\input{ogreWatcher}
+\input{watcher3d}
+\input{messageStream2Text}
 
 \printindex
-
 \end{document}
