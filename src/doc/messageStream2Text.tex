@@ -3,7 +3,7 @@
 {\it messageStream2Text} is not your typical GUI in that it has no graphical interface. It's in the GUI section though as it uses 
 the GUI watcher API to talk to a running watcher daemon. It was written (and is used) as a tool to debug the message stream interface. It simply
 connects to a daemon instance, requests a message stream, and dumps all the recieved messages to the console on stdout. Think of it as a 
-tcpdump for watcher message streams. 
+tcpdump for watcher message streams. See figure \ref{fig:ms2tSample} for a sample of the output.
 
 {\it messageStream2Text} source code can be found in {\tt .\slash src\slash clients\slash messageStream2Text}. 
 
@@ -20,4 +20,22 @@ tcpdump for watcher message streams.
 \item {\tt server}, name or ipaddress of the server to connect to.
 \item {\tt service}, name of service (usaully "watcherd") or port number on which the server is listening.
 \end{itemize}
+
+\begin{figure}[htb]
+\framebox[0.99\textwidth][l]{%
+    \parbox{0.99\textwidth}{
+        {\tt
+            Message \# 158: from: 192.168.3.60 version: 1 type: "3 (gps)" time: 1250210220433  x: 9.9999999999999467 y: 21.5 z: 0 format: 0 layer: Clock\\
+            Message \# 159: from: 192.168.1.100 version: 1 type: "3 (gps)" time: 1250210221433  x: 10 y: 10 z: 0 format: 0 layer: Clock\\
+            Message \# 160: from: 192.168.1.101 version: 1 type: "3 (gps)" time: 1250210221434  x: 3.1529667948633628 y: 8.5446181642756738 z: 0 format: 0 layer: Clock\\
+            Message \# 161: from: 192.168.1.121 version: 1 type: "5 (edge)" time: 1250210221434  node1: 192.168.1.100 node2: 192.168.1.101 edgeColor: red expiration: 0 width: 2 dir: unidirectional layer: Clock add: true node1Label:  NULL  middleLabel: from: 0.0.0.0 version: 1 type: "4 (label)" time: 1250210221434  label: hour (floating)  font size: 0 layer: Clock fg: (white) bg: (black) exp: 0 add: true lat: 0 lng: 0 alt: 0 node2Label:  NULL \\
+            Message \# 162: from: 192.168.1.102 version: 1 type: "3 (gps)" time: 1250210221434  x: 3.3086939364114212 y: 2.5685517452260545 z: 1 format: 0 layer: Clock\\
+            Message \# 163: from: 192.168.1.121 version: 1 type: "5 (edge)" time: 1250210221434  node1: 192.168.1.100 node2: 192.168.1.102 edgeColor: blue expiration: 0 width: 2 dir: unidirectional layer: Clock add: true node1Label:  NULL  middleLabel: from: 0.0.0.0 version: 1 type: "4 (label)" time: 1250210221434  label: min (floating)  font size: 0 layer: Clock fg: (white) bg: (black) exp: 0 add: true lat: 0 lng: 0 alt: 0 node2Label:  NULL \\
+            Message \# 164: from: 192.168.1.103 version: 1 type: "3 (gps)" time: 1250210221434  x: 11.045284632676534 y: 19.945218953682733 z: 2 format: 0 layer: Clock\\
+        }
+    }
+}
+\caption{Sample {\it messageStream2Text} output.}
+\label{fig:ms2tSample}
+\end{figure}
 
