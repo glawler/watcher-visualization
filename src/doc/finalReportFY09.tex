@@ -183,18 +183,15 @@ But in addition to the ``negative'' lessons, there were positive lessons learned
 relatively frequent and told us we were on the correct path. 
 
 We settled on using the Boost C++ library as it has very good support for writing robust, scalable network applications (the ASIO library). In addition
-to ASIO, boost comes with a wide variety of other well-written libraries. So it was decided to use as boost as mush as possible, this promotes code reuse, 
-the code (presumably has been vetted), and since Boost is portable--we would get maximum portability. Boost generally impressed with one major exception: the 
-serialization library. All messages that go on the wire need to be serialized and unserialized. All Watcher messages use the Boost serialization library to do
+to ASIO, Boost comes with a wide variety of other well-written libraries. So it was decided to use as Boost as much as possible as it is stable, standard, and, portabile. 
+Boost generally impressed with one major exception: the serialization library. All messages that go on the wire need to be serialized and unserialized. All Watcher 
+messages use the Boost serialization library to do
 this. It was thought that since serialization is a (pretty) simple task, there would be few problems. But it turned out that this library caused us the most headaches 
 of any of the other third-party libraries we used. The library is fragile and difficult to use when embedding in libraries, which we use for the Watcher messages as they 
-cross component boundaries. Originally we used static libraries, but saw that since the library is template based the only instances that were being instantiated 
-were those that were directly in the code. The compiler only instantiates templates for types that it sees at compile time, but since the message types are dynamic
-nothing was getting instantiated when linking to the message library. We solved this by moving a dynamic message library. Because the compiler does not know which types
-are needed ahead of time in a dynamically linked environment, it is forced to instantiate code to serialize and serialize all message types. This took awhile to 
-figure out and online forums and documentation were not overly helpful. 
+cross component boundaries. After consulting not overly helpful online forums and documentation, we discovered (for technical reasons) that the library had to be a shared 
+dynamically linked library. Once we made that change, it worked correctly. 
 
-The rest of the Boost library worked well. We believe the new watcher daemon, which uses the Boost ASIO network library will be able to scale
+The rest of the Boost library worked well. We believe the new Watcher daemon, which uses the Boost ASIO network library will be able to scale
 to multiple hundred, if not thousands of nodes. That being said, this had not been fully tested. 
 
 In general, the new architecture has been validated. The decoupling of graphic rendering from message processing has worked out well. The Watcher system
@@ -203,11 +200,12 @@ more benefits if we move the system into a test bed analysis direction.) The sys
 viewing independent test bed times and locations. The message stream idea has even been extended to include multiple shared streams and shared stream events
 which will support multiple GUIs and analysis tools viewing and controlling the same data stream. Although this idea has not been implemented it validates
 the architecture when such thoughts can be discussed and envisioned. The message stream interface was validated as well given the ease with which it 
-was integrated in the proof-of-concept OGRE-based watcher GUI and {\it messageStream2Text} debugging utility. 
+was integrated in the proof-of-concept OGRE-based Watcher GUI and {\it messageStream2Text} debugging utility. 
 
 The investigation into different game engine tool kits has been enlightening. It has helped us narrow in on a more specific functionality set that is needed
 for a Watcher GUI. Many game engines have a feature set that is almost too full, a feature set that contains things a Watcher GUI will not need, such as 
-a networking suite. Since the Watcher uses the network library written just for it, this is not needed. The overhead in supporting this very full
+a networking suite. Since the Watcher uses the network library written just for it, the game engine supplied networking library is not needed. The overhead in supporting 
+some game engines overly full
 feature set may be too much (or at least unnecessary) for Watcher GUI development. For example, the Delta3D suite is essentially as small standard 
 interface around a number of different libraries. This interface while uniform may not fit all modules in the system. Also having to build and install
 all the modules can be tedious and time consuming. A more focused library such as OGRE, may be better suited for Watcher GUI development. It is just 
@@ -215,7 +213,7 @@ a graphical engine. (It does have semi-well integrated hooks for needed modules 
 in Delta3D could write a Watcher GUI quickly -- but since the development team did not have any experience in game\slash graphical engines prior to 
 this project, the feature set focus was useful. 
 
-In the original watcher, the build environment was based on Makefiles. This is a fine approach for small projects, which the watcher was, but as it grew
+In the original Watcher, the build environment was based on Makefiles. This is a fine approach for small projects, which the Watcher was, but as it grew
 in number of components and dependencies the decision was made to move to a GNU auto-tools based build environment. This greatly simplified a number
 of things. The ability to add and check the build machine for dependencies was straightforward. Previously the build environment would simply fail to link
 if a needed dependency was not installed. The auto-tools system checks for dependencies as a first step and provides a straight-forward, abstracted way 
@@ -226,7 +224,7 @@ compile their code.
 There were a few assumptions in the build environment that caused trouble when building the system at ARL. Auto-tools abstracts the locations
 of key files (system libraries, etc.) and build variables (compiler flags, etc.). In our configuration we ignored this a few times when looking 
 for libraries we used. This was for our own convenience. Different developers put different third-party libraries in different locations. We hard-coded
-a few of these locations into the configuration scripts. We assumes there would be no issues as the places we listed included system paths and most
+a few of these locations into the configuration scripts. We assumed there would be no issues as the places we listed included system paths and most
 installations would be in standard system locations. At ARL though, the NiCE system is used in which multiple versions and platforms of each library
 is built and installed in version and platform specific locations in the file system. So our build system failed to find the libraries when building 
 at ARL. These issues have been resolved by updating the configure scripts in the Watcher code tree. 
@@ -294,11 +292,13 @@ discussion. If the project is re-funded, some subset of these ideas will be refi
 
 The FY09 Watcher Improvements effort has made substantial progress
 in taking the Watcher from a basic prototype towards becoming a
-powerful, extensible, efficient, and polished tool for advanced MANET
-research and experimentation.  The follow-on tasks proposed here
+powerful, extensible, efficient, scalable, and polished system for advanced MANET
+research and experimentation. The lessons learned on this project have given the 
+development team insight into techniques and technologies needed to expand the prototype 
+into a flexible working system for MANET visualization.  The follow-on tasks proposed here
 promise to provide important new capabilities for understanding
 large-scale MANETs, integrating with third-party tools, presenting 
 more realistic and compelling visualizations, and moving beyond passive 
-monitoring to active experiment control and analysis. 
+monitoring to active experiment control and test analysis. 
 
 \end{document}
