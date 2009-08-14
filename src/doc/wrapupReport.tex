@@ -16,8 +16,8 @@
 \usepackage{url}
 \usepackage[dvips]{graphicx}
 
-\author{Geoff Lawler \url{<geoff.lawler@cobham.com>} \\ Cobham Analytic Solutions}
-\title{{\bf Watcher Improvements Project}\\Wrap-up Report FY09}
+\author{Geoff Lawler \url{<geoff.lawler@cobham.com>} \\ SPARTA, Inc. dba Cobham Analytic Solutions}
+\title{{\bf Visualization Tool Improvments for the Wireless Emulation Lab (WEL) Project}\\Final Report FY09}
 % \subtitle{The Search for Spock}
 
 \begin{document}
@@ -33,7 +33,9 @@ tell if the mobility scenario was working and the node connectivty appeared corr
 graph was added to enable researchers to debug the inner workings of the MANET security tools they were developing on their MANET emulation test beds. The ability to display labels
 allowed the state of any node to be seen at a glance. The Watcher was found to be a useful tool and was used by a fair number of reasearchers in the community. 
 
-In the summer of 2007, ARL approached Cobham Analytic Solutions (then SPARTA) with the idea of funding a small project not only to enhance the Watcher in order to make it a better tool for research, but also to enhance 
+In the summer of 2007, ARL approached SPARTA, Inc. dba Cobham Analytic Solutions\footnote{On June 3, 2008, SPARTA, Inc. completed a merger with Cobham, plc a United Kingdom (UK) 
+public company. SPARTA Inc. is a wholly owned subsidary of Cobham North America. SPARTA Inc. is doing business as Cobham Analytic Solutions}
+(hereafter referred to as Cobham) with the idea of funding a small project not only to enhance the Watcher in order to make it a better tool for research, but also to enhance 
 its graphics for use in demos. The contract and statement of work were finalized and a kickoff meeting was held in August of 2008. Now in August of 2009 the contract is ending and 
 this report summarizes the work done, findings, and possible future directions for Watcher improvements. 
 
@@ -53,7 +55,7 @@ GUI is sometimes refered to as the ``legacy Watcher''.) A proof of concept using
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.5\textwidth]{legWatcherGUI.eps}
-\caption{``Legacy Watcher'' at end of project. Note user interface widgets.}
+\caption{``Legacy Watcher'' at end of project. Note user interface widgets, playback buttons and slider, menus, etc.}
 \label{fig:legWatcherGUI}
 \end{figure}
 
@@ -64,14 +66,14 @@ for the project: where the Watcher system may go and how it can get there.
 
 \section{Work Performed}
 
-\subsection{Watcher Improvements}
 The main Watcher GUI had many updates and fixes applied in the first half of the contract. This portion of the time was focused on updating the GUI to 
 support usability and display features for the Army Science Conference in December 2008. Thus the focus was on modifying the existing code base---fixing bugs 
 and adding features requested by ARL. The last six months of the contract focused much more on the new architecture, full ``TiVo'' mode, and removing 
 the reliance on the idsCommunications hierarchy daemons as a transport mechanism. The second half of the contract saw a large amount of code written, new GUIs developed, and 
 a near complete rewrite of the existing Watcher GUI. 
 
-Here is a list of significant updates and bug fixes applied in the first half of the contract:
+\subsection{Watcher Improvements--First Half}
+The first half on the contract focused on improvements and bug fixes to the existing code base support the Army Science conference.  
 
 \begin{itemize}
 \item Wrapped the OpenGL window in a Qt window, giving us modern GUI widgets. 
@@ -95,7 +97,7 @@ for an example snapshot.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.4\textwidth]{watcherBandwidthGraphDialog.eps}
-\caption{Example of 2d scrolling graph in ``legacy watcher''}
+\caption{Example of 2d scrolling graph in ``legacy watcher'' showing data from 2 test nodes.}
 \label{fig:watcherBandwidthGraphDialog}
 \end{figure}
 
@@ -104,12 +106,15 @@ for an example snapshot.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.5\textwidth]{watcherWithBackground.eps}
-\caption{``Legacy Watcher'' showing background and 3D primitives}
+\caption{``Legacy Watcher'' graphics window showing background and 3D primitives.}
 \label{fig:watcherWithBackground}
 \end{figure}
 
-The second half of the contract focused on a new Watcher architecture, designed to support full ``TiVo'' mode and provide a fully dynamic system, removing reliance
-on hierarchy daemons as a transport mechanism. Below is a list of highlights from this half of the project.
+\subsection{Watcher Improvements--Second Half}
+The second half of the contract focused on redesign and writing a new code base. A new Watcher architecture was designed and developed. It was 
+designed for extensibililty and scalablility, to easily support full ``TiVo'' mode, to provide a fully dynamic system, and to remove reliance
+on the hierarchy as a transport mechanism. Below is a list of highlights from this half of the project. The next section (\ref{newArch}) gives a few more details
+on the new architecture.
 
 \begin{itemize}
 \item Wrote new Watcher messaging system including message parsing, protocols, and message formats from scratch. 
@@ -120,27 +125,33 @@ flexibility, efficient random access, and the ability of third-party application
 \item Rewrote all network code, creating the Watcher daemon and removing GUI reliance on hierarchy. Network functionality is now
 much more scalable. 
 \item Wrote proof-of-concept Watcher GUI based on the Object-Oriented Graphical Rendering Engine (OGRE) (\url{www.ogre3d.org}). See Figure \ref{fig:ogreWatcherGUI} for a
-screen shot. (Note that the robots can be easily swapped out for tanks or other more suitable figures.) 
+screen shot. (Note that the robots can be easily swapped out for tanks or other more suitable figures.) The proof-of-concept supports adding nodes and edges, and 
+correctly moving the nodes around. It does not support labels, layers, or any configuration information. 
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.8\textwidth]{ogreWatcherGUI.eps}
-\caption{First cut at game engine-based Watcher GUI. The Watcher of the future?}
+\caption{First cut at game engine-based Watcher GUI. Note realistic environment. Game engines allow for more sophisticated graphics and user interaction.}
 \label{fig:ogreWatcherGUI}
 \end{figure}
 
-\item The Watcher GUI now supports fully dynamic layers and graph data. No layer or graph data is hard-coded in the Watcher system, all 
-the layer and graph data is fed directly from test nodes and handled in the GUI in a simple and systematic way.
-\item Investigated use of Google Earth for a Watcher system GUI. It appears feasible. 
-\item Investigated the Delta-3D game engine (\url{www.delta3d.org}) as the basis of a new Watcher GUI. Wrote proof-of-concept application. 
+\item The Watcher GUI now supports fully dynamic layers and graph data. (Every GUI primitive such as nodes, edges, and layers are assigned a layer. Each layer can be
+toggled via the layer menu. The graph data is the periodic data fed from the test nodes and the title of the graph.) No layer or graph data is hard-coded in the Watcher system, all 
+the layer and graph data is fed directly from test nodes and handled in the GUI in a simple and systematic way. New layers and graph titles show up dynamically in the appropriate 
+menus. The menus are populated from live test node data or configuration data from a previous run.
+\item Investigated use of Google Earth for a Watcher system GUI. It appears feasible. It will lack smoothness in display (refresh times are once a seconds), but it 
+does have nearly perfect graphics for a Watcher GUI, good user interaction, and built-in layers. Offline caching of images, for offline test bed controllers, should work. 
+\item Investigated the Delta-3D game engine (\url{www.delta3d.org}) as the basis of a new Watcher GUI. Wrote proof-of-concept application. Delta3d and OGRE woudl both make 
+a fine basis for a Watcher GUI. The build and development environment for Delta-3D is more Windows oriented though. 
 \item Wrote test node daemon that runs on test nodes and converts old hierarchy-based Watcher messages into new message format. 
 This means that old Watcher-aware daemons do not have to be updated to support the new transport mechanism.
 \item Wrote new Watcher GPS daemon that supports the new GPS daemon that {\it eMANE} uses (gpsd). 
 \end{itemize}
 
 \subsection{New Architecture}
+\label{newArch}
 
-The Watcher architecture was redesigned and abstracted to promote flexibility and extensibility. Divorcing the record 
+The Watcher architecture was redesigned and abstracted to promote flexibility, extensibility, and scalability.  Divorcing the record 
 capability from the display mechanism allowed us to easily add full ``TiVo'' capability (pause\slash fast-forward\slash rewind) and the ability to have multiple 
 GUIs with independent views into the same data set. One researcher can view a test run which focuses on a single node or region, 
 pausing and fast-forwarding a single section of the playing field while another researcher can view it all or jump from 
@@ -150,7 +161,7 @@ of the new architecture.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.8\textwidth]{watcherArch.eps}
-\caption{New Watcher system architecture}
+\caption{New Watcher system architecture. Is much more scalable and extensible. Supports multiple GUIs, database oriented record and playback, ``TiVO'' like message streaming API.} 
 \label{fig:watcherArch}
 \end{figure}
 
@@ -234,6 +245,6 @@ research and experimentation.  The follow-on tasks proposed here
 promise to provide important new capabilities for understanding
 large-scale MANETs, integrating with third-party tools, presenting 
 more realistic and compelling visualizations, and moving beyond passive 
-monitoring to active experiment control.
+monitoring to active experiment control and analysis. 
 
 \end{document}
