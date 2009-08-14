@@ -151,19 +151,19 @@ This means that old Watcher-aware daemons do not have to be updated to support t
 \subsection{New Architecture}
 \label{newArch}
 
-The Watcher architecture was redesigned and abstracted to promote flexibility, extensibility, and scalability.  Divorcing the record 
-capability from the display mechanism allowed us to easily add full ``TiVo'' capability (pause\slash fast-forward\slash rewind) and the ability to have multiple 
-GUIs with independent views into the same data set. One researcher can view a test run which focuses on a single node or region, 
-pausing and fast-forwarding a single section of the playing field while another researcher can view it all or jump from 
-location to location, viewing multiple different layers of the data set. See Figure \ref{fig:watcherArch} for a diagram 
-of the new architecture.
-
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.8\textwidth]{watcherArch.eps}
 \caption{New Watcher system architecture. Is much more scalable and extensible. Supports multiple GUIs, database oriented record and playback, ``TiVo'' like message streaming APR.} 
 \label{fig:watcherArch}
 \end{figure}
+
+The Watcher architecture was redesigned and abstracted to promote flexibility, extensibility, and scalability.  Divorcing the record 
+capability from the display mechanism allowed us to easily add full ``TiVo'' capability (pause\slash fast-forward\slash rewind) and the ability to have multiple 
+GUIs with independent views into the same data set. One researcher can view a test run which focuses on a single node or region, 
+pausing and fast-forwarding a single section of the playing field while another researcher can view it all or jump from 
+location to location, viewing multiple different layers of the data set. See Figure \ref{fig:watcherArch} for a diagram 
+of the new architecture.
 
 Abstracting the layer concept allows the researcher to add layers dynamically at run-time. For example, 
 if a researcher notices a problem with bandwidth usage, he or she can easily write a new test node daemon that 
