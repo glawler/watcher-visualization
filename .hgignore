@@ -267,18 +267,23 @@ share/info/dir
 #
 # ignore latex temp files.
 #
-^src/doc/legWatcherGUI.eps   # these eps files are generated from other files.
-^src/doc/ogreWatcherGUI.eps
-^src/doc/watcherArch.eps
-^src/doc/.*\.aux
-^src/doc/.*\.make
-^src/doc/.*\.d
-^src/doc/.*\.dvi
-^src/doc/.*\.fls
-^src/doc/.*\.idx
-^src/doc/.*\.ilg
-^src/doc/.*\.ind
-^src/doc/.*\.pdf
-^src/doc/.*\.ps
-^src/doc/.*\.toc
+# these eps files are generated from other files.
+^src/doc/legWatcherGUI\.eps$
+^src/doc/ogreWatcherGUI\.eps$
+^src/doc/watcherArch\.eps$
+^src/doc/oldWatcher\.eps$
+^src/doc/watcherBandwidthGraphDialog\.eps$
+^src/doc/watcherWithBackground\.eps$
+^src/doc/.*\.aux$
+^src/doc/.*\.make$
+^src/doc/.*\.d$
+^src/doc/.*\.dvi$
+^src/doc/.*\.fls$
+^src/doc/.*\.idx$
+^src/doc/.*\.ilg$
+^src/doc/.*\.ind$
+^src/doc/.*\.pdf$
+^src/doc/.*\.ps$
+^src/doc/.*\.toc$
+^src/doc/.*\.temp$
 
