@@ -25,6 +25,7 @@
 #include <QTimer>
 #include <string>
 #include <GL/glut.h>
+#include <getopt.h>
 
 #include "ui_watcher.h"
 #include "watcherMainWindow.h"
@@ -42,6 +43,18 @@ using namespace libconfig;
 int main(int argc, char *argv[])
 {
     TRACE_ENTER();
+
+    option options[] = {
+        { "help", 0, NULL, 'h' },
+        { "configFile", 1, NULL, 'f' },
+        { 0, 0, NULL, 0 }
+    };
+    char i;
+    while ((i = getopt_long(argc, argv, "hf:", options, NULL)) != -1) 
+        if (i=='h') {
+            cout << "Usage : " << basename(argv[0]) << " -f,--configFile=cfgFile -h,--help" << endl;
+            exit(EXIT_FAILURE);
+        }
 
     string configFilename;
     SingletonConfig::lock(); 
