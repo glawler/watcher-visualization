@@ -1192,7 +1192,7 @@ bool manetGLView::loadConfiguration()
     else
     {
         BackgroundImage &bgImage=BackgroundImage::getInstance(); 
-        char *ext=rindex(strVal.data(), '.');
+        const char *ext=rindex(strVal.data(), '.');
         if (!ext)
         {
             LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
