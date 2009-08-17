@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
     string address("glory");
     string port("8095");
-    size_t numThreads;
+    size_t numThreads=8;
     std::string dbPath("event.db");
 
     if (!config.lookupValue("server", address))
