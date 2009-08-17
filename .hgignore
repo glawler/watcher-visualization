@@ -272,6 +272,8 @@ share/info/dir
 ^src/doc/ogreWatcherGUI\.eps$
 ^src/doc/watcherArch\.eps$
 ^src/doc/oldWatcher\.eps$
+^src/doc/legWatcherLayersMenu\.eps$
+^src/doc/legWatcherViewMenu\.eps$
 ^src/doc/watcherBandwidthGraphDialog\.eps$
 ^src/doc/watcherWithBackground\.eps$
 ^src/doc/.*\.aux$
