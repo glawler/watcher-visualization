@@ -66,15 +66,7 @@
 
 /**
  * @page UsersGuide
- * @section TOC
- *  <h3>Table of Contents</h3>
- * @section Modules
- *  Module Descriptions
- * @section HowTo
- *  How to do stuff
- * @section Glossary
- *  Glossary of Terms
- * @section Index
+ * The User's Guide can be built by doing a 'make' in the ./src/doc directory. 
  */
 
 /** 
