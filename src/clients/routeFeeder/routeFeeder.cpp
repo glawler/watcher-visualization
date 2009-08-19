@@ -296,7 +296,7 @@ static void updateRoutes(detector *st, Route *list)
                 em->edgeColor=st->onehopcolor;
                 em->expiration=Timestamp(st->reportperiod*1.5); 
                 em->width=st->routeedgewidth;
-                em->layer=ROUTING_LAYER; // GTL st->onehoplayer;
+                em->layer=ONE_HOP_ROUTING_LAYER; // GTL st->onehoplayer;
                 em->addEdge=true;
                 em->bidirectional=false;
                 messages.push_back(em);
