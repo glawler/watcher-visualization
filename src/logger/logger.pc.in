@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: watcher
+Description: A small wrapper around Apache's log4cxx library.  
+Requires: liblog4cxx 
+Version: @VERSION@
+Libs: -L${libdir} -llogger
+Cflags: -I${includedir}
+

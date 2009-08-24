@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/libwatcher
+
+Name: watcher
+Description: Collection of watcher messages. 
+Requires: 
+Version: @VERSION@
+Libs: -L${libdir} -lwatchermsg
+Cflags: -I${includedir}
+
