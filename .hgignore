@@ -289,3 +289,7 @@ share/info/dir
 ^src/doc/.*\.toc$
 ^src/doc/.*\.temp$
 
+^src/libwatcher/watcher.pc
+^src/libwatcher/watchermsg.pc
+^src/logger/logger.pc
+
