@@ -1,18 +1,3 @@
-/**
- * @file connectivityMessage.h
- * @author Geoff Lawler <geoff.lawler@cobham.com> 
- * @date 2009-07-15
- */
-#ifndef CONNNECTIVITY_MESSAGE_DATA_H
-#define CONNNECTIVITY_MESSAGE_DATA_H
-
-#include <vector>
-
-#include "message.h"
-#include "watcherTypes.h"
-
-namespace watcher 
-{
 /* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
@@ -30,6 +15,21 @@ namespace watcher
  *     You should have received a copy of the GNU Affero General Public License
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * @file connectivityMessage.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
+#ifndef CONNNECTIVITY_MESSAGE_DATA_H
+#define CONNNECTIVITY_MESSAGE_DATA_H
+
+#include <vector>
+
+#include "message.h"
+#include "watcherTypes.h"
+
+namespace watcher 
+{
 
     namespace event 
     {

@@ -1,12 +1,4 @@
 /**
- * @file messageStatus.h
- * @author Geoff Lawler <geoff.lawler@cobham.com> 
- * @date 2009-07-15
- */
-#ifndef STATUS_MESSAGE_H
-#define STATUS_MESSAGE_H
-
-#include "message.h"
 /* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
@@ -25,6 +17,14 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+ * @file messageStatus.h
+ * @author Geoff Lawler <geoff.lawler@cobham.com> 
+ * @date 2009-07-15
+ */
+#ifndef STATUS_MESSAGE_H
+#define STATUS_MESSAGE_H
+
+#include "message.h"
 
 namespace watcher {
     namespace event {
