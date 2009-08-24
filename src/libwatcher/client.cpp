@@ -17,6 +17,8 @@
  */
 
 #include "client.h"
+#include "message.h"
+#include "clientConnection.h"
 
 using namespace watcher;
 using namespace watcher::event;

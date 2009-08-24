@@ -2,8 +2,31 @@ SUBDIRS=. test
 
 include $(top_srcdir)/Makefile.top
 
-noinst_LIBRARIES=libwatcher.a
+lib_LIBRARIES=libwatcher.a
+libwatcher_a_includedir=$(includedir)/libwatcher
+libwatcher_a_include_HEADERS=\
+	client.h \
+	message_fwd.h \
+	watcherTypes.h \
+	watcherGlobalFunctions.h
+
+
 lib_LTLIBRARIES=libwatchermsg.la
+libwatchermsg_la_includedir=$(includedir)/libwatcher
+libwatchermsg_la_include_HEADERS=\
+	message.h \
+	colorMessage.h \
+	connectivityMessage.h \
+	dataPointMessage.h \
+	edgeMessage.h \
+	gpsMessage.h \
+	labelMessage.h \
+	messageTypesAndVersions.h \
+	nodeStatusMessage.h \
+	watcherColors.h
+	
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = watcher.pc watchermsg.pc
 
 libwatchermsg_la_SOURCES=message.h message.cpp \
 	colorMessage.cpp \

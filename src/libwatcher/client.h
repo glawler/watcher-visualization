@@ -15,14 +15,8 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  * @file client.h
- * @author Geoff Lawler <geoff.lawler@cobham.com> 
- * @date 2009-07-15
- */
-/**
- * @file message.h
  * @author Geoff Lawler <geoff.lawler@cobham.com> 
  * @date 2009-07-15
  */
@@ -36,11 +30,16 @@
 #include <boost/thread.hpp>
 #include "logger.h"
 
-#include "clientConnection.h"
-#include "libwatcher/message.h"
+#include "libwatcher/message_fwd.h"
 
 namespace watcher 
 {
+    class ClientConnection;
+    typedef boost::shared_ptr<ClientConnection> ClientConnectionPtr; 
+
+    class MessageHandler;
+    typedef boost::shared_ptr<MessageHandler> MessageHandlerPtr; 
+
     /// Currently it's just a thin wrapper around the clientConnection class. 
     class Client : private boost::noncopyable
     {

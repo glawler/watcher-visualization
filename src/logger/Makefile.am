@@ -8,3 +8,6 @@ liblogger_la_SOURCES=logger.cpp logger.h
 liblogger_la_includedir=$(includedir)
 liblogger_la_include_HEADERS=logger.h
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = logger.pc
+

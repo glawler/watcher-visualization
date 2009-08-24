@@ -1,4 +1,3 @@
-/**
 /* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
@@ -16,7 +15,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+/**
  * @file messageStatus.h
  * @author Geoff Lawler <geoff.lawler@cobham.com> 
  * @date 2009-07-15

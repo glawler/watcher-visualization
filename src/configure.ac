@@ -174,8 +174,11 @@ AC_MSG_RESULT($enable_hierarchy_client)
 AC_CONFIG_FILES([ \
     Makefile \
     logger/Makefile \
+    logger/logger.pc \
     util/Makefile \
     libwatcher/Makefile \
+    libwatcher/watcher.pc \
+    libwatcher/watchermsg.pc \
     libwatcher/test/Makefile \
     clients/Makefile \
     clients/routeFeeder/Makefile \
