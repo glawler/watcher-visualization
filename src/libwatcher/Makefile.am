@@ -6,7 +6,9 @@ lib_LIBRARIES=libwatcher.a
 libwatcher_a_includedir=$(includedir)/libwatcher
 libwatcher_a_include_HEADERS=\
 	client.h \
+	connection_fwd.h \
 	message_fwd.h \
+	messageHandler.h \
 	sendMessageHandler.h \
 	watcherTypes.h \
 	watcherGlobalFunctions.h
