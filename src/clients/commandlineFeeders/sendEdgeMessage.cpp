@@ -70,7 +70,7 @@
 #include <libwatcher/client.h>
 #include <libwatcher/edgeMessage.h>
 #include <libwatcher/messageTypesAndVersions.h>    // for GUILayer
-#include "sendMessageHandler.h"
+#include <libwatcher/sendMessageHandler.h>
 
 using namespace std;
 using namespace watcher;

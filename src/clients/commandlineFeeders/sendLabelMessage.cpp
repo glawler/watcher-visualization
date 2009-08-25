@@ -74,7 +74,7 @@
 #include "logger.h"
 #include <libwatcher/client.h>
 #include <libwatcher/labelMessage.h>
-#include "sendMessageHandler.h"
+#include <libwatcher/sendMessageHandler.h>
 
 using namespace std;
 using namespace watcher;

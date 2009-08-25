@@ -64,7 +64,7 @@
 #include <libwatcher/watcherTypes.h>
 #include <libwatcher/client.h>
 #include <libwatcher/dataPointMessage.h>
-#include <sendMessageHandler.h>
+#include <libwatcher/sendMessageHandler.h>
 
 #include "logger.h"
 

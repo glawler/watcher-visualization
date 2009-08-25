@@ -66,7 +66,7 @@
 #include <libwatcher/client.h>
 #include <libwatcher/gpsMessage.h>
 #include <libwatcher/watcherTypes.h> // for NodeIdentifer
-#include "sendMessageHandler.h"
+#include <libwatcher/sendMessageHandler.h>
 
 using namespace std;
 using namespace watcher;

@@ -68,7 +68,7 @@
 #include <libwatcher/connectivityMessage.h>
 #include <libwatcher/client.h>
 #include "logger.h"
-#include "sendMessageHandler.h"
+#include <libwatcher/sendMessageHandler.h>
 
 using namespace std;
 using namespace watcher;

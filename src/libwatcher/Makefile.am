@@ -7,9 +7,9 @@ libwatcher_a_includedir=$(includedir)/libwatcher
 libwatcher_a_include_HEADERS=\
 	client.h \
 	message_fwd.h \
+	sendMessageHandler.h \
 	watcherTypes.h \
 	watcherGlobalFunctions.h
-
 
 lib_LTLIBRARIES=libwatchermsg.la
 libwatchermsg_la_includedir=$(includedir)/libwatcher
@@ -56,6 +56,7 @@ libwatcher_a_SOURCES= \
 	edgeDisplayInfo.cpp \
 	labelDisplayInfo.cpp \
 	messageHandler.h messageHandlerFwd.h messageHandler.cpp \
+	sendMessageHandler.h \
 	messageStatus.cpp \
 	messageStream.h messageStream.cpp \
 	messageStreamFilter.h messageStreamFilter.cpp \

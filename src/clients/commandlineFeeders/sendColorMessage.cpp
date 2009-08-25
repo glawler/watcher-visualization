@@ -81,7 +81,7 @@
 #include <libwatcher/client.h>
 #include <libwatcher/colorMessage.h>
 #include <libwatcher/watcherColors.h>
-#include "sendMessageHandler.h"
+#include <libwatcher/sendMessageHandler.h>
 
 using namespace std;
 using namespace watcher;
