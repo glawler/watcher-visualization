@@ -527,7 +527,7 @@ int main(int argc, char *argv[])
     CommunicationsMessageAccess mode=COMMUNICATIONS_MESSAGE_READONLY;
     string serverName;
 
-    LOAD_LOG_PROPS("log.properties"); 
+    LOAD_LOG_PROPS("watcherHierarchyClient.log.properties"); 
 
     while((ch=getopt(argc, argv,"t:u:w:r:s:?h"))!=-1)
     {

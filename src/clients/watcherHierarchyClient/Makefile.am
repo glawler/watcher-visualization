@@ -1,10 +1,14 @@
 
+include $(srcdir)/../Makefile.clients
+
 CXXFLAGS+=-I/usr/include/libxml2 
 LDADD=-lxml2
 
 CPPFLAGS += @BOOST_CPPFLAGS@
 LDFLAGS += @BOOST_LDFLAGS@
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
+
+BUILT_SOURCES=watcherHierarchyClient.log.properties
 
 # We have to get our build/include stuff sorted out.
 CXXFLAGS+=-I../../include 
