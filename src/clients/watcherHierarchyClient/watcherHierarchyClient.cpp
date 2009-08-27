@@ -50,6 +50,7 @@
 #include <string.h>
 
 #include "idsCommunications.h"
+#include "apisupport.h"
 #include "demolib.h"
 
 #include "legacyWatcherMessageUnmarshal.h"
@@ -196,6 +197,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
     EdgeMessagePtr em(new EdgeMessage);
 
     // Add the basics.
+    em->fromNodeID=ip::address_v4(mi->origin); 
     em->node1=ip::address_v4(ne->head);
     em->node2=ip::address_v4(ne->tail);
     em->edgeColor=Color(ne->color[0], ne->color[1], ne->color[2], ne->color[3]); 
@@ -270,6 +272,7 @@ void sendGPS(void *messageHandlerData, const struct MessageInfo *mi)
     gpsMessage->x=wGPS.lon;
     gpsMessage->y=wGPS.lat;
     gpsMessage->z=wGPS.alt;
+    gpsMessage->fromNodeID=ip::address_v4(mi->origin);
 
     st->client->sendMessage(gpsMessage);
 
