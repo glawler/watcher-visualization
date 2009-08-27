@@ -196,8 +196,8 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
     EdgeMessagePtr em(new EdgeMessage);
 
     // Add the basics.
-    em->node1=ip::address_v4(htonl(ne->head));
-    em->node2=ip::address_v4(htonl(ne->tail));
+    em->node1=ip::address_v4(ne->head);
+    em->node2=ip::address_v4(ne->tail);
     em->edgeColor=Color(ne->color[0], ne->color[1], ne->color[2], ne->color[3]); 
     em->expiration=ne->expiration;
     em->layer=legacyFamilyValue2GUILayer(ne->family); 
