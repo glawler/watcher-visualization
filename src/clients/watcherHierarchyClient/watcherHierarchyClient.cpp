@@ -130,7 +130,7 @@ void sendLabel(void *messageHandlerData, const struct MessageInfo *mi, bool addL
 
     lm->label=lab.text;
     lm->fontSize=12;        // not in NodeLabel
-    lm->fromNodeID=ip::address_v4(htonl(lab.node));     
+    lm->fromNodeID=ip::address_v4(lab.node);     
     lm->foreground=Color(lab.fgcolor[0], lab.fgcolor[1], lab.fgcolor[2], lab.fgcolor[3]);
     lm->background=Color(lab.bgcolor[0], lab.bgcolor[1], lab.bgcolor[2], lab.bgcolor[3]);
     lm->expiration=lab.expiration;
@@ -219,7 +219,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
             // cheating a little
             if (i==0)  // head
             {
-                mlp->fromNodeID=ip::address_v4(htonl(ne->head));
+                mlp->fromNodeID=ip::address_v4(ne->head);
                 em->setNode1Label(mlp);
             }
             else if (i==1)  // middle
@@ -228,7 +228,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
             }
             else if (i==2)  // tail
             {
-                mlp->fromNodeID=ip::address_v4(htonl(ne->tail));
+                mlp->fromNodeID=ip::address_v4(ne->tail);
                 em->setNode2Label(mlp);
             }
             else break; // Shouldn't happen
