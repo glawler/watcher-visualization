@@ -373,8 +373,8 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
 
     EdgeMessagePtr em(new EdgeMessage);
 
-    em->node1=boost::asio::ip::address::from_string("127.0.0.1");  // use this node as head
-    em->node2=boost::asio::ip::address_v4(cn->addr);
+    em->node1=ip::address_v4(communicationsNodeAddress(st->cs));
+    em->node2=ip::address_v4(cn->addr);
     em->edgeColor=Color::red;       // GTL may want to put this in a configuration file somewhere.
     em->expiration=0;
     em->layer=HIERARCHY_LAYER;
