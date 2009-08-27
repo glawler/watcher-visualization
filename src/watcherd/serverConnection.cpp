@@ -311,6 +311,11 @@ namespace watcher {
 
                 // Add the incoming address to the Message so everyone
                 // knows who the message came from.
+                // GTL - this breaks when the watcher is run on a control network
+                // and the nodes are on a data network. The endpoint of the
+                // socket is the control network address of the test node not the 
+                // data network address - so we end up with 2 different node IDs for 
+                // each node.
                 boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint();
                 BOOST_FOREACH(MessagePtr m, arrivedMessages) {
                     if(m->fromNodeID==NodeIdentifier())  // is empty
