@@ -204,6 +204,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
     em->expiration=ne->expiration;
     em->layer=legacyFamilyValue2GUILayer(ne->family); 
     em->addEdge=addEdge;
+    em->width=2.0;
 
     // Add any labels if we have them.
     NodeLabel *labels[] = { &ne->labelHead, &ne->labelMiddle, &ne->labelHead }; 
@@ -376,8 +377,9 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
     em->node1=ip::address_v4(communicationsNodeAddress(st->cs));
     em->node2=ip::address_v4(cn->addr);
     em->edgeColor=Color::red;       // GTL may want to put this in a configuration file somewhere.
-    em->expiration=0;
+    em->expiration=Infinity;
     em->layer=HIERARCHY_LAYER;
+    em->width=2.0;
 
 	switch(cn->state)
 	{
