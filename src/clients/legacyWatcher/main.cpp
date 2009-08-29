@@ -44,15 +44,9 @@ int main(int argc, char *argv[])
 {
     TRACE_ENTER();
 
-    option options[] = {
-        { "help", 0, NULL, 'h' },
-        { "configFile", 1, NULL, 'f' },
-        { 0, 0, NULL, 0 }
-    };
-    char i;
-    while ((i = getopt_long(argc, argv, "hf:", options, NULL)) != -1) 
-        if (i=='h') {
-            cout << "Usage : " << basename(argv[0]) << " -f,--configFile=cfgFile -h,--help" << endl;
+    for (int i=0; i!=argc; i++)
+        if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help") || !strcmp(argv[i], "-?")) {
+            cout << "Usage : " << basename(argv[0]) << " -c,--configFile=cfgFile -h,--help" << endl;
             exit(EXIT_FAILURE);
         }
 
