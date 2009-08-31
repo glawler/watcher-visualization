@@ -351,6 +351,7 @@ int main(int argc, char *argv[])
                           fprintf(stderr, "Error parsing localhost address: %s\n", optarg); 
                           exit(EX_USAGE); 
                       }
+                      detinit.localhost.s_addr=ntohl(detinit.localhost.s_addr);
                       break;
             case 'o':
                       detinit.onehopcolor.fromString(optarg);
