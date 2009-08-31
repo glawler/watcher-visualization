@@ -117,6 +117,7 @@ namespace watcher {
             MatchEdgeLayer(const WatcherGraph::Graph &g_, const GUILayer &l_) : g(g_), layer(l_) {}
             bool operator()(const boost::graph_traits<WatcherGraph::Graph>::edge_descriptor &e)
             {
+                // LOG_DEBUG("MatchEdgeLayer: " << g[e].displayInfo->layer << " == " << layer << " is " << (g[e].displayInfo->layer==layer?"true":"false")); 
                 return g[e].displayInfo->layer==layer;
             }
         };
@@ -127,8 +128,7 @@ namespace watcher {
             const WatcherGraph::Graph &g;
             WatcherNodeVertexGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
 
-            void operator()(std::ostream &out, 
-                    boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v) const
+            void operator()(std::ostream &out, WatcherGraph::vertex const &v) const
             {
                 out << "[";
                 stringstream label;
@@ -152,8 +152,7 @@ namespace watcher {
             const WatcherGraph::Graph &g;
             WatcherNodeEdgeGraphVizWriter(const WatcherGraph::Graph &g_) : g(g_) { }
 
-            void operator()(std::ostream &out, 
-                    boost::graph_traits<WatcherGraph::Graph>::edge_descriptor const &e) const
+            void operator()(std::ostream &out, WatcherGraph::edge const &e) const
             {
                 out << "[";
                 stringstream label;
@@ -165,7 +164,9 @@ namespace watcher {
                 label << "\""; 
 
                 out << " color=" << g[e].displayInfo->color;
+                out << " layer=" << g[e].displayInfo->layer;
                 out << "]"; 
+
             }
         };
     }
@@ -199,15 +200,10 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
     //     Find the intersection of the sets of the est of existing neighbors
     //     and the set of neighbors in the message. Then make sure that 
     //     the intersection of nodes exist. 
+    
     graph_traits<Graph>::vertex_iterator src;
-    boost::graph_traits<Graph>::out_edge_iterator i, end, newEnd;
     findOrCreateNode(message->fromNodeID, src, message->layer); 
-
-    // Remove all edges on the same layer as the message. 
-    tie(i, end)=out_edges(*src, theGraph);
-    newEnd=remove_if(i, end, GraphFunctors::MatchEdgeLayer(theGraph, message->layer)); 
-    for( ; newEnd!=end; ++newEnd)
-        remove_edge(newEnd, theGraph);
+    remove_out_edge_if(*src, GraphFunctors::MatchEdgeLayer(theGraph, message->layer), theGraph);
 
     // Add edges from connectivity message
     graph_traits<Graph>::vertex_iterator dest;
@@ -463,7 +459,7 @@ std::ostream &WatcherGraph::toStream(std::ostream &out) const
             out, 
             theGraph, 
             GraphFunctors::WatcherNodeVertexGraphVizWriter(theGraph), 
-            GraphFunctors::WatcherNodeEdgeGraphVizWriter(theGraph)); 
+            GraphFunctors::WatcherNodeEdgeGraphVizWriter(theGraph));
 
     TRACE_EXIT();
     return out;

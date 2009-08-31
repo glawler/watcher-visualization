@@ -79,19 +79,26 @@ namespace watcher
              * The graph is a boost directed adjacency_list. This interface is public
              * so GUI developers can get direct access if needed. 
              */
-            typedef boost::adjacency_list<
-                boost::vecS, 
-                boost::vecS, 
-                boost::directedS,
-                WatcherGraphNode, 
-                WatcherGraphEdge> Graph;
+                // struct watcher_vertex_t { typedef boost::vertex_property_tag kind; };
+                // struct watcher_edge_t { typedef boost::edge_property_tag kind; };
 
-            typedef boost::graph_traits<Graph>::vertex_descriptor  vertex;
-            typedef boost::graph_traits<Graph>::vertices_size_type vertexInt;
-            typedef boost::graph_traits<Graph>::vertex_iterator    vertexIterator;
-            typedef boost::graph_traits<Graph>::edge_descriptor    edge;
-            typedef boost::graph_traits<Graph>::edges_size_type    edgeInt;
-            typedef boost::graph_traits<Graph>::edge_iterator      edgeIterator;
+                // typedef boost::property<watcher_vertex_t, WatcherGraphNode> VertexProperty;
+                // typedef boost::property<watcher_edge_t, WatcherGraphEdge> EdgeProperty;
+
+                typedef boost::adjacency_list<
+                    boost::listS, 
+                    boost::vecS, 
+                    boost::directedS,
+                    WatcherGraphNode, 
+                    WatcherGraphEdge
+                > Graph;
+
+                typedef boost::graph_traits<Graph>::vertex_descriptor  vertex;
+                typedef boost::graph_traits<Graph>::vertices_size_type vertexInt;
+                typedef boost::graph_traits<Graph>::vertex_iterator    vertexIterator;
+                typedef boost::graph_traits<Graph>::edge_descriptor    edge;
+                typedef boost::graph_traits<Graph>::edges_size_type    edgeInt;
+                typedef boost::graph_traits<Graph>::edge_iterator      edgeIterator;
 
             /**
              * The actual boost::graph.
