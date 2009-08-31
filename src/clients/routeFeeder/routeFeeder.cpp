@@ -78,43 +78,6 @@ bool operator<(const Route &a, const Route &b) {
 
 typedef vector<Route> RouteList; 
 
-/*
-   Iface   Destination     Gateway         Flags   RefCnt  Use     Metric  Mask       MTU      Window  IRTT
-   eth0    7402A8C0        7C02A8C0        0007    0       0       0       FFFFFFFF   00       0
-   eth0    7402A8C0        7202A8C0        0007    0       0       0       FFFFFFFF   00       0
-   */
-
-static void routeRead(unsigned int network, unsigned int netmask, RouteList &oneHopRoutes, RouteList &nextHopRoutes)
-{
-    TRACE_ENTER(); 
-
-    FILE *fil;
-    char line[1024];
-
-    fil=fopen("/proc/net/route","r");
-    while(fgets(line,sizeof(line)-1,fil))
-    {
-        char iface[16];
-        int flags,refcnt,use,metric,mtu,window;
-        unsigned int dst,nexthop,mask;
-        int rc;
-
-        rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
-
-        if (rc==10 && (ntohl(dst)!=ntohl(network)) && ((ntohl(dst) & ntohl(netmask)) == ntohl(network))) {
-            if (nexthop==0)
-                nextHopRoutes.push_back(Route(dst, nexthop, mask, iface));
-            else 
-                oneHopRoutes.push_back(Route(dst, nexthop, mask, iface));
-        }
-    }
-
-    fclose(fil);
-
-    TRACE_EXIT();
-    return;
-}
-
 #if DEBUG
 static void routeDump(const RouteList &r)
 {
@@ -182,6 +145,42 @@ typedef struct DetectorInit
 	struct in_addr localhost;
 
 } DetectorInit;
+
+/*
+   Iface   Destination     Gateway         Flags   RefCnt  Use     Metric  Mask       MTU      Window  IRTT
+   eth0    7402A8C0        7C02A8C0        0007    0       0       0       FFFFFFFF   00       0
+   eth0    7402A8C0        7202A8C0        0007    0       0       0       FFFFFFFF   00       0
+   */
+static void routeRead(unsigned int network, unsigned int netmask, RouteList &oneHopRoutes, RouteList &nextHopRoutes)
+{
+    TRACE_ENTER(); 
+
+    FILE *fil;
+    char line[1024];
+
+    fil=fopen("/proc/net/route","r");
+    while(fgets(line,sizeof(line)-1,fil))
+    {
+        char iface[16];
+        int flags,refcnt,use,metric,mtu,window;
+        unsigned int dst,nexthop,mask;
+        int rc;
+
+        rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
+
+        if (rc==10 && (ntohl(dst)!=ntohl(network)) && ((ntohl(dst) & ntohl(netmask)) == ntohl(network))) {
+            if (nexthop!=0)
+                nextHopRoutes.push_back(Route(ntohl(dst), ntohl(nexthop), ntohl(mask), iface));
+            else 
+                oneHopRoutes.push_back(Route(ntohl(dst), ntohl(nexthop), ntohl(mask), iface));
+        }
+    }
+
+    fclose(fil);
+
+    TRACE_EXIT();
+    return;
+}
 
 static void updateRoutes(detector *st, RouteList &oneHopRoutes, RouteList &nextHopRoutes)
 {
@@ -328,7 +327,9 @@ int main(int argc, char *argv[])
 	detinit.filterMask.s_addr=0;
 	detinit.localhost.s_addr=0;
 
-    while ((ch = getopt(argc, argv, "m:n:h:o:x:t:e:b:i:d:p:w:l:c?")) != -1)
+    detinit.constantUpdates=false;
+
+    while ((ch = getopt(argc, argv, "m:n:h:o:x:t:e:b:i:d:p:w:l:cu?")) != -1)
         switch (ch)
         {
             case 'm': if(-1 == inet_pton(AF_INET, optarg, &detinit.filterMask))
