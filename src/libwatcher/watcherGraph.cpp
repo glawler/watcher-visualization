@@ -297,14 +297,14 @@ void WatcherGraph::doMaintanence()
     Timestamp now(getCurrentTime());
 
     // remove edges that have expired
-    // remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
-    {
-        boost::graph_traits<Graph>::edge_iterator i, end, newEnd;
-        tie(i, end)=edges(theGraph);
-        newEnd=remove_if(i, end, GraphFunctors::EdgeExpired(theGraph, now));
-        for( ; newEnd!=end; ++newEnd)
-            remove_edge(*newEnd, theGraph);
-    }
+    remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
+    // {
+    //     boost::graph_traits<Graph>::edge_iterator i, end, newEnd;
+    //     tie(i, end)=edges(theGraph);
+    //     newEnd=remove_if(i, end, GraphFunctors::EdgeExpired(theGraph, now));
+    //     for( ; newEnd!=end; ++newEnd)
+    //         remove_edge(*newEnd, theGraph);
+    // }
 
     graph_traits<Graph>::edge_iterator ei, eEnd;
     for(tie(ei, eEnd)=edges(theGraph); ei!=eEnd; ++ei)
