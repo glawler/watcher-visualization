@@ -198,6 +198,7 @@ static void updateRoutes(detector *st, RouteList &oneHopRoutes, RouteList &nextH
     if (st->constantUpdates || oneHopRoutes!=st->prevOneHopRoutes) { 
         ConnectivityMessagePtr message(new ConnectivityMessage);
         message->layer=ONE_HOP_ROUTING_LAYER;
+        message->fromNodeID=boost::asio::ip::address_v4(st->localhost.s_addr); 
         for (RouteList::const_iterator i=oneHopRoutes.begin(); i!=oneHopRoutes.end(); i++) 
             if (st->iface != string(i->iface))
                 message->neighbors.push_back(boost::asio::ip::address_v4(i->dst));
@@ -208,6 +209,7 @@ static void updateRoutes(detector *st, RouteList &oneHopRoutes, RouteList &nextH
     if (st->constantUpdates || nextHopRoutes!=st->prevNextHopRoutes) { 
         ConnectivityMessagePtr message(new ConnectivityMessage);
         message->layer=ROUTING_LAYER;
+        message->fromNodeID=boost::asio::ip::address_v4(st->localhost.s_addr); 
         for (RouteList::const_iterator i=nextHopRoutes.begin(); i!=nextHopRoutes.end(); i++) 
             if (st->iface != string(i->iface))
                 message->neighbors.push_back(boost::asio::ip::address_v4(i->nexthop));
