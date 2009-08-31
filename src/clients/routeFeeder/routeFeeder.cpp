@@ -101,7 +101,7 @@ static void routeRead(unsigned int network, unsigned int netmask, RouteList &one
 
         rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
 
-        if (rc==10 && ((ntohl(dst) & ntohl(netmask)) == ntohl(network))) {
+        if (rc==10 && (ntohl(dst)!=ntohl(network)) && ((ntohl(dst) & ntohl(netmask)) == ntohl(network))) {
             if (nexthop==0)
                 nextHopRoutes.push_back(Route(dst, nexthop, mask, iface));
             else 
