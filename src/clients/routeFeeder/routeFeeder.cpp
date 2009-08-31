@@ -33,6 +33,7 @@
 #include <assert.h>
 
 #include <string>
+#include <vector>
 
 #include <libwatcher/client.h>                         // we are a client of the watcher.
 #include <libwatcher/edgeMessage.h>         // we may send edgeMessages to the watcher. 
@@ -53,15 +54,29 @@ static const char *rcsid __attribute__ ((unused)) = "$Id: routingfeeder.c,v 1.0 
  *  Copyright (C) 2006,2007,2008,2009 Sparta Inc.  Written by the NIP group, SRD, ISSO
  */
 
-typedef struct Route
+struct Route
 {
     unsigned int dst;
     unsigned int nexthop;
     unsigned int mask;
     char iface[16];
 
-    struct Route *next;
-} Route;
+    Route(int d, int n, int m, char i[16]) : dst(d), nexthop(n), mask(m) { memcpy(iface, i, sizeof(iface)); }
+    Route(const Route &cpy) { dst=cpy.dst; nexthop=cpy.nexthop; mask=cpy.mask; memcpy(iface, cpy.iface, sizeof(iface)); }
+    ~Route() { }
+    ostream &operator<<(ostream &out) { return out << "dst: " << dst << " nexthop: " << nexthop << " mask: " << mask << " iface: " << (const char *)iface; }
+
+};
+
+bool operator==(const Route &a, const Route &b) { 
+    return a.dst==b.dst && a.nexthop==b.nexthop && a.mask==b.mask && !strncmp(a.iface, b.iface, sizeof(a.iface)); 
+}
+
+bool operator<(const Route &a, const Route &b) { 
+    return a.dst < b.dst;
+}
+
+typedef vector<Route> RouteList; 
 
 /*
    Iface   Destination     Gateway         Flags   RefCnt  Use     Metric  Mask       MTU      Window  IRTT
@@ -69,13 +84,12 @@ typedef struct Route
    eth0    7402A8C0        7202A8C0        0007    0       0       0       FFFFFFFF   00       0
    */
 
-static Route *routeRead(unsigned int network, unsigned int netmask)
+static void routeRead(unsigned int network, unsigned int netmask, RouteList &oneHopRoutes, RouteList &nextHopRoutes)
 {
     TRACE_ENTER(); 
 
     FILE *fil;
     char line[1024];
-    Route *list=NULL,*nxt;
 
     fil=fopen("/proc/net/route","r");
     while(fgets(line,sizeof(line)-1,fil))
@@ -85,105 +99,38 @@ static Route *routeRead(unsigned int network, unsigned int netmask)
         unsigned int dst,nexthop,mask;
         int rc;
 
-
         rc=sscanf(line,"%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x\t%o\t%d\n",iface,&dst,&nexthop,&flags,&refcnt,&use,&metric,&mask,&mtu,&window);
 
-        if (rc==10 && ((ntohl(dst) & ntohl(netmask)) == ntohl(network)))
-        {
-            nxt = (Route*)malloc(sizeof(*nxt));
-            assert(nxt!=NULL);
-            nxt->dst=htonl(dst);
-            nxt->nexthop=htonl(nexthop);
-            nxt->mask=ntohl(mask); 
-            strncpy(nxt->iface,iface,sizeof(nxt->iface));
-
-            nxt->next=list;
-            list=nxt;
+        if (rc==10 && ((ntohl(dst) & ntohl(netmask)) == ntohl(network))) {
+            if (nexthop==0)
+                nextHopRoutes.push_back(Route(dst, nexthop, mask, iface));
+            else 
+                oneHopRoutes.push_back(Route(dst, nexthop, mask, iface));
         }
     }
 
     fclose(fil);
 
     TRACE_EXIT();
-    return list;
+    return;
 }
 
 #if DEBUG
-static void routeDump(Route *r)
+static void routeDump(const RouteList &r)
 {
     TRACE_ENTER();
-    while(r)
-    {
-        LOG_DEBUG(r->dst << " -> " << r->nexthop << " mask " << r->mask); 
-        r=r->next;
+
+    if (r.size()) {
+        for (RouteList::const_iterator i=r.begin(); i!=r.end(); i++) {
+            ostringstream out;
+            out << *i; 
+        }
+        LOG_DEBUG("%s", out.str().c_str());
     }
+        
     TRACE_EXIT();
 }
 #endif // DEBUG
-
-static int routeNumber(Route *r)
-{
-    TRACE_ENTER();
-    int count=0;
-
-    while(r)
-    {
-        count++;
-        r=r->next;
-    }
-
-    TRACE_EXIT_RET(count); 
-    return count;
-}
-
-static void routeFree(Route *r)
-{
-    TRACE_ENTER();
-    Route *d;
-
-    while(r)
-    {
-        d=r;
-        r=r->next;
-        free(d);
-    }
-    TRACE_EXIT();
-}
-
-static void routeInsert(Route **list, Route *n)
-{
-    TRACE_ENTER();
-    Route *nxt;
-    nxt = (Route*)malloc(sizeof(*nxt));
-    nxt->dst=n->dst;
-    nxt->nexthop=n->nexthop;
-    nxt->mask=n->mask;
-
-    nxt->next=*list;
-    *list=nxt;
-    TRACE_EXIT();
-}
-
-/* return first route to in list which has the same nexthop
-*/
-static Route *routeSearchNext(Route *list, Route *key)
-{
-    TRACE_ENTER();
-    Route *r;
-
-    r=list;
-    while(r)
-    {
-        if (r->nexthop==key->nexthop)
-        {
-            TRACE_EXIT_RET(r); 
-            return r;
-        }
-        r=r->next;
-    }
-    TRACE_EXIT_RET("NULL"); 
-    return NULL;
-}
 
 typedef struct detector
 {
@@ -205,7 +152,10 @@ typedef struct detector
 	struct in_addr filterMask;
 	struct in_addr localhost;
 
-    int useConnectivityMessage;
+    RouteList prevNextHopRoutes;   /* The previous next hop list we saw. */
+    RouteList prevOneHopRoutes;    /* the previous one hop list we saw. */
+
+    bool constantUpdates;
 
 } detector;
 
@@ -225,104 +175,50 @@ typedef struct DetectorInit
     string nexthoplayer;
     string onehoplayer;
 
+    bool constantUpdates;
+
 	struct in_addr filterNetwork;
 	struct in_addr filterMask;
 	struct in_addr localhost;
 
-    int useConnectivityMessage;
-
 } DetectorInit;
 
-static void updateRoutes(detector *st, Route *list)
+static void updateRoutes(detector *st, RouteList &oneHopRoutes, RouteList &nextHopRoutes)
 {
     TRACE_ENTER();
-    Route *r,*tmpNextHop=NULL;
-    Route *tmpOneHop=NULL;
 
-    /*
-     * 	for each edge in newlist,
-     * 	   	if there is not an edge in oldList or tmpList to nexthop, add it, and add to tmpList
-     */
     static vector<MessagePtr> messages;
-    ConnectivityMessagePtr nextHopMessage(new ConnectivityMessage);
-    ConnectivityMessagePtr oneHopMessage(new ConnectivityMessage); 
-    nextHopMessage->layer=ROUTING_LAYER;
-    oneHopMessage->layer=ONE_HOP_ROUTING_LAYER;
-
     if(!messages.empty())
         messages.clear(); 
 
-    for(r=list;r;r=r->next)
-    {
-        if (!st->iface.empty()) 
-            if (st->iface != string(r->iface))    /* if we're checking interfaces, and this route is on the wrong one...  */
-                continue;
+    bool sendMessage=false;
 
-#if 1
-        LOG_DEBUG("nexthop inserting us -> " << r->nexthop); 
-#endif
-
-        if ((r->nexthop!=0) && (routeSearchNext(tmpNextHop,r)==NULL))   /* if its multi-hop, and not on the next hop list */
-        {
-            if (!st->useConnectivityMessage)
-            {
-                EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
-                em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
-                em->node2=boost::asio::ip::address_v4(r->nexthop);
-                em->edgeColor=st->nexthopcolor;
-                em->expiration=Timestamp(st->reportperiod*1.5); 
-                em->width=st->routeedgewidth;
-                em->layer=ROUTING_LAYER; // GTL st->nexthoplayer;
-                em->addEdge=true;
-                em->bidirectional=false;
-                messages.push_back(em);
-            }
-            else
-                nextHopMessage->neighbors.push_back(boost::asio::ip::address_v4(r->nexthop));
-
-            routeInsert(&tmpNextHop,r);
-        }
-
-        if (r->nexthop==0)   /* if its a one-hop... */
-        {
-#if 1
-            LOG_DEBUG("onehop inserting us -> " << r->dst); 
-#endif
-            if (!st->useConnectivityMessage)
-            {
-                EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage); 
-                em->node1=boost::asio::ip::address_v4(htonl(st->localhost.s_addr)); 
-                em->node2=boost::asio::ip::address_v4(r->dst); 
-                em->edgeColor=st->onehopcolor;
-                em->expiration=Timestamp(st->reportperiod*1.5); 
-                em->width=st->routeedgewidth;
-                em->layer=ONE_HOP_ROUTING_LAYER; // GTL st->onehoplayer;
-                em->addEdge=true;
-                em->bidirectional=false;
-                messages.push_back(em);
-            }
-            else
-                oneHopMessage->neighbors.push_back(boost::asio::ip::address_v4(r->dst));
-
-            routeInsert(&tmpOneHop,r);
-        }
+    /*
+     * If constant updates is true, always send route list. Else only send when the new list differs from the old.
+     */
+    if (st->constantUpdates || oneHopRoutes!=st->prevOneHopRoutes) { 
+        ConnectivityMessagePtr message(new ConnectivityMessage);
+        message->layer=ONE_HOP_ROUTING_LAYER;
+        for (RouteList::const_iterator i=oneHopRoutes.begin(); i!=oneHopRoutes.end(); i++) 
+            if (st->iface != string(i->iface))
+                message->neighbors.push_back(boost::asio::ip::address_v4(i->dst));
+        st->prevOneHopRoutes=oneHopRoutes;
+        messages.push_back(message); 
+        sendMessage=true;
+    }
+    if (st->constantUpdates || nextHopRoutes!=st->prevNextHopRoutes) { 
+        ConnectivityMessagePtr message(new ConnectivityMessage);
+        message->layer=ROUTING_LAYER;
+        for (RouteList::const_iterator i=nextHopRoutes.begin(); i!=nextHopRoutes.end(); i++) 
+            if (st->iface != string(i->iface))
+                message->neighbors.push_back(boost::asio::ip::address_v4(i->nexthop));
+        st->prevNextHopRoutes=nextHopRoutes;
+        messages.push_back(message); 
+        sendMessage=true;
     }
 
-    if (st->useConnectivityMessage)
-    {
-        if (nextHopMessage->neighbors.size())
-            messages.push_back(nextHopMessage); 
-        if (oneHopMessage->neighbors.size())
-            messages.push_back(oneHopMessage); 
-    }
-
-    if (!messages.empty())
+    if (sendMessage)
         st->watcherClientPtr->sendMessages(messages); 
-    else
-        LOG_DEBUG("No routes found so no messages sent!"); 
-
-    routeFree(tmpNextHop);
-    routeFree(tmpOneHop);
 
     TRACE_EXIT();
 }
@@ -335,30 +231,20 @@ static void detectorSend(detector *st)
 {
     TRACE_ENTER();
 
-    Route *list;
+    RouteList oneHopRoutes, nextHopRoutes;
 
-    list=routeRead(st->filterNetwork.s_addr, st->filterMask.s_addr);
+    routeRead(st->filterNetwork.s_addr, st->filterMask.s_addr, oneHopRoutes, nextHopRoutes);
 
     long long int curtime;
     struct timeval tp;
     gettimeofday(&tp, NULL); 
-    curtime=(long long int)tp.tv_sec * 1000 + (long long int)tp.tv_usec/1000;
+    curtime=(long long int)tp.tv_sec*1000 + (long long int)tp.tv_usec/1000;
 
-    LOG_DEBUG("node= " << st->localhost.s_addr << " time= " << curtime << " numroutes= " << routeNumber(list)); 
-
-#ifdef DEBUG
-    LOG_DEBUG("old:"); 
-    routeDump(st->oldList);
-
-    LOG_DEBUG("new:");
-    routeDump(list);
-#endif
+    LOG_DEBUG("node= " << st->localhost.s_addr << " time= " << curtime << " routes= " << nextHopRoutes.size() << " onehoproutes= " << oneHopRoutes.size() << " totalroutes= " << nextHopRoutes.size()+oneHopRoutes.size());
 
     st->reportnum++;
 
-    updateRoutes(st,list);
-
-    routeFree(list);
+    updateRoutes(st,oneHopRoutes, nextHopRoutes);
 
     TRACE_EXIT();
 }
@@ -376,6 +262,7 @@ static detector *detectorInit(DetectorInit *detinit)
         return NULL;
 
     st->duration=detinit->duration;
+    st->constantUpdates=detinit->constantUpdates;
     st->reportperiod=detinit->reportperiod;
     st->reportnum=0;
     st->iface=detinit->iface;
@@ -391,8 +278,6 @@ static detector *detectorInit(DetectorInit *detinit)
 	st->filterNetwork.s_addr=detinit->filterNetwork.s_addr;
 	st->filterMask.s_addr=detinit->filterMask.s_addr;
 	st->localhost.s_addr=detinit->localhost.s_addr;
-
-    st->useConnectivityMessage=detinit->useConnectivityMessage;
 
     TRACE_EXIT();
     return st;
@@ -442,8 +327,6 @@ int main(int argc, char *argv[])
 	detinit.filterNetwork.s_addr=0;
 	detinit.filterMask.s_addr=0;
 	detinit.localhost.s_addr=0;
-
-    detinit.useConnectivityMessage=0; 
 
     while ((ch = getopt(argc, argv, "m:n:h:o:x:t:e:b:i:d:p:w:l:c?")) != -1)
         switch (ch)
@@ -496,9 +379,9 @@ int main(int argc, char *argv[])
             case 'l':
                       logPropsFile=string(optarg);
                       break;
-            case 'c':
-                    detinit.useConnectivityMessage=1;
-                    break;
+            case 'u': 
+                      detinit.constantUpdates=true;
+                      break;
             case '?':
             default:
                       fprintf(stderr,"%s - poll the linux routing table, and draw the routes in the watcher\n"
@@ -508,13 +391,11 @@ int main(int argc, char *argv[])
                               "-n network - the network used to filter the routes (ex. 192.168.1.0)\n" 
                               "-p milliseconds - specify the period to poll and report\n"
                               "-i interface - display only routes through this ethernet interface (or any if unspecified)\n"
-                              "-o color - onehop edge color\n"
                               "-e layer - onehop layer name\n"
-                              "-x color - nexthop edge color\n"
                               "-b layer - nexthop layer name\n"
                               "-t seconds - Run for this long, then exit\n"
-                              "-w width - make edges width pixels wide (default 15)\n" 
-                              "-c - send connectivity messages - let the GUI decide how to display the routes\n",
+                              "-u - send updates every period. If not set, only send updates when the routes change.\n",
+                              // "-c - use connectivity messages instead of edge messages (this disables width and color settings)\n"
                               basename(argv[0])
                              );
                       exit(1);
