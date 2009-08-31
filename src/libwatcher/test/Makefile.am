@@ -14,7 +14,7 @@ LIBS += $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 BUILT_SOURCES=\
 	test.log.properties 
 
-bin_PROGRAMS=testCC
+# bin_PROGRAMS=testCC
 
 check_PROGRAMS=\
 	testStartMessage \

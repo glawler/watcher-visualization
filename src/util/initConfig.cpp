@@ -63,37 +63,24 @@ bool watcher::initConfig(
             const char *configFileString)
 {
     int c;
-    // int digit_optind = 0;
-
     bool retVal=false;
+    static struct option long_options[] = {
+        {configFileString, required_argument, 0, configFileChar},
+        {0, 0, 0, 0}
+    };
 
-    while (true) 
-    {
-        // int this_option_optind = optind ? optind : 1;
-        int option_index = 0;
-        static struct option long_options[] = {
-            {configFileString, required_argument, 0, configFileChar},
-            {0, 0, 0, 0}
-        };
+    opterr=0; // Don't print message just because we see an option we don't understand.
+    optind=0; // reset so getopt starts at the start again.
 
-        opterr=0; // Don't print message just because we see an option we don't understand.
+    char args[] = { configFileChar, ':', '\0' };
 
-        char args[] = { configFileChar, ':', '\n' };
-        c = getopt_long(argc, argv, args, long_options, &option_index);
-
-        if (c == -1)
-            break;
-
-        if (c==configFileChar)
-        {
-            if(true==(retVal=readConfig(config, optarg)))
-            {
+    while(-1!=(c = getopt_long(argc, argv, args, long_options, NULL))) {
+        if (c==configFileChar) {
+            if(true==(retVal=readConfig(config, optarg))) {
                 configFilename=optarg;
                 break;
             }
         }
-
-        // else - ignore things we don't understand
     }
 
     // Last ditch: look for a file called `echo argv[0]`.cfg.
