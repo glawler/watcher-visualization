@@ -376,10 +376,19 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
 
     em->node1=ip::address_v4(communicationsNodeAddress(st->cs));
     em->node2=ip::address_v4(cn->addr);
-    em->edgeColor=Color::red;       // GTL may want to put this in a configuration file somewhere.
     em->expiration=Infinity;
-    em->layer=HIERARCHY_LAYER;
+
+    if (cn->type==COMMUNICATIONSNEIGHBOR_PARENT) {
+        em->edgeColor=Color::blue;
+        em->layer="hierachy";
+    }
+    else {
+        em->edgeColor=Color::red;
+        em->layer="hierarchy-neighbor";
+    }
+
     em->width=2.0;
+    em->fromNodeID=ip::address_v4(st->cs->localid);
 
 	switch(cn->state)
 	{
