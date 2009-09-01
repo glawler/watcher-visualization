@@ -378,13 +378,17 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
     em->node2=ip::address_v4(cn->addr);
     em->expiration=Infinity;
 
-    if (cn->type==COMMUNICATIONSNEIGHBOR_PARENT) {
+    if (cn->type==COMMUNICATIONSNEIGHBOR_PARENT || cn->type==COMMUNICATIONSNEIGHBOR_CHILD) {
         em->edgeColor=Color::blue;
-        em->layer="hierachy";
+        em->layer="hierachy-parents";
+    }
+    else if (cn->type==COMMUNICATIONSNEIGHBOR_CHILD) {
+        em->edgeColor=Color::orange;
+        em->layer="hierachy-children";
     }
     else {
         em->edgeColor=Color::red;
-        em->layer="hierarchy-neighbor";
+        em->layer="hierarchy-neighbors";
     }
 
     em->width=2.0;
