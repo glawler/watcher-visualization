@@ -114,7 +114,7 @@ namespace watcher
             boost::asio::io_service::strand theStrand; // for reading
             boost::asio::io_service::strand writeStrand;
 
-            typedef boost::array<char, 8192> IncomingBuffer;
+            typedef boost::array<char, 32768> IncomingBuffer;
             IncomingBuffer incomingBuffer;
 
             void handle_write_message(const boost::system::error_code& e, std::vector<event::MessagePtr> messages);
