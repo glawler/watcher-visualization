@@ -59,6 +59,7 @@
 #include "edgeMessage.h"
 #include "gpsMessage.h"
 #include "colorMessage.h"
+#include "colors.h"
 #include "client.h"
 #include "logger.h"
 
@@ -379,16 +380,16 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
     em->expiration=Infinity;
 
     if (cn->type==COMMUNICATIONSNEIGHBOR_PARENT) {
-        em->edgeColor=Color::blue;
-        em->layer="hierachy-parents";
+        em->edgeColor=colors::blue;
+        em->layer="hierachy_parents";
     }
     else if (cn->type==COMMUNICATIONSNEIGHBOR_CHILD) {
-        em->edgeColor=Color::orange;
-        em->layer="hierachy-children";
+        em->edgeColor=colors::orange;
+        em->layer="hierachy_children";
     }
     else {
-        em->edgeColor=Color::red;
-        em->layer="hierarchy-neighbors";
+        em->edgeColor=colors::red;
+        em->layer="hierarchy_neighbors";
     }
 
     em->width=2.0;

@@ -8,6 +8,7 @@
 
 #include "libwatcher/watcherSerialize.h"
 #include "libwatcher/watcherGraph.h"
+#include "libwatcher/colors.h"
 
 #include "logger.h"
 
@@ -15,6 +16,7 @@ using namespace std;
 using namespace boost;
 using namespace watcher;
 using namespace watcher::event;
+using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 using namespace boost::archive;
 
@@ -23,29 +25,29 @@ EdgeMessagePtr createEdgeMessage()
     LabelMessagePtr lmm(new LabelMessage); 
     lmm->label="I am the middle label"; 
     lmm->fontSize=15;
-    lmm->foreground=Color::black;
-    lmm->background=Color::white;
+    lmm->foreground=colors::black;
+    lmm->background=colors::white;
     lmm->expiration=5000;
 
     LabelMessagePtr lm1(new LabelMessage); 
     lm1->label="I am node1 label"; 
     lm1->fontSize=30;
-    lm1->foreground=Color::blue;
-    lm1->background=Color::red;
+    lm1->foreground=colors::blue;
+    lm1->background=colors::red;
     lm1->expiration=10000;
 
     // Test with a NULL MessageLabelPtr for the node2 label.
     // LabelMessagePtr lm2(new LabelMessage); 
     // lm2->label="I am node2 label"; 
     // lm2->fontSize=10;
-    // lm2->foreground=Color::red;
-    // lm2->background=Color::blue;
+    // lm2->foreground=red;
+    // lm2->background=blue;
     // lm2->expiration=7500;
 
     EdgeMessagePtr em(new EdgeMessage); 
     em->node1=asio::ip::address::from_string("192.168.1.101");
     em->node2=asio::ip::address::from_string("192.168.1.102");
-    em->edgeColor=Color::red;
+    em->edgeColor=colors::red;
     em->expiration=20000;
     em->width=15;
     em->layer=UNDEFINED_LAYER;
@@ -91,7 +93,7 @@ BOOST_AUTO_TEST_CASE( output_test )
     em->bidirectional=true;
     em->node1=asio::ip::address::from_string("192.168.1.103"); 
     em->node2=asio::ip::address::from_string("192.168.1.104"); 
-    em->edgeColor=Color::green;
+    em->edgeColor=colors::green;
     wg.updateGraph(em); 
 
     // add the same neighbors again...
@@ -105,7 +107,7 @@ BOOST_AUTO_TEST_CASE( output_test )
     // nsm->fromNodeID=asio::ip::address::from_string("192.168.1.100"); 
     // wg.updateGraph(nsm); 
   
-    ColorMessagePtr colm(new ColorMessage(Color::red, asio::ip::address::from_string("192.168.1.101"))); 
+    ColorMessagePtr colm(new ColorMessage(colors::red, asio::ip::address::from_string("192.168.1.101"))); 
     wg.updateGraph(colm); 
 
     cout << "Graph with edge message and neighbors:" << endl << wg << endl;

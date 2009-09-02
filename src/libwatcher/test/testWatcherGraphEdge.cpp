@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE( output_test )
 
     wge.displayInfo->loadConfiguration("Bogus Layer"); 
     wge.displayInfo->label="This is an edge. There are others like it, but this on is mine."; 
-    wge.displayInfo->color=Color::yellow;
+    wge.displayInfo->color=colors::yellow;
     wge.displayInfo->width=12.232412;
     wge.expiration=10000;
 

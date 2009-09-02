@@ -24,6 +24,7 @@
 #include "watcherSerialize.h"
 #include "labelMessage.h"
 #include "messageTypesAndVersions.h"
+#include "colors.h"
 
 using namespace std;
 
@@ -35,8 +36,8 @@ namespace watcher {
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
             label(label_),
             fontSize(fontSize_),
-            foreground(Color::white),
-            background(Color::black),
+            foreground(colors::white),
+            background(colors::black),
             expiration(0),
             addLabel(true),
             layer(),
@@ -52,8 +53,8 @@ namespace watcher {
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
             label(label_),
             fontSize(fontSize_),
-            foreground(Color::white),
-            background(Color::black),
+            foreground(colors::white),
+            background(colors::black),
             expiration(0),
             addLabel(true),
             layer(),
@@ -70,8 +71,8 @@ namespace watcher {
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
             label(label_),
             fontSize(fontSize_),
-            foreground(Color::white),
-            background(Color::black),
+            foreground(colors::white),
+            background(colors::black),
             expiration(0),
             addLabel(true),
             layer(),

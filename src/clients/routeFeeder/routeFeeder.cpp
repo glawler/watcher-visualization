@@ -317,9 +317,9 @@ int main(int argc, char *argv[])
 
     DetectorInit detinit;
     detinit.iface="";
-    detinit.onehopcolor=Color::green;
+    detinit.onehopcolor=colors::green;
     detinit.onehoplayer="One Hop Routing";
-    detinit.nexthopcolor=Color::blue;
+    detinit.nexthopcolor=colors::blue;
     detinit.nexthoplayer="Network Routing"; 
     detinit.reportperiod=2000;
     detinit.duration=0;

@@ -2,7 +2,7 @@
 include $(srcdir)/../Makefile.clients
 
 CXXFLAGS+=-I/usr/include/libxml2 
-LDADD=-lxml2
+LDADD+=-lxml2
 
 CPPFLAGS += @BOOST_CPPFLAGS@
 LDFLAGS += @BOOST_LDFLAGS@

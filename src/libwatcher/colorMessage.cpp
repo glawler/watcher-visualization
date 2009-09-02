@@ -24,17 +24,19 @@
 #include "watcherSerialize.h"
 #include "watcherGlobalFunctions.h" // for address serialization
 #include "colorMessage.h"
+#include "colors.h"
 
 using namespace std;
 using namespace boost;
 
 namespace watcher {
+    using namespace colors;
     namespace event {
         INIT_LOGGER(ColorMessage, "Message.ColorMessage");
 
         ColorMessage::ColorMessage() : 
             Message(COLOR_MESSAGE_TYPE, COLOR_MESSAGE_VERSION),
-            color(Color::black),
+            color(black),
             flashPeriod(0),
             expiration(0),
             layer(PHYSICAL_LAYER)

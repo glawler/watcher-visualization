@@ -14,6 +14,7 @@ using namespace std;
 using namespace boost;
 using namespace watcher;
 using namespace watcher::event;
+using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 
 EdgeMessagePtr createEdgeMessage()
@@ -22,29 +23,29 @@ EdgeMessagePtr createEdgeMessage()
     LabelMessagePtr lmm(new LabelMessage); 
     lmm->label="I am the middle label"; 
     lmm->fontSize=15;
-    lmm->foreground=Color::black;
-    lmm->background=Color::white;
+    lmm->foreground=black;
+    lmm->background=white;
     lmm->expiration=5000;
 
     LabelMessagePtr lm1(new LabelMessage); 
     lm1->label="I am node1 label"; 
     lm1->fontSize=30;
-    lm1->foreground=Color::blue;
-    lm1->background=Color::red;
+    lm1->foreground=blue;
+    lm1->background=red;
     lm1->expiration=10000;
 
     // Test with a NULL MessageLabelPtr for the node2 label.
     // LabelMessagePtr lm2(new LabelMessage); 
     // lm2->label="I am node2 label"; 
     // lm2->fontSize=10;
-    // lm2->foreground=Color::red;
-    // lm2->background=Color::blue;
+    // lm2->foreground=red;
+    // lm2->background=blue;
     // lm2->expiration=7500;
 
     EdgeMessagePtr em(new EdgeMessage); 
     em->node1=NodeIdentifier::from_string("192.168.1.1");
     em->node2=NodeIdentifier::from_string("192.168.1.2");
-    em->edgeColor=Color::red;
+    em->edgeColor=red;
     em->expiration=20000;
     em->width=15;
     em->layer=UNDEFINED_LAYER;

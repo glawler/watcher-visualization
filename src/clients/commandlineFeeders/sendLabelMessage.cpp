@@ -75,6 +75,7 @@
 #include <libwatcher/client.h>
 #include <libwatcher/labelMessage.h>
 #include <libwatcher/sendMessageHandler.h>
+#include <libwatcher/colors.h>
 
 using namespace std;
 using namespace watcher;
@@ -119,8 +120,8 @@ int main(int argc, char **argv)
     string logProps("sendMessage.log.properties");
     unsigned int fontSize=0;
     asio::ip::address address;
-    Color fg=Color::black;
-    Color bg=Color::white;
+    Color fg=colors::black;
+    Color bg=colors::white;
     uint32_t expiration=10000;
     float lat=0.0, lng=0.0, alt=0.0;
     bool remove=false;

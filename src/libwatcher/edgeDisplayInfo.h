@@ -42,7 +42,7 @@ namespace watcher
             EdgeDisplayInfo();
             virtual ~EdgeDisplayInfo(); 
 
-            watcher::event::Color color;        ///< Color of the edge line
+            watcher::Color color;        ///< Color of the edge line
             float width;                        ///< width of the edge line
            
             bool flash;                         ///< To flash or not to flash, that is the question
@@ -53,7 +53,7 @@ namespace watcher
             std::string label;                  ///< written next to the edge, not used often
             std::string labelFont; 
             double labelPointSize; 
-            watcher::event::Color labelColor;
+            watcher::Color labelColor;
 
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 

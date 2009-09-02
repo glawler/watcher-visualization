@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 
     bool tailSet=false;
 
-    Color edgeColor=Color::red;
+    Color edgeColor=colors::red;
     unsigned int width=15;
     GUILayer layer=UNDEFINED_LAYER;
     bool bidirectional=false;

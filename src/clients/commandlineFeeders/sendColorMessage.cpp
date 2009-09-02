@@ -81,6 +81,7 @@
 #include <libwatcher/client.h>
 #include <libwatcher/colorMessage.h>
 #include <libwatcher/watcherColors.h>
+#include <libwatcher/colors.h>
 #include <libwatcher/sendMessageHandler.h>
 
 using namespace std;
@@ -111,7 +112,7 @@ int main(int argc, char **argv)
     TRACE_ENTER();
 
     int c;
-    Color color(Color::red);
+    Color color(colors::red);
     string server;
     asio::ip::address nodeAddr=boost::asio::ip::address::from_string("127.0.0.1"); 
     Timestamp flashTime=0;

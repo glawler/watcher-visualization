@@ -7,11 +7,13 @@
 #include <boost/test/unit_test.hpp>
 
 #include <libwatcher/labelMessage.h>
+#include <libwatcher/colors.h>
 #include "logger.h"
 
 using namespace std;
 using namespace boost;
 using namespace watcher::event;
+using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 
 BOOST_AUTO_TEST_CASE( ctor_test )
@@ -22,8 +24,8 @@ BOOST_AUTO_TEST_CASE( ctor_test )
     lm1.label="Hello world";
     lm1.fontSize=60;
     lm1.fromNodeID=asio::ip::address_v4((0x7f000001));   // 127.0.0.1
-    lm1.foreground=Color::black;
-    lm1.background=Color::white;
+    lm1.foreground=black;
+    lm1.background=white;
     lm1.expiration=10;
     lm1.addLabel=true;
 
@@ -57,8 +59,8 @@ BOOST_AUTO_TEST_CASE( archive_test )
     lmOut.label="Hello world";
     lmOut.fontSize=60;
     lmOut.fromNodeID=asio::ip::address::from_string("127.0.0.1"); 
-    lmOut.foreground=Color::black;
-    lmOut.background=Color::white;
+    lmOut.foreground=black;
+    lmOut.background=white;
     lmOut.expiration=10;
     lmOut.addLabel=false;       // Normally you would not mix address, and (lat,lng, alt), but 
     lmOut.lat=1.23456789;       // for testing it's ok. 
@@ -134,8 +136,8 @@ BOOST_AUTO_TEST_CASE( output_test )
     lmp1->label="Hello world";
     lmp1->fontSize=60;
     lmp1->fromNodeID=boost::asio::ip::address::from_string("127.0.0.1");  
-    lmp1->foreground=Color::black;
-    lmp1->background=Color::white;
+    lmp1->foreground=black;
+    lmp1->background=white;
     lmp1->expiration=10;
 
     LOG_DEBUG("*lmp1 :" << *lmp1); 

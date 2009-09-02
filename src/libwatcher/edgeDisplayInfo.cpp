@@ -18,10 +18,12 @@
 
 #include "edgeDisplayInfo.h"
 #include "singletonConfig.h" 
+#include "colors.h"
 #include "messageTypesAndVersions.h"
 
 using namespace watcher;
 using namespace watcher::event;
+using namespace watcher::colors;
 using namespace libconfig; 
 using namespace std;
 
@@ -29,7 +31,7 @@ INIT_LOGGER(EdgeDisplayInfo, "DisplayInfo.EdgeDisplayInfo");
 
 EdgeDisplayInfo::EdgeDisplayInfo() :
     DisplayInfo("edge"),
-    color(Color::blue),
+    color(blue),
     width(30),
     flash(false), 
     flashInterval(500),
@@ -38,7 +40,7 @@ EdgeDisplayInfo::EdgeDisplayInfo() :
     label("none"),
     labelFont("Helvetica"),
     labelPointSize(12.5),
-    labelColor(Color::blue)
+    labelColor(blue)
 {
     TRACE_ENTER();
 
@@ -73,7 +75,7 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         edgeSetting.add(key, Setting::TypeString)=strVal;
     label=strVal;
 
-    strVal=Color::blue.toString(); 
+    strVal=blue.toString(); 
     key="color"; 
     if (!edgeSetting.lookupValue(key, strVal))
         edgeSetting.add(key, Setting::TypeString)=strVal;
@@ -109,7 +111,7 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         edgeSetting.add(key, Setting::TypeFloat)=floatVal;
     labelPointSize=floatVal;
 
-    strVal=Color::blue.toString(); 
+    strVal=blue.toString(); 
     key="labelColor"; 
     if (!edgeSetting.lookupValue(key, strVal))
         edgeSetting.add(key, Setting::TypeString)=strVal;

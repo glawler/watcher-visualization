@@ -27,6 +27,7 @@
 #include <string>
 #include "watcherTypes.h"
 #include "watcherColors.h"
+#include "colors.h"
 #include "labelMessage.h"
 #include "displayInfo.h"
 
@@ -43,8 +44,8 @@ namespace watcher
             LabelDisplayInfo();
             virtual ~LabelDisplayInfo(); 
 
-            watcher::event::Color backgroundColor;
-            watcher::event::Color foregroundColor;
+            watcher::Color backgroundColor;
+            watcher::Color foregroundColor;
 
             std::string fontName; ///< not really supported
             float pointSize;

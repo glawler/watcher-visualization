@@ -31,6 +31,7 @@
 #include "edgeMessage.h"
 #include "messageTypesAndVersions.h"
 #include "watcherGlobalFunctions.h"         // for address serialize(). 
+#include "colors.h"
 
 using namespace std;
 using namespace boost;
@@ -71,7 +72,7 @@ namespace watcher {
             Message(EDGE_MESSAGE_TYPE, EDGE_MESSAGE_VERSION),
             node1(),
             node2(),
-            edgeColor(Color::blue),
+            edgeColor(colors::blue),
             expiration(Infinity), 
             width(2.0),
             layer(PHYSICAL_LAYER),

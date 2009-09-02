@@ -4,8 +4,8 @@ CXXFLAGS += -Wno-deprecated
 
 DEFS += -DBOOST_TEST_DYN_LINK
 
-LDADD = $(top_srcdir)/libwatcher/libwatcher.a
-LDADD += $(top_srcdir)/libwatcher/libwatchermsg.la
+LDADD = $(top_srcdir)/libwatcher/libwatchermsg.la
+LDADD += $(top_srcdir)/libwatcher/libwatcher.a
 LDADD += $(top_srcdir)/util/libwatcherutils.a
 LDADD += $(top_srcdir)/logger/liblogger.la
 

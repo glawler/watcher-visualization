@@ -25,10 +25,12 @@
 #include <boost/foreach.hpp>
 #include "singletonConfig.h"
 #include "nodeDisplayInfo.h"
+#include "colors.h"
 
 using namespace std;
 using namespace watcher;
-using namespace watcher::event;     // for Color
+using namespace watcher::event;
+using namespace watcher::colors;
 using namespace libconfig;
 using namespace boost; 
 
@@ -52,8 +54,8 @@ NodeDisplayInfo::NodeDisplayInfo() :
     label(NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET)),
     labelFont("Helvetica"), 
     labelPointSize(12.5),
-    labelColor(Color::blue),
-    color(Color::red)
+    labelColor(blue),
+    color(red)
 {
     TRACE_ENTER();
 
@@ -123,7 +125,7 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
     else
         label=strVal;
 
-    strVal=Color::red.toString(); 
+    strVal=red.toString(); 
     key="color"; 
     if (!nodeSetting.lookupValue(key, strVal))
         nodeSetting.add(key, Setting::TypeString)=strVal;
@@ -198,7 +200,7 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         nodeSetting.add(key, Setting::TypeFloat)=floatVal;
     labelPointSize=floatVal;
 
-    strVal=Color::blue.toString(); 
+    strVal=blue.toString(); 
     key="labelColor"; 
     if (!nodeSetting.lookupValue(key, strVal))
         nodeSetting.add(key, Setting::TypeString)=strVal;

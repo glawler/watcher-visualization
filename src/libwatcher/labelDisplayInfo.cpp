@@ -21,6 +21,7 @@
 
 using namespace watcher;
 using namespace watcher::event;
+using namespace watcher::colors;
 using namespace libconfig;
 using namespace std;
 
@@ -28,8 +29,8 @@ INIT_LOGGER(LabelDisplayInfo, "DisplayInfo.LabelDisplayInfo");
 
 LabelDisplayInfo::LabelDisplayInfo() : 
     DisplayInfo("label"),
-    backgroundColor(Color::black),
-    foregroundColor(Color::white),
+    backgroundColor(black),
+    foregroundColor(white),
     fontName("Times New Roman"),
     pointSize(20), 
     labelText(""),

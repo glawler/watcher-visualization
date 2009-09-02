@@ -29,6 +29,7 @@
 #include "watcherTypes.h"               // for NodeIdentifier
 #include "messageTypesAndVersions.h"    // for GUILayer
 #include "watcherColors.h"
+#include "colors.h"
 #include "displayInfo.h"
 
 namespace watcher
@@ -87,9 +88,9 @@ namespace watcher
             std::string label;
             std::string labelFont;
             double labelPointSize;
-            watcher::event::Color labelColor;
+            watcher::Color labelColor;
 
-            watcher::event::Color color; 
+            watcher::Color color; 
 
             /* The configuration interface. */
 

@@ -11,7 +11,9 @@ libwatcher_a_include_HEADERS=\
 	messageHandler.h \
 	sendMessageHandler.h \
 	watcherTypes.h \
-	watcherGlobalFunctions.h
+	watcherGlobalFunctions.h \
+	watcherColors.h \
+	colors.h
 
 lib_LTLIBRARIES=libwatchermsg.la
 libwatchermsg_la_includedir=$(includedir)/libwatcher
@@ -24,13 +26,13 @@ libwatchermsg_la_include_HEADERS=\
 	gpsMessage.h \
 	labelMessage.h \
 	messageTypesAndVersions.h \
-	nodeStatusMessage.h \
-	watcherColors.h
+	nodeStatusMessage.h 
 	
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = watcher.pc watchermsg.pc
 
-libwatchermsg_la_SOURCES=message.h message.cpp \
+libwatchermsg_la_SOURCES=\
+	message.h message.cpp \
 	colorMessage.cpp \
 	connectivityMessage.cpp \
 	dataPointMessage.cpp \
@@ -44,8 +46,7 @@ libwatchermsg_la_SOURCES=message.h message.cpp \
 	speedWatcherMessage.cpp \
 	startWatcherMessage.cpp \
 	stopWatcherMessage.cpp \
-	testMessage.cpp \
-	watcherColors.cpp
+	testMessage.cpp 
 
 libwatcher_a_SOURCES= \
 	client.h client.cpp \
@@ -69,4 +70,6 @@ libwatcher_a_SOURCES= \
 	watcherGraphNode.cpp \
 	watcherRegion.h watcherRegion.cpp \
 	watcherdAPIMessageHandler.h watcherdAPIMessageHandler.cpp \
-	watcherTypes.cpp
+	watcherTypes.cpp \
+	watcherColors.cpp \
+	colors.cpp
