@@ -77,7 +77,16 @@ namespace watcher {
     bool Color::fromString(const std::string &color)
     {
         // GTL - this may not be a great, read efficient, idea....
-        if(color=="snow") *this=snow;
+        // Should put them all into a BST, and query that.
+        if(color=="white") *this=white;
+        else if(color=="black") *this=black;
+        else if(color=="blue") *this=blue;
+        else if(color=="red") *this=red;
+        else if(color=="green") *this=green;
+        else if(color=="yellow") *this=yellow;
+        else if(color=="orange") *this=orange;
+        else if(color=="purple") *this=purple;
+        else if(color=="snow") *this=snow;
         else if(color=="snow2") *this=snow2;
         else if(color=="snow3") *this=snow3;
         else if(color=="snow4") *this=snow4;
@@ -126,8 +135,6 @@ namespace watcher {
         else if(color=="lavender") *this=lavender;
         else if(color=="lavenderblush") *this=lavenderblush;
         else if(color=="mistyrose") *this=mistyrose;
-        else if(color=="white") *this=white;
-        else if(color=="black") *this=black;
         else if(color=="darkslategray") *this=darkslategray;
         else if(color=="dimgray") *this=dimgray;
         else if(color=="slategray") *this=slategray;
@@ -143,7 +150,6 @@ namespace watcher {
         else if(color=="lightslateblue") *this=lightslateblue;
         else if(color=="mediumblue") *this=mediumblue;
         else if(color=="royalblue") *this=royalblue;
-        else if(color=="blue") *this=blue;
         else if(color=="dodgerblue") *this=dodgerblue;
         else if(color=="deepskyblue") *this=deepskyblue;
         else if(color=="skyblue") *this=skyblue;
@@ -161,7 +167,6 @@ namespace watcher {
         else if(color=="cadetblue") *this=cadetblue;
         else if(color=="mediumaquamarine") *this=mediumaquamarine;
         else if(color=="aquamarine") *this=aquamarine;
-        else if(color=="green") *this=green;
         else if(color=="darkgreen") *this=darkgreen;
         else if(color=="darkolivegreen") *this=darkolivegreen;
         else if(color=="darkseagreen") *this=darkseagreen;
@@ -183,7 +188,6 @@ namespace watcher {
         else if(color=="palegoldenrod") *this=palegoldenrod;
         else if(color=="lightgoldenrodyellow") *this=lightgoldenrodyellow;
         else if(color=="lightyellow") *this=lightyellow;
-        else if(color=="yellow") *this=yellow;
         else if(color=="gold") *this=gold;
         else if(color=="lightgoldenrod") *this=lightgoldenrod;
         else if(color=="goldenrod") *this=goldenrod;
@@ -204,13 +208,11 @@ namespace watcher {
         else if(color=="darksalmon") *this=darksalmon;
         else if(color=="salmon") *this=salmon;
         else if(color=="lightsalmon") *this=lightsalmon;
-        else if(color=="orange") *this=orange;
         else if(color=="darkorange") *this=darkorange;
         else if(color=="coral") *this=coral;
         else if(color=="lightcoral") *this=lightcoral;
         else if(color=="tomato") *this=tomato;
         else if(color=="orangered") *this=orangered;
-        else if(color=="red") *this=red;
         else if(color=="hotpink") *this=hotpink;
         else if(color=="deeppink") *this=deeppink;
         else if(color=="pink") *this=pink;
@@ -226,7 +228,6 @@ namespace watcher {
         else if(color=="darkorchid") *this=darkorchid;
         else if(color=="darkviolet") *this=darkviolet;
         else if(color=="blueviolet") *this=blueviolet;
-        else if(color=="purple") *this=purple;
         else if(color=="mediumpurple") *this=mediumpurple;
         else if(color=="thistle") *this=thistle;
         else
@@ -298,7 +299,15 @@ namespace watcher {
     std::string Color::toString(const Color &c)
     {   
         // GTL - this may not be a great, read efficient, idea....
-        if(c==snow) return string("snow");
+        // Should put them all into a BST, and query that.
+        if(c==white) return string("white");
+        else if(c==black) return string("black");
+        else if(c==blue) return string("blue");
+        else if(c==green) return string("green");
+        else if(c==red) return string("red");
+        else if(c==yellow) return string("yellow");
+        else if(c==orange) return string("orange");
+        else if(c==snow) return string("snow");
         else if(c==snow2) return string("snow2");
         else if(c==snow3) return string("snow3");
         else if(c==snow4) return string("snow4");
@@ -347,8 +356,6 @@ namespace watcher {
         else if(c==lavender) return string("lavender");
         else if(c==lavenderblush) return string("lavenderblush");
         else if(c==mistyrose) return string("mistyrose");
-        else if(c==white) return string("white");
-        else if(c==black) return string("black");
         else if(c==darkslategray) return string("darkslategray");
         else if(c==dimgray) return string("dimgray");
         else if(c==slategray) return string("slategray");
@@ -364,7 +371,6 @@ namespace watcher {
         else if(c==lightslateblue) return string("lightslateblue");
         else if(c==mediumblue) return string("mediumblue");
         else if(c==royalblue) return string("royalblue");
-        else if(c==blue) return string("blue");
         else if(c==dodgerblue) return string("dodgerblue");
         else if(c==deepskyblue) return string("deepskyblue");
         else if(c==skyblue) return string("skyblue");
@@ -382,7 +388,6 @@ namespace watcher {
         else if(c==cadetblue) return string("cadetblue");
         else if(c==mediumaquamarine) return string("mediumaquamarine");
         else if(c==aquamarine) return string("aquamarine");
-        else if(c==green) return string("green");
         else if(c==darkgreen) return string("darkgreen");
         else if(c==darkolivegreen) return string("darkolivegreen");
         else if(c==darkseagreen) return string("darkseagreen");
@@ -404,7 +409,6 @@ namespace watcher {
         else if(c==palegoldenrod) return string("palegoldenrod");
         else if(c==lightgoldenrodyellow) return string("lightgoldenrodyellow");
         else if(c==lightyellow) return string("lightyellow");
-        else if(c==yellow) return string("yellow");
         else if(c==gold) return string("gold");
         else if(c==lightgoldenrod) return string("lightgoldenrod");
         else if(c==goldenrod) return string("goldenrod");
@@ -425,13 +429,11 @@ namespace watcher {
         else if(c==darksalmon) return string("darksalmon");
         else if(c==salmon) return string("salmon");
         else if(c==lightsalmon) return string("lightsalmon");
-        else if(c==orange) return string("orange");
         else if(c==darkorange) return string("darkorange");
         else if(c==coral) return string("coral");
         else if(c==lightcoral) return string("lightcoral");
         else if(c==tomato) return string("tomato");
         else if(c==orangered) return string("orangered");
-        else if(c==red) return string("red");
         else if(c==hotpink) return string("hotpink");
         else if(c==deeppink) return string("deeppink");
         else if(c==pink) return string("pink");
