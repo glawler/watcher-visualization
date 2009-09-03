@@ -150,7 +150,7 @@ namespace watcher {
 
             Message::toStream(out);
             out << " label: " << label;
-            if (fromNodeID.to_v4().to_ulong()==0)
+            if (lat!=0.0 && lng!=0.0)
                 out << " (floating) ";
             else
                 out << " (attached) "; 
