@@ -69,49 +69,39 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
 
     SingletonConfig::lock();
 
-    string strVal="none"; 
     string key="label"; 
-    if (!edgeSetting.lookupValue(key, strVal))
-        edgeSetting.add(key, Setting::TypeString)=strVal;
-    label=strVal;
+    if (!edgeSetting.lookupValue(key, label))
+        edgeSetting.add(key, Setting::TypeString)=label;
 
-    strVal=blue.toString(); 
+    string strVal=color.toString(); 
     key="color"; 
     if (!edgeSetting.lookupValue(key, strVal))
         edgeSetting.add(key, Setting::TypeString)=strVal;
     color.fromString(strVal); 
 
-    float floatVal=15;
     key="width"; 
-    if (!edgeSetting.lookupValue(key, floatVal))
-        edgeSetting.add(key, Setting::TypeFloat)=floatVal;
-    width=floatVal;
+    if (!edgeSetting.lookupValue(key, width))
+        edgeSetting.add(key, Setting::TypeFloat)=width;
 
-    bool boolVal=false;
     key="flash"; 
-    if (!edgeSetting.lookupValue(key, boolVal))
-        edgeSetting.add(key, Setting::TypeBoolean)=boolVal;
-    flash=boolVal;
+    if (!edgeSetting.lookupValue(key, flash))
+        edgeSetting.add(key, Setting::TypeBoolean)=flash;
 
-    int intVal=100;
+    int intVal=flashInterval;
     key="flashInterval"; 
     if (!edgeSetting.lookupValue(key, intVal))
         edgeSetting.add(key, Setting::TypeInt)=intVal;
-    flashInterval=intVal;
+    intVal=flashInterval;
 
-    strVal=labelFont;
     key="labelFont";
-    if (!edgeSetting.lookupValue(key, strVal))
-        edgeSetting.add(key, Setting::TypeString)=strVal;
-    labelFont=strVal;
+    if (!edgeSetting.lookupValue(key, labelFont))
+        edgeSetting.add(key, Setting::TypeString)=labelFont;
 
-    floatVal=labelPointSize;
     key="labelPointSize"; 
-    if (!edgeSetting.lookupValue(key, floatVal))
-        edgeSetting.add(key, Setting::TypeFloat)=floatVal;
-    labelPointSize=floatVal;
+    if (!edgeSetting.lookupValue(key, labelPointSize))
+        edgeSetting.add(key, Setting::TypeFloat)=labelPointSize;
 
-    strVal=blue.toString(); 
+    strVal=labelColor.toString(); 
     key="labelColor"; 
     if (!edgeSetting.lookupValue(key, strVal))
         edgeSetting.add(key, Setting::TypeString)=strVal;

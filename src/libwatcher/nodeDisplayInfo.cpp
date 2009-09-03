@@ -113,92 +113,61 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
 
     SingletonConfig::lock();
 
-    bool boolVal;
     string strVal, key;
-    int intVal;
-    float floatVal;
 
-    strVal=NodeDisplayInfo::labelDefault2String(LAST_OCTET); 
     key="label"; 
-    if (!nodeSetting.lookupValue(key, strVal))
-        nodeSetting.add(key, Setting::TypeString)=strVal;
-    else
-        label=strVal;
+    if (!nodeSetting.lookupValue(key, label))
+        nodeSetting.add(key, Setting::TypeString)=label;
 
-    strVal=red.toString(); 
+    strVal=color.toString();
     key="color"; 
     if (!nodeSetting.lookupValue(key, strVal))
         nodeSetting.add(key, Setting::TypeString)=strVal;
-    else
-        color.fromString(strVal); 
+    color.fromString(strVal); 
 
     strVal=NodeDisplayInfo::nodeShapeToString(CIRCLE);
     key="shape"; 
     if (!nodeSetting.lookupValue(key, strVal))
         nodeSetting.add(key, Setting::TypeString)=strVal;
-    else
-        shape=NodeDisplayInfo::stringToNodeShape(strVal); 
+    shape=NodeDisplayInfo::stringToNodeShape(strVal); 
 
-    boolVal=false;
     key="sparkle"; 
-    if (!nodeSetting.lookupValue(key, boolVal))
-        nodeSetting.add(key, Setting::TypeBoolean)=boolVal;
-    else
-        sparkle=boolVal;
+    if (!nodeSetting.lookupValue(key, sparkle))
+        nodeSetting.add(key, Setting::TypeBoolean)=sparkle;
 
-    boolVal=false;
     key="spin"; 
-    if (!nodeSetting.lookupValue(key, boolVal))
-        nodeSetting.add(key, Setting::TypeBoolean)=boolVal;
-    else
-        spin=boolVal;
+    if (!nodeSetting.lookupValue(key, spin))
+        nodeSetting.add(key, Setting::TypeBoolean)=spin;
 
-    intVal=100;
     key="spinTimeout"; 
-    if (!nodeSetting.lookupValue(key, intVal)) 
-        nodeSetting.add(key, Setting::TypeInt)=intVal;  // GTL possible 64 bit issue here, has Int64 as a type
-    else
-        spinTimeout=intVal;
+    if (!nodeSetting.lookupValue(key, spinTimeout)) 
+        nodeSetting.add(key, Setting::TypeInt)=spinTimeout; 
 
-    floatVal=5.0; 
     key="spinIncrement"; 
-    if (!nodeSetting.lookupValue(key, floatVal))
-        nodeSetting.add(key, Setting::TypeFloat)=floatVal;
-    else
-        spinIncrement=floatVal;
+    if (!nodeSetting.lookupValue(key, spinIncrement))
+        nodeSetting.add(key, Setting::TypeFloat)=spinIncrement;
 
-    boolVal=false;
     key="flash"; 
-    if (!nodeSetting.lookupValue(key, boolVal))
-        nodeSetting.add(key, Setting::TypeBoolean)=boolVal;
-    else
-        flash=boolVal;
+    if (!nodeSetting.lookupValue(key, flash))
+        nodeSetting.add(key, Setting::TypeBoolean)=flash;
 
-    intVal=500; 
+    int intVal=(int)flashInterval;
     key="flashInterval"; 
     if (!nodeSetting.lookupValue(key, intVal))
         nodeSetting.add(key, Setting::TypeInt)=intVal;
-    else
-        flashInterval=intVal;
+    flashInterval=intVal;
 
-    floatVal=1.0; 
     key="size"; 
-    if (!nodeSetting.lookupValue(key, floatVal))
-        nodeSetting.add(key, Setting::TypeFloat)=floatVal;
-    else
-        size=floatVal;
+    if (!nodeSetting.lookupValue(key, size))
+        nodeSetting.add(key, Setting::TypeFloat)=size;
 
-    strVal=labelFont;
     key="labelFont";
-    if (!nodeSetting.lookupValue(key, strVal))
-        nodeSetting.add(key, Setting::TypeString)=strVal;
-    labelFont=strVal;
+    if (!nodeSetting.lookupValue(key, labelFont))
+        nodeSetting.add(key, Setting::TypeString)=labelFont;
 
-    floatVal=labelPointSize;
     key="labelPointSize"; 
-    if (!nodeSetting.lookupValue(key, floatVal))
-        nodeSetting.add(key, Setting::TypeFloat)=floatVal;
-    labelPointSize=floatVal;
+    if (!nodeSetting.lookupValue(key, labelPointSize))
+        nodeSetting.add(key, Setting::TypeFloat)=labelPointSize;
 
     strVal=blue.toString(); 
     key="labelColor"; 
