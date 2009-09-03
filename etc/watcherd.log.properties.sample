@@ -29,16 +29,16 @@ log4j.rootLogger=debug, flog, stdout
 # log4j.logger.Watcherd=trace
 # log4j.logger.WatcherGraph=trace
 # log4j.logger.DisplayInfo=trace
-# log4j.logger.LayerDisplayInfo=trace
-# log4j.logger.NodeDisplayInfo=trace
-# log4j.logger.EdgeDisplayInfo=trace
-# log4j.logger.LabelDisplayInfo=trace
-# log4j.logger.Database.SqliteDatabase=info
+# log4j.logger.DisplayInfo.LayerDisplayInfo=trace
+# log4j.logger.DisplayInfo.NodeDisplayInfo=trace
+# log4j.logger.DisplayInfo.EdgeDisplayInfo=trace
+log4j.logger.DisplayInfo.LabelDisplayInfo=trace
+log4j.logger.DisplayInfo.LabelDisplayInfo.FloatingMessageLabel=trace
 
 #
 # set levels for libwatcher module
 #
-# log4j.logger.Message.ColorMessage=trace
+log4j.logger.Message.ColorMessage=fatal;
 # log4j.logger.Message.DataRequestMessage=trace
 # log4j.logger.Message.EdgeMessage=trace
 # log4j.logger.Message.GPSMessage=trace
@@ -51,7 +51,7 @@ log4j.rootLogger=debug, flog, stdout
 # log4j.logger.WatcherMessage.StartMessage=trace
 # log4j.logger.WatcherMessage.StopMessage=trace
 # log4j.logger.Message.TestMessage=trace
-# log4j.logger.Color=trace
+log4j.logger.Color=fatal
 # log4j.logger.WatcherRegion=trace
 
 
@@ -61,15 +61,15 @@ log4j.rootLogger=debug, flog, stdout
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender
 log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
 # log4j.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
-log4j.appender.stdout.layout.ConversionPattern=[%-5p] (%F:%L) - %m%n
+log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} [%-5p] (%F:%L) - %m%n
 
 #
 # flog is set to log to a file, not appended
 #
 log4j.appender.flog=org.apache.log4j.FileAppender
 log4j.appender.flog.layout=org.apache.log4j.PatternLayout
-log4j.appender.flog.file=watcherd.log
+log4j.appender.flog.file=watcher.log
 log4j.appender.flog.append=false
-log4j.appender.flog.layout.ConversionPattern=%-4r [%t] %-5p %c (%-12F:%-4L) - %m%n
+log4j.appender.flog.layout.ConversionPattern=%d{ABSOLUTE} [%t] %-5p %c (%-12F:%-4L) - %m%n
 
 
