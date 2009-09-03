@@ -86,6 +86,16 @@ namespace watcher {
                 return l == lhs->layer;
             }
         };
+        struct LabelMessageExpired 
+        {
+            LabelMessageExpired(const Timestamp &t) : now(t) {}
+            const Timestamp now;
+            bool operator()(const LabelMessagePtr &lhs)
+            {
+                LOG_DEBUG("LabelMessageExpired - " << lhs->expiration << " vs. " << now << " == " << (((lhs->expiration == Infinity) ? false : (now > lhs->expiration))?"true":"false")); 
+                return (lhs->expiration == Infinity) ? false : (now > lhs->expiration); 
+            }
+        };
         struct LabelExpired
         {
             LabelExpired(const Timestamp &t) : now(t) {}
@@ -296,15 +306,9 @@ void WatcherGraph::doMaintanence()
 
     Timestamp now(getCurrentTime());
 
-    // remove edges that have expired
+    floatingLabels.erase(remove_if(floatingLabels.begin(), floatingLabels.end(), GraphFunctors::LabelExpired(now)), floatingLabels.end());
+
     remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
-    // {
-    //     boost::graph_traits<Graph>::edge_iterator i, end, newEnd;
-    //     tie(i, end)=edges(theGraph);
-    //     newEnd=remove_if(i, end, GraphFunctors::EdgeExpired(theGraph, now));
-    //     for( ; newEnd!=end; ++newEnd)
-    //         remove_edge(*newEnd, theGraph);
-    // }
 
     graph_traits<Graph>::edge_iterator ei, eEnd;
     for(tie(ei, eEnd)=edges(theGraph); ei!=eEnd; ++ei)
@@ -420,30 +424,56 @@ bool WatcherGraph::updateNodeColor(const ColorMessagePtr &message)
     return retVal;
 }
 
-bool WatcherGraph::addRemoveAttachedLabel(const LabelMessagePtr &message)
+struct MatchLabelMessage {
+    MatchLabelMessage(const FloatingLabelDisplayInfoPtr p) : p_(p) {}
+    bool operator()(const FloatingLabelDisplayInfoPtr &p) {return *p == *p_;}
+    const FloatingLabelDisplayInfoPtr p_;
+};
+
+bool WatcherGraph::addRemoveLabel(const LabelMessagePtr &message)
 {
     TRACE_ENTER();
 
     bool retVal;
-    boost::graph_traits<Graph>::vertex_iterator nodeIter;
-    if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
-    {
-        LOG_DEBUG("Updating attached label information for node " << theGraph[*nodeIter].nodeId);
-        if (message->addLabel)
-        {
-            LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
-            lmp->loadConfiguration(message); 
-            theGraph[*nodeIter].labels.push_back(lmp);
+    // Floating label
+    if (message->lat && message->lng) {
+        FloatingLabelDisplayInfoPtr l(new FloatingLabelDisplayInfo);
+        l->loadConfiguration(message);
+        if (!message->addLabel) { 
+            LOG_DEBUG("Deleting floating label: " << *message); 
+            floatingLabels.erase(remove_if(floatingLabels.begin(), floatingLabels.end(), MatchLabelMessage(l)), floatingLabels.end()); 
         }
-        else
-        {
-            WatcherGraphNode::LabelList::iterator b=theGraph[*nodeIter].labels.begin();
-            WatcherGraphNode::LabelList::iterator e=theGraph[*nodeIter].labels.end();
-            WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message));
-            LOG_DEBUG("Told to remove labels."); 
-            theGraph[*nodeIter].labels.erase(newEnd, e);
+        else  {
+            LOG_DEBUG("Adding floating label: " << *message); 
+            l->lat=message->lat;
+            l->lng=message->lng;
+            l->alt=message->alt;
+            floatingLabels.push_back(l);
         }
+        LOG_DEBUG("Current number of floating labels: " << floatingLabels.size());
         retVal=true;
+    }
+    else {
+        boost::graph_traits<Graph>::vertex_iterator nodeIter;
+        if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
+        {
+            LOG_DEBUG("Updating attached label information for node " << theGraph[*nodeIter].nodeId);
+            if (message->addLabel)
+            {
+                LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
+                lmp->loadConfiguration(message); 
+                theGraph[*nodeIter].labels.push_back(lmp);
+            }
+            else
+            {
+                WatcherGraphNode::LabelList::iterator b=theGraph[*nodeIter].labels.begin();
+                WatcherGraphNode::LabelList::iterator e=theGraph[*nodeIter].labels.end();
+                WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message));
+                LOG_DEBUG("Told to remove labels."); 
+                theGraph[*nodeIter].labels.erase(newEnd, e);
+            }
+            retVal=true;
+        }
     }
 
     TRACE_EXIT_RET(retVal);
@@ -554,7 +584,7 @@ bool WatcherGraph::updateGraph(const MessagePtr &message)
             retVal=updateNodeStatus(dynamic_pointer_cast<NodeStatusMessage>(message));
             break;
         case LABEL_MESSAGE_TYPE:
-            retVal=addRemoveAttachedLabel(dynamic_pointer_cast<LabelMessage>(message));
+            retVal=addRemoveLabel(dynamic_pointer_cast<LabelMessage>(message));
             break;
         case COLOR_MESSAGE_TYPE:
             retVal=updateNodeColor(dynamic_pointer_cast<ColorMessage>(message));

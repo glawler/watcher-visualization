@@ -58,6 +58,7 @@ libwatcher_a_SOURCES= \
 	displayInfo.cpp \
 	edgeDisplayInfo.cpp \
 	labelDisplayInfo.cpp \
+	floatingLabelDisplayInfo.cpp \
 	messageHandler.h messageHandlerFwd.h messageHandler.cpp \
 	sendMessageHandler.h \
 	messageStatus.cpp \

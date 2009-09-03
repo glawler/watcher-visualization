@@ -132,6 +132,13 @@ ostream &LabelDisplayInfo::toStream(ostream &out) const
     return out; 
 }
 
+bool LabelDisplayInfo::operator==(const LabelDisplayInfo &other)
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+    return labelText==other.labelText && backgroundColor==other.backgroundColor && foregroundColor==other.foregroundColor; 
+}
+
 bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 {
     TRACE_ENTER();

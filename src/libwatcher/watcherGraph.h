@@ -36,6 +36,7 @@
 #include "gpsMessage.h"
 #include "nodeStatusMessage.h"
 #include "edgeMessage.h"
+#include "floatingLabelDisplayInfo.h"
 
 namespace watcher
 {
@@ -104,6 +105,15 @@ namespace watcher
              * The actual boost::graph.
              */
             Graph theGraph;
+
+            /** List of floating labels */
+            typedef std::vector<FloatingLabelDisplayInfoPtr> FloatingLabelList;
+
+            /** 
+             * List of floating labels. These are not attached to any node. 
+             * coordinates are still in coordinates.
+             */
+            FloatingLabelList floatingLabels;
 
 
             /**
@@ -236,7 +246,7 @@ namespace watcher
             /**
              * Update an attached label - either add or remove it.
              */
-            bool addRemoveAttachedLabel(const LabelMessagePtr &message);
+            bool addRemoveLabel(const LabelMessagePtr &message);
 
             /** Find a node, if it doesn't exist, create it. Returns iterator to the node 
              * @param[in] id - the id of the node you want to find/create.

@@ -56,6 +56,8 @@ namespace watcher
             /** This doesn't really belong here, but I've nowhere else to put it. */
             Timestamp expiration; 
 
+            bool operator==(const LabelDisplayInfo &other); 
+
             /** load configuration from a LabelMessage.
              * @retval true configuration succeeded
              * @retval false failed
