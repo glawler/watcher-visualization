@@ -655,6 +655,10 @@ bool WatcherGraph::createNode(const NodeIdentifier &id, boost::graph_traits<Grap
 bool WatcherGraph::saveConfig() const
 {
     TRACE_ENTER();
+
+    BOOST_FOREACH(const FloatingLabelDisplayInfoPtr &fldip, floatingLabels)
+        fldip->saveConfiguration();
+
     graph_traits<Graph>::edge_iterator ei, eEnd;
     for(tie(ei, eEnd)=edges(theGraph); ei!=eEnd; ++ei)
     {
