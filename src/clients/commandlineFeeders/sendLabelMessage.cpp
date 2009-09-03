@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     asio::ip::address address;
     Color fg=colors::black;
     Color bg=colors::white;
-    uint32_t expiration=10000;
+    uint32_t expiration=Infinity;
     float lat=0.0, lng=0.0, alt=0.0;
     bool remove=false;
     GUILayer layer=PHYSICAL_LAYER;
