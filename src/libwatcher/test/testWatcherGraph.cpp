@@ -212,6 +212,56 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
     BOOST_CHECK_EQUAL( (size_t)1, num_edges(wg.theGraph)); 
 }
 
+BOOST_AUTO_TEST_CASE( graph_node_floating_label_expiration_test )
+{
+    WatcherGraph wg; 
+
+    struct 
+    {
+        char *str;
+        Timestamp exp;
+        float x, y, z;
+    } labelData [] = {
+        { "This floating label will never self destruct", -1, 1, 1, 1},
+        { "This floating label will self destruct in .5 seconds", 500, 2, 2, 2},
+        { "This floating label will self destruct in 1.5 seconds", 1500, 3, 3, 3},
+        { "This floating label will self destruct in 2.5 seconds", 2500, 4, 4, 4},
+        { "This floating label will self destruct in 3.5 seconds", 3500, 5, 5, 5},
+        { "This floating label will self destruct in 4.5 seconds", 4500, 6, 6, 6},
+    }; 
+
+    size_t numLabels=sizeof(labelData)/sizeof(labelData[0]);
+    for (unsigned int i=0; i<numLabels; i++)
+    {
+        LabelMessagePtr lmp(new LabelMessage(labelData[i].str, labelData[i].x, labelData[i].y, labelData[i].z)); 
+        lmp->expiration=labelData[i].exp; 
+        wg.updateGraph(lmp);
+    }
+
+    BOOST_CHECK_EQUAL( numLabels, wg.floatingLabels.size() );  
+
+    for (unsigned int i=0; i<numLabels; i++)
+    {
+        WatcherGraph::FloatingLabelList::iterator labelIterBegin=wg.floatingLabels.begin(); 
+        WatcherGraph::FloatingLabelList::iterator labelIterEnd=wg.floatingLabels.end();
+        LOG_INFO("Current floating lables (" << wg.floatingLabels.size() << ") at " << Timestamp(time(NULL))*1000); 
+        for( ;labelIterBegin!=labelIterEnd; ++labelIterBegin)
+        {
+            LOG_INFO("\t" << (*labelIterBegin)->labelText); 
+        }
+
+        BOOST_CHECK_EQUAL( numLabels-i, wg.floatingLabels.size() );
+
+        cout << "."; 
+        cout.flush(); 
+        sleep(1);
+        wg.doMaintanence();  // Should remove one label
+    }
+
+    BOOST_CHECK_EQUAL( (size_t)1, wg.floatingLabels.size() );
+}
+
+
 BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
 {
     WatcherGraph wg; 
