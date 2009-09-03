@@ -1912,6 +1912,21 @@ void manetGLView::drawLayer(const GUILayer &layer)
 {
     TRACE_ENTER();
 
+    {
+        // LOG_DEBUG("Drawing floating labels..."); 
+        WatcherGraph::FloatingLabelList::const_iterator b=wGraph.floatingLabels.begin(); 
+        WatcherGraph::FloatingLabelList::const_iterator e=wGraph.floatingLabels.end(); 
+        for ( ; b!=e; ++b) {
+            if ((*b)->layer==layer) {
+                // LOG_DEBUG("Displaying floating label: " << *b); 
+                GLdouble x, y, z; 
+                gps2openGLPixels(GPSMessage::LAT_LONG_ALT_WGS84, (*b)->lat, (*b)->lng, (*b)->alt, x, y, z); 
+                LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
+                drawLabel(x, y, z, li);
+            }
+        }
+    }
+
     WatcherGraph::edgeIterator ei, eend;
     for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
     {
