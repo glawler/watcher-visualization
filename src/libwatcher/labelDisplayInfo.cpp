@@ -143,9 +143,6 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 {
     TRACE_ENTER();
 
-    // load defaults, then modify 'em 
-    loadConfiguration(mess->layer); 
-
     if (mess->expiration!=Infinity)
     {
         Timestamp now=getCurrentTime();
@@ -161,6 +158,9 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
         pointSize=mess->fontSize; 
     layer=mess->layer; 
     labelText=mess->label;
+
+    // Overwrite given config with local file config
+    loadConfiguration(mess->layer); 
 
     TRACE_EXIT_RET_BOOL(true); 
     return true; 
