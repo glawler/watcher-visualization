@@ -120,8 +120,8 @@ int main(int argc, char **argv)
     string logProps("sendMessage.log.properties");
     unsigned int fontSize=0;
     asio::ip::address address;
-    Color fg=colors::black;
-    Color bg=colors::white;
+    Color bg=colors::black;
+    Color fg=colors::white;
     uint32_t expiration=Infinity;
     float lat=0.0, lng=0.0, alt=0.0;
     bool remove=false;
