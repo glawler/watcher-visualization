@@ -1781,20 +1781,30 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
     else
         glColor4fv(nodeColor);
 
+    glPushMatrix();
+    glTranslated(x, y, z);
+    handleSize(node.displayInfo);
+    handleSpin(threeDView, node.displayInfo);
     switch(node.displayInfo->shape)
     {
-        case NodePropertiesMessage::CIRCLE: drawSphere(x, y, z, 4, node.displayInfo); break;
-        case NodePropertiesMessage::SQUARE: drawCube(x, y, z, 4, node.displayInfo); break;
-        case NodePropertiesMessage::TRIANGLE: drawPyramid(x, y, z, 4, node.displayInfo); break;
-        case NodePropertiesMessage::TORUS: drawTorus(x, y, z, 4, node.displayInfo); break;
-        case NodePropertiesMessage::TEAPOT: drawTeapot(x, y, z, 4, node.displayInfo); break;
+        case NodePropertiesMessage::CIRCLE: drawSphere(4); break;
+        case NodePropertiesMessage::SQUARE: drawCube(4); break;
+        case NodePropertiesMessage::TRIANGLE: drawPyramid(4); break;
+        case NodePropertiesMessage::TORUS: drawTorus(4); break;
+        case NodePropertiesMessage::TEAPOT: drawTeapot(4); break;
         case NodePropertiesMessage::NOSHAPE: /* What is the shape of no shape? */ break;
     }
-
-    drawNodeLabel(node, physical);
-
     if (isActive(ANTENNARADIUS_LAYER))
-        drawWireframeSphere(x, y, z, antennaRadius, node.displayInfo); 
+        drawWireframeSphere(antennaRadius); 
+    glPopMatrix();
+
+    // Don't spin the label
+    glPushMatrix();
+    glTranslated(x, y, z);
+    handleSize(node.displayInfo);
+    drawNodeLabel(node, physical);
+    glPopMatrix(); 
+
 
     TRACE_EXIT(); 
 }
@@ -1856,9 +1866,12 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
             snprintf(buf, sizeof(buf), "%s", node.displayInfo->label.c_str());  // use what is ever there. 
     }        
 
-    GLdouble x, y, z; 
-    gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
-    renderText(x, y+6, z+5, QString(buf),
+    // GLdouble x, y, z; 
+    // gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
+    // renderText(x, y+6, z+5, QString(buf),
+    //             QFont(node.displayInfo->labelFont.c_str(), 
+    //                  (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
+    renderText(0, 6, 3, QString(buf),
                 QFont(node.displayInfo->labelFont.c_str(), 
                      (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
 
@@ -2466,12 +2479,8 @@ void manetGLView::handleSize(const NodeDisplayInfoPtr &ndi)
     glScalef(ndi->size, ndi->size, ndi->size);
 }
 
-void manetGLView::drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &/*ndi*/)
+void manetGLView::drawWireframeSphere(GLdouble radius)
 {
-    glPushMatrix();
-
-    glTranslatef(x, y, z);
-
     if (threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
@@ -2486,24 +2495,16 @@ void manetGLView::drawWireframeSphere( GLdouble x, GLdouble y, GLdouble z, GLdou
         gluDisk(q,radius-1,radius,36,1);
         gluDeleteQuadric(q);
     }
-    glPopMatrix();
 }
 
-void manetGLView::drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
+void manetGLView::drawPyramid(GLdouble radius)
 {
-    glPushMatrix();
-
-    glTranslated(x, y, z);
-
-    handleSize(ndi);
-    handleSpin(threeDView, ndi);
-
     // fprintf(stdout, "Drawing triangle with \"radius\" : %f. x/y offset is %f\n", radius, offset); 
 
     if (threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
-        glScalef(9,9,9);        // Eyeballing it.
+        glScalef(radius*1.2, radius*1.2, radius*1.2);
 
         glBegin(GL_TRIANGLES);
         {
@@ -2559,17 +2560,10 @@ void manetGLView::drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radi
         glEnd();
         glPopAttrib();
     }
-    glPopMatrix();
 }
 
-void manetGLView::drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
+void manetGLView::drawCube(GLdouble radius)
 {
-    glPushMatrix();
-    glTranslated(x, y, z);
-
-    handleSize(ndi);
-    handleSpin(threeDView, ndi);
-
     GLfloat widthScaled=radius; 
 
     if (threeDView)
@@ -2579,7 +2573,7 @@ void manetGLView::drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, 
         // I had this "easy" call to glutDrawSolidCube, but the shadows did not look as good as when I set the 
         // normal myself.
         //  glutSolidCube(widthScaled*2); 
-        glScalef(9,9,9);        // Eyeballing it. - this 9 should be in a header somewhere.
+        glScalef(widthScaled*1.2, widthScaled*1.2, widthScaled*1.2);
         glBegin(GL_QUADS);
         // Front Face
         glNormal3f( 0.0f, 0.0f, 1.0f);                  // Normal Pointing Towards Viewer
@@ -2633,17 +2627,10 @@ void manetGLView::drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, 
         glEnd();
         glLineWidth(1.0); 
     }
-    glPopMatrix();
 }
 
-void manetGLView::drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
+void manetGLView::drawTeapot(GLdouble radius)
 {
-    glPushMatrix();
-    glTranslated(x, y, z);
-
-    handleSize(ndi);
-    handleSpin(threeDView, ndi);
-
     GLfloat widthScaled=radius; 
 
     if (threeDView)
@@ -2666,19 +2653,11 @@ void manetGLView::drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius
         glEnd();
         glLineWidth(1.0); 
     }
-    glPopMatrix();
 }
 
-void manetGLView::drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
+void manetGLView::drawDisk(GLdouble radius)
 {
     GLUquadric* q=NULL;
-
-    glPushMatrix();
-
-    glTranslatef(x, y, z);
-
-    handleSize(ndi);
-    handleSpin(threeDView, ndi);
 
     q=gluNewQuadric();
     gluDisk(q,radius-1,radius,36,1);
@@ -2688,63 +2667,43 @@ void manetGLView::drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius,
 }
 
 
-void manetGLView::drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
+void manetGLView::drawTorus(GLdouble radius)
 {
     GLfloat inner=radius-1;
     GLfloat outer=radius;
 
     if (threeDView)
     {
-        glPushMatrix();
-        glTranslated(x, y, z);
-        handleSize(ndi);
-        handleSpin(threeDView, ndi);
-
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
         glutSolidTorus(inner, outer, 10, 10);  
         glPopAttrib();
-        glPopMatrix();
     }
     else
     {
         GLUquadric* q=NULL;
-        glPushMatrix();
-        glTranslatef(x, y, z);
-        handleSize(ndi);
-        handleSpin(threeDView, ndi);
         q=gluNewQuadric();
         gluDisk(q,inner, outer,36,1);
         gluDeleteQuadric(q);
-        glPopMatrix();
     }
 }
 
-void manetGLView::drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
+void manetGLView::drawSphere(GLdouble radius)
 {
-
     if (threeDView)
     {
-        glPushMatrix();
-        glTranslated(x, y, z);
-        handleSize(ndi);
-        handleSpin(threeDView, ndi);
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
         glutSolidSphere(radius, 10, 10);
         glPopAttrib();
-        glPopMatrix();
     }
     else
-        drawDisk(x,y,z,radius, ndi); 
+        drawDisk(radius); 
 }
 
-void manetGLView::drawCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const NodeDisplayInfoPtr &ndi)
+void manetGLView::drawCircle(GLdouble radius)
 {
     glPushMatrix();
-    glTranslatef(x, y, z);
-    handleSize(ndi);
-    handleSpin(threeDView, ndi);
     GLUquadric* q=NULL;
     q=gluNewQuadric();
     gluDisk(q,radius-1,radius,36,1);
@@ -2752,14 +2711,13 @@ void manetGLView::drawCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble radius
     glPopMatrix();
 }
 
-void manetGLView::drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
+void manetGLView::drawFrownyCircle(GLdouble /* radius */)
 { 
     static GLfloat const dead[]={1.0,0.0,0.0,1.0}; 
 
     glColor4fv(dead);
 
     // draw outsize circle
-    glTranslatef(x, y, z);
     GLUquadric* q=NULL;
     q=gluNewQuadric();
     gluDisk(q, 6, 7, 36, 1);
@@ -2767,33 +2725,23 @@ void manetGLView::drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble)
 
     // draw eyes and mouth
     glBegin(GL_LINES); 
-    glVertex3f(x-4.0,y+3.0,z); 
-    glVertex3f(x-2.0,y+1.0,z); 
-    glVertex3f(x-2.0,y+3.0,z); 
-    glVertex3f(x-4.0,y+1.0,z); 
+    glVertex3f(-4.0,+3.0,0); 
+    glVertex3f(-2.0,+1.0,0); 
+    glVertex3f(-2.0,+3.0,0); 
+    glVertex3f(-4.0,+1.0,0); 
 
-    glVertex3f(x+4.0,y+3.0,z); 
-    glVertex3f(x+2.0,y+1.0,z); 
-    glVertex3f(x+2.0,y+3.0,z); 
-    glVertex3f(x+4.0,y+1.0,z); 
+    glVertex3f(+4.0,+3.0,0); 
+    glVertex3f(+2.0,+1.0,0); 
+    glVertex3f(+2.0,+3.0,0); 
+    glVertex3f(+4.0,+1.0,0); 
 
-    glVertex3f(x-3.0,y-3.0,z); 
-    glVertex3f(x-2.0,y-2.0,z); 
-    glVertex3f(x-2.0,y-2.0,z); 
-    glVertex3f(x+2.0,y-2.0,z); 
-    glVertex3f(x+2.0,y-2.0,z); 
-    glVertex3f(x+3.0,y-3.0,z); 
+    glVertex3f(-3.0,-3.0,0); 
+    glVertex3f(-2.0,-2.0,0); 
+    glVertex3f(-2.0,-2.0,0); 
+    glVertex3f(+2.0,-2.0,0); 
+    glVertex3f(+2.0,-2.0,0); 
+    glVertex3f(+3.0,-3.0,0); 
 
-#if 0 
-    glVertex3f(x+0.0,y-2.0,z); 
-    glVertex3f(x+2.0,y-4.0,z); 
-    glVertex3f(x+2.0,y-4.0,z); 
-    glVertex3f(x+3.0,y-4.0,z); 
-    glVertex3f(x+3.0,y-4.0,z); 
-    glVertex3f(x+3.0,y-3.0,z); 
-    glVertex3f(x+3.0,y-3.0,z); 
-    glVertex3f(x+2.0,y-2.0,z); 
-#endif 
     glEnd(); 
     return; 
 } /* drawFrownyCircle */ 

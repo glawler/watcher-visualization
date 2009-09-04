@@ -295,15 +295,16 @@ signals:
         void drawLabel(GLfloat x, GLfloat y, GLfloat z, const watcher::LabelDisplayInfoPtr &label);
         void handleSpin(int threeD, const watcher::NodeDisplayInfoPtr &ndi); 
         void handleSize(const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawWireframeSphere(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawPyramid( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawCube(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawTeapot(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawDisk( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawTorus(GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawSphere( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawCircle( GLdouble x, GLdouble y, GLdouble z, GLdouble radius, const watcher::NodeDisplayInfoPtr &ndi); 
-        void drawFrownyCircle(GLdouble x, GLdouble y, GLdouble z, GLdouble); 
+
+        void drawWireframeSphere(GLdouble radius); 
+        void drawPyramid(GLdouble radius); 
+        void drawCube(GLdouble radius); 
+        void drawTeapot(GLdouble radius); 
+        void drawDisk(GLdouble radius); 
+        void drawTorus(GLdouble radius); 
+        void drawSphere(GLdouble radius); 
+        void drawCircle(GLdouble radius); 
+        void drawFrownyCircle(GLdouble); 
 
 };
 
