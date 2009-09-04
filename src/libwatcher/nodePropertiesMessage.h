@@ -52,29 +52,40 @@ namespace watcher {
 
                 /** The color of the node (this makes colorMessage redundant */
                 Color color;
+
+                /** Since there is no "NULL" color, set this to true if you want the 
+                 * color in this message to be used.
+                 */
+                bool useColor;
                 
-                /** Suggested size of the node */
+                /** Suggested size of the node, deafult is -1==ignore. */
                 float size;
 
-                enum NodeShape { CIRCLE=0, SQUARE, TRIANGLE, TORUS, TEAPOT };
+                enum NodeShape { NOSHAPE=0, CIRCLE, SQUARE, TRIANGLE, TORUS, TEAPOT };
                 static std::string nodeShapeToString(const NodeShape &shape);
-                static NodeShape stringToNodeShape(const std::string &shape);
+                /** Convert a string into a shape. Sets argument to empty string if unsuccessful. */
+                static bool stringToNodeShape(const std::string &s, NodeShape &shape);
 
                 /** Suggested shape */
                 NodeShape shape;
 
-                enum DisplayEffect { SPARKLE, SPIN, FLASH };
+                /** if true, honor the shape variable */
+                bool useShape; 
+
+                enum DisplayEffect { NOEFFECT=0, SPARKLE, SPIN, FLASH };
                 static std::string displayEffectToString(const NodePropertiesMessage::DisplayEffect &e); 
-                static DisplayEffect stringToDisplayEffect(const std::string &e); 
+                /** Convert a string into an effect. Sets argument to empty string if unsuccessful. */
+                static bool stringToDisplayEffect(const std::string &s, DisplayEffect &e); 
                 typedef std::vector<DisplayEffect> DisplayEffectList;
 
                 /** Suggested effects */
                 DisplayEffectList displayEffects;
 
-                /** Possible abstract properies of the node */
-                enum NodeProperty { LEAFNODE, CLUSTERHEAD, ROOT, ATTACKER, VICTIM }; 
+                /** Possible abstract properies of the node. NONE to unset. */
+                enum NodeProperty { NOPROPERTY=0, LEAFNODE, CLUSTERHEAD, ROOT, ATTACKER, VICTIM }; 
                 static std::string nodePropertyToString(const NodeProperty &p);
-                static NodeProperty stringToNodeProperty(const std::string &p);
+                /** Convert a string into a property. Sets argument to empty string if unsuccessful. */
+                static bool stringToNodeProperty(const std::string &s, NodeProperty &p);
                 typedef std::vector<NodeProperty> NodePropertyList;
 
                 /** Properties of the node */

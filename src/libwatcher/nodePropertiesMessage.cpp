@@ -41,8 +41,10 @@ namespace watcher {
             Message(NODE_PROPERTIES_MESSAGE_TYPE, NODE_PROPERTIES_MESSAGE_VERSION),
             layer(PHYSICAL_LAYER),
             color(colors::red),
-            size(1.0),
-            shape(CIRCLE),
+            useColor(false),
+            size(-1.0),
+            shape(NOSHAPE),
+            useShape(false),
             displayEffects(),
             nodeProperties()
         {
@@ -54,8 +56,10 @@ namespace watcher {
             Message(other),
             layer(other.layer),
             color(other.color),
+            useColor(other.useColor),
             size(other.size),
             shape(other.shape),
+            useShape(other.useShape),
             displayEffects(other.displayEffects),
             nodeProperties(other.nodeProperties)
         {
@@ -77,8 +81,10 @@ namespace watcher {
                 Message::operator==(other) && 
                 layer==other.layer &&
                 color==other.color &&
+                useColor==other.useColor &&
                 size==other.size &&
                 shape==other.shape &&
+                useShape==other.useShape &&
                 displayEffects==other.displayEffects &&
                 nodeProperties==other.nodeProperties;
 
@@ -93,8 +99,10 @@ namespace watcher {
             Message::operator=(other);
             layer=other.layer;
             color=other.color;
+            useColor=other.useColor;
             size=other.size;
             shape=other.shape;
+            useShape=other.useShape;
             displayEffects=other.displayEffects;
             nodeProperties=other.nodeProperties;
 
@@ -110,8 +118,10 @@ namespace watcher {
             Message::toStream(out);
             out << " layer: " << layer;
             out << " color: " << color;
+            out << " (" << (useColor?"ignored":"active") << ")";
             out << " size: " << size;
             out << " shape: " << nodeShapeToString(shape);
+            out << " (" << (useShape?"ignored":"active") << ")";
 
             out << "[";
             BOOST_FOREACH(const DisplayEffect &e, displayEffects)
@@ -141,8 +151,10 @@ namespace watcher {
             ar & boost::serialization::base_object<Message>(*this);
             ar & layer;
             ar & color;
+            ar & useColor;
             ar & size;
             ar & shape;
+            ar & useShape;
             ar & displayEffects;
             ar & nodeProperties;
             TRACE_EXIT();
@@ -157,6 +169,7 @@ namespace watcher {
             string retVal;
             switch(shape) 
             {
+                case NOSHAPE: retVal="shapeless"; break;
                 case CIRCLE: retVal="circle"; break;
                 case SQUARE: retVal="square"; break;
                 case TRIANGLE: retVal="triangle"; break;
@@ -168,18 +181,22 @@ namespace watcher {
         }
 
         // static 
-        NodePropertiesMessage::NodeShape NodePropertiesMessage::stringToNodeShape(const string &shape)
+        bool NodePropertiesMessage::stringToNodeShape(const string &s, NodePropertiesMessage::NodeShape &shape)
         {
             TRACE_ENTER();
-            NodeShape retVal;
-            if (iequals(shape, "circle")) retVal=CIRCLE;
-            else if (iequals(shape,"square")) retVal=SQUARE;
-            else if (iequals(shape,"triangle")) retVal=TRIANGLE;
-            else if (iequals(shape,"torus")) retVal=TORUS;
-            else if (iequals(shape,"teapot")) retVal=TEAPOT;
-            else
-                LOG_ERROR("I don't know what shape " << shape << " represents, guessing circle"); 
-            TRACE_EXIT();
+            
+            bool retVal;
+            if (iequals(s, "shapeless")) shape=NOSHAPE;
+            else if (iequals(s, "circle")) shape=CIRCLE;
+            else if (iequals(s,"square")) shape=SQUARE;
+            else if (iequals(s,"triangle")) shape=TRIANGLE;
+            else if (iequals(s,"torus")) shape=TORUS;
+            else if (iequals(s,"teapot")) shape=TEAPOT;
+            else {
+                LOG_ERROR("I don't know what shape " << shape << " represents, giving up.");
+                retVal=false;
+            }
+            TRACE_EXIT_RET_BOOL(retVal);
             return retVal;
         }
         // static 
@@ -189,28 +206,33 @@ namespace watcher {
             string retVal;
             switch(p) 
             {
-                case NodePropertiesMessage::LEAFNODE: retVal="leafnode"; break;
-                case NodePropertiesMessage::CLUSTERHEAD: retVal="clusterhead"; break;
-                case NodePropertiesMessage::ROOT: retVal="root"; break;
-                case NodePropertiesMessage::ATTACKER: retVal="attacker"; break;
-                case NodePropertiesMessage::VICTIM: retVal="victim"; break;
+                case NOPROPERTY: retVal="noproperty"; break;
+                case LEAFNODE: retVal="leafnode"; break;
+                case CLUSTERHEAD: retVal="clusterhead"; break;
+                case ROOT: retVal="root"; break;
+                case ATTACKER: retVal="attacker"; break;
+                case VICTIM: retVal="victim"; break;
             }
             TRACE_EXIT_RET(retVal);
             return retVal;
         }
         // static
-        NodePropertiesMessage::NodeProperty NodePropertiesMessage::stringToNodeProperty(const std::string &shape)
+        bool NodePropertiesMessage::stringToNodeProperty(const std::string &s, NodePropertiesMessage::NodeProperty &p)
         {
             TRACE_ENTER();
-            NodePropertiesMessage::NodeProperty retVal;
-            if (iequals(shape, "leafnode")) retVal=NodePropertiesMessage::LEAFNODE;
-            else if (iequals(shape,"clusterhead")) retVal=NodePropertiesMessage::CLUSTERHEAD;
-            else if (iequals(shape,"root")) retVal=NodePropertiesMessage::ROOT;
-            else if (iequals(shape,"attacker")) retVal=NodePropertiesMessage::ATTACKER;
-            else if (iequals(shape,"victim")) retVal=NodePropertiesMessage::VICTIM;
-            else 
-                LOG_ERROR("I don't know what property " << shape << " represents."); 
-            TRACE_EXIT();
+
+            bool retVal=true;
+            if (iequals(s, "noproperty")) p=NOPROPERTY;
+            else if (iequals(s, "leafnode")) p=LEAFNODE;
+            else if (iequals(s,"clusterhead")) p=CLUSTERHEAD;
+            else if (iequals(s,"root")) p=ROOT;
+            else if (iequals(s,"attacker")) p=ATTACKER;
+            else if (iequals(s,"victim")) p=VICTIM;
+            else  {
+                LOG_ERROR("I don't know what property " << s << " represents."); 
+                retVal=false;
+            }
+            TRACE_EXIT_RET_BOOL(retVal);
             return retVal;
         }
         // static 
@@ -220,24 +242,29 @@ namespace watcher {
             string retVal;
             switch(e) 
             {
-                case NodePropertiesMessage::SPARKLE: retVal="sparkle"; break;
-                case NodePropertiesMessage::SPIN: retVal="spin"; break;
-                case NodePropertiesMessage::FLASH: retVal="flash"; break;
+                case NOEFFECT: retVal="noeffect"; break;
+                case SPARKLE: retVal="sparkle"; break;
+                case SPIN: retVal="spin"; break;
+                case FLASH: retVal="flash"; break;
             }
-            TRACE_EXIT_RET(retVal);
+            TRACE_EXIT();
             return retVal;
         }
+
         // static 
-        NodePropertiesMessage::DisplayEffect NodePropertiesMessage::stringToDisplayEffect(const std::string &e)
+        bool NodePropertiesMessage::stringToDisplayEffect(const std::string &s, NodePropertiesMessage::DisplayEffect &e)
         {
             TRACE_ENTER();
-            NodePropertiesMessage::DisplayEffect retVal;
-            if (iequals(e, "sparkle")) retVal=NodePropertiesMessage::SPARKLE;
-            else if (iequals(e,"spin")) retVal=NodePropertiesMessage::SPIN;
-            else if (iequals(e,"flash")) retVal=NodePropertiesMessage::FLASH;
-            else 
+            bool retVal=true;
+            if (iequals(s, "noeffect")) e=NodePropertiesMessage::NOEFFECT;
+            else if (iequals(s, "sparkle")) e=NodePropertiesMessage::SPARKLE;
+            else if (iequals(s,"spin")) e=NodePropertiesMessage::SPIN;
+            else if (iequals(s,"flash")) e=NodePropertiesMessage::FLASH;
+            else {
                 LOG_ERROR("I don't know what effect " << e << " represents."); 
-            TRACE_EXIT();
+                retVal=false;
+            }
+            TRACE_EXIT_RET_BOOL(retVal);
             return retVal;
         }
     }

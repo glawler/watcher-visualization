@@ -9,6 +9,7 @@ bin_PROGRAMS= \
 	sendColorMessage \
 	sendConnectivityMessage \
 	sendDataPointMessage \
+	sendNodePropertiesMessage \
 	showClock
 
 # How do we tell the make system that the default foo_PROGRAM file is foo.cpp instead of foo.c? 
@@ -18,6 +19,7 @@ sendEdgeMessage_SOURCES=sendEdgeMessage.cpp
 sendColorMessage_SOURCES=sendColorMessage.cpp
 sendConnectivityMessage_SOURCES=sendConnectivityMessage.cpp
 sendDataPointMessage_SOURCES=sendDataPointMessage.cpp
+sendNodePropertiesMessage_SOURCES=sendNodePropertiesMessage.cpp
 showClock_SOURCES=showClock.cpp
 
 

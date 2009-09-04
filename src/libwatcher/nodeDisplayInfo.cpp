@@ -129,18 +129,21 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
     key="shape"; 
     if (!nodeSetting.lookupValue(key, strVal))
         nodeSetting.add(key, Setting::TypeString)=strVal;
-    shape=NodePropertiesMessage::stringToNodeShape(strVal); 
+    NodePropertiesMessage::stringToNodeShape(strVal, shape);
 
     key="properties";
     if (!nodeSetting.exists(key)) {
-        nodeSetting.add(Setting::TypeArray);
+        nodeSetting.add(key, Setting::TypeArray);
         BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &p, nodeProperties)
             nodeSetting[key].add(Setting::TypeString)=NodePropertiesMessage::nodePropertyToString(p);
     }
     else {
         int n=nodeSetting[key].getLength();
-        for (int i=0; i<n; i++)
-            nodeProperties.push_back(NodePropertiesMessage::stringToNodeProperty(nodeSetting[key][i]));
+        for (int i=0; i<n; i++) {
+            NodePropertiesMessage::NodeProperty p;
+            if (NodePropertiesMessage::stringToNodeProperty(nodeSetting[key][i], p))
+                nodeProperties.push_back(p); 
+        }
     }
 
     key="sparkle"; 
