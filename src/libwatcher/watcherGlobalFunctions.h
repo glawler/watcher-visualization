@@ -36,16 +36,16 @@ namespace boost
         template<class Archive>
             void save(Archive & ar, const watcher::NodeIdentifier &a, const unsigned int /* version */)
             {
-                std::string tmp=a.to_string();
+                unsigned long tmp=a.to_v4().to_ulong();
                 ar & tmp;
             }
 
         template<class Archive>
             void load(Archive & ar, watcher::NodeIdentifier &a, const unsigned int /* version */)
             {
-                std::string tmp;
+                unsigned long tmp;
                 ar & tmp;
-                a=boost::asio::ip::address::from_string(tmp);
+                a=watcher::NodeIdentifier(boost::asio::ip::address_v4(tmp));
             }
     }
 }
