@@ -31,6 +31,7 @@
 #include "watcherColors.h"
 #include "colors.h"
 #include "displayInfo.h"
+#include "nodePropertiesMessage.h"
 
 namespace watcher
 {
@@ -49,12 +50,14 @@ namespace watcher
             /** The node's ID. */
             NodeIdentifier nodeId;
             
-            enum NodeShape { CIRCLE=0, SQUARE, TRIANGLE, TORUS, TEAPOT };
-            static std::string nodeShapeToString(const NodeDisplayInfo::NodeShape &shape);
-            static NodeShape stringToNodeShape(const std::string &shape);
             /** Item's shape */
-            NodeShape shape;
+            event::NodePropertiesMessage::NodeShape shape;
 
+            /** Item's properties */
+            event::NodePropertiesMessage::NodePropertyList nodeProperties;
+
+            /** Item's effects */
+#warning GTL TODO: make these effects into array like properties (above) are. 
             bool sparkle; ///< display effects for a node - may not all be supported in GUI
             bool spin; ///< display effects for a node - may not all be supported in GUI
             bool flash; ///< display effects for a node - may not all be supported in GUI
@@ -90,6 +93,7 @@ namespace watcher
             double labelPointSize;
             watcher::Color labelColor;
 
+            /** Node's color */
             watcher::Color color; 
 
             /* The configuration interface. */

@@ -26,6 +26,7 @@ libwatchermsg_la_include_HEADERS=\
 	gpsMessage.h \
 	labelMessage.h \
 	messageTypesAndVersions.h \
+	nodePropertiesMessage.h \
 	nodeStatusMessage.h 
 	
 pkgconfigdir = $(libdir)/pkgconfig
@@ -40,6 +41,7 @@ libwatchermsg_la_SOURCES=\
 	gpsMessage.cpp \
 	labelMessage.cpp \
 	messageTypesAndVersions.cpp \
+	nodePropertiesMessage.cpp \
 	nodeStatusMessage.cpp \
 	playbackTimeRange.cpp \
 	seekWatcherMessage.cpp \

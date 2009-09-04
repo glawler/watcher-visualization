@@ -57,6 +57,9 @@ namespace watcher {
                 case DATA_POINT_MESSAGE_TYPE:
                     out << static_cast<int>(DATA_POINT_MESSAGE_TYPE) << " (data point)";
                     break;
+                case NODE_PROPERTIES_MESSAGE_TYPE:
+                    out << static_cast<int>(NODE_PROPERTIES_MESSAGE_TYPE) << " (node properties)";
+                    break;
 
                 case SEEK_MESSAGE_TYPE:
                     out << static_cast<int>(SEEK_MESSAGE_TYPE) << " (seek)";

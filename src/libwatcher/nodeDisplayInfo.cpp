@@ -21,7 +21,6 @@
  * @author Geoff Lawler <Geoff.Lawler@cobham.com>
  * @date 2009-01-27
  */
-#include <boost/algorithm/string.hpp>       // for iequals();
 #include <boost/foreach.hpp>
 #include "singletonConfig.h"
 #include "nodeDisplayInfo.h"
@@ -38,7 +37,8 @@ INIT_LOGGER(NodeDisplayInfo, "DisplayInfo.NodeDisplayInfo");
 
 NodeDisplayInfo::NodeDisplayInfo() : 
     DisplayInfo("node"), 
-    shape(CIRCLE),
+    shape(NodePropertiesMessage::CIRCLE),
+    nodeProperties(),
     sparkle(false),
     spin(false),
     flash(false),
@@ -125,11 +125,23 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         nodeSetting.add(key, Setting::TypeString)=strVal;
     color.fromString(strVal); 
 
-    strVal=NodeDisplayInfo::nodeShapeToString(CIRCLE);
+    strVal=NodePropertiesMessage::nodeShapeToString(NodePropertiesMessage::CIRCLE);
     key="shape"; 
     if (!nodeSetting.lookupValue(key, strVal))
         nodeSetting.add(key, Setting::TypeString)=strVal;
-    shape=NodeDisplayInfo::stringToNodeShape(strVal); 
+    shape=NodePropertiesMessage::stringToNodeShape(strVal); 
+
+    key="properties";
+    if (!nodeSetting.exists(key)) {
+        nodeSetting.add(Setting::TypeArray);
+        BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &p, nodeProperties)
+            nodeSetting[key].add(Setting::TypeString)=NodePropertiesMessage::nodePropertyToString(p);
+    }
+    else {
+        int n=nodeSetting[key].getLength();
+        for (int i=0; i<n; i++)
+            nodeProperties.push_back(NodePropertiesMessage::stringToNodeProperty(nodeSetting[key][i]));
+    }
 
     key="sparkle"; 
     if (!nodeSetting.lookupValue(key, sparkle))
@@ -200,41 +212,6 @@ string NodeDisplayInfo::labelDefault2String(const NodeDisplayInfo::LabelDefault 
     return retVal;
 }
 
-
-// static 
-string NodeDisplayInfo::nodeShapeToString(const NodeDisplayInfo::NodeShape &shape)
-{
-    TRACE_ENTER();
-
-    string retVal;
-    switch(shape) 
-    {
-        case CIRCLE: retVal="circle"; break;
-        case SQUARE: retVal="square"; break;
-        case TRIANGLE: retVal="trianle"; break;
-        case TORUS: retVal="torus"; break;
-        case TEAPOT: retVal="teapot"; break;
-    }
-    TRACE_EXIT_RET(retVal);
-    return retVal;
-}
-
-// static 
-NodeDisplayInfo::NodeShape NodeDisplayInfo::stringToNodeShape(const string &shape)
-{
-    TRACE_ENTER();
-    NodeShape retVal;
-    if (iequals(shape, "circle")) retVal=CIRCLE;
-    else if (iequals(shape,"square")) retVal=SQUARE;
-    else if (iequals(shape,"triangle")) retVal=TRIANGLE;
-    else if (iequals(shape,"torus")) retVal=TORUS;
-    else if (iequals(shape,"teapot")) retVal=TEAPOT;
-    else
-        LOG_ERROR("I don't know what shape " << shape << " represents, guessing circle"); 
-    TRACE_EXIT();
-    return retVal;
-}
-
 void NodeDisplayInfo::saveConfiguration()
 {
     TRACE_ENTER();
@@ -249,7 +226,7 @@ void NodeDisplayInfo::saveConfiguration()
 
     nodeSetting["label"]=label;
     nodeSetting["color"]=color.toString(); 
-    nodeSetting["shape"]=NodeDisplayInfo::nodeShapeToString(shape);
+    nodeSetting["shape"]=NodePropertiesMessage::nodeShapeToString(shape);
     nodeSetting["sparkle"]=sparkle;
     nodeSetting["spin"]=spin;
     nodeSetting["spinTimeout"]=spinTimeout;
@@ -257,6 +234,10 @@ void NodeDisplayInfo::saveConfiguration()
     nodeSetting["flash"]=flash;
     nodeSetting["flashInterval"]=(int)flashInterval; // GTL loss of precision here. 
     nodeSetting["size"]=size;
+
+    unsigned int i=0;
+    BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &p, nodeProperties) 
+        nodeSetting["properties"][i++]=NodePropertiesMessage::nodePropertyToString(p);
 
     SingletonConfig::unlock();
 
