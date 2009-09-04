@@ -37,6 +37,7 @@
 #include "nodeStatusMessage.h"
 #include "edgeMessage.h"
 #include "floatingLabelDisplayInfo.h"
+#include "nodePropertiesMessage.h"
 
 namespace watcher
 {
@@ -247,6 +248,11 @@ namespace watcher
              * Update an attached label - either add or remove it.
              */
             bool addRemoveLabel(const LabelMessagePtr &message);
+
+            /**
+             * Update, create, or remove a node's properties.
+             */
+            bool updateNodeProperties(const NodePropertiesMessagePtr &message);
 
             /** Find a node, if it doesn't exist, create it. Returns iterator to the node 
              * @param[in] id - the id of the node you want to find/create.

@@ -403,6 +403,43 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
     return retVal;
 }
 
+bool WatcherGraph::updateNodeProperties(const NodePropertiesMessagePtr &message)
+{
+    TRACE_ENTER();
+
+    bool retVal;
+    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
+    {
+        LOG_DEBUG("Updating properties for node " << theGraph[*nodeIter].nodeId);
+        NodeDisplayInfoPtr dInfo=theGraph[*nodeIter].displayInfo;
+        if (message->useColor)
+            dInfo->color=message->color; 
+        if (message->useShape)
+            dInfo->shape=message->shape;
+        if (message->size>=0.0)
+            dInfo->size=message->size;
+        if (message->displayEffects.size()) {
+            BOOST_FOREACH(NodePropertiesMessage::DisplayEffect &e, message->displayEffects)
+                switch(e) {
+                    case NodePropertiesMessage::SPIN: dInfo->spin=!dInfo->spin; break;
+                    case NodePropertiesMessage::FLASH: dInfo->flash=!dInfo->flash; break;
+                    case NodePropertiesMessage::SPARKLE: dInfo->sparkle=!dInfo->sparkle; break;
+                }
+        }
+        if (message->nodeProperties.size()) 
+            dInfo->nodeProperties=message->nodeProperties;
+
+        // Now reload local settings as they take precedence 
+        // dInfo->loadConfiguration(message->layer);
+
+        retVal=true;
+    }
+    
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
 bool WatcherGraph::updateNodeColor(const ColorMessagePtr &message)
 {
     TRACE_ENTER();
@@ -567,7 +604,7 @@ bool WatcherGraph::updateGraph(const MessageStreamFilter &theFilter)
 bool WatcherGraph::updateGraph(const MessagePtr &message)
 {
     TRACE_ENTER();
-    bool retVal=false;
+    bool retVal=true;
 
     switch(message->type)
     {
@@ -588,6 +625,9 @@ bool WatcherGraph::updateGraph(const MessagePtr &message)
             break;
         case COLOR_MESSAGE_TYPE:
             retVal=updateNodeColor(dynamic_pointer_cast<ColorMessage>(message));
+            break;
+        case NODE_PROPERTIES_MESSAGE_TYPE:
+            retVal=updateNodeProperties(dynamic_pointer_cast<NodePropertiesMessage>(message));
             break;
         default:
             retVal=false;

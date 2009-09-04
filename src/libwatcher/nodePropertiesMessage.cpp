@@ -123,11 +123,13 @@ namespace watcher {
             out << " shape: " << nodeShapeToString(shape);
             out << " (" << (useShape?"active":"ignored") << ")";
 
+            out << " effects: ";
             out << "[";
             BOOST_FOREACH(const DisplayEffect &e, displayEffects)
                 out << displayEffectToString(e) << ",";
             out << "]";
 
+            out << " properties: ";
             out << "[";
             BOOST_FOREACH(const NodeProperty &p, nodeProperties)
                 out << nodePropertyToString(p) << ",";
