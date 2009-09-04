@@ -80,6 +80,8 @@ namespace watcher {
                 /** Properties of the node */
                 NodePropertyList nodeProperties;
 
+                //@}
+
                 /**
                  * Create a node properties messages.
                  */
