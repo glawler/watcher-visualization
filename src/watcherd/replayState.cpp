@@ -231,8 +231,13 @@ void ReplayState::run()
         timeval tv;
         gettimeofday(&tv, 0);
         Timestamp skew = (tv.tv_sec - impl_->wall_time.tv_sec) * 1000 + (tv.tv_usec - impl_->wall_time.tv_usec) / 1000;
+        LOG_DEBUG("skew=" << skew << " delta=" << impl_->delta);
         skew -= impl_->delta;
         LOG_DEBUG("calculated skew of " << skew << " ms");
+        if (skew < 0) {
+            LOG_DEBUG("something strange happened, skew < delta ??");
+            skew = 0;
+        }
         memcpy(&impl_->wall_time, &tv, sizeof(tv));
 
         // time until next event
