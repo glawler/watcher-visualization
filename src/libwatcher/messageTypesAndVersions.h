@@ -34,24 +34,24 @@ namespace watcher {
         typedef enum 
         {
             // feeder API messages
-            UNKNOWN_MESSAGE_TYPE      = 0x0,
-            MESSAGE_STATUS_TYPE       = 0x1,
-            TEST_MESSAGE_TYPE         = 0x2,
-            GPS_MESSAGE_TYPE          = 0x3,
-            LABEL_MESSAGE_TYPE        = 0x4,
-            EDGE_MESSAGE_TYPE         = 0x5,
-            COLOR_MESSAGE_TYPE        = 0x6,
-            CONNECTIVITY_MESSAGE_TYPE = 0x7,
-            NODE_STATUS_MESSAGE_TYPE  = 0x8,
-            DATA_POINT_MESSAGE_TYPE   = 0x9,
-            NODE_PROPERTIES_MESSAGE_TYPE = 0xA,
+            UNKNOWN_MESSAGE_TYPE      = 0x00000000,
+            MESSAGE_STATUS_TYPE       = 0x00000001,
+            TEST_MESSAGE_TYPE         = 0x00000002,
+            GPS_MESSAGE_TYPE          = 0x00000003,
+            LABEL_MESSAGE_TYPE        = 0x00000004,
+            EDGE_MESSAGE_TYPE         = 0x00000005,
+            COLOR_MESSAGE_TYPE        = 0x00000006,
+            CONNECTIVITY_MESSAGE_TYPE = 0x00000007,
+            NODE_STATUS_MESSAGE_TYPE  = 0x00000008,
+            DATA_POINT_MESSAGE_TYPE   = 0x00000009,
+            NODE_PROPERTIES_MESSAGE_TYPE = 0x0000000a,
 
             // watcherdAPI messages
-            SEEK_MESSAGE_TYPE         = 0xB, // DO NOT REORDER THIS WITHOUT CHANGING isFeederEvent
-            START_MESSAGE_TYPE        = 0xC,
-            STOP_MESSAGE_TYPE         = 0xD,
-            SPEED_MESSAGE_TYPE        = 0xE,
-            PLAYBACK_TIME_RANGE_MESSAGE_TYPE = 0xF,
+            SEEK_MESSAGE_TYPE         = 0x0000ff00, // DO NOT REORDER THIS WITHOUT CHANGING isFeederEvent
+            START_MESSAGE_TYPE        = 0x0000ff01,
+            STOP_MESSAGE_TYPE         = 0x0000ff02,
+            SPEED_MESSAGE_TYPE        = 0x0000ff03,
+            PLAYBACK_TIME_RANGE_MESSAGE_TYPE = 0x0000ff04,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
