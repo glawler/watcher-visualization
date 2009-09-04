@@ -1790,7 +1790,7 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
         case NodePropertiesMessage::CIRCLE: drawSphere(4); break;
         case NodePropertiesMessage::SQUARE: drawCube(4); break;
         case NodePropertiesMessage::TRIANGLE: drawPyramid(4); break;
-        case NodePropertiesMessage::TORUS: drawTorus(4); break;
+        case NodePropertiesMessage::TORUS: drawTorus(2,4); break;
         case NodePropertiesMessage::TEAPOT: drawTeapot(4); break;
         case NodePropertiesMessage::NOSHAPE: /* What is the shape of no shape? */ break;
     }
@@ -1798,10 +1798,11 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
         drawWireframeSphere(antennaRadius); 
     glPopMatrix();
 
-    // Don't spin the label
+    // Don't spin the label or the property values
     glPushMatrix();
     glTranslated(x, y, z);
     handleSize(node.displayInfo);
+    handleProperties(node.displayInfo);
     drawNodeLabel(node, physical);
     glPopMatrix(); 
 
@@ -2479,6 +2480,25 @@ void manetGLView::handleSize(const NodeDisplayInfoPtr &ndi)
     glScalef(ndi->size, ndi->size, ndi->size);
 }
 
+void manetGLView::handleProperties(const NodeDisplayInfoPtr &ndi)
+{
+    BOOST_FOREACH(NodePropertiesMessage::NodeProperty &p, ndi->nodeProperties) {
+        switch(p) { 
+            case NodePropertiesMessage::NOPROPERTY: 
+                break;
+
+            case NodePropertiesMessage::ROOT:         drawTorus(10, 11); 
+            case NodePropertiesMessage::CLUSTERHEAD:  drawTorus(8, 9);
+            case NodePropertiesMessage::LEAFNODE:     drawTorus(6, 7);
+                break;
+            case NodePropertiesMessage::ATTACKER: 
+                break;
+            case NodePropertiesMessage::VICTIM: 
+                break;
+        }
+    }
+}
+
 void manetGLView::drawWireframeSphere(GLdouble radius)
 {
     if (threeDView)
@@ -2667,11 +2687,8 @@ void manetGLView::drawDisk(GLdouble radius)
 }
 
 
-void manetGLView::drawTorus(GLdouble radius)
+void manetGLView::drawTorus(GLdouble inner, GLdouble outer)
 {
-    GLfloat inner=radius-1;
-    GLfloat outer=radius;
-
     if (threeDView)
     {
         glPushAttrib(GL_NORMALIZE);

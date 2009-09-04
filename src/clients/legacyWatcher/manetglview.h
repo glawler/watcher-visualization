@@ -295,13 +295,14 @@ signals:
         void drawLabel(GLfloat x, GLfloat y, GLfloat z, const watcher::LabelDisplayInfoPtr &label);
         void handleSpin(int threeD, const watcher::NodeDisplayInfoPtr &ndi); 
         void handleSize(const watcher::NodeDisplayInfoPtr &ndi); 
+        void handleProperties(const watcher::NodeDisplayInfoPtr &ndi); 
 
         void drawWireframeSphere(GLdouble radius); 
         void drawPyramid(GLdouble radius); 
         void drawCube(GLdouble radius); 
         void drawTeapot(GLdouble radius); 
         void drawDisk(GLdouble radius); 
-        void drawTorus(GLdouble radius); 
+        void drawTorus(GLdouble innerRadius, GLdouble outerRadius); 
         void drawSphere(GLdouble radius); 
         void drawCircle(GLdouble radius); 
         void drawFrownyCircle(GLdouble); 
