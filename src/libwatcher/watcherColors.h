@@ -24,6 +24,7 @@
 #ifndef WATCHER_COLORS_H
 #define WATCHER_COLORS_H
 
+#include <stdint.h>         // for uint32_t
 #include "logger.h"
 #include <boost/serialization/access.hpp>
 #include <boost/shared_ptr.hpp>
