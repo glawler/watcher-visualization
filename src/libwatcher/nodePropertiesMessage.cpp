@@ -17,7 +17,7 @@
  */
 
 /**
- * @file nodePropertiesMessage.h
+ * @file nodePropertiesMessage.cpp
  * @author Geoff Lawler <geoff.lawer@cobham.com>
  * @date 2009-09-04
  */
