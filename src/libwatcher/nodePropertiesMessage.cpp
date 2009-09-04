@@ -118,10 +118,10 @@ namespace watcher {
             Message::toStream(out);
             out << " layer: " << layer;
             out << " color: " << color;
-            out << " (" << (useColor?"ignored":"active") << ")";
+            out << " (" << (useColor?"active":"ignored") << ")";
             out << " size: " << size;
             out << " shape: " << nodeShapeToString(shape);
-            out << " (" << (useShape?"ignored":"active") << ")";
+            out << " (" << (useShape?"active":"ignored") << ")";
 
             out << "[";
             BOOST_FOREACH(const DisplayEffect &e, displayEffects)
@@ -185,7 +185,7 @@ namespace watcher {
         {
             TRACE_ENTER();
             
-            bool retVal;
+            bool retVal=true;
             if (iequals(s, "shapeless")) shape=NOSHAPE;
             else if (iequals(s, "circle")) shape=CIRCLE;
             else if (iequals(s,"square")) shape=SQUARE;

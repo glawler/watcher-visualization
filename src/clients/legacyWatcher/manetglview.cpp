@@ -1783,11 +1783,12 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
 
     switch(node.displayInfo->shape)
     {
-        case NodeDisplayInfo::CIRCLE: drawSphere(x, y, z, 4, node.displayInfo); break;
-        case NodeDisplayInfo::SQUARE: drawCube(x, y, z, 4, node.displayInfo); break;
-        case NodeDisplayInfo::TRIANGLE: drawPyramid(x, y, z, 4, node.displayInfo); break;
-        case NodeDisplayInfo::TORUS: drawTorus(x, y, z, 4, node.displayInfo); break;
-        case NodeDisplayInfo::TEAPOT: drawTeapot(x, y, z, 4, node.displayInfo); break;
+        case NodePropertiesMessage::CIRCLE: drawSphere(x, y, z, 4, node.displayInfo); break;
+        case NodePropertiesMessage::SQUARE: drawCube(x, y, z, 4, node.displayInfo); break;
+        case NodePropertiesMessage::TRIANGLE: drawPyramid(x, y, z, 4, node.displayInfo); break;
+        case NodePropertiesMessage::TORUS: drawTorus(x, y, z, 4, node.displayInfo); break;
+        case NodePropertiesMessage::TEAPOT: drawTeapot(x, y, z, 4, node.displayInfo); break;
+        case NodePropertiesMessage::NOSHAPE: /* What is the shape of no shape? */ break;
     }
 
     drawNodeLabel(node, physical);

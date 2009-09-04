@@ -72,7 +72,7 @@ void usage(const char *progName)
     fprintf(stderr, "\n");
     fprintf(stderr, "   -h, --help                  Show this message\n"); 
 
-    exit(1); 
+    exit(EXIT_FAILURE); 
 }
 
 int main(int argc, char **argv)
@@ -128,8 +128,8 @@ int main(int argc, char **argv)
             case 'l': message->layer=optarg; 
                       break;
             case 'a': {
-                          bool error=NodePropertiesMessage::stringToNodeShape(optarg, message->shape);
-                          if (error) {
+                          bool success=NodePropertiesMessage::stringToNodeShape(optarg, message->shape);
+                          if (!success) {
                               fprintf(stderr, "Unable to parse shape argument \"%s\".\n\n", optarg); 
                               usage(argv[0]);
                           }
@@ -138,8 +138,8 @@ int main(int argc, char **argv)
                       break;
             case 'e': {
                           NodePropertiesMessage::DisplayEffect e;
-                          bool error=NodePropertiesMessage::stringToDisplayEffect(optarg, e);
-                          if (error) {
+                          bool success=NodePropertiesMessage::stringToDisplayEffect(optarg, e);
+                          if (!success) {
                               fprintf(stderr, "Unable to parse effect argument \"%s\".\n\n", optarg); 
                               usage(argv[0]);
                           }
@@ -148,8 +148,8 @@ int main(int argc, char **argv)
                       break;
             case 'p': {
                           NodePropertiesMessage::NodeProperty p;
-                          bool error=NodePropertiesMessage::stringToNodeProperty(optarg, p);
-                          if (error) {
+                          bool success=NodePropertiesMessage::stringToNodeProperty(optarg, p);
+                          if (!success) {
                               fprintf(stderr, "Unable to parse property argument \"%s\".\n\n", optarg); 
                               usage(argv[0]);
                           }
