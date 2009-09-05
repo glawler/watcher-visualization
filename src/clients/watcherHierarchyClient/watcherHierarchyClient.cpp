@@ -59,6 +59,7 @@
 #include "edgeMessage.h"
 #include "gpsMessage.h"
 #include "colorMessage.h"
+#include "nodePropertiesMessage.h"
 #include "colors.h"
 #include "client.h"
 #include "logger.h"
@@ -92,23 +93,32 @@ typedef struct detector
 /* This is called by the API when this node's position in the hierarchy changes
  * It is defined using the API function idsPositionRegister().
  */
-static void myDetectorPositionUpdate(void *, IDSPositionType position, IDSPositionStatus status)
+static void myDetectorPositionUpdate(void *d, IDSPositionType position, IDSPositionStatus status)
 {
+    detector *dt=((detector*)d);
+    NodePropertiesMessagePtr pm(new NodePropertiesMessage);
+    pm->fromNodeID=ip::address_v4(dt->cs->localid);
+
     switch(position)
     {
         case COORDINATOR_ROOT: 
             LOG_DEBUG("Position change: root " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+            pm->nodeProperties.push_back(status==IDSPOSITION_ACTIVE?NodePropertiesMessage::ROOT:NodePropertiesMessage::LEAFNODE);
                 break;
         case COORDINATOR_REGIONAL: 
             LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+            pm->nodeProperties.push_back(status==IDSPOSITION_ACTIVE?NodePropertiesMessage::REGIONAL:NodePropertiesMessage::LEAFNODE);
                 break;
         case COORDINATOR_NEIGHBORHOOD:
             LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+            pm->nodeProperties.push_back(status==IDSPOSITION_ACTIVE?NodePropertiesMessage::NEIGHBORHOOD:NodePropertiesMessage::LEAFNODE);
             break;
         case COORDINATOR_ROOTGROUP:
             LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
+            pm->nodeProperties.push_back(status==IDSPOSITION_ACTIVE?NodePropertiesMessage::ROOT:NodePropertiesMessage::LEAFNODE);
             break;
     }
+    dt->client->sendMessage(pm); 
 }
 
 void sendLabel(void *messageHandlerData, const struct MessageInfo *mi, bool addLabel) 
