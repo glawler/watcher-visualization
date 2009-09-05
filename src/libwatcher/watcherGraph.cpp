@@ -413,6 +413,7 @@ bool WatcherGraph::updateNodeProperties(const NodePropertiesMessagePtr &message)
     {
         LOG_DEBUG("Updating properties for node " << theGraph[*nodeIter].nodeId);
         NodeDisplayInfoPtr dInfo=theGraph[*nodeIter].displayInfo;
+        // dInfo->loadConfiguration(message->layer);
         if (message->useColor)
             dInfo->color=message->color; 
         if (message->useShape)
@@ -429,9 +430,6 @@ bool WatcherGraph::updateNodeProperties(const NodePropertiesMessagePtr &message)
         }
         if (message->nodeProperties.size()) 
             dInfo->nodeProperties=message->nodeProperties;
-
-        // Now reload local settings as they take precedence 
-        // dInfo->loadConfiguration(message->layer);
 
         retVal=true;
     }
@@ -709,10 +707,8 @@ bool WatcherGraph::saveConfig() const
     }
         
     graph_traits<Graph>::vertex_iterator vi, vEnd;
-    for(tie(vi, vEnd)=vertices(theGraph); vi!=vEnd; ++vi)
-    {
-        if (theGraph[*vi].displayInfo->layer==PHYSICAL_LAYER)
-        {
+    for(tie(vi, vEnd)=vertices(theGraph); vi!=vEnd; ++vi) {
+        if (theGraph[*vi].displayInfo->layer==PHYSICAL_LAYER) {
             theGraph[*vi].displayInfo->saveConfiguration();
 
             BOOST_FOREACH(const LabelDisplayInfoPtr &ldip, theGraph[*vi].labels)

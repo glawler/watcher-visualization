@@ -131,21 +131,6 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         nodeSetting.add(key, Setting::TypeString)=strVal;
     NodePropertiesMessage::stringToNodeShape(strVal, shape);
 
-    key="properties";
-    if (!nodeSetting.exists(key)) {
-        nodeSetting.add(key, Setting::TypeArray);
-        BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &p, nodeProperties)
-            nodeSetting[key].add(Setting::TypeString)=NodePropertiesMessage::nodePropertyToString(p);
-    }
-    else {
-        int n=nodeSetting[key].getLength();
-        for (int i=0; i<n; i++) {
-            NodePropertiesMessage::NodeProperty p;
-            if (NodePropertiesMessage::stringToNodeProperty(nodeSetting[key][i], p))
-                nodeProperties.push_back(p); 
-        }
-    }
-
     key="sparkle"; 
     if (!nodeSetting.lookupValue(key, sparkle))
         nodeSetting.add(key, Setting::TypeBoolean)=sparkle;
@@ -238,12 +223,6 @@ void NodeDisplayInfo::saveConfiguration()
     nodeSetting["flashInterval"]=(int)flashInterval; // GTL loss of precision here. 
     nodeSetting["size"]=size;
 
-    unsigned int i=0;
-    BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &p, nodeProperties) 
-        nodeSetting["properties"][i++]=NodePropertiesMessage::nodePropertyToString(p);
-
     SingletonConfig::unlock();
-
-    TRACE_EXIT();
 }
 
