@@ -1765,6 +1765,17 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
 
     // LOG_DEBUG("Drawing node on " << (physical?"non":"") << "physical layer."); 
 
+    GLdouble x, y, z; 
+    gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
+
+    glPushMatrix();
+    glTranslated(x, y, z);
+
+    handleSize(node.displayInfo);
+    handleProperties(node.displayInfo);
+
+    drawNodeLabel(node, physical);
+
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     GLfloat nodeColor[]={
         node.displayInfo->color.r/255.0, 
@@ -1773,17 +1784,11 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
         physical ? node.displayInfo->color.a/255.0 : ghostLayerTransparency
     };
 
-    GLdouble x, y, z; 
-    gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
-
     if (monochromeMode)
         glColor4fv(black);
     else
         glColor4fv(nodeColor);
 
-    glPushMatrix();
-    glTranslated(x, y, z);
-    handleSize(node.displayInfo);
     handleSpin(threeDView, node.displayInfo);
     switch(node.displayInfo->shape)
     {
@@ -1797,15 +1802,6 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
     if (isActive(ANTENNARADIUS_LAYER))
         drawWireframeSphere(antennaRadius); 
     glPopMatrix();
-
-    // Don't spin the label or the property values
-    glPushMatrix();
-    glTranslated(x, y, z);
-    handleSize(node.displayInfo);
-    handleProperties(node.displayInfo);
-    drawNodeLabel(node, physical);
-    glPopMatrix(); 
-
 
     TRACE_EXIT(); 
 }
@@ -2482,14 +2478,25 @@ void manetGLView::handleSize(const NodeDisplayInfoPtr &ndi)
 
 void manetGLView::handleProperties(const NodeDisplayInfoPtr &ndi)
 {
+    const GLfloat black[]={0.0,0.0,0.0,1.0};
     BOOST_FOREACH(NodePropertiesMessage::NodeProperty &p, ndi->nodeProperties) {
         switch(p) { 
             case NodePropertiesMessage::NOPROPERTY: 
                 break;
 
-            case NodePropertiesMessage::ROOT:         drawTorus(10, 11); 
-            case NodePropertiesMessage::CLUSTERHEAD:  drawTorus(8, 9);
-            case NodePropertiesMessage::LEAFNODE:     drawTorus(6, 7);
+            case NodePropertiesMessage::ROOT:         
+                if (monochromeMode) glColor4fv(black); else glColor4f(255, 0, 0, 255);
+                drawTorus(1, 13); 
+                // no break
+            case NodePropertiesMessage::REGIONAL:     
+                if (monochromeMode) glColor4fv(black); else glColor4f(0, 255, 0, 255);
+                drawTorus(1, 10);
+                // no break
+            case NodePropertiesMessage::NEIGHBORHOOD: 
+                if (monochromeMode) glColor4fv(black); else glColor4f(0, 0, 255, 255); 
+                drawTorus(1, 7);
+                break;
+            case NodePropertiesMessage::LEAFNODE:
                 break;
             case NodePropertiesMessage::ATTACKER: 
                 break;
@@ -2693,14 +2700,14 @@ void manetGLView::drawTorus(GLdouble inner, GLdouble outer)
     {
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
-        glutSolidTorus(inner, outer, 10, 10);  
+        glutSolidTorus(inner, outer, 15, 15);  
         glPopAttrib();
     }
     else
     {
         GLUquadric* q=NULL;
         q=gluNewQuadric();
-        gluDisk(q,inner, outer,36,1);
+        gluDisk(q, outer-inner, outer, 36, 1); 
         gluDeleteQuadric(q);
     }
 }
