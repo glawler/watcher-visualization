@@ -82,7 +82,7 @@ namespace watcher {
                 DisplayEffectList displayEffects;
 
                 /** Possible abstract properies of the node. NONE to unset. */
-                enum NodeProperty { NOPROPERTY=0, LEAFNODE, CLUSTERHEAD, ROOT, ATTACKER, VICTIM }; 
+                enum NodeProperty { NOPROPERTY=0, LEAFNODE, NEIGHBORHOOD, REGIONAL, ROOT, ATTACKER, VICTIM }; 
                 static std::string nodePropertyToString(const NodeProperty &p);
                 /** Convert a string into a property. Sets argument to empty string if unsuccessful. */
                 static bool stringToNodeProperty(const std::string &s, NodeProperty &p);

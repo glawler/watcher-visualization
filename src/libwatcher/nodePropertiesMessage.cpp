@@ -210,7 +210,8 @@ namespace watcher {
             {
                 case NOPROPERTY: retVal="noproperty"; break;
                 case LEAFNODE: retVal="leafnode"; break;
-                case CLUSTERHEAD: retVal="clusterhead"; break;
+                case NEIGHBORHOOD: retVal="neighborhood"; break;
+                case REGIONAL: retVal="regional"; break;
                 case ROOT: retVal="root"; break;
                 case ATTACKER: retVal="attacker"; break;
                 case VICTIM: retVal="victim"; break;
@@ -226,7 +227,8 @@ namespace watcher {
             bool retVal=true;
             if (iequals(s, "noproperty")) p=NOPROPERTY;
             else if (iequals(s, "leafnode")) p=LEAFNODE;
-            else if (iequals(s,"clusterhead")) p=CLUSTERHEAD;
+            else if (iequals(s,"neighborhood")) p=NEIGHBORHOOD;
+            else if (iequals(s,"regional")) p=REGIONAL;
             else if (iequals(s,"root")) p=ROOT;
             else if (iequals(s,"attacker")) p=ATTACKER;
             else if (iequals(s,"victim")) p=VICTIM;
