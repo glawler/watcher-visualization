@@ -1409,6 +1409,7 @@ void manetGLView::checkIO()
             case EDGE_MESSAGE_TYPE: layer=(dynamic_pointer_cast<EdgeMessage>(message))->layer; break;
             case COLOR_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ColorMessage>(message))->layer; break;
             case CONNECTIVITY_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ConnectivityMessage>(message))->layer; break;
+            case NODE_PROPERTIES_MESSAGE_TYPE: layer=(dynamic_pointer_cast<NodePropertiesMessage>(message))->layer; break;
             default: break;
         }
 
@@ -1752,8 +1753,10 @@ bool manetGLView::isActive(const watcher::GUILayer &layer)
     // LayerList::const_iterator li=std::find(knownLayers.begin(), knownLayers.end(), layer); 
     bool retVal=false;
     BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-        if (llip->layer==layer)
+        if (llip->layer==layer) {
             retVal=llip->active;
+            break;
+        }
 
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
@@ -2485,16 +2488,25 @@ void manetGLView::handleProperties(const NodeDisplayInfoPtr &ndi)
                 break;
 
             case NodePropertiesMessage::ROOT:         
-                if (monochromeMode) glColor4fv(black); else glColor4f(255, 0, 0, 255);
-                drawTorus(1, 13); 
-                // no break
+                if (isActive(HIERARCHY_LAYER)) { 
+                    if (monochromeMode) glColor4fv(black); else glColor4f(255, 0, 0, 255);
+                    drawTorus(1, 13);
+                    drawTorus(1, 10);
+                    drawTorus(1, 7); 
+                }
+                break;
             case NodePropertiesMessage::REGIONAL:     
-                if (monochromeMode) glColor4fv(black); else glColor4f(0, 255, 0, 255);
-                drawTorus(1, 10);
-                // no break
+                if (isActive(HIERARCHY_LAYER)) { 
+                    if (monochromeMode) glColor4fv(black); else glColor4f(0, 255, 0, 255);
+                    drawTorus(1, 10);
+                    drawTorus(1, 7);
+                }
+                break;
             case NodePropertiesMessage::NEIGHBORHOOD: 
-                if (monochromeMode) glColor4fv(black); else glColor4f(0, 0, 255, 255); 
-                drawTorus(1, 7);
+                if (isActive(HIERARCHY_LAYER)) {
+                    if (monochromeMode) glColor4fv(black); else glColor4f(0, 0, 255, 255); 
+                    drawTorus(1, 7);
+                }
                 break;
             case NodePropertiesMessage::LEAFNODE:
                 break;

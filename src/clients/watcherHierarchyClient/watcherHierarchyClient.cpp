@@ -98,6 +98,7 @@ static void myDetectorPositionUpdate(void *d, IDSPositionType position, IDSPosit
     detector *dt=((detector*)d);
     NodePropertiesMessagePtr pm(new NodePropertiesMessage);
     pm->fromNodeID=ip::address_v4(dt->cs->localid);
+    pm->layer=HIERARCHY_LAYER;
 
     switch(position)
     {

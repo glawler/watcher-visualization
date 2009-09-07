@@ -60,7 +60,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -e, --effect=effect         The effect to apply to the node, one of: flash, spin, sparkle.\n");
     fprintf(stderr, "                                  This agrument can be used multiple times. Not all GUIs support all effects.\n");
     fprintf(stderr, "   -P, --property=prop         Tell the daemon that this node has a certain property, one of\n");
-    fprintf(stderr, "                                  leafnode, clusterhead, root, attacker, victim. This argument can be used\n");
+    fprintf(stderr, "                                  leafnode, neighborhoor, regional, root, attacker, victim. This argument can be used\n");
     fprintf(stderr, "                                  more than once.\n"); 
     // fprintf(stderr, "   -x, --expiration=seconds    How long in seconds to apply the properties. 0==forever, default forever.\n"); 
     fprintf(stderr, "   -c, --color=color           Set the node's color to color. Color can be string, e.g. \"blue\", or \n"); 
