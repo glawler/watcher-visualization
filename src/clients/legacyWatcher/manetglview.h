@@ -162,6 +162,7 @@ signals:
 
         float streamRate; 
         bool playbackPaused;
+        bool autorewind;
 
         watcher::event::GPSMessage gpsDataFormat;
         

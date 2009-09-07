@@ -935,6 +935,7 @@ manetGLView::manetGLView(QWidget *parent) :
     QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
     streamRate(1.0),
     playbackPaused(false),
+    autorewind(false), 
     currentMessageTimestamp(0),
     playbackRangeEnd(0),
     playbackRangeStart(0),
@@ -1091,7 +1092,8 @@ bool manetGLView::loadConfiguration()
         { "showVerboseStatusString", false, &showVerboseStatusString }, 
         { "showWallTime", true, &showWallTimeinStatusString }, 
         { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
-        { "showPlaybackRange", true, &showPlaybackRangeString }
+        { "showPlaybackRange", true, &showPlaybackRangeString },
+        { "autorewind", true, &autorewind }
     }; 
     for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
     {
@@ -1325,7 +1327,7 @@ bool manetGLView::loadConfiguration()
 
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-    watcherIdleTimer->start(30); 
+    watcherIdleTimer->start(100); 
 
     TRACE_EXIT();
     return true;
@@ -1472,6 +1474,25 @@ void manetGLView::updatePlaybackSliderRange()
 void manetGLView::watcherIdle()
 {
     TRACE_ENTER();
+
+    if (autorewind) {
+        static time_t noNewMessagesForSeconds=0;
+        if (currentMessageTimestamp==playbackRangeEnd) { 
+            time_t now=time(NULL);
+            if (!noNewMessagesForSeconds)
+                noNewMessagesForSeconds=now;
+
+            if (now-noNewMessagesForSeconds>10) {
+                LOG_WARN("Autorewind engaged - jumping to start of data...");
+                LOG_DEBUG("playbackRangeEnd " << playbackRangeEnd << " noNewMessagesForSeconds: " << noNewMessagesForSeconds); 
+                noNewMessagesForSeconds=0;
+                rewindToStartOfPlayback();
+            }
+        }
+        else 
+            noNewMessagesForSeconds=0;
+    }
+
     TRACE_EXIT();
 }
 
@@ -2822,7 +2843,8 @@ void manetGLView::saveConfiguration()
         { "showVerboseStatusString", showVerboseStatusString }, 
         { "showWallTime", showWallTimeinStatusString }, 
         { "showPlaybackTime", showPlaybackTimeInStatusString },
-        { "showPlaybackRange", showPlaybackRangeString }
+        { "showPlaybackRange", showPlaybackRangeString },
+        { "autorewind", autorewind }
     };
 
     for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
