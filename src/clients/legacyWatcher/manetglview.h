@@ -224,6 +224,8 @@ signals:
 
         std::string statusFontName;
 
+        watcher::Timestamp playbackStartTime;
+
         void drawNodeLabel(const watcher::WatcherGraphNode &node, bool physical);
         void gps2openGLPixels(const watcher::GPSMessage::DataFormat &format, const double inx, const double iny, const double inz, GLdouble &x, GLdouble &y, GLdouble &z);
         bool isActive(const watcher::GUILayer &layer); 

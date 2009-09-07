@@ -944,6 +944,7 @@ manetGLView::manetGLView(QWidget *parent) :
     showVerboseStatusString(false),
     statusFontPointSize(10),
     statusFontName("Helvetica"),
+    playbackStartTime(SeekMessage::eof),  // live mode
     autoCenterNodesFlag(false)
 {
     TRACE_ENTER();
@@ -1158,7 +1159,7 @@ bool manetGLView::loadConfiguration()
         int *val; 
     } intVals[] = 
     {
-        { "statusFontPointSize", 12, &statusFontPointSize } 
+        { "statusFontPointSize", 12, &statusFontPointSize }
     }; 
     for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
     {
@@ -1168,6 +1169,24 @@ bool manetGLView::loadConfiguration()
             root.add(prop, libconfig::Setting::TypeInt)=intVal;
         *intVals[i].val=intVal; 
         LOG_DEBUG("Setting " << intVals[i].prop << " to " << intVal);
+    }
+
+    struct 
+    {
+        const char *prop; 
+        long long int def;
+        long long int *val; 
+    } longlongIntVals[] = 
+    {
+        { "playbackStartTime", SeekMessage::eof, &playbackStartTime } 
+    }; 
+    for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++) {
+        prop=longlongIntVals[i].prop;
+        long long int intVal=longlongIntVals[i].def; 
+        if (!root.lookupValue(prop, intVal))
+            root.add(prop, libconfig::Setting::TypeInt64)=intVal;
+        *longlongIntVals[i].val=intVal; 
+        LOG_DEBUG("Setting " << longlongIntVals[i].prop << " to " << intVal);
     }
 
     //
@@ -1371,7 +1390,7 @@ void manetGLView::checkIO()
     if (!messageStream)
     {
         messageStream=MessageStream::createNewMessageStream(serverName); 
-        messageStream->setStreamTimeStart(SeekMessage::eof);
+        messageStream->setStreamTimeStart(playbackStartTime);
         messageStream->startStream();
         messageStream->getMessageTimeRange();
     }
@@ -2871,6 +2890,17 @@ void manetGLView::saveConfiguration()
     }; 
     for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
         root[intVals[i].prop]=*intVals[i].val;
+
+    struct 
+    {
+        const char *prop; 
+        long long int *val; 
+    } longlongIntVals[] = 
+    {
+        { "playbackStartTime", &playbackStartTime } 
+    }; 
+    for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++)
+        root[longlongIntVals[i].prop]=*longlongIntVals[i].val;
 
     root["viewPoint"]["angle"][0]=manetAdj.angleX;
     root["viewPoint"]["angle"][1]=manetAdj.angleY;
