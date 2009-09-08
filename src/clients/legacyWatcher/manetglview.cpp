@@ -1559,6 +1559,7 @@ void manetGLView::drawManet(void)
         bgi.getDrawingCoords(minx, width, miny, height, z); 
         if (z>-25)
             bgi.setDrawingCoords(minx, width, miny, height, -25); 
+        qglColor(QColor("white")); 
         bgi.drawImage(); 
     }
 
@@ -1641,6 +1642,7 @@ void manetGLView::drawManet(void)
 
         glPopMatrix();
     }
+
 
 }
 
