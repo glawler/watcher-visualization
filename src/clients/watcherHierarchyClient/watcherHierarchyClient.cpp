@@ -60,6 +60,7 @@
 #include "gpsMessage.h"
 #include "colorMessage.h"
 #include "nodePropertiesMessage.h"
+#include "connectivityMessage.h"
 #include "colors.h"
 #include "client.h"
 #include "logger.h"
@@ -384,51 +385,44 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
 
     detector *st=(detector*)data;
 
-    EdgeMessagePtr em(new EdgeMessage);
+    std::vector<event::MessagePtr> messages;
+    ConnectivityMessagePtr parentMessage(new ConnectivityMessage);
+    ConnectivityMessagePtr childMessage(new ConnectivityMessage);
+    ConnectivityMessagePtr neighborMessage(new ConnectivityMessage);
+    
+    ip::address_v4 nodeAddr(st->cs->localid);
+    parentMessage->fromNodeID=nodeAddr;
+    childMessage->fromNodeID=nodeAddr;
+    neighborMessage->fromNodeID=nodeAddr;
 
-    em->node1=ip::address_v4(communicationsNodeAddress(st->cs));
-    em->node2=ip::address_v4(cn->addr);
-    em->expiration=Infinity;
+    parentMessage->layer="hierarchy_parents";
+    childMessage->layer="hierarchy_children";
+    neighborMessage->layer="hierarchy_neighbors";
 
-    if (cn->type==COMMUNICATIONSNEIGHBOR_PARENT) {
-        em->edgeColor=colors::blue;
-        em->layer="hierachy_parents";
+    CommunicationsNeighbor *n=communicationsNeighborList(st->cs);
+    for(; n; n = n->next) {
+        if (n->distance==1) {
+            neighborMessage->neighbors.push_back(ip::address_v4(n->addr));
+        }
+        else {
+            if (n->type&COMMUNICATIONSNEIGHBOR_PARENT) {
+                parentMessage->neighbors.push_back(ip::address_v4(n->addr));
+            }
+            else {
+                childMessage->neighbors.push_back(ip::address_v4(n->addr));
+            }
+        }
     }
-    else if (cn->type==COMMUNICATIONSNEIGHBOR_CHILD) {
-        em->edgeColor=colors::orange;
-        em->layer="hierachy_children";
-    }
-    else {
-        em->edgeColor=colors::red;
-        em->layer="hierarchy_neighbors";
-    }
 
-    em->width=2.0;
-    em->fromNodeID=ip::address_v4(st->cs->localid);
+    if (neighborMessage->neighbors.size()) 
+        messages.push_back(neighborMessage);
+    if (parentMessage->neighbors.size()) 
+        messages.push_back(parentMessage);
+    if (childMessage->neighbors.size()) 
+        messages.push_back(childMessage);
 
-	switch(cn->state)
-	{
-		case COMMUNICATIONSNEIGHBOR_ARRIVING:
-            LOG_INFO("New neighbor " << em->node2 << " arriving. Dist: " << cn->distance << " type: " << cn->type << ((cn->distance==1)?"onehopArrive":""));
-            em->addEdge=true;
-		break;
-		case COMMUNICATIONSNEIGHBOR_UPDATING:
-            LOG_INFO("Neighbor " << em->node2 << " update. Dist: " << cn->distance << " type: " << cn->type << 
-				( ((cn->distance==1) & (!(cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP))) ? "onehopArrive" : (((cn->distance>1) && (cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP)) ? "onehopDepart" : "")) );
-            em->addEdge=false;
-		break;
-		case COMMUNICATIONSNEIGHBOR_DEPARTING:
-			LOG_INFO("Neighbor " << em->node2 << " departing.  Dist: " << cn->distance << " type: " << cn->type << ((cn->type&COMMUNICATIONSNEIGHBOR_WASONEHOP) ? "onehopDepart" : ""));
-            em->addEdge=false;
-		break;
-		default:
-			LOG_ERROR("Bad neighbor update code!"); 
-            TRACE_EXIT_RET("error"); 
-            return;
-		break;
-	}
-
-    st->client->sendMessage(em); 
+    if (messages.size())
+        st->client->sendMessages(messages); 
 
     TRACE_EXIT(); 
 }
