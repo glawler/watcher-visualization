@@ -69,43 +69,49 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
 
     SingletonConfig::lock();
 
-    string key="label"; 
-    if (!edgeSetting.lookupValue(key, label))
-        edgeSetting.add(key, Setting::TypeString)=label;
+    try {
 
-    string strVal=color.toString(); 
-    key="color"; 
-    if (!edgeSetting.lookupValue(key, strVal))
-        edgeSetting.add(key, Setting::TypeString)=strVal;
-    color.fromString(strVal); 
+        string key="label"; 
+        if (!edgeSetting.lookupValue(key, label))
+            edgeSetting.add(key, Setting::TypeString)=label;
 
-    key="width"; 
-    if (!edgeSetting.lookupValue(key, width))
-        edgeSetting.add(key, Setting::TypeFloat)=width;
+        string strVal=color.toString(); 
+        key="color"; 
+        if (!edgeSetting.lookupValue(key, strVal))
+            edgeSetting.add(key, Setting::TypeString)=strVal;
+        color.fromString(strVal); 
 
-    key="flash"; 
-    if (!edgeSetting.lookupValue(key, flash))
-        edgeSetting.add(key, Setting::TypeBoolean)=flash;
+        key="width"; 
+        if (!edgeSetting.lookupValue(key, width))
+            edgeSetting.add(key, Setting::TypeFloat)=width;
 
-    int intVal=flashInterval;
-    key="flashInterval"; 
-    if (!edgeSetting.lookupValue(key, intVal))
-        edgeSetting.add(key, Setting::TypeInt)=intVal;
-    intVal=flashInterval;
+        key="flash"; 
+        if (!edgeSetting.lookupValue(key, flash))
+            edgeSetting.add(key, Setting::TypeBoolean)=flash;
 
-    key="labelFont";
-    if (!edgeSetting.lookupValue(key, labelFont))
-        edgeSetting.add(key, Setting::TypeString)=labelFont;
+        int intVal=flashInterval;
+        key="flashInterval"; 
+        if (!edgeSetting.lookupValue(key, intVal))
+            edgeSetting.add(key, Setting::TypeInt)=intVal;
+        flashInterval=intVal;
 
-    key="labelPointSize"; 
-    if (!edgeSetting.lookupValue(key, labelPointSize))
-        edgeSetting.add(key, Setting::TypeFloat)=labelPointSize;
+        key="labelFont";
+        if (!edgeSetting.lookupValue(key, labelFont))
+            edgeSetting.add(key, Setting::TypeString)=labelFont;
 
-    strVal=labelColor.toString(); 
-    key="labelColor"; 
-    if (!edgeSetting.lookupValue(key, strVal))
-        edgeSetting.add(key, Setting::TypeString)=strVal;
-    labelColor.fromString(strVal); 
+        key="labelPointSize"; 
+        if (!edgeSetting.lookupValue(key, labelPointSize))
+            edgeSetting.add(key, Setting::TypeFloat)=labelPointSize;
+
+        strVal=labelColor.toString(); 
+        key="labelColor"; 
+        if (!edgeSetting.lookupValue(key, strVal))
+            edgeSetting.add(key, Setting::TypeString)=strVal;
+        labelColor.fromString(strVal); 
+    }
+    catch (const SettingException &e) {
+        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+    }
 
     SingletonConfig::unlock();
 
@@ -122,11 +128,16 @@ void EdgeDisplayInfo::saveConfiguration()
 
     SingletonConfig::lock();
 
-    edgeSetting["color"]=color.toString(); 
-    edgeSetting["width"]=width; 
-    edgeSetting["flash"]=flash; 
-    edgeSetting["flashInterval"]=(int)flashInterval;
-    edgeSetting["label"]=label; 
+    try {
+        edgeSetting["color"]=color.toString(); 
+        edgeSetting["width"]=width; 
+        edgeSetting["flash"]=flash; 
+        edgeSetting["flashInterval"]=(int)flashInterval;
+        edgeSetting["label"]=label; 
+    }
+    catch (const SettingException &e) {
+        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+    }
 
     SingletonConfig::unlock();
 

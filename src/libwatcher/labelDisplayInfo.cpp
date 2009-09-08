@@ -64,36 +64,43 @@ bool LabelDisplayInfo::loadConfiguration(const GUILayer &layer_)
 
     SingletonConfig::lock();
 
-    string strVal;
-    string key="foregroundColor"; 
-    if (!labelSettings.lookupValue(key, strVal))
-        labelSettings.add(key, Setting::TypeString)=foregroundColor.toString();
-    foregroundColor.fromString(strVal); 
+    try {
 
-    key="backgroundColor"; 
-    if (!labelSettings.lookupValue(key, strVal))
-        labelSettings.add(key, Setting::TypeString)=backgroundColor.toString();
-    else
-        backgroundColor.fromString(strVal); 
+        string strVal;
+        string key="foregroundColor"; 
+        if (!labelSettings.lookupValue(key, strVal))
+            labelSettings.add(key, Setting::TypeString)=foregroundColor.toString();
+        foregroundColor.fromString(strVal); 
 
-    key="font"; 
-    if (!labelSettings.lookupValue(key, strVal))
-        labelSettings.add(key, Setting::TypeString)=fontName;
-    else
-        fontName=strVal;
+        key="backgroundColor"; 
+        if (!labelSettings.lookupValue(key, strVal))
+            labelSettings.add(key, Setting::TypeString)=backgroundColor.toString();
+        else
+            backgroundColor.fromString(strVal); 
 
-    float floatVal;
-    key="pointSize"; 
-    if (!labelSettings.lookupValue(key, floatVal))
-        labelSettings.add(key, Setting::TypeFloat)=pointSize;
-    else
-        pointSize=floatVal; 
+        key="font"; 
+        if (!labelSettings.lookupValue(key, strVal))
+            labelSettings.add(key, Setting::TypeString)=fontName;
+        else
+            fontName=strVal;
 
-    // strVal="none"; 
-    // key="labelText"; 
-    // if (!labelSettings.lookupValue(key, strVal))
-    //     labelSettings.add(key, Setting::TypeString)=strVal;
-    // labelText=strVal;
+        float floatVal;
+        key="pointSize"; 
+        if (!labelSettings.lookupValue(key, floatVal))
+            labelSettings.add(key, Setting::TypeFloat)=pointSize;
+        else
+            pointSize=floatVal; 
+
+        // strVal="none"; 
+        // key="labelText"; 
+        // if (!labelSettings.lookupValue(key, strVal))
+        //     labelSettings.add(key, Setting::TypeString)=strVal;
+        // labelText=strVal;
+
+    }
+    catch (const SettingException &e) {
+        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+    }
 
     SingletonConfig::unlock(); 
 
@@ -110,10 +117,15 @@ void LabelDisplayInfo::saveConfiguration()
 
     SingletonConfig::lock();
 
-    labelSetting["backgroundColor"]=backgroundColor.toString(); 
-    labelSetting["foregroundColor"]=foregroundColor.toString(); 
-    labelSetting["font"]=fontName;
-    labelSetting["pointSize"]=pointSize;
+    try {
+        labelSetting["backgroundColor"]=backgroundColor.toString(); 
+        labelSetting["foregroundColor"]=foregroundColor.toString(); 
+        labelSetting["font"]=fontName;
+        labelSetting["pointSize"]=pointSize;
+    }
+    catch (const SettingException &e) {
+        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+    }
 
     SingletonConfig::unlock();
 

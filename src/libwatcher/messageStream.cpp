@@ -203,17 +203,18 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
 {
     TRACE_ENTER();
 
+    readReady=false;
+
     messagesArrived++; 
 
     // We don't really add anything yet to a generic watcherdAPI client.
     bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(conn, message); 
-
     {
         lock_guard<mutex> lock(messageCacheMutex);
         messageCache.push_back(message); 
-        readReady=true;
         // let lock go out of scope
     }
+    readReady=true;
     LOG_DEBUG("MessageCache size=" << messageCache.size());
     LOG_DEBUG("Notifing all waiting threads that there is data to be read"); 
     messageCacheCond.notify_all();

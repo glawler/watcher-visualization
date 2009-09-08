@@ -54,35 +54,43 @@ const string DisplayInfo::getBasePath(const GUILayer &layer)
 
     SingletonConfig::lock();
 
-    if (!root.exists(baseName))
-        root.add(baseName, Setting::TypeGroup); 
+    string retVal;
+    try {
 
-    // "DisplayOptions" group
-    Setting &dispOptsGroupSetting=cfg.lookup(baseName);
-    if (!dispOptsGroupSetting.exists(layerCfgId))
-        dispOptsGroupSetting.add(layerCfgId, Setting::TypeGroup);
+        if (!root.exists(baseName))
+            root.add(baseName, Setting::TypeGroup); 
 
-    // "DisplayOptions.layer" group
-    Setting &layerCfgSetting=cfg.lookup(dispOptsGroupSetting.getPath() + separator + layerCfgId); 
+        // "DisplayOptions" group
+        Setting &dispOptsGroupSetting=cfg.lookup(baseName);
+        if (!dispOptsGroupSetting.exists(layerCfgId))
+            dispOptsGroupSetting.add(layerCfgId, Setting::TypeGroup);
 
-    // canonicalize the layer so libconfig won't barf. 
-    boost::regex rx("[^A-Za-z0-9]"); 
-    string replace("_"); 
-    string layerName=regex_replace(layer, rx, replace);
+        // "DisplayOptions.layer" group
+        Setting &layerCfgSetting=cfg.lookup(dispOptsGroupSetting.getPath() + separator + layerCfgId); 
 
-    if (!layerCfgSetting.exists(layerName))
-        layerCfgSetting.add(layerName, Setting::TypeGroup);
+        // canonicalize the layer so libconfig won't barf. 
+        boost::regex rx("[^A-Za-z0-9]"); 
+        string replace("_"); 
+        string layerName=regex_replace(layer, rx, replace);
 
-    // "DisplayOptions.layer.[LAYERNAME]" group
-    Setting &layerSetting=cfg.lookup(layerCfgSetting.getPath() + separator + layerName); 
+        if (!layerCfgSetting.exists(layerName))
+            layerCfgSetting.add(layerName, Setting::TypeGroup);
 
-    // "DisplayOptions.layer.[LAYERNAME].[category] group 
-    if (!layerSetting.exists(categoryName))
-        layerSetting.add(categoryName, Setting::TypeGroup);
-    Setting &categorySetting=cfg.lookup(layerSetting.getPath() + separator + categoryName); 
+        // "DisplayOptions.layer.[LAYERNAME]" group
+        Setting &layerSetting=cfg.lookup(layerCfgSetting.getPath() + separator + layerName); 
+
+        // "DisplayOptions.layer.[LAYERNAME].[category] group 
+        if (!layerSetting.exists(categoryName))
+            layerSetting.add(categoryName, Setting::TypeGroup);
+        Setting &categorySetting=cfg.lookup(layerSetting.getPath() + separator + categoryName); 
+        retVal=categorySetting.getPath();
+    }
+    catch (const SettingException &e) {
+        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+    }
 
     SingletonConfig::unlock();
 
     TRACE_EXIT_RET(true);
-    return categorySetting.getPath(); 
+    return retVal;
 }
