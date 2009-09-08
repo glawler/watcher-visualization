@@ -53,13 +53,19 @@ int main(int argc, char *argv[])
     string configFilename;
     SingletonConfig::lock(); 
     Config &config=SingletonConfig::instance(); 
-    if (false==initConfig(config, argc, argv, configFilename))
-    {
-        cerr << "Error reading configuration file, unable to continue." << endl;
-        cerr << "Usage: " << basename(argv[0]) << " [-f|--configFile] configfile [standard watcher arguments]" << endl;
-        return 1;
+    try {
+        if (false==initConfig(config, argc, argv, configFilename))
+        {
+            cerr << "Error reading configuration file, unable to continue." << endl;
+            cerr << "Usage: " << basename(argv[0]) << " [-f|--configFile] configfile [standard watcher arguments]" << endl;
+            return 1;
+        }
+        SingletonConfig::setConfigFile(configFilename);
     }
-    SingletonConfig::setConfigFile(configFilename);
+    catch (const SettingException &e) {
+        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+    }
+
     SingletonConfig::unlock();
 
     string logConf("watcher.log.properties");
