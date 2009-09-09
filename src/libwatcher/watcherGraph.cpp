@@ -258,11 +258,11 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         LOG_DEBUG("Set edge expiration. Was: " << oldExp << " now: " << theGraph[ei.first].expiration);
     }
 
-    theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
-
     // set color if asked (will change edge display info for all nodes on the same layer
     theGraph[ei.first].displayInfo->color=message->edgeColor; 
     theGraph[ei.first].displayInfo->width=message->width;
+
+    theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
 
     // If labels are specified, set them up. 
     if (message->node1Label && !message->node1Label->label.empty())
