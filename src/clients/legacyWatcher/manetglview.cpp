@@ -1639,19 +1639,19 @@ void manetGLView::drawManet(void)
         if (showWallTimeinStatusString)
         {
             buf+=" Wall Time: ";
-            buf+=posix_time::to_simple_string(now);
+            buf+=posix_time::to_iso_extended_string(now);
         }
         if (showPlaybackTimeInStatusString)
         {
             buf+=" Play Time: ";
-            buf+=posix_time::to_simple_string(from_time_t(currentMessageTimestamp/1000));
+            buf+=posix_time::to_iso_extended_string(from_time_t(currentMessageTimestamp/1000));
         }
         if (showPlaybackRangeString)
         {
             buf+=" Time Range: ";
-            buf+=posix_time::to_simple_string(from_time_t(playbackRangeStart/1000));
+            buf+=posix_time::to_iso_extended_string(from_time_t(playbackRangeStart/1000));
             buf+=" to ";
-            buf+=posix_time::to_simple_string(from_time_t(playbackRangeEnd/1000));
+            buf+=posix_time::to_iso_extended_string(from_time_t(playbackRangeEnd/1000));
         }
 
         if (nowTS-2500.0<currentMessageTimestamp)
@@ -1690,7 +1690,7 @@ void manetGLView::setPlaybackSlider(QSlider *s)
 
     playbackSlider=s;
     connect(playbackSlider, SIGNAL(sliderReleased()), this, SLOT(updatePlaybackSliderFromGUI()));
-    connect(playbackSlider, SIGNAL(sliderMoved()), this, SLOT(sliderMovedInGUI()));
+    connect(playbackSlider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMovedInGUI(int)));
     connect(playbackSlider, SIGNAL(sliderPressed()), this, SLOT(sliderPressedInGUI()));
 }
 
@@ -1703,13 +1703,13 @@ void manetGLView::sliderPressedInGUI()
     TRACE_EXIT();
 }
 
-void manetGLView::sliderMovedInGUI()
+void manetGLView::sliderMovedInGUI(int newVal)
 {
     TRACE_ENTER();
     if (!playbackSlider)
         return;
-    // GTL - This does not appear to do anything.
     // playbackSlider->setStatusTip(QString(playbackSlider->value()));
+    // LOG_DEBUG("sliderMoved - new value: " << newVal); 
     TRACE_EXIT();
 }
 

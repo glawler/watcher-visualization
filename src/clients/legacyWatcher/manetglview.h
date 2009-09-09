@@ -91,7 +91,7 @@ public slots:
         void scrollingGraphActivated(QString graphName);
 
         void updatePlaybackSliderFromGUI();
-        void sliderMovedInGUI();
+        void sliderMovedInGUI(int newVal);
         void sliderPressedInGUI();
 
         void saveConfiguration();
