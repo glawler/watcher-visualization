@@ -401,7 +401,7 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
 
     CommunicationsNeighbor *n=communicationsNeighborList(st->cs);
     for(; n; n = n->next) {
-        if (n->distance==1) {
+        if (n->distance==1 && !n->type&COMMUNICATIONSNEIGHBOR_PARENT) {
             neighborMessage->neighbors.push_back(ip::address_v4(n->addr));
         }
         else {
