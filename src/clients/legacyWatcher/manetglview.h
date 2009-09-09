@@ -92,6 +92,7 @@ public slots:
 
         void updatePlaybackSliderFromGUI();
         void sliderMovedInGUI();
+        void sliderPressedInGUI();
 
         void saveConfiguration();
 
@@ -163,6 +164,7 @@ signals:
         float streamRate; 
         bool playbackPaused;
         bool autorewind;
+        bool sliderPressed;
 
         watcher::event::GPSMessage gpsDataFormat;
         

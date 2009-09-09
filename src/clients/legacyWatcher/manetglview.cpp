@@ -936,6 +936,7 @@ manetGLView::manetGLView(QWidget *parent) :
     streamRate(1.0),
     playbackPaused(false),
     autorewind(false), 
+    sliderPressed(false),
     currentMessageTimestamp(0),
     playbackRangeEnd(0),
     playbackRangeStart(0),
@@ -1447,7 +1448,8 @@ void manetGLView::checkIO()
         }
 
         currentMessageTimestamp=message->timestamp;
-        playbackSlider->setValue(currentMessageTimestamp/1000); 
+        if (!sliderPressed)
+           playbackSlider->setValue(currentMessageTimestamp/1000); 
 
         if (currentMessageTimestamp>playbackRangeEnd+5000)
             messageStream->getMessageTimeRange();
@@ -1689,6 +1691,16 @@ void manetGLView::setPlaybackSlider(QSlider *s)
     playbackSlider=s;
     connect(playbackSlider, SIGNAL(sliderReleased()), this, SLOT(updatePlaybackSliderFromGUI()));
     connect(playbackSlider, SIGNAL(sliderMoved()), this, SLOT(sliderMovedInGUI()));
+    connect(playbackSlider, SIGNAL(sliderPressed()), this, SLOT(sliderPressedInGUI()));
+}
+
+void manetGLView::sliderPressedInGUI()
+{
+    TRACE_ENTER();
+    if (!playbackSlider)
+        return;
+    sliderPressed=true;
+    TRACE_EXIT();
 }
 
 void manetGLView::sliderMovedInGUI()
@@ -1697,7 +1709,7 @@ void manetGLView::sliderMovedInGUI()
     if (!playbackSlider)
         return;
     // GTL - This does not appear to do anything.
-    playbackSlider->setStatusTip(QString(playbackSlider->value()));
+    // playbackSlider->setStatusTip(QString(playbackSlider->value()));
     TRACE_EXIT();
 }
 
@@ -1705,8 +1717,7 @@ void manetGLView::sliderMovedInGUI()
 void manetGLView::updatePlaybackSliderFromGUI()
 {
     TRACE_ENTER();
-    if (!messageStream || !playbackSlider)
-    {
+    if (!messageStream || !playbackSlider) {
         TRACE_EXIT();
         return;
     }
@@ -1716,9 +1727,11 @@ void manetGLView::updatePlaybackSliderFromGUI()
     LOG_DEBUG("slider update - new start time: " << newStart << " slider position: " << playbackSlider->value() << " cur mess ts: " << currentMessageTimestamp); 
 
     currentMessageTimestamp=newStart;  // So it displays in status string immediately. 
+    playbackSlider->setValue(newStart/1000); 
     messageStream->setStreamTimeStart(newStart); 
     messageStream->startStream(); 
 
+    sliderPressed=false;
     TRACE_EXIT();
 }
 
