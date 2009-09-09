@@ -224,6 +224,7 @@ signals:
         bool backgroundImage; 
 
         std::string statusFontName;
+        watcher::Color hierarchyRingColor;
 
         watcher::Timestamp playbackStartTime;
 

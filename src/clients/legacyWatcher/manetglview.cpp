@@ -945,6 +945,7 @@ manetGLView::manetGLView(QWidget *parent) :
     showVerboseStatusString(false),
     statusFontPointSize(10),
     statusFontName("Helvetica"),
+    hierarchyRingColor(),
     playbackStartTime(SeekMessage::eof),  // live mode
     autoCenterNodesFlag(false)
 {
@@ -1031,6 +1032,7 @@ bool manetGLView::loadConfiguration()
     monochromeMode = false;
     threeDView = true;
     backgroundImage = true;
+    bool retVal=true;
 
     //
     // Check configuration for GUI settings.
@@ -1039,282 +1041,293 @@ bool manetGLView::loadConfiguration()
     SingletonConfig::lock();
     libconfig::Setting &root=cfg.getRoot();
 
-    string prop="server";
-    if (!root.lookupValue(prop, serverName))
-    {
-        LOG_FATAL("Please specify the server name in the cfg file");
-        LOG_FATAL("I set the default to localhost, but that may not be what you want."); 
-        root.add(prop, Setting::TypeString)="localhost"; 
-        TRACE_EXIT_RET_BOOL(false); 
-        return false;
-    }
+    try {
 
-    prop="layers";
-    if (!root.exists(prop))
-        root.add(prop, libconfig::Setting::TypeGroup);
-
-    libconfig::Setting &layers=cfg.lookup(prop);
-
-    // We cheat a little here and always make sure there's an antenna radius "layer"
-    if (!layers.exists(ANTENNARADIUS_LAYER))
-        layers.add(ANTENNARADIUS_LAYER, Setting::TypeBoolean)=false;
-
-    LOG_INFO("Reading layer states from cfg file");
-    int layerNum=layers.getLength();
-    for (int i=0; i<layerNum; i++)
-    {
-        string name(layers[i].getName());
-        LOG_DEBUG("Reading layer menu config for " << name); 
-        bool val=true;
-        if (!layers.lookupValue(name, val))
-            layers.add(name, Setting::TypeBoolean)=val;  // Shouldn't happen unless misformed cfg file. 
-        addLayerMenuItem(name, val);
-    }
-
-    // Force a PHYSICAL_LAYER to at least be an option in the menu.
-    bool foundPhy=false;
-    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-        if (llip->layer==PHYSICAL_LAYER)
-            foundPhy=true;
-    if (!foundPhy)
-        addLayerMenuItem(PHYSICAL_LAYER, true);
-
-    struct 
-    {
-        const char *prop; 
-        bool def; 
-        bool *val; 
-    } boolVals[] = 
-    {
-        { "nodes3d", true, &threeDView },
-        { "monochrome", false, &monochromeMode }, 
-        { "displayBackgroundImage", true, &backgroundImage },
-        { "showVerboseStatusString", false, &showVerboseStatusString }, 
-        { "showWallTime", true, &showWallTimeinStatusString }, 
-        { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
-        { "showPlaybackRange", true, &showPlaybackRangeString },
-        { "autorewind", true, &autorewind }
-    }; 
-    for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
-    {
-        prop=boolVals[i].prop;
-        bool boolVal=boolVals[i].def; 
-        if (!root.lookupValue(prop, boolVal))
-            root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
-        LOG_DEBUG("Setting " << boolVals[i].prop << " to " << (boolVal?"true":"false")); 
-        *boolVals[i].val=boolVal; 
-    }
-    emit threeDViewToggled(threeDView);
-    emit monochromeToggled(monochromeMode);
-    emit backgroundImageToggled(backgroundImage);
-    emit checkPlaybackTime(showPlaybackTimeInStatusString);
-    emit checkPlaybackRange(showPlaybackRangeString);
-    emit checkWallTime(showWallTimeinStatusString);
-
-    struct 
-    {
-        const char *prop; 
-        const char *def; 
-        string *val; 
-    } strVals[] = 
-    {
-        { "statusFontName", "Helvetica", &statusFontName } 
-    }; 
-    for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++)
-    {
-        prop=strVals[i].prop;
-        string strVal=strVals[i].def; 
-        if (!root.lookupValue(prop, strVal))
-            root.add(prop, libconfig::Setting::TypeString)=strVal;
-        *strVals[i].val=strVal; 
-        LOG_DEBUG("Setting " << strVals[i].prop << " to " << strVal);
-    }
-
-    struct 
-    {
-        const char *prop; 
-        float def; 
-        float *val; 
-    } floatVals[] = 
-    {
-        { "scaleText", 1.0, &scaleText }, 
-        { "scaleLine", 1.0, &scaleLine }, 
-        { "layerPadding", 1.0, &layerPadding }, 
-        { "gpsScale", 80000.0, &gpsScale }, 
-        { "antennaRadius", 200.0, &antennaRadius },
-        { "ghostLayerTransparency", 0.15, &ghostLayerTransparency }
-    }; 
-    for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
-    {
-        prop=floatVals[i].prop;
-        float floatVal=floatVals[i].def; 
-        if (!root.lookupValue(prop, floatVal))
-            root.add(prop, libconfig::Setting::TypeFloat)=floatVal;
-        *floatVals[i].val=floatVal; 
-        LOG_DEBUG("Setting " << floatVals[i].prop << " to " << floatVal);
-    }
-
-    struct 
-    {
-        const char *prop; 
-        int def; 
-        int *val; 
-    } intVals[] = 
-    {
-        { "statusFontPointSize", 12, &statusFontPointSize }
-    }; 
-    for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
-    {
-        prop=intVals[i].prop;
-        int intVal=intVals[i].def; 
-        if (!root.lookupValue(prop, intVal))
-            root.add(prop, libconfig::Setting::TypeInt)=intVal;
-        *intVals[i].val=intVal; 
-        LOG_DEBUG("Setting " << intVals[i].prop << " to " << intVal);
-    }
-
-    struct 
-    {
-        const char *prop; 
-        long long int def;
-        long long int *val; 
-    } longlongIntVals[] = 
-    {
-        { "playbackStartTime", SeekMessage::eof, &playbackStartTime } 
-    }; 
-    for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++) {
-        prop=longlongIntVals[i].prop;
-        long long int intVal=longlongIntVals[i].def; 
-        if (!root.lookupValue(prop, intVal))
-            root.add(prop, libconfig::Setting::TypeInt64)=intVal;
-        *longlongIntVals[i].val=intVal; 
-        LOG_DEBUG("Setting " << longlongIntVals[i].prop << " to " << intVal);
-    }
-
-    //
-    // Load background image settings
-    //
-    prop="backgroundImage";
-    if (!root.exists(prop))
-        root.add(prop, libconfig::Setting::TypeGroup);
-    libconfig::Setting &s=cfg.lookup(prop);
-
-    prop="imageFile"; 
-    string strVal;
-    if (!s.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
-    {
-        LOG_INFO("watcherBackground:imageFile entry not found (or it equals \"none\") in configuration file, "
-                "disabling background image functionality");
-        if (strVal.empty())
-            s.add(prop, libconfig::Setting::TypeString)="none";
-        toggleBackgroundImage(false);
-        emit enableBackgroundImage(false);
-    }
-    else
-    {
-        BackgroundImage &bgImage=BackgroundImage::getInstance(); 
-        const char *ext=rindex(strVal.data(), '.');
-        if (!ext)
+        string prop="server";
+        if (!root.lookupValue(prop, serverName))
         {
-            LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
-            exit(1);
+            LOG_FATAL("Please specify the server name in the cfg file");
+            LOG_FATAL("I set the default to localhost, but that may not be what you want."); 
+            root.add(prop, Setting::TypeString)="localhost"; 
+            TRACE_EXIT_RET_BOOL(false); 
+            return false;
         }
-        else if (0==strncasecmp(ext+sizeof(char), "bmp", 3))
-        {
-            if (!bgImage.loadBMPFile(strVal.data()))
-            {
-                LOG_FATAL("Unable to load background BMP image in watcher from file: " << strVal); 
-                TRACE_EXIT_RET_BOOL(false);
-                return false;
-            }
-        }
-        else if (0==strncmp("ppm", ext+sizeof(char), 3))
-        {
-            if (!bgImage.loadPPMFile(strVal.data()))
-            {
-                LOG_FATAL("Unable to load background PPM image in watcher from file: " << strVal); 
-                TRACE_EXIT_RET_BOOL(false);
-                return false;
-            }
-        }
-    }
-    // bg image location and size.
-    prop="coordinates";
-    float coordVals[5]={0.0, 0.0, 0.0, 0.0, 0.0};
-    if (!s.exists(prop))
-    {
-        s.add(prop, libconfig::Setting::TypeArray);
-        for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
-            s[prop].add(libconfig::Setting::TypeFloat)=coordVals[i];
-    }
-    else
-    {
-        for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
-            coordVals[i]=s[prop][i];
-        BackgroundImage &bg=BackgroundImage::getInstance();
-        bg.setDrawingCoords(coordVals[0], coordVals[1], coordVals[2], coordVals[3], coordVals[4]); 
-    }
 
-    //
-    // Load viewpoint
-    //
-    prop="viewPoint";
-    if (!root.exists(prop))
-        root.add(prop, libconfig::Setting::TypeGroup);
-    libconfig::Setting &vp=cfg.lookup(prop); 
+        prop="layers";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeGroup);
 
-    struct 
-    {
-        const char *type;
-        float *data[3];
-    } viewPoints[] =
-    {
-        { "angle", { &manetAdj.angleX, &manetAdj.angleY, &manetAdj.angleZ }},
-        { "scale", { &manetAdj.scaleX, &manetAdj.scaleY, &manetAdj.scaleZ }},
-        { "shift", { &manetAdj.shiftX, &manetAdj.shiftY, &manetAdj.shiftZ }}
-    };
-    for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++)
-    {
-        if (!vp.exists(viewPoints[i].type))
+        libconfig::Setting &layers=cfg.lookup(prop);
+
+        // We cheat a little here and always make sure there's an antenna radius "layer"
+        if (!layers.exists(ANTENNARADIUS_LAYER))
+            layers.add(ANTENNARADIUS_LAYER, Setting::TypeBoolean)=false;
+
+        LOG_INFO("Reading layer states from cfg file");
+        int layerNum=layers.getLength();
+        for (int i=0; i<layerNum; i++)
         {
-            vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
-            for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
-                vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
+            string name(layers[i].getName());
+            LOG_DEBUG("Reading layer menu config for " << name); 
+            bool val=true;
+            if (!layers.lookupValue(name, val))
+                layers.add(name, Setting::TypeBoolean)=val;  // Shouldn't happen unless misformed cfg file. 
+            addLayerMenuItem(name, val);
+        }
+
+        // Force a PHYSICAL_LAYER to at least be an option in the menu.
+        bool foundPhy=false;
+        BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
+            if (llip->layer==PHYSICAL_LAYER)
+                foundPhy=true;
+        if (!foundPhy)
+            addLayerMenuItem(PHYSICAL_LAYER, true);
+
+        struct 
+        {
+            const char *prop; 
+            bool def; 
+            bool *val; 
+        } boolVals[] = 
+        {
+            { "nodes3d", true, &threeDView },
+            { "monochrome", false, &monochromeMode }, 
+            { "displayBackgroundImage", true, &backgroundImage },
+            { "showVerboseStatusString", false, &showVerboseStatusString }, 
+            { "showWallTime", true, &showWallTimeinStatusString }, 
+            { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
+            { "showPlaybackRange", true, &showPlaybackRangeString },
+            { "autorewind", true, &autorewind }
+        }; 
+        for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
+        {
+            prop=boolVals[i].prop;
+            bool boolVal=boolVals[i].def; 
+            if (!root.lookupValue(prop, boolVal))
+                root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
+            LOG_DEBUG("Setting " << boolVals[i].prop << " to " << (boolVal?"true":"false")); 
+            *boolVals[i].val=boolVal; 
+        }
+        emit threeDViewToggled(threeDView);
+        emit monochromeToggled(monochromeMode);
+        emit backgroundImageToggled(backgroundImage);
+        emit checkPlaybackTime(showPlaybackTimeInStatusString);
+        emit checkPlaybackRange(showPlaybackRangeString);
+        emit checkWallTime(showWallTimeinStatusString);
+
+        string hrc("blue");
+        struct 
+        {
+            const char *prop; 
+            const char *def; 
+            string *val; 
+        } strVals[] = 
+        {
+            { "statusFontName", "Helvetica", &statusFontName },
+            { "hierarchyRingColor", "blue", &hrc } 
+        }; 
+        for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++)
+        {
+            prop=strVals[i].prop;
+            string strVal=strVals[i].def; 
+            if (!root.lookupValue(prop, strVal))
+                root.add(prop, libconfig::Setting::TypeString)=strVal;
+            *strVals[i].val=strVal; 
+            LOG_DEBUG("Setting " << strVals[i].prop << " to " << strVal);
+        }
+        hierarchyRingColor.fromString(hrc);
+
+        struct 
+        {
+            const char *prop; 
+            float def; 
+            float *val; 
+        } floatVals[] = 
+        {
+            { "scaleText", 1.0, &scaleText }, 
+            { "scaleLine", 1.0, &scaleLine }, 
+            { "layerPadding", 1.0, &layerPadding }, 
+            { "gpsScale", 80000.0, &gpsScale }, 
+            { "antennaRadius", 200.0, &antennaRadius },
+            { "ghostLayerTransparency", 0.15, &ghostLayerTransparency }
+        }; 
+        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
+        {
+            prop=floatVals[i].prop;
+            float floatVal=floatVals[i].def; 
+            if (!root.lookupValue(prop, floatVal))
+                root.add(prop, libconfig::Setting::TypeFloat)=floatVal;
+            *floatVals[i].val=floatVal; 
+            LOG_DEBUG("Setting " << floatVals[i].prop << " to " << floatVal);
+        }
+
+        struct 
+        {
+            const char *prop; 
+            int def; 
+            int *val; 
+        } intVals[] = 
+        {
+            { "statusFontPointSize", 12, &statusFontPointSize }
+        }; 
+        for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
+        {
+            prop=intVals[i].prop;
+            int intVal=intVals[i].def; 
+            if (!root.lookupValue(prop, intVal))
+                root.add(prop, libconfig::Setting::TypeInt)=intVal;
+            *intVals[i].val=intVal; 
+            LOG_DEBUG("Setting " << intVals[i].prop << " to " << intVal);
+        }
+
+        struct 
+        {
+            const char *prop; 
+            long long int def;
+            long long int *val; 
+        } longlongIntVals[] = 
+        {
+            { "playbackStartTime", SeekMessage::eof, &playbackStartTime } 
+        }; 
+        for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++) {
+            prop=longlongIntVals[i].prop;
+            long long int intVal=longlongIntVals[i].def; 
+            if (!root.lookupValue(prop, intVal))
+                root.add(prop, libconfig::Setting::TypeInt64)=intVal;
+            *longlongIntVals[i].val=intVal; 
+            LOG_DEBUG("Setting " << longlongIntVals[i].prop << " to " << intVal);
+        }
+
+        //
+        // Load background image settings
+        //
+        prop="backgroundImage";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeGroup);
+        libconfig::Setting &s=cfg.lookup(prop);
+
+        prop="imageFile"; 
+        string strVal;
+        if (!s.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
+        {
+            LOG_INFO("watcherBackground:imageFile entry not found (or it equals \"none\") in configuration file, "
+                    "disabling background image functionality");
+            if (strVal.empty())
+                s.add(prop, libconfig::Setting::TypeString)="none";
+            toggleBackgroundImage(false);
+            emit enableBackgroundImage(false);
         }
         else
         {
-            libconfig::Setting &s=vp[viewPoints[i].type];
-            for (int j=0; j<s.getLength(); j++)
-                *viewPoints[i].data[j]=s[j];
+            BackgroundImage &bgImage=BackgroundImage::getInstance(); 
+            const char *ext=rindex(strVal.data(), '.');
+            if (!ext)
+            {
+                LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
+                exit(1);
+            }
+            else if (0==strncasecmp(ext+sizeof(char), "bmp", 3))
+            {
+                if (!bgImage.loadBMPFile(strVal.data()))
+                {
+                    LOG_FATAL("Unable to load background BMP image in watcher from file: " << strVal); 
+                    TRACE_EXIT_RET_BOOL(false);
+                    return false;
+                }
+            }
+            else if (0==strncmp("ppm", ext+sizeof(char), 3))
+            {
+                if (!bgImage.loadPPMFile(strVal.data()))
+                {
+                    LOG_FATAL("Unable to load background PPM image in watcher from file: " << strVal); 
+                    TRACE_EXIT_RET_BOOL(false);
+                    return false;
+                }
+            }
         }
+        // bg image location and size.
+        prop="coordinates";
+        float coordVals[5]={0.0, 0.0, 0.0, 0.0, 0.0};
+        if (!s.exists(prop))
+        {
+            s.add(prop, libconfig::Setting::TypeArray);
+            for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
+                s[prop].add(libconfig::Setting::TypeFloat)=coordVals[i];
+        }
+        else
+        {
+            for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
+                coordVals[i]=s[prop][i];
+            BackgroundImage &bg=BackgroundImage::getInstance();
+            bg.setDrawingCoords(coordVals[0], coordVals[1], coordVals[2], coordVals[3], coordVals[4]); 
+        }
+
+        //
+        // Load viewpoint
+        //
+        prop="viewPoint";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeGroup);
+        libconfig::Setting &vp=cfg.lookup(prop); 
+
+        struct 
+        {
+            const char *type;
+            float *data[3];
+        } viewPoints[] =
+        {
+            { "angle", { &manetAdj.angleX, &manetAdj.angleY, &manetAdj.angleZ }},
+            { "scale", { &manetAdj.scaleX, &manetAdj.scaleY, &manetAdj.scaleZ }},
+            { "shift", { &manetAdj.shiftX, &manetAdj.shiftY, &manetAdj.shiftZ }}
+        };
+        for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++)
+        {
+            if (!vp.exists(viewPoints[i].type))
+            {
+                vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
+                for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
+                    vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
+            }
+            else
+            {
+                libconfig::Setting &s=vp[viewPoints[i].type];
+                for (int j=0; j<s.getLength(); j++)
+                    *viewPoints[i].data[j]=s[j];
+            }
+        }
+
+        LOG_INFO("Set viewpoint - angle: " << manetAdj.angleX << ", " << manetAdj.angleY << ", " << manetAdj.angleZ);
+        LOG_INFO("Set viewpoint - scale: " << manetAdj.scaleX << ", " << manetAdj.scaleY << ", " << manetAdj.scaleZ);
+        LOG_INFO("Set viewpoint - shift: " << manetAdj.shiftX << ", " << manetAdj.shiftY << ", " << manetAdj.shiftZ);
+
+        // background color
+        prop="backgroundColor";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeGroup);
+        libconfig::Setting &bgColSet=cfg.lookup(prop);
+
+        struct 
+        {
+            const char *name;
+            float val;
+        } bgColors[] = 
+        {
+            { "r", 0.0 }, 
+            { "g", 0.0 }, 
+            { "b", 0.0 }, 
+            { "a", 255.0 }
+        };
+        for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
+            if (!bgColSet.lookupValue(bgColors[i].name, bgColors[i].val))
+                bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
+
+        glClearColor(bgColors[0].val, bgColors[1].val,bgColors[2].val,bgColors[3].val);
+
     }
-
-    LOG_INFO("Set viewpoint - angle: " << manetAdj.angleX << ", " << manetAdj.angleY << ", " << manetAdj.angleZ);
-    LOG_INFO("Set viewpoint - scale: " << manetAdj.scaleX << ", " << manetAdj.scaleY << ", " << manetAdj.scaleZ);
-    LOG_INFO("Set viewpoint - shift: " << manetAdj.shiftX << ", " << manetAdj.shiftY << ", " << manetAdj.shiftZ);
-
-    // background color
-    prop="backgroundColor";
-    if (!root.exists(prop))
-        root.add(prop, libconfig::Setting::TypeGroup);
-    libconfig::Setting &bgColSet=cfg.lookup(prop);
-
-    struct 
-    {
-        const char *name;
-        float val;
-    } bgColors[] = 
-    {
-        { "r", 0.0 }, 
-        { "g", 0.0 }, 
-        { "b", 0.0 }, 
-        { "a", 255.0 }
-    };
-    for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
-        if (!bgColSet.lookupValue(bgColors[i].name, bgColors[i].val))
-            bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
-
-    glClearColor(bgColors[0].val, bgColors[1].val,bgColors[2].val,bgColors[3].val);
+    catch (const libconfig::SettingException &e) {
+        LOG_ERROR("Error loading configuration at " << e.getPath() << ": " << e.what());
+        retVal=false;
+    }
 
     SingletonConfig::unlock();
 
@@ -1323,14 +1336,14 @@ bool manetGLView::loadConfiguration()
     //
     QTimer *checkIOTimer = new QTimer(this);
     QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
-    checkIOTimer->start(20);
+    checkIOTimer->start(100);
 
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
     watcherIdleTimer->start(100); 
 
     TRACE_EXIT();
-    return true;
+    return retVal;
 }
 
 QSize manetGLView::minimumSizeHint() const
@@ -1396,12 +1409,14 @@ void manetGLView::checkIO()
         messageStream->startStream();
         messageStream->getMessageTimeRange();
     }
-
-    while(messageStream && messageStream->isStreamReadable())
+   
+    int messagesProcessed=0;
+    while(messageStream && messageStream->isStreamReadable() && ++messagesProcessed<100)
     {
         MessagePtr message;
         messageStream->getNextMessage(message);
-        LOG_DEBUG("Got message: " << *message);
+        static unsigned long long messageCount=0;
+        LOG_DEBUG("Got message number " <<  ++messageCount << " : " << *message);
         wGraph.updateGraph(message);
 
         // DataPoint data is handled directly by the scrolling graph thing.
@@ -1415,11 +1430,10 @@ void manetGLView::checkIO()
             PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
             playbackRangeEnd=trm->max_;
             playbackRangeStart=trm->min_;
-            // updatePlaybackSliderRange();
         }
 
         currentMessageTimestamp=message->timestamp;
-        // if (currentMessageTimestamp>playbackRangeEnd)
+        if (currentMessageTimestamp+5000>playbackRangeEnd)
             updatePlaybackSliderRange();
 
         // Really need to make layers a member of a base class...
@@ -1464,7 +1478,7 @@ void manetGLView::updatePlaybackSliderRange()
     if (playbackSlider)
     {
         if (currentMessageTimestamp>playbackRangeEnd)
-            playbackRangeEnd=currentMessageTimestamp;
+            playbackRangeEnd=currentMessageTimestamp+5000;
         playbackSlider->setRange(0, (playbackRangeEnd-playbackRangeStart)/1000);
         playbackSlider->setValue((currentMessageTimestamp-playbackRangeStart)/1000); 
     }
@@ -2531,7 +2545,8 @@ void manetGLView::handleProperties(const NodeDisplayInfoPtr &ndi)
 
             case NodePropertiesMessage::ROOT:         
                 if (isActive(HIERARCHY_LAYER)) { 
-                    if (monochromeMode) glColor4fv(black); else glColor4f(255, 0, 0, 255);
+                    if (monochromeMode) glColor4fv(black); 
+                    else glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
                     drawTorus(1, 13);
                     drawTorus(1, 10);
                     drawTorus(1, 7); 
@@ -2539,14 +2554,16 @@ void manetGLView::handleProperties(const NodeDisplayInfoPtr &ndi)
                 break;
             case NodePropertiesMessage::REGIONAL:     
                 if (isActive(HIERARCHY_LAYER)) { 
-                    if (monochromeMode) glColor4fv(black); else glColor4f(0, 255, 0, 255);
+                    if (monochromeMode) glColor4fv(black); 
+                    else glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
                     drawTorus(1, 10);
                     drawTorus(1, 7);
                 }
                 break;
             case NodePropertiesMessage::NEIGHBORHOOD: 
                 if (isActive(HIERARCHY_LAYER)) {
-                    if (monochromeMode) glColor4fv(black); else glColor4f(0, 0, 255, 255); 
+                    if (monochromeMode) glColor4fv(black); 
+                    else glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
                     drawTorus(1, 7);
                 }
                 break;
@@ -2833,124 +2850,133 @@ void manetGLView::saveConfiguration()
     SingletonConfig::lock(); 
     Setting &root=cfg.getRoot();
 
-    struct 
-    {
-        const char *prop;
-        bool boolVal;
-    } boolConfigs[] =
-    {
-        { "nodes3d",        threeDView },
-        { "monochrome",     monochromeMode },
-        { "displayBackgroundImage", backgroundImage },
-        { "showVerboseStatusString", showVerboseStatusString }, 
-        { "showWallTime", showWallTimeinStatusString }, 
-        { "showPlaybackTime", showPlaybackTimeInStatusString },
-        { "showPlaybackRange", showPlaybackRangeString },
-        { "autorewind", autorewind }
-    };
+    try {
 
-    for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
-        root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
-
-    string prop="layers";
-    libconfig::Setting &layers=cfg.lookup(prop);
-
-    // We have to create cfg layers here as we may've gotten new dynamic layers while we were running.
-    // I am beginning (ha!) to dislike libconfig...
-    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-    {
-        int i, numCfgLayers=layers.getLength();
-        LOG_DEBUG("numCfgLayers=" << numCfgLayers);
-        for (i=0; i<numCfgLayers; i++)
+        struct 
         {
-            string layerName=string(layers[i].getName());
-            if (layerName==llip->layer)
+            const char *prop;
+            bool boolVal;
+        } boolConfigs[] =
+        {
+            { "nodes3d",        threeDView },
+            { "monochrome",     monochromeMode },
+            { "displayBackgroundImage", backgroundImage },
+            { "showVerboseStatusString", showVerboseStatusString }, 
+            { "showWallTime", showWallTimeinStatusString }, 
+            { "showPlaybackTime", showPlaybackTimeInStatusString },
+            { "showPlaybackRange", showPlaybackRangeString },
+            { "autorewind", autorewind }
+        };
+
+        for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
+            root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
+
+        string prop="layers";
+        libconfig::Setting &layers=cfg.lookup(prop);
+
+        // We have to create cfg layers here as we may've gotten new dynamic layers while we were running.
+        // I am beginning (ha!) to dislike libconfig...
+        BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
+        {
+            int i, numCfgLayers=layers.getLength();
+            LOG_DEBUG("numCfgLayers=" << numCfgLayers);
+            for (i=0; i<numCfgLayers; i++)
             {
-                layers[i]=llip->active;
-                break;
+                string layerName=string(layers[i].getName());
+                if (layerName==llip->layer)
+                {
+                    layers[i]=llip->active;
+                    break;
+                }
+            }
+            if (i==numCfgLayers) 
+            {
+                LOG_DEBUG("Adding layer " << llip->layer << " with value " << llip->active << " to " << layers.getName() << " cfg"); 
+                layers.add(string(llip->layer), Setting::TypeBoolean)=llip->active;
             }
         }
-        if (i==numCfgLayers) 
+
+        struct 
         {
-            LOG_DEBUG("Adding layer " << llip->layer << " with value " << llip->active << " to " << layers.getName() << " cfg"); 
-            layers.add(string(llip->layer), Setting::TypeBoolean)=llip->active;
-        }
+            const char *prop; 
+            float *val; 
+        } floatVals[] = 
+        {
+            { "scaleText", &scaleText }, 
+            { "scaleLine", &scaleLine }, 
+            { "layerPadding", &layerPadding }, 
+            { "gpsScale", &gpsScale }, 
+            { "antennaRadius", &antennaRadius },
+            { "ghostLayerTransparency", &ghostLayerTransparency }
+        }; 
+        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
+            root[floatVals[i].prop]=*floatVals[i].val;
+
+        string hrc(hierarchyRingColor.toString());
+        struct 
+        {
+            const char *prop; 
+            string *val; 
+        } strVals[] = 
+        {
+            { "statusFontName", &statusFontName },
+            { "hierarchyRingColor", &hrc }
+        }; 
+        for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++)
+            root[strVals[i].prop]=*strVals[i].val;
+
+        struct 
+        {
+            const char *prop; 
+            int *val; 
+        } intVals[] = 
+        {
+            { "statusFontPointSize", &statusFontPointSize }
+        }; 
+        for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
+            root[intVals[i].prop]=*intVals[i].val;
+
+        struct 
+        {
+            const char *prop; 
+            long long int *val; 
+        } longlongIntVals[] = 
+        {
+            { "playbackStartTime", &playbackStartTime } 
+        }; 
+        for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++)
+            root[longlongIntVals[i].prop]=*longlongIntVals[i].val;
+
+        root["viewPoint"]["angle"][0]=manetAdj.angleX;
+        root["viewPoint"]["angle"][1]=manetAdj.angleY;
+        root["viewPoint"]["angle"][2]=manetAdj.angleZ;
+        root["viewPoint"]["scale"][0]=manetAdj.scaleX;
+        root["viewPoint"]["scale"][1]=manetAdj.scaleY;
+        root["viewPoint"]["scale"][2]=manetAdj.scaleZ;
+        root["viewPoint"]["shift"][0]=manetAdj.shiftX;
+        root["viewPoint"]["shift"][1]=manetAdj.shiftY;
+        root["viewPoint"]["shift"][2]=manetAdj.shiftZ;
+
+        BackgroundImage &bg=BackgroundImage::getInstance();
+        float bgfloatVals[5];
+        bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
+        root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
+        root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
+        root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
+        root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
+        root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
+
+        GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
+        root["backgroundColor"]["r"]=cols[0];
+        root["backgroundColor"]["g"]=cols[1];
+        root["backgroundColor"]["b"]=cols[2];
+        root["backgroundColor"]["a"]=cols[3];
+
     }
-
-    struct 
-    {
-        const char *prop; 
-        float *val; 
-    } floatVals[] = 
-    {
-        { "scaleText", &scaleText }, 
-        { "scaleLine", &scaleLine }, 
-        { "layerPadding", &layerPadding }, 
-        { "gpsScale", &gpsScale }, 
-        { "antennaRadius", &antennaRadius },
-        { "ghostLayerTransparency", &ghostLayerTransparency }
-    }; 
-    for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
-        root[floatVals[i].prop]=*floatVals[i].val;
-
-    struct 
-    {
-        const char *prop; 
-        string *val; 
-    } strVals[] = 
-    {
-        { "statusFontName", &statusFontName } 
-    }; 
-    for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++)
-        root[strVals[i].prop]=*strVals[i].val;
-
-    struct 
-    {
-        const char *prop; 
-        int *val; 
-    } intVals[] = 
-    {
-        { "statusFontPointSize", &statusFontPointSize }
-    }; 
-    for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
-        root[intVals[i].prop]=*intVals[i].val;
-
-    struct 
-    {
-        const char *prop; 
-        long long int *val; 
-    } longlongIntVals[] = 
-    {
-        { "playbackStartTime", &playbackStartTime } 
-    }; 
-    for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++)
-        root[longlongIntVals[i].prop]=*longlongIntVals[i].val;
-
-    root["viewPoint"]["angle"][0]=manetAdj.angleX;
-    root["viewPoint"]["angle"][1]=manetAdj.angleY;
-    root["viewPoint"]["angle"][2]=manetAdj.angleZ;
-    root["viewPoint"]["scale"][0]=manetAdj.scaleX;
-    root["viewPoint"]["scale"][1]=manetAdj.scaleY;
-    root["viewPoint"]["scale"][2]=manetAdj.scaleZ;
-    root["viewPoint"]["shift"][0]=manetAdj.shiftX;
-    root["viewPoint"]["shift"][1]=manetAdj.shiftY;
-    root["viewPoint"]["shift"][2]=manetAdj.shiftZ;
-
-    BackgroundImage &bg=BackgroundImage::getInstance();
-    float bgfloatVals[5];
-    bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
-    root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
-    root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
-    root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
-    root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
-    root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
-
-    GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
-    glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
-    root["backgroundColor"]["r"]=cols[0];
-    root["backgroundColor"]["g"]=cols[1];
-    root["backgroundColor"]["b"]=cols[2];
-    root["backgroundColor"]["a"]=cols[3];
+    catch (const libconfig::SettingException &e) {
+        LOG_ERROR("Error loading configuration at " << e.getPath() << ": " << e.what());
+    }
 
     SingletonConfig::unlock();
 
@@ -2990,6 +3016,7 @@ void manetGLView::reversePlayback()
             playbackSetSpeed(-abs(streamRate));
         playbackPaused=false;
         messageStream->startStream(); 
+        messageStream->getMessageTimeRange();
     }
     TRACE_EXIT();
 }
