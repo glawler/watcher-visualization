@@ -1451,7 +1451,7 @@ void manetGLView::checkIO()
         if (!sliderPressed)
            playbackSlider->setValue(currentMessageTimestamp/1000); 
 
-        if (currentMessageTimestamp>playbackRangeEnd+5000)
+        if (currentMessageTimestamp>playbackRangeEnd+1000)
             messageStream->getMessageTimeRange();
 
         // Really need to make layers a member of a base class...
@@ -3082,6 +3082,7 @@ void manetGLView::forwardToEndOfPlayback()
     TRACE_ENTER();
     pausePlayback(); 
     messageStream->setStreamTimeStart(SeekMessage::eof); 
+    playbackSetSpeed(1.0);
     playbackPaused=false;
     messageStream->startStream(); 
     currentMessageTimestamp=playbackRangeEnd;
