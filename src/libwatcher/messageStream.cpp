@@ -39,6 +39,7 @@ MessageStream::MessageStream(
         const float streamRate_) : 
     messagesSent(0),
     messagesArrived(0),
+    messagesDropped(0),
     messageStreamFilters(),
     streamRate(streamRate_),
     streamStartTime(startTime_),
@@ -203,9 +204,13 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
 {
     TRACE_ENTER();
 
-    readReady=false;
-
     messagesArrived++; 
+
+    if (messageCache.size()>750)  { // Whoa, start dropping messages - the GUI cannot keep up.
+        messagesDropped++;
+        TRACE_EXIT_RET_BOOL(false);
+        return false;
+    }
 
     // We don't really add anything yet to a generic watcherdAPI client.
     bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(conn, message); 
@@ -218,7 +223,6 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
     LOG_DEBUG("MessageCache size=" << messageCache.size());
     LOG_DEBUG("Notifing all waiting threads that there is data to be read"); 
     messageCacheCond.notify_all();
-
 
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;

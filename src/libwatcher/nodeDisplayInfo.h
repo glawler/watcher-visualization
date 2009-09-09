@@ -57,7 +57,7 @@ namespace watcher
             event::NodePropertiesMessage::NodePropertyList nodeProperties;
 
             /** Item's effects */
-#warning GTL TODO: make these effects into array like properties (above) are. 
+// #warning GTL TODO: make these effects into array like properties (above) are. 
             bool sparkle; ///< display effects for a node - may not all be supported in GUI
             bool spin; ///< display effects for a node - may not all be supported in GUI
             bool flash; ///< display effects for a node - may not all be supported in GUI

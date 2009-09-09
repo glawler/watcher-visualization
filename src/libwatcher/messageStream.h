@@ -205,6 +205,7 @@ namespace watcher
         // Bookkeeping
         unsigned int messagesSent;
         unsigned int messagesArrived;
+        unsigned int messagesDropped;
 
         private:
         DECLARE_LOGGER();
