@@ -1417,6 +1417,26 @@ void manetGLView::checkIO()
         messageStream->getNextMessage(message);
         static unsigned long long messageCount=0;
         LOG_DEBUG("Got message number " <<  ++messageCount << " : " << *message);
+
+
+        if (!isFeederEvent(message->type)) {
+            if (message->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE) {
+                PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
+                playbackRangeEnd=trm->max_;
+                playbackRangeStart=trm->min_;
+                if (playbackSlider)
+                    playbackSlider->setRange(playbackRangeStart/1000, playbackRangeEnd/1000);
+                if (!currentMessageTimestamp)
+                    currentMessageTimestamp=
+                        playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
+                        playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
+                                           
+            }
+
+            // End of handling non feeder messages. 
+            continue;
+        }
+
         wGraph.updateGraph(message);
 
         // DataPoint data is handled directly by the scrolling graph thing.
@@ -1425,16 +1445,12 @@ void manetGLView::checkIO()
             WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
             sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
         }
-        else if (message->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE)
-        {
-            PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
-            playbackRangeEnd=trm->max_;
-            playbackRangeStart=trm->min_;
-        }
 
         currentMessageTimestamp=message->timestamp;
-        if (currentMessageTimestamp+5000>playbackRangeEnd)
-            updatePlaybackSliderRange();
+        playbackSlider->setValue(currentMessageTimestamp/1000); 
+
+        if (currentMessageTimestamp>playbackRangeEnd+5000)
+            messageStream->getMessageTimeRange();
 
         // Really need to make layers a member of a base class...
         GUILayer layer;
@@ -1475,13 +1491,13 @@ void manetGLView::checkIO()
 void manetGLView::updatePlaybackSliderRange()
 {
     TRACE_ENTER();
-    if (playbackSlider)
-    {
-        if (currentMessageTimestamp>playbackRangeEnd)
-            playbackRangeEnd=currentMessageTimestamp+5000;
-        playbackSlider->setRange(0, (playbackRangeEnd-playbackRangeStart)/1000);
-        playbackSlider->setValue((currentMessageTimestamp-playbackRangeStart)/1000); 
-    }
+    // if (playbackSlider)
+    // {
+    //     // playbackSlider->setRange(0, (playbackRangeEnd-playbackRangeStart)/1000);
+    //     // playbackSlider->setValue((currentMessageTimestamp-playbackRangeStart)/1000); 
+    //     playbackSlider->setRange(playbackRangeStart/1000, playbackRangeEnd/1000);
+    //     playbackSlider->setValue(currentMessageTimestamp/1000); 
+    // }
     TRACE_EXIT();
 }
 
@@ -1694,12 +1710,14 @@ void manetGLView::updatePlaybackSliderFromGUI()
         TRACE_EXIT();
         return;
     }
-   
-    pausePlayback(); 
-    messageStream->setStreamTimeStart(playbackRangeStart+(playbackSlider->value()*1000));
+ 
+    Timestamp newStart(playbackSlider->value());
+    newStart*=1000;
+    LOG_DEBUG("slider update - new start time: " << newStart << " slider position: " << playbackSlider->value() << " cur mess ts: " << currentMessageTimestamp); 
+
+    currentMessageTimestamp=newStart;  // So it displays in status string immediately. 
+    messageStream->setStreamTimeStart(newStart); 
     messageStream->startStream(); 
-    // no need to set range or current message timestamp, they'll be updated when 
-    // we get the first message at the new timestamp
 
     TRACE_EXIT();
 }
@@ -2992,7 +3010,6 @@ void manetGLView::pausePlayback()
     TRACE_ENTER();
     playbackPaused=true;
     messageStream->stopStream(); 
-    messageStream->getMessageTimeRange();
     TRACE_EXIT();
 }
 void manetGLView::normalPlayback()
@@ -3001,7 +3018,6 @@ void manetGLView::normalPlayback()
     playbackPaused=false;
     playbackSetSpeed(1.0);
     messageStream->startStream(); 
-    messageStream->getMessageTimeRange();
     TRACE_EXIT();
 }
 void manetGLView::reversePlayback()
@@ -3016,7 +3032,6 @@ void manetGLView::reversePlayback()
             playbackSetSpeed(-abs(streamRate));
         playbackPaused=false;
         messageStream->startStream(); 
-        messageStream->getMessageTimeRange();
     }
     TRACE_EXIT();
 }
@@ -3033,7 +3048,6 @@ void manetGLView::forwardPlayback()
         playbackPaused=false;
         messageStream->startStream(); 
     }
-    messageStream->getMessageTimeRange();
     TRACE_EXIT();
 }
 void manetGLView::rewindToStartOfPlayback()
@@ -3046,6 +3060,8 @@ void manetGLView::rewindToStartOfPlayback()
     else
         messageStream->startStream(); 
     playbackPaused=false;
+    currentMessageTimestamp=playbackRangeStart;
+    playbackSlider->setValue(currentMessageTimestamp/1000); 
     TRACE_EXIT();
 }
 void manetGLView::forwardToEndOfPlayback()
@@ -3056,7 +3072,7 @@ void manetGLView::forwardToEndOfPlayback()
     playbackPaused=false;
     messageStream->startStream(); 
     currentMessageTimestamp=playbackRangeEnd;
-    messageStream->getMessageTimeRange();
+    playbackSlider->setValue(currentMessageTimestamp/1000); 
     TRACE_EXIT();
 }
 
