@@ -1703,7 +1703,7 @@ void manetGLView::sliderPressedInGUI()
     TRACE_EXIT();
 }
 
-void manetGLView::sliderMovedInGUI(int newVal)
+void manetGLView::sliderMovedInGUI(int /*newVal*/)
 {
     TRACE_ENTER();
     if (!playbackSlider)
@@ -1712,7 +1712,6 @@ void manetGLView::sliderMovedInGUI(int newVal)
     // LOG_DEBUG("sliderMoved - new value: " << newVal); 
     TRACE_EXIT();
 }
-
 
 void manetGLView::updatePlaybackSliderFromGUI()
 {
@@ -2524,9 +2523,11 @@ void manetGLView::toggleBackgroundImage(bool isOn)
 void manetGLView::clearAllEdges()
 {
     TRACE_ENTER();
-    WatcherGraph::edgeIterator ei, eend;
-    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
-        remove_edge(*ei, wGraph.theGraph);  // GTL does this blow away the label memory as well? 
+
+    WatcherGraph::vertexIterator vi, viend, vj, vjend;
+    for(tie(vi, viend)=vertices(wGraph.theGraph); vi!=viend; ++vi)
+        clear_out_edges(*vi, wGraph.theGraph); 
+
     TRACE_EXIT();
 }
 void manetGLView::clearAllLabels()
