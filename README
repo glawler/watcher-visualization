@@ -1,22 +1,23 @@
 
 
 
+To build: 
+cd src
+./configure
+make 
+make doc
+cd clients/legacyWatcher
+qmake-qt4   (or just qmake if only qt4 is installed on your machine)
+make
+
+Look in ./src/doc for User's Guide and ./doc for doxygen generated dev docs.
 
 
 
 *********************************************************************
 *** Regardless of what this file is called, do not read me. I am ****
-*** woefully out of date ********************************************
+*** woefully out of date. Ignore things below this. *****************
 *********************************************************************
-
-
-
-
-
-
-
-
-
 
 
 Here are instructions on building and running the "new old watcher"
