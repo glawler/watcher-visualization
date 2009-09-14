@@ -1,24 +1,0 @@
-#!/bin/sh
-ex=../key_authority/nnp-keygen
-max=22
-net=192.168.2
-if [ -x ${ex} ] 
-then
-    rm -f keyfile.pub keyfile.[1-9] keyfile.[1-9][0-9] keyfile.1[0-9][0-9] keyfile.2[0-4][0-9] keyfile.25[0-5]
-    for (( i=1; i <= ${max} ; ++i ));
-    do
-        priv=`${ex}`
-        pub=`echo ${priv} | cut -d'|' -f1-3`
-        echo "${net}.${i}|${priv}" > keyfile.${i}
-        echo "${net}.${i}|${pub}" >> keyfile.pub
-        echo -n " $i of ${max}"
-    done;
-    for (( i=1; i <= ${max} ; ++i ));
-    do
-        cat keyfile.pub >> keyfile.${i}
-        echo -n " $i of ${max}  "
-    done;
-    echo "made ${max} key files"
-else
-    echo "need ${ex}"
-fi

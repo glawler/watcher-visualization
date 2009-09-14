@@ -1,6 +1,0 @@
-
-To generate the makefile, use qmake-qt4. Then make as usual.
-
-> qmake-qt4
-> make 
-
