@@ -1,4 +1,4 @@
-AC_INIT(watcher, 1.0)
+AC_INIT(watcher, 0.6)
 AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
 AC_PROG_CXX

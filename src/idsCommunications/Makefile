@@ -454,5 +454,9 @@ depend: ${ALLSRCS} ${ALLHEADERS}
 	@makedepend -f- -- $(CPPFLAGS) $(CFLAGS) -- ${ALLSRCS} > $@ 2>/dev/null;
 	@for f in ${ALLOBJS} depend ; do echo "$$f: Makefile" >> $@; done
 
+distdir:
+
+dist:
+
 # no errors if "depend" doesn't exist
 -include depend

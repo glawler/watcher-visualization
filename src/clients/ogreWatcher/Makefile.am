@@ -22,7 +22,14 @@ ogreWatcher_SOURCES= \
 	ogreWatcherApplication.cpp \
 	node.cpp \
 	edge.cpp \
-	watcherMessageFrameListener.cpp 
+	watcherMessageFrameListener.cpp \
+	edge.h \
+	node.h \
+	ogreApplication.h \
+	ogreFrameListener.h \
+	ogreWatcherApplication.h \
+	watcherMessageFrameListener.h
+
 
 resources.cfg : 
 	@ echo Creating resources.cfg from sample configuration at $(TOPDIR)/etc/ogre.resources.cfg.sample

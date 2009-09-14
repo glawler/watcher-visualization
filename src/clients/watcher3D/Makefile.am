@@ -17,3 +17,4 @@ libWatcher3D_la_SOURCES=libWatcher3D.cpp
 # watcher3D - non-standard game executable.
 bin_PROGRAMS=watcher3D
 watcher3D_SOURCES=main.cpp
+

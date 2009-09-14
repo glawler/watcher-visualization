@@ -48,3 +48,4 @@ testWatcherGraph_SOURCES=testWatcherGraph.cpp
 testWatcherGraphNode_SOURCES=testWatcherGraphNode.cpp
 testWatcherGraphEdge_SOURCES=testWatcherGraphEdge.cpp
 testLoadSaveDisplayInfo_SOURCES=testLoadSaveDisplayInfo.cpp
+testMessageStream_SOURCES=testMessageStream.cpp
