@@ -2520,6 +2520,13 @@ void manetGLView::toggleBackgroundImage(bool isOn)
     updateGL();
     TRACE_EXIT();
 }
+
+void manetGLView::clearAll()
+{
+    TRACE_ENTER();
+    wGraph.theGraph.clear();
+    TRACE_EXIT();
+}
 void manetGLView::clearAllEdges()
 {
     TRACE_ENTER();

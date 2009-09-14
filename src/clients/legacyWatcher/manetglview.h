@@ -67,6 +67,7 @@ public slots:
 
         void clearAllLabels();
         void clearAllEdges();
+        void clearAll();
 
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);

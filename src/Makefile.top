@@ -3,6 +3,8 @@
 # "Fixes" warning in log4cxx about type punning. 
 CPPFLAGS += -fno-strict-aliasing
 
+CPPFLAGS += -O2
+
 # "Fixes" warning about old headers
 CPPFLAGS += -Wno-deprecated
 

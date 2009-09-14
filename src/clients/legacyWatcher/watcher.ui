@@ -241,13 +241,15 @@ p, li { white-space: pre-wrap; }
     <property name="title" >
      <string>&amp;Layers</string>
     </property>
-    <addaction name="actionClearAllLabels" />
-    <addaction name="actionClearAllEdges" />
    </widget>
    <widget class="QMenu" name="menuView" >
     <property name="title" >
      <string>&amp;View</string>
     </property>
+    <addaction name="actionClearAllLabels" />
+    <addaction name="actionClearAllEdges" />
+    <addaction name="actionClearAll" />
+    <addaction name="separator" />
     <addaction name="actionFullscreen" />
     <addaction name="actionNormalscreen" />
     <addaction name="actionKeyboardShortcuts" />
@@ -352,6 +354,11 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text" >
     <string>Playback &amp;Range</string>
+   </property>
+  </action>
+  <action name="actionClearAll" >
+   <property name="text" >
+    <string>&amp;Clear All</string>
    </property>
   </action>
  </widget>
@@ -805,9 +812,25 @@ p, li { white-space: pre-wrap; }
      <x>464</x>
      <y>207</y>
     </hint>
-    <hint type="destinationlabel">
+    <hint type="destinationlabel" >
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClearAll</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>clearAll()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>464</x>
+     <y>375</y>
     </hint>
    </hints>
   </connection>
