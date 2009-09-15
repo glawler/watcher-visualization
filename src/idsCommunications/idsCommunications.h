@@ -106,7 +106,6 @@ typedef long long int destime;
  */
 #define NODE_LOCAL	(0x7f000001)
 #define NODE_ALL	(0xFFFFFFFF)
-#define NODE_ROOTGROUP  (0xE000041B) /* random ad-hoc multicast addr 224.0.4.27 */
 #define NODE_IS_MULTICAST(m) (((m) & 0xf0000000) == 0xe0000000)
 
 
@@ -171,8 +170,7 @@ typedef enum
      * (only addr=NODE_LOCAL is implemented) */
     COMMUNICATIONSDESTINATION_NEARESTCOORD,
 
-    /* multicast the message to the given group
-     * (currently only NODE_ROOTGROUP is supported) */
+    /* multicast the message to the given group */
     COMMUNICATIONSDESTINATION_MULTICAST,
 
 } CommunicationsDestinationType;
@@ -606,11 +604,6 @@ size_t messageInfoRawPayloadLenGet(const struct MessageInfo *messageInfo);
  *  COORDINATOR_REGIONAL active indicates that the node is "somewhere in
  *      the middle" (has grandchildren but is not root)
  *
- *  COORDINATOR_ROOTGROUP active indicates that the node is an active member 
- *      of the "root group" (note that this is orthogonal to the other
- *      COORDINATOR_* values -- a root group member may be a leaf, a root,
- *      or anything else)
- *
  *  A node that is not an active ROOT/NEIGHBORHOOD/REGIONAL coordinator
  *  is a leaf node.
  *
@@ -626,8 +619,7 @@ typedef enum IDSPositionType
     COORDINATOR_NEIGHBORHOOD=0,
     COORDINATOR_REGIONAL,
     COORDINATOR_ROOT,
-    COORDINATOR_ROOTGROUP,
-#define COORDINATOR_MAXVAL (COORDINATOR_ROOTGROUP+1)
+#define COORDINATOR_MAXVAL 4
 } IDSPositionType;
 
 /*
@@ -709,8 +701,7 @@ IDSPosition *idsPositionCurrent( CommunicationsStatePtr cs);
 
 /* To set the arrangement of the nodes to a specific configuration, create a
  * "state vector", consisting of a list of nodes with the parent node which
- * each that node should use and a flag indicating whether it is a member
- * of the "root group".  Then, pass that vector to IDSStateSet, and it will
+ * each that node should use. Then, pass that vector to IDSStateSet, and it will
  * be flood-routed to all the nodes, and immediately adopted.
  * The clustering algorithm will then run from there.  (It may immediately 
  * change things too, so try to make sure the set configuration is a valid
@@ -722,7 +713,6 @@ typedef struct
 {
     ManetAddr node;
     ManetAddr parent;
-    unsigned int rootgroupflag:1;
     /* Clustering-algorithm-specific data.
      * Don't go overboard; the entire IDSState vector must fit in a packet.
      * This will be freed by IDSStateFree() using free().

@@ -230,7 +230,6 @@ typedef struct manetNode
 	neighbor *neighborlist;
 	int level;			/* which level we're at in the hierarchy  */
 	int rootflag;           /* node is a hierarchy root */
-	int rootgroupflag;      /* node is an active member of "root group" */
 
 	struct routingState *routing;    /* routing stuff. */
 	struct clusteringState *cluster;    /* clustering stuff */

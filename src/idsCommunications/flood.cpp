@@ -154,10 +154,7 @@ void floodPacket(manetNode *us, packet *p)
 			packetFree(cpy);
 		}
 
-		if ((pf->origdst==NODE_BROADCAST)
-		    || (pf->origdst==us->addr)
-		    || (pf->origdst==NODE_ROOTGROUP
-			&& us->rootgroupflag))
+		if ((pf->origdst==NODE_BROADCAST) || (pf->origdst==us->addr))
 		{
 #ifdef DEBUG_FLOOD
 			fprintf(stderr,"node %d: flood decapsulating.  src= %d dst= %s id= %u type= 0x%x len= %d\n",us->addr & 0xFF,pf->origsrc & 0xFF,manetAddr2Str(pf->origdst),pf->id,pf->origtype,p->len-sizeof(*pf));

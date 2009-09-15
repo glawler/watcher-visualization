@@ -790,7 +790,6 @@ manet *manetInit(Config *conf,long long int starttime)
 		m->nlist[i].clusterhead=NULL;
 		m->nlist[i].neighborlist=NULL;
 		m->nlist[i].rootflag=0;
-		m->nlist[i].rootgroupflag=0;
 		m->nlist[i].level=0;
 
 		m->nlist[i].addr=i;     /* may be replaced with an actual address later */

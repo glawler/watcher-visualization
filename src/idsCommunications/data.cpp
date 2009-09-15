@@ -442,9 +442,7 @@ static void dataData(manetNode *us, packet *p)
 		return;
         }
 
-	if (p->dst==NODE_BROADCAST
-	    || (p->dst==NODE_ROOTGROUP
-		&& us->rootgroupflag))
+	if (p->dst==NODE_BROADCAST)
 	{
 		if (pd->destinationCount==0)
 			forus=1;
@@ -494,7 +492,7 @@ static void dataData(manetNode *us, packet *p)
 		/* The first time we receive a packet, it will be unacked, and thats the only time we want to decapsulate and deliver it  */
 		
 		cpy=packetCopy(p,-pd->len);          /* decapsulate the enclosed packet */
-		if (pd->destinationCount!=0)		/* there are 3 cases for this, pure broadcast/multicast (p->dst==NODE_BROADCAST or a multicast addr like NODE_ROOTGROUP, destinationCount==0), pure unicast (p->dst=us->addr, destinationcount==0), multiple-destinations broadcast (pd->dst==NODE_BROADCAST, destinationCount>0).  In the third case, we need to reset the packet's observed dst addr to our own (its /not/ a broadcast, though it was carried in one)  */
+		if (pd->destinationCount!=0)		/* there are 3 cases for this, pure broadcast/multicast (p->dst==NODE_BROADCAST or a multicast addr destinationCount==0), pure unicast (p->dst=us->addr, destinationcount==0), multiple-destinations broadcast (pd->dst==NODE_BROADCAST, destinationCount>0).  In the third case, we need to reset the packet's observed dst addr to our own (its /not/ a broadcast, though it was carried in one)  */
 			cpy->dst=us->addr;
 		cpy->type=pd->origtype;
 

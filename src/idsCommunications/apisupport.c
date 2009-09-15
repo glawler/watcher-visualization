@@ -493,8 +493,6 @@ void idsPositionUnmarshal(const ApiCommand *ac,IDSPositionType *position, IDSPos
 #define SET_BIT(f,n,v)  do { (f) |= ((!!(v)) << (n)); } while (0)
 #define IDSSTATE_STATE_FLAG_LOCKED_GET(f)     TEST_BIT(f,0)
 #define IDSSTATE_STATE_FLAG_LOCKED_SET(f,v)   SET_BIT(f,0,v)
-#define IDSSTATE_NODE_FLAG_ROOTGROUP_GET(f)   TEST_BIT(f,0)
-#define IDSSTATE_NODE_FLAG_ROOTGROUP_SET(f,v) SET_BIT(f,0,v)
 
 static size_t IDSStateElementMarshaledSize(const IDSStateElement *e)
 {
@@ -553,7 +551,6 @@ ApiCommand *IDSStateMarshal(const IDSState *vect)
 		unsigned char nodeflags = 0;
 		MARSHALLONG(hp,vect->state[i].node);
 		MARSHALLONG(hp,vect->state[i].parent);
-		IDSSTATE_NODE_FLAG_ROOTGROUP_SET(nodeflags, vect->state[i].rootgroupflag);
 		/* the rest of the node flags byte is set to zero (reserved) */
 		MARSHALBYTE(hp,nodeflags);
 		MARSHALSHORT(hp,vect->state[i].clusteringDataLen);
@@ -603,7 +600,6 @@ IDSState *IDSStateUnmarshal(const packet *p)
 			UNMARSHALLONG(hp, ret->state[i].node);
 			UNMARSHALLONG(hp, ret->state[i].parent);
 			UNMARSHALBYTE(hp, nodeflags);
-			ret->state[i].rootgroupflag = IDSSTATE_NODE_FLAG_ROOTGROUP_GET(nodeflags);
 			/* the rest of the flags byte is ignored (reserved) */
 			UNMARSHALSHORT(hp, ret->state[i].clusteringDataLen);
 			if (ret->state[i].clusteringDataLen != 0)
@@ -1388,9 +1384,6 @@ fprintf(stderr, "posw8position: %s\n", p);
 		else
 		if (strcasecmp(p,"region")==0)
 			cpw.position=COORDINATOR_REGIONAL;
-		else
-		if (strcasecmp(p,"rootgroup")==0)
-			cpw.position=COORDINATOR_ROOTGROUP;
 		else
 		{
 			fprintf(stderr,"illegal position in position weight file!\n");

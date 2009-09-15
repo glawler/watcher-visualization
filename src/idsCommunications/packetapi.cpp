@@ -1407,8 +1407,7 @@ static void packetApiReceive(manetNode *us, packet *p)
 	MessageInfo *mi;
 	MessageTypeNode *ct;
 
-	if (!((p->dst==us->addr) || (p->dst==NODE_BROADCAST)
-	      || (p->dst==NODE_ROOTGROUP && us->rootgroupflag)))
+	if (!((p->dst==us->addr) || (p->dst==NODE_BROADCAST)))
 		return;
 
 #ifdef DEBUG_APPROUTING
@@ -1926,26 +1925,7 @@ static void idsPositionCheck(manetNode *us,void *data)
 	idsPositionSend(us,COORDINATOR_ROOT,stat);
 
 
-	/*
-	 * Check Root Group
-         */
-	if ((us->rootgroupflag))
-	{
-		/* we're an active member of the root group */
-		stat=IDSPOSITION_ACTIVE;
-	}
-	else
-		stat=IDSPOSITION_INACTIVE;
-
-#ifdef DEBUG_PACKETAPI
-	if (us->packetApi->currentPositionState[COORDINATOR_ROOTGROUP]!=stat)
-	{
-		elog("idsPositionCheck: COORDINATOR_ROOTGROUP %s\n",idsPositionStatus2Str(stat));
-	}
-#endif
-	us->packetApi->currentPositionState[COORDINATOR_ROOTGROUP]=stat;
-	idsPositionSend(us,COORDINATOR_ROOTGROUP,stat);
-
+    stat=IDSPOSITION_INACTIVE;
 
 	/* If we have child nodes, then we are a NEIGHBORHOOD coordinator
 	 */

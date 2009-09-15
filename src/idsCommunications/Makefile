@@ -171,7 +171,6 @@ LDFLAGS+=-lpcap
 #COMPFLAGS += -DDEBUG_SELECT
 #COMPFLAGS += -DDEBUG_TESTTRAFFIC
 #COMPFLAGS += -DDEBUG_WATCHER
-#COMPFLAGS += -DDEBUG_DYNAMICROOTGROUP
 
 %.x : %.c
 	splint +posixlib +matchanyintegral +boolint -compdestroy -mustfreeonly -dependenttrans -kepttrans -branchstate -compmempass $(INCLUDES) $<

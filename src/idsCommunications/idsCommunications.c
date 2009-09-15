@@ -1860,7 +1860,7 @@ void communicationsWatcherEdgeRemove(CommunicationsStatePtr cs, int bitmap, Mane
 
 /*
  * Returns a static buffer holding ddd.ddd.ddd.ddd style representation
- * of "x". NODE_LOCAL, NODE_ALL, and NODE_ROOTGROUP get treated separately
+ * of "x". NODE_LOCAL and NODE_ALL get treated separately
  * and return the corresponding string instead of a dotted quad.
  */
 char const *manetAddr2Str(ManetAddr x)
@@ -1873,10 +1873,6 @@ char const *manetAddr2Str(ManetAddr x)
     else if(x == NODE_ALL)
     {
         strcpy(ret, "NODE_ALL");
-    }
-    else if(x == NODE_ROOTGROUP)
-    {
-        strcpy(ret, "NODE_ROOTGROUP");
     }
     else
     {
@@ -1941,9 +1937,6 @@ char const *idsPosition2Str(IDSPositionType position)
 	break;
 	case COORDINATOR_ROOT:
 		ret = "COORDINATOR_ROOT";
-	break;
-	case COORDINATOR_ROOTGROUP:
-		ret = "COORDINATOR_ROOTGROUP";
 	break;
 	default:
 	{
