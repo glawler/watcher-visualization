@@ -115,9 +115,7 @@ static void myDetectorPositionUpdate(void *d, IDSPositionType position, IDSPosit
             LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
             pm->nodeProperties.push_back(status==IDSPOSITION_ACTIVE?NodePropertiesMessage::NEIGHBORHOOD:NodePropertiesMessage::LEAFNODE);
             break;
-        case COORDINATOR_ROOTGROUP:
-            LOG_DEBUG("Position change: regional " << (status==IDSPOSITION_ACTIVE?"active":"inactive")); 
-            pm->nodeProperties.push_back(status==IDSPOSITION_ACTIVE?NodePropertiesMessage::ROOT:NodePropertiesMessage::LEAFNODE);
+        default:
             break;
     }
     dt->client->sendMessage(pm); 
