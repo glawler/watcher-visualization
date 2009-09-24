@@ -121,6 +121,33 @@ static void myDetectorPositionUpdate(void *d, IDSPositionType position, IDSPosit
     dt->client->sendMessage(pm); 
 }
 
+GUILayer legacyFamilyValue2GUILayer(unsigned int family)
+{
+    TRACE_ENTER();
+    switch (family)
+    {
+        case COMMUNICATIONS_LABEL_FAMILY_UNDEFINED: return UNDEFINED_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_PHYSICAL: return PHYSICAL_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_HIERARCHY: return HIERARCHY_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_BANDWIDTH: return BANDWIDTH_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING: return ROUTING_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING_ONEHOP: return ONE_HOP_ROUTING_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS: return ANTENNARADIUS_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_SANITYCHECK: return SANITY_CHECK_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ANOMPATHS: return ANOMPATHS_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_CORRELATION: return CORROLATION_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ALERT: return ALERT_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_CORRELATION_3HOP: return CORROLATION_3HOP_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING2: return ROUTING2_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_ROUTING2_ONEHOP: return ROUTING2_ONE_HOP_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_FLOATINGGRAPH: return FLOATING_GRAPH_LAYER;
+        case COMMUNICATIONS_LABEL_FAMILY_NORMPATHS: return NORMAL_PATHS_LAYER; 
+        default: return UNDEFINED_LAYER;
+    }
+
+    TRACE_EXIT(); 
+}
+
 void sendLabel(void *messageHandlerData, const struct MessageInfo *mi, bool addLabel) 
 {
     TRACE_ENTER();
@@ -147,6 +174,7 @@ void sendLabel(void *messageHandlerData, const struct MessageInfo *mi, bool addL
     lm->background=Color(lab.bgcolor[0], lab.bgcolor[1], lab.bgcolor[2], lab.bgcolor[3]);
     lm->expiration=lab.expiration;
     lm->addLabel=addLabel;
+    lm->layer=legacyFamilyValue2GUILayer(lab.family); 
 
     st->client->sendMessage(lm); 
 }
@@ -163,33 +191,6 @@ void sendLabelRemove(void *messageHandlerData, const struct MessageInfo *mi)
     TRACE_ENTER();
     sendLabel(messageHandlerData, mi, false);
     TRACE_ENTER();
-}
-
-GUILayer legacyFamilyValue2GUILayer(unsigned int family)
-{
-    TRACE_ENTER();
-    switch (family)
-    {
-        case COMMUNICATIONS_LABEL_FAMILY_UNDEFINED: return UNDEFINED_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_PHYSICAL: return PHYSICAL_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_HIERARCHY: return HIERARCHY_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_BANDWIDTH: return BANDWIDTH_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_ROUTING: return ROUTING_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_ROUTING_ONEHOP: return ONE_HOP_ROUTING_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_ANTENNARADIUS: return ANTENNARADIUS_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_SANITYCHECK: return SANITY_CHECK_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_ANOMPATHS: return ANOMPATHS_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_CORRELATION: return CORROLATION_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_ALERT: return ALERT_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_CORRELATION_3HOP: return CORROLATION_3HOP_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_ROUTING2: return ROUTING2_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_ROUTING2_ONEHOP: return ROUTING2_ONE_HOP_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_FLOATINGGRAPH: return FLOATING_GRAPH_LAYER;
-        case COMMUNICATIONS_LABEL_FAMILY_NORMPATHS: return NORMAL_PATHS_LAYER; 
-        default: return UNDEFINED_LAYER;
-    }
-
-    TRACE_EXIT(); 
 }
 
 void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEdge)
@@ -355,6 +356,7 @@ void sendFloatinglabel(void *messageHandlerData, const struct MessageInfo *mi, b
     lm->lat=lab.x;      // GTL - I don't think these are GPS coords, but pixel positions...
     lm->lng=lab.y;
     lm->alt=lab.z;
+    lm->layer=legacyFamilyValue2GUILayer(lab.family); 
 
     st->client->sendMessage(lm); 
     TRACE_EXIT();
