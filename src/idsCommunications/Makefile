@@ -457,5 +457,7 @@ distdir:
 
 dist:
 
+check:
+
 # no errors if "depend" doesn't exist
 -include depend
