@@ -1,0 +1,13 @@
+AC_INIT(logger, 1.0)
+AM_INIT_AUTOMAKE([foreign])
+
+AC_PROG_CXX
+AC_PROG_LIBTOOL
+
+PKG_PROG_PKG_CONFIG
+PKG_CHECK_MODULES(LOG4CXX, liblog4cxx >= 0.10.0)
+
+AC_CONFIG_FILES([Makefile logger.pc])
+AC_OUTPUT
+
+
