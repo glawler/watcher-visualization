@@ -494,12 +494,12 @@ static void selectLoop(detector *dt)
     int maxfd;
     int rc;
     // struct timeval curtime;
-    struct timeval timeout;
     int apifd;
     CommunicationsLogStatePtr cl = communicationsLogStateGet(dt->cs);
 
     while(1)
     {
+        struct timeval timeout={2,0};
         FD_ZERO(&readfds);
         FD_ZERO(&writefds);
         maxfd=-1;
