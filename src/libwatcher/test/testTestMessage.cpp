@@ -17,6 +17,8 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
 
+DECLARE_GLOBAL_LOGGER("testTestMessage"); 
+
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
     LOAD_LOG_PROPS("test.log.properties"); 

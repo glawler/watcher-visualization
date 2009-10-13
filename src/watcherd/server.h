@@ -22,7 +22,7 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 #include "serverConnection.h"
-#include "logger.h"
+#include "declareLogger.h"
 #include "watcherd_fwd.h"
 
 namespace watcher 

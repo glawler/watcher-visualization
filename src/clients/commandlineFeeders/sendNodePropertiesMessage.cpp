@@ -46,6 +46,8 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace boost;
 
+DECLARE_GLOBAL_LOGGER("sendNodePropertiesMessage"); 
+
 void usage(const char *progName)
 { 
     fprintf(stderr, "Usage: %s [args]\n", basename(progName)); 

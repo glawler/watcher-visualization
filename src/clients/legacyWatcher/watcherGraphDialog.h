@@ -27,7 +27,7 @@
 #include <Qt/qdialog.h>
 
 #include "graphPlot.h"
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

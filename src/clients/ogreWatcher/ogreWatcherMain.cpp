@@ -29,6 +29,8 @@
 #include "ogreWatcherApplication.h"
 #include "watcherMessageFrameListener.h"
 
+DECLARE_GLOBAL_LOGGER("ogreWatcher"); 
+
 using namespace std;
 using namespace watcher;
 using namespace libconfig;

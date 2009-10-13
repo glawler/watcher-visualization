@@ -25,6 +25,7 @@
 #include "singletonConfig.h"
 #include "nodeDisplayInfo.h"
 #include "colors.h"
+#include "logger.h"
 
 using namespace std;
 using namespace watcher;

@@ -22,6 +22,7 @@
  */
 #include "watcherSerialize.h"
 #include "playbackTimeRange.h"
+#include "logger.h"
 
 namespace watcher {
     namespace event {

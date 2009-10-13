@@ -25,8 +25,6 @@ namespace watcher {
     namespace event {
         ostream& operator<<(ostream &out, const MessageType &type)
         {
-            TRACE_ENTER();
-
             out << "\"";
             switch(type)
             {
@@ -90,7 +88,6 @@ namespace watcher {
             }
             out << "\"";
 
-            TRACE_EXIT();
             return out;
         }
     }

@@ -24,6 +24,7 @@
 #include "libwatcher/seekWatcherMessage.h"
 #include "libwatcher/speedWatcherMessage.h"
 #include "libwatcher/playbackTimeRange.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -207,9 +208,10 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
     messagesArrived++; 
 
     if (messageCache.size()>750)  { // Whoa, start dropping messages - the GUI cannot keep up.
-        messagesDropped++;
-        TRACE_EXIT_RET_BOOL(false);
-        return false;
+        // messagesDropped++;
+        // TRACE_EXIT_RET_BOOL(false);
+        // return false;
+        usleep(100000);
     }
 
     // We don't really add anything yet to a generic watcherdAPI client.
@@ -270,9 +272,7 @@ bool MessageStream::handleMessagesSent(const vector<MessagePtr> &messages)
 
 std::ostream &watcher::operator<<(std::ostream &out, const MessageStream & /*messStream*/)
 {
-    TRACE_ENTER();
     out << "MessageStream()";
-    TRACE_EXIT();
     return out;
 }
 

@@ -30,7 +30,7 @@
 #include "watcherGraphDialog.h"
 #include "libwatcher/dataPointMessage.h"
 #include "stringIndexedMenuItem.h"
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

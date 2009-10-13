@@ -25,6 +25,7 @@
 #include "labelMessage.h"
 #include "messageTypesAndVersions.h"
 #include "colors.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -170,9 +171,7 @@ namespace watcher {
 
         ostream& operator<<(ostream &out, const LabelMessage &mess)
         {
-            TRACE_ENTER();
             mess.operator<<(out);
-            TRACE_EXIT();
             return out;
         }
 

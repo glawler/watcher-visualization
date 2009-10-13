@@ -28,6 +28,7 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include "libwatcher/watcherTypes.h" //for Timestamp
+#include "declareLogger.h"
 
 // forward decls
 namespace boost {
@@ -122,6 +123,7 @@ namespace watcher {
             //impl* impl_;
             boost::scoped_ptr<impl> impl_;
             void timer_handler(const boost::system::error_code& error);
+            DECLARE_LOGGER();
     };
 
 }

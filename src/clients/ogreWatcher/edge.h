@@ -26,7 +26,7 @@
 
 #include <utility>
 #include <Ogre.h>
-#include "logger.h"
+#include "declareLogger.h"
 
 #include "node.h"
 

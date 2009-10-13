@@ -25,7 +25,7 @@
 #define WATCHER_COLORS_H
 
 #include <stdint.h>         // for uint32_t
-#include "logger.h"
+#include "declareLogger.h"
 #include <boost/serialization/access.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -101,12 +101,10 @@ namespace watcher
             template <typename Archive>
                 void serialize(Archive & ar, const unsigned int /* file_version */)
                 {
-                    TRACE_ENTER();
                     ar & r;
                     ar & g;
                     ar & b;
                     ar & a;
-                    TRACE_EXIT();
                 }
             DECLARE_LOGGER();
     };

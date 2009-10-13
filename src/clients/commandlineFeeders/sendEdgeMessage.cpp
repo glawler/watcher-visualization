@@ -72,6 +72,8 @@
 #include <libwatcher/messageTypesAndVersions.h>    // for GUILayer
 #include <libwatcher/sendMessageHandler.h>
 
+DECLARE_GLOBAL_LOGGER("sendEdgeMessage"); 
+
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;

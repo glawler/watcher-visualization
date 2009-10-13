@@ -28,7 +28,7 @@
 #include <list>
 #include <string>
 
-#include "logger.h"
+#include "declareLogger.h"
 #include "gpsMessage.h"
 #include "labelMessage.h"
 #include "colorMessage.h"

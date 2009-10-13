@@ -22,6 +22,7 @@
  */
 #include "watcherSerialize.h"
 #include "startWatcherMessage.h"
+#include "logger.h"
 
 namespace watcher {
     namespace event {

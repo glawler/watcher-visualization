@@ -22,6 +22,7 @@
  */
 #include "watcherSerialize.h"
 #include "seekWatcherMessage.h"
+#include "logger.h"
 
 namespace watcher {
     namespace event {
@@ -44,8 +45,6 @@ namespace watcher {
 
         std::ostream& operator<< (std::ostream& o, const SeekMessage& m)
         {
-            TRACE_ENTER();
-            TRACE_EXIT();
             return o << "SeekMessage(offset=" << m.offset << " , rel=" << m.rel << ')';
         }
 

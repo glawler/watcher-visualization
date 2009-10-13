@@ -32,7 +32,7 @@
 
 #include "libwatcher/watcherTypes.h"    // for Timestamp
 #include "libwatcher/message.h"         // for MessagePtr
-#include "logger.h"
+#include "declareLogger.h"
 
 #include "client.h"
 #include "watcherdAPIMessageHandler.h"

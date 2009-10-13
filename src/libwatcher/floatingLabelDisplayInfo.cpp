@@ -16,6 +16,7 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "floatingLabelDisplayInfo.h"
+#include "logger.h"
 
 using namespace std;
 using namespace watcher;
@@ -56,8 +57,6 @@ ostream &FloatingLabelDisplayInfo::toStream(ostream &out) const
 
 ostream& watcher::operator<<(ostream &out, const FloatingLabelDisplayInfo &obj)
 {
-    TRACE_ENTER();
     obj.operator<<(out);
-    TRACE_EXIT();
     return out;
 }

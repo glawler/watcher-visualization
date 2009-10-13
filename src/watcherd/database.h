@@ -30,6 +30,7 @@
 
 #include "libwatcher/message_fwd.h"
 #include "libwatcher/watcherTypes.h"
+#include "declareLogger.h"
 
 namespace watcher {
     typedef std::pair<Timestamp, Timestamp> TimeRange;
@@ -60,6 +61,8 @@ namespace watcher {
             virtual TimeRange eventRange() = 0;
 
             virtual ~Database() = 0;
+
+            DECLARE_LOGGER();
     };
 
     /** Get the thread-local database handle for the current thread.  If one

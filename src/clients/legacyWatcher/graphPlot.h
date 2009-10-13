@@ -35,7 +35,7 @@
 #include "qwt_legend.h"
 #include "qwt_legend_item.h"
 
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

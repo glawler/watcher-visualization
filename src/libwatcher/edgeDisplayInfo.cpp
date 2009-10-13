@@ -20,6 +20,7 @@
 #include "singletonConfig.h" 
 #include "colors.h"
 #include "messageTypesAndVersions.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace watcher::event;

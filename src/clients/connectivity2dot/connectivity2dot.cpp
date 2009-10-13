@@ -88,6 +88,8 @@
 #include "libwatcher/watcherGraph.h"
 #include "logger.h"
 
+DECLARE_GLOBAL_LOGGER("connectivity2dot"); 
+
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;

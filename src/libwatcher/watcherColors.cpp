@@ -20,6 +20,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "logger.h"
 #include "watcherColors.h"
 #include "colors.h"
 #include <cstdio>
@@ -290,9 +291,7 @@ namespace watcher {
 
     ostream &operator<<(ostream &out, const Color &c)
     {
-        TRACE_ENTER();
         c.operator<<(out);
-        TRACE_EXIT();
         return out;
     }
 

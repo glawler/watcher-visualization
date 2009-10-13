@@ -15,6 +15,8 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
 
+DECLARE_GLOBAL_LOGGER("testWatcherGraphEdge"); 
+
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
     // Do this in first test so we can log.

@@ -25,7 +25,7 @@
 #define YETANOTHERNODE_H
 
 #include <Ogre.h>
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace ogreWatcher
 {

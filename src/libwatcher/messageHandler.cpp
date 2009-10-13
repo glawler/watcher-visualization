@@ -19,6 +19,8 @@
 #include <boost/cast.hpp>
 
 #include "messageHandler.h"
+#include "logger.h"
+
 #include <libwatcher/messageStatus.h>
 
 using namespace std; 

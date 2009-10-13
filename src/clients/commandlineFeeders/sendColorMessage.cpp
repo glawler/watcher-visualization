@@ -84,6 +84,8 @@
 #include <libwatcher/colors.h>
 #include <libwatcher/sendMessageHandler.h>
 
+DECLARE_GLOBAL_LOGGER("sendColorMessage");
+
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;

@@ -27,7 +27,7 @@
 #include <QGLWidget>
 #include <QMenu>
 #include <QSlider>
-#include "logger.h"
+#include "declareLogger.h"
 #include "libwatcher/watcherGraph.h"
 #include "libwatcher/messageStream.h"
 

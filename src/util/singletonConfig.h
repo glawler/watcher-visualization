@@ -21,7 +21,7 @@
 
 #include <string>
 
-#include "logger.h"
+#include "declareLogger.h"
 #include "libconfig.h++"
 #include "pthread.h"
 

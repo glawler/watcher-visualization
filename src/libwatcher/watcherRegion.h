@@ -26,7 +26,7 @@
 
 #include <ostream>
 #include <boost/shared_ptr.hpp>
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

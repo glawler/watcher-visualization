@@ -23,6 +23,7 @@
  */
 #include "watcherSerialize.h"
 #include "nodeStatusMessage.h"
+#include "logger.h"
 
 using namespace std;
 using namespace watcher;
@@ -116,9 +117,7 @@ string NodeStatusMessage::statusEventToString(const NodeStatusMessage::statusEve
 
 ostream &operator<<(ostream &out, const NodeStatusMessage &mess)
 {
-    TRACE_ENTER();
     mess.operator<<(out);
-    TRACE_EXIT();
     return out;
 }
 

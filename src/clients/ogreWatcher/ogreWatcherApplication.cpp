@@ -25,6 +25,7 @@
 #include "ogreWatcherApplication.h"
 #include "watcherMessageFrameListener.h"
 #include "singletonConfig.h"
+#include "logger.h"
 
 using namespace std;
 using namespace Ogre;

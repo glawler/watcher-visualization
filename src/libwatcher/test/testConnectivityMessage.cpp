@@ -12,11 +12,14 @@
 
 #include <libwatcher/connectivityMessage.h>
 #include <libwatcher/watcherGlobalFunctions.h>
+#include <logger.h>
 
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost;
+
+DECLARE_GLOBAL_LOGGER("testConnectivityMessage"); 
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {

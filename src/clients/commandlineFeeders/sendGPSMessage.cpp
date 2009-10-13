@@ -68,6 +68,8 @@
 #include <libwatcher/watcherTypes.h> // for NodeIdentifer
 #include <libwatcher/sendMessageHandler.h>
 
+DECLARE_GLOBAL_LOGGER("sendGPSMessage"); 
+
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;

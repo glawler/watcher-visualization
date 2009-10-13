@@ -17,6 +17,8 @@ using namespace watcher::event;
 using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 
+DECLARE_GLOBAL_LOGGER("testEdgeMessage");
+
 EdgeMessagePtr createEdgeMessage()
 {
 

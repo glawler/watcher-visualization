@@ -26,7 +26,7 @@
 
 #include <boost/utility.hpp>                // for noncopyable
 #include "messageTypesAndVersions.h"        // for GUILayer
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

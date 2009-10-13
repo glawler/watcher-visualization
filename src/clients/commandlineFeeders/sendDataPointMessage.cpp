@@ -68,6 +68,8 @@
 
 #include "logger.h"
 
+DECLARE_GLOBAL_LOGGER("sendDataPointMessage"); 
+
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost;

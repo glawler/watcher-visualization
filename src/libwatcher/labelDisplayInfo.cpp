@@ -18,6 +18,7 @@
 
 #include "singletonConfig.h"
 #include "labelDisplayInfo.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -180,8 +181,6 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 
 ostream& watcher::operator<<(ostream &out, const LabelDisplayInfo &obj)
 {
-    TRACE_ENTER();
     obj.operator<<(out);
-    TRACE_EXIT();
     return out;
 }

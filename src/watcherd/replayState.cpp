@@ -27,10 +27,13 @@
 #include "Assert.h"
 #include "database.h"
 #include "watcherd.h"
+#include "logger.h"
 
 using namespace util;
 using namespace watcher;
 using namespace watcher::event;
+
+INIT_LOGGER(ReplayState, "ReplayState"); 
 
 //< default value for number of events to prefetch from the database
 const unsigned int DEFAULT_BUFFER_SIZE = 20U; /* db rows */

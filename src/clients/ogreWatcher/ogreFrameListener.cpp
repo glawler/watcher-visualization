@@ -17,6 +17,7 @@
  */
 
 #include "ogreFrameListener.h"
+#include "logger.h"
 
 using namespace Ogre;
 

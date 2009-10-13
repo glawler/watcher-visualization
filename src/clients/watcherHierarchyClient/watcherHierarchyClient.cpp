@@ -71,6 +71,8 @@ using namespace watcher::event;
 using namespace boost;
 using namespace boost::asio;
 
+DECLARE_GLOBAL_LOGGER("watcherHierarchyClient"); 
+
 /*  Copyright (C) 2004  Networks Associates Technology, Inc.
  *  Copyright (C) 2006  Sparta Inc.  Written by the NIP group, SRD, ISSO
  *  All rights reserved.

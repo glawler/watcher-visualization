@@ -44,6 +44,8 @@ using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 
+DECLARE_GLOBAL_LOGGER("routeFeeder"); 
+
 static const char *rcsid __attribute__ ((unused)) = "$Id: routingfeeder.c,v 1.0 2009/04/28 22:08:47 glawler Exp $";
 
 // #define DEBUG 1
@@ -350,7 +352,7 @@ int main(int argc, char *argv[])
                       {
                           fprintf(stderr, "Error parsing localhost address: %s\n", optarg); 
                           exit(EX_USAGE); 
-                      }
+                       }
                       detinit.localhost.s_addr=ntohl(detinit.localhost.s_addr);
                       break;
             case 'o':

@@ -21,7 +21,7 @@
 #define LIB_ACTORS_H
 
 // Watcher includes
-#include "logger.h"
+#include "declareLogger.h"
 
 // Delta3D includes
 #include <disable_watcher_logging.h> /* undef watcher logging macros */

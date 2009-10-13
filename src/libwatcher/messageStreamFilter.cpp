@@ -17,6 +17,7 @@
  */
 
 #include "messageStreamFilter.h"
+#include "logger.h"
 
 using namespace watcher;
 
@@ -56,8 +57,6 @@ std::ostream &MessageStreamFilter::toStream(std::ostream &out) const
 
 std::ostream &operator<<(std::ostream &out, const MessageStreamFilter &messStreamFilter)
 {
-    TRACE_ENTER();
-    TRACE_EXIT();
     return messStreamFilter.operator<<(out);
 }
 

@@ -33,6 +33,7 @@
 #include "watcherdConfig.h"
 #include "replayState.h"
 #include "database.h"
+#include "logger.h"
 
 using namespace std; 
 using namespace boost::asio;

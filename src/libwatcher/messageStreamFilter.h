@@ -28,7 +28,7 @@
 #include <boost/shared_ptr.hpp>
 #include "watcherRegion.h"
 #include "libwatcher/messageTypesAndVersions.h"  // for GUILayer
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

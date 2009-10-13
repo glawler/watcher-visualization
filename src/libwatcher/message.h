@@ -27,7 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/access.hpp>
 
-#include "logger.h"
+#include "declareLogger.h"
 #include "messageTypesAndVersions.h"
 #include "watcherTypes.h"
 #include "message_fwd.h"

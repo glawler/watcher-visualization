@@ -25,6 +25,7 @@
 #include "watcherGlobalFunctions.h" // for address serialization
 #include "colorMessage.h"
 #include "colors.h"
+#include "logger.h"
 
 using namespace std;
 using namespace boost;
@@ -117,9 +118,7 @@ namespace watcher {
 
         ostream& operator<<(ostream &out, const ColorMessage &mess)
         {
-            TRACE_ENTER();
             mess.operator<<(out);
-            TRACE_EXIT();
             return out;
         }
 

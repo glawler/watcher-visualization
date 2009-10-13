@@ -20,6 +20,7 @@
 
 // #include "watcherSerialize.h"
 #include "watcherGraphEdge.h"
+#include "logger.h"
 
 using namespace watcher; 
 
@@ -65,9 +66,7 @@ std::ostream &WatcherGraphEdge::toStream(std::ostream &out) const
 
 std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraphEdge &edge)
 {
-    TRACE_ENTER();
     edge.operator<<(out);
-    TRACE_EXIT();
     return out;
 }
 

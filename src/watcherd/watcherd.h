@@ -42,7 +42,7 @@
 #include "serverMessageHandler.h"
 #include "server.h"
 #include "libconfig.h++"
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

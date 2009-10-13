@@ -23,6 +23,7 @@
  */
 #include <Ogre.h>
 #include "edge.h"
+#include "logger.h"
 
 using namespace Ogre;
 

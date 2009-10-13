@@ -22,6 +22,7 @@
  */
 #include "watcherSerialize.h"
 #include "speedWatcherMessage.h"
+#include "logger.h"
 
 namespace watcher {
     namespace event {

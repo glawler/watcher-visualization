@@ -19,6 +19,7 @@
 #include <boost/regex.hpp>
 #include "singletonConfig.h"
 #include "displayInfo.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace watcher::event;

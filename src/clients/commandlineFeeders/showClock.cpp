@@ -61,6 +61,8 @@
 #include "logger.h"
 #include <libwatcher/sendMessageHandler.h>
 
+DECLARE_GLOBAL_LOGGER("showClock"); 
+
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;

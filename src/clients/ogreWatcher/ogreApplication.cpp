@@ -47,6 +47,7 @@ Description: Base class for all the OGRE examples
 #include <OgreConfigFile.h>
 #include "ogreFrameListener.h"
 #include "ogreApplication.h"
+#include "logger.h"
 
 using namespace std;
 using namespace Ogre;

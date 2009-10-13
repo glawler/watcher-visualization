@@ -25,6 +25,7 @@
 
 #include "watcherSerialize.h"
 #include "watcherGlobalFunctions.h"             // for address serialization
+#include "logger.h"
 
 #include "connectivityMessage.h"
 
@@ -104,9 +105,7 @@ namespace watcher
 
         ostream &operator<<(ostream &out, const ConnectivityMessage &mess)
         {
-            TRACE_ENTER();
             mess.operator<<(out);
-            TRACE_EXIT();
             return out;
         }
 

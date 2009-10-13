@@ -22,8 +22,8 @@
  * @date 2009-07-15 
  */
 #include "legacyWatcherMessageUnmarshal.h"
+#include "watcherHierarchyClientLogger.h"
 #include "marshal.h"
-#include "logger.h"
 
 /* Unmarshal a single label into an existing label structure.  Assumes that the label already has some
  *  * memory to put the text into.

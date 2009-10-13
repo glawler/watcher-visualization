@@ -20,6 +20,7 @@
 #include <boost/pointer_cast.hpp>       // for dynamic_pointer_cast<>
 #include "watcherMessageFrameListener.h"
 #include "seekWatcherMessage.h"
+#include "logger.h"
 
 using namespace std;
 using namespace Ogre;

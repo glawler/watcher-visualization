@@ -19,6 +19,7 @@
 #include "watcherSerialize.h"
 
 #include "messageStatus.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -99,9 +100,7 @@ namespace watcher {
 
         ostream& operator<<(ostream &out, const MessageStatus &mess)
         {
-            TRACE_ENTER();
             mess.operator<<(out);
-            TRACE_EXIT();
             return out;
         }
 

@@ -34,6 +34,8 @@
 
 using namespace watcher;
 
+INIT_LOGGER(Database, "Database"); 
+
 /** Create a new connection to the specified database.
  * @param[in] uri resource name for the database to open.
  */

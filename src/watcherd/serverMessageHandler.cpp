@@ -20,6 +20,7 @@
 
 #include "libwatcher/messageStatus.h"
 #include "serverMessageHandler.h"
+#include "logger.h"
 
 using namespace std; 
 using namespace watcher;

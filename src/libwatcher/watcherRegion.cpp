@@ -17,6 +17,7 @@
  */
 
 #include "watcherRegion.h"
+#include "logger.h"
 
 using namespace watcher;
 
@@ -45,8 +46,6 @@ std::ostream &WatcherRegion::toStream(std::ostream &out) const
 
 std::ostream &watcher::operator<<(std::ostream &out, const WatcherRegion &region)
 {
-    TRACE_ENTER();
-    TRACE_EXIT();
     return region.operator<<(out);
 }
 

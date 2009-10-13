@@ -26,6 +26,7 @@
 #include "writeDBMessageHandler.h"
 #include "database.h"
 #include "libwatcher/connection.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace watcher::event;

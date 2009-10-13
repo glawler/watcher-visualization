@@ -25,7 +25,7 @@
 #define sqlite_database_h
 
 #include "database.h"
-#include "logger.h"
+#include "declareLogger.h"
 #include "sqlite_wrapper_fwd.h"
 
 namespace watcher {

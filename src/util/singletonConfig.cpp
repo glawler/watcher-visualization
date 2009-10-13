@@ -17,6 +17,7 @@
  */
 
 #include "singletonConfig.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace libconfig;
@@ -24,7 +25,9 @@ using namespace libconfig;
 pthread_mutex_t SingletonConfig::accessMutex=PTHREAD_MUTEX_INITIALIZER;
 std::string SingletonConfig::filename=""; 
 
-INIT_LOGGER(SingletonConfig, "SingletonConfig");
+namespace watcher {
+    INIT_LOGGER(SingletonConfig, "SingletonConfig");
+}
 
 // static
 Config &SingletonConfig::instance()

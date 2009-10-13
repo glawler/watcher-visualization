@@ -24,7 +24,7 @@
 #ifndef WATCHER_BG_IMAGRE_H
 #define WATCHER_BG_IMAGRE_H
 
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher 
 {

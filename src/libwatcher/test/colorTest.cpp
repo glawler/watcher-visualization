@@ -23,6 +23,7 @@ using namespace watcher;
 using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 
+DECLARE_GLOBAL_LOGGER("colorTest"); 
 
 BOOST_AUTO_TEST_CASE( ctors_test )
 {

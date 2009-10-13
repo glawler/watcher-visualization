@@ -20,6 +20,7 @@
 
 #include "watcherd.h"
 #include "singletonConfig.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace watcher::event;

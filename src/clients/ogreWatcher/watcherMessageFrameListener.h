@@ -26,7 +26,7 @@
 
 #include <string>
 #include <Ogre.h>
-#include <logger.h>
+#include <declareLogger.h>
 
 #include <messageStream.h>
 #include <gpsMessage.h>

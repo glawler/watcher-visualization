@@ -28,6 +28,7 @@
 #include "nodePropertiesMessage.h"
 #include "messageTypesAndVersions.h"
 #include "colors.h"
+#include "logger.h"
 
 using namespace std;
 using namespace boost;
@@ -141,9 +142,7 @@ namespace watcher {
 
         ostream& operator<<(ostream &out, const NodePropertiesMessage &mess)
         {
-            TRACE_ENTER();
             mess.operator<<(out);
-            TRACE_EXIT();
             return out;
         }
 

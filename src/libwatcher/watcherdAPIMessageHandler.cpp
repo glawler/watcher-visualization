@@ -18,6 +18,7 @@
 
 #include <boost/cast.hpp>
 
+#include "logger.h"
 #include "watcherdAPIMessageHandler.h"
 #include <libwatcher/messageStatus.h>
 

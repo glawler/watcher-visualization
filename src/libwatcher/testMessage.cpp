@@ -23,6 +23,7 @@
  */
 #include "watcherSerialize.h"
 #include "testMessage.h"
+#include "logger.h"
 
 namespace watcher {
     namespace event {
@@ -102,9 +103,7 @@ namespace watcher {
 
         std::ostream &operator<<(std::ostream &out, const TestMessage &mess)
         {
-            TRACE_ENTER();
             mess.operator<<(out);
-            TRACE_EXIT();
             return out;
         }
 

@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include "messageStreamFilter.h"
+#include "logger.h"
 
 #include "connectivityMessage.h"
 #include "gpsMessage.h"
@@ -53,6 +54,8 @@ namespace watcher {
      */
     namespace GraphFunctors
     {
+        DECLARE_GLOBAL_LOGGER("GraphFunctors"); 
+
         /** Helper class to find nodes by their nodeIds */
         class MatchNodeId
         {
@@ -721,9 +724,7 @@ bool WatcherGraph::saveConfig() const
 }
 std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph &watcherGraph)
 {
-    TRACE_ENTER();
     watcherGraph.operator<<(out);
-    TRACE_EXIT();
     return out;
 }
 

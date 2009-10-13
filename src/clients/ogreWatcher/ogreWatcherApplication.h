@@ -28,7 +28,7 @@
 #include <CEGUI/CEGUISchemeManager.h>
 #include <OgreCEGUIRenderer.h>
 #include <boost/smart_ptr.hpp>
-#include <logger.h>
+#include <declareLogger.h>
 #include "ogreApplication.h"
 
 namespace ogreWatcher

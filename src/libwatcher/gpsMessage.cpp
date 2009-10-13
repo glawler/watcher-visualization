@@ -23,6 +23,7 @@
  */
 #include "watcherSerialize.h"
 #include "gpsMessage.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -104,9 +105,7 @@ namespace watcher {
 
         ostream &operator<<(ostream &out, const GPSMessage &mess)
         {
-            TRACE_ENTER();
             mess.operator<<(out);
-            TRACE_EXIT();
             return out;
         }
 

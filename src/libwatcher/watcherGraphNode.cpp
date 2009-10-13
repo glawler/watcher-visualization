@@ -26,6 +26,7 @@
 // #include "watcherSerialize.h"
 
 #include "watcherGraphNode.h"
+#include "logger.h"
 
 using namespace std;
 using namespace watcher;
@@ -76,9 +77,7 @@ std::ostream &WatcherGraphNode::toStream(std::ostream &out) const
 
 std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraphNode &node)
 {
-    TRACE_ENTER();
     node.operator<<(out);
-    TRACE_EXIT();
     return out;
 }
 

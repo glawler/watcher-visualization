@@ -16,6 +16,8 @@ using namespace watcher::event;
 using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 
+DECLARE_GLOBAL_LOGGER("testLabelMessage"); 
+
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
     LOAD_LOG_PROPS("log.properties"); 

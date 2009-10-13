@@ -26,6 +26,8 @@ using namespace libconfig;
 using namespace boost::unit_test_framework;
 namespace bf=boost::filesystem;
 
+DECLARE_GLOBAL_LOGGER("testLoadSaveDisplayInfo"); 
+
 bool configConfig(char *filename)
 {
     Config &cfg=SingletonConfig::instance();

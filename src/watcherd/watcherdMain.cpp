@@ -51,6 +51,8 @@ void usage(const char *progName, bool exitp)
         exit(EXIT_FAILURE); 
 }
 
+DECLARE_GLOBAL_LOGGER("watcherdMain");
+
 int main(int argc, char* argv[])
 {
     TRACE_ENTER();

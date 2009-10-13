@@ -25,7 +25,7 @@
 #define THISISASKYBOXYOUBETCHA_H
 
 #include <GL/gl.h>
-#include "logger.h"
+#include "declareLogger.h"
 
 namespace watcher
 {

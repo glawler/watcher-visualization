@@ -20,6 +20,8 @@ using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 using namespace boost::archive;
 
+DECLARE_GLOBAL_LOGGER("testWatcherGraph"); 
+
 EdgeMessagePtr createEdgeMessage()
 {
     LabelMessagePtr lmm(new LabelMessage); 
