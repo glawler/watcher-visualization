@@ -1,7 +1,7 @@
 
 # watcher
 include $(srcdir)/../Makefile.clients
-CPPFLAGS+=-I$(top_srcdir)/logger
+CPPFLAGS+=@LOGGER_CFLAGS@
 CPPFLAGS+=-I$(top_srcdir)/util
 CPPFLAGS+=-I$(top_srcdir)/libwatcher
 

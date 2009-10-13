@@ -10,7 +10,7 @@ if ENABLE_HIERARCHY_CLIENT
 IDS_COMMS_DIR = idsCommunications
 endif
 
-SUBDIRS=logger util libwatcher $(IDS_COMMS_DIR) clients $(FULL_BUILD_DIRS) 
+SUBDIRS=util libwatcher $(IDS_COMMS_DIR) clients $(FULL_BUILD_DIRS) 
 
 .PHONY: doc
 

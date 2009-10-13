@@ -14,7 +14,7 @@ BUILT_SOURCES=watcherHierarchyClient.log.properties
 CXXFLAGS+=-I../../include 
 CXXFLAGS+=-I../../libwatcher 
 CXXFLAGS+=-I../../watcherd
-CXXFLAGS+=-I../../logger
+CXXFLAGS+=@LOGGER_CFLAGS@
 CXXFLAGS+=-I../../idsCommunications
 CXXFLAGS+=-I../..
 
@@ -25,12 +25,10 @@ LDFLAGS+=-L/usr/local/lib/
 LDFLAGS+=-L../../libwatcher
 LDFLAGS+=-L../../watcherd
 LDFLAGS+=-L../../../lib
-LDFLAGS+=-L../../logger
 LDFLAGS+=-L../../idsCommunications
+LDFLAGS+=@LOGGER_LIBS@
 
 LIBS+=-lidsCommunications
-LIBS+=-llog4cxx
-LIBS+=-llogger
 LIBS+=-lwatcher
 LIBS+=-lwatchermsg
 LIBS+=-lwatcher

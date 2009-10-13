@@ -2,8 +2,8 @@ AC_INIT(watcher, 0.6)
 AM_INIT_AUTOMAKE([foreign])
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_RANLIB
 AC_PROG_LIBTOOL
+PKG_PROG_PKG_CONFIG
 
 # Boost 1.36 is when asio appeared
 AX_BOOST_BASE(1.36)
@@ -15,6 +15,8 @@ AX_BOOST_REGEX
 AX_BOOST_THREAD
 AX_BOOST_UNIT_TEST_FRAMEWORK
 AX_BOOST_DATE_TIME
+
+PKG_CHECK_MODULES(LOGGER, logger)
 
 # allow optional 'test node only' build which builds just test node components.
 AC_MSG_CHECKING(--enable-testnodeonly)
@@ -173,8 +175,6 @@ AC_MSG_RESULT($enable_hierarchy_client)
 
 AC_CONFIG_FILES([ \
     Makefile \
-    logger/Makefile \
-    logger/logger.pc \
     util/Makefile \
     libwatcher/Makefile \
     libwatcher/watcher.pc \
