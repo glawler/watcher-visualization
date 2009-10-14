@@ -192,6 +192,8 @@ share/info/dir
 
 ^src/util/Makefile
 ^src/logger/Makefile
+^src/logger/configure
+^src/logger/libtool
 
 ^src/sqlite_wrapper/Makefile$
 
