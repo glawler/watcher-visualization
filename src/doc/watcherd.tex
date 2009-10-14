@@ -57,6 +57,16 @@ connections
 \item {\tt serverThreadNum}, the number of threads to spawn for handling connections
 \item {\tt databasePath}, the full pathname to the test node event database (default:
 {\tt event.db})
+\item {\tt dataNetwork}, if it exists, this network address will be mapped onto any
+incoming feeder messages that do not specify a source address. For example, if the 
+{\tt dataNetwork} is set to 192.168.10.0 and the incoming feeder message is from ip address
+192.168.1.121, the incoming feeder message is set to 192.168.10.121. This is needed as the watcher
+daemon will use the ip address of incoming feeder messages to set the {\tt from address} on the messages.
+If the watcherd is running on a network that is different than the test nodes (which is 
+frequently the case when using a control network), this will map the control network addresses
+to the data network address space, so all feeder messages appear to come from the same
+network. If the dataNetwork was not specified, then this would generate 2 different
+addresses for a single node, confusing any attached GUI.
 \end{itemize}
 
 \subsection{Command Line Options}

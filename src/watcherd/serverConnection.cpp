@@ -34,6 +34,7 @@
 #include "replayState.h"
 #include "database.h"
 #include "logger.h"
+#include "singletonConfig.h"
 
 using namespace std; 
 using namespace boost::asio;
@@ -61,9 +62,26 @@ namespace watcher {
         strand_(io_service),
         write_strand_(io_service),
         conn_type(unknown),
-        isPlaying_(false), isLive_(true)
+        isPlaying_(false), isLive_(true),
+        dataNetwork(0)
     {
-        TRACE_ENTER(); 
+        TRACE_ENTER();
+        libconfig::Config &cfg=SingletonConfig::instance();
+        libconfig::Setting &root=cfg.getRoot();
+        try {
+            string value;
+            if (root.lookupValue("dataNetwork", value)) {
+                boost::system::error_code ec;
+                dataNetwork=ip::address_v4::from_string(value, ec);
+                if (ec) {
+                    LOG_ERROR("Error parsing dataNetwork value from configuration file: " << ec);
+                    exit (1); // GTL too harsh?
+                }
+            }
+        }
+        catch (const libconfig::SettingException &e) {
+            LOG_ERROR("Error reading \"dataNetwork\" from configuration at " << e.getPath() << ": " << e.what());
+        }
         TRACE_EXIT();
     }
 
@@ -311,16 +329,16 @@ namespace watcher {
                          remoteEndpoint().address()); 
 
                 // Add the incoming address to the Message so everyone
-                // knows who the message came from.
-                // GTL - this breaks when the watcher is run on a control network
-                // and the nodes are on a data network. The endpoint of the
-                // socket is the control network address of the test node not the 
-                // data network address - so we end up with 2 different node IDs for 
-                // each node.
+                // knows who the message came from. If there is a dataNetwork, use that 
+                // to mask/modify the incoming ip address to be in the correct network.
                 boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint();
                 BOOST_FOREACH(MessagePtr m, arrivedMessages) {
-                    if(m->fromNodeID==NodeIdentifier())  // is empty
-                        m->fromNodeID=ep.address();
+                    if (isFeederEvent(m->type)) {
+                        if (m->fromNodeID==NodeIdentifier() && dataNetwork.to_ulong()!=0) { 
+                            unsigned long mask=ip::address_v4::netmask(dataNetwork).to_ulong();
+                            m->fromNodeID=ip::address_v4((ep.address().to_v4().to_ulong() & ~mask) | (mask & dataNetwork.to_ulong()));
+                        }
+                    }
                 }
 
                 /*

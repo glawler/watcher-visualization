@@ -116,6 +116,9 @@ namespace watcher
             bool isPlaying_;
             bool isLive_;
             boost::shared_ptr<ReplayState> replay;
+
+            /// If needed, a network address to map incoming message IDs with.
+            boost::asio::ip::address_v4 dataNetwork;
     };
 
 } // namespace http
