@@ -25,12 +25,16 @@
 #define BASE_MESSAGE_H
 
 #include <boost/shared_ptr.hpp>
-#include <boost/serialization/access.hpp>
 
 #include "declareLogger.h"
 #include "messageTypesAndVersions.h"
 #include "watcherTypes.h"
 #include "message_fwd.h"
+
+namespace Marshal {
+    class Input;
+    class Output;
+}
 
 namespace watcher {
     /** 
@@ -48,8 +52,8 @@ namespace watcher {
                 static MessagePtr unpack(std::istream&);
 
                 /** seralize object to ostream */
-                void pack(std::ostream&) const;
-                
+                std::ostream& pack(std::ostream&) const;
+
                 /** The version of this message. All versions are defined in \ref messageTypesAndVersions.h */
                 unsigned int version;
 
@@ -78,6 +82,8 @@ namespace watcher {
                 /** And this too shall pass */
                 virtual ~Message();
 
+                static MessagePtr create(MessageType);
+
                 /** Compare this message against another to see if they are equal.
                  * @param other the other message
                  * @return bool true is equal, false otherwise.
@@ -103,12 +109,14 @@ namespace watcher {
                 inline std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
             protected:
+                /** write the message-specific payload to the specific ostream in the wire protocol format. */
+                virtual std::ostream& packPayload(std::ostream&) const;
+
+                virtual void readPayload(Marshal::Input&);
+
             private:
-                friend class boost::serialization::access;
-                template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
                 DECLARE_LOGGER();
         };
-
 
         std::ostream &operator<<(std::ostream &out, const Message &mess);
     }

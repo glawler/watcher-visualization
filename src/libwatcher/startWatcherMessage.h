@@ -37,8 +37,6 @@ namespace watcher {
             public:
                 StartMessage(); 
             private:
-                template <typename Archive> void serialize(Archive & ar, const unsigned int version);
-                friend class boost::serialization::access;
                 DECLARE_LOGGER();
         };
 

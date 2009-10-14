@@ -17,10 +17,13 @@
  */
 
 #include <sys/time.h>
+#include <iomanip>
 
-#include "watcherSerialize.h"
 #include "message.h"
 #include "logger.h"
+#include "marshal.hpp"
+
+#include "libwatcher/messageStatus.h"
 
 using namespace std;
 
@@ -98,13 +101,54 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void Message::serialize(Archive & ar, const unsigned int /* file_version */)
+        //default empty implementation, should be overriden by subclasses
+        std::ostream& Message::packPayload (std::ostream& os) const
         {
             TRACE_ENTER();
-            ar & version;
-            ar & type;
-            ar & timestamp;
-            ar & fromNodeID;
+            TRACE_EXIT();
+            return os;
+        }
+
+        Marshal::Input& operator>> (Marshal::Input& in, MessageType& t)
+        {
+            int msgtype;
+            in >> msgtype;
+
+            // TODO add the other message types - melkins
+            switch (msgtype) {
+                case UNKNOWN_MESSAGE_TYPE:
+                    t = UNKNOWN_MESSAGE_TYPE;
+                default:
+                    throw std::runtime_error("invalid message type in message");
+            }
+            return in;
+        }
+
+        Marshal::Input& operator>> (Marshal::Input& in, NodeIdentifier& id)
+        {
+            std::string s;
+            in >> s;
+            id = boost::asio::ip::address::from_string(s);
+            return in;
+        }
+
+        MessagePtr Message::create(MessageType t)
+        {
+            MessagePtr ret;
+            // TODO maybe this should be a map instead of a swich statement? - melkins
+            switch (t) {
+                case MESSAGE_STATUS_TYPE:
+                    ret.reset( new MessageStatus() );
+                default:
+                    throw std::runtime_error("invalid message type in message");
+            }
+            return ret;
+        }
+
+        void Message::readPayload(Marshal::Input& is)
+        {
+            // empty default implementation
+            TRACE_ENTER();
             TRACE_EXIT();
         }
 
@@ -112,40 +156,49 @@ namespace watcher {
         {
             TRACE_ENTER();
             is >> std::setprecision(std::numeric_limits<double>::digits10 + 2); 
-            boost::archive::text_iarchive ia(is);
 
-#if 0
-            ia.register_type<StartMessage>();
-            ia.register_type<SeekMessage>();
-            ia.register_type<StopMessage>();
-            ia.register_type<TestMessage>();
-#endif
+            unsigned int version;
+            MessageType type;
 
-            Message* ret = 0;
-            try
-            {
-                ia >> ret;
-            }
-            catch (boost::archive::archive_exception& e)
-            {
-                LOG_WARN("Exception thrown while deserializing the message: " << e.what());
-                TRACE_EXIT();
-                return MessagePtr();
-            }
+            Marshal::Input marshal(is);
+            marshal >> version;
+            marshal >> type;
+
+            // construct a new message by type
+            MessagePtr ret = Message::create(type);
+
+            // fill in values already read
+            ret->version = version;
+            ret->type = type;
+
+            // complete reading header
+            marshal >> ret->timestamp;
+            marshal >> ret->fromNodeID;
+
+            // read message-specific message payload via virtual method
+            ret->readPayload(marshal);
+
             TRACE_EXIT();
-            return MessagePtr(ret); 
+            return ret; 
         }
 
-        void Message::pack(std::ostream& os) const
+        std::ostream& Message::pack(std::ostream& os) const
         {
             TRACE_ENTER();
             os << std::setprecision(std::numeric_limits<double>::digits10 + 2); 
-            boost::archive::text_oarchive oa(os);
-            const Message* base = this;
-            oa << base;
+
+            Marshal::Output out(os);
+            out << version;
+            out << type;
+            out << timestamp;
+            out << fromNodeID;
+
+            // pack message-specific payload after header
+            packPayload(os);
+
             TRACE_EXIT();
+
+            return os;
         }
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::Message);
