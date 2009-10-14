@@ -21,11 +21,12 @@
  * @author geoff lawler <geoff.lawler@cobham.com>
  * @date 2009-05-06
  */
+#include <iterator>
 #include <boost/asio.hpp>
 
-#include "watcherSerialize.h"
 #include "watcherGlobalFunctions.h"             // for address serialization
 #include "logger.h"
+#include "watcherMarshal.h"
 
 #include "connectivityMessage.h"
 
@@ -109,16 +110,14 @@ namespace watcher
             return out;
         }
 
-        template <typename Archive> void ConnectivityMessage::serialize(Archive & ar, const unsigned int /* file_version */)
+        //virtual
+        void ConnectivityMessage::readPayload(std::istream& is)
         {
             TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & neighbors;
-            ar & layer;
+            Marshal::Input in(is);
+            in.getCollection( std::back_inserter(neighbors) );
+            in >> layer;
             TRACE_EXIT();
         }
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::ConnectivityMessage);
-

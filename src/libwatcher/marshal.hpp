@@ -20,6 +20,10 @@ namespace Marshal {
             Input& operator>>(long long& v);
             Input& operator>>(unsigned long long& v);
             Input& operator>>(std::string& v);
+            Input& operator>>(double& v);
+
+            //read a collection
+            template <typename OutputIterator> Input& getCollection (OutputIterator it);
     };
 
     Input& Input::operator>>(short& v)
@@ -126,30 +130,121 @@ namespace Marshal {
         return *this;
     }
 
+    Input& Input::operator>>(double& v)
+    {
+        return *this;
+    }
+
+    template <typename OutputIterator> Input& Input::getCollection (OutputIterator it)
+    {
+        size_t n;
+        char buf;
+
+        // get number of items in collection
+        is.read(&buf, 1);
+        n = buf;
+
+        for (size_t i = 0; i < n; ++i) {
+            typename OutputIterator::container_type::value_type tmp;
+            *this >> tmp;
+            *it++ = tmp;
+        }
+
+        return *this;
+    }
+
     class Output {
         private:
             std::ostream& os;
         public:
             Output(std::ostream& os_) : os(os_) {};
-            Output& operator>>(short v);
-            Output& operator>>(long v);
+            Output& operator<<(short v);
+            Output& operator<<(unsigned short v);
+            Output& operator<<(int v);
+            Output& operator<<(unsigned int v);
+            Output& operator<<(long v);
+            Output& operator<<(unsigned long v);
+            Output& operator<< (long long v);
+            Output& operator<< (unsigned long long v);
+            Output& operator<< (const std::string&);
     };
 
-    Output& Output::operator>> (short v)
+    Output& Output::operator<< (short v)
     {
-        char buf[sizeof(short)];
+        char buf[sizeof(int16_t)];
         char *p = buf;
         MARSHALSHORT(p, v);
         os.write(buf, sizeof(buf));
         return *this;
     }
 
-    Output& Output::operator>> (long v)
+    Output& Output::operator<< (unsigned short v)
     {
-        char buf[sizeof(long)];
+        char buf[sizeof(uint16_t)];
+        char *p = buf;
+        MARSHALSHORT(p, v);
+        os.write(buf, sizeof(buf));
+        return *this;
+    }
+
+    Output& Output::operator<< (int v)
+    {
+        char buf[sizeof(int32_t)];
         char *p = buf;
         MARSHALLONG(p, v);
         os.write(buf, sizeof(buf));
+        return *this;
+    }
+
+    Output& Output::operator<< (unsigned int v)
+    {
+        char buf[sizeof(uint32_t)];
+        char *p = buf;
+        MARSHALLONG(p, v);
+        os.write(buf, sizeof(buf));
+        return *this;
+    }
+
+    Output& Output::operator<< (long v)
+    {
+        char buf[sizeof(int32_t)];
+        char *p = buf;
+        MARSHALLONG(p, v);
+        os.write(buf, sizeof(buf));
+        return *this;
+    }
+
+    Output& Output::operator<< (unsigned long v)
+    {
+        char buf[sizeof(uint32_t)];
+        char *p = buf;
+        MARSHALLONG(p, v);
+        os.write(buf, sizeof(buf));
+        return *this;
+    }
+
+    Output& Output::operator<< (long long v)
+    {
+        char buf[sizeof(uint64_t)];
+        char *p = buf;
+        MARSHALLONGLONG(p, v);
+        os.write(buf, sizeof(buf));
+        return *this;
+    }
+
+    Output& Output::operator<< (unsigned long long v)
+    {
+        char buf[sizeof(uint64_t)];
+        char *p = buf;
+        MARSHALLONGLONG(p, v);
+        os.write(buf, sizeof(buf));
+        return *this;
+    }
+
+    Output& Output::operator<< (const std::string& s)
+    {
+        os.put(s.length());
+        os.write(s.c_str(), s.length());
         return *this;
     }
 }

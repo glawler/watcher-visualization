@@ -21,11 +21,11 @@
  * @author Geoff Lawler <geoff.lawer@cobham.com>
  * @date 2009-07-15
  */
-#include "watcherSerialize.h"
 #include "watcherGlobalFunctions.h" // for address serialization
 #include "colorMessage.h"
 #include "colors.h"
 #include "logger.h"
+#include "marshal.hpp"
 
 using namespace std;
 using namespace boost;
@@ -122,17 +122,24 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void ColorMessage::serialize(Archive& ar, const unsigned int /* file_version */)
+        //manipulator to deserialize a color
+        Marshal::Input& operator>> (Marshal::Input& in, Color& c)
+        {
+            std::string s;
+            in >> s;
+            c.fromString(s);
+            return in;
+        }
+
+        void ColorMessage::readPayload(std::istream& is)
         {
             TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & color;
-            ar & flashPeriod;
-            ar & expiration;
-            ar & layer; 
+            Marshal::Input in(is);
+            in >> color;
+            in >> flashPeriod;
+            in >> expiration;
+            in >> layer; 
             TRACE_EXIT();
         }
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::ColorMessage);

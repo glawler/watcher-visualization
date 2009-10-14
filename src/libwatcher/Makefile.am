@@ -33,6 +33,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = watcher.pc watchermsg.pc
 
 libwatchermsg_la_SOURCES=\
+			 messageFactory.cpp \
 	message.h message.cpp \
 	colorMessage.cpp colorMessage.h \
 	connectivityMessage.cpp connectivityMessage.h \

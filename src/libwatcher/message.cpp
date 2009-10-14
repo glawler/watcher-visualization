@@ -21,9 +21,7 @@
 
 #include "message.h"
 #include "logger.h"
-#include "marshal.hpp"
-
-#include "libwatcher/messageStatus.h"
+#include "watcherMarshal.h"
 
 using namespace std;
 
@@ -109,40 +107,39 @@ namespace watcher {
             return os;
         }
 
+        // manipulator for reading a MessageType
         Marshal::Input& operator>> (Marshal::Input& in, MessageType& t)
         {
             int msgtype;
             in >> msgtype;
 
+            MessageType tmp = UNKNOWN_MESSAGE_TYPE;
+
+#define CASE(X) case X: tmp = X; break;
             // TODO add the other message types - melkins
             switch (msgtype) {
-                case UNKNOWN_MESSAGE_TYPE:
-                    t = UNKNOWN_MESSAGE_TYPE;
-                default:
-                    throw std::runtime_error("invalid message type in message");
+                CASE( TEST_MESSAGE_TYPE );
+                CASE( MESSAGE_STATUS_TYPE );
+                CASE( GPS_MESSAGE_TYPE );
+                CASE( LABEL_MESSAGE_TYPE );
+                CASE( EDGE_MESSAGE_TYPE );
+                CASE( COLOR_MESSAGE_TYPE );
+                CASE( CONNECTIVITY_MESSAGE_TYPE );
+                CASE( SEEK_MESSAGE_TYPE );
+                CASE( START_MESSAGE_TYPE );
+                CASE( STOP_MESSAGE_TYPE );
+                CASE( SPEED_MESSAGE_TYPE );
+                CASE( NODE_STATUS_MESSAGE_TYPE );
+                // no default case so the compiler emits warnings for unhandled types
             }
-            return in;
-        }
+#undef CASE
 
-        Marshal::Input& operator>> (Marshal::Input& in, NodeIdentifier& id)
-        {
-            std::string s;
-            in >> s;
-            id = boost::asio::ip::address::from_string(s);
-            return in;
-        }
+            if (tmp == UNKNOWN_MESSAGE_TYPE)
+                throw std::runtime_error("invalid message type in message");
 
-        MessagePtr Message::create(MessageType t)
-        {
-            MessagePtr ret;
-            // TODO maybe this should be a map instead of a swich statement? - melkins
-            switch (t) {
-                case MESSAGE_STATUS_TYPE:
-                    ret.reset( new MessageStatus() );
-                default:
-                    throw std::runtime_error("invalid message type in message");
-            }
-            return ret;
+            t = tmp;
+
+            return in;
         }
 
         void Message::readPayload(Marshal::Input& is)
@@ -171,7 +168,7 @@ namespace watcher {
             ret->version = version;
             ret->type = type;
 
-            // complete reading header
+            // complete reading the header
             marshal >> ret->timestamp;
             marshal >> ret->fromNodeID;
 
