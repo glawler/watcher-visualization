@@ -101,6 +101,7 @@ namespace watcher
                 typedef boost::graph_traits<Graph>::edge_descriptor    edge;
                 typedef boost::graph_traits<Graph>::edges_size_type    edgeInt;
                 typedef boost::graph_traits<Graph>::edge_iterator      edgeIterator;
+                typedef boost::graph_traits<Graph>::out_edge_iterator  outEdgeIterator;
 
             /**
              * The actual boost::graph.

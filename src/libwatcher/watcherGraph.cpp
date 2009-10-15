@@ -208,23 +208,41 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
 
     bool retVal=true;
 
-    // GTL - find a better way to do this than removing all the edges, then 
-    // adding them back. Do: 
-    //     Find the intersection of the sets of the est of existing neighbors
-    //     and the set of neighbors in the message. Then make sure that 
-    //     the intersection of nodes exist. 
-    
-    graph_traits<Graph>::vertex_iterator src;
+    // First add all new (not-existing) edges, then remove edges that have disappeared.
+    vertexIterator src, dst;
+    outEdgeIterator e, e_end;
     findOrCreateNode(message->fromNodeID, src, message->layer); 
-    remove_out_edge_if(*src, GraphFunctors::MatchEdgeLayer(theGraph, message->layer), theGraph);
 
-    // Add edges from connectivity message
-    graph_traits<Graph>::vertex_iterator dest;
-    BOOST_FOREACH(NodeIdentifier nid, message->neighbors)
-    {
-        findOrCreateNode(nid, dest, message->layer); 
-        std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
-        theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
+    // add new edges.
+    BOOST_FOREACH(NodeIdentifier nid, message->neighbors) {
+        for (tie(e, e_end)=out_edges(*src, theGraph); e!=e_end; ++e) 
+            if (theGraph[target(*e, theGraph)].nodeId==nid) 
+                if (theGraph[*e].displayInfo->layer==message->layer) 
+                    break;
+
+        if (e!=e_end)  // found it
+            continue;
+
+        findOrCreateNode(nid, dst, message->layer); 
+        std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dst, theGraph);
+        if (ei.second)
+            theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
+
+    }
+
+    // remove missing edges
+    for (tie(e, e_end)=out_edges(*src, theGraph); e!=e_end; ++e) {
+        BOOST_FOREACH(NodeIdentifier nid, message->neighbors) 
+            if (theGraph[target(*e, theGraph)].nodeId==nid) 
+                if (theGraph[*e].displayInfo->layer==message->layer) 
+                    break;
+        
+        if (e!=e_end) // found it
+            continue;
+
+        outEdgeIterator tmp=e;
+        remove_edge(e, theGraph);
+        e=tmp; // GTL Do I need this?
     }
     
     // THis is expensive.
