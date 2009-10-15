@@ -38,6 +38,7 @@
 #include "watcherScrollingGraphControl.h"
 #include "singletonConfig.h"
 #include "backgroundImage.h"
+#include "logger.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 

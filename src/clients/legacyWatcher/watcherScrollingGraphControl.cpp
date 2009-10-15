@@ -32,7 +32,7 @@
 
 #include "watcherScrollingGraphControl.h"
 #include "graphPlot.h"
-// #include "marshal.h"
+#include "logger.h"
 
 using namespace std;
 using namespace watcher;

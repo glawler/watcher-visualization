@@ -31,6 +31,7 @@
 
 #include "backgroundImage.h"
 #include "bitmap.h"
+#include "logger.h"
 
 using namespace watcher;
 

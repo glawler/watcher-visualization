@@ -22,6 +22,7 @@
  * @date 2009-07-15 
  */
 #include "watcherGraphDialog.h"
+#include "logger.h"
 
 using namespace watcher;
 

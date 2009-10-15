@@ -40,6 +40,8 @@ using namespace std;
 using namespace watcher;
 using namespace libconfig;
 
+DECLARE_GLOBAL_LOGGER("watcherGlobalLogger"); 
+
 int main(int argc, char *argv[])
 {
     TRACE_ENTER();

@@ -25,6 +25,7 @@
 
 #include <qwt_symbol.h>
 #include "graphPlot.h"
+#include "logger.h"
 
 using namespace std;
 using namespace watcher;

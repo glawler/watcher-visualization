@@ -25,6 +25,7 @@
 // #include "watcherScrollingGraphControl.h"
 // #include "ui_watcherScrollingGraphGUI.h"
 #include "qwt_plot_curve.h"
+#include "logger.h"
 
 using namespace watcher;
 using namespace std;
