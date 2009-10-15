@@ -170,6 +170,8 @@ void manetGLView::invert4x4(GLdouble dst[16], GLdouble const src[16])
     tmp[7] = (pair4*src[0]) + (pair9*src[4]) + (pair10*src[8]);
     tmp[7] -= (pair5*src[0]) + (pair8*src[4]) + (pair11*src[8]);
     // second 8 elements
+    tmp[8] = (pair12*src[7]) + (pair15*src[11]) + (pair16*src[15]);
+    tmp[8] -= (pair13*src[7]) + (pair14*src[11]) + (pair17*src[15]);
     tmp[9] = (pair13*src[3]) + (pair18*src[11]) + (pair21*src[15]);
     tmp[9] -= (pair12*src[3]) + (pair19*src[11]) + (pair20*src[15]);
     tmp[10] = (pair14*src[3]) + (pair19*src[7]) + (pair22*src[15]);
