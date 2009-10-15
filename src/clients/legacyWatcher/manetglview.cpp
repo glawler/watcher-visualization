@@ -908,7 +908,7 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
 
         x=inx*gpsScale;
         y=iny*gpsScale;
-        z=inz-20;
+        z=inz*gpsScale;
 
         static double xOff=0.0, yOff=0.0;
         static bool xOffInit=false;
@@ -1778,25 +1778,43 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
     }
     else
     {
+        GLUquadricObj *quadric=gluNewQuadric();
+        gluQuadricNormals(quadric, GLU_SMOOTH);
+
+        float vx = x2-x1;
+        float vy = y2-y1;
+        float vz = z2-z1;
+
+        //handle the degenerate case of z1 == z2 with an approximation
+        if(vz == 0)
+            vz = .0001;
+
+        float v = sqrt( vx*vx + vy*vy + vz*vz );
+        float ax = 57.2957795*acos( vz/v );
+        if ( vz < 0.0 )
+            ax = -ax;
+        float rx = -vy*vz;
+        float ry = vx*vz;
         glPushMatrix();
-        glTranslatef(x1,y1,z1);
 
-        // gluCylinder draws "out the z axis", so rotate view 90 on the y axis and angle-between-the-nodes on the x axis
-        // before drawing the cylinder
+        //draw the cylinder body
+        glTranslatef( x1,y1,z1 );
+        glRotatef(ax, rx, ry, 0.0);
+        gluQuadricOrientation(quadric,GLU_OUTSIDE);
+        gluCylinder(quadric, width, 0, v, 10, 1);
 
-        glRotated(90.0, 0.0, 1.0, 0.0);                             // y rotate
-        glRotated(atan2(y1-y2,x2-x1)*(180/M_PI), 1.0, 0.0, 0.0);    // x rotate, y1-y2,x2-x1 was trail and error wrt the quadrants
+        // //draw the first cap
+        // gluQuadricOrientation(quadric,GLU_INSIDE);
+        // gluDisk( quadric, 0.0, width, subdivisions, 1);
+        // glTranslatef( 0,0,v );
 
-        // glRotated(atan2(z1-z2,y2-y1)*(180/M_PI), 0.0, 1.0, 0.0);    // y rotate, y1-y2,x2-x1 was trail and error wrt the quadrants
-        // glRotated(atan2(x1-x2,z2-z1)*(180/M_PI), 0.0, 0.0, 1.0);    // z rotate, y1-y2,x2-x1 was trail and error wrt the quadrants
-        // float distance=sqrt(pow(x1-x2,2)+pow(y1-y2,2)+pow(z1-z2,2));
-        float distance=sqrt(pow(x1-x2,2)+pow(y1-y2,2)+pow(z1-z2,2));
+        // //draw the second cap
+        // gluQuadricOrientation(quadric,GLU_OUTSIDE);
+        // gluDisk( quadric, 0.0, width, subdivisions, 1);
 
-        GLUquadric *q=gluNewQuadric();
-        gluCylinder(q, width, 0, distance, 10, 10); 
-        gluDeleteQuadric(q);
+        glPopMatrix();
 
-        glPopMatrix(); 
+        gluDeleteQuadric(quadric);
     }
 
     // draw the edge's label, if there is one.
