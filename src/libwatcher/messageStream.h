@@ -179,6 +179,12 @@ namespace watcher
          */
         bool connect();
 
+        /**
+         * Clear the message cache. Can be used to clear the cache if the GUI is overloaded
+         * or knowns that it does not need the cached data.
+         */
+        void clearMessageCache(); 
+
         protected:
 
         /**

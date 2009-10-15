@@ -270,6 +270,18 @@ bool MessageStream::handleMessagesSent(const vector<MessagePtr> &messages)
     return retVal;
 }
 
+void MessageStream::clearMessageCache()
+{
+    TRACE_ENTER();
+    {
+        lock_guard<mutex> lock(messageCacheMutex);
+        messageCache.clear();
+        readReady=false;
+        // let lock go out of scope
+    }
+    TRACE_EXIT();
+}
+
 std::ostream &watcher::operator<<(std::ostream &out, const MessageStream & /*messStream*/)
 {
     out << "MessageStream()";

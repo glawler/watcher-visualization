@@ -1726,6 +1726,7 @@ void manetGLView::updatePlaybackSliderFromGUI()
 
     currentMessageTimestamp=newStart;  // So it displays in status string immediately. 
     playbackSlider->setValue(newStart/1000); 
+    messageStream->clearMessageCache();
     messageStream->setStreamTimeStart(newStart); 
     messageStream->startStream(); 
 
@@ -3048,6 +3049,7 @@ void manetGLView::normalPlayback()
     TRACE_ENTER();
     playbackPaused=false;
     playbackSetSpeed(1.0);
+    messageStream->clearMessageCache();
     messageStream->startStream(); 
     TRACE_EXIT();
 }
@@ -3055,6 +3057,7 @@ void manetGLView::reversePlayback()
 {
     TRACE_ENTER();
     pausePlayback(); 
+    messageStream->clearMessageCache();
     if (streamRate!=0.0)
     {
         if (streamRate<0.0)
@@ -3070,6 +3073,7 @@ void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
     pausePlayback(); 
+    messageStream->clearMessageCache();
     if (streamRate!=0.0)
     {
         if (streamRate>0.0)
@@ -3085,6 +3089,7 @@ void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
     pausePlayback(); 
+    messageStream->clearMessageCache();
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
     if (streamRate<0.0)
         normalPlayback();
@@ -3099,6 +3104,7 @@ void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
     pausePlayback(); 
+    messageStream->clearMessageCache();
     messageStream->setStreamTimeStart(SeekMessage::eof); 
     playbackSetSpeed(1.0);
     playbackPaused=false;
