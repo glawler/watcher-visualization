@@ -170,8 +170,6 @@ void manetGLView::invert4x4(GLdouble dst[16], GLdouble const src[16])
     tmp[7] = (pair4*src[0]) + (pair9*src[4]) + (pair10*src[8]);
     tmp[7] -= (pair5*src[0]) + (pair8*src[4]) + (pair11*src[8]);
     // second 8 elements
-    tmp[8] = (pair12*src[7]) + (pair15*src[11]) + (pair16*src[15]);
-    tmp[8] -= (pair13*src[7]) + (pair14*src[11]) + (pair17*src[15]);
     tmp[9] = (pair13*src[3]) + (pair18*src[11]) + (pair21*src[15]);
     tmp[9] -= (pair12*src[3]) + (pair19*src[11]) + (pair20*src[15]);
     tmp[10] = (pair14*src[3]) + (pair19*src[7]) + (pair22*src[15]);
@@ -1801,16 +1799,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         glTranslatef( x1,y1,z1 );
         glRotatef(ax, rx, ry, 0.0);
         gluQuadricOrientation(quadric,GLU_OUTSIDE);
-        gluCylinder(quadric, width, 0, v, 10, 1);
-
-        // //draw the first cap
-        // gluQuadricOrientation(quadric,GLU_INSIDE);
-        // gluDisk( quadric, 0.0, width, subdivisions, 1);
-        // glTranslatef( 0,0,v );
-
-        // //draw the second cap
-        // gluQuadricOrientation(quadric,GLU_OUTSIDE);
-        // gluDisk( quadric, 0.0, width, subdivisions, 1);
+        gluCylinder(quadric, width, 0, v, 15, 15);
 
         glPopMatrix();
 
@@ -2845,10 +2834,12 @@ void manetGLView::drawSphere(GLdouble radius)
 {
     if (threeDView)
     {
-        glPushAttrib(GL_NORMALIZE);
-        glNormal3f(0.0, 0.0, 1.0);
-        glutSolidSphere(radius, 10, 10);
-        glPopAttrib();
+        GLUquadricObj *quadric=gluNewQuadric();
+        gluQuadricNormals(quadric, GLU_SMOOTH);
+        glPushMatrix();
+        gluSphere(quadric, radius, 15, 15);
+        glPopMatrix();
+        gluDeleteQuadric(quadric);
     }
     else
         drawDisk(radius); 
