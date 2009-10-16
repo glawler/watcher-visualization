@@ -2999,15 +2999,15 @@ void manetGLView::saveConfiguration()
         for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++)
             root[longlongIntVals[i].prop]=*longlongIntVals[i].val;
 
-        root["viewPoint"]["angle"][0]=manetAdj.angleX;
-        root["viewPoint"]["angle"][1]=manetAdj.angleY;
-        root["viewPoint"]["angle"][2]=manetAdj.angleZ;
-        root["viewPoint"]["scale"][0]=manetAdj.scaleX;
-        root["viewPoint"]["scale"][1]=manetAdj.scaleY;
-        root["viewPoint"]["scale"][2]=manetAdj.scaleZ;
-        root["viewPoint"]["shift"][0]=manetAdj.shiftX;
-        root["viewPoint"]["shift"][1]=manetAdj.shiftY;
-        root["viewPoint"]["shift"][2]=manetAdj.shiftZ;
+        root["viewPoint"]["angle"][0]=fpclassify(manetAdj.angleX)==FP_NAN ? 0.0 : manetAdj.angleX;
+        root["viewPoint"]["angle"][1]=fpclassify(manetAdj.angleY)==FP_NAN ? 0.0 : manetAdj.angleY;
+        root["viewPoint"]["angle"][2]=fpclassify(manetAdj.angleZ)==FP_NAN ? 0.0 : manetAdj.angleZ;
+        root["viewPoint"]["scale"][0]=fpclassify(manetAdj.scaleX)==FP_NAN ? 0.0 : manetAdj.scaleX;
+        root["viewPoint"]["scale"][1]=fpclassify(manetAdj.scaleY)==FP_NAN ? 0.0 : manetAdj.scaleY;
+        root["viewPoint"]["scale"][2]=fpclassify(manetAdj.scaleZ)==FP_NAN ? 0.0 : manetAdj.scaleZ;
+        root["viewPoint"]["shift"][0]=fpclassify(manetAdj.shiftX)==FP_NAN ? 0.0 : manetAdj.shiftX;
+        root["viewPoint"]["shift"][1]=fpclassify(manetAdj.shiftY)==FP_NAN ? 0.0 : manetAdj.shiftY;
+        root["viewPoint"]["shift"][2]=fpclassify(manetAdj.shiftZ)==FP_NAN ? 0.0 : manetAdj.shiftZ;
 
         BackgroundImage &bg=BackgroundImage::getInstance();
         float bgfloatVals[5];
