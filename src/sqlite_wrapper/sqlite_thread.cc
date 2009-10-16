@@ -22,23 +22,38 @@
  */
 
 #include <pthread.h>
+//#include <iostream>
+#include <unistd.h>
 
+#if 0
 namespace
 {
     pthread_mutex_t busy_lock = PTHREAD_MUTEX_INITIALIZER;
     pthread_cond_t busy_cond = PTHREAD_COND_INITIALIZER;
 }
+#endif
 
 extern "C" int busy_handler(void *, int)
 {
+    //std::cout << "busy_handler: enter (thread " << pthread_self() << ")\n";
+#if 0
     pthread_mutex_lock(&busy_lock);
     pthread_cond_wait(&busy_cond, &busy_lock);
     pthread_mutex_unlock(&busy_lock);
+#else
+
+#define BUSY_SLEEP 20 /* milliseconds */
+    usleep(BUSY_SLEEP);
+#endif
+
+    //std::cout << "busy_handler: exit (thread " << pthread_self() << ")\n";
 
     return 1; // nonzero means try again
 }
 
 void busy_done()
 {
-    pthread_cond_signal(&busy_cond);
+    //std::cout << "busy_done: enter (thread " << pthread_self() << ")\n";
+    //pthread_cond_signal(&busy_cond);
+    //std::cout << "busy_done: exit (thread " << pthread_self() << ")\n";
 }

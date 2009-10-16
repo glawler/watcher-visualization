@@ -1,4 +1,5 @@
 #!/bin/sh
+libtoolize --force
 if [ ! -d aclocal ]; then
 	mkdir aclocal
 fi
