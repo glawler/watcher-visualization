@@ -52,8 +52,8 @@ def main(serverName):
             try:
                 # GTL -- need to check the return val here. 
                 retCode=subprocess.call(['sendGPSMessage',
-                                         '-x', str(session.fix.latitude), 
-                                         '-y', str(session.fix.longitude), 
+                                         '-x', str(session.fix.longitude), 
+                                         '-y', str(session.fix.latitude), 
                                          '-z', str(session.fix.altitude),
                                          '-s', str(serverName) ])
             except OSError:
