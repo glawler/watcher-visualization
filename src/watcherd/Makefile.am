@@ -38,4 +38,3 @@ watcherd_LDADD = ../libwatcher/libwatchermsg.la
 watcherd_LDADD += ../libwatcher/libwatcher.a 
 watcherd_LDADD += ../sqlite_wrapper/libsqlite_wrapper.a
 watcherd_LDADD += ../util/libwatcherutils.a 
-watcherd_LDADD += ../logger/liblogger.la

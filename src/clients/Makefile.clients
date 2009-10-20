@@ -8,4 +8,3 @@ CPPFLAGS += -I$(top_srcdir)/clients/include
 LDADD = $(top_srcdir)/libwatcher/libwatchermsg.la 
 LDADD += $(top_srcdir)/libwatcher/libwatcher.a 
 LDADD += $(top_srcdir)/util/libwatcherutils.a 
-LDADD += $(top_srcdir)/logger/liblogger.la
