@@ -87,6 +87,15 @@ if test x$enable_testnodeonly == xno; then
     AC_MSG_RESULT($enable_watcher3d)
     AM_CONDITIONAL([ENABLE_WATCHER3D], [test x$enable_watcher3d != xno])
 
+    # allow optional disabling of earthWatcher
+    AC_MSG_CHECKING(--enable-earthWatcher)
+    AC_ARG_ENABLE(earthWatcher,
+	      [AS_HELP_STRING([--enable-earthWatcher],[enable compilation of earthWatcher])],
+	      [enable_earthWatcher=$enableval],
+          [enable_earthWatcher="no"])
+    AC_MSG_RESULT($enable_earthWatcher)
+    AM_CONDITIONAL([ENABLE_EARTHWATCHER], [test x$enable_earthWatcher != xno])
+
     # OGRE, OIS, and CEGUI
     if test x$enable_ogreWatcher != xno; then
         AC_DEFINE(FEAT_OGREWATCHER)
@@ -211,6 +220,10 @@ fi
 
 if test x$enable_hierarchy_client != xno; then
     AC_CONFIG_FILES([clients/watcherHierarchyClient/Makefile])
+fi
+
+if test x$enable_earthWatcher != xno; then
+    AC_CONFIG_FILES([clients/earthWatcher/Makefile])
 fi
 
 AC_OUTPUT
