@@ -173,6 +173,10 @@ AC_ARG_ENABLE(hierarchy_client,
 AM_CONDITIONAL([ENABLE_HIERARCHY_CLIENT], [test x$enable_hierarchy_client != xno])
 AC_MSG_RESULT($enable_hierarchy_client)
 
+if test x$enable_hierarchy_client != xno; then
+    PKG_CHECK_MODULES(idsCommunications, idsCommunications >= 1.0)
+fi
+
 AC_CONFIG_FILES([ \
     Makefile \
     util/Makefile \

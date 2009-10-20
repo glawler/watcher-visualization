@@ -15,7 +15,7 @@ CXXFLAGS+=-I../../include
 CXXFLAGS+=-I../../libwatcher 
 CXXFLAGS+=-I../../watcherd
 CXXFLAGS+=@LOGGER_CFLAGS@
-CXXFLAGS+=-I../../idsCommunications
+CXXFLAGS+=@idsCommunications_CFLAGS@
 CXXFLAGS+=-I../..
 
 CFLAGS+=-I../../../include
@@ -25,14 +25,12 @@ LDFLAGS+=-L/usr/local/lib/
 LDFLAGS+=-L../../libwatcher
 LDFLAGS+=-L../../watcherd
 LDFLAGS+=-L../../../lib
-LDFLAGS+=-L../../idsCommunications
 LDFLAGS+=@LOGGER_LIBS@
 
-LIBS+=-lidsCommunications
 LIBS+=-lwatcher
 LIBS+=-lwatchermsg
 LIBS+=-lwatcher
-LIBS+=-lidsCommunications
+LIBS+=@idsCommunications_LIBS@
 
 bin_PROGRAMS=watcherHierarchyClient
 
