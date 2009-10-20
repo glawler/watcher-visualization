@@ -108,53 +108,55 @@ if test x$enable_testnodeonly == xno; then
         # AC_SUBST(CEGUI-OGRE_LIBS)
     fi
 
-    # qmake-qt4 seems to set the correct includes and libs, we just need to determine where it is for the QWT detection
-    AC_MSG_CHECKING(for qt4)
-    ac_cv_qt=
-    if test -d /usr/local/include/qt; then
-        AC_MSG_RESULT(/usr/local/include/qt)
-    #    QT4_INCLUDES="/usr/local/include/qt"
-    #    QT4_LIBS="-L/usr/local/lib"
-    #    ac_cv_qt_dir=/usr/local/lib
-    elif test -d /usr/include/qt4; then
-        AC_MSG_RESULT(/usr/include/qt4)
-    #    QT4_INCLUDES="/usr/include/qt4"
-        ac_cv_qt='-qt4'
-    #    ac_cv_qt_dir=/usr/lib
-    elif test -d /usr/include/qt; then
-        AC_MSG_RESULT(/usr/include/qt)
-    #    QT4_INCLUDES="/usr/include/qt4"
-    #    ac_cv_qt_dir=/usr/lib
-    elif test -d /usr/include/Qt; then
-        AC_MSG_RESULT(/usr/include)
-    else
-        AC_MSG_ERROR(not found)
+    if test x$enable_watcher3d != xno; then
+	    # qmake-qt4 seems to set the correct includes and libs, we just need to determine where it is for the QWT detection
+	    AC_MSG_CHECKING(for qt4)
+	    ac_cv_qt=
+	    if test -d /usr/local/include/qt; then
+		AC_MSG_RESULT(/usr/local/include/qt)
+	    #    QT4_INCLUDES="/usr/local/include/qt"
+	    #    QT4_LIBS="-L/usr/local/lib"
+	    #    ac_cv_qt_dir=/usr/local/lib
+	    elif test -d /usr/include/qt4; then
+		AC_MSG_RESULT(/usr/include/qt4)
+	    #    QT4_INCLUDES="/usr/include/qt4"
+		ac_cv_qt='-qt4'
+	    #    ac_cv_qt_dir=/usr/lib
+	    elif test -d /usr/include/qt; then
+		AC_MSG_RESULT(/usr/include/qt)
+	    #    QT4_INCLUDES="/usr/include/qt4"
+	    #    ac_cv_qt_dir=/usr/lib
+	    elif test -d /usr/include/Qt; then
+		AC_MSG_RESULT(/usr/include)
+	    else
+		AC_MSG_ERROR(not found)
+	    fi
+	    #if test -f ${ac_cv_qt_dir}/libqt-mt.so; then
+	    #    QT4_LIBS="$QT4_LIBS -lqt-mt"
+	    #else
+	    #    QT4_LIBS="$QT4_LIBS -lqt"
+	    #fi
+	    
+	    AC_MSG_CHECKING(for qwt)
+	    if test -d include/qwt; then
+		AC_MSG_RESULT(./include/qwt)
+		QWT_INCLUDES="../../../include/qwt"
+		QWT_LIB="-L../../../lib -lqwt"
+	    elif test -d /usr/local/include/qwt; then
+		AC_MSG_RESULT(/usr/local/include/qt)
+		QWT_INCLUDES="/usr/local/include/qwt"
+		QWT_LIB="-L/usr/local/lib -lqwt"
+	    elif test -d /usr/include/qwt${ac_cv_qt}; then
+		AC_MSG_RESULT(/usr/include/qwt${ac_cv_qt})
+		QWT_INCLUDES="/usr/include/qwt${ac_cv_qt}"
+		QWT_LIB="-lqwt${ac_cv_qt}"
+	    else
+		AC_MSG_ERROR(not found)
+	    fi
+	    
+	    AC_SUBST(QWT_INCLUDES)
+	    AC_SUBST(QWT_LIB)
     fi
-    #if test -f ${ac_cv_qt_dir}/libqt-mt.so; then
-    #    QT4_LIBS="$QT4_LIBS -lqt-mt"
-    #else
-    #    QT4_LIBS="$QT4_LIBS -lqt"
-    #fi
-    
-    AC_MSG_CHECKING(for qwt)
-    if test -d include/qwt; then
-        AC_MSG_RESULT(./include/qwt)
-        QWT_INCLUDES="../../../include/qwt"
-        QWT_LIB="-L../../../lib -lqwt"
-    elif test -d /usr/local/include/qwt; then
-        AC_MSG_RESULT(/usr/local/include/qt)
-        QWT_INCLUDES="/usr/local/include/qwt"
-        QWT_LIB="-L/usr/local/lib -lqwt"
-    elif test -d /usr/include/qwt${ac_cv_qt}; then
-        AC_MSG_RESULT(/usr/include/qwt${ac_cv_qt})
-        QWT_INCLUDES="/usr/include/qwt${ac_cv_qt}"
-        QWT_LIB="-lqwt${ac_cv_qt}"
-    else
-        AC_MSG_ERROR(not found)
-    fi
-    
-    AC_SUBST(QWT_INCLUDES)
-    AC_SUBST(QWT_LIB)
 
 else
     #
