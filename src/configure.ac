@@ -97,8 +97,9 @@ if test x$enable_testnodeonly == xno; then
     AM_CONDITIONAL([ENABLE_EARTHWATCHER], [test x$enable_earthWatcher != xno])
 
     ac_cv_kml=no
-    AC_ARG_WITH(kml, [AS_HELP_STRING([--with-kml=PREFIX],[use the libkml installed in the PREFIX directory])]
-	    	[ac_cv_kml=$withval])
+    AC_ARG_WITH([kml], 
+                [AS_HELP_STRING([--with-kml=PREFIX],[use the libkml installed in the PREFIX directory])],
+    	    	[ac_cv_kml=$withval])
 
     if test x$enable_earthWatcher != xno; then
 	    AC_MSG_CHECKING(for libkml)
