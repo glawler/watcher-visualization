@@ -153,24 +153,25 @@ int main(int argc, char **argv)
         config.getRoot().add("outputFile", libconfig::Setting::TypeString) = outputFile;
     }
 
-    MessageStreamPtr ms(MessageStream::createNewMessageStream(serverName, service));
+    // open a message stream of live events for now
+    MessageStreamPtr ms(MessageStream::createNewMessageStream(serverName, service, -1));
     if (!ms) {
         LOG_FATAL("Unable to create new message stream to server \"" << serverName << "\" using service (or port) \"" << service);
         TRACE_EXIT_RET(EXIT_FAILURE); 
         return EXIT_FAILURE;
     }
 
-    MessagePtr mp;
-
     LOG_INFO("Starting event playback");
     ms->startStream(); 
 
-    //libkml boilerplate
+    // libkml boilerplate
     kmldom::KmlFactory* kmlFac(kmldom::KmlFactory::GetFactory());
-    kmldom::KmlPtr kml(kmlFac->CreateKml());
+    KmlPtr kml(kmlFac->CreateKml());
 
-    //create initial DOM
-
+    /*
+     * create initial DOM tree.  As nodes appear, they get added to the tree.  As nodes move, we update the position attribute
+     * in the DOM, and regenerate the KML file.
+     */
     FolderPtr folder(kmlFac->CreateFolder());
     folder->set_name("Watcher");
     kml->set_feature(folder);
@@ -184,6 +185,8 @@ int main(int argc, char **argv)
 
     LOG_INFO("Waiting for events ");
     unsigned int messageNumber = 0;
+    MessagePtr mp;
+    time_t last_output = 0; // counter to allow for writing the kml file on a fixed time interval
     while (ms->getNextMessage(mp)) {
         std::cout << "Message #" << (++messageNumber) << ": " << *mp << std::endl; 
 
@@ -195,11 +198,14 @@ int main(int argc, char **argv)
 
             PlacemarkPtr ptr;
 
+            // determine if we have already created a placemark for this node previously
             NodeMapIteratorType it = nodeMap.find(mp->fromNodeID);
             if (it == nodeMap.end()) {
                 //not found, create a new entry
                 ptr = kmlFac->CreatePlacemark();
-                ptr->set_name("node");
+                std::string ip(mp->fromNodeID.to_string());
+                ptr->set_name(ip); // textual label, can be html
+                ptr->set_id(ip); // internal label for locating object in the DOM tree
                 /*
                 //id and target id are both set here
                 //target id is required when changing some attribute of a feature already in the dom
@@ -236,8 +242,13 @@ int main(int argc, char **argv)
         }
         */
 
-        if (messageNumber == 1) //temporary for testing purposes
-            break;
+        time_t now = time(0);
+        const unsigned int output_interval = 1; // seconds
+        if (now - last_output >= output_interval) {
+            LOG_DEBUG("writing kml file");
+            last_output = now;
+            kmlbase::File::WriteStringToFile(kmldom::SerializePretty(kml), outputFile);
+        }
     }
 
     /*
@@ -245,8 +256,6 @@ int main(int argc, char **argv)
     kmlFile->SerializeToString(&xml);
     kmlbase::File::WriteStringToFile(xml, outputFile);
     */
-    kmlbase::File::WriteStringToFile(kmldom::SerializePretty(kml), outputFile);
-
 
     // Save any configuration changes made during the run.
     LOG_INFO("Saving last known configuration to " << configFilename); 
