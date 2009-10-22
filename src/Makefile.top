@@ -38,33 +38,3 @@ LDFLAGS += $(BOOST_LDFLAGS)
 ctags:
 	ctags -R $(TOPDIR)
 
-# make install into staging dir, uninstall "server" components by hand, 
-# then tar it up and remove the tmp dir.
-TMPDISTDIR = $(shell pwd)/tmpDistDir
-testnode-dist:
-	@echo Temporarily installing distribution
-	mkdir -p $(TMPDISTDIR) && $(MAKE) DESTDIR=$(TMPDISTDIR) install
-	@echo Removing non-testnode files from distribution
-	$(RM) $(TMPDISTDIR)/$(bindir)/showClock
-	$(RM) $(TMPDISTDIR)/$(bindir)/messageStream2Text
-	$(RM) $(TMPDISTDIR)/$(bindir)/connectivity2dot
-	$(RM) $(TMPDISTDIR)/$(bindir)/watcherd
-	@echo Creating $(top_srcdir)/testnode-dist.tbz tar file.
-	tar jcvf $(top_srcdir)/testnode-dist.tbz -C $(TMPDISTDIR) .
-	@echo Removing tmp installation directory
-	$(RM) -r $(TMPDISTDIR)
-	@echo testnode-dist complete, testnode-dist is $(top_srcdir)/testnode-dist.tbz
-
-# make install into staging dir, uninstall "testnode" components by hand, 
-# then tar it up and remove the tmp dir.
-testnode-dist:
-	@echo Temporarily installing distribution
-	mkdir -p $(TMPDISTDIR) && $(MAKE) DESTDIR=$(TMPDISTDIR) install
-	@echo Removing non-servernode files from distribution
-	$(RM) $(TMPDISTDIR)/$(bindir)/routeFeeder
-	@echo Creating $(top_srcdir)/testnode-dist.tbz tar file.
-	tar jcvf $(top_srcdir)/testnode-dist.tbz -C $(TMPDISTDIR) .
-	@echo Removing tmp installation directory
-	$(RM) -r $(TMPDISTDIR)
-	@echo testnode-dist complete, testnode-dist is $(top_srcdir)/testnode-dist.tbz
-

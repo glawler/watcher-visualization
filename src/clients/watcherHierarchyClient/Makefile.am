@@ -1,10 +1,7 @@
 
 include $(srcdir)/../Makefile.clients
 
-CXXFLAGS+=-I/usr/include/libxml2 
-LDADD+=-lxml2
-
-CPPFLAGS += @BOOST_CPPFLAGS@
+CXXFLAGS += @BOOST_CPPFLAGS@
 LDFLAGS += @BOOST_LDFLAGS@
 LIBS+=$(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB)
 
@@ -18,10 +15,8 @@ CXXFLAGS+=@LOGGER_CFLAGS@
 CXXFLAGS+=@idsCommunications_CFLAGS@
 CXXFLAGS+=-I../..
 
-CFLAGS+=-I../../../include
-CFLAGS+=-I/usr/include/libxml2
+CFLAGS=$(CXXFLAGS)
 
-LDFLAGS+=-L/usr/local/lib/
 LDFLAGS+=-L../../libwatcher
 LDFLAGS+=-L../../watcherd
 LDFLAGS+=-L../../../lib
@@ -40,7 +35,5 @@ watcherHierarchyClient_SOURCES=\
 	legacyWatcherMessageUnmarshal.cpp \
 	legacyWatcherMessageUnmarshal.h \
 	marshal.h \
-	watcherGPS.cpp \
-	watcherGPS.h \
 	watcherHierarchyClient.cpp
 

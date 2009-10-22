@@ -280,16 +280,19 @@ void sendGPS(void *messageHandlerData, const struct MessageInfo *mi)
 
     LOG_DEBUG("Received GPS message of size " << payloadLen << ", unmarshalling it."); 
 
-    WatcherGPS wGPS;
-    watcherGPSUnmarshal(payload, payloadLen, &wGPS);
+    WatcherGPS *wGPS=watcherGPSUnmarshal(payload, payloadLen);
 
-    GPSMessagePtr gpsMessage(new GPSMessage);
-    gpsMessage->x=wGPS.lon;
-    gpsMessage->y=wGPS.lat;
-    gpsMessage->z=wGPS.alt;
-    gpsMessage->fromNodeID=ip::address_v4(mi->origin);
-
-    st->client->sendMessage(gpsMessage);
+    if (wGPS) {
+        GPSMessagePtr gpsMessage(new GPSMessage);
+        gpsMessage->x=wGPS->lon;
+        gpsMessage->y=wGPS->lat;
+        gpsMessage->z=wGPS->alt;
+        gpsMessage->fromNodeID=ip::address_v4(mi->origin);
+        free(wGPS);
+        st->client->sendMessage(gpsMessage);
+    }
+    else 
+        LOG_ERROR("Error unmarshalling a watcher GPS message"); 
 
     TRACE_EXIT();
 }
