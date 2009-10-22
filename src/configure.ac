@@ -96,6 +96,32 @@ if test x$enable_testnodeonly == xno; then
     AC_MSG_RESULT($enable_earthWatcher)
     AM_CONDITIONAL([ENABLE_EARTHWATCHER], [test x$enable_earthWatcher != xno])
 
+    ac_cv_kml=no
+    AC_ARG_WITH(kml, [AS_HELP_STRING([--with-kml=PREFIX],[use the libkml installed in the PREFIX directory])]
+	    	[ac_cv_kml=$withval])
+
+    if test x$enable_earthWatcher != xno; then
+	    AC_MSG_CHECKING(for libkml)
+	    if test x$ac_cv_kml = xno; then
+		    #not specified by the user, look in the standard locations
+		    for d in /usr /usr/local; do
+			    if test -d $d/include/kml; then
+				    ac_cv_kml=$d
+			    fi
+		    done
+	    fi
+	    if test x$ac_cv_kml = xno; then
+		    AC_MSG_ERROR("unable to locate libkml")
+	    fi
+	    AC_MSG_RESULT($ac_cv_kml)
+	    KML_INCLUDES="-I$ac_cv_kml/include"
+	    KML_LDFLAGS="-L$ac_cv_kml/lib"
+	    KML_LDADD="-lkmlconvenience -lkmlengine -lkmldom"
+	    AC_SUBST(KML_INCLUDES)
+	    AC_SUBST(KML_LDFLAGS)
+	    AC_SUBST(KML_LDADD)
+    fi
+
     # OGRE, OIS, and CEGUI
     if test x$enable_ogreWatcher != xno; then
         AC_DEFINE(FEAT_OGREWATCHER)
