@@ -1,3 +1,4 @@
+include $(top_srcdir)/Makefile.top
 
 if ENABLE_HIERARCHY_CLIENT
 WHC_DIR = watcherHierarchyClient
