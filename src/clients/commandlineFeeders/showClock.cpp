@@ -82,6 +82,8 @@ void usage(const char *progName)
     fprintf(stderr, "   -S, --hideSecondRing        Don't send message to draw the outer, second hand ring\n");
     fprintf(stderr, "   -H, --hideHourRing          Don't send message to draw the inner, hour hand ring\n");
     fprintf(stderr, "   -e, --expireHands           When drawing edges for the hands, set an expiration on the edges.\n"); 
+    fprintf(stderr, "   -t, --latitude              Place the clock at this latitude (def==0).\n"); 
+    fprintf(stderr, "   -g, --longitude             Place the clock at this longitude (def==0).\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "   -h, --help                  Show this message\n"); 
 
@@ -97,6 +99,7 @@ int main(int argc, char **argv)
     string logProps(string(basename(argv[0]))+string(".log.properties"));
     double radius=50.0; 
     bool showSecondRing=true, showHourRing=true, expireHands=false;
+    double offsetLong=0, offsetLat=0;
 
     while (true) 
     {
@@ -108,11 +111,13 @@ int main(int argc, char **argv)
             {"hideSecondRing", no_argument, 0, 'S'},
             {"hideHourRing", no_argument, 0, 'H'},
             {"expireHands", no_argument, 0, 'e'},
+            {"latitude", required_argument, 0, 't'}, 
+            {"longitude", required_argument, 0, 'g'}, 
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "r:s:p:eSHh?", long_options, &option_index);
+        c = getopt_long(argc, argv, "r:s:p:t:g:eSHh?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -136,6 +141,12 @@ int main(int argc, char **argv)
                 break;
             case 'e':
                 expireHands=true;
+                break;
+            case 'g':
+                offsetLong=lexical_cast<double>(optarg); 
+                break;
+            case 't':
+                offsetLat=lexical_cast<double>(optarg); 
                 break;
             case 'h':
             case '?':
@@ -186,7 +197,7 @@ int main(int argc, char **argv)
     while (true)  // draw everything all the time as we don't know when watcher will start
     {
         // Draw center node
-        GPSMessagePtr gpsMess(new GPSMessage(radius, radius, 0));
+        GPSMessagePtr gpsMess(new GPSMessage(offsetLong+radius, offsetLat+radius, 0));
         gpsMess->layer=layer;
         gpsMess->fromNodeID=centerId;
         if(!client.sendMessage(gpsMess))
@@ -210,8 +221,8 @@ int main(int argc, char **argv)
 
             // Move hour. min, and sec nodes to appropriate locations. 
             GPSMessagePtr gpsMess(new GPSMessage(
-                        (sin(nodeData[i].theta)*nodeData[i].length)+radius, 
-                        (cos(nodeData[i].theta)*nodeData[i].length)+radius, 
+                        offsetLong+(sin(nodeData[i].theta)*nodeData[i].length)+radius, 
+                        offsetLat+(cos(nodeData[i].theta)*nodeData[i].length)+radius, 
                         (double)i));
             gpsMess->layer=layer;
             gpsMess->fromNodeID=*nodeData[i].id;
@@ -243,7 +254,7 @@ int main(int argc, char **argv)
             for (unsigned int i=0; i<12; i++, theta+=(2*PI)/12)
             {
                 NodeIdentifier thisId=NodeIdentifier::from_string("192.168.2." + lexical_cast<string>(i+1));
-                GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*radius)+radius, (cos(theta)*radius)+radius, 0.0)); 
+                GPSMessagePtr gpsMess(new GPSMessage(offsetLong+((sin(theta)*radius)+radius), offsetLat+((cos(theta)*radius)+radius, 0.0))); 
                 gpsMess->layer=layer;
                 gpsMess->fromNodeID=thisId;
                 if(!client.sendMessage(gpsMess))
@@ -263,7 +274,7 @@ int main(int argc, char **argv)
             {
                 NodeIdentifier thisId=NodeIdentifier::from_string("192.168.3." + lexical_cast<string>(i+1));
                 double faceRad=radius*1.15;
-                GPSMessagePtr gpsMess(new GPSMessage((sin(theta)*faceRad)+radius, (cos(theta)*faceRad)+radius, 0.0)); 
+                GPSMessagePtr gpsMess(new GPSMessage(offsetLong+((sin(theta)*faceRad)+radius), offsetLat+((cos(theta)*faceRad)+radius), 0.0)); 
                 gpsMess->layer=layer;
                 gpsMess->fromNodeID=thisId;
                 if(!client.sendMessage(gpsMess))

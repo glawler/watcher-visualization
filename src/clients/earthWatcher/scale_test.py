@@ -9,7 +9,7 @@ import time
 
 total_nodes=10 # number of nodes to create
 refresh_rate=200 # milliseconds -- how often to move a node
-server_name='localhost'
+server_name='glory'
 pos_increment=0.0005 # how far to move the node during each update
 
 net_addr = '10.0.0.' # network address prefix -- used as label
