@@ -254,7 +254,7 @@ int main(int argc, char **argv)
             for (unsigned int i=0; i<12; i++, theta+=(2*PI)/12)
             {
                 NodeIdentifier thisId=NodeIdentifier::from_string("192.168.2." + lexical_cast<string>(i+1));
-                GPSMessagePtr gpsMess(new GPSMessage(offsetLong+((sin(theta)*radius)+radius), offsetLat+((cos(theta)*radius)+radius, 0.0))); 
+                GPSMessagePtr gpsMess(new GPSMessage(offsetLong+((sin(theta)*radius)+radius), offsetLat+((cos(theta)*radius)+radius), 0.0)); 
                 gpsMess->layer=layer;
                 gpsMess->fromNodeID=thisId;
                 if(!client.sendMessage(gpsMess))
