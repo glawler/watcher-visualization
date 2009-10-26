@@ -7,4 +7,4 @@ LDADD += @KML_LDADD@
 LDFLAGS += @KML_LDFLAGS@
 
 bin_PROGRAMS=earthWatcher
-earthWatcher_SOURCES=earthWatcher.cc
+earthWatcher_SOURCES=earthWatcher.cc kml.cc
