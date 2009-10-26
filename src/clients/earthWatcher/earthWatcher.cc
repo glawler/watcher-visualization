@@ -85,8 +85,30 @@ using kmldom::KmlPtr;
 using kmldom::PlacemarkPtr;
 using kmldom::PointPtr;
 using kmldom::UpdatePtr;
+using kmldom::IconStyleIconPtr;
+using kmldom::IconStylePtr;
+using kmldom::StylePtr;
+using kmldom::DocumentPtr;
 using kmlengine::KmlFile;
 using kmlengine::KmlFilePtr;
+
+const std::string BASE_ICON_URL = "http://maps.google.com/mapfiles/kml/shapes/";
+
+//interesting icons for placemarks
+const char *ICONS[] = {
+    "cabs.png",
+    "bus.png",
+    "rail.png",
+    "truck.png",
+    "airports.png",
+    "ferry.png",
+    "heliport.png",
+    "tram.png",
+    "sailing.png"
+};
+
+// template to get the number of items in an array
+template <typename T, int N> size_t sizeof_array( T (&)[N] ) { return N; }
 
 int main(int argc, char **argv)
 {
@@ -169,14 +191,34 @@ int main(int argc, char **argv)
     KmlPtr kml(kmlFac->CreateKml());
 
     /*
-     * create initial DOM tree.  As nodes appear, they get added to the tree.  As nodes move, we update the position attribute
+     * create initial DOM tree.  As nodes appear, they get added to the tree. 
+     * As nodes move, we update the position attribute
      * in the DOM, and regenerate the KML file.
      */
+    DocumentPtr document(kmlFac->CreateDocument());
+    kml->set_feature(document);
+
     FolderPtr folder(kmlFac->CreateFolder());
     folder->set_name("Watcher");
-    kml->set_feature(folder);
+    document->add_feature(folder);
 
-    //KmlFilePtr kmlFile(KmlFile::CreateFromImport(kml));
+    // set up styles for each icon we use, using the icon name as the id
+    for (size_t i = 0; i < sizeof_array(ICONS); ++i) {
+        IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
+        std::string url(BASE_ICON_URL + ICONS[i]);
+        icon->set_href(url.c_str());
+
+        IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+        iconStyle->set_icon(icon);
+
+        StylePtr style(kmlFac->CreateStyle());
+        style->set_iconstyle(iconStyle);
+        style->set_id(ICONS[i]);
+
+        document->add_styleselector(style);
+    }
+
+    srandom(time(0));//we use random() to select the icon below
 
     // keep a mapping from the node to its placemark object
     typedef std::map<NodeIdentifier, PlacemarkPtr> NodeMapType;
@@ -214,6 +256,10 @@ int main(int argc, char **argv)
                 */
                 nodeMap[mp->fromNodeID] = ptr;
 
+                //for testing purposes, randomly select an interesting icon to replace the default yellow pushpin
+                std::string styleUrl(std::string("#") + ICONS[ random() % sizeof_array(ICONS) ]);
+                ptr->set_styleurl(styleUrl);
+
                 folder->add_feature(ptr);//add to DOM
             } else
                 ptr = it->second;
@@ -227,21 +273,6 @@ int main(int argc, char **argv)
         } else
             continue; //nothing to do
 
-        //commented out for now since it might be possible to avoid since we can stash PlacemarkPtr's in a map
-        /*
-        if (true) {
-            //adding a Feature
-            folder->add_feature(obj);
-        } else {
-            // changing a Feature
-            kmldom::ChangePtr change(kmlFac->CreateChange());
-            change->add_object(obj);
-            UpdatePtr update(kmlFac->CreateUpdate());
-            update->add_updateoperation(change);
-            kmlengine::ProcessUpdate(update, kmlFile);
-        }
-        */
-
         time_t now = time(0);
         const unsigned int output_interval = 1; // seconds
         if (now - last_output >= output_interval) {
@@ -250,12 +281,6 @@ int main(int argc, char **argv)
             kmlbase::File::WriteStringToFile(kmldom::SerializePretty(kml), outputFile);
         }
     }
-
-    /*
-    std::string xml;
-    kmlFile->SerializeToString(&xml);
-    kmlbase::File::WriteStringToFile(xml, outputFile);
-    */
 
     // Save any configuration changes made during the run.
     LOG_INFO("Saving last known configuration to " << configFilename); 
