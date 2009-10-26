@@ -179,6 +179,7 @@ int main(int argc, char **argv)
         if (changed) {
             time_t now = time(0);
             if (now - last_output >= refresh) {
+                graph.doMaintanence(); // expire stale links
                 LOG_DEBUG("writing kml file");
                 last_output = now;
                 write_kml(graph, outputFile);
