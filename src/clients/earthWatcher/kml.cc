@@ -43,6 +43,7 @@ using kmldom::IconStylePtr;
 using kmldom::KmlFactory;
 using kmldom::KmlPtr;
 using kmldom::LineStringPtr;
+using kmldom::LineStylePtr;
 using kmldom::PlacemarkPtr;
 using kmldom::PointPtr;
 using kmldom::StylePtr;
@@ -139,10 +140,22 @@ void output_nodes(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
     }
 }
 
-void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folder)
+/*
+ * Convert a watcher color to the KML format.
+ */
+std::string watcher_color_to_kml(const watcher::Color& color)
+{
+    char buf[sizeof("aabbggrr")];
+    sprintf(buf, "%02x%02x%02x%02x", color.a, color.b, color.g, color.r);
+    return std::string(buf);
+}
+
+void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr document, FolderPtr folder)
 {
     WatcherGraph::edgeIterator ei, eend;
     unsigned int count = 0;
+    bool has_style = false;
+
     for (tie(ei, eend) = edges(graph.theGraph); ei != eend; ++ei, ++count) {
         const WatcherGraphEdge &edge = graph.theGraph[*ei]; 
         const WatcherGraphNode &node1 = graph.theGraph[source(*ei, graph.theGraph)]; 
@@ -158,9 +171,24 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         ptr->set_geometry(lineString);
 
+        // WatcherGraph only has a single style per layer, so we stash the value somewhere instead of creating multiple styles
+        if (!has_style) {
+            LineStylePtr lineStyle(kmlFac->CreateLineStyle());
+            lineStyle->set_color(watcher_color_to_kml(edge.displayInfo->color));
+            lineStyle->set_width(edge.displayInfo->width);
+
+            StylePtr style(kmlFac->CreateStyle());
+            style->set_linestyle(lineStyle);
+            style->set_id("edge-style");
+
+            document->add_styleselector(style);
+            has_style = true;
+        }
+
         std::string label("edge-" + boost::lexical_cast<std::string>(count));
         ptr->set_id(label);
         ptr->set_name(label);
+        ptr->set_styleurl("#edge-style");
 
         folder->add_feature(ptr);//add to DOM
     }
@@ -191,7 +219,7 @@ void write_kml(const WatcherGraph& graph, const std::string& outputFile)
     icon_setup(kmlFac, document);
 #endif // CUSTOM_ICON
     output_nodes(kmlFac, graph, folder);
-    output_edges(kmlFac, graph, folder);
+    output_edges(kmlFac, graph, document, folder);
 
     kmlbase::File::WriteStringToFile(kmldom::SerializePretty(kml), outputFile);
 }
