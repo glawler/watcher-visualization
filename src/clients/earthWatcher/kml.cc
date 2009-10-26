@@ -30,6 +30,8 @@
 
 #include "libwatcher/watcherGraph.h"
 
+#include <boost/lexical_cast.hpp>
+
 using kmldom::ChangePtr;
 using kmldom::CreatePtr;
 using kmldom::CoordinatesPtr;
@@ -112,7 +114,7 @@ void output_nodes(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
         ptr->set_id(ip); // internal label for locating object in the DOM tree
 
         // set the location
-        ptr->set_geometry(kmlconvenience::CreatePointLatLon(node.gpsData->x, node.gpsData->y));
+        ptr->set_geometry(kmlconvenience::CreatePointLatLon(node.gpsData->y, node.gpsData->x));
 
         /*
         //id and target id are both set here
@@ -147,8 +149,8 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
         const WatcherGraphNode &node2 = graph.theGraph[target(*ei, graph.theGraph)]; 
 
         CoordinatesPtr coords = kmlFac->CreateCoordinates();
-        coords->add_latlng(node1.gpsData->x, node1.gpsData->y);
-        coords->add_latlng(node2.gpsData->x, node2.gpsData->y);
+        coords->add_latlng(node1.gpsData->y, node1.gpsData->x);
+        coords->add_latlng(node2.gpsData->y, node2.gpsData->x);
 
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
@@ -156,9 +158,7 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         ptr->set_geometry(lineString);
 
-        char buf[sizeof("edge-X")];
-        sprintf(buf, "edge-%d", count);
-        std::string label(buf);
+        std::string label("edge-" + boost::lexical_cast<std::string>(count));
         ptr->set_id(label);
         ptr->set_name(label);
 
