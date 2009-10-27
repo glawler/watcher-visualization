@@ -129,8 +129,7 @@ void output_nodes(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
         const WatcherGraphNode &node = graph.theGraph[*vi]; 
 
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-        std::string ip(node.nodeId.to_string());
-        ptr->set_name(ip); // textual label, can be html
+        ptr->set_name(node.displayInfo->get_label(node.nodeId)); // textual label, can be html
 
         // set the location
         ptr->set_geometry(kmlconvenience::CreatePointLatLon(node.gpsData->y, node.gpsData->x));

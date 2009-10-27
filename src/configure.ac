@@ -17,6 +17,8 @@ AX_BOOST_UNIT_TEST_FRAMEWORK
 AX_BOOST_DATE_TIME
 
 PKG_CHECK_MODULES(LOGGER, logger)
+PKG_CHECK_MODULES(LIBIDMEF, libidmef)
+PKG_CHECK_MODULES(IDSCOMMUNICATIONS, idsCommunications)
 
 # allow optional 'test node only' build which builds just test node components.
 AC_MSG_CHECKING(--enable-testnodeonly)
