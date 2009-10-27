@@ -1923,6 +1923,7 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
     else
         glColor4fv(nodeColor);
 
+#if 0
     // a little awkward since we're mixing enums, reserved strings, and free form strings
     char buf[64]; 
     if (!node.nodeId.is_v4())
@@ -1962,13 +1963,14 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
         else
             snprintf(buf, sizeof(buf), "%s", node.displayInfo->label.c_str());  // use what is ever there. 
     }        
+#endif
 
     // GLdouble x, y, z; 
     // gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
     // renderText(x, y+6, z+5, QString(buf),
     //             QFont(node.displayInfo->labelFont.c_str(), 
     //                  (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
-    renderText(0, 6, 3, QString(buf),
+    renderText(0, 6, 3, QString(node.displayInfo->get_label()),
                 QFont(node.displayInfo->labelFont.c_str(), 
                      (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
 
