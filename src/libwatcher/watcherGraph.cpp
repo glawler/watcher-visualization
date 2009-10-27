@@ -223,6 +223,8 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
         if (e!=e_end)  // found it
             continue;
 
+        LOG_DEBUG("Adding new edge between " << message->fromNodeID.to_string() << " and " << nid.to_string()); 
+
         findOrCreateNode(nid, dst, message->layer); 
         std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dst, theGraph);
         if (ei.second)
@@ -231,18 +233,30 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
     }
 
     // remove missing edges
-    for (tie(e, e_end)=out_edges(*src, theGraph); e!=e_end; ++e) {
-        BOOST_FOREACH(NodeIdentifier nid, message->neighbors) 
-            if (theGraph[target(*e, theGraph)].nodeId==nid) 
-                if (theGraph[*e].displayInfo->layer==message->layer) 
+    LOG_DEBUG("Removing missing out edges from " << message->fromNodeID.to_string()); 
+    outEdgeIterator next;
+    tie(e, e_end)=out_edges(*src, theGraph);
+    for (next=e; e!=e_end; e=next) {
+        next++;
+        LOG_DEBUG("Seeing if out edge " << theGraph[target(*e, theGraph)].nodeId.to_string() << " is missing."); 
+        bool found=false;
+        BOOST_FOREACH(NodeIdentifier nid, message->neighbors) {
+            LOG_DEBUG("Scanning for missing destination edge " << nid.to_string());
+            if (theGraph[target(*e, theGraph)].nodeId==nid) { 
+                LOG_DEBUG("Found missing edge, seeing if it's on the correct layer");
+                if (theGraph[*e].displayInfo->layer==message->layer) {
+                    LOG_DEBUG("Found missing edge on the correct layer, will not remove it.");
+                    found=true;
                     break;
+                }
+            }
+        }
         
-        if (e!=e_end) // found it
+        if (found) // found it so it's not missing. 
             continue;
 
-        outEdgeIterator tmp=e;
+        LOG_DEBUG("Removing missing edge between " << message->fromNodeID.to_string() << " and " << theGraph[target(*e, theGraph)].nodeId << " on layer " << message->layer);
         remove_edge(e, theGraph);
-        e=tmp; // GTL Do I need this?
     }
     
     // THis is expensive.
