@@ -93,7 +93,7 @@ namespace watcher
             double labelPointSize;
             watcher::Color labelColor;
 
-            std::string get_label(const NodeIdentifier& nodeId);
+            std::string get_label();
 
             /** Node's color */
             watcher::Color color; 

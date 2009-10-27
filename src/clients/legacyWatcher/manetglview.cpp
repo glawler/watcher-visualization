@@ -1928,7 +1928,7 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
     // renderText(x, y+6, z+5, QString(buf),
     //             QFont(node.displayInfo->labelFont.c_str(), 
     //                  (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
-    renderText(0, 6, 3, QString(node.displayInfo->get_label(node.nodeId).c_str()),
+    renderText(0, 6, 3, QString(node.displayInfo->get_label().c_str()),
                 QFont(node.displayInfo->labelFont.c_str(), 
                      (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
 
