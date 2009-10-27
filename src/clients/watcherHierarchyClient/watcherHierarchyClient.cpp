@@ -406,17 +406,12 @@ void detectorNeighborUpdate(void *data, CommunicationsNeighbor *cn)
 
     CommunicationsNeighbor *n=communicationsNeighborList(st->cs);
     for(; n; n = n->next) {
-        if (n->distance==1 && !n->type&COMMUNICATIONSNEIGHBOR_PARENT) {
+        if (n->distance==1)
             neighborMessage->neighbors.push_back(ip::address_v4(n->addr));
-        }
-        else {
-            if (n->type&COMMUNICATIONSNEIGHBOR_PARENT) {
-                parentMessage->neighbors.push_back(ip::address_v4(n->addr));
-            }
-            else {
-                childMessage->neighbors.push_back(ip::address_v4(n->addr));
-            }
-        }
+        if (n->type&COMMUNICATIONSNEIGHBOR_PARENT) 
+            parentMessage->neighbors.push_back(ip::address_v4(n->addr));
+        if (n->type&COMMUNICATIONSNEIGHBOR_CHILD)
+            childMessage->neighbors.push_back(ip::address_v4(n->addr));
     }
 
     if (neighborMessage->neighbors.size()) 
