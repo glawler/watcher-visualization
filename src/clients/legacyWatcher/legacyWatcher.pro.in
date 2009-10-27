@@ -25,9 +25,11 @@ QMAKE_CXXFLAGS_DEBUG += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@
 QMAKE_CFLAGS_RELEASE += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@
 QMAKE_CXXFLAGS_RELEASE += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@
 
+# Leave in odd -llwatchermsg -lwatcher -llwatchermsg construct. 
 LIBS += -L../../util
-LIBS += -L../../libwatcher -lwatcher
 LIBS += -L../../libwatcher/.libs -lwatchermsg
+LIBS += -L../../libwatcher -lwatcher
+LIBS += -lwatchermsg
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -lconfig++
 LIBS += @LOGGER_LIBS@
