@@ -131,15 +131,12 @@ void output_nodes(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         std::string ip(node.nodeId.to_string());
         ptr->set_name(ip); // textual label, can be html
-        //ptr->set_id(ip); // internal label for locating object in the DOM tree
 
         // set the location
         ptr->set_geometry(kmlconvenience::CreatePointLatLon(node.gpsData->y, node.gpsData->x));
 
-        /*
         //target id is required when changing some attribute of a feature already in the dom
-        ptr->set_targetid("node0");
-        */
+        //ptr->set_targetid("node0");
 
 #ifdef CUSTOM_ICON
         set_node_icon(node, ptr);
