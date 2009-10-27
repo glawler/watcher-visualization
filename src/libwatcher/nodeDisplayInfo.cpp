@@ -245,7 +245,7 @@ void NodeDisplayInfo::saveConfiguration()
  * @param nodeId the node associated with this label
  * @return the label to use for this node
  */
-std::string NodeDisplayInfo::get_label(const NodeIdentifier& nodeId)
+std::string NodeDisplayInfo::get_label()
 {
     // a little awkward since we're mixing enums, reserved strings, and free form strings
     if (!nodeId.is_v4())
