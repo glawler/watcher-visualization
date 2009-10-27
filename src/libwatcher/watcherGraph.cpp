@@ -255,8 +255,10 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
         if (found) // found it so it's not missing. 
             continue;
 
-        LOG_DEBUG("Removing missing edge between " << message->fromNodeID.to_string() << " and " << theGraph[target(*e, theGraph)].nodeId << " on layer " << message->layer);
-        remove_edge(e, theGraph);
+        if (theGraph[*e].displayInfo->layer==message->layer) {
+            LOG_DEBUG("Removing missing edge between " << message->fromNodeID.to_string() << " and " << theGraph[target(*e, theGraph)].nodeId << " on layer " << message->layer);
+            remove_edge(e, theGraph);
+        }
     }
     
     // THis is expensive.
