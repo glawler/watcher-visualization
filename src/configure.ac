@@ -158,7 +158,7 @@ if test x$enable_testnodeonly == xno; then
 	elif test -d /usr/include/Qt; then
 	    AC_MSG_RESULT(/usr/include)
 	else
-        AC_MSG_WARN([Did not find QT4 in "standard" locations. QWT LDFLAGS and CFLAGS must be given in environment variables.])
+        AC_MSG_WARN([Did not find QT4 in "standard" locations. QT4 LDFLAGS and CFLAGS must be given in environment variables.])
 	fi
 	
     AC_MSG_CHECKING(for qwt)
