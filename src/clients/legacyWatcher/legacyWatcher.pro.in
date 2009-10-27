@@ -31,7 +31,6 @@ LIBS += -L../../libwatcher -lwatcher
 LIBS += -L../../libwatcher/.libs -lwatchermsg
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -lconfig++
-LIBS += -llog4cxx
 LIBS += @LOGGER_LIBS@
 LIBS += @LIBIDMEF_LIBS@ @IDSCOMMUNICATIONS_LIBS@
 LIBS += -lwatcherutils
