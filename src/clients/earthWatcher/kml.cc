@@ -42,8 +42,10 @@ using kmldom::IconStyleIconPtr;
 using kmldom::IconStylePtr;
 using kmldom::KmlFactory;
 using kmldom::KmlPtr;
+using kmldom::LabelStylePtr;
 using kmldom::LineStringPtr;
 using kmldom::LineStylePtr;
+using kmldom::MultiGeometryPtr;
 using kmldom::PlacemarkPtr;
 using kmldom::PointPtr;
 using kmldom::StylePtr;
@@ -66,7 +68,7 @@ NodeIconMap nodeIconMap;
 
 const std::string BASE_ICON_URL = "http://maps.google.com/mapfiles/kml/shapes/";
 
-//interesting icons for placemarks
+// interesting icons for placemarks
 const char *ICONS[] = {
     "cabs.png",
     "bus.png",
@@ -100,6 +102,23 @@ void icon_setup(KmlFactory* kmlFac, DocumentPtr document)
         document->add_styleselector(style);
     }
 }
+
+/*
+ * For testing purposes, randomly select an interesting icon to replace the default yellow pushpin.
+ * In order to use the same icon between invocations of write_kml(), a map is used to store the icon
+ * selected.
+ */
+void set_node_icon(const WatcherGraphNode& node, PlacemarkPtr ptr)
+{
+    std::string styleUrl;
+    NodeIconMapIterator it = nodeIconMap.find(node.nodeId);
+    if (it == nodeIconMap.end()) {
+        styleUrl = std::string("#") + ICONS[ random() % sizeof_array(ICONS) ];
+        nodeIconMap[node.nodeId] = styleUrl;
+    } else
+        styleUrl = it->second;
+    ptr->set_styleurl(styleUrl);
+}
 #endif // CUSTOM_ICON
 
 void output_nodes(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folder)
@@ -112,28 +131,18 @@ void output_nodes(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folde
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         std::string ip(node.nodeId.to_string());
         ptr->set_name(ip); // textual label, can be html
-        ptr->set_id(ip); // internal label for locating object in the DOM tree
+        //ptr->set_id(ip); // internal label for locating object in the DOM tree
 
         // set the location
         ptr->set_geometry(kmlconvenience::CreatePointLatLon(node.gpsData->y, node.gpsData->x));
 
         /*
-        //id and target id are both set here
         //target id is required when changing some attribute of a feature already in the dom
-        ptr->set_id("node0");
         ptr->set_targetid("node0");
         */
 
 #ifdef CUSTOM_ICON
-        // for testing purposes, randomly select an interesting icon to replace the default yellow pushpin
-        std::string styleUrl;
-        NodeIconMapIterator it = nodeIconMap.find(node.nodeId);
-        if (it == nodeIconMap.end()) {
-            styleUrl = std::string("#") + ICONS[ random() % sizeof_array(ICONS) ];
-            nodeIconMap[node.nodeId] = styleUrl;
-        } else
-            styleUrl = it->second;
-        ptr->set_styleurl(styleUrl);
+        set_node_icon(node, ptr);
 #endif
 
         folder->add_feature(ptr);//add to DOM
@@ -168,8 +177,30 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr doc
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
 
+        CoordinatesPtr pointCoords(kmlFac->CreateCoordinates());
+        //place label at the midpoint on the line between the two nodes
+        pointCoords->add_latlng((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2);
+
+        PointPtr point(kmlFac->CreatePoint());
+        point->set_coordinates(pointCoords);
+
+        /*
+         * Google Earth doesn't allow a label to be attached to something without a Point, so
+         * we need to create a container with the LineString and the Point at which to attach
+         * the label/icon.
+         */
+        MultiGeometryPtr multiGeo(kmlFac->CreateMultiGeometry());
+        multiGeo->add_geometry(lineString);
+        multiGeo->add_geometry(point);
+
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-        ptr->set_geometry(lineString);
+        ptr->set_geometry(multiGeo);
+
+        // WatcherGraphEdge supports multiple labels per edge, but GE only supports one, so just use the first label in the list
+        LabelDisplayInfoPtr labelDisplayInfo(edge.labels.front());
+        if (labelDisplayInfo) {
+            ptr->set_name(labelDisplayInfo->labelText);
+        }
 
         // WatcherGraph only has a single style per layer, so we stash the value somewhere instead of creating multiple styles
         if (!has_style) {
@@ -177,17 +208,24 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr doc
             lineStyle->set_color(watcher_color_to_kml(edge.displayInfo->color));
             lineStyle->set_width(edge.displayInfo->width);
 
+            IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+            iconStyle->set_scale(0); // scale to 0 should mean hide it?
+
             StylePtr style(kmlFac->CreateStyle());
-            style->set_linestyle(lineStyle);
             style->set_id("edge-style");
+            style->set_linestyle(lineStyle);
+            style->set_iconstyle(iconStyle);
+
+            if (labelDisplayInfo) {
+                LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+                labelStyle->set_color(watcher_color_to_kml(labelDisplayInfo->foregroundColor));
+                style->set_labelstyle(labelStyle);
+            }
 
             document->add_styleselector(style);
             has_style = true;
         }
 
-        std::string label("edge-" + boost::lexical_cast<std::string>(count));
-        ptr->set_id(label);
-        ptr->set_name(label);
         ptr->set_styleurl("#edge-style");
 
         folder->add_feature(ptr);//add to DOM
