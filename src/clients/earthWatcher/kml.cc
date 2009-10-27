@@ -31,6 +31,7 @@
 #include "libwatcher/watcherGraph.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 
 using kmldom::ChangePtr;
 using kmldom::CreatePtr;
@@ -84,25 +85,6 @@ const char *ICONS[] = {
 // template to get the number of items in an array
 template <typename T, int N> size_t sizeof_array( T (&)[N] ) { return N; }
 
-void icon_setup(KmlFactory* kmlFac, DocumentPtr document)
-{
-    // set up styles for each icon we use, using the icon name as the id
-    for (size_t i = 0; i < sizeof_array(ICONS); ++i) {
-        IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
-        std::string url(BASE_ICON_URL + ICONS[i]);
-        icon->set_href(url.c_str());
-
-        IconStylePtr iconStyle(kmlFac->CreateIconStyle());
-        iconStyle->set_icon(icon);
-
-        StylePtr style(kmlFac->CreateStyle());
-        style->set_iconstyle(iconStyle);
-        style->set_id(ICONS[i]);
-
-        document->add_styleselector(style);
-    }
-}
-
 /*
  * For testing purposes, randomly select an interesting icon to replace the default yellow pushpin.
  * In order to use the same icon between invocations of write_kml(), a map is used to store the icon
@@ -121,29 +103,41 @@ void set_node_icon(const WatcherGraphNode& node, PlacemarkPtr ptr)
 }
 #endif // CUSTOM_ICON
 
-void output_nodes(KmlFactory* kmlFac, const WatcherGraph& graph, FolderPtr folder)
-{
-    // iterate over all nodes in the graph
-    WatcherGraph::vertexIterator vi, vend;
-    for (tie(vi, vend) = vertices(graph.theGraph); vi != vend; ++vi) {
-        const WatcherGraphNode &node = graph.theGraph[*vi]; 
+typedef std::map<GUILayer, FolderPtr> LayerMap;
+typedef LayerMap::iterator LayerMapIterator;
 
-        PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-        ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
+struct DefinedLabelStyle {
+    std::string id;
+    watcher::Color color;
+    DefinedLabelStyle(const watcher::Color& col, const std::string& name) : id(name), color(col) {}
+};
 
-        // set the location
-        ptr->set_geometry(kmlconvenience::CreatePointLatLon(node.gpsData->y, node.gpsData->x));
+typedef boost::shared_ptr<DefinedLabelStyle> DefinedLabelStylePtr;
+typedef std::list<DefinedLabelStylePtr> DefinedLabelStyleList;
 
-        //target id is required when changing some attribute of a feature already in the dom
-        //ptr->set_targetid("node0");
+class Args {
+    public:
+        Args(const WatcherGraph&);
+        KmlPtr kml;
+        void start();
+    private:
+        KmlFactory *kmlFac;
+        const WatcherGraph& graph;
+        DocumentPtr doc;
+        FolderPtr topFolder;
+        LayerMap layerMap;
+        int label_count;
+        DefinedLabelStyleList definedLabelStyles;
 
-#ifdef CUSTOM_ICON
-        set_node_icon(node, ptr);
-#endif
-
-        folder->add_feature(ptr);//add to DOM
-    }
-}
+        void icon_setup();
+        FolderPtr get_layer(const GUILayer& name);
+        void output_nodes();
+        void output_edges();
+        void add_labels(const std::list<LabelDisplayInfoPtr>&, double lat, double lng);
+        void add_to_layer(const GUILayer& name, PlacemarkPtr);
+        PointPtr create_point(double lat, double lng);
+        std::string get_label_style(LabelDisplayInfoPtr dispInfo);
+};
 
 /*
  * Convert a watcher color to the KML format.
@@ -155,7 +149,160 @@ std::string watcher_color_to_kml(const watcher::Color& color)
     return std::string(buf);
 }
 
-void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr document, FolderPtr folder)
+Args::Args(const WatcherGraph& g) :
+    // libkml boilerplate
+    kmlFac(kmldom::KmlFactory::GetFactory()),
+    graph(g),
+    kml(kmlFac->CreateKml()),
+    doc(kmlFac->CreateDocument()),
+    topFolder(kmlFac->CreateFolder()),
+    label_count(0)
+{
+
+    /*
+     * create initial DOM tree.  As nodes appear, they get added to the tree. 
+     * As nodes move, we update the position attribute
+     * in the DOM, and regenerate the KML file.
+     */
+    kml->set_feature(doc);
+    topFolder->set_name("Watcher");
+    doc->add_feature(topFolder);
+}
+
+void Args::start()
+{
+    icon_setup();
+    output_nodes();
+    output_edges();
+}
+
+void Args::icon_setup()
+{
+    // set up styles for each icon we use, using the icon name as the id
+    for (size_t i = 0; i < sizeof_array(ICONS); ++i) {
+        IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
+        std::string url(BASE_ICON_URL + ICONS[i]);
+        icon->set_href(url.c_str());
+
+        IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+        iconStyle->set_icon(icon);
+
+        StylePtr style(kmlFac->CreateStyle());
+        style->set_iconstyle(iconStyle);
+        style->set_id(ICONS[i]);
+
+        doc->add_styleselector(style);
+    }
+}
+
+FolderPtr Args::get_layer(const GUILayer& name)
+{
+    LayerMapIterator it = layerMap.find(name);
+    if (it == layerMap.end()) {
+        FolderPtr layer = kmlFac->CreateFolder();
+        layer->set_name(name);
+        topFolder->add_feature(layer);
+        layerMap[name] = layer;
+        return layer;
+    } else
+        return it->second;
+}
+
+void Args::add_to_layer(const GUILayer& name, PlacemarkPtr place)
+{
+    FolderPtr layer = get_layer(name);
+    layer->add_feature(place);
+}
+
+std::string Args::get_label_style(LabelDisplayInfoPtr dispInfo)
+{
+    // many labels will probably share the same attributes, so we cache
+    // them to make the KML file smaller
+    BOOST_FOREACH(DefinedLabelStylePtr lsp, definedLabelStyles) {
+        if (dispInfo->foregroundColor == lsp->color)
+            return lsp->id;
+    }
+    // not found, create a new style
+
+    // no icon for labels
+    IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+    iconStyle->set_scale(0); // scale to 0 should mean hide it?
+
+    kmldom::LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+    labelStyle->set_color(watcher_color_to_kml(dispInfo->foregroundColor));
+    //TODO: KML doesn't support background colors
+
+    std::string url("label-style-" + boost::lexical_cast<std::string>(label_count));
+    ++label_count;
+
+    StylePtr style(kmlFac->CreateStyle());
+    style->set_id(url);
+    style->set_iconstyle(iconStyle);
+    style->set_labelstyle(labelStyle);
+
+    doc->add_styleselector(style);
+
+    definedLabelStyles.push_back( DefinedLabelStylePtr(new DefinedLabelStyle(dispInfo->foregroundColor, url)));
+
+    return url;
+}
+
+// create a placemark for each label, putting into the appropriate layer
+void Args::add_labels(const std::list<LabelDisplayInfoPtr>& labels,
+                      double lat, double lng)
+{
+    BOOST_FOREACH(LabelDisplayInfoPtr dispInfo, labels) {
+        PlacemarkPtr place(kmlFac->CreatePlacemark());
+        place->set_name(dispInfo->labelText);
+        place->set_geometry(create_point(lat, lng));
+        place->set_styleurl("#" + get_label_style(dispInfo));
+
+        add_to_layer(dispInfo->layer, place);
+
+        ++label_count;
+    }
+}
+
+/*
+ * Point's can not be shared because even though they are marked const, libKML does modify them.
+ * Therefore, we must duplicate the points for each Placemark
+ */
+PointPtr Args::create_point(double lat, double lng)
+{
+    CoordinatesPtr coords(kmlFac->CreateCoordinates());
+    coords->add_latlng(lat, lng);
+
+    PointPtr point(kmlFac->CreatePoint());
+    point->set_coordinates(coords);
+
+    return point;
+}
+
+void Args::output_nodes()
+{
+    // iterate over all nodes in the graph
+    WatcherGraph::vertexIterator vi, vend;
+    for (tie(vi, vend) = vertices(graph.theGraph); vi != vend; ++vi) {
+        const WatcherGraphNode &node = graph.theGraph[*vi]; 
+
+        PlacemarkPtr ptr = kmlFac->CreatePlacemark();
+        ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
+        ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x));
+
+        //target id is required when changing some attribute of a feature already in the dom
+        //ptr->set_targetid("node0");
+
+#ifdef CUSTOM_ICON
+        set_node_icon(node, ptr);
+#endif
+        add_to_layer(node.displayInfo->layer, ptr);
+
+        // create a placemark for each label, putting into the appropriate layer
+        add_labels(node.labels, node.gpsData->y, node.gpsData->x);
+    }
+}
+
+void Args::output_edges()
 {
     WatcherGraph::edgeIterator ei, eend;
     unsigned int count = 0;
@@ -173,12 +320,8 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr doc
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
 
-        CoordinatesPtr pointCoords(kmlFac->CreateCoordinates());
         //place label at the midpoint on the line between the two nodes
-        pointCoords->add_latlng((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2);
-
-        PointPtr point(kmlFac->CreatePoint());
-        point->set_coordinates(pointCoords);
+        PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2));
 
         /*
          * Google Earth doesn't allow a label to be attached to something without a Point, so
@@ -191,12 +334,7 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr doc
 
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         ptr->set_geometry(multiGeo);
-
-        // WatcherGraphEdge supports multiple labels per edge, but GE only supports one, so just use the first label in the list
-        LabelDisplayInfoPtr labelDisplayInfo(edge.labels.front());
-        if (labelDisplayInfo) {
-            ptr->set_name(labelDisplayInfo->labelText);
-        }
+        ptr->set_name(edge.displayInfo->label);
 
         // WatcherGraph only has a single style per layer, so we stash the value somewhere instead of creating multiple styles
         if (!has_style) {
@@ -212,19 +350,22 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr doc
             style->set_linestyle(lineStyle);
             style->set_iconstyle(iconStyle);
 
-            if (labelDisplayInfo) {
-                LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
-                labelStyle->set_color(watcher_color_to_kml(labelDisplayInfo->foregroundColor));
-                style->set_labelstyle(labelStyle);
-            }
+            kmldom::LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+            labelStyle->set_color(watcher_color_to_kml(edge.displayInfo->labelColor));
+            style->set_labelstyle(labelStyle);
 
-            document->add_styleselector(style);
+            doc->add_styleselector(style);
             has_style = true;
         }
 
         ptr->set_styleurl("#edge-style");
 
-        folder->add_feature(ptr);//add to DOM
+        add_to_layer(edge.displayInfo->layer, ptr);
+
+        // add additional placemarks for each label on this edge
+        add_labels(edge.labels,
+                   (node1.gpsData->y + node2.gpsData->y)/2,
+                   (node1.gpsData->x + node2.gpsData->x)/2);
     }
 }
 
@@ -233,27 +374,8 @@ void output_edges(KmlFactory* kmlFac, const WatcherGraph& graph, DocumentPtr doc
 
 void write_kml(const WatcherGraph& graph, const std::string& outputFile)
 {
-    // libkml boilerplate
-    KmlFactory* kmlFac(kmldom::KmlFactory::GetFactory());
-    KmlPtr kml(kmlFac->CreateKml());
+    Args args(graph);
+    args.start();
 
-    /*
-     * create initial DOM tree.  As nodes appear, they get added to the tree. 
-     * As nodes move, we update the position attribute
-     * in the DOM, and regenerate the KML file.
-     */
-    DocumentPtr document(kmlFac->CreateDocument());
-    kml->set_feature(document);
-
-    FolderPtr folder(kmlFac->CreateFolder());
-    folder->set_name("Watcher");
-    document->add_feature(folder);
-
-#ifdef CUSTOM_ICON
-    icon_setup(kmlFac, document);
-#endif // CUSTOM_ICON
-    output_nodes(kmlFac, graph, folder);
-    output_edges(kmlFac, graph, document, folder);
-
-    kmlbase::File::WriteStringToFile(kmldom::SerializePretty(kml), outputFile);
+    kmlbase::File::WriteStringToFile(kmldom::SerializePretty(args.kml), outputFile);
 }
