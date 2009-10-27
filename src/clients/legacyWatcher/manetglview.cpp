@@ -1923,54 +1923,12 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
     else
         glColor4fv(nodeColor);
 
-#if 0
-    // a little awkward since we're mixing enums, reserved strings, and free form strings
-    char buf[64]; 
-    if (!node.nodeId.is_v4())
-        snprintf(buf, sizeof(buf), "%s", node.nodeId.to_string().c_str());  // punt
-    else
-    {
-        unsigned long addr=node.nodeId.to_v4().to_ulong(); // host byte order. 
-
-        if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::FOUR_OCTETS))
-            snprintf(buf, sizeof(buf), "%lu.%lu.%lu.%lu", ((addr)>>24)&0xFF,((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
-        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::THREE_OCTETS))
-            snprintf(buf, sizeof(buf), "%lu.%lu.%lu", ((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
-        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::TWO_OCTETS))
-            snprintf(buf, sizeof(buf), "%lu.%lu", ((addr)>>8)&0xFF,(addr)&0xFF); 
-        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET))
-            snprintf(buf, sizeof(buf), "%lu", (addr)&0xFF); 
-        else if (node.displayInfo->label=="none")
-            buf[0]='\0';
-        else if (node.displayInfo->label==NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::HOSTNAME))
-        {
-            struct in_addr saddr; 
-            saddr.s_addr=htonl(addr); 
-            struct hostent *he=gethostbyaddr((const void *)saddr.s_addr, sizeof(saddr.s_addr), AF_INET); 
-
-            if (he) 
-            {
-                snprintf(buf, sizeof(buf), "%s", he->h_name); 
-                // only do the lookup one time successfully per host. 
-                node.displayInfo->label=buf; 
-            }
-            else
-            {
-                LOG_WARN("Unable to get hostnmae for node " << node.nodeId); 
-                node.displayInfo->label="UnableToGetHostNameSorry";
-            }
-        }
-        else
-            snprintf(buf, sizeof(buf), "%s", node.displayInfo->label.c_str());  // use what is ever there. 
-    }        
-#endif
-
     // GLdouble x, y, z; 
     // gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
     // renderText(x, y+6, z+5, QString(buf),
     //             QFont(node.displayInfo->labelFont.c_str(), 
     //                  (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
-    renderText(0, 6, 3, QString(node.displayInfo->get_label()),
+    renderText(0, 6, 3, QString(node.displayInfo->get_label(node.nodeId).c_str()),
                 QFont(node.displayInfo->labelFont.c_str(), 
                      (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
 
