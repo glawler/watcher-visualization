@@ -21,8 +21,6 @@
  * @author michael.elkins@cobham.com
  */
 
-#define CUSTOM_ICON // use non-default icon for nodes
-
 // libkml
 #include "kml/convenience/convenience.h"
 #include "kml/engine.h"
@@ -58,7 +56,6 @@ using namespace watcher;
 
 namespace {
 
-#ifdef CUSTOM_ICON
 /*
  * Keep a mapping to the random Icon associated with a particular node so that the
  * same icon is used between invocations of write_kml().
@@ -101,7 +98,6 @@ void set_node_icon(const WatcherGraphNode& node, PlacemarkPtr ptr)
         styleUrl = it->second;
     ptr->set_styleurl(styleUrl);
 }
-#endif // CUSTOM_ICON
 
 typedef std::map<GUILayer, FolderPtr> LayerMap;
 typedef LayerMap::iterator LayerMapIterator;
@@ -115,9 +111,9 @@ struct DefinedLabelStyle {
 typedef boost::shared_ptr<DefinedLabelStyle> DefinedLabelStylePtr;
 typedef std::list<DefinedLabelStylePtr> DefinedLabelStyleList;
 
-class Args {
+class Render {
     public:
-        Args(const WatcherGraph&);
+        Render(const WatcherGraph&);
         KmlPtr kml;
         void start();
     private:
@@ -133,10 +129,13 @@ class Args {
         FolderPtr get_layer(const GUILayer& name);
         void output_nodes();
         void output_edges();
+        void output_floating_labels();
+        void add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng);
+        void add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng);
         void add_labels(const std::list<LabelDisplayInfoPtr>&, double lat, double lng);
         void add_to_layer(const GUILayer& name, PlacemarkPtr);
         PointPtr create_point(double lat, double lng);
-        std::string get_label_style(LabelDisplayInfoPtr dispInfo);
+        std::string get_label_style(const watcher::Color&);
 };
 
 /*
@@ -149,7 +148,7 @@ std::string watcher_color_to_kml(const watcher::Color& color)
     return std::string(buf);
 }
 
-Args::Args(const WatcherGraph& g) :
+Render::Render(const WatcherGraph& g) :
     // libkml boilerplate
     kmlFac(kmldom::KmlFactory::GetFactory()),
     graph(g),
@@ -169,14 +168,17 @@ Args::Args(const WatcherGraph& g) :
     doc->add_feature(topFolder);
 }
 
-void Args::start()
+void Render::start()
 {
     icon_setup();
     output_nodes();
     output_edges();
+    output_floating_labels();
 }
 
-void Args::icon_setup()
+// generate styles for each supported icon so they can be shared.
+// note that we disable the label on the icon and expect that another placemark with the label will be located at the same position
+void Render::icon_setup()
 {
     // set up styles for each icon we use, using the icon name as the id
     for (size_t i = 0; i < sizeof_array(ICONS); ++i) {
@@ -187,15 +189,22 @@ void Args::icon_setup()
         IconStylePtr iconStyle(kmlFac->CreateIconStyle());
         iconStyle->set_icon(icon);
 
+        LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+        labelStyle->set_scale(0); // hide the label, we use separate placemarks for the labels so they can have their own style
+
         StylePtr style(kmlFac->CreateStyle());
         style->set_iconstyle(iconStyle);
+        style->set_labelstyle(labelStyle);
         style->set_id(ICONS[i]);
 
         doc->add_styleselector(style);
     }
 }
 
-FolderPtr Args::get_layer(const GUILayer& name)
+/*
+ * Return the KML folder associated with the given layer name.  Creates the layer if it does not already exist.
+ */
+FolderPtr Render::get_layer(const GUILayer& name)
 {
     LayerMapIterator it = layerMap.find(name);
     if (it == layerMap.end()) {
@@ -208,29 +217,34 @@ FolderPtr Args::get_layer(const GUILayer& name)
         return it->second;
 }
 
-void Args::add_to_layer(const GUILayer& name, PlacemarkPtr place)
+/*
+ * Add a placemark to the named layer.
+ */
+void Render::add_to_layer(const GUILayer& name, PlacemarkPtr place)
 {
     FolderPtr layer = get_layer(name);
     layer->add_feature(place);
 }
 
-std::string Args::get_label_style(LabelDisplayInfoPtr dispInfo)
+/*
+ * many labels will probably share the same attributes, so we cache
+ * them to make the KML file smaller
+  */
+std::string Render::get_label_style(const watcher::Color& color)
 {
-    // many labels will probably share the same attributes, so we cache
-    // them to make the KML file smaller
     BOOST_FOREACH(DefinedLabelStylePtr lsp, definedLabelStyles) {
-        if (dispInfo->foregroundColor == lsp->color)
+        if (color == lsp->color)
             return lsp->id;
     }
     // not found, create a new style
 
     // no icon for labels
     IconStylePtr iconStyle(kmlFac->CreateIconStyle());
-    iconStyle->set_scale(0); // scale to 0 should mean hide it?
+    iconStyle->set_scale(0); // scale to 0 means hide it
 
     kmldom::LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
-    labelStyle->set_color(watcher_color_to_kml(dispInfo->foregroundColor));
-    //TODO: KML doesn't support background colors
+    labelStyle->set_color(watcher_color_to_kml(color));
+    //TODO: KML doesn't support background colors for placemark labels
 
     std::string url("label-style-" + boost::lexical_cast<std::string>(label_count));
     ++label_count;
@@ -242,24 +256,31 @@ std::string Args::get_label_style(LabelDisplayInfoPtr dispInfo)
 
     doc->add_styleselector(style);
 
-    definedLabelStyles.push_back( DefinedLabelStylePtr(new DefinedLabelStyle(dispInfo->foregroundColor, url)));
+    definedLabelStyles.push_back( DefinedLabelStylePtr(new DefinedLabelStyle(color, url)));
 
     return url;
 }
 
+void Render::add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng)
+{
+    PlacemarkPtr place(kmlFac->CreatePlacemark());
+    place->set_name(label);
+    place->set_geometry(create_point(lat, lng));
+    place->set_styleurl("#" + get_label_style(color));
+
+    add_to_layer(layer, place);
+}
+
+void Render::add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng)
+{
+    add_label(dispInfo->layer, dispInfo->labelText, dispInfo->foregroundColor, lat, lng);
+}
+
 // create a placemark for each label, putting into the appropriate layer
-void Args::add_labels(const std::list<LabelDisplayInfoPtr>& labels,
-                      double lat, double lng)
+void Render::add_labels(const std::list<LabelDisplayInfoPtr>& labels, double lat, double lng)
 {
     BOOST_FOREACH(LabelDisplayInfoPtr dispInfo, labels) {
-        PlacemarkPtr place(kmlFac->CreatePlacemark());
-        place->set_name(dispInfo->labelText);
-        place->set_geometry(create_point(lat, lng));
-        place->set_styleurl("#" + get_label_style(dispInfo));
-
-        add_to_layer(dispInfo->layer, place);
-
-        ++label_count;
+        add_label(dispInfo, lat, lng);
     }
 }
 
@@ -267,7 +288,7 @@ void Args::add_labels(const std::list<LabelDisplayInfoPtr>& labels,
  * Point's can not be shared because even though they are marked const, libKML does modify them.
  * Therefore, we must duplicate the points for each Placemark
  */
-PointPtr Args::create_point(double lat, double lng)
+PointPtr Render::create_point(double lat, double lng)
 {
     CoordinatesPtr coords(kmlFac->CreateCoordinates());
     coords->add_latlng(lat, lng);
@@ -278,7 +299,27 @@ PointPtr Args::create_point(double lat, double lng)
     return point;
 }
 
-void Args::output_nodes()
+void Render::output_floating_labels()
+{
+    // LOG_DEBUG("Drawing floating labels..."); 
+    WatcherGraph::FloatingLabelList::const_iterator b = graph.floatingLabels.begin(); 
+    WatcherGraph::FloatingLabelList::const_iterator e = graph.floatingLabels.end(); 
+    for ( ; b != e; ++b) {
+        add_label((*b)->layer, (*b)->labelText, (*b)->foregroundColor, (*b)->lat, (*b)->lng);
+
+#if 0
+        if ((*b)->layer==layer) {
+            // LOG_DEBUG("Displaying floating label: " << *b); 
+            GLdouble x, y, z; 
+            gps2openGLPixels(GPSMessage::LAT_LONG_ALT_WGS84, (*b)->lat, (*b)->lng, (*b)->alt, x, y, z); 
+            LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
+            drawLabel(x, y, z, li);
+        }
+#endif
+    }
+}
+
+void Render::output_nodes()
 {
     // iterate over all nodes in the graph
     WatcherGraph::vertexIterator vi, vend;
@@ -286,23 +327,24 @@ void Args::output_nodes()
         const WatcherGraphNode &node = graph.theGraph[*vi]; 
 
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-        ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
+        //ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
         ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x));
-
-        //target id is required when changing some attribute of a feature already in the dom
+        ptr->set_id(node.nodeId.to_string());
+        // target id is required when changing some attribute of a feature already in the dom
         //ptr->set_targetid("node0");
-
-#ifdef CUSTOM_ICON
         set_node_icon(node, ptr);
-#endif
+
         add_to_layer(node.displayInfo->layer, ptr);
+
+        // add a label for the node separate from its placemark icon
+        add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x);
 
         // create a placemark for each label, putting into the appropriate layer
         add_labels(node.labels, node.gpsData->y, node.gpsData->x);
     }
 }
 
-void Args::output_edges()
+void Render::output_edges()
 {
     WatcherGraph::edgeIterator ei, eend;
     unsigned int count = 0;
@@ -320,7 +362,7 @@ void Args::output_edges()
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
 
-        //place label at the midpoint on the line between the two nodes
+        // place label at the midpoint on the line between the two nodes
         PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2));
 
         /*
@@ -374,7 +416,7 @@ void Args::output_edges()
 
 void write_kml(const WatcherGraph& graph, const std::string& outputFile)
 {
-    Args args(graph);
+    Render args(graph);
     args.start();
 
     kmlbase::File::WriteStringToFile(kmldom::SerializePretty(args.kml), outputFile);
