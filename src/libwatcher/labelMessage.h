@@ -74,7 +74,7 @@ namespace watcher {
                  * @param label the text to display on the label.
                  * @param fontSize the size of the font, if 0 use the GUI default size.
                  */
-                LabelMessage(const std::string &label="", const int fontSize=0); 
+                LabelMessage(const std::string &label="", const float fontSize=0.0); 
 
                 /**
                  * Attach a label to an arbitrary node.
@@ -82,7 +82,7 @@ namespace watcher {
                  * @param address the ID of the node to attach the label to.
                  * @param fontSize the size of the font, if 0 use the GUI default size.
                  */
-                LabelMessage(const std::string &label, const NodeIdentifier &address, const int fontSize=0);
+                LabelMessage(const std::string &label, const NodeIdentifier &address, const float fontSize=0);
 
                 /**
                  * Float a label in space. 
@@ -92,7 +92,7 @@ namespace watcher {
                  * @param alt the altitude of the label
                  * @param fontSize the size of the font, if 0 use the GUI default size.
                  */
-                LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const int fontSize=0);
+                LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const float fontSize=0);
 
                 /** copy a the message 
                  * @param other the message to copy 
