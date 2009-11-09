@@ -33,7 +33,7 @@ namespace watcher {
     namespace event {
         INIT_LOGGER(LabelMessage, "Message.LabelMessage");
 
-        LabelMessage::LabelMessage(const string &label_, int fontSize_)   :
+        LabelMessage::LabelMessage(const string &label_, const float fontSize_)   :
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
             label(label_),
             fontSize(fontSize_),
@@ -50,7 +50,7 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        LabelMessage::LabelMessage(const string &label_, const boost::asio::ip::address &address_, int fontSize_)   :
+        LabelMessage::LabelMessage(const string &label_, const boost::asio::ip::address &address_, const float fontSize_)   :
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
             label(label_),
             fontSize(fontSize_),
@@ -68,7 +68,7 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        LabelMessage::LabelMessage(const std::string &label_, const float &lat_, const float &lng_, const float &alt_, const int fontSize_) : 
+        LabelMessage::LabelMessage(const std::string &label_, const float &lat_, const float &lng_, const float &alt_, const float fontSize_) : 
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
             label(label_),
             fontSize(fontSize_),
