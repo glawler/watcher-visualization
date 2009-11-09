@@ -48,10 +48,9 @@
  * @arg <b>-t, --fontSize=size</b>         The font size of the label
  * @arg <b>-f, --foreground=color</b>      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.
  * @arg <b>-b, --background=color</b>      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.
- * @arg <b>-e, --expiration=seconds</b>    How long in millisecond to diplay the label
  * @arg <b>-r, --remove</b>                Remove the label if it is attached
  * @arg <b>-L, --layer=layer</b>           Which layer the label is part of. Default is "Physcial".
- * @arg <b>-x, --expiration=seconds</b>, How long in seconds to change the color. 0==forever
+ * @arg <b>-x, --expiration=milliseconds</b>, How long in seconds to change the color. 0==forever
  * @arg <b>-p, --logProps</b>, log.properties file, which controls logging for this program
  * @arg <b>-h, --help</b>, Show help message
  *
@@ -105,7 +104,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -t, --fontSize=size         The font size of the label\n");
     fprintf(stderr, "   -f, --foreground=color      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
     fprintf(stderr, "   -b, --background=color      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n");
-    fprintf(stderr, "   -e, --expiration=seconds    How long in secondt to diplay the label\n");
+    fprintf(stderr, "   -e, --expiration=milliseconds  How long in milliseconds to diplay the label\n");
     fprintf(stderr, "   -r, --remove                Remove the label if it is attached\n"); 
     fprintf(stderr, "   -L, --layer=layer           Which layer the label is part of. Default is physical\n"); 
 
@@ -160,7 +159,7 @@ int main(int argc, char **argv)
             case 'l': label=optarg; break;
             case 's': server=optarg; break;
             case 'p': logProps=optarg; break;
-            case 't': fontSize=lexical_cast<unsigned int>(optarg); break;
+            case 't': fontSize=lexical_cast<float>(optarg); break;
             case 'f': { bool val=fg.fromString(optarg); if (!val) { printf("\nBad argument for fg color\n\n"); usage(argv[0]); } break; }
             case 'b': { bool val=bg.fromString(optarg); if (!val) { printf("\nBad argument for bg color\n\n"); usage(argv[0]); } break; }
             case 'e': expiration=lexical_cast<uint32_t>(optarg); break;
