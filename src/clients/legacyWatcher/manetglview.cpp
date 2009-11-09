@@ -1420,7 +1420,6 @@ void manetGLView::checkIO()
         static unsigned long long messageCount=0;
         LOG_DEBUG("Got message number " <<  ++messageCount << " : " << *message);
 
-
         if (!isFeederEvent(message->type)) {
             if (message->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE) {
                 PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
@@ -1438,8 +1437,6 @@ void manetGLView::checkIO()
             // End of handling non feeder messages. 
             continue;
         }
-
-        wGraph.updateGraph(message);
 
         // DataPoint data is handled directly by the scrolling graph thing.
         if (message->type==DATA_POINT_MESSAGE_TYPE)
@@ -1466,6 +1463,8 @@ void manetGLView::checkIO()
             case NODE_PROPERTIES_MESSAGE_TYPE: layer=(dynamic_pointer_cast<NodePropertiesMessage>(message))->layer; break;
             default: break;
         }
+
+        wGraph.updateGraph(message);
 
         if (!layer.empty())
         {
