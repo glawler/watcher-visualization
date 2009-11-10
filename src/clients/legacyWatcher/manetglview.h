@@ -308,7 +308,6 @@ signals:
         void drawPyramid(GLdouble radius); 
         void drawCube(GLdouble radius); 
         void drawTeapot(GLdouble radius); 
-        void drawDisk(GLdouble radius); 
         void drawTorus(GLdouble innerRadius, GLdouble outerRadius); 
         void drawSphere(GLdouble radius); 
         void drawCircle(GLdouble radius); 

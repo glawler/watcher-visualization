@@ -1871,11 +1871,6 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
     glPushMatrix();
     glTranslated(x, y, z);
 
-    handleSize(node.displayInfo);
-    handleProperties(node.displayInfo);
-
-    drawNodeLabel(node, physical);
-
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     GLfloat nodeColor[]={
         node.displayInfo->color.r/255.0, 
@@ -1884,10 +1879,27 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
         physical ? node.displayInfo->color.a/255.0 : ghostLayerTransparency
     };
 
+    drawNodeLabel(node, physical);
+
     if (monochromeMode)
         glColor4fv(black);
     else
         glColor4fv(nodeColor);
+
+    if (isActive(ANTENNARADIUS_LAYER)) { 
+        // 30.86666666666666666666 meters == 1 second of latitude
+        // 1/30.86666666666666666666 of a second of lat == 1 meter
+        // 0.000278 is a second in decimal degrees
+        // 0.000278*(1/30.86666)=.00000900648142688583==change in lat for one meter.
+        // This is still wrong though - or at least does not match MANE's idea of distance.
+        // drawWireframeSphere(antennaRadius*0.00000900648142688583*gpsScale);
+        // The number below is just an eyeball value.
+        drawWireframeSphere(antennaRadius*0.000015*gpsScale);
+    }
+
+    // Handle size after drawing antenna so as to not scale it
+    handleSize(node.displayInfo);
+    handleProperties(node.displayInfo);
 
     handleSpin(threeDView, node.displayInfo);
     switch(node.displayInfo->shape)
@@ -1899,8 +1911,7 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
         case NodePropertiesMessage::TEAPOT: drawTeapot(4); break;
         case NodePropertiesMessage::NOSHAPE: /* What is the shape of no shape? */ break;
     }
-    if (isActive(ANTENNARADIUS_LAYER))
-        drawWireframeSphere(antennaRadius); 
+
     glPopMatrix();
 
     TRACE_EXIT(); 
@@ -2763,18 +2774,6 @@ void manetGLView::drawTeapot(GLdouble radius)
     }
 }
 
-void manetGLView::drawDisk(GLdouble radius)
-{
-    GLUquadric* q=NULL;
-
-    q=gluNewQuadric();
-    gluDisk(q,radius-1,radius,36,1);
-    gluDeleteQuadric(q);
-
-    glPopMatrix();
-}
-
-
 void manetGLView::drawTorus(GLdouble inner, GLdouble outer)
 {
     if (threeDView)
@@ -2804,8 +2803,12 @@ void manetGLView::drawSphere(GLdouble radius)
         glPopMatrix();
         gluDeleteQuadric(quadric);
     }
-    else
-        drawDisk(radius); 
+    else {
+        GLUquadric* q=NULL;
+        q=gluNewQuadric();
+        gluDisk(q,radius-1,radius,36,1);
+        gluDeleteQuadric(q);
+    }
 }
 
 void manetGLView::drawCircle(GLdouble radius)
