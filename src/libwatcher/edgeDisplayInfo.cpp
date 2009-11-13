@@ -33,7 +33,7 @@ INIT_LOGGER(EdgeDisplayInfo, "DisplayInfo.EdgeDisplayInfo");
 EdgeDisplayInfo::EdgeDisplayInfo() :
     DisplayInfo("edge"),
     color(blue),
-    width(30),
+    width(2),
     flash(false), 
     flashInterval(500),
     nextFlashUpdate(0), 
