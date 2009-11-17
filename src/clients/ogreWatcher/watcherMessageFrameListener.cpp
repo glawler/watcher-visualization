@@ -111,18 +111,18 @@ namespace ogreWatcher {
         {
             static Entity *nodeEntity=NULL;
             if (!nodeEntity)  {
-                nodeEntity=mSceneMgr->createEntity("nodeEntity", "robot.mesh"); 
-                // MaterialPtr nodeMaterial = MaterialManager::getSingleton().create("Hummer", "Hummer");
-                // nodeMaterial->setReceiveShadows(true);
-                // nodeMaterial->getTechnique(0)->setLightingEnabled(true);
-
+                nodeEntity=mSceneMgr->createEntity("nodeEntity", "robot.mesh"); // Ogre::SceneManager::PT_SPHERE); 
+                AnimationState *ani=ent->getAnimationState("walk");
+                ani->setLoop(true);
+                ani->setEnabled(true);
             }
 
             ent=nodeEntity->clone(entId);
-            // ent->setMaterialName("Hummer"); 
+            ent->setMaterialName("node"); 
             ent->setCastShadows(true); 
+
             sNode=mSceneMgr->getRootSceneNode()->createChildSceneNode(sceneNodeId);
-            sNode->scale(0.2, 0.2, 0.2); 
+            sNode->scale(0.3, 0.3, 0.3);
             sNode->attachObject(ent);
         }
         else
@@ -195,8 +195,7 @@ namespace ogreWatcher {
             edgeSceneNode->attachObject(edgeEntity); 
         }
 
-        // GTL todo: replace "Vector3(0, 10, 0)" below with center of bounding boxes of the nodes
-        Vector3 nodeBoundingBoxCenter(0, 10, 0); 
+        Vector3 nodeBoundingBoxCenter(0, node2Entity->getBoundingBox().getCenter().y, 0);
 
         // Now that we've got the edge and the positions of everyone, create a spline
         // between the nodes and contour it to the terrain. Then draw the spline.
@@ -216,10 +215,9 @@ namespace ogreWatcher {
             RaySceneQueryResult::iterator itr = result.begin();
 
             if (itr!=result.end() && itr->worldFragment)
-            {
                 if (itr->worldFragment->singleIntersection.y>point.y)
                     point.y=itr->worldFragment->singleIntersection.y;
-            }
+
             spline.addPoint(point);
             point+=delta;
         }
@@ -269,8 +267,8 @@ namespace ogreWatcher {
         
         if (itr!=result.end() && itr->worldFragment)
         {
-            if (itr->worldFragment->singleIntersection.y>position.y)
-                position.y=itr->worldFragment->singleIntersection.y;
+            if (itr->worldFragment->singleIntersection.y>position.y) 
+                position.y=itr->worldFragment->singleIntersection.y+sNode->_getWorldAABB().getHalfSize().y;
         }
 
         sNode->setPosition(position); 

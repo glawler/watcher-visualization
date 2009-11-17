@@ -54,7 +54,7 @@ public:
                 mDirection=Vector3::ZERO;
                 if (!nextLocation()) {
                     mAnimationState=mEntity->getAnimationState("Die");
-                    mAnimationState->setLoop(true);
+                    mAnimationState->setLoop(false);
                     mAnimationState->setEnabled(true);
                 }
                 else {
@@ -120,7 +120,7 @@ protected:
         mNode->attachObject(mEntity);
 
         // Create the walking list
-        mWalkList.push_back(Vector3(550.0f,  0.0f,  50.0f));
+        mWalkList.push_back(Vector3(150.0f,  0.0f,  50.0f));
         mWalkList.push_back(Vector3(-100.0f,  0.0f, -100.0f));
         mWalkList.push_back(Vector3(-100.0f,  0.0f, 0.0f));
         mWalkList.push_back(Vector3(100.0f,  0.0f, -75.0f));
