@@ -110,19 +110,15 @@ namespace ogreWatcher {
         if (!mSceneMgr->hasEntity(entId))
         {
             static Entity *nodeEntity=NULL;
-            if (!nodeEntity)  {
-                nodeEntity=mSceneMgr->createEntity("nodeEntity", "robot.mesh"); // Ogre::SceneManager::PT_SPHERE); 
-                AnimationState *ani=ent->getAnimationState("walk");
-                ani->setLoop(true);
-                ani->setEnabled(true);
-            }
+            if (!nodeEntity)  
+                nodeEntity=mSceneMgr->createEntity("nodeEntity", Ogre::SceneManager::PT_SPHERE); 
 
             ent=nodeEntity->clone(entId);
             ent->setMaterialName("node"); 
             ent->setCastShadows(true); 
 
             sNode=mSceneMgr->getRootSceneNode()->createChildSceneNode(sceneNodeId);
-            sNode->scale(0.3, 0.3, 0.3);
+            sNode->scale(0.05, 0.05, 0.05);
             sNode->attachObject(ent);
         }
         else
