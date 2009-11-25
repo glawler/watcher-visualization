@@ -43,6 +43,11 @@ Server::Server(
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
 
     acceptor_.open(endpoint.protocol());
+
+    // GSM - fix ZeroWindow errors
+    boost::asio::ip::tcp::no_delay option(true);
+    acceptor_.set_option(option);
+
     acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();

@@ -29,12 +29,12 @@ using namespace sqlite_wrapper;
 using namespace std;
 using namespace boost;
 
-void sqlite_wrapper::config(int mode)
-{
-    int res = sqlite3_config(mode);
-    if (res != SQLITE_OK)
-        throw Exception("sqlite3_config error");
-}
+// void sqlite_wrapper::config(int mode)
+//{
+//    int res = sqlite3_config(mode);
+//    if (res != SQLITE_OK)
+//        throw Exception("sqlite3_config error");
+//}
 
 Connection::Connection(const std::string& path, flags f) : db_(0)
 {

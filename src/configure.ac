@@ -59,10 +59,10 @@ if test x$enable_testnodeonly == xno; then
     AX_PATH_LIB(libconfig.h)
 
     # check for recent version of sqlite3
-    AC_MSG_CHECKING([for sqlite3 >= 3.6.10])
+    AC_MSG_CHECKING([for sqlite3 >= 3.5.9])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <sqlite3.h>
 		]],
-        [[#if SQLITE_VERSION_NUMBER >= 3006010
+        [[#if SQLITE_VERSION_NUMBER >= 3005009
     //OK
     #else
     #  error sqlite version is too old
