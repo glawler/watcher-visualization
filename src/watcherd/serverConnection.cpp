@@ -324,14 +324,22 @@ namespace watcher {
             vector<MessagePtr> arrivedMessages; 
             if (DataMarshaller::unmarshalPayload(arrivedMessages, numOfMessages, incomingBuffer.begin(), bytes_transferred))
             {
+                boost::system::error_code err;
+                boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint(err);
+                if (err) { 
+                    LOG_INFO("Lost connection to client, cleaning up connection"); 
+                    read_error(err); // not really a read error, but this cleans up the connection.
+                    TRACE_EXIT();
+                    return;
+                }
+
                 LOG_INFO("Recvd " << arrivedMessages.size() << " message" <<
-                         (arrivedMessages.size()>1?"s":"") << " from " <<
-                         remoteEndpoint().address()); 
+                        (arrivedMessages.size()>1?"s":"") << " from " <<
+                        ep.address()); 
 
                 // Add the incoming address to the Message so everyone
                 // knows who the message came from. If there is a dataNetwork, use that 
                 // to mask/modify the incoming ip address to be in the correct network.
-                boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint();
                 BOOST_FOREACH(MessagePtr m, arrivedMessages) {
                     if (isFeederEvent(m->type)) {
                         if (m->fromNodeID==NodeIdentifier() && dataNetwork.to_ulong()!=0) { 
@@ -355,7 +363,7 @@ namespace watcher {
                     BOOST_FOREACH(MessagePtr& i, arrivedMessages) {
                         if (dispatch_gui_event(i)) {
                             //empty
-                       } else if (isFeederEvent(i->type)) {
+                        } else if (isFeederEvent(i->type)) {
                             conn_type = feeder;
 
                             if (! watcher.readOnly()) {
@@ -366,7 +374,7 @@ namespace watcher {
                                  */
                                 addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
                             }
-                       }
+                        }
                     }
                 }
 
