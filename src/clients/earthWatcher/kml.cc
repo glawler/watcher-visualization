@@ -54,6 +54,11 @@ using kmlengine::KmlFilePtr;
 
 using namespace watcher;
 
+namespace watcher {
+    // set from config file
+    extern float LayerPadding;
+}
+
 namespace {
 
 /*
@@ -99,7 +104,14 @@ void set_node_icon(const WatcherGraphNode& node, PlacemarkPtr ptr)
     ptr->set_styleurl(styleUrl);
 }
 
-typedef std::map<GUILayer, FolderPtr> LayerMap;
+struct LayerInfo {
+    float zpad; // alt padding value to order layers vertically
+    FolderPtr folder; // folder for this layer
+    LayerInfo(float zp, FolderPtr p) : zpad(zp), folder(p) {}
+    LayerInfo() : zpad(0.0) {}  // required for use in std::map
+};
+
+typedef std::map<GUILayer, LayerInfo> LayerMap;
 typedef LayerMap::iterator LayerMapIterator;
 
 struct DefinedLabelStyle {
@@ -124,18 +136,19 @@ class Render {
         LayerMap layerMap;
         int label_count;
         DefinedLabelStyleList definedLabelStyles;
+        float zpad;
 
         void icon_setup();
-        FolderPtr get_layer(const GUILayer& name);
+        const LayerInfo& get_layer(const GUILayer& name);
         void output_nodes();
         void output_edges();
         void output_floating_labels();
-        void add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng);
-        void add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng);
-        void add_labels(const std::list<LabelDisplayInfoPtr>&, double lat, double lng);
-        void add_to_layer(const GUILayer& name, PlacemarkPtr);
-        PointPtr create_point(double lat, double lng);
+        void add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng, double alt);
+        void add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng, double alt);
+        void add_labels(const std::list<LabelDisplayInfoPtr>&, double lat, double lng, double alt);
+        PointPtr create_point(double lat, double lng, double alt);
         std::string get_label_style(const watcher::Color&);
+        std::string get_edge_style(const WatcherGraphEdge& edge, unsigned int edgenum);
 };
 
 /*
@@ -155,9 +168,9 @@ Render::Render(const WatcherGraph& g) :
     kml(kmlFac->CreateKml()),
     doc(kmlFac->CreateDocument()),
     topFolder(kmlFac->CreateFolder()),
-    label_count(0)
+    label_count(0),
+    zpad(0.0)
 {
-
     /*
      * create initial DOM tree.  As nodes appear, they get added to the tree. 
      * As nodes move, we update the position attribute
@@ -204,26 +217,19 @@ void Render::icon_setup()
 /*
  * Return the KML folder associated with the given layer name.  Creates the layer if it does not already exist.
  */
-FolderPtr Render::get_layer(const GUILayer& name)
+const LayerInfo& Render::get_layer(const GUILayer& name)
 {
     LayerMapIterator it = layerMap.find(name);
     if (it == layerMap.end()) {
         FolderPtr layer = kmlFac->CreateFolder();
         layer->set_name(name);
         topFolder->add_feature(layer);
-        layerMap[name] = layer;
-        return layer;
+        if (!layerMap.empty())
+            zpad += LayerPadding;
+        layerMap[name] = LayerInfo(zpad, layer);
+        return layerMap[name];
     } else
         return it->second;
-}
-
-/*
- * Add a placemark to the named layer.
- */
-void Render::add_to_layer(const GUILayer& name, PlacemarkPtr place)
-{
-    FolderPtr layer = get_layer(name);
-    layer->add_feature(place);
 }
 
 /*
@@ -261,26 +267,28 @@ std::string Render::get_label_style(const watcher::Color& color)
     return url;
 }
 
-void Render::add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng)
+void Render::add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng, double alt)
 {
+    const LayerInfo& li (get_layer(layer));
+
     PlacemarkPtr place(kmlFac->CreatePlacemark());
     place->set_name(label);
-    place->set_geometry(create_point(lat, lng));
+    place->set_geometry(create_point(lat, lng, alt + li.zpad));
     place->set_styleurl("#" + get_label_style(color));
 
-    add_to_layer(layer, place);
+    li.folder->add_feature(place);
 }
 
-void Render::add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng)
+void Render::add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng, double alt)
 {
-    add_label(dispInfo->layer, dispInfo->labelText, dispInfo->foregroundColor, lat, lng);
+    add_label(dispInfo->layer, dispInfo->labelText, dispInfo->foregroundColor, lat, lng, alt);
 }
 
 // create a placemark for each label, putting into the appropriate layer
-void Render::add_labels(const std::list<LabelDisplayInfoPtr>& labels, double lat, double lng)
+void Render::add_labels(const std::list<LabelDisplayInfoPtr>& labels, double lat, double lng, double alt)
 {
     BOOST_FOREACH(LabelDisplayInfoPtr dispInfo, labels) {
-        add_label(dispInfo, lat, lng);
+        add_label(dispInfo, lat, lng, alt);
     }
 }
 
@@ -288,34 +296,24 @@ void Render::add_labels(const std::list<LabelDisplayInfoPtr>& labels, double lat
  * Point's can not be shared because even though they are marked const, libKML does modify them.
  * Therefore, we must duplicate the points for each Placemark
  */
-PointPtr Render::create_point(double lat, double lng)
+PointPtr Render::create_point(double lat, double lng, double alt)
 {
     CoordinatesPtr coords(kmlFac->CreateCoordinates());
-    coords->add_latlng(lat, lng);
+    coords->add_latlngalt(lat, lng, alt);
 
     PointPtr point(kmlFac->CreatePoint());
     point->set_coordinates(coords);
+    point->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);     // avoid clamping to ground
 
     return point;
 }
 
 void Render::output_floating_labels()
 {
-    // LOG_DEBUG("Drawing floating labels..."); 
     WatcherGraph::FloatingLabelList::const_iterator b = graph.floatingLabels.begin(); 
     WatcherGraph::FloatingLabelList::const_iterator e = graph.floatingLabels.end(); 
     for ( ; b != e; ++b) {
-        add_label((*b)->layer, (*b)->labelText, (*b)->foregroundColor, (*b)->lat, (*b)->lng);
-
-#if 0
-        if ((*b)->layer==layer) {
-            // LOG_DEBUG("Displaying floating label: " << *b); 
-            GLdouble x, y, z; 
-            gps2openGLPixels(GPSMessage::LAT_LONG_ALT_WGS84, (*b)->lat, (*b)->lng, (*b)->alt, x, y, z); 
-            LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
-            drawLabel(x, y, z, li);
-        }
-#endif
+        add_label((*b)->layer, (*b)->labelText, (*b)->foregroundColor, (*b)->lat, (*b)->lng, (*b)->alt);
     }
 }
 
@@ -326,49 +324,83 @@ void Render::output_nodes()
     for (tie(vi, vend) = vertices(graph.theGraph); vi != vend; ++vi) {
         const WatcherGraphNode &node = graph.theGraph[*vi]; 
 
+        const LayerInfo& layer(get_layer(node.displayInfo->layer));
+
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         //ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
-        ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x));
+        ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, node.gpsData->z + layer.zpad));
         ptr->set_id(node.nodeId.to_string());
         // target id is required when changing some attribute of a feature already in the dom
         //ptr->set_targetid("node0");
         set_node_icon(node, ptr);
 
-        add_to_layer(node.displayInfo->layer, ptr);
+        layer.folder->add_feature(ptr); // add placemark to DOM
 
         // add a label for the node separate from its placemark icon
-        add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x);
+        add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, node.gpsData->z);
 
         // create a placemark for each label, putting into the appropriate layer
-        add_labels(node.labels, node.gpsData->y, node.gpsData->x);
+        add_labels(node.labels, node.gpsData->y, node.gpsData->x, node.gpsData->z);
     }
+}
+
+std::string Render::get_edge_style(const WatcherGraphEdge& edge, unsigned int edgenum)
+{
+        std::string edgeid = "edge-style-" + boost::lexical_cast<std::string>(edgenum);
+
+        LineStylePtr lineStyle(kmlFac->CreateLineStyle());
+        lineStyle->set_color(watcher_color_to_kml(edge.displayInfo->color));
+        lineStyle->set_width(edge.displayInfo->width);
+
+        IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+        iconStyle->set_scale(0); // scale to 0 means hide it
+
+        StylePtr style ( kmlFac->CreateStyle() );
+        style->set_id(edgeid);
+        style->set_linestyle(lineStyle);
+        style->set_iconstyle(iconStyle);
+
+        kmldom::LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+        if (edge.displayInfo->label == "none") {
+            labelStyle->set_scale(0); // hide the label
+        }
+        labelStyle->set_color(watcher_color_to_kml(edge.displayInfo->labelColor));
+        style->set_labelstyle(labelStyle);
+
+        doc->add_styleselector(style);
+
+        return "#" + edgeid;
 }
 
 void Render::output_edges()
 {
     WatcherGraph::edgeIterator ei, eend;
-    unsigned int count = 0;
-    bool has_style = false;
+    int edgenum = 0;
 
-    for (tie(ei, eend) = edges(graph.theGraph); ei != eend; ++ei, ++count) {
+    for (tie(ei, eend) = edges(graph.theGraph); ei != eend; ++ei, ++edgenum) {
         const WatcherGraphEdge &edge = graph.theGraph[*ei]; 
         const WatcherGraphNode &node1 = graph.theGraph[source(*ei, graph.theGraph)]; 
         const WatcherGraphNode &node2 = graph.theGraph[target(*ei, graph.theGraph)]; 
 
+        const LayerInfo& layer(get_layer(edge.displayInfo->layer));
+
         CoordinatesPtr coords = kmlFac->CreateCoordinates();
-        coords->add_latlng(node1.gpsData->y, node1.gpsData->x);
-        coords->add_latlng(node2.gpsData->y, node2.gpsData->x);
+        coords->add_latlngalt(node1.gpsData->y, node1.gpsData->x, node1.gpsData->z + layer.zpad);
+        coords->add_latlngalt(node2.gpsData->y, node2.gpsData->x, node2.gpsData->z + layer.zpad);
 
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
+        lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
 
         // place label at the midpoint on the line between the two nodes
-        PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2));
+        PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2 + layer.zpad ));
 
         /*
          * Google Earth doesn't allow a label to be attached to something without a Point, so
          * we need to create a container with the LineString and the Point at which to attach
          * the label/icon.
+         * TODO: this could be optimized in the case where the label is "none", since the Point can
+         * be omitted.
          */
         MultiGeometryPtr multiGeo(kmlFac->CreateMultiGeometry());
         multiGeo->add_geometry(lineString);
@@ -377,37 +409,12 @@ void Render::output_edges()
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         ptr->set_geometry(multiGeo);
         ptr->set_name(edge.displayInfo->label);
+        ptr->set_styleurl(get_edge_style(edge, edgenum));
 
-        // WatcherGraph only has a single style per layer, so we stash the value somewhere instead of creating multiple styles
-        if (!has_style) {
-            LineStylePtr lineStyle(kmlFac->CreateLineStyle());
-            lineStyle->set_color(watcher_color_to_kml(edge.displayInfo->color));
-            lineStyle->set_width(edge.displayInfo->width);
-
-            IconStylePtr iconStyle(kmlFac->CreateIconStyle());
-            iconStyle->set_scale(0); // scale to 0 should mean hide it?
-
-            StylePtr style(kmlFac->CreateStyle());
-            style->set_id("edge-style");
-            style->set_linestyle(lineStyle);
-            style->set_iconstyle(iconStyle);
-
-            kmldom::LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
-            labelStyle->set_color(watcher_color_to_kml(edge.displayInfo->labelColor));
-            style->set_labelstyle(labelStyle);
-
-            doc->add_styleselector(style);
-            has_style = true;
-        }
-
-        ptr->set_styleurl("#edge-style");
-
-        add_to_layer(edge.displayInfo->layer, ptr);
+        layer.folder->add_feature(ptr);
 
         // add additional placemarks for each label on this edge
-        add_labels(edge.labels,
-                   (node1.gpsData->y + node2.gpsData->y)/2,
-                   (node1.gpsData->x + node2.gpsData->x)/2);
+        add_labels(edge.labels, (node1.gpsData->y + node2.gpsData->y)/2, (node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2);
     }
 }
 

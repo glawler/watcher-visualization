@@ -41,6 +41,10 @@ using namespace watcher;
 
 void write_kml(const WatcherGraph& graph, const std::string& outputFile); // kml.cc
 
+namespace watcher {
+    float LayerPadding = 10;
+}
+
 namespace {
 
 //arguments to getopt_long()
@@ -151,6 +155,12 @@ int main(int argc, char **argv)
         LOG_INFO("'outputFile' not found in the configuration file, using default: " << outputFile  
                  << " and adding this to the configuration file.");
         config.getRoot().add("outputFile", libconfig::Setting::TypeString) = outputFile;
+    }
+
+    if (!config.lookupValue("layerPadding", LayerPadding)) {
+        LOG_INFO("'layerPadding' not found in the configuration file, using default: " << LayerPadding
+                 << " and adding this to the configuration file.");
+        config.getRoot().add("layerPadding", libconfig::Setting::TypeFloat) = LayerPadding;
     }
 
     // open a message stream of live events for now
