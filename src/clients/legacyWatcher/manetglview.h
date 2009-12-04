@@ -167,6 +167,9 @@ signals:
         watcher::WatcherGraph wGraph;
         std::string serverName; 
 
+        void connectStream(); // connect to watherd and init the message stream. blocking...
+        boost::thread *watcherdConnectionThread;
+
         float streamRate; 
         bool playbackPaused;
         bool autorewind;
@@ -241,6 +244,7 @@ signals:
         bool isActive(const watcher::GUILayer &layer); 
 
         // drawing stuff
+        void drawNotConnectedState(); 
         bool autoCenterNodesFlag; 
         void drawManet(void);
         struct QuadranglePoint

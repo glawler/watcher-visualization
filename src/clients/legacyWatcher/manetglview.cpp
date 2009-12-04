@@ -934,6 +934,7 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
 
 manetGLView::manetGLView(QWidget *parent) : 
     QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
+    watcherdConnectionThread(NULL),
     streamRate(1.0),
     playbackPaused(false),
     autorewind(false), 
@@ -965,6 +966,7 @@ manetGLView::manetGLView(QWidget *parent) :
 
     // Don't oeverwrite QPAinter...
     setAutoFillBackground(false);
+
     TRACE_EXIT();
 }
 
@@ -1054,6 +1056,8 @@ bool manetGLView::loadConfiguration()
             TRACE_EXIT_RET_BOOL(false); 
             return false;
         }
+        else 
+            watcherdConnectionThread=new boost::thread(boost::bind(&manetGLView::connectStream, this));
 
         prop="layers";
         if (!root.exists(prop))
@@ -1401,18 +1405,31 @@ void manetGLView::initializeGL()
     TRACE_EXIT();
 }
 
+void manetGLView::connectStream() 
+{
+    TRACE_ENTER();
+    while(1) {
+        if (!messageStream) {
+            messageStream=MessageStream::createNewMessageStream(serverName);     // This blocks until connected
+            messageStream->setStreamTimeStart(playbackStartTime);
+            messageStream->startStream();
+            messageStream->getMessageTimeRange();
+        }
+        else  {
+            // There needs to be some test connection, reconnect logic here.
+            sleep(10);
+        }
+    }
+    TRACE_EXIT();
+}
+
 void manetGLView::checkIO()
 {
     TRACE_ENTER();
 
     if (!messageStream)
-    {
-        messageStream=MessageStream::createNewMessageStream(serverName); 
-        messageStream->setStreamTimeStart(playbackStartTime);
-        messageStream->startStream();
-        messageStream->getMessageTimeRange();
-    }
-   
+        return;
+
     int messagesProcessed=0;
     while(messageStream && messageStream->isStreamReadable() && ++messagesProcessed<100)
     {
@@ -1534,8 +1551,80 @@ void manetGLView::paintGL()
 {
     TRACE_ENTER();
 
-    wGraph.doMaintanence(); // check expiration, etc. 
-    drawManet();
+    if (!messageStream)
+        drawNotConnectedState();
+    else {
+        wGraph.doMaintanence(); // check expiration, etc. 
+        drawManet();
+    }
+
+    TRACE_EXIT();
+}
+
+void manetGLView::drawNotConnectedState()
+{
+    TRACE_ENTER();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glPushMatrix();
+    glScalef(1.0, 1.0, 1.0);
+
+    // Color -- red
+    glColor4ub(0xFF, 0x00, 0x00, 0xFF); 
+
+    // "head"
+    glTranslatef(0.0, 0.0, -10.0);
+    glNormal3f(0.0, 0.0, 1.0); 
+    glutSolidTorus(0.1, 2.5, 60, 60); 
+
+    // Eyes
+    double xOffs[]={-1.0, 1.0}; 
+    for (int i=0; i<2; i++) {
+        glPushMatrix();
+        glTranslatef(xOffs[i], 1.0, 0.0); 
+        glRotatef(90, 1.0, 0.0, 0.0); 
+        glRotatef(45, 0.0, 1.0, 0.0); 
+        GLUquadricObj *quadric=gluNewQuadric();
+        gluQuadricNormals(quadric, GLU_SMOOTH);
+        gluQuadricOrientation(quadric,GLU_OUTSIDE);
+        gluCylinder(quadric, 0.06, 0.03, 0.5, 32, 32); 
+        glRotatef(90, 0.0, 1.0, 0.0); 
+        gluCylinder(quadric, 0.06, 0.03, 0.5, 32, 32); 
+        glRotatef(90, 0.0, 1.0, 0.0); 
+        gluCylinder(quadric, 0.06, 0.03, 0.5, 32, 32); 
+        glRotatef(90, 0.0, 1.0, 0.0); 
+        gluCylinder(quadric, 0.06, 0.03, 0.5, 32, 32); 
+        gluDeleteQuadric(quadric);
+        glPopMatrix();
+    }
+
+    // mouth
+    {
+        GLUquadricObj *quadric=gluNewQuadric();
+        gluQuadricNormals(quadric, GLU_SMOOTH);
+        gluQuadricOrientation(quadric,GLU_OUTSIDE);
+        glPushMatrix();
+        glTranslatef(-1.0, -1.0, 0.0); 
+        glRotatef(90, 1.0, 0.0, 0.0); 
+        glRotatef(315, 0.0, 1.0, 0.0); 
+        gluCylinder(quadric, 0.06, 0.03, 0.8, 32, 32); 
+        glRotatef(135, 0.0, 1.0, 0.0); 
+        gluCylinder(quadric, 0.06, 0.06, 2.0, 32, 32); 
+        glPopMatrix();
+        glPushMatrix();
+        glTranslatef(1.0, -1.0, 0.0); 
+        glRotatef(90, 1.0, 0.0, 0.0); 
+        glRotatef(45, 0.0, 1.0, 0.0); 
+        gluCylinder(quadric, 0.06, 0.03, 0.8, 32, 32); 
+        glPopMatrix();
+    }
+
+
+    renderText(12, height()-12, QString("Not connected to watcher daemon. Trying to connect every 5 seconds."));
+
+    glPopMatrix();
 
     TRACE_EXIT();
 }
@@ -3046,6 +3135,10 @@ void manetGLView::saveConfiguration()
 void manetGLView::pausePlayback()
 {
     TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
     playbackPaused=true;
     messageStream->stopStream(); 
     TRACE_EXIT();
@@ -3053,6 +3146,10 @@ void manetGLView::pausePlayback()
 void manetGLView::normalPlayback()
 {
     TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
     playbackPaused=false;
     playbackSetSpeed(1.0);
     messageStream->clearMessageCache();
@@ -3062,6 +3159,10 @@ void manetGLView::normalPlayback()
 void manetGLView::reversePlayback()
 {
     TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
     pausePlayback(); 
     messageStream->clearMessageCache();
     if (streamRate!=0.0)
@@ -3078,6 +3179,10 @@ void manetGLView::reversePlayback()
 void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
     pausePlayback(); 
     messageStream->clearMessageCache();
     if (streamRate!=0.0)
@@ -3094,6 +3199,10 @@ void manetGLView::forwardPlayback()
 void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
     pausePlayback(); 
     messageStream->clearMessageCache();
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
@@ -3109,6 +3218,10 @@ void manetGLView::rewindToStartOfPlayback()
 void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
     pausePlayback(); 
     messageStream->clearMessageCache();
     messageStream->setStreamTimeStart(SeekMessage::eof); 
@@ -3123,6 +3236,10 @@ void manetGLView::forwardToEndOfPlayback()
 void manetGLView::playbackSetSpeed(double x)
 {
     TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
     LOG_DEBUG("Setting stream rate to " << x); 
     streamRate=x;
     messageStream->setStreamRate(streamRate);
