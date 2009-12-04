@@ -27,6 +27,9 @@
 #include "singletonConfig.h"
 #include "logger.h"
 
+#include <CEGUI/CEGUIFontManager.h>
+#include <CEGUI/CEGUIWindowManager.h>
+
 using namespace std;
 using namespace Ogre;
 using namespace watcher;
@@ -83,12 +86,13 @@ namespace ogreWatcher {
         mCamera->lookAt(500, 0, 500);  // GTL todo: make dynamic, look at center of terrain
         
         // CEGUI setup
-        // mGUIRenderer = new CEGUI::OgreCEGUIRenderer(mWindow, Ogre::RENDER_QUEUE_OVERLAY, false, 3000, mSceneMgr);
-        // mGUISystem = new CEGUI::System(mGUIRenderer);
-        // 
-        // // Mouse
-        // CEGUI::SchemeManager::getSingleton().loadScheme((CEGUI::utf8*)"TaharezLookSkin.scheme");
-        // CEGUI::MouseCursor::getSingleton().setImage("TaharezLook", "MouseArrow");
+        mGUIRenderer = new CEGUI::OgreCEGUIRenderer(mWindow, Ogre::RENDER_QUEUE_OVERLAY, false, 3000, mSceneMgr);
+        mGUISystem = new CEGUI::System(mGUIRenderer);
+        CEGUI::SchemeManager::getSingleton().loadScheme((CEGUI::utf8*)"TaharezLookSkin.scheme");
+        CEGUI::MouseCursor::getSingleton().setImage("TaharezLook", "MouseArrow");
+        mGUISystem->setDefaultMouseCursor((CEGUI::utf8*)"TaharezLook", (CEGUI::utf8*)"MouseArrow");
+        CEGUI::Window* pLayout = CEGUI::WindowManager::getSingleton().loadWindowLayout("watcher.layout");
+        mGUISystem->setGUISheet(pLayout);
 
         Light *light=mSceneMgr->createLight("Light3");
         light->setType(Light::LT_DIRECTIONAL);

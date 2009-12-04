@@ -1113,6 +1113,7 @@ bool manetGLView::loadConfiguration()
         emit threeDViewToggled(threeDView);
         emit monochromeToggled(monochromeMode);
         emit backgroundImageToggled(backgroundImage);
+        emit loopPlaybackToggled(autorewind);
         emit checkPlaybackTime(showPlaybackTimeInStatusString);
         emit checkPlaybackRange(showPlaybackRangeString);
         emit checkWallTime(showWallTimeinStatusString);
@@ -2123,6 +2124,38 @@ void manetGLView::showKeyboardShortcuts()
     TRACE_EXIT();
 }
 
+void manetGLView::setGPSScale() 
+{
+    TRACE_ENTER();
+    bool ok;
+    double value=QInputDialog::getDouble(this, tr("GPS Scale"), tr("Plese enter the new GPS Scale value"), 
+            gpsScale, 1, DBL_MAX, 1, &ok);
+
+    if (ok) {
+        LOG_DEBUG("Setting GPS scale to " << value); 
+        gpsScale=value;
+    }
+    TRACE_EXIT();
+}
+
+void manetGLView::setEdgeWidth()
+{
+    TRACE_ENTER();
+
+    bool ok;
+    double value=QInputDialog::getDouble(this, tr("Set Edge Width"), tr("Plese enter the new Scale width for all edges"), 
+            2, 1, DBL_MAX, 1, &ok);
+
+    if (ok) {
+        LOG_DEBUG("Setting all edge widths to " << value); 
+        WatcherGraph::edgeIterator ei, eend;
+        for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
+            wGraph.theGraph[*ei].displayInfo->width=value;
+    }
+
+    TRACE_EXIT();
+}
+
 void manetGLView::keyPressEvent(QKeyEvent * event)
 {
     TRACE_ENTER();
@@ -2500,6 +2533,14 @@ void manetGLView::toggleBackgroundImage(bool isOn)
     backgroundImage=isOn; 
     emit backgroundImageToggled(isOn); 
     updateGL();
+    TRACE_EXIT();
+}
+void manetGLView::toggleLoopPlayback(bool isOn) 
+{
+    TRACE_ENTER();
+    LOG_DEBUG("Toggling looped playback: " << (isOn==true?"on":"off"));
+    autorewind=isOn;
+    emit loopPlaybackToggled(isOn);
     TRACE_EXIT();
 }
 

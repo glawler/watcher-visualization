@@ -72,7 +72,11 @@ public slots:
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);
         void toggleBackgroundImage(bool isOn);
+        void toggleLoopPlayback(bool inOn);
         void showKeyboardShortcuts(); 
+
+        void setGPSScale();  // spawn dialog to get new scale value
+        void setEdgeWidth(); // spawn dialog to get default edge width
 
         void showPlaybackTime(bool isOn);
         void showPlaybackRange(bool isOn);
@@ -108,6 +112,7 @@ signals:
         void monochromeToggled(bool isOn);
         void threeDViewToggled(bool isOn); 
         void backgroundImageToggled(bool isOn); 
+        void loopPlaybackToggled(bool inOn);
 
         void checkPlaybackTime(bool isOn);
         void checkPlaybackRange(bool isOn);
