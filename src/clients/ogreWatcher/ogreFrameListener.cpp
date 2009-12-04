@@ -335,17 +335,19 @@ namespace ogreWatcher
         using namespace OIS;
         TRACE_ENTER();
 
-        if(mWindow->isClosed())	return false;
+        if (mWindow->isClosed())	
+            return false;
 
         //Need to capture/update each device
         mKeyboard->capture();
         mMouse->capture();
-        if( mJoy ) mJoy->capture();
+        if (mJoy) 
+            mJoy->capture();
 
         bool buffJ = (mJoy) ? mJoy->buffered() : true;
 
         //Check if one of the devices is not buffered
-        if( !mMouse->buffered() || !mKeyboard->buffered() || !buffJ )
+        if(!mMouse->buffered() || !mKeyboard->buffered() || !buffJ)
         {
             // one of the input modes is immediate, so setup what is needed for immediate movement
             if (mTimeUntilNextToggle >= 0)
@@ -371,14 +373,14 @@ namespace ogreWatcher
         }
 
         //Check to see which device is not buffered, and handle it
-        if( !mKeyboard->buffered() )
-            if( processUnbufferedKeyInput(evt) == false )
+        if (!mKeyboard->buffered())
+            if (processUnbufferedKeyInput(evt) == false)
                 return false;
-        if( !mMouse->buffered() )
-            if( processUnbufferedMouseInput(evt) == false )
+        if (!mMouse->buffered())
+            if (processUnbufferedMouseInput(evt) == false)
                 return false;
 
-        if( !mMouse->buffered() || !mKeyboard->buffered() || !buffJ )
+        if (!mMouse->buffered() || !mKeyboard->buffered() || !buffJ)
             moveCamera();
 
         TRACE_EXIT();
