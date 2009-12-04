@@ -74,6 +74,9 @@ public slots:
         void toggleBackgroundImage(bool isOn);
         void showKeyboardShortcuts(); 
 
+        void setGPSScale();  // spawn dialog to get new scale value
+        void setEdgeWidth(); // spawn dialog to get default edge width
+
         void showPlaybackTime(bool isOn);
         void showPlaybackRange(bool isOn);
         void showWallTime(bool isOn);

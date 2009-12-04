@@ -253,14 +253,16 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionFullscreen" />
     <addaction name="actionNormalscreen" />
     <addaction name="actionKeyboardShortcuts" />
+    <addaction name="actionSetGPSScale" />
+    <addaction name="actionSetEdgeWidth" />
     <addaction name="separator" />
     <addaction name="action3DNodes" />
     <addaction name="actionMonochrome" />
     <addaction name="actionBackgroundImage" />
     <addaction name="separator" />
     <addaction name="actionWallTime" />
-    <addaction name="actionPlaybackTime" />
     <addaction name="actionPlaybackRange" />
+    <addaction name="actionPlaybackTime" />
    </widget>
    <widget class="QMenu" name="menuGraph" >
     <property name="title" >
@@ -345,7 +347,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="text" >
-    <string>&amp;Playback Time</string>
+    <string>Playback &amp;Time</string>
    </property>
   </action>
   <action name="actionPlaybackRange" >
@@ -359,6 +361,16 @@ p, li { white-space: pre-wrap; }
   <action name="actionClearAll" >
    <property name="text" >
     <string>&amp;Clear All</string>
+   </property>
+  </action>
+  <action name="actionSetGPSScale" >
+   <property name="text" >
+    <string>Set &amp;GPS Scale</string>
+   </property>
+  </action>
+  <action name="actionSetEdgeWidth" >
+   <property name="text" >
+    <string>Set Edge Width</string>
    </property>
   </action>
  </widget>
@@ -823,6 +835,38 @@ p, li { white-space: pre-wrap; }
    <signal>activated()</signal>
    <receiver>manetGLViewWindow</receiver>
    <slot>clearAll()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>464</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSetEdgeWidth</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>setEdgeWidth()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>464</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSetGPSScale</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>setGPSScale()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>-1</x>
