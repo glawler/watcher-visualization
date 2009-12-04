@@ -25,6 +25,7 @@
 #include "kml/convenience/convenience.h"
 #include "kml/engine.h"
 #include "kml/dom.h"
+#include "kml/base/file.h"
 
 #include "libwatcher/watcherGraph.h"
 
