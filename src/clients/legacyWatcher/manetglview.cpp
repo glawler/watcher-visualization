@@ -1113,6 +1113,7 @@ bool manetGLView::loadConfiguration()
         emit threeDViewToggled(threeDView);
         emit monochromeToggled(monochromeMode);
         emit backgroundImageToggled(backgroundImage);
+        emit loopPlaybackToggled(autorewind);
         emit checkPlaybackTime(showPlaybackTimeInStatusString);
         emit checkPlaybackRange(showPlaybackRangeString);
         emit checkWallTime(showWallTimeinStatusString);
@@ -2532,6 +2533,14 @@ void manetGLView::toggleBackgroundImage(bool isOn)
     backgroundImage=isOn; 
     emit backgroundImageToggled(isOn); 
     updateGL();
+    TRACE_EXIT();
+}
+void manetGLView::toggleLoopPlayback(bool isOn) 
+{
+    TRACE_ENTER();
+    LOG_DEBUG("Toggling looped playback: " << (isOn==true?"on":"off"));
+    autorewind=isOn;
+    emit loopPlaybackToggled(isOn);
     TRACE_EXIT();
 }
 
