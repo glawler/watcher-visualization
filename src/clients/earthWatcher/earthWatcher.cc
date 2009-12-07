@@ -36,6 +36,10 @@
 #include "singletonConfig.h"
 #include "libwatcher/messageStream.h"
 #include "libwatcher/watcherGraph.h"
+#include "libwatcher/playbackTimeRange.h"
+
+#define TOOL_NAME "earthWatcher"
+DECLARE_GLOBAL_LOGGER(TOOL_NAME);
 
 using namespace watcher;
 
@@ -43,24 +47,32 @@ void write_kml(const WatcherGraph& graph, const std::string& outputFile); // kml
 
 namespace watcher {
     float LayerPadding = 10;
+    float Lonoff = 0.0;
+    float Latoff = 0.0;
+    float Altoff = 0.0;
 }
 
 namespace {
 
 //arguments to getopt_long()
 const option OPTIONS[] = {
+    { "latoff", required_argument, 0, 'a' },
+    { "altoff", required_argument, 0, 'A' },
     { "config", required_argument, 0, 'c' },
     { "help", no_argument, 0, 'h' },
-    { "output-file", required_argument, 0, 'o' },
+    { "output", required_argument, 0, 'o' },
+    { "lonoff", required_argument, 0, 'O' },
     { "refresh", required_argument, 0, 'r' },
     { "seek", required_argument, 0, 'S' },
+    { "server", required_argument, 0, 's' },
+    { "speed", required_argument, 0, 'd' },
     { 0, 0, 0, 0 }
 };
 
-#define TOOL_NAME "earthWatcher"
 const char *CONFIG_FILE = TOOL_NAME ".cfg";
 const char *OUTPUT_FILE = "watcher.kml";
 const char *PROPERTY_FILE = TOOL_NAME ".log.properties";
+const char *DEFAULT_HOST = "127.0.0.1";
 const unsigned int DEFAULT_REFRESH = 1; // SECONDS
 
 void usage()
@@ -68,17 +80,22 @@ void usage()
     const char *SEP = "\t\t";   // separator for argument/description columns
 
     std::cout << "usage: earthWatcher [ -h ] [ -c FILE ]\n"
+        "  -a, --latoff OFF" << SEP << "translate GPS coordinates relative to a given latitude\n"
+        "  -A, --altoff OFF" << SEP << "translate GPS coordinates relative to the given altitude\n"
         "  -c, --config FILE" << SEP << "specify a configuration file (default: " << CONFIG_FILE << ")\n"
+        "  -d, --speed SPEED" << SEP << "specify the event playback rate (default: 1.0)\n"
         "  -h, --help\t" << SEP << "display this help message\n"
-        "  -o, --output-file FILE" << SEP << "specifies the output KML file (default: " << OUTPUT_FILE << ")\n"
+        "  -o, --output FILE" << SEP << "specifies the output KML file (default: " << OUTPUT_FILE << ")\n"
+        "  -O, --lonoff OFF" << SEP << "translate GPS coordinates relative to a given longitude\n"
         "  -r, --refresh SECS" << SEP << "write the the output every SECS seconds (default: " << DEFAULT_REFRESH << ")\n"
+        "  -s, --server HOST" << SEP << "connect to the watcher server on the given host (default: " << DEFAULT_HOST << ")\n"
         "  -S, --seek POS" << SEP << "start event playback at timestamp POS (default: -1)\n"
+        "\tPOS may be specified relative to the first and last timestamps in the Watcher database by prefixing the offset with + or -\n"
+        "\tExample: +5000 means 5 seconds after the first event in the database.\n"
         << std::endl;
 }
 
 } // end namespace
-
-DECLARE_GLOBAL_LOGGER(TOOL_NAME);
 
 int main(int argc, char **argv)
 {
@@ -87,14 +104,47 @@ int main(int argc, char **argv)
     const char *output_file = 0;
     Timestamp start_timestamp = -1 ; // default to EOF (live playback)
     unsigned int refresh = DEFAULT_REFRESH;
+    float speed = 1.0;
+    bool relativeTS = false; // when true, start_timestamp is relative to first or last event in the Watcher DB
+    unsigned int args = 0;
+    enum {
+        argLayerPadding = (1<<0),
+        argLonoff = (1<<1),
+        argLatoff = (1<<2),
+        argAltoff = (1<<3),
+        argOutputFile = (1<<4),
+        argServerName = (1<<5)
+    };
+    std::string outputFile(OUTPUT_FILE);
+    std::string serverName(DEFAULT_HOST);
 
-    for (int i; (i = getopt_long(argc, argv, "hc:o:r:S:", OPTIONS, 0)) != -1; ) {
+    for (int i; (i = getopt_long(argc, argv, "a:A:hc:d:o:O:r:S:", OPTIONS, 0)) != -1; ) {
         switch (i) {
             case 'c':
                 break; //handled by initConfig()
 
+            case 'a':
+                Latoff = atof(optarg);
+                args |= argLatoff;
+                break;
+
+            case 'A':
+                Altoff = atof(optarg);
+                args |= argAltoff;
+                break;
+
+            case 'd':
+                speed = atoi(optarg);
+                break;
+
             case 'o': // output-file
-                output_file = optarg;
+                outputFile = optarg;
+                args |= argOutputFile;
+                break;
+
+            case 'O':
+                Lonoff = atoi(optarg);
+                args |= argLonoff;
                 break;
 
             case 'r':
@@ -102,8 +152,15 @@ int main(int argc, char **argv)
                 break;
 
             case 'S':
+                relativeTS = (optarg[0] == '+' || optarg[0] == '-'); // when +/- is prefix, seek relative to starting/ending event
                 start_timestamp = atol(optarg);
+                if (start_timestamp == -1)
+                    relativeTS = false; // special case for EOF value
                 break;
+
+            case 's':
+                serverName = optarg;
+                args |= argServerName;
 
             case 'h':
             default:
@@ -122,68 +179,94 @@ int main(int argc, char **argv)
     SingletonConfig::unlock();
 
     std::string logConf(PROPERTY_FILE);
-    if (!config.lookupValue("logPropertiesFile", logConf))
-    {
-        std::cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf 
-            << " and adding it to the configuration file." << std::endl;
-        config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString) = logConf;
+    std::string service("watcherd");
+    struct {
+        const char *configName;
+        std::string *value;
+        unsigned int bit;
+    } ConfigString[] = {
+        { "logPropertiesFile", &logConf, 0 },
+        { "server", &serverName, argServerName },
+        { "service", &service, 0 },
+        { "outputFile", &outputFile, argOutputFile },
+        { 0, 0, 0 } // terminator
+    };
+
+    for (size_t i = 0; ConfigString[i].configName != 0; ++i) {
+        if ((args & ConfigString[i].bit) == 0 && !config.lookupValue(ConfigString[i].configName, *ConfigString[i].value)) {
+            LOG_INFO("'" << ConfigString[i].configName << "' not found in the configuration file, using default: " << *ConfigString[i].value
+                     << " and adding this to the configuration file.");
+            config.getRoot().add(ConfigString[i].configName, libconfig::Setting::TypeString) = *ConfigString[i].value;
+        }
     }
 
     LOAD_LOG_PROPS(logConf); 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
 
-    std::string serverName("127.0.0.1");
-    if (!config.lookupValue("server", serverName))
-    {
-        LOG_INFO("'server' not found in the configuration file, using default: " << serverName 
-                << " and adding this to the configuration file.");
-        config.getRoot().add("server", libconfig::Setting::TypeString) = serverName;
-    }
+    struct {
+        const char *configName;
+        float* value;
+        unsigned int bit;
+    } ConfigFloat[] = {
+        { "layerPadding", &LayerPadding, argLayerPadding },
+        { "lonOff", &Lonoff, argLonoff },
+        { "latOff", &Latoff, argLatoff },
+        { "altOff", &Altoff, argAltoff },
+        { 0, 0, 0 } // terminator
+    };
 
-    std::string service("watcherd");
-    if (!config.lookupValue("service", service))
-    {
-        LOG_INFO("'service' not found in the configuration file, using default: " << service  
-                << " and adding this to the configuration file.");
-        config.getRoot().add("service", libconfig::Setting::TypeString) = service;
-    }
-
-    std::string outputFile(OUTPUT_FILE);
-    if (output_file)
-        outputFile = output_file; //initialize from user supplied argument
-    else if (!config.lookupValue("outputFile", outputFile)) {
-        LOG_INFO("'outputFile' not found in the configuration file, using default: " << outputFile  
-                 << " and adding this to the configuration file.");
-        config.getRoot().add("outputFile", libconfig::Setting::TypeString) = outputFile;
-    }
-
-    if (!config.lookupValue("layerPadding", LayerPadding)) {
-        LOG_INFO("'layerPadding' not found in the configuration file, using default: " << LayerPadding
-                 << " and adding this to the configuration file.");
-        config.getRoot().add("layerPadding", libconfig::Setting::TypeFloat) = LayerPadding;
+    for (size_t i = 0; ConfigFloat[i].configName != 0; ++i) {
+        if ((args & ConfigFloat[i].bit) == 0 && !config.lookupValue(ConfigFloat[i].configName, *ConfigFloat[i].value)) {
+            LOG_INFO("'" << ConfigFloat[i].configName << "' not found in the configuration file, using default: " << *ConfigFloat[i].value
+                     << " and adding this to the configuration file.");
+            config.getRoot().add(ConfigFloat[i].configName, libconfig::Setting::TypeFloat) = *ConfigFloat[i].value;
+        }
     }
 
     // open a message stream of live events for now
-    MessageStreamPtr ms(MessageStream::createNewMessageStream(serverName, service, start_timestamp));
+    MessageStreamPtr ms(MessageStream::createNewMessageStream(serverName, service, start_timestamp, speed));
     if (!ms) {
         LOG_FATAL("Unable to create new message stream to server \"" << serverName << "\" using service (or port) \"" << service);
         TRACE_EXIT_RET(EXIT_FAILURE); 
         return EXIT_FAILURE;
     }
 
-    LOG_INFO("Starting event playback");
-    ms->startStream(); 
+    if (relativeTS) {
+        ms->getMessageTimeRange();
+    } else {
+        LOG_INFO("Starting event playback");
+        ms->startStream(); 
+    }
 
     srandom(time(0));//we use random() to select the icon below
     WatcherGraph graph;
 
-    LOG_INFO("Waiting for events ");
     unsigned int messageNumber = 0;
     MessagePtr mp;
     time_t last_output = 0; // counter to allow for writing the kml file on a fixed time interval
     bool changed = false;
+    bool needTimeRange = relativeTS;
+
+    LOG_INFO("Waiting for events ");
     while (ms->getNextMessage(mp)) {
         std::cout << "Message #" << (++messageNumber) << ": " << *mp << std::endl; 
+
+        if (needTimeRange) {
+            PlaybackTimeRangeMessagePtr trp(boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(mp));
+            if (trp.get() != 0) {
+                LOG_INFO( "first offset=" << trp->min_ << ", last offset=" << trp->max_ );
+                needTimeRange = false;
+
+                Timestamp off = start_timestamp + (( start_timestamp >= 0 ) ? trp->min_ : trp->max_ );
+                ms->setStreamTimeStart(off);
+
+                LOG_INFO("Starting event playback");
+                ms->startStream(); 
+
+                continue;
+            }
+        }
+
         changed |= graph.updateGraph(mp);
 
         if (changed) {

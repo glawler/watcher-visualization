@@ -58,6 +58,9 @@ using namespace watcher;
 namespace watcher {
     // set from config file
     extern float LayerPadding;
+    extern float Lonoff;
+    extern float Latoff;
+    extern float Altoff;
 }
 
 namespace {
@@ -300,7 +303,7 @@ void Render::add_labels(const std::list<LabelDisplayInfoPtr>& labels, double lat
 PointPtr Render::create_point(double lat, double lng, double alt)
 {
     CoordinatesPtr coords(kmlFac->CreateCoordinates());
-    coords->add_latlngalt(lat, lng, alt);
+    coords->add_latlngalt(lat + Latoff, lng + Lonoff, alt + Altoff);
 
     PointPtr point(kmlFac->CreatePoint());
     point->set_coordinates(coords);
@@ -386,8 +389,8 @@ void Render::output_edges()
         const LayerInfo& layer(get_layer(edge.displayInfo->layer));
 
         CoordinatesPtr coords = kmlFac->CreateCoordinates();
-        coords->add_latlngalt(node1.gpsData->y, node1.gpsData->x, node1.gpsData->z + layer.zpad);
-        coords->add_latlngalt(node2.gpsData->y, node2.gpsData->x, node2.gpsData->z + layer.zpad);
+        coords->add_latlngalt(node1.gpsData->y + Latoff, node1.gpsData->x + Lonoff, node1.gpsData->z + layer.zpad + Altoff);
+        coords->add_latlngalt(node2.gpsData->y + Latoff, node2.gpsData->x + Lonoff, node2.gpsData->z + layer.zpad + Altoff);
 
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
