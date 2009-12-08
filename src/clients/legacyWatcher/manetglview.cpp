@@ -1575,7 +1575,7 @@ void manetGLView::maintainGraph()
 {
     TRACE_ENTER();
     while (true) {
-        {
+        if (!playbackPaused) {      // If paused, just keep things as they are.
             boost::lock_guard<boost::mutex> l(graphMutex);
             wGraph.doMaintanence(); // check expiration, etc. 
         }
@@ -3177,6 +3177,7 @@ void manetGLView::pausePlayback()
         return;
     }
     playbackPaused=true;
+    messageStream->clearMessageCache();
     messageStream->stopStream(); 
     TRACE_EXIT();
 }
