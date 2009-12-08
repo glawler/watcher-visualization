@@ -134,7 +134,7 @@ int main(int argc, char **argv)
                 break;
 
             case 'd':
-                speed = atoi(optarg);
+                speed = atof(optarg);
                 break;
 
             case 'o': // output-file
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
                 break;
 
             case 'O':
-                Lonoff = atoi(optarg);
+                Lonoff = atof(optarg);
                 args |= argLonoff;
                 break;
 
@@ -178,14 +178,20 @@ int main(int argc, char **argv)
         std::cout << "Configuration file not found. Creating new configuration file and using default runtime values." << std::endl;
     SingletonConfig::unlock();
 
+    /* handle log.properties file as a special case */
     std::string logConf(PROPERTY_FILE);
+    if (!config.lookupValue("logProperties", logConf)) {
+        config.getRoot().add("logProperties", libconfig::Setting::TypeString) = logConf;
+    }
+    LOAD_LOG_PROPS(logConf); 
+    LOG_INFO("Logger initialized from file \"" << logConf << "\"");
+
     std::string service("watcherd");
     struct {
         const char *configName;
         std::string *value;
         unsigned int bit;
     } ConfigString[] = {
-        { "logPropertiesFile", &logConf, 0 },
         { "server", &serverName, argServerName },
         { "service", &service, 0 },
         { "outputFile", &outputFile, argOutputFile },
@@ -200,8 +206,7 @@ int main(int argc, char **argv)
         }
     }
 
-    LOAD_LOG_PROPS(logConf); 
-    LOG_INFO("Logger initialized from file \"" << logConf << "\"");
+    LOG_DEBUG("latOff=" << Latoff << " lonOff=" << Lonoff << " altOff=" << Altoff);
 
     struct {
         const char *configName;
