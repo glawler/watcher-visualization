@@ -935,6 +935,8 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
 manetGLView::manetGLView(QWidget *parent) : 
     QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
     watcherdConnectionThread(NULL),
+    maintainGraphThread(NULL),
+    checkIOThread(NULL),
     streamRate(1.0),
     playbackPaused(false),
     autorewind(false), 
@@ -975,6 +977,21 @@ manetGLView::~manetGLView()
     TRACE_ENTER();
     for (vector<StringIndexedMenuItem*>::iterator i=layerMenuItems.begin(); i!=layerMenuItems.end(); ++i)
         delete *i;
+
+    // Grab the lock and kill the threads.
+    boost::lock_guard<boost::mutex> l(graphMutex);
+    boost::thread *threads[]={
+        watcherdConnectionThread, 
+        maintainGraphThread, 
+        checkIOThread
+    };
+    for (unsigned int i=0; i<sizeof(threads)/sizeof(threads[0]); i++) {
+        if (threads[i]) {
+            delete threads[i];
+            threads[i]=NULL;
+        }
+    }
+
     TRACE_EXIT();
 }
 
@@ -1056,8 +1073,6 @@ bool manetGLView::loadConfiguration()
             TRACE_EXIT_RET_BOOL(false); 
             return false;
         }
-        else 
-            watcherdConnectionThread=new boost::thread(boost::bind(&manetGLView::connectStream, this));
 
         prop="layers";
         if (!root.exists(prop))
@@ -1341,13 +1356,12 @@ bool manetGLView::loadConfiguration()
     // 
     // Set up timer callbacks.
     //
-    QTimer *checkIOTimer = new QTimer(this);
-    QObject::connect(checkIOTimer, SIGNAL(timeout()), this, SLOT(checkIO()));
-    checkIOTimer->start(100);
-
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
     watcherIdleTimer->start(100); 
+
+    // start work threads
+    watcherdConnectionThread=new boost::thread(boost::bind(&manetGLView::connectStream, this));
 
     TRACE_EXIT();
     return retVal;
@@ -1414,6 +1428,13 @@ void manetGLView::connectStream()
             messageStream->setStreamTimeStart(playbackStartTime);
             messageStream->startStream();
             messageStream->getMessageTimeRange();
+    
+            // spawn work threads
+            if (!checkIOThread) 
+                checkIOThread=new boost::thread(boost::bind(&manetGLView::checkIO, this));
+            if (!maintainGraphThread) 
+                maintainGraphThread=new boost::thread(boost::bind(&manetGLView::maintainGraph, this));
+
         }
         else  {
             // There needs to be some test connection, reconnect logic here.
@@ -1427,85 +1448,86 @@ void manetGLView::checkIO()
 {
     TRACE_ENTER();
 
-    if (!messageStream)
-        return;
+    while(true) {
 
-    int messagesProcessed=0;
-    while(messageStream && messageStream->isStreamReadable() && ++messagesProcessed<100)
-    {
         MessagePtr message;
-        messageStream->getNextMessage(message);
-        static unsigned long long messageCount=0;
-        LOG_DEBUG("Got message number " <<  ++messageCount << " : " << *message);
+        while(messageStream && messageStream->getNextMessage(message))
+        {
+            static unsigned long long messageCount=0;
+            LOG_DEBUG("Got message number " <<  ++messageCount << " : " << *message);
 
+            if (!isFeederEvent(message->type)) {
+                if (message->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE) {
+                    PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
+                    playbackRangeEnd=trm->max_;
+                    playbackRangeStart=trm->min_;
+                    if (playbackSlider)
+                        playbackSlider->setRange(playbackRangeStart/1000, playbackRangeEnd/1000);
+                    if (!currentMessageTimestamp)
+                        currentMessageTimestamp=
+                            playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
+                            playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
 
-        if (!isFeederEvent(message->type)) {
-            if (message->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE) {
-                PlaybackTimeRangeMessagePtr trm(dynamic_pointer_cast<PlaybackTimeRangeMessage>(message));
-                playbackRangeEnd=trm->max_;
-                playbackRangeStart=trm->min_;
-                if (playbackSlider)
-                    playbackSlider->setRange(playbackRangeStart/1000, playbackRangeEnd/1000);
-                if (!currentMessageTimestamp)
-                    currentMessageTimestamp=
-                        playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
-                        playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
-                                           
+                }
+
+                // End of handling non feeder messages. 
+                continue;
             }
 
-            // End of handling non feeder messages. 
-            continue;
-        }
-
-        wGraph.updateGraph(message);
-
-        // DataPoint data is handled directly by the scrolling graph thing.
-        if (message->type==DATA_POINT_MESSAGE_TYPE)
-        {
-            WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
-            sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
-        }
-
-        currentMessageTimestamp=message->timestamp;
-        if (!sliderPressed)
-           playbackSlider->setValue(currentMessageTimestamp/1000); 
-
-        if (currentMessageTimestamp>playbackRangeEnd+1000)
-            messageStream->getMessageTimeRange();
-
-        // Really need to make layers a member of a base class...
-        GUILayer layer;
-        switch (message->type)
-        {
-            case LABEL_MESSAGE_TYPE: layer=(dynamic_pointer_cast<LabelMessage>(message))->layer; break;
-            case EDGE_MESSAGE_TYPE: layer=(dynamic_pointer_cast<EdgeMessage>(message))->layer; break;
-            case COLOR_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ColorMessage>(message))->layer; break;
-            case CONNECTIVITY_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ConnectivityMessage>(message))->layer; break;
-            case NODE_PROPERTIES_MESSAGE_TYPE: layer=(dynamic_pointer_cast<NodePropertiesMessage>(message))->layer; break;
-            default: break;
-        }
-
-        if (!layer.empty())
-        {
-            LOG_DEBUG("Seeing if " << layer << " is known to us or not."); 
-            bool found=false;
-            BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
             {
-                if (llip->layer==layer)
+                boost::lock_guard<boost::mutex> l(graphMutex);
+                wGraph.updateGraph(message);
+            }
+
+            // DataPoint data is handled directly by the scrolling graph thing.
+            if (message->type==DATA_POINT_MESSAGE_TYPE)
+            {
+                WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
+                sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
+            }
+
+            currentMessageTimestamp=message->timestamp;
+            if (!sliderPressed)
+                playbackSlider->setValue(currentMessageTimestamp/1000); 
+
+            if (currentMessageTimestamp>playbackRangeEnd+1000)
+                messageStream->getMessageTimeRange();
+
+            // Really need to make layers a member of a base class...
+            GUILayer layer;
+            switch (message->type)
+            {
+                case LABEL_MESSAGE_TYPE: layer=(dynamic_pointer_cast<LabelMessage>(message))->layer; break;
+                case EDGE_MESSAGE_TYPE: layer=(dynamic_pointer_cast<EdgeMessage>(message))->layer; break;
+                case COLOR_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ColorMessage>(message))->layer; break;
+                case CONNECTIVITY_MESSAGE_TYPE: layer=(dynamic_pointer_cast<ConnectivityMessage>(message))->layer; break;
+                case NODE_PROPERTIES_MESSAGE_TYPE: layer=(dynamic_pointer_cast<NodePropertiesMessage>(message))->layer; break;
+                default: break;
+            }
+
+            if (!layer.empty())
+            {
+                LOG_DEBUG("Seeing if " << layer << " is known to us or not."); 
+                bool found=false;
+                BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
                 {
-                    found=true;
-                    break;
+                    if (llip->layer==layer)
+                    {
+                        found=true;
+                        break;
+                    }
+                }
+                if(!found)
+                {
+                    LOG_DEBUG("Adding new layer to known layers: " << layer); 
+                    addLayerMenuItem(layer, true); 
                 }
             }
-            if(!found)
-            {
-                LOG_DEBUG("Adding new layer to known layers: " << layer); 
-                addLayerMenuItem(layer, true); 
-            }
         }
+        updateGL();  // redraw
+        usleep(100000);
     }
 
-    updateGL();  // redraw
     TRACE_EXIT();
 }
 
@@ -1544,6 +1566,21 @@ void manetGLView::watcherIdle()
             noNewMessagesForSeconds=0;
     }
 
+    updateGL();
+
+    TRACE_EXIT();
+}
+
+void manetGLView::maintainGraph() 
+{
+    TRACE_ENTER();
+    while (true) {
+        {
+            boost::lock_guard<boost::mutex> l(graphMutex);
+            wGraph.doMaintanence(); // check expiration, etc. 
+        }
+        usleep(500000);
+    }
     TRACE_EXIT();
 }
 
@@ -1554,10 +1591,10 @@ void manetGLView::paintGL()
     if (!messageStream)
         drawNotConnectedState();
     else {
-        wGraph.doMaintanence(); // check expiration, etc. 
+        boost::lock_guard<boost::mutex> l(graphMutex);
         drawManet();
     }
-
+    
     TRACE_EXIT();
 }
 

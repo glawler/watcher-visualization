@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 
     LOG_INFO("Waiting for events ");
     while (ms->getNextMessage(mp)) {
-        std::cout << "Message #" << (++messageNumber) << ": " << *mp << std::endl; 
+        // std::cout << "Message #" << (++messageNumber) << ": " << *mp << std::endl; 
 
         if (needTimeRange) {
             PlaybackTimeRangeMessagePtr trp(boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(mp));

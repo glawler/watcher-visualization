@@ -27,6 +27,7 @@
 #include <QGLWidget>
 #include <QMenu>
 #include <QSlider>
+#include <boost/thread/locks.hpp>
 #include "declareLogger.h"
 #include "libwatcher/watcherGraph.h"
 #include "libwatcher/messageStream.h"
@@ -169,6 +170,9 @@ signals:
 
         void connectStream(); // connect to watherd and init the message stream. blocking...
         boost::thread *watcherdConnectionThread;
+        boost::thread *maintainGraphThread;
+        boost::thread *checkIOThread;
+        boost::mutex graphMutex;
 
         float streamRate; 
         bool playbackPaused;
@@ -322,6 +326,8 @@ signals:
         void drawCircle(GLdouble radius); 
         void drawFrownyCircle(GLdouble); 
 
+        // updating the graph is a separate function as it's done in it's own thread
+        void maintainGraph();
 };
 
 #endif
