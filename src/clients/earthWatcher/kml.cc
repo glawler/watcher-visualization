@@ -303,11 +303,11 @@ void Render::add_labels(const std::list<LabelDisplayInfoPtr>& labels, double lat
 PointPtr Render::create_point(double lat, double lng, double alt)
 {
     CoordinatesPtr coords(kmlFac->CreateCoordinates());
-    coords->add_latlngalt(lat + Latoff, lng + Lonoff, alt + Altoff);
+    coords->add_latlngalt(lat + Latoff, lng + Lonoff, alt);
 
     PointPtr point(kmlFac->CreatePoint());
     point->set_coordinates(coords);
-    point->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);     // avoid clamping to ground
+    point->set_altitudemode(kmldom::ALTITUDEMODE_RELATIVETOGROUND);     // avoid clamping to ground
 
     return point;
 }
@@ -332,7 +332,8 @@ void Render::output_nodes()
 
         PlacemarkPtr ptr = kmlFac->CreatePlacemark();
         //ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
-        ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, node.gpsData->z + layer.zpad));
+        //ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, node.gpsData->z + layer.zpad));
+        ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, layer.zpad));
         ptr->set_id(node.nodeId.to_string());
         // target id is required when changing some attribute of a feature already in the dom
         //ptr->set_targetid("node0");
@@ -341,10 +342,12 @@ void Render::output_nodes()
         layer.folder->add_feature(ptr); // add placemark to DOM
 
         // add a label for the node separate from its placemark icon
-        add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, node.gpsData->z);
+        //add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, node.gpsData->z);
+        add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, 0);
 
         // create a placemark for each label, putting into the appropriate layer
-        add_labels(node.labels, node.gpsData->y, node.gpsData->x, node.gpsData->z);
+        //add_labels(node.labels, node.gpsData->y, node.gpsData->x, node.gpsData->z);
+        add_labels(node.labels, node.gpsData->y, node.gpsData->x, 0);
     }
 }
 
@@ -389,15 +392,22 @@ void Render::output_edges()
         const LayerInfo& layer(get_layer(edge.displayInfo->layer));
 
         CoordinatesPtr coords = kmlFac->CreateCoordinates();
+        coords->add_latlngalt(node1.gpsData->y + Latoff, node1.gpsData->x + Lonoff, layer.zpad);
+        coords->add_latlngalt(node2.gpsData->y + Latoff, node2.gpsData->x + Lonoff, layer.zpad);
+        /*
         coords->add_latlngalt(node1.gpsData->y + Latoff, node1.gpsData->x + Lonoff, node1.gpsData->z + layer.zpad + Altoff);
         coords->add_latlngalt(node2.gpsData->y + Latoff, node2.gpsData->x + Lonoff, node2.gpsData->z + layer.zpad + Altoff);
+        */
 
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
-        lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
+        //lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
+        lineString->set_altitudemode(kmldom::ALTITUDEMODE_RELATIVETOGROUND);    // avoid clamping points to the ground
+        lineString->set_tessellate(true);
 
         // place label at the midpoint on the line between the two nodes
-        PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2 + layer.zpad ));
+        //PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2 + layer.zpad ));
+        PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, layer.zpad ));
 
         /*
          * Google Earth doesn't allow a label to be attached to something without a Point, so
@@ -418,7 +428,8 @@ void Render::output_edges()
         layer.folder->add_feature(ptr);
 
         // add additional placemarks for each label on this edge
-        add_labels(edge.labels, (node1.gpsData->y + node2.gpsData->y)/2, (node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2);
+        add_labels(edge.labels, (node1.gpsData->y + node2.gpsData->y)/2, (node1.gpsData->x + node2.gpsData->x)/2, 0);
+        //add_labels(edge.labels, (node1.gpsData->y + node2.gpsData->y)/2, (node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2);
     }
 }
 
