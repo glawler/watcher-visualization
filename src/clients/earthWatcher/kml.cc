@@ -379,6 +379,21 @@ std::string Render::get_edge_style(const WatcherGraphEdge& edge, unsigned int ed
         return "#" + edgeid;
 }
 
+const int SplineSteps = 20;
+
+// Draw a spline between the given points at the given altitude
+void drawSpline(const GPSMessagePtr& a, const GPSMessagePtr& b, float alt, CoordinatesPtr& coords)
+{
+    float xstep = ( a->x - b->x ) / SplineSteps;
+    float ystep = ( a->y - b->y ) / SplineSteps;
+    float x = a->x;
+    float y = a->y;
+
+    for (int i = 0; i < SplineSteps; ++i, x+=xstep, y+=ystep ) {
+        coords->add_latlngalt(y + Latoff, x + Lonoff, alt);
+    }
+}
+
 void Render::output_edges()
 {
     WatcherGraph::edgeIterator ei, eend;
@@ -392,8 +407,11 @@ void Render::output_edges()
         const LayerInfo& layer(get_layer(edge.displayInfo->layer));
 
         CoordinatesPtr coords = kmlFac->CreateCoordinates();
+        drawSpline(node1.gpsData, node2.gpsData, layer.zpad, coords);
+        /*
         coords->add_latlngalt(node1.gpsData->y + Latoff, node1.gpsData->x + Lonoff, layer.zpad);
         coords->add_latlngalt(node2.gpsData->y + Latoff, node2.gpsData->x + Lonoff, layer.zpad);
+        */
         /*
         coords->add_latlngalt(node1.gpsData->y + Latoff, node1.gpsData->x + Lonoff, node1.gpsData->z + layer.zpad + Altoff);
         coords->add_latlngalt(node2.gpsData->y + Latoff, node2.gpsData->x + Lonoff, node2.gpsData->z + layer.zpad + Altoff);
@@ -402,8 +420,8 @@ void Render::output_edges()
         LineStringPtr lineString = kmlFac->CreateLineString();
         lineString->set_coordinates(coords);
         //lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
+        //lineString->set_tessellate(true);
         lineString->set_altitudemode(kmldom::ALTITUDEMODE_RELATIVETOGROUND);    // avoid clamping points to the ground
-        lineString->set_tessellate(true);
 
         // place label at the midpoint on the line between the two nodes
         //PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2 + layer.zpad ));
