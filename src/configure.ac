@@ -17,8 +17,6 @@ AX_BOOST_UNIT_TEST_FRAMEWORK
 AX_BOOST_DATE_TIME
 
 PKG_CHECK_MODULES(LOGGER, logger)
-PKG_CHECK_MODULES(LIBIDMEF, libidmef)
-PKG_CHECK_MODULES(IDSCOMMUNICATIONS, idsCommunications)
 
 # allow optional 'test node only' build which builds just test node components.
 AC_MSG_CHECKING(--enable-testnodeonly)
@@ -202,6 +200,7 @@ AC_MSG_RESULT($enable_hierarchy_client)
 
 if test x$enable_hierarchy_client != xno; then
     PKG_CHECK_MODULES(idsCommunications, idsCommunications >= 1.0)
+    PKG_CHECK_MODULES(LIBIDMEF, libidmef == 0.7.3-beta-McAfee20050325)
 fi
 
 AC_CONFIG_FILES([ \
