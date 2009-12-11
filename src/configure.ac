@@ -200,7 +200,7 @@ AC_MSG_RESULT($enable_hierarchy_client)
 
 if test x$enable_hierarchy_client != xno; then
     PKG_CHECK_MODULES(idsCommunications, idsCommunications >= 1.0)
-    PKG_CHECK_MODULES(LIBIDMEF, libidmef == 0.7.3-beta-McAfee20050325)
+    PKG_CHECK_MODULES(LIBIDMEF, libidmef = 0.7.3-beta-McAfee20050325)
 fi
 
 AC_CONFIG_FILES([ \
