@@ -161,6 +161,7 @@ int main(int argc, char **argv)
             case 's':
                 serverName = optarg;
                 args |= argServerName;
+                break;
 
             case 'h':
             default:
