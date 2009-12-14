@@ -61,6 +61,7 @@ namespace watcher {
     extern float Lonoff;
     extern float Latoff;
     extern float Altoff;
+    extern int SplineSteps;
 }
 
 namespace {
@@ -379,17 +380,15 @@ std::string Render::get_edge_style(const WatcherGraphEdge& edge, unsigned int ed
         return "#" + edgeid;
 }
 
-const int SplineSteps = 20;
-
 // Draw a spline between the given points at the given altitude
 void drawSpline(const GPSMessagePtr& a, const GPSMessagePtr& b, float alt, CoordinatesPtr& coords)
 {
-    float xstep = ( a->x - b->x ) / SplineSteps;
-    float ystep = ( a->y - b->y ) / SplineSteps;
+    float xstep = ( b->x - a->x ) / SplineSteps;
+    float ystep = ( b->y - a->y ) / SplineSteps;
     float x = a->x;
     float y = a->y;
 
-    for (int i = 0; i < SplineSteps; ++i, x+=xstep, y+=ystep ) {
+    for (int i = 0; i < SplineSteps; ++i, x += xstep, y += ystep) {
         coords->add_latlngalt(y + Latoff, x + Lonoff, alt);
     }
 }

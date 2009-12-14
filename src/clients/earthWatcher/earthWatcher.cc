@@ -50,6 +50,7 @@ namespace watcher {
     float Lonoff = 0.0;
     float Latoff = 0.0;
     float Altoff = 0.0;
+    int SplineSteps = 20;
 }
 
 namespace {
@@ -66,6 +67,7 @@ const option OPTIONS[] = {
     { "seek", required_argument, 0, 'S' },
     { "server", required_argument, 0, 's' },
     { "speed", required_argument, 0, 'd' },
+    { "steps", required_argument, 0, 't' },
     { 0, 0, 0, 0 }
 };
 
@@ -90,6 +92,7 @@ void usage()
         "  -r, --refresh SECS" << SEP << "write the the output every SECS seconds (default: " << DEFAULT_REFRESH << ")\n"
         "  -s, --server HOST" << SEP << "connect to the watcher server on the given host (default: " << DEFAULT_HOST << ")\n"
         "  -S, --seek POS" << SEP << "start event playback at timestamp POS (default: -1)\n"
+        "  -t, --steps NUM" << SEP << "number of points to use when drawing a spline (default: " << SplineSteps << ")\n"
         "\tPOS may be specified relative to the first and last timestamps in the Watcher database by prefixing the offset with + or -\n"
         "\tExample: +5000 means 5 seconds after the first event in the database.\n"
         << std::endl;
@@ -118,7 +121,7 @@ int main(int argc, char **argv)
     std::string outputFile(OUTPUT_FILE);
     std::string serverName(DEFAULT_HOST);
 
-    for (int i; (i = getopt_long(argc, argv, "a:A:hc:d:o:O:r:S:", OPTIONS, 0)) != -1; ) {
+    for (int i; (i = getopt_long(argc, argv, "a:A:hc:d:o:O:r:S:t:", OPTIONS, 0)) != -1; ) {
         switch (i) {
             case 'c':
                 break; //handled by initConfig()
@@ -161,6 +164,14 @@ int main(int argc, char **argv)
             case 's':
                 serverName = optarg;
                 args |= argServerName;
+                break;
+
+            case 't':
+                SplineSteps = atoi(optarg);
+                if (SplineSteps < 2) {
+                    std::cerr << "error: number of steps can not be less than 2" << std::endl;
+                    return EXIT_FAILURE;
+                }
                 break;
 
             case 'h':
