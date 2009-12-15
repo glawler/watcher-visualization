@@ -62,52 +62,16 @@ namespace watcher {
     extern float Latoff;
     extern float Altoff;
     extern int SplineSteps;
+    extern float IconScale;
+    extern std::string IconPath;
 }
 
 namespace {
 
-/*
- * Keep a mapping to the random Icon associated with a particular node so that the
- * same icon is used between invocations of write_kml().
- */
-typedef std::map<NodeIdentifier, std::string> NodeIconMap ;
-typedef NodeIconMap::iterator NodeIconMapIterator ;
-NodeIconMap nodeIconMap;
-
 const std::string BASE_ICON_URL = "http://maps.google.com/mapfiles/kml/shapes/";
-
-// interesting icons for placemarks
-const char *ICONS[] = {
-    "cabs.png",
-    "bus.png",
-    "rail.png",
-    "truck.png",
-    "airports.png",
-    "ferry.png",
-    "heliport.png",
-    "tram.png",
-    "sailing.png"
-};
 
 // template to get the number of items in an array
 template <typename T, int N> size_t sizeof_array( T (&)[N] ) { return N; }
-
-/*
- * For testing purposes, randomly select an interesting icon to replace the default yellow pushpin.
- * In order to use the same icon between invocations of write_kml(), a map is used to store the icon
- * selected.
- */
-void set_node_icon(const WatcherGraphNode& node, PlacemarkPtr ptr)
-{
-    std::string styleUrl;
-    NodeIconMapIterator it = nodeIconMap.find(node.nodeId);
-    if (it == nodeIconMap.end()) {
-        styleUrl = std::string("#") + ICONS[ random() % sizeof_array(ICONS) ];
-        nodeIconMap[node.nodeId] = styleUrl;
-    } else
-        styleUrl = it->second;
-    ptr->set_styleurl(styleUrl);
-}
 
 struct LayerInfo {
     float zpad; // alt padding value to order layers vertically
@@ -143,7 +107,6 @@ class Render {
         DefinedLabelStyleList definedLabelStyles;
         float zpad;
 
-        void icon_setup();
         const LayerInfo& get_layer(const GUILayer& name);
         void output_nodes();
         void output_edges();
@@ -188,35 +151,9 @@ Render::Render(const WatcherGraph& g) :
 
 void Render::start()
 {
-    icon_setup();
     output_nodes();
     output_edges();
     output_floating_labels();
-}
-
-// generate styles for each supported icon so they can be shared.
-// note that we disable the label on the icon and expect that another placemark with the label will be located at the same position
-void Render::icon_setup()
-{
-    // set up styles for each icon we use, using the icon name as the id
-    for (size_t i = 0; i < sizeof_array(ICONS); ++i) {
-        IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
-        std::string url(BASE_ICON_URL + ICONS[i]);
-        icon->set_href(url.c_str());
-
-        IconStylePtr iconStyle(kmlFac->CreateIconStyle());
-        iconStyle->set_icon(icon);
-
-        LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
-        labelStyle->set_scale(0); // hide the label, we use separate placemarks for the labels so they can have their own style
-
-        StylePtr style(kmlFac->CreateStyle());
-        style->set_iconstyle(iconStyle);
-        style->set_labelstyle(labelStyle);
-        style->set_id(ICONS[i]);
-
-        doc->add_styleselector(style);
-    }
 }
 
 /*
@@ -324,9 +261,11 @@ void Render::output_floating_labels()
 
 void Render::output_nodes()
 {
+    int nodecount = 0;
+
     // iterate over all nodes in the graph
     WatcherGraph::vertexIterator vi, vend;
-    for (tie(vi, vend) = vertices(graph.theGraph); vi != vend; ++vi) {
+    for (tie(vi, vend) = vertices(graph.theGraph); vi != vend; ++vi, ++nodecount) {
         const WatcherGraphNode &node = graph.theGraph[*vi]; 
 
         const LayerInfo& layer(get_layer(node.displayInfo->layer));
@@ -338,7 +277,30 @@ void Render::output_nodes()
         ptr->set_id(node.nodeId.to_string());
         // target id is required when changing some attribute of a feature already in the dom
         //ptr->set_targetid("node0");
-        set_node_icon(node, ptr);
+
+        // create style for the icon
+        IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
+        std::string url(BASE_ICON_URL + IconPath);
+        icon->set_href(url.c_str());
+
+        IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+        iconStyle->set_icon(icon);
+        iconStyle->set_color(watcher_color_to_kml(node.displayInfo->color));
+        iconStyle->set_scale(IconScale);
+
+        LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+        labelStyle->set_scale(0); // hide the label, we use separate placemarks for the labels so they can have their own style
+
+        StylePtr style(kmlFac->CreateStyle());
+        style->set_iconstyle(iconStyle);
+        style->set_labelstyle(labelStyle);
+
+        std::string styleId("node-style-" + boost::lexical_cast<std::string>(nodecount));
+        style->set_id(styleId);
+
+        doc->add_styleselector(style);
+
+        ptr->set_styleurl("#" + styleId);
 
         layer.folder->add_feature(ptr); // add placemark to DOM
 

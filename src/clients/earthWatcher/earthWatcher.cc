@@ -50,7 +50,9 @@ namespace watcher {
     float Lonoff = 0.0;
     float Latoff = 0.0;
     float Altoff = 0.0;
+    float IconScale = 1.0;
     int SplineSteps = 20;
+    std::string IconPath ( "placemark_circle.png") ;
 }
 
 namespace {
@@ -68,6 +70,8 @@ const option OPTIONS[] = {
     { "server", required_argument, 0, 's' },
     { "speed", required_argument, 0, 'd' },
     { "steps", required_argument, 0, 't' },
+    { "icon-scale", required_argument, 0, 'i' },
+    { "icon-path", required_argument, 0, 'I' },
     { 0, 0, 0, 0 }
 };
 
@@ -87,6 +91,8 @@ void usage()
         "  -c, --config FILE" << SEP << "specify a configuration file (default: " << CONFIG_FILE << ")\n"
         "  -d, --speed SPEED" << SEP << "specify the event playback rate (default: 1.0)\n"
         "  -h, --help\t" << SEP << "display this help message\n"
+        "  -i, --icon-scale=NUM" << SEP << "adjust the size of node icons\n"
+        "  -I, --icon-path=STR" << SEP << "specify the node icon to use (default: " << IconPath << ")\n"
         "  -o, --output FILE" << SEP << "specifies the output KML file (default: " << OUTPUT_FILE << ")\n"
         "  -O, --lonoff OFF" << SEP << "translate GPS coordinates relative to a given longitude\n"
         "  -r, --refresh SECS" << SEP << "write the the output every SECS seconds (default: " << DEFAULT_REFRESH << ")\n"
@@ -121,7 +127,7 @@ int main(int argc, char **argv)
     std::string outputFile(OUTPUT_FILE);
     std::string serverName(DEFAULT_HOST);
 
-    for (int i; (i = getopt_long(argc, argv, "a:A:hc:d:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
+    for (int i; (i = getopt_long(argc, argv, "a:A:hi:I:c:d:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
         switch (i) {
             case 'c':
                 break; //handled by initConfig()
@@ -138,6 +144,14 @@ int main(int argc, char **argv)
 
             case 'd':
                 speed = atof(optarg);
+                break;
+
+            case 'i':
+                IconScale = atof(optarg);
+                break;
+
+            case 'I':
+                IconPath = optarg;
                 break;
 
             case 'o': // output-file
