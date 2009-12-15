@@ -121,7 +121,7 @@ int main(int argc, char **argv)
     std::string outputFile(OUTPUT_FILE);
     std::string serverName(DEFAULT_HOST);
 
-    for (int i; (i = getopt_long(argc, argv, "a:A:hc:d:o:O:r:S:t:", OPTIONS, 0)) != -1; ) {
+    for (int i; (i = getopt_long(argc, argv, "a:A:hc:d:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
         switch (i) {
             case 'c':
                 break; //handled by initConfig()
