@@ -255,7 +255,6 @@ int main(int argc, char **argv)
         ms->startStream(); 
     }
 
-    srandom(time(0));//we use random() to select the icon below
     WatcherGraph graph;
 
     unsigned int messageNumber = 0;
@@ -264,9 +263,17 @@ int main(int argc, char **argv)
     bool changed = false;
     bool needTimeRange = relativeTS;
 
+    const char *cfname = configFilename.c_str();
+    struct stat sb;
+    time_t cftime;      // time at which config file was last modified
+    if (stat(cfname, &sb) == -1) {
+        std::cerr << "stat: " << strerror(errno) << std::endl;
+        return EXIT_FAILURE;
+    }
+    cftime = sb.st_mtime;
+
     LOG_INFO("Waiting for events ");
     while (ms->getNextMessage(mp)) {
-        // std::cout << "Message #" << (++messageNumber) << ": " << *mp << std::endl; 
 
         if (needTimeRange) {
             PlaybackTimeRangeMessagePtr trp(boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(mp));
@@ -289,6 +296,19 @@ int main(int argc, char **argv)
         if (changed) {
             time_t now = time(0);
             if (now - last_output >= refresh) {
+                // reload config file if changed
+                if (stat(cfname, &sb) == -1) {
+                    LOG_ERROR( "stat: " << strerror(errno) );
+                    return EXIT_FAILURE;
+                }
+                if (sb.st_mtime > cftime) {
+                    cftime = sb.st_mtime;
+                    LOG_INFO("reloading configuration file");
+                    SingletonConfig::lock();
+                    config.readFile(cfname);
+                    SingletonConfig::unlock();
+                }
+
                 graph.doMaintanence(); // expire stale links
                 LOG_DEBUG("writing kml file");
                 last_output = now;
