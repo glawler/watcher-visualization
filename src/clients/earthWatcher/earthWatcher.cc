@@ -98,9 +98,9 @@ void usage()
         "  -r, --refresh SECS" << SEP << "write the the output every SECS seconds (default: " << DEFAULT_REFRESH << ")\n"
         "  -s, --server HOST" << SEP << "connect to the watcher server on the given host (default: " << DEFAULT_HOST << ")\n"
         "  -S, --seek POS" << SEP << "start event playback at timestamp POS (default: -1)\n"
-        "  -t, --steps NUM" << SEP << "number of points to use when drawing a spline (default: " << SplineSteps << ")\n"
         "\tPOS may be specified relative to the first and last timestamps in the Watcher database by prefixing the offset with + or -\n"
         "\tExample: +5000 means 5 seconds after the first event in the database.\n"
+        "  -t, --steps NUM" << SEP << "number of points to use when drawing a spline (default: " << SplineSteps << ")\n"
         << std::endl;
 }
 
