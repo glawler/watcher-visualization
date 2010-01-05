@@ -29,6 +29,9 @@
 
 #include "libwatcher/watcherGraph.h"
 
+#include "initConfig.h"
+#include "singletonConfig.h"
+
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
@@ -76,8 +79,9 @@ template <typename T, int N> size_t sizeof_array( T (&)[N] ) { return N; }
 struct LayerInfo {
     float zpad; // alt padding value to order layers vertically
     FolderPtr folder; // folder for this layer
-    LayerInfo(float zp, FolderPtr p) : zpad(zp), folder(p) {}
-    LayerInfo() : zpad(0.0) {}  // required for use in std::map
+    bool visible; // control whether this layer is output to the KML file
+    LayerInfo(float zp, FolderPtr p, bool v) : zpad(zp), folder(p), visible(v) {}
+    LayerInfo() : zpad(0.0), visible(true) {}  // required for use in std::map
 };
 
 typedef std::map<GUILayer, LayerInfo> LayerMap;
@@ -107,7 +111,8 @@ class Render {
         DefinedLabelStyleList definedLabelStyles;
         float zpad;
 
-        const LayerInfo& get_layer(const GUILayer& name);
+        const LayerInfo& get_layer(const GUILayer& name, bool visible);
+        void create_layers();
         void output_nodes();
         void output_edges();
         void output_floating_labels();
@@ -151,6 +156,7 @@ Render::Render(const WatcherGraph& g) :
 
 void Render::start()
 {
+    create_layers();
     output_nodes();
     output_edges();
     output_floating_labels();
@@ -159,19 +165,46 @@ void Render::start()
 /*
  * Return the KML folder associated with the given layer name.  Creates the layer if it does not already exist.
  */
-const LayerInfo& Render::get_layer(const GUILayer& name)
+const LayerInfo& Render::get_layer(const GUILayer& name, bool visible = true)
 {
     LayerMapIterator it = layerMap.find(name);
     if (it == layerMap.end()) {
         FolderPtr layer = kmlFac->CreateFolder();
         layer->set_name(name);
+        layer->set_visibility(visible);
         topFolder->add_feature(layer);
-        if (!layerMap.empty())
+        if (visible && !layerMap.empty())
             zpad += LayerPadding;
-        layerMap[name] = LayerInfo(zpad, layer);
+        layerMap[name] = LayerInfo(zpad, layer, visible);
         return layerMap[name];
     } else
         return it->second;
+}
+
+/*
+ * Pre-create layers that are defined in the configuration file.  This allows the
+ * stacking order to be fixed between runs.
+ */
+void Render::create_layers()
+{
+    libconfig::Config& cfg = SingletonConfig::instance();
+    SingletonConfig::lock();
+    libconfig::Setting &root = cfg.getRoot();
+    std::string prop = "layers";
+    if (!root.exists(prop))
+        root.add(prop, libconfig::Setting::TypeGroup);
+    libconfig::Setting &layers = cfg.lookup(prop);
+
+    int layerNum = layers.getLength();
+    for (int i = 0; i < layerNum; i++) {
+        std::string name(layers[i].getName());
+        bool val = true;
+        if (!layers.lookupValue(name, val))
+            layers.add(name, libconfig::Setting::TypeBoolean) = val;  // Shouldn't happen unless misformed cfg file. 
+        get_layer(name, val);
+    }
+
+    SingletonConfig::unlock();
 }
 
 /*
@@ -413,7 +446,6 @@ void Render::output_edges()
 }
 
 } // end namespace
-
 
 void write_kml(const WatcherGraph& graph, const std::string& outputFile)
 {
