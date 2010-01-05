@@ -122,7 +122,9 @@ int main(int argc, char **argv)
         argLatoff = (1<<2),
         argAltoff = (1<<3),
         argOutputFile = (1<<4),
-        argServerName = (1<<5)
+        argServerName = (1<<5),
+        argSplineSteps = (1<<6),
+        argIconPath = (1<<7)
     };
     std::string outputFile(OUTPUT_FILE);
     std::string serverName(DEFAULT_HOST);
@@ -152,6 +154,7 @@ int main(int argc, char **argv)
 
             case 'I':
                 IconPath = optarg;
+                args |= argIconPath;
                 break;
 
             case 'o': // output-file
@@ -186,6 +189,7 @@ int main(int argc, char **argv)
                     std::cerr << "error: number of steps can not be less than 2" << std::endl;
                     return EXIT_FAILURE;
                 }
+                args |= argSplineSteps;
                 break;
 
             case 'h':
@@ -221,6 +225,7 @@ int main(int argc, char **argv)
         { "server", &serverName, argServerName },
         { "service", &service, 0 },
         { "outputFile", &outputFile, argOutputFile },
+        { "iconPath", &IconPath, argIconPath },
         { 0, 0, 0 } // terminator
     };
 
@@ -251,6 +256,23 @@ int main(int argc, char **argv)
             LOG_INFO("'" << ConfigFloat[i].configName << "' not found in the configuration file, using default: " << *ConfigFloat[i].value
                      << " and adding this to the configuration file.");
             config.getRoot().add(ConfigFloat[i].configName, libconfig::Setting::TypeFloat) = *ConfigFloat[i].value;
+        }
+    }
+
+    struct {
+        const char *configName;
+        int* value;
+        unsigned int bit;
+    } ConfigInt[] = {
+        { "splineSteps", &SplineSteps, argSplineSteps },
+        { 0, 0, 0 } // terminator
+    };
+
+    for (size_t i = 0; ConfigInt[i].configName != 0; ++i) {
+        if ((args & ConfigInt[i].bit) == 0 && !config.lookupValue(ConfigInt[i].configName, *ConfigInt[i].value)) {
+            LOG_INFO("'" << ConfigInt[i].configName << "' not found in the configuration file, using default: " << *ConfigInt[i].value
+                     << " and adding this to the configuration file.");
+            config.getRoot().add(ConfigInt[i].configName, libconfig::Setting::TypeInt) = *ConfigInt[i].value;
         }
     }
 
