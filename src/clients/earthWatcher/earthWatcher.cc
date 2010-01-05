@@ -51,7 +51,7 @@ namespace watcher {
     float Latoff = 0.0;
     float Altoff = 0.0;
     float IconScale = 1.0;
-    int SplineSteps = 20;
+    int SplineSteps = 2;
     std::string IconPath ( "placemark_circle.png") ;
 }
 
