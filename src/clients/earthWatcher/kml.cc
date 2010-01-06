@@ -169,12 +169,19 @@ const LayerInfo& Render::get_layer(const GUILayer& name, bool visible = true)
 {
     LayerMapIterator it = layerMap.find(name);
     if (it == layerMap.end()) {
-        FolderPtr layer = kmlFac->CreateFolder();
-        layer->set_name(name);
-        layer->set_visibility(visible);
-        topFolder->add_feature(layer);
-        if (visible && !layerMap.empty())
-            zpad += LayerPadding;
+        /*
+         * GE doesn't seem to honor the <visibility> attribute, so avoid
+         * creating a folder for this layer if it is not visible.
+         */
+        FolderPtr layer;
+        if (visible) {
+            layer = kmlFac->CreateFolder();
+            layer->set_name(name);
+            //layer->set_visibility(visible);
+            topFolder->add_feature(layer);
+            if (!layerMap.empty())
+                zpad += LayerPadding;
+        }
         layerMap[name] = LayerInfo(zpad, layer, visible);
         return layerMap[name];
     } else
@@ -182,8 +189,9 @@ const LayerInfo& Render::get_layer(const GUILayer& name, bool visible = true)
 }
 
 /*
- * Pre-create layers that are defined in the configuration file.  This allows the
- * stacking order to be fixed between runs.
+ * Pre-create layers that are defined in the configuration file.  This allows
+ * the stacking order to be fixed between runs.  This also allows layers to be
+ * hidden.
  */
 void Render::create_layers()
 {
@@ -246,12 +254,14 @@ void Render::add_label(const GUILayer& layer, const std::string& label, const wa
 {
     const LayerInfo& li (get_layer(layer));
 
-    PlacemarkPtr place(kmlFac->CreatePlacemark());
-    place->set_name(label);
-    place->set_geometry(create_point(lat, lng, alt + li.zpad));
-    place->set_styleurl("#" + get_label_style(color));
+    if (li.visible) {
+        PlacemarkPtr place(kmlFac->CreatePlacemark());
+        place->set_name(label);
+        place->set_geometry(create_point(lat, lng, alt + li.zpad));
+        place->set_styleurl("#" + get_label_style(color));
 
-    li.folder->add_feature(place);
+        li.folder->add_feature(place);
+    }
 }
 
 void Render::add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng, double alt)
@@ -303,46 +313,50 @@ void Render::output_nodes()
 
         const LayerInfo& layer(get_layer(node.displayInfo->layer));
 
-        PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-        //ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
-        //ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, node.gpsData->z + layer.zpad));
-        ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, layer.zpad));
-        ptr->set_id(node.nodeId.to_string());
-        // target id is required when changing some attribute of a feature already in the dom
-        //ptr->set_targetid("node0");
+        if (layer.visible) {
+            PlacemarkPtr ptr = kmlFac->CreatePlacemark();
+            //ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
+            //ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, node.gpsData->z + layer.zpad));
+            ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, layer.zpad));
+            ptr->set_id(node.nodeId.to_string());
+            // target id is required when changing some attribute of a feature already in the dom
+            //ptr->set_targetid("node0");
 
-        // create style for the icon
-        IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
-        std::string url(BASE_ICON_URL + IconPath);
-        icon->set_href(url.c_str());
+            // create style for the icon
+            IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
+            std::string url(BASE_ICON_URL + IconPath);
+            icon->set_href(url.c_str());
 
-        IconStylePtr iconStyle(kmlFac->CreateIconStyle());
-        iconStyle->set_icon(icon);
-        iconStyle->set_color(watcher_color_to_kml(node.displayInfo->color));
-        iconStyle->set_scale(IconScale);
+            IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+            iconStyle->set_icon(icon);
+            iconStyle->set_color(watcher_color_to_kml(node.displayInfo->color));
+            iconStyle->set_scale(IconScale);
 
-        LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
-        labelStyle->set_scale(0); // hide the label, we use separate placemarks for the labels so they can have their own style
+            LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+            labelStyle->set_scale(0); // hide the label, we use separate placemarks for the labels so they can have their own style
 
-        StylePtr style(kmlFac->CreateStyle());
-        style->set_iconstyle(iconStyle);
-        style->set_labelstyle(labelStyle);
+            StylePtr style(kmlFac->CreateStyle());
+            style->set_iconstyle(iconStyle);
+            style->set_labelstyle(labelStyle);
 
-        std::string styleId("node-style-" + boost::lexical_cast<std::string>(nodecount));
-        style->set_id(styleId);
+            std::string styleId("node-style-" + boost::lexical_cast<std::string>(nodecount));
+            style->set_id(styleId);
 
-        doc->add_styleselector(style);
+            doc->add_styleselector(style);
 
-        ptr->set_styleurl("#" + styleId);
+            ptr->set_styleurl("#" + styleId);
 
-        layer.folder->add_feature(ptr); // add placemark to DOM
+            layer.folder->add_feature(ptr); // add placemark to DOM
 
-        // add a label for the node separate from its placemark icon
-        //add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, node.gpsData->z);
-        add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, 0);
+            // add a label for the node separate from its placemark icon
+            add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, 0);
+        }
 
-        // create a placemark for each label, putting into the appropriate layer
-        //add_labels(node.labels, node.gpsData->y, node.gpsData->x, node.gpsData->z);
+        /*
+         * Create a placemark for each label, putting into the appropriate layer.
+         * Each label has an independant layer, so this call occurs outside the
+         * check for the node layer's visibility.
+         */
         add_labels(node.labels, node.gpsData->y, node.gpsData->x, 0);
     }
 }
@@ -400,48 +414,40 @@ void Render::output_edges()
 
         const LayerInfo& layer(get_layer(edge.displayInfo->layer));
 
-        CoordinatesPtr coords = kmlFac->CreateCoordinates();
-        drawSpline(node1.gpsData, node2.gpsData, layer.zpad, coords);
-        /*
-        coords->add_latlngalt(node1.gpsData->y + Latoff, node1.gpsData->x + Lonoff, layer.zpad);
-        coords->add_latlngalt(node2.gpsData->y + Latoff, node2.gpsData->x + Lonoff, layer.zpad);
-        */
-        /*
-        coords->add_latlngalt(node1.gpsData->y + Latoff, node1.gpsData->x + Lonoff, node1.gpsData->z + layer.zpad + Altoff);
-        coords->add_latlngalt(node2.gpsData->y + Latoff, node2.gpsData->x + Lonoff, node2.gpsData->z + layer.zpad + Altoff);
-        */
+        if (layer.visible) {
+            CoordinatesPtr coords = kmlFac->CreateCoordinates();
+            drawSpline(node1.gpsData, node2.gpsData, layer.zpad, coords);
 
-        LineStringPtr lineString = kmlFac->CreateLineString();
-        lineString->set_coordinates(coords);
-        //lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
-        //lineString->set_tessellate(true);
-        lineString->set_altitudemode(kmldom::ALTITUDEMODE_RELATIVETOGROUND);    // avoid clamping points to the ground
+            LineStringPtr lineString = kmlFac->CreateLineString();
+            lineString->set_coordinates(coords);
+            //lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
+            //lineString->set_tessellate(true);
+            lineString->set_altitudemode(kmldom::ALTITUDEMODE_RELATIVETOGROUND);    // avoid clamping points to the ground
 
-        // place label at the midpoint on the line between the two nodes
-        //PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2 + layer.zpad ));
-        PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, layer.zpad ));
+            // place label at the midpoint on the line between the two nodes
+            PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, layer.zpad ));
 
-        /*
-         * Google Earth doesn't allow a label to be attached to something without a Point, so
-         * we need to create a container with the LineString and the Point at which to attach
-         * the label/icon.
-         * TODO: this could be optimized in the case where the label is "none", since the Point can
-         * be omitted.
-         */
-        MultiGeometryPtr multiGeo(kmlFac->CreateMultiGeometry());
-        multiGeo->add_geometry(lineString);
-        multiGeo->add_geometry(point);
+            /*
+             * Google Earth doesn't allow a label to be attached to something without a Point, so
+             * we need to create a container with the LineString and the Point at which to attach
+             * the label/icon.
+             * TODO: this could be optimized in the case where the label is "none", since the Point can
+             * be omitted.
+             */
+            MultiGeometryPtr multiGeo(kmlFac->CreateMultiGeometry());
+            multiGeo->add_geometry(lineString);
+            multiGeo->add_geometry(point);
 
-        PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-        ptr->set_geometry(multiGeo);
-        ptr->set_name(edge.displayInfo->label);
-        ptr->set_styleurl(get_edge_style(edge, edgenum));
+            PlacemarkPtr ptr = kmlFac->CreatePlacemark();
+            ptr->set_geometry(multiGeo);
+            ptr->set_name(edge.displayInfo->label);
+            ptr->set_styleurl(get_edge_style(edge, edgenum));
 
-        layer.folder->add_feature(ptr);
+            layer.folder->add_feature(ptr);
+        }
 
         // add additional placemarks for each label on this edge
         add_labels(edge.labels, (node1.gpsData->y + node2.gpsData->y)/2, (node1.gpsData->x + node2.gpsData->x)/2, 0);
-        //add_labels(edge.labels, (node1.gpsData->y + node2.gpsData->y)/2, (node1.gpsData->x + node2.gpsData->x)/2, (node1.gpsData->z + node2.gpsData->z)/2);
     }
 }
 
