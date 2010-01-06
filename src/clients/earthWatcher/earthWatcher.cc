@@ -43,9 +43,9 @@ DECLARE_GLOBAL_LOGGER(TOOL_NAME);
 
 using namespace watcher;
 
-void write_kml(const WatcherGraph& graph, const std::string& outputFile); // kml.cc
+namespace earthwatcher {
+    void write_kml(const WatcherGraph& graph, const std::string& outputFile); // kml.cc
 
-namespace watcher {
     float LayerPadding = 10;
     float Lonoff = 0.0;
     float Latoff = 0.0;
@@ -54,6 +54,8 @@ namespace watcher {
     int SplineSteps = 2;
     std::string IconPath ( "placemark_circle.png") ;
 }
+
+using namespace earthwatcher;
 
 namespace {
 
@@ -104,6 +106,112 @@ void usage()
         << std::endl;
 }
 
+sigset_t Signals;
+
+void init_signals()
+{
+    if (sigemptyset(&Signals) ||
+        sigaddset(&Signals, SIGHUP) ||
+        sigaddset(&Signals, SIGTERM) ||
+        sigaddset(&Signals, SIGINT)) {
+        throw std::runtime_error("failed to initialiaze sigset_t");
+    }
+    pthread_sigmask(SIG_BLOCK, &Signals, 0);
+}
+
+// Global variables shared between main() and process_events()
+std::string ServerName(DEFAULT_HOST);
+std::string Service("watcherd");
+std::string ConfigFilename; //filled by initConfig()
+std::string OutputFile(OUTPUT_FILE);
+Timestamp StartTimestamp = -1 ; // default to EOF (live playback)
+unsigned int Refresh = DEFAULT_REFRESH;
+float Speed = 1.0;
+bool RelativeTS = false; // when true, start_timestamp is relative to first or last event in the Watcher DB
+
+void *process_events(void *)
+{
+    // open a message stream of live events for now
+    MessageStreamPtr ms(MessageStream::createNewMessageStream(ServerName, Service, StartTimestamp, Speed));
+    if (!ms) {
+        LOG_FATAL("Unable to create new message stream to server \"" << ServerName << "\" using service (or port) \"" << Service);
+        TRACE_EXIT_RET(EXIT_FAILURE); 
+        exit( EXIT_FAILURE );
+    }
+
+    if (RelativeTS) {
+        ms->getMessageTimeRange();
+    } else {
+        LOG_INFO("Starting event playback");
+        ms->startStream(); 
+    }
+
+    WatcherGraph graph;
+
+    unsigned int messageNumber = 0;
+    MessagePtr mp;
+    time_t last_output = 0; // counter to allow for writing the kml file on a fixed time interval
+    bool changed = false;
+    bool needTimeRange = RelativeTS;
+
+    const char *cfname = ConfigFilename.c_str();
+    struct stat sb;
+    time_t cftime;      // time at which config file was last modified
+    if (stat(cfname, &sb) == -1) {
+        LOG_ERROR("stat: " << strerror(errno));
+        exit( EXIT_FAILURE );
+    }
+    cftime = sb.st_mtime;
+
+    LOG_INFO("Waiting for events ");
+    while (ms->getNextMessage(mp)) {
+
+        if (needTimeRange) {
+            PlaybackTimeRangeMessagePtr trp(boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(mp));
+            if (trp.get() != 0) {
+                LOG_INFO( "first offset=" << trp->min_ << ", last offset=" << trp->max_ );
+                needTimeRange = false;
+
+                Timestamp off = StartTimestamp + ((StartTimestamp >= 0 ) ? trp->min_ : trp->max_ );
+                ms->setStreamTimeStart(off);
+
+                LOG_INFO("Starting event playback");
+                ms->startStream(); 
+
+                continue;
+            }
+        }
+
+        changed |= graph.updateGraph(mp);
+
+        if (changed) {
+            time_t now = time(0);
+            if (now - last_output >= Refresh) {
+                // reload config file if changed
+                if (stat(cfname, &sb) == -1) {
+                    LOG_ERROR( "stat: " << strerror(errno) );
+                    exit( EXIT_FAILURE) ;
+                }
+                if (sb.st_mtime > cftime) {
+                    cftime = sb.st_mtime;
+                    LOG_INFO("reloading configuration file");
+                    SingletonConfig::lock();
+                    SingletonConfig::instance().readFile(cfname);
+                    SingletonConfig::unlock();
+                }
+
+                graph.doMaintanence(); // expire stale links
+                LOG_DEBUG("writing kml file");
+                last_output = now;
+                write_kml(graph, OutputFile);
+            }
+            changed = false; // reset flag
+        }
+    }
+
+    return 0;
+}
+
 } // end namespace
 
 int main(int argc, char **argv)
@@ -111,10 +219,6 @@ int main(int argc, char **argv)
     TRACE_ENTER();
 
     const char *output_file = 0;
-    Timestamp start_timestamp = -1 ; // default to EOF (live playback)
-    unsigned int refresh = DEFAULT_REFRESH;
-    float speed = 1.0;
-    bool relativeTS = false; // when true, start_timestamp is relative to first or last event in the Watcher DB
     unsigned int args = 0;
     enum {
         argLayerPadding = (1<<0),
@@ -126,8 +230,6 @@ int main(int argc, char **argv)
         argSplineSteps = (1<<6),
         argIconPath = (1<<7)
     };
-    std::string outputFile(OUTPUT_FILE);
-    std::string serverName(DEFAULT_HOST);
 
     for (int i; (i = getopt_long(argc, argv, "a:A:hi:I:c:d:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
         switch (i) {
@@ -145,7 +247,7 @@ int main(int argc, char **argv)
                 break;
 
             case 'd':
-                speed = atof(optarg);
+                Speed = atof(optarg);
                 break;
 
             case 'i':
@@ -158,7 +260,7 @@ int main(int argc, char **argv)
                 break;
 
             case 'o': // output-file
-                outputFile = optarg;
+                OutputFile = optarg;
                 args |= argOutputFile;
                 break;
 
@@ -168,18 +270,18 @@ int main(int argc, char **argv)
                 break;
 
             case 'r':
-                refresh = atoi(optarg);
+                Refresh = atoi(optarg);
                 break;
 
             case 'S':
-                relativeTS = (optarg[0] == '+' || optarg[0] == '-'); // when +/- is prefix, seek relative to starting/ending event
-                start_timestamp = atol(optarg);
-                if (start_timestamp == -1)
-                    relativeTS = false; // special case for EOF value
+                RelativeTS = (optarg[0] == '+' || optarg[0] == '-'); // when +/- is prefix, seek relative to starting/ending event
+                StartTimestamp = atol(optarg);
+                if (StartTimestamp == -1)
+                    RelativeTS = false; // special case for EOF value
                 break;
 
             case 's':
-                serverName = optarg;
+                ServerName = optarg;
                 args |= argServerName;
                 break;
 
@@ -203,9 +305,9 @@ int main(int argc, char **argv)
 
     libconfig::Config& config = SingletonConfig::instance();
     SingletonConfig::lock();
-    std::string configFilename; //filled by initConfig()
-    if (! watcher::initConfig(config, argc, argv, configFilename))
+    if (! watcher::initConfig(config, argc, argv, ConfigFilename))
         std::cout << "Configuration file not found. Creating new configuration file and using default runtime values." << std::endl;
+    SingletonConfig::setConfigFile(ConfigFilename);
     SingletonConfig::unlock();
 
     /* handle log.properties file as a special case */
@@ -216,15 +318,14 @@ int main(int argc, char **argv)
     LOAD_LOG_PROPS(logConf); 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
 
-    std::string service("watcherd");
     struct {
         const char *configName;
         std::string *value;
         unsigned int bit;
     } ConfigString[] = {
-        { "server", &serverName, argServerName },
-        { "service", &service, 0 },
-        { "outputFile", &outputFile, argOutputFile },
+        { "server", &ServerName, argServerName },
+        { "service", &Service, 0 },
+        { "outputFile", &OutputFile, argOutputFile },
         { "iconPath", &IconPath, argIconPath },
         { 0, 0, 0 } // terminator
     };
@@ -276,89 +377,27 @@ int main(int argc, char **argv)
         }
     }
 
-    // open a message stream of live events for now
-    MessageStreamPtr ms(MessageStream::createNewMessageStream(serverName, service, start_timestamp, speed));
-    if (!ms) {
-        LOG_FATAL("Unable to create new message stream to server \"" << serverName << "\" using service (or port) \"" << service);
-        TRACE_EXIT_RET(EXIT_FAILURE); 
-        return EXIT_FAILURE;
+    init_signals();
+
+    // spawn thread to receive Watcher events
+    pthread_t tid;
+    pthread_create(&tid, 0, process_events, 0);
+
+    // wait for user interrupt
+    int caughtSig;
+    int r = sigwait(&Signals, &caughtSig);
+    if (r == -1) {
+        throw std::runtime_error("sigwait returned -1");
     }
+    LOG_INFO("caught signal " << caughtSig);
 
-    if (relativeTS) {
-        ms->getMessageTimeRange();
-    } else {
-        LOG_INFO("Starting event playback");
-        ms->startStream(); 
-    }
-
-    WatcherGraph graph;
-
-    unsigned int messageNumber = 0;
-    MessagePtr mp;
-    time_t last_output = 0; // counter to allow for writing the kml file on a fixed time interval
-    bool changed = false;
-    bool needTimeRange = relativeTS;
-
-    const char *cfname = configFilename.c_str();
-    struct stat sb;
-    time_t cftime;      // time at which config file was last modified
-    if (stat(cfname, &sb) == -1) {
-        std::cerr << "stat: " << strerror(errno) << std::endl;
-        return EXIT_FAILURE;
-    }
-    cftime = sb.st_mtime;
-
-    LOG_INFO("Waiting for events ");
-    while (ms->getNextMessage(mp)) {
-
-        if (needTimeRange) {
-            PlaybackTimeRangeMessagePtr trp(boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(mp));
-            if (trp.get() != 0) {
-                LOG_INFO( "first offset=" << trp->min_ << ", last offset=" << trp->max_ );
-                needTimeRange = false;
-
-                Timestamp off = start_timestamp + (( start_timestamp >= 0 ) ? trp->min_ : trp->max_ );
-                ms->setStreamTimeStart(off);
-
-                LOG_INFO("Starting event playback");
-                ms->startStream(); 
-
-                continue;
-            }
-        }
-
-        changed |= graph.updateGraph(mp);
-
-        if (changed) {
-            time_t now = time(0);
-            if (now - last_output >= refresh) {
-                // reload config file if changed
-                if (stat(cfname, &sb) == -1) {
-                    LOG_ERROR( "stat: " << strerror(errno) );
-                    return EXIT_FAILURE;
-                }
-                if (sb.st_mtime > cftime) {
-                    cftime = sb.st_mtime;
-                    LOG_INFO("reloading configuration file");
-                    SingletonConfig::lock();
-                    config.readFile(cfname);
-                    SingletonConfig::unlock();
-                }
-
-                graph.doMaintanence(); // expire stale links
-                LOG_DEBUG("writing kml file");
-                last_output = now;
-                write_kml(graph, outputFile);
-            }
-            changed = false; // reset flag
-        }
-    }
+    pthread_cancel(tid);
 
     // Save any configuration changes made during the run.
-    LOG_INFO("Saving last known configuration to " << configFilename); 
-    SingletonConfig::lock();
-    config.writeFile(configFilename.c_str());
+    LOG_INFO("Saving last known configuration to " << ConfigFilename); 
+    SingletonConfig::saveConfig();
+    LOG_INFO("Done.");
 
-    TRACE_EXIT_RET(0);
-    return 0;
+    TRACE_EXIT_RET(EXIT_SUCCESS);
+    exit( EXIT_SUCCESS );
 }

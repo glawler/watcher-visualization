@@ -56,9 +56,7 @@ using kmldom::UpdatePtr;
 using kmlengine::KmlFile;
 using kmlengine::KmlFilePtr;
 
-using namespace watcher;
-
-namespace watcher {
+namespace earthwatcher {
     // set from config file
     extern float LayerPadding;
     extern float Lonoff;
@@ -68,6 +66,9 @@ namespace watcher {
     extern float IconScale;
     extern std::string IconPath;
 }
+
+using namespace watcher;
+using namespace earthwatcher;
 
 namespace {
 
@@ -453,6 +454,8 @@ void Render::output_edges()
 
 } // end namespace
 
+namespace earthwatcher {
+
 void write_kml(const WatcherGraph& graph, const std::string& outputFile)
 {
     Render args(graph);
@@ -460,3 +463,5 @@ void write_kml(const WatcherGraph& graph, const std::string& outputFile)
 
     kmlbase::File::WriteStringToFile(kmldom::SerializePretty(args.kml), outputFile);
 }
+
+} // namespace
