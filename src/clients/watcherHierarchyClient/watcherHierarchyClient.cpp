@@ -232,6 +232,7 @@ void sendEdge(void *messageHandlerData, const struct MessageInfo *mi, bool addEd
             mlp->background=Color(labels[i]->bgcolor[0], labels[i]->bgcolor[1], labels[i]->bgcolor[2], labels[i]->bgcolor[3]);
             mlp->expiration=labels[i]->expiration;
             mlp->addLabel=addEdge;
+            mlp->layer=legacyFamilyValue2GUILayer(ne->family);
 
             // cheating a little
             if (i==0)  // head
