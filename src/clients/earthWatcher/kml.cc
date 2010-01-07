@@ -393,8 +393,9 @@ std::string Render::get_edge_style(const WatcherGraphEdge& edge, unsigned int ed
 // Draw a spline between the given points at the given altitude
 void drawSpline(const GPSMessagePtr& a, const GPSMessagePtr& b, float alt, CoordinatesPtr& coords)
 {
-    float xstep = ( b->x - a->x ) / SplineSteps;
-    float ystep = ( b->y - a->y ) / SplineSteps;
+    /* SplineSteps is the number of points, so SplineSteps-1 is the number of segments */
+    float xstep = ( b->x - a->x ) / (SplineSteps - 1);
+    float ystep = ( b->y - a->y ) / (SplineSteps - 1);
     float x = a->x;
     float y = a->y;
 
