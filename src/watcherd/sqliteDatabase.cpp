@@ -49,6 +49,12 @@ SqliteDatabase::SqliteDatabase(const std::string& path) :
     conn_->execute("CREATE TABLE IF NOT EXISTS events ( ts INTEGER, evtype INTEGER, node TEXT, data TEXT ); "
                    "CREATE INDEX IF NOT EXISTS time ON events ( ts ASC );");
 
+    /* Added to enable higher insert rate.
+     * More concerned with performance than crash integrity
+     */
+    conn_->execute("PRAGMA synchronous = 0;");
+    conn_->execute("PRAGMA journal_mode = 0;");
+
     /*
      * This must come after the db creation otherwise it will fail saying that
      * table "events" does not exist.
