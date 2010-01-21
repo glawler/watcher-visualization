@@ -57,3 +57,74 @@ accurate, the EarthWatcher has options to translate the coordinates relative to
 some location on the Earth.  For example, the origin is located in the Atlantic
 Ocean off the coast of West Africa.  Using the {\tt latOff} and {\tt lonOff}
 options can place the nodes in a more geographically interesting location.
+
+\subsubsection{Using EarthWatcher with Google Earth GUI}
+
+EarthWatcher writes a KML file, by defauled named {\tt watcher.kml}.  Follow
+these steps to view the generated KML file in Google Earth:
+
+\begin{itemize}
+\item Launch the Google Earth GUI.
+\item Select the {\it Add} menu.
+\item Select the {\it Network Link} menu item.
+\item Click the {\it Browse} button next to the text input box labaled {\it
+Link}.
+\item Browse to the folder containing the KML file created by EarthWatcher.
+\item Click on the {\it Refresh tab}.
+\item In the {\it Time-Based Refresh area}, click the drop down box next to {\it
+When} and select {\it Periodically}.
+\item Set the time to 0 hours, 0 minutes and 1 second.
+\item Click OK.
+\end{itemize}
+
+In the {\it Places} pane in Google Earth, there will be a {\it Untitled Network Link}
+under {\it Temporary Places} in the tree view that contains all the Watcher related
+elements.  Double-clicking on {\it Untitled Network Link} will cause Google
+Earth to center and zoom in on the Watcher objects.
+
+\subsubsection{Using Google Earth when disconnected from the Internet}
+
+Google Earth is normally used on an Internet-connected workstation.  When
+browsing an area of interest, the satellite images are broken into tiles and
+sent to the Google Earth client on demand.  In order to avoid sending the same
+tiles repeatedly, the Google Earth client caches the tiles locally on the hard
+drive.  Once the tiles are cached, it is possible to use the Google Earth client
+to browse areas that are contained in the cache while disconnected from the
+Internet.
+
+On a Linux-based operating system, the image cache is located in the
+{\tt \$HOME\slash .googleearth\slash Cache } directory.  The image cache consists of
+two files named {\tt dbCache.dat} and {\tt dbCache.dat.index}.  In addition to
+the satellite image cache, there are also subdirectories containing cached
+placemark icons and 3-D models.  It is possible to package up the {\tt Cache}
+directory and move it to another machine for use.
+
+Google Earth allows a maximum size of 2 gigabytes for the satellite image cache.
+When attempting to cache multiple different areas of interest, this limitation
+may require creation of separate cache files for each area rather than a single
+cache file.  The cache files can be swapped and Google Earth restarted in order
+to switch the area of interest for browsing.  The easiest way to handle this is
+to have separate {\tt Cache} directories for each location of interest.  For
+example, {\tt Cache.NewYork} or {\tt Cache.GrandCanyon}.  The appropriate
+directory can be renamed {\tt Cache} or a symbolic-link can be used to select
+which image cache to use.
+
+In the sitation where the disconnected workstation used for browsing Google
+Earth can not initially be connected to the Internet, it is necessary to perform
+one additional initial step, otherwise Google Earth will fail to work.  The
+first time Google Earth is run some registration information is exhanged with
+Google's servers.  When running in disconnected mode, this information must
+exist, or it can't be used for offline browsing.  On a Linux-based machine, the
+generated configuration files reside in the {\tt \$HOME\slash .config\slash Google}
+directory.  These files can be copied from any Internet connected machine and
+will allow offline browsing on another machine.
+
+In the simplest case where a single image cache is generated on an
+Internet-connected machine and moved to another offline machine for browsing,
+the following command is sufficient for creating a package that can be moved to
+the offline machine:
+
+{\tt \# tar jcvf ge-cache.tar.bz2 .config\slash Google .googleearth}
+
+This file can be unpacked in the home directory of the Google Earth user on the
+offline machine.
