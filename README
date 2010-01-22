@@ -13,6 +13,42 @@ Look in ./src/doc for User's Guide and ./doc for doxygen generated dev docs.
 Look in ./src/watcherd for the watcher daemon and ./src/clients/legacyWatcher 
 for the watcher GUI (or one of them anyway).
 
+NOTE for 64 BIT: when configuring, pass the location of the 64 bit boost libs by
+using --with-boost-libdir=/usr/lib64. i.e. ./configure ... --with-boost-libdir=/usr/lib64
+
+If building OGRE the following packages are needed (for 64 bit machines):
+======================================================================================================================================
+ Package                            Arch                       Version                              Repository                   Size
+======================================================================================================================================
+Installing:
+ogre                               x86_64                     1.6.4-1.fc12                         fedora                      1.9 M
+ogre-devel                         x86_64                     1.6.4-1.fc12                         fedora                      492 k
+ogre-devel-doc                     x86_64                     1.6.4-1.fc12                         fedora                      6.3 M
+ogre-samples                       x86_64                     1.6.4-1.fc12                         fedora                       17 M
+Installing for dependencies:
+DevIL                              x86_64                     1.7.8-4.fc12                         updates                     252 k
+SILLY                              x86_64                     0.1.0-7.fc12                         fedora                       18 k
+cegui                              x86_64                     0.6.2-4.fc12                         fedora                      790 k
+cegui-devel                        x86_64                     0.6.2-4.fc12                         fedora                      213 k
+freeimage                          x86_64                     3.10.0-3.fc12                        fedora                      209 k
+glew                               x86_64                     1.5.1-3.fc12                         fedora                      109 k
+ois                                x86_64                     1.0-6.fc12                           fedora                       38 k
+tinyxml                            x86_64                     2.5.3-5.fc12                         fedora                       47 k
+tolua++                            x86_64                     1.0.92-9.fc12                        fedora                       39 k
+xerces-c                           x86_64                     2.8.0-5.fc12                         fedora                      934 k
+zziplib                            x86_64                     0.13.49-8.fc12                       fedora                       64 k
+
+The yum command is: 
+sudo yum install ogre.x86_64 ogre-devel.x86_64 ogre-devel-doc.x86_64 ogre-samples.x86_64 ois.x86_64 ois-devel.x86_64 ogre-cg.x86_64 ogre-devel.x86_64
+(for 32 bit use the i686 versions instead).
+
+For building earthWatcher you need:
+- libkml
+- uriparser
+yum install uriparser.x86_64 uriparser-devel.x86_64 libkml.x86_64 libkml-devel.x86_64
+In order to find the libkml libs on 64 bit you must set LDFLAGS="-L[path-to-libkml]", then 
+put that same directoty path into a file in /etc/ld.so.conf.d/libkml-x86_64.conf and rerun
+ldconfig as root. 
 
 
 
