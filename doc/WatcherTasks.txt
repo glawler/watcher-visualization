@@ -1,5 +1,0 @@
-- stand up issue tracker on issosrd.com
-- stand up source repoi/source builder on issosrd.com
-- add python bindings to watcher at message API, and other places
-- make the GUI parallelliable by threading the message handling. (Or profile and find out where to put it.)
-
