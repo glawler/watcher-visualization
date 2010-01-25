@@ -19,7 +19,6 @@ CFLAGS=$(CXXFLAGS)
 
 LDFLAGS+=-L../../libwatcher
 LDFLAGS+=-L../../watcherd
-LDFLAGS+=-L../../../lib
 LDFLAGS+=@LOGGER_LIBS@
 
 LIBS+=-lwatcher
