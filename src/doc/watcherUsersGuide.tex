@@ -16,22 +16,40 @@
 \usepackage{makeidx}
 \makeindex
 \usepackage[dvips]{graphicx}
-
 \usepackage{url}
 
-\pagestyle{headings}
-
-\author{Geoff Lawler \url{<geoff.lawler@cobham.com>} \and {Michael Elkins \url{<michael.elkins@cobham.com>}}}
-
-\title{Watcher User's Guide}
-
 \begin{document}
+\pagestyle{empty}
+\title{Watcher User's Guide}
+\author{Geoff Lawler \url{<geoff.lawler@cobham.com>} \and {Michael Elkins \url{<michael.elkins@cobham.com>}}}
 \maketitle
-\newpage 
-
-\tableofcontents
+\thispagestyle{empty}
 \newpage
-
+Prepared through collaborative participation in the Communications and Networks Consortium sponsored by the U. S. Army Research Laboratory under the Collaborative Technology Alliance Program, Cooperative Agreement DAAD19-01-2-0011. The U.S. Government is authorized to reproduce and distribute reprints for Government purposes notwithstanding any copyright notation thereon.  
+\\\\
+The views and conclusions contained in this document are those of the authors and should not be interpreted as representing the official policies, either expressed or implied, of the Army Research Laboratory or the U. S. Government.
+\\\\
+\\\\
+{\bf License Information:}\\
+\\\\
+\begin{tt}
+Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+\\\\
+This file is part of WATCHER.
+\\\\
+WATCHER is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+\\\\
+WATCHER is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+\\\\
+You should have received a copy of the GNU Affero General Public License along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
+\end{tt}
+\thispagestyle{empty}
+\newpage 
+\setcounter{tocdepth}{3}
+\tableofcontents
+\thispagestyle{empty}
+\newpage 
+\pagestyle{headings}
 \section{Introduction}
 
 The {\it watcher}, or {\it watcher system} allows users to visualize emulated Mobile As-Hoc Networks. 
@@ -163,6 +181,7 @@ as the canonical. It should be as easy as the canonical {\tt .\slash configure \
 \item[--enable-testnodeonly]   Only configure and build test node components. Do not build the watcher daemon.
 \item[--enable-ogreWatcher]    Enable compilation of ogreWatcher.
 \item[--enable-watcher3d]      Enable compilation of watcher3d GUI.
+\item[--enable-earthWatcher]      Enable compilation of earthWatcher daemon.
 \item[--enable-hierarchy\_client] Enable compilation of the watcher hierarchy client (both libidsCommunications and watcherHierachyClient). 
 \end{description}
 
