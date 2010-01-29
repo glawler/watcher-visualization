@@ -22,6 +22,7 @@
  */
 
 #include <cassert>
+#include <sstream>
 #include "sqlite_wrapper.h"
 #include "sqlite_thread.h"
 
@@ -173,10 +174,19 @@ void Row::step()
                 throw Exception( sqlite3_errmsg(impl_->conn.db_) );
             } break;
 
+        case SQLITE_CORRUPT:
+            { 
+                flags_ |= row_fail;
+                throw Exception("database is corrupt"); 
+            } 
+            break;
+
         default:
             {
                 flags_ |= row_fail;
-                throw Exception("unhandled return code from sqlite3_step():");
+                std::ostringstream err_mess;
+                err_mess << "Unhandled ret code from sqlite3_step: " << res;
+                throw Exception(err_mess.str());
             } break;
     }
 }
