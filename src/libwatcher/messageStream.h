@@ -185,6 +185,12 @@ namespace watcher
          */
         void clearMessageCache(); 
 
+        // Bookkeeping
+        unsigned int messagesSent;
+        unsigned int messagesArrived;
+        unsigned int messagesDropped;
+        unsigned int messageQueueSize() { return messageCache.size(); }
+
         protected:
 
         /**
@@ -207,11 +213,6 @@ namespace watcher
 
         virtual bool handleMessageSent(const event::MessagePtr &message); 
         virtual bool handleMessagesSent(const std::vector<event::MessagePtr> &messages);
-
-        // Bookkeeping
-        unsigned int messagesSent;
-        unsigned int messagesArrived;
-        unsigned int messagesDropped;
 
         private:
         DECLARE_LOGGER();

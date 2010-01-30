@@ -29,6 +29,7 @@
 #include <boost/foreach.hpp>
 #include <values.h>  // DBL_MAX
 #include <GL/glut.h>
+#include <sstream>
 
 #include <libwatcher/watcherGraph.h>
 #include <libwatcher/seekWatcherMessage.h>  // for epoch, eof
@@ -1118,6 +1119,7 @@ bool manetGLView::loadConfiguration()
             { "showWallTime", true, &showWallTimeinStatusString }, 
             { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
             { "showPlaybackRange", true, &showPlaybackRangeString },
+            { "showDebugInfo", false, &showDebugInfo },
             { "autorewind", true, &autorewind }
         }; 
         for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
@@ -1400,16 +1402,16 @@ void manetGLView::initializeGL()
 
     GLfloat ambLight0[]={ 0.0, 0.0, 0.0, 1.0 };
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambLight0); 
-    
+
     GLfloat specLight0[]={ 1.0, 1.0, 1.0, 1.0 };
     glLightfv(GL_LIGHT0, GL_SPECULAR, specLight0);
-    
+
     GLfloat diffLight0[]= { 1.0, 1.0, 1.0, 1.0 }; 
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight0);
 
     GLfloat ambLightDef[]={0.1,0.1,0.1,1.0}; // OPenGL's default is: 0.2,0.2,0.2,1
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambLightDef); 
-    
+
     glEnable(GL_LIGHTING); 
     glEnable(GL_LIGHT0); 
 
@@ -1428,7 +1430,7 @@ void manetGLView::connectStream()
             messageStream->setStreamTimeStart(playbackStartTime);
             messageStream->startStream();
             messageStream->getMessageTimeRange();
-    
+
             // spawn work threads
             if (!checkIOThread) 
                 checkIOThread=new boost::thread(boost::bind(&manetGLView::checkIO, this));
@@ -1584,7 +1586,7 @@ void manetGLView::maintainGraph()
     TRACE_EXIT();
 }
 
-void manetGLView::paintGL() 
+void manetGLView::paintGL()
 {
     TRACE_ENTER();
 
@@ -1593,8 +1595,41 @@ void manetGLView::paintGL()
     else {
         boost::lock_guard<boost::mutex> l(graphMutex);
         drawManet();
+        
+        // drawStatusString uses QPainter so must be called 
+        // after all openGL calls
+        drawStatusString(); 
+
+        if (showDebugInfo)
+            drawDebugInfo();
     }
-    
+
+    TRACE_EXIT();
+}
+
+void manetGLView::drawDebugInfo()
+{
+    TRACE_ENTER();
+
+    ostringstream info;
+    info << "Messages sent: " << messageStream->messagesSent << endl;
+    info << "Messages arrived: " << messageStream->messagesArrived << endl;
+    info << "Messages dropped: " << messageStream->messagesDropped << endl;
+    info << "Messages queued: " << messageStream->messageQueueSize() << endl;
+
+    QPainter painter(this);
+    QString text(info.str().c_str());
+    QFont font(statusFontName.c_str(), statusFontPointSize); 
+    QFontMetrics metrics = QFontMetrics(font);
+    int border = qMax(4, metrics.leading());
+    QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setFont(font);
+    painter.setPen(Qt::white); 
+    double padding=0.01;
+    painter.drawText(width()*padding, height()*padding, rect.width(), rect.height(), Qt::AlignLeft | Qt::TextWordWrap, text);
+    painter.end();
+
     TRACE_EXIT();
 }
 
@@ -1744,66 +1779,72 @@ void manetGLView::drawManet(void)
             glPopMatrix();
         }
     }
+}
 
-    // draw status string
+void manetGLView::drawStatusString()
+{
+    // // draw status string
+    QPainter painter(this);
+
+    ptime now = from_time_t(time(NULL));
+
+    string buf;
+
+    Timestamp nowTS=getCurrentTime();
+    if (playbackPaused)
+        buf="(paused)";
+    else if (nowTS-2500.0<currentMessageTimestamp)
+        buf="(live)";
+    else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
+        buf="(end of data)";
+    else
+        buf="(playback)";
+
+    if (showWallTimeinStatusString)
     {
-        glPushMatrix();
-
-        ptime now = from_time_t(time(NULL));
-        glScalef(0.02, 0.02, 0.02);
-
-        string buf;
-
-        Timestamp nowTS=getCurrentTime();
-        if (playbackPaused)
-            buf="(paused)";
-        else if (nowTS-2500.0<currentMessageTimestamp)
-            buf="(live)";
-        else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
-            buf="(end of data)";
-        else
-            buf="(playback)";
-
-        if (showWallTimeinStatusString)
-        {
-            buf+=" Wall Time: ";
-            buf+=posix_time::to_iso_extended_string(now);
-        }
-        if (showPlaybackTimeInStatusString)
-        {
-            buf+=" Play Time: ";
-            buf+=posix_time::to_iso_extended_string(from_time_t(currentMessageTimestamp/1000));
-        }
-        if (showPlaybackRangeString)
-        {
-            buf+=" Time Range: ";
-            buf+=posix_time::to_iso_extended_string(from_time_t(playbackRangeStart/1000));
-            buf+=" to ";
-            buf+=posix_time::to_iso_extended_string(from_time_t(playbackRangeEnd/1000));
-        }
-
-        if (nowTS-2500.0<currentMessageTimestamp)
-            qglColor(QColor(monochromeMode ? "black" : "green")); 
-        else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
-            qglColor(QColor(monochromeMode ? "black" : "blue")); 
-        else
-            qglColor(QColor(monochromeMode ? "black" : "red")); 
-
-        if (showVerboseStatusString)
-        {
-            char buff[256];
-            snprintf(buff, sizeof(buff), " Loc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, text: %f lpad: %f",
-                    manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
-                    manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
-                    scaleText, layerPadding); 
-            buf+=string(buff); 
-        }
-        renderText(12, height()-12, QString(buf.c_str()), QFont(statusFontName.c_str(), statusFontPointSize)); 
-
-        glPopMatrix();
+        buf+="\nWall Time: ";
+        buf+=posix_time::to_iso_extended_string(now);
+    }
+    if (showPlaybackTimeInStatusString)
+    {
+        buf+="\nPlay Time: ";
+        buf+=posix_time::to_iso_extended_string(from_time_t(currentMessageTimestamp/1000));
+    }
+    if (showPlaybackRangeString)
+    {
+        buf+="\nTime Range: ";
+        buf+=posix_time::to_iso_extended_string(from_time_t(playbackRangeStart/1000));
+        buf+=" to ";
+        buf+=posix_time::to_iso_extended_string(from_time_t(playbackRangeEnd/1000));
     }
 
+    if (nowTS-2500.0<currentMessageTimestamp)
+        painter.setPen(QColor(monochromeMode ? "black" : "green")); 
+    else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
+        painter.setPen(QColor(monochromeMode ? "black" : "blue")); 
+    else
+        painter.setPen(QColor(monochromeMode ? "black" : "red")); 
 
+    if (showVerboseStatusString)
+    {
+        char buff[256];
+        snprintf(buff, sizeof(buff), "\nLoc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, text: %f lpad: %f",
+                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
+                manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
+                scaleText, layerPadding); 
+        buf+=string(buff); 
+    }
+
+    QString text(buf.c_str());
+    QFont font(statusFontName.c_str(), statusFontPointSize); 
+    QFontMetrics metrics = QFontMetrics(font);
+    int border = qMax(4, metrics.leading());
+    QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setFont(font);
+    double padding=0.01;
+    painter.drawText(width()*padding, height()-rect.height()-(height()*padding), rect.width(), rect.height(), Qt::AlignLeft | Qt::TextWordWrap, text);
+    painter.end();
 }
 
 void manetGLView::setPlaybackSlider(QSlider *s)
@@ -1848,7 +1889,7 @@ void manetGLView::updatePlaybackSliderFromGUI()
         TRACE_EXIT();
         return;
     }
- 
+
     Timestamp newStart(playbackSlider->value());
     newStart*=1000;
     LOG_DEBUG("slider update - new start time: " << newStart << " slider position: " << playbackSlider->value() << " cur mess ts: " << currentMessageTimestamp); 
@@ -2067,8 +2108,8 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
     //             QFont(node.displayInfo->labelFont.c_str(), 
     //                  (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
     renderText(0, 6, 3, QString(node.displayInfo->get_label().c_str()),
-                QFont(node.displayInfo->labelFont.c_str(), 
-                     (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
+            QFont(node.displayInfo->labelFont.c_str(), 
+                (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
 
     TRACE_EXIT();
 }
@@ -2098,7 +2139,7 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
                 fgColor[i]=0; 
 
     float offset=4.0;
-        
+
     QFont f(label->fontName.c_str(), (int)(label->pointSize*manetAdj.scaleX*scaleText)); 
 
     // Do cheesy shadow effect as I can't get a proper bounding box around the text as
@@ -2226,6 +2267,7 @@ void manetGLView::showKeyboardShortcuts()
         "C   - change background color\n"
         "F   - change information text font\n"
         "T   - reset layer padding to 0\n"
+        "D   - Display debugging information\n"
         "k/l - increase/decrease gps scale\n"
         "a/s - increase/decrease node label font size\n"
         "t/y - increase/decrease padding between layers\n" 
@@ -2288,6 +2330,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
 
     quint32 nativeKey = event->nativeVirtualKey();
     int qtKey = event->key();
+    bool handled=false;
 
     switch (nativeKey)
     {
@@ -2300,6 +2343,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                 if (ok)
                     glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
             }
+            handled=true;
             break;
         case 'F': 
             {
@@ -2313,67 +2357,80 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                     statusFontPointSize=font.pointSize(); 
                 }
             }
+            handled=true;
+            break;
+        case 'D':
+            LOG_DEBUG("Got cap D turning on debugging info"); 
+            showDebugInfo=!showDebugInfo;
+            if (messageStream) { 
+                messageStream->messagesSent=0;
+                messageStream->messagesArrived=0;
+                messageStream->messagesDropped=0;
+            }
+            handled=true;
             break;
         case 'T':
             layerPadding=0;
+            handled=true;
             break;
     }
 
-    switch(qtKey)
-    {
-        case Qt::Key_Left:  shiftCenterRight(); break;
-        case Qt::Key_Right: shiftCenterLeft(); break;
-        case Qt::Key_Up:    shiftCenterDown(); break;
-        case Qt::Key_Down:  shiftCenterUp(); break;
-        case Qt::Key_N:     shiftCenterIn(); break; 
-        case Qt::Key_M:     shiftCenterOut(); break;
-        case Qt::Key_Q:     zoomOut(); break;
-        case Qt::Key_W:     zoomIn(); break;
-        case Qt::Key_A:     scaleText++; break;
-        case Qt::Key_S:     scaleText--; if (scaleText<1) scaleText=1; break;
-        case Qt::Key_Z:     compressDistance(); break;
-        case Qt::Key_X:     expandDistance(); break;
-        case Qt::Key_E:     rotateX(-5.0); break;
-        case Qt::Key_R:     rotateX(5.0); break;
-        case Qt::Key_D:     rotateY(-5.0); break;
-        case Qt::Key_F:     rotateY(5.0); break;
-        case Qt::Key_C:     rotateZ(-5.0); break;
-        case Qt::Key_V:     rotateZ(5.0); break;
-        case Qt::Key_K:     gpsScale+=10; break;
-        case Qt::Key_L:     gpsScale-=10; break;
-        case Qt::Key_T:     layerPadding+=2; break;
-        case Qt::Key_Y:     layerPadding-=2; if (layerPadding<=0) layerPadding=0; break;
-        // case Qt::Key_B:     
-        //     layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
-        //     emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
-        //     break;
-        case Qt::Key_Equal:
-        case Qt::Key_Plus: 
-                            autoCenterNodesFlag=true;
-                            scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
-                            autoCenterNodesFlag=false;
-                            break;
-        case Qt::Key_Space:
-                            break;
-                            // globalReplay.runFlag = !globalReplay.runFlag;
-                            // if (globalReplay.runFlag)
-                            //     messageStream.startStream();
-                            // else
-                            //     messageStream.stopStream();
-                            // break;
+    if (!handled) {
+        switch(qtKey) {
+            case Qt::Key_Left:  shiftCenterRight(); break;
+            case Qt::Key_Right: shiftCenterLeft(); break;
+            case Qt::Key_Up:    shiftCenterDown(); break;
+            case Qt::Key_Down:  shiftCenterUp(); break;
+            case Qt::Key_N:     shiftCenterIn(); break; 
+            case Qt::Key_M:     shiftCenterOut(); break;
+            case Qt::Key_Q:     zoomOut(); break;
+            case Qt::Key_W:     zoomIn(); break;
+            case Qt::Key_A:     scaleText++; break;
+            case Qt::Key_S:     scaleText--; if (scaleText<1) scaleText=1; break;
+            case Qt::Key_Z:     compressDistance(); break;
+            case Qt::Key_X:     expandDistance(); break;
+            case Qt::Key_E:     rotateX(-5.0); break;
+            case Qt::Key_R:     rotateX(5.0); break;
+            case Qt::Key_D:     rotateY(-5.0); break;
+            case Qt::Key_F:     rotateY(5.0); break;
+            case Qt::Key_C:     rotateZ(-5.0); break;
+            case Qt::Key_V:     rotateZ(5.0); break;
+            case Qt::Key_K:     gpsScale+=10; break;
+            case Qt::Key_L:     gpsScale-=10; break;
+            case Qt::Key_T:     layerPadding+=2; break;
+            case Qt::Key_Y:     layerPadding-=2; if (layerPadding<=0) layerPadding=0; break;
+                                // case Qt::Key_B:     
+                                //     layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
+                                //     emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
+                                //     break;
+            case Qt::Key_Equal:
+            case Qt::Key_Plus: 
+                                autoCenterNodesFlag=true;
+                                scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
+                                autoCenterNodesFlag=false;
+                                break;
+            case Qt::Key_Space:
+                                break;
+                                // globalReplay.runFlag = !globalReplay.runFlag;
+                                // if (globalReplay.runFlag)
+                                //     messageStream.startStream();
+                                // else
+                                //     messageStream.stopStream();
+                                // break;
 
-                            // GTL TODO: add shortcuts for ff/rew, etc. 
-                            // case 't': globalReplay.step = 1000; break;
-                            // case 'a' - 'a' + 1: arrowZoomOut(); break;
-                            // case 's' - 'a' + 1: arrowZoomIn(); break;
-                            // case 'r' - 'a' + 1: textZoomReset(); arrowZoomReset(); viewpointReset(); break;
-        case Qt::Key_Question:
-        case Qt::Key_H:
+                                // GTL TODO: add shortcuts for ff/rew, etc. 
+                                // case 't': globalReplay.step = 1000; break;
+                                // case 'a' - 'a' + 1: arrowZoomOut(); break;
+                                // case 's' - 'a' + 1: arrowZoomIn(); break;
+                                // case 'r' - 'a' + 1: textZoomReset(); arrowZoomReset(); viewpointReset(); break;
+            case Qt::Key_Question:
+            case Qt::Key_H:
                                 showKeyboardShortcuts();
                                 break;
 
-        default:
-                            event->ignore();
+            default:
+                                event->ignore();
+        }
     }
 
     update();
@@ -3047,6 +3104,7 @@ void manetGLView::saveConfiguration()
             { "showWallTime", showWallTimeinStatusString }, 
             { "showPlaybackTime", showPlaybackTimeInStatusString },
             { "showPlaybackRange", showPlaybackRangeString },
+            { "showDebugInfo", &showDebugInfo },
             { "autorewind", autorewind }
         };
 
@@ -3284,4 +3342,5 @@ void manetGLView::playbackSetSpeed(double x)
     emit streamRateSet(streamRate);
     TRACE_EXIT();
 }
+
 
