@@ -275,6 +275,7 @@ void MessageStream::clearMessageCache()
     TRACE_ENTER();
     {
         lock_guard<mutex> lock(messageCacheMutex);
+        messagesDropped+=messageCache.size();
         messageCache.clear();
         readReady=false;
         // let lock go out of scope
