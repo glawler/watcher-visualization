@@ -77,6 +77,9 @@ namespace watcher {
                 case PLAYBACK_TIME_RANGE_MESSAGE_TYPE:
                     out << static_cast<int>(PLAYBACK_TIME_RANGE_MESSAGE_TYPE) << " (playback time range)";
                     break;
+                case MESSAGE_STREAM_FILTER_MESSAGE_TYPE:
+                    out << static_cast<int>(MESSAGE_STREAM_FILTER_MESSAGE_TYPE) << " (message stream filter)";
+                    break;
 
 
                 case USER_DEFINED_MESSAGE_TYPE: 

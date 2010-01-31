@@ -31,8 +31,12 @@
 namespace watcher
 {
     /**
+     * @class WatcherRegion
      * This class defines a region that exists in the watcher environment.
      * It is meant to be used as a filter to narrow the messages that are sent to an watcherd attached GUI.
+     *
+     * It is currently just a place holder. At some point it'll hold gps locations or some 
+     * way of choosing a specific chunk of space.
      */
     class WatcherRegion
     {
@@ -44,6 +48,11 @@ namespace watcher
              */
             virtual ~WatcherRegion();
 
+            /** judge me */
+            bool operator==(const WatcherRegion &other) const;
+
+            /** make me equal */
+            WatcherRegion &operator=(const WatcherRegion &other);
             /**
              * Write an instance of this class as a human readable stream to the otream given
              * @param out the output stream

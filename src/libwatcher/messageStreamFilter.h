@@ -48,6 +48,11 @@ namespace watcher
             MessageStreamFilter();
 
             /**
+             * Clone me.
+             */
+            MessageStreamFilter(const MessageStreamFilter &copyme); 
+
+            /**
              * Death to all humans!
              */
             virtual ~MessageStreamFilter();
@@ -82,6 +87,12 @@ namespace watcher
              */
             void setRegion(const WatcherRegion &region); 
 
+            /** judge me */
+            bool operator==(const MessageStreamFilter &other) const;
+
+            /** make me equal */
+            MessageStreamFilter &operator=(const MessageStreamFilter &other);
+
             /**
              * Write an instance of this class as a human readable stream to the otream given
              * @param out the output stream
@@ -97,16 +108,19 @@ namespace watcher
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            /** Annoying, but the easiest (only?) way to go when using boost::serialize
+             * just pretented these are private for now. Blah.
+             */
+            std::string layer;
+            unsigned int messageType;  
+            WatcherRegion region;
+
         protected:
 
             // noop
 
         private:
             DECLARE_LOGGER();
-
-            std::string layer;
-            unsigned int messageType;  
-            WatcherRegion region;
 
     }; // like a graduating senior
 
@@ -119,7 +133,6 @@ namespace watcher
      * @return reference to the output stream
      */
     std::ostream &operator<<(std::ostream &out, const MessageStreamFilter &messStreamFilter);
-
 }
 
 #endif //  THIS_ONE_TIME_AT_BAND_CAMP____H

@@ -10,6 +10,7 @@ libwatcher_a_include_HEADERS=\
 	message_fwd.h \
 	messageHandler.h \
 	sendMessageHandler.h \
+	messageStreamFilter.h \
 	watcherTypes.h \
 	watcherGlobalFunctions.h \
 	watcherColors.h \
@@ -26,6 +27,8 @@ libwatchermsg_la_include_HEADERS=\
 	gpsMessage.h \
 	labelMessage.h \
 	messageTypesAndVersions.h \
+	messageStreamFilter.h \
+	messageStreamFilterMessage.h \
 	nodePropertiesMessage.h \
 	nodeStatusMessage.h 
 	
@@ -41,6 +44,7 @@ libwatchermsg_la_SOURCES=\
 	gpsMessage.cpp gpsMessage.h \
 	labelMessage.cpp labelMessage.h \
 	messageTypesAndVersions.cpp messageTypesAndVersions.h \
+	messageStreamFilterMessage.h messageStreamFilterMessage.cpp \
 	nodePropertiesMessage.cpp nodePropertiesMessage.h \
 	nodeStatusMessage.cpp nodeStatusMessage.h \
 	playbackTimeRange.cpp playbackTimeRange.h \

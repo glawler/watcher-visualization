@@ -30,6 +30,13 @@ MessageStreamFilter::MessageStreamFilter() :
     TRACE_EXIT();
 }
 
+MessageStreamFilter::MessageStreamFilter(const MessageStreamFilter &copyme)
+{
+    TRACE_ENTER();
+    *this=copyme;
+    TRACE_EXIT();
+}
+
 MessageStreamFilter::~MessageStreamFilter()
 {
     TRACE_ENTER();
@@ -42,6 +49,27 @@ unsigned int MessageStreamFilter::getMessageType() const { return messageType; }
 void MessageStreamFilter::setMessageType(const unsigned int &t) { messageType=t; }
 WatcherRegion MessageStreamFilter::getRegion() const { return region; } 
 void MessageStreamFilter::setRegion(const WatcherRegion &r) { region=r; } 
+
+bool MessageStreamFilter::operator==(const MessageStreamFilter &other) const 
+{
+    TRACE_ENTER();
+    bool retVal=
+        layer==other.layer && 
+        messageType==other.messageType && 
+        region==other.region;
+
+    TRACE_EXIT_RET_BOOL(retVal);
+    return retVal;
+}
+
+MessageStreamFilter &MessageStreamFilter::operator=(const MessageStreamFilter &other) 
+{
+    TRACE_ENTER();
+    layer=other.layer;
+    messageType=other.messageType;
+    region=other.region;
+    TRACE_EXIT();
+}
 
 //virtual 
 std::ostream &MessageStreamFilter::toStream(std::ostream &out) const

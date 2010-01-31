@@ -36,7 +36,19 @@ WatcherRegion::~WatcherRegion()
     TRACE_EXIT();
 }
 
-// virtual 
+
+bool WatcherRegion::operator==(const WatcherRegion &other) const
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+WatcherRegion &WatcherRegion::operator=(const WatcherRegion &other)
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
 std::ostream &WatcherRegion::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
