@@ -4,10 +4,11 @@ CXXFLAGS += -Wno-deprecated
 
 DEFS += -DBOOST_TEST_DYN_LINK
 
-LDADD = $(top_srcdir)/libwatcher/libwatchermsg.la
-LDADD += $(top_srcdir)/libwatcher/libwatcher.a
-LDADD += $(top_srcdir)/util/libwatcherutils.a
-LDADD += @LOGGER_LIBS@
+# LDADD = $(top_srcdir)/libwatcher/libwatchermsg.la
+LIBS += $(top_srcdir)/libwatcher/message.o
+LIBS += $(top_srcdir)/libwatcher/messageTypesAndVersions.o
+LIBS += $(top_srcdir)/util/libwatcherutils.a
+LIBS += @LOGGER_LIBS@
 
 LIBS += $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 
@@ -30,7 +31,8 @@ check_PROGRAMS=\
 	testWatcherGraphNode \
 	testWatcherGraphEdge \
 	testLoadSaveDisplayInfo \
-	testMessageStream
+	testMessageStream \
+	testMessage
 
 TESTS=$(check_PROGRAMS)
 
@@ -49,3 +51,4 @@ testWatcherGraphNode_SOURCES=testWatcherGraphNode.cpp
 testWatcherGraphEdge_SOURCES=testWatcherGraphEdge.cpp
 testLoadSaveDisplayInfo_SOURCES=testLoadSaveDisplayInfo.cpp
 testMessageStream_SOURCES=testMessageStream.cpp
+testMessage_SOURCES=testMessage.cpp
