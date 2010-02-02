@@ -83,7 +83,7 @@ std::ostream &MessageStreamFilter::toStream(std::ostream &out) const
 }
 
 
-std::ostream &operator<<(std::ostream &out, const MessageStreamFilter &messStreamFilter)
+std::ostream &watcher::operator<<(std::ostream &out, const MessageStreamFilter &messStreamFilter)
 {
     return messStreamFilter.operator<<(out);
 }
