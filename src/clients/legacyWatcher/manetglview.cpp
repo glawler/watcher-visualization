@@ -3104,7 +3104,7 @@ void manetGLView::saveConfiguration()
             { "showWallTime", showWallTimeinStatusString }, 
             { "showPlaybackTime", showPlaybackTimeInStatusString },
             { "showPlaybackRange", showPlaybackRangeString },
-            { "showDebugInfo", &showDebugInfo },
+            { "showDebugInfo", showDebugInfo },
             { "autorewind", autorewind }
         };
 
