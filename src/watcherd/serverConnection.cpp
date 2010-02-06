@@ -27,6 +27,7 @@
 #include <libwatcher/speedWatcherMessage.h>
 #include <libwatcher/nodeStatusMessage.h>
 #include <libwatcher/playbackTimeRange.h>
+#include <libwatcher/messageStreamFilterMessage.h>
 
 #include "watcherd.h"
 #include "writeDBMessageHandler.h"
@@ -284,6 +285,25 @@ namespace watcher {
             LOG_WARN("unable to cast to PlaybackTimeRangeMessage");
     }
 
+    void ServerConnection::filter(event::MessagePtr& m)
+    {
+        MessageStreamFilterMessagePtr p (boost::dynamic_pointer_cast<MessageStreamFilterMessage>(m));
+        if (p) { 
+            if (p->applyFilter) { 
+                LOG_DEBUG("Adding message filter: " << p->theFilter);
+                messageStreamFilters.push_back(p->theFilter);
+            }
+            else {
+                LOG_DEBUG("Removing message filter: " << p->theFilter);
+                messageStreamFilters.remove(p->theFilter);
+            }
+            LOG_DEBUG("There are now " << messageStreamFilters.size() << " filters on this stream:"); 
+            BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) 
+                LOG_DEBUG("     " << f); 
+        } else
+            LOG_WARN("unable to cast to MessageStreamFilterMessagePtr");
+    }
+
     bool ServerConnection::dispatch_gui_event(MessagePtr& m)
     {
         static const struct {
@@ -295,6 +315,7 @@ namespace watcher {
             { SEEK_MESSAGE_TYPE, &ServerConnection::seek },
             { SPEED_MESSAGE_TYPE, &ServerConnection::speed },
             { PLAYBACK_TIME_RANGE_MESSAGE_TYPE, &ServerConnection::range },
+            { MESSAGE_STREAM_FILTER_MESSAGE_TYPE, &ServerConnection::filter },
             { UNKNOWN_MESSAGE_TYPE, 0 }
         };
 
@@ -474,6 +495,18 @@ namespace watcher {
     void ServerConnection::sendMessage(MessagePtr msg)
     {
         TRACE_ENTER();
+
+        LOG_DEBUG("messageStreamFilters size in sendMessage: " << messageStreamFilters.size()); 
+        BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) {
+            if (!f.passFilter(msg)) {
+                LOG_DEBUG("Not sending message as it did not pass the current set of message filters"); 
+                TRACE_EXIT();
+                return;
+            }
+            else
+                LOG_DEBUG("Message passes all filters - sending it."); 
+        }
+
         DataMarshaller::NetworkMarshalBuffers outBuffers;
         DataMarshaller::marshalPayload(msg, outBuffers);
 
@@ -494,8 +527,32 @@ namespace watcher {
     void ServerConnection::sendMessage(const std::vector<MessagePtr>& msgs)
     {
         TRACE_ENTER();
+
+        std::vector<MessagePtr> messageList;
+
+        LOG_DEBUG("messageStreamFilters size in sendMessage: " << messageStreamFilters.size()); 
+        BOOST_FOREACH(const MessagePtr m, msgs) { 
+            bool passed=false;
+            BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) 
+                if (f.passFilter(m))  
+                    passed=true;
+
+            if (passed) {  
+                LOG_DEBUG("Message passes all filters - sending it."); 
+                messageList.push_back(m); 
+            }
+            else 
+                LOG_DEBUG("Not sending message as it did not pass the current set of message filters"); 
+        }
+    
+        if (!messageList.size()) { 
+            LOG_DEBUG("No messages passed the filters, sending nothing."); 
+            TRACE_EXIT();
+            return; 
+        }
+
         DataMarshaller::NetworkMarshalBuffers outBuffers;
-        DataMarshaller::marshalPayload(msgs, outBuffers);
+        DataMarshaller::marshalPayload(messageList, outBuffers);
 
         /// FIXME melkins 2004-04-19
         // is it safe to call async_write and async_read from different

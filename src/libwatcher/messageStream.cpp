@@ -24,6 +24,7 @@
 #include "libwatcher/seekWatcherMessage.h"
 #include "libwatcher/speedWatcherMessage.h"
 #include "libwatcher/playbackTimeRange.h"
+#include "libwatcher/messageStreamFilterMessage.h"
 #include "logger.h"
 
 using namespace watcher;
@@ -154,14 +155,24 @@ bool MessageStream::isStreamReadable() const
     return retVal;
 }
 
-bool MessageStream::addMessageFilter(const MessageStreamFilter & /*filter*/)
+bool MessageStream::addMessageFilter(const MessageStreamFilterPtr filter)
 {
     TRACE_ENTER();
-    
-    assert(0);  // filters are not supported yet. 
+    MessageStreamFilterMessagePtr mess(new MessageStreamFilterMessage(*filter));
+    mess->applyFilter=true;
+    bool retVal=connection->sendMessage(mess);
+    TRACE_EXIT_RET_BOOL(retVal); 
+    return retVal;
+}
 
-    TRACE_EXIT_RET("true");
-    return true;
+bool MessageStream::removeMessageFilter(const MessageStreamFilterPtr filter)
+{
+    TRACE_ENTER();
+    MessageStreamFilterMessagePtr mess(new MessageStreamFilterMessage(*filter));
+    mess->applyFilter=false;
+    bool retVal=connection->sendMessage(mess);
+    TRACE_EXIT_RET_BOOL(retVal); 
+    return retVal;
 }
 
 bool MessageStream::getMessageTimeRange() const
@@ -211,7 +222,7 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
         // messagesDropped++;
         // TRACE_EXIT_RET_BOOL(false);
         // return false;
-        usleep(100000);
+        // usleep(100000);
     }
 
     // We don't really add anything yet to a generic watcherdAPI client.

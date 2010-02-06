@@ -27,7 +27,8 @@
 #include <ostream>
 #include <boost/shared_ptr.hpp>
 #include "watcherRegion.h"
-#include "libwatcher/messageTypesAndVersions.h"  // for GUILayer
+#include "messageTypesAndVersions.h"  // for GUILayer
+#include "message_fwd.h"
 #include "declareLogger.h"
 
 namespace watcher
@@ -56,6 +57,12 @@ namespace watcher
              * Death to all humans!
              */
             virtual ~MessageStreamFilter();
+
+            /** Does this message pass this filter?
+             * Returns true if the message does *not* meet any 
+             * of the criteria set in this filter instance.
+             */
+            bool passFilter(const MessagePtr m) const;
 
             /**
              * Returns the current layer of this filter

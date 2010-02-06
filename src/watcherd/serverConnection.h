@@ -39,6 +39,7 @@
 #include "libwatcher/message.h"
 #include "libwatcher/connection.h"
 #include "libwatcher/dataMarshaller.h"
+#include "libwatcher/messageStreamFilter.h"
 
 #include "watcherd_fwd.h"
 #include "serverConnectionFwd.h"
@@ -95,6 +96,7 @@ namespace watcher
             void stop(event::MessagePtr& m);
             void speed(event::MessagePtr& m);
             void range(event::MessagePtr& m);
+            void filter(event::MessagePtr& m);
 
             Watcherd& watcher;
             boost::asio::io_service& io_service_;
@@ -119,6 +121,9 @@ namespace watcher
 
             /// If needed, a network address to map incoming message IDs with.
             boost::asio::ip::address_v4 dataNetwork;
+
+            typedef std::list<MessageStreamFilter> MessageStreamFilterList;
+            MessageStreamFilterList messageStreamFilters;
     };
 
 } // namespace http

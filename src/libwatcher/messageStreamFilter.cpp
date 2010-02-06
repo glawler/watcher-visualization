@@ -17,6 +17,12 @@
  */
 
 #include "messageStreamFilter.h"
+#include "message.h"
+#include "labelMessage.h"
+#include "edgeMessage.h"
+#include "connectivityMessage.h"
+#include "colorMessage.h"
+#include "nodePropertiesMessage.h"
 #include "logger.h"
 
 using namespace watcher;
@@ -69,6 +75,37 @@ MessageStreamFilter &MessageStreamFilter::operator=(const MessageStreamFilter &o
     messageType=other.messageType;
     region=other.region;
     TRACE_EXIT();
+}
+
+bool MessageStreamFilter::passFilter(const MessagePtr m) const
+{
+    TRACE_ENTER();
+    // Just handle message types and layers for now.
+
+    // Really need to make layers a member of a base class...
+    bool retVal=true;
+    switch (m->type)
+    {
+        case LABEL_MESSAGE_TYPE: 
+            retVal=layer==(boost::dynamic_pointer_cast<LabelMessage>(m))->layer; 
+            break;
+        case EDGE_MESSAGE_TYPE: 
+            retVal=layer==(boost::dynamic_pointer_cast<EdgeMessage>(m))->layer; 
+            break;
+        case COLOR_MESSAGE_TYPE: 
+            retVal=layer==(boost::dynamic_pointer_cast<ColorMessage>(m))->layer; 
+            break;
+        case CONNECTIVITY_MESSAGE_TYPE: 
+            retVal=layer==(boost::dynamic_pointer_cast<ConnectivityMessage>(m))->layer; 
+            break;
+        case NODE_PROPERTIES_MESSAGE_TYPE: 
+            retVal=layer==(boost::dynamic_pointer_cast<NodePropertiesMessage>(m))->layer; 
+            break;
+        default: 
+            break;
+    }
+    TRACE_EXIT_RET_BOOL(retVal);
+    return retVal;
 }
 
 //virtual 

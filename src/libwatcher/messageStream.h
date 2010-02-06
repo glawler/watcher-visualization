@@ -147,9 +147,14 @@ namespace watcher
          * Once set, the stream will only contist of messages which pass the filter. More than
          * one filter can be added and the filters are additive. 
          * @param filter the filter to apply to the stream. 
-         * @retval true
+         * @retval true if watcherd notifed of new filter
          */
-        bool addMessageFilter(const MessageStreamFilter &filter);
+        bool addMessageFilter(const MessageStreamFilterPtr filter);
+
+        /** 
+         * This method removes a previously applied filter
+         */
+        bool removeMessageFilter(const MessageStreamFilterPtr filter);
 
         /**
          * Causes the server to respond with a PlaybackTimeRange message at some point in the 

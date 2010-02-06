@@ -1431,6 +1431,16 @@ void manetGLView::connectStream()
             messageStream->startStream();
             messageStream->getMessageTimeRange();
 
+            // Tell the watcherd that we want/don't want messages for this layer.
+            BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
+                MessageStreamFilterPtr f(new MessageStreamFilter);
+                f->setLayer(llip->layer);
+                if (llip->active)
+                    messageStream->addMessageFilter(f);
+                else
+                    messageStream->removeMessageFilter(f);
+            }
+
             // spawn work threads
             if (!checkIOThread) 
                 checkIOThread=new boost::thread(boost::bind(&manetGLView::checkIO, this));
@@ -1453,8 +1463,7 @@ void manetGLView::checkIO()
     while(true) {
 
         MessagePtr message;
-        while(messageStream && messageStream->getNextMessage(message))
-        {
+        while(messageStream && messageStream->getNextMessage(message)) {
             static unsigned long long messageCount=0;
             LOG_DEBUG("Got message number " <<  ++messageCount << " : " << *message);
 
@@ -1482,8 +1491,7 @@ void manetGLView::checkIO()
             }
 
             // DataPoint data is handled directly by the scrolling graph thing.
-            if (message->type==DATA_POINT_MESSAGE_TYPE)
-            {
+            if (message->type==DATA_POINT_MESSAGE_TYPE) {
                 WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
                 sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
             }
@@ -1507,8 +1515,7 @@ void manetGLView::checkIO()
                 default: break;
             }
 
-            if (!layer.empty())
-            {
+            if (!layer.empty()) {
                 LOG_DEBUG("Seeing if " << layer << " is known to us or not."); 
                 bool found=false;
                 BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
@@ -1526,8 +1533,8 @@ void manetGLView::checkIO()
                 }
             }
         }
-        updateGL();  // redraw
-        usleep(100000);
+        // updateGL();  // redraw
+        // usleep(100000);
     }
 
     TRACE_EXIT();
@@ -2663,16 +2670,23 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
     GUILayer layer=layerName.toStdString();
 
     bool found=false;
-    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-    {
-        if (llip->layer==layer)
-        {
+    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
+        if (llip->layer==layer) {
             llip->active=turnOn;
             found=true;
+
+            if (messageStream) {
+                // Tell the watcherd that we want/don't want messages for this layer.
+                MessageStreamFilterPtr f(new MessageStreamFilter);
+                f->setLayer(llip->layer);
+                if (turnOn)
+                    messageStream->addMessageFilter(f);
+                else
+                    messageStream->removeMessageFilter(f);
+            }
         }
     }
-    if(!found)
-    {
+    if(!found) {
         LOG_DEBUG("Adding new layer to known layers: " << layer); 
         LayerListItemPtr item(new LayerListItem);
         item->layer=layer;
@@ -3235,7 +3249,7 @@ void manetGLView::pausePlayback()
         return;
     }
     playbackPaused=true;
-    messageStream->clearMessageCache();
+//    messageStream->clearMessageCache();
     messageStream->stopStream(); 
     TRACE_EXIT();
 }
