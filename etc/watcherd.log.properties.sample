@@ -4,9 +4,9 @@
 #
 # log4j.rootLogger=fatal, flog, stdout
 # log4j.rootLogger=error, flog, stdout
-# log4j.rootLogger=warn, flog, stdout
+log4j.rootLogger=warn, flog, stdout
 # log4j.rootLogger=info, flog, stdout
-log4j.rootLogger=debug, flog, stdout
+# log4j.rootLogger=debug, flog, stdout
 # log4j.rootLogger=trace, flog, stdout
 
 #
@@ -22,7 +22,7 @@ log4j.rootLogger=debug, flog, stdout
 # log4j.logger.MessageHandler=trace
 # log4j.logger.MessageStream=trace
 # log4j.logger.MessageStreamFilter=trace
-# log4j.logger.ServerConnection=trace
+# log4j.logger.Connection.ServerConnection=trace
 # log4j.logger.Server=trace
 # log4j.logger.MessageHandler.ServerMessageHandler=trace
 # log4j.logger.SingletonConfig=trace
@@ -32,13 +32,13 @@ log4j.rootLogger=debug, flog, stdout
 # log4j.logger.DisplayInfo.LayerDisplayInfo=trace
 # log4j.logger.DisplayInfo.NodeDisplayInfo=trace
 # log4j.logger.DisplayInfo.EdgeDisplayInfo=trace
-log4j.logger.DisplayInfo.LabelDisplayInfo=trace
-log4j.logger.DisplayInfo.LabelDisplayInfo.FloatingMessageLabel=trace
+# log4j.logger.DisplayInfo.LabelDisplayInfo=trace
+# log4j.logger.DisplayInfo.LabelDisplayInfo.FloatingMessageLabel=trace
 
 #
 # set levels for libwatcher module
 #
-log4j.logger.Message.ColorMessage=fatal;
+# log4j.logger.Message.ColorMessage=fatal;
 # log4j.logger.Message.DataRequestMessage=trace
 # log4j.logger.Message.EdgeMessage=trace
 # log4j.logger.Message.GPSMessage=trace
@@ -66,10 +66,10 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} [%-5p] (%F:%L) - %m%
 #
 # flog is set to log to a file, not appended
 #
-log4j.appender.flog=org.apache.log4j.FileAppender
-log4j.appender.flog.layout=org.apache.log4j.PatternLayout
-log4j.appender.flog.file=watcher.log
-log4j.appender.flog.append=false
-log4j.appender.flog.layout.ConversionPattern=%d{ABSOLUTE} [%t] %-5p %c (%-12F:%-4L) - %m%n
+# log4j.appender.flog=org.apache.log4j.FileAppender
+# log4j.appender.flog.layout=org.apache.log4j.PatternLayout
+# log4j.appender.flog.file=watcher.log
+# log4j.appender.flog.append=false
+# log4j.appender.flog.layout.ConversionPattern=%d{ABSOLUTE} [%t] %-5p %c (%-12F:%-4L) - %m%n
 
 
