@@ -209,6 +209,7 @@ AC_CONFIG_FILES([ \
     libwatcher/Makefile \
     libwatcher/watcher.pc \
     libwatcher/watchermsg.pc \
+    util/watcherutils.pc \
     libwatcher/test/Makefile \
     clients/Makefile \
     clients/routeFeeder/Makefile \
