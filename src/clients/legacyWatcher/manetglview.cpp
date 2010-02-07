@@ -941,6 +941,7 @@ manetGLView::manetGLView(QWidget *parent) :
     streamRate(1.0),
     playbackPaused(false),
     autorewind(false), 
+    messageStreamFiltering(true), 
     sliderPressed(false),
     currentMessageTimestamp(0),
     playbackRangeEnd(0),
@@ -1120,7 +1121,8 @@ bool manetGLView::loadConfiguration()
             { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
             { "showPlaybackRange", true, &showPlaybackRangeString },
             { "showDebugInfo", false, &showDebugInfo },
-            { "autorewind", true, &autorewind }
+            { "autorewind", true, &autorewind },
+            { "messageStreamFiltering", true, &messageStreamFiltering }
         }; 
         for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
         {
@@ -1135,6 +1137,7 @@ bool manetGLView::loadConfiguration()
         emit monochromeToggled(monochromeMode);
         emit backgroundImageToggled(backgroundImage);
         emit loopPlaybackToggled(autorewind);
+        emit enableStreamFiltering(messageStreamFiltering);
         emit checkPlaybackTime(showPlaybackTimeInStatusString);
         emit checkPlaybackRange(showPlaybackRangeString);
         emit checkWallTime(showWallTimeinStatusString);
@@ -1432,13 +1435,15 @@ void manetGLView::connectStream()
             messageStream->getMessageTimeRange();
 
             // Tell the watcherd that we want/don't want messages for this layer.
-            BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
-                MessageStreamFilterPtr f(new MessageStreamFilter);
-                f->setLayer(llip->layer);
-                if (llip->active)
-                    messageStream->addMessageFilter(f);
-                else
-                    messageStream->removeMessageFilter(f);
+            if (messageStreamFiltering) { 
+                BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
+                    MessageStreamFilterPtr f(new MessageStreamFilter);
+                    f->setLayer(llip->layer);
+                    if (llip->active)
+                        messageStream->addMessageFilter(f);
+                    else
+                        messageStream->removeMessageFilter(f);
+                }
             }
 
             // spawn work threads
@@ -2583,6 +2588,29 @@ void manetGLView::toggleNodeSelectedForGraph(unsigned int)
     TRACE_EXIT();
 }
 
+void manetGLView::streamFilteringEnabled(bool isEnabled) 
+{
+    TRACE_ENTER();
+    LOG_DEBUG("Change is stream filtering. Filtering is now " << (isEnabled?"enabled":"disabled") << ".");
+
+    messageStreamFiltering=isEnabled;
+
+    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
+        if (messageStream) {
+            messageStream->enableFiltering(isEnabled); 
+            MessageStreamFilterPtr f(new MessageStreamFilter);
+            f->setLayer(llip->layer);
+            // If enabling filtering turn on all currently active filters
+            // else remove them all
+            if (isEnabled && llip->active)
+                messageStream->addMessageFilter(f);
+            else
+                messageStream->removeMessageFilter(f);
+        }
+    }
+    TRACE_EXIT(); 
+}
+
 void manetGLView::scrollingGraphActivated(QString graphName)
 {
     TRACE_ENTER();
@@ -2675,7 +2703,7 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
             llip->active=turnOn;
             found=true;
 
-            if (messageStream) {
+            if (messageStreamFiltering && messageStream) {
                 // Tell the watcherd that we want/don't want messages for this layer.
                 MessageStreamFilterPtr f(new MessageStreamFilter);
                 f->setLayer(llip->layer);
@@ -3119,7 +3147,8 @@ void manetGLView::saveConfiguration()
             { "showPlaybackTime", showPlaybackTimeInStatusString },
             { "showPlaybackRange", showPlaybackRangeString },
             { "showDebugInfo", showDebugInfo },
-            { "autorewind", autorewind }
+            { "autorewind", autorewind },
+            { "messageStreamFiltering", messageStreamFiltering }
         };
 
         for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)

@@ -64,7 +64,8 @@ namespace watcher {
         write_strand_(io_service),
         conn_type(unknown),
         isPlaying_(false), isLive_(true),
-        dataNetwork(0)
+        dataNetwork(0),
+        messageStreamFilterEnabled(false)
     {
         TRACE_ENTER();
         libconfig::Config &cfg=SingletonConfig::instance();
@@ -289,6 +290,7 @@ namespace watcher {
     {
         MessageStreamFilterMessagePtr p (boost::dynamic_pointer_cast<MessageStreamFilterMessage>(m));
         if (p) { 
+            messageStreamFilterEnabled=p->enableAllFiltering;
             if (p->applyFilter) { 
                 LOG_DEBUG("Adding message filter: " << p->theFilter);
                 messageStreamFilters.push_back(p->theFilter);
@@ -496,15 +498,16 @@ namespace watcher {
     {
         TRACE_ENTER();
 
-        LOG_DEBUG("messageStreamFilters size in sendMessage: " << messageStreamFilters.size()); 
-        BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) {
-            if (!f.passFilter(msg)) {
-                LOG_DEBUG("Not sending message as it did not pass the current set of message filters"); 
-                TRACE_EXIT();
-                return;
+        if (!messageStreamFilterEnabled) {
+            BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) {
+                if (!f.passFilter(msg)) {
+                    LOG_DEBUG("Not sending message as it did not pass the current set of message filters"); 
+                    TRACE_EXIT();
+                    return;
+                }
+                else
+                    LOG_DEBUG("Message passes all filters - sending it."); 
             }
-            else
-                LOG_DEBUG("Message passes all filters - sending it."); 
         }
 
         DataMarshaller::NetworkMarshalBuffers outBuffers;
@@ -530,25 +533,29 @@ namespace watcher {
 
         std::vector<MessagePtr> messageList;
 
-        LOG_DEBUG("messageStreamFilters size in sendMessage: " << messageStreamFilters.size()); 
-        BOOST_FOREACH(const MessagePtr m, msgs) { 
-            bool passed=false;
-            BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) 
-                if (f.passFilter(m))  
-                    passed=true;
-
-            if (passed) {  
-                LOG_DEBUG("Message passes all filters - sending it."); 
-                messageList.push_back(m); 
+        if (!messageStreamFilterEnabled)
+            messageList=msgs;
+        else {
+            BOOST_FOREACH(const MessagePtr m, msgs) { 
+                bool passed=false;
+                // Need to figure out if filters are ANDed or ORed or something else
+                // for now if it passes any - it's in.
+                BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) 
+                    if (f.passFilter(m))  
+                        passed=true;
+                if (passed) {  
+                    LOG_DEBUG("Message passes all filters - sending it."); 
+                    messageList.push_back(m); 
+                }
+                else 
+                    LOG_DEBUG("Not sending message as it did not pass the current set of message filters"); 
             }
-            else 
-                LOG_DEBUG("Not sending message as it did not pass the current set of message filters"); 
-        }
-    
-        if (!messageList.size()) { 
-            LOG_DEBUG("No messages passed the filters, sending nothing."); 
-            TRACE_EXIT();
-            return; 
+
+            if (!messageList.size()) { 
+                LOG_DEBUG("No messages passed the filters, sending nothing."); 
+                TRACE_EXIT();
+                return; 
+            }
         }
 
         DataMarshaller::NetworkMarshalBuffers outBuffers;

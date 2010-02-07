@@ -44,6 +44,9 @@ namespace watcher {
                 /** If true, thent he filter is applied, else it is removed. */
                 bool applyFilter;
 
+                /** If true, enable all filtering, else disable all filtering */
+                bool enableAllFiltering;
+
                 /** Let there be default light */
                 MessageStreamFilterMessage(); 
 

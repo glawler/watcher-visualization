@@ -103,6 +103,8 @@ public slots:
 
         void saveConfiguration();
 
+        void streamFilteringEnabled(bool isEnabled); 
+
 signals:
         void positionReset();
 
@@ -129,6 +131,8 @@ signals:
 
         // Emitted when view->backgroun image should be enabled/disabled.
         void enableBackgroundImage(bool);
+
+        void enableStreamFiltering(bool); 
 
     protected:
         DECLARE_LOGGER();
@@ -176,6 +180,7 @@ signals:
         float streamRate; 
         bool playbackPaused;
         bool autorewind;
+        bool messageStreamFiltering;
         bool sliderPressed;
 
         watcher::event::GPSMessage gpsDataFormat;

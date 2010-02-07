@@ -156,6 +156,9 @@ namespace watcher
          */
         bool removeMessageFilter(const MessageStreamFilterPtr filter);
 
+        /** Turns filtering on or off. Returns previous value */
+        bool enableFiltering(bool enable); 
+
         /**
          * Causes the server to respond with a PlaybackTimeRange message at some point in the 
          * near future. 
@@ -229,6 +232,7 @@ namespace watcher
         typedef MessageStreamFilterList::iterator MessageStreamFilterListIterator;
         typedef MessageStreamFilterList::const_iterator MessageStreamFilterListConstIterator;
         MessageStreamFilterList messageStreamFilters;
+        bool messageFilteringEnabled;
 
         float streamRate;
         Timestamp streamStartTime;

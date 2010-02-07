@@ -160,6 +160,7 @@ bool MessageStream::addMessageFilter(const MessageStreamFilterPtr filter)
     TRACE_ENTER();
     MessageStreamFilterMessagePtr mess(new MessageStreamFilterMessage(*filter));
     mess->applyFilter=true;
+    mess->enableAllFiltering=messageFilteringEnabled;
     bool retVal=connection->sendMessage(mess);
     TRACE_EXIT_RET_BOOL(retVal); 
     return retVal;
@@ -170,8 +171,14 @@ bool MessageStream::removeMessageFilter(const MessageStreamFilterPtr filter)
     TRACE_ENTER();
     MessageStreamFilterMessagePtr mess(new MessageStreamFilterMessage(*filter));
     mess->applyFilter=false;
+    mess->enableAllFiltering=messageFilteringEnabled;
     bool retVal=connection->sendMessage(mess);
     TRACE_EXIT_RET_BOOL(retVal); 
+    return retVal;
+}
+bool MessageStream::enableFiltering(bool enable) {
+    bool retVal=messageFilteringEnabled;
+    messageFilteringEnabled=enable;
     return retVal;
 }
 

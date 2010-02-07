@@ -36,7 +36,8 @@ namespace watcher {
 
         MessageStreamFilterMessage::MessageStreamFilterMessage() : 
             Message(MESSAGE_STREAM_FILTER_MESSAGE_TYPE, MESSAGE_STREAM_FILTER_MESSAGE_VERSION),
-            applyFilter(true)
+            applyFilter(true),
+            enableAllFiltering(true)
         {
             TRACE_ENTER();
             TRACE_EXIT();
@@ -45,6 +46,7 @@ namespace watcher {
         MessageStreamFilterMessage::MessageStreamFilterMessage(const MessageStreamFilter &filter) : 
             Message(MESSAGE_STREAM_FILTER_MESSAGE_TYPE, MESSAGE_STREAM_FILTER_MESSAGE_VERSION),
             applyFilter(true),
+            enableAllFiltering(true),
             theFilter(filter)
         {
             TRACE_ENTER();
@@ -54,6 +56,7 @@ namespace watcher {
         MessageStreamFilterMessage::MessageStreamFilterMessage(const MessageStreamFilterMessage &other) : 
             Message(other),
             applyFilter(other.applyFilter),
+            enableAllFiltering(other.enableAllFiltering), 
             theFilter(other.theFilter) 
         {
             TRACE_ENTER();
@@ -67,6 +70,7 @@ namespace watcher {
             bool retVal = 
                 Message::operator==(other) && 
                 applyFilter==other.applyFilter &&
+                enableAllFiltering==other.enableAllFiltering && 
                 theFilter==other.theFilter;
 
             TRACE_EXIT_RET(retVal);
@@ -79,6 +83,7 @@ namespace watcher {
 
             Message::operator=(other);
             applyFilter=other.applyFilter;
+            enableAllFiltering=other.enableAllFiltering;
             theFilter=other.theFilter;
 
             TRACE_EXIT();
@@ -92,6 +97,7 @@ namespace watcher {
 
             Message::toStream(out);
             out << "(" << (applyFilter?"apply":"remove") << " filter) ";
+            out << " filtering: " << (enableAllFiltering?"on":"off"); 
             out << " filter: " << theFilter;
 
             TRACE_EXIT();
@@ -109,6 +115,7 @@ namespace watcher {
             TRACE_ENTER();
             ar & boost::serialization::base_object<Message>(*this);
             ar & applyFilter;
+            ar & enableAllFiltering;
             ar & theFilter.layer;
             ar & theFilter.messageType;
             // region is currently data free, so don't bother serializing

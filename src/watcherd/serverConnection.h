@@ -124,6 +124,7 @@ namespace watcher
 
             typedef std::list<MessageStreamFilter> MessageStreamFilterList;
             MessageStreamFilterList messageStreamFilters;
+            bool messageStreamFilterEnabled; 
     };
 
 } // namespace http
