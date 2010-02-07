@@ -17,39 +17,13 @@
  */
 
 /** 
- * @file watcherMainWindow.h
+ * @file watcherVersion.h
  * @author Geoff Lawler <geoff.lawler@cobham.com>
- * @date 2009-07-15 
+ * @date 2010-02-07
  */
-#ifndef WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
-#define WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
+#ifndef WATCHER_VERS_HEADER_H_SADADSADSDASD
+#define WATCHER_VERS_HEADER_H_SADADSADSDASD
 
-#include <string>
-#include <QtGui/QMainWindow>
-#include "declareLogger.h"
-#include "ui_watcher.h"
+#define LEGACY_WATCHER_VERSION_STRING "0.6.0"
 
-namespace watcher
-{
-    class WatcherMainWindow : public QMainWindow
-    {
-        Q_OBJECT
-
-        public:
-
-            explicit WatcherMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-            ~WatcherMainWindow(); 
-
-            public slots:
-
-            signals:
-
-        protected:
-
-        private:
-
-                DECLARE_LOGGER();
-    };
-}
-
-#endif // WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
+#endif //  WATCHER_VERS_HEADER_H_SADADSADSDASD

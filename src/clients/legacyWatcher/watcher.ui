@@ -311,15 +311,10 @@ p, li { white-space: pre-wrap; }
     <addaction name="separator"/>
     <addaction name="actionFullscreen"/>
     <addaction name="actionNormalscreen"/>
-    <addaction name="actionKeyboardShortcuts"/>
-    <addaction name="actionSetGPSScale"/>
-    <addaction name="actionSetEdgeWidth"/>
-    <addaction name="actionStreamFiltering"/>
     <addaction name="separator"/>
     <addaction name="action3DNodes"/>
     <addaction name="actionMonochrome"/>
     <addaction name="actionBackgroundImage"/>
-    <addaction name="actionLoopPlayback"/>
     <addaction name="separator"/>
     <addaction name="actionWallTime"/>
     <addaction name="actionPlaybackRange"/>
@@ -330,9 +325,28 @@ p, li { white-space: pre-wrap; }
      <string>&amp;Graph</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionKeyboardShortcuts"/>
+    <addaction name="separator"/>
+    <addaction name="action_About"/>
+   </widget>
+   <widget class="QMenu" name="menuConfiguration">
+    <property name="title">
+     <string>&amp;Configuration</string>
+    </property>
+    <addaction name="actionSetGPSScale"/>
+    <addaction name="actionSetEdgeWidth"/>
+    <addaction name="actionStreamFiltering"/>
+    <addaction name="actionLoopPlayback"/>
+   </widget>
    <addaction name="menuLayers"/>
    <addaction name="menuView"/>
    <addaction name="menuGraph"/>
+   <addaction name="menuConfiguration"/>
+   <addaction name="menu_Help"/>
   </widget>
   <action name="actionFullscreen">
    <property name="checkable">
@@ -350,7 +364,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>&amp;3D Nodes</string>
@@ -384,7 +398,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>&amp;Background Image</string>
@@ -431,7 +445,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSetEdgeWidth">
    <property name="text">
-    <string>Set Edge Width</string>
+    <string>Set &amp;Edge Width</string>
    </property>
   </action>
   <action name="actionLoopPlayback">
@@ -439,7 +453,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Loop Playback</string>
+    <string>&amp;Loop Playback</string>
    </property>
   </action>
   <action name="actionStreamFiltering">
@@ -450,7 +464,12 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Stream Filtering</string>
+    <string>Stream &amp;Filtering</string>
+   </property>
+  </action>
+  <action name="action_About">
+   <property name="text">
+    <string>&amp;About</string>
    </property>
   </action>
  </widget>
@@ -1017,6 +1036,22 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>464</x>
      <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_About</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>spawnAboutBox()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>

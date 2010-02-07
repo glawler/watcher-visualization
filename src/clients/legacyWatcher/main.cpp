@@ -27,7 +27,6 @@
 #include <GL/glut.h>
 #include <getopt.h>
 
-#include "ui_watcher.h"
 #include "watcherMainWindow.h"
 #include "watcherScrollingGraphControl.h"
 
@@ -84,6 +83,7 @@ int main(int argc, char *argv[])
 
     QApplication::setColorSpec(QApplication::CustomColor);
     QApplication app(argc, argv);
+
     WatcherMainWindow *window = new WatcherMainWindow;
     Ui::MainWindow ui;
     ui.setupUi(window);

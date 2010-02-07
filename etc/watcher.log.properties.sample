@@ -17,6 +17,7 @@ log4j.rootLogger=debug, flog, stdout
 # log4j.logger.WatcherScrollingGraphControl=trace
 # log4j.logger.WatcherPropertyData=trace
 # log4j.logger.WatcherGraph=trace
+# log4j.logger.WatcherAboutDialog=fatal
 
 # libwatcher
 # log4j.logger.DataMarshaller=info

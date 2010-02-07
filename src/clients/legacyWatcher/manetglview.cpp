@@ -35,6 +35,7 @@
 #include <libwatcher/seekWatcherMessage.h>  // for epoch, eof
 #include <libwatcher/playbackTimeRange.h>  // for epoch, eof
 
+#include "watcherAboutDialog.h"
 #include "manetglview.h"
 #include "watcherScrollingGraphControl.h"
 #include "singletonConfig.h"
@@ -2301,6 +2302,14 @@ void manetGLView::showKeyboardShortcuts()
     // info.setText(QString(help)); 
     // info.show();
     QMessageBox::information(this, tr("Keyboard Shortcuts"), help);
+    TRACE_EXIT();
+}
+
+void manetGLView::spawnAboutBox()
+{
+    TRACE_ENTER();
+    WatcherAboutDialog *d = new WatcherAboutDialog;
+    d->show();
     TRACE_EXIT();
 }
 

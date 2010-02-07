@@ -17,28 +17,27 @@
  */
 
 /** 
- * @file watcherMainWindow.h
+ * @file watcherAbourDialog.h
  * @author Geoff Lawler <geoff.lawler@cobham.com>
- * @date 2009-07-15 
+ * @date 2010-02-07
  */
-#ifndef WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
-#define WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
+#ifndef SOTHEN_WHATS_ALL_THIS_ABOUT_THE_WATCHER_H
+#define SOTHEN_WHATS_ALL_THIS_ABOUT_THE_WATCHER_H
 
-#include <string>
-#include <QtGui/QMainWindow>
+#include <QtGui/QDialog>
+#include "ui_aboutDialog.h"
 #include "declareLogger.h"
-#include "ui_watcher.h"
 
 namespace watcher
 {
-    class WatcherMainWindow : public QMainWindow
+    class WatcherAboutDialog : public QDialog, public Ui::AboutDialog
     {
         Q_OBJECT
 
         public:
 
-            explicit WatcherMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-            ~WatcherMainWindow(); 
+            explicit WatcherAboutDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+            ~WatcherAboutDialog(); 
 
             public slots:
 
@@ -52,4 +51,4 @@ namespace watcher
     };
 }
 
-#endif // WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
+#endif // SOTHEN_WHATS_ALL_THIS_ABOUT_THE_WATCHER_H

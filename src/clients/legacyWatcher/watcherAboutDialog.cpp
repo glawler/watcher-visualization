@@ -17,39 +17,32 @@
  */
 
 /** 
- * @file watcherMainWindow.h
+ * @file watcherMainWindow.cpp
  * @author Geoff Lawler <geoff.lawler@cobham.com>
  * @date 2009-07-15 
  */
-#ifndef WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
-#define WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
+#include "watcherAboutDialog.h"
+#include "legacyWatcherVersion.h"
+#include "logger.h"
 
-#include <string>
-#include <QtGui/QMainWindow>
-#include "declareLogger.h"
-#include "ui_watcher.h"
+using namespace watcher;
+using namespace std;
 
-namespace watcher
+INIT_LOGGER(WatcherAboutDialog, "WatcherAboutDialog"); 
+
+WatcherAboutDialog::WatcherAboutDialog(QWidget *parent, Qt::WindowFlags f) :
+    QDialog(parent, f)
 {
-    class WatcherMainWindow : public QMainWindow
-    {
-        Q_OBJECT
-
-        public:
-
-            explicit WatcherMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-            ~WatcherMainWindow(); 
-
-            public slots:
-
-            signals:
-
-        protected:
-
-        private:
-
-                DECLARE_LOGGER();
-    };
+    TRACE_ENTER();
+    setupUi(this);
+    QString ver("Version: "); 
+    ver+=LEGACY_WATCHER_VERSION_STRING;
+    label_Version->setText(ver); 
+    TRACE_EXIT();
 }
 
-#endif // WATRCHER_AMINE_WAINFODW_YOU_BETCHA_H
+WatcherAboutDialog::~WatcherAboutDialog()
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}

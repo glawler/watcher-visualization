@@ -101,6 +101,8 @@ public slots:
         void sliderMovedInGUI(int newVal);
         void sliderPressedInGUI();
 
+        void spawnAboutBox(); 
+
         void saveConfiguration();
 
         void streamFilteringEnabled(bool isEnabled); 

@@ -54,7 +54,9 @@ HEADERS += \
     watcherMainWindow.h \
     watcherScrollingGraphControl.h
 
-FORMS += watcher.ui
+FORMS += \
+    watcher.ui \
+    aboutDialog.ui
 
 SOURCES += \
     backgroundImage.cpp \
