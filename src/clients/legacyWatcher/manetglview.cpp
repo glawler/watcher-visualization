@@ -1434,6 +1434,7 @@ void manetGLView::connectStream()
             messageStream->setStreamTimeStart(playbackStartTime);
             messageStream->startStream();
             messageStream->getMessageTimeRange();
+            messageStream->enableFiltering(messageStreamFiltering);
 
             // Tell the watcherd that we want/don't want messages for this layer.
             if (messageStreamFiltering) { 
@@ -2600,7 +2601,7 @@ void manetGLView::toggleNodeSelectedForGraph(unsigned int)
 void manetGLView::streamFilteringEnabled(bool isEnabled) 
 {
     TRACE_ENTER();
-    LOG_DEBUG("Change is stream filtering. Filtering is now " << (isEnabled?"enabled":"disabled") << ".");
+    LOG_DEBUG("Change in stream filtering. Filtering is now " << (isEnabled?"enabled":"disabled") << ".");
 
     messageStreamFiltering=isEnabled;
 
