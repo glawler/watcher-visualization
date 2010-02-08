@@ -34,6 +34,7 @@ using namespace libconfig;
 option Options[] = {
     { "help", 0, NULL, 'h' },
     { "config", 1, NULL, 'c' },
+    { "database", 1, NULL, 'd' },
     { "read-only", 1, NULL, 'r' },
     { 0, 0, NULL, 0 }
 };
@@ -43,6 +44,7 @@ void usage(const char *progName, bool exitp)
     cout << "Usage: " << basename(progName) << " [-c config filename]" << endl;
     cout << "Args: " << endl; 
     cout << "   -h, show this messsage and exit." << endl; 
+    cout << "   -d database, use this event database when running watcherd" << endl; 
     cout << "   -c configfile - If not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
     cout << "   -r, --read-only - do not write events to the database." << endl;
     cout << "If a configuration file is not found on startup, a default one will be created, used, and saved on program exit." << endl;
@@ -59,13 +61,17 @@ int main(int argc, char* argv[])
 
     int i;
     bool readOnly = false;
-    while ((i = getopt_long(argc, argv, "hc:r", Options, NULL)) != -1) {
+    std::string dbPath;
+    while ((i = getopt_long(argc, argv, "hc:d:r", Options, NULL)) != -1) {
         switch (i) {
             case 'c':
                 //handled below
                 break;
             case 'r':
                 readOnly = true;
+                break;
+            case 'd':
+                dbPath=string(optarg);
                 break;
             default:
                 usage(argv[0], true); 
@@ -98,7 +104,6 @@ int main(int argc, char* argv[])
     string address("glory");
     string port("8095");
     size_t numThreads=8;
-    std::string dbPath("event.db");
 
     if (!config.lookupValue("server", address))
     {
@@ -121,12 +126,15 @@ int main(int argc, char* argv[])
            config.getRoot().add("serverThreadNum", libconfig::Setting::TypeInt)=static_cast<int>(numThreads);
     }
 
-    if (!config.lookupValue("databasePath", dbPath))
+    std::string tmpDBPath("event.db"); 
+    if (!config.lookupValue("databasePath", tmpDBPath))
     {
         LOG_INFO("'databasePath' not found in the configuration file, using default: " << dbPath
                 << " and adding this to the configuration file.");
-           config.getRoot().add("databasePath", libconfig::Setting::TypeString)=dbPath;
+           config.getRoot().add("databasePath", libconfig::Setting::TypeString)=tmpDBPath;
     }
+    if (dbPath.size())  
+        config.getRoot()["databasePath"]=dbPath;
 
     WatcherdPtr theWatcherDaemon(new Watcherd(readOnly));
     try
