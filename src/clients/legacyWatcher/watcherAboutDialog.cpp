@@ -37,6 +37,9 @@ WatcherAboutDialog::WatcherAboutDialog(QWidget *parent, Qt::WindowFlags f) :
     setupUi(this);
     QString ver("Version: "); 
     ver+=LEGACY_WATCHER_VERSION_STRING;
+    ver+=" (";
+    ver+=LEGACY_WATCHER_VERSION_DATE_STRING;
+    ver+=")";
     label_Version->setText(ver); 
     TRACE_EXIT();
 }
