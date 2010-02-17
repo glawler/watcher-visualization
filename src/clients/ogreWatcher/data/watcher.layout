@@ -7,10 +7,12 @@
             <Property Name="TitlebarEnabled" Value="false" />
             <Property Name="CloseButtonEnabled" Value="False" />
 
+               <!--
 		<Window Type="TaharezLook/Button" Name="cmdFitToWindow">
 			<Property Name="Text" Value="Fit to Window" />
-       		<Property Name="UnifiedAreaRect" Value="{{0.2,0},{0.2,0},{0.4,0},{0.8,0}}" />
+       		<Property Name="UnifiedAreaRect" Value="{{0.2,0},{0.2,0},{0.55,0},{0.8,0}}" />
         </Window>
+        -->
 
 		<Window Type="TaharezLook/Button" Name="cmdQuit">
 			<Property Name="Text" Value="Quit" />
