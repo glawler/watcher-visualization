@@ -1389,38 +1389,49 @@ QSize manetGLView::sizeHint() const
     return retVal;
 }
 
+// Values figure out by hand using Number and shift keys.
+static GLfloat matShine=0.6;
+static GLfloat specReflection[] = { 0.05, 0.05, 0.05, 1.0f };
+static GLfloat globalAmbientLight[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+static GLfloat posLight0[]={ 50.0f, 50.0f, 000.0f, 1.0f };
+static GLfloat ambLight0[]={ 0.25, 0.25, 0.25, 1.0f };
+static GLfloat specLight0[]={ 0.1f, 0.1f, 0.1f, 1.0f };
+static GLfloat diffLight0[]={ 0.05, 0.05, 0.05, 1.0f };
+
 void manetGLView::initializeGL()
 {
+    TRACE_ENTER();
+
     TRACE_ENTER();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE); 
+    
+    glEnable(GL_TEXTURE_2D);
+
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientLight);
 
     glShadeModel(GL_SMOOTH); 
+    // glShadeModel(GL_FLAT); 
 
     // LIGHT0
-    GLfloat posLight0[]={ 50.0f, 50.0f, 000.0f, 1.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, posLight0);
-
-    GLfloat ambLight0[]={ 0.0, 0.0, 0.0, 1.0 };
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambLight0); 
-
-    GLfloat specLight0[]={ 1.0, 1.0, 1.0, 1.0 };
     glLightfv(GL_LIGHT0, GL_SPECULAR, specLight0);
-
-    GLfloat diffLight0[]= { 1.0, 1.0, 1.0, 1.0 }; 
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight0);
-
-    GLfloat ambLightDef[]={0.1,0.1,0.1,1.0}; // OPenGL's default is: 0.2,0.2,0.2,1
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambLightDef); 
 
     glEnable(GL_LIGHTING); 
     glEnable(GL_LIGHT0); 
 
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_COLOR_MATERIAL);
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
+    glMaterialf(GL_FRONT, GL_SHININESS, matShine);
+
+    TRACE_EXIT();
 
     TRACE_EXIT();
 }
@@ -1607,8 +1618,10 @@ void manetGLView::paintGL()
     if (!messageStream)
         drawNotConnectedState();
     else {
-        boost::lock_guard<boost::mutex> l(graphMutex);
-        drawManet();
+        {
+            boost::lock_guard<boost::mutex> l(graphMutex);
+            drawManet();
+        }
         
         // drawStatusString uses QPainter so must be called 
         // after all openGL calls
@@ -1630,6 +1643,12 @@ void manetGLView::drawDebugInfo()
     info << "Messages arrived: " << messageStream->messagesArrived << endl;
     info << "Messages dropped: " << messageStream->messagesDropped << endl;
     info << "Messages queued: " << messageStream->messageQueueSize() << endl;
+    // info << "mat shine: " << matShine << endl;
+    // info << "spec reflect: " << specReflection[0] << endl;
+    // info << "amb light: " << ambLight0[0] << endl;
+    // info << "diff light: " << diffLight0[0] << endl;
+    // info << "spec light: " << specLight0[0] << endl;
+    // info << "global amb light: " << globalAmbientLight[0] << endl;
 
     QPainter painter(this);
     QString text(info.str().c_str());
@@ -2350,109 +2369,235 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
 {
     TRACE_ENTER();
 
-    quint32 nativeKey = event->nativeVirtualKey();
     int qtKey = event->key();
-    bool handled=false;
+    Qt::KeyboardModifiers kbMods=event->modifiers();
 
-    switch (nativeKey)
-    {
-        case 'C':
-            {
-                LOG_DEBUG("Got cap C in keyPressEvent - spawning color chooser for background color"); 
-                QRgb rgb=0xffffffff;
-                bool ok=false;
-                rgb=QColorDialog::getRgba(rgb, &ok);
-                if (ok)
-                    glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
-            }
-            handled=true;
-            break;
-        case 'F': 
-            {
-                LOG_DEBUG("Got cap F in keyPressEvent - spawning font chooser for info string"); 
-                bool ok;
-                QFont initial(statusFontName.c_str(), statusFontPointSize); 
-                QFont font=QFontDialog::getFont(&ok, initial, this); 
-                if (ok)
-                {
-                    statusFontName=font.family().toStdString(); 
-                    statusFontPointSize=font.pointSize(); 
-                }
-            }
-            handled=true;
-            break;
-        case 'D':
-            LOG_DEBUG("Got cap D turning on debugging info"); 
-            showDebugInfo=!showDebugInfo;
-            if (messageStream) { 
-                messageStream->messagesSent=0;
-                messageStream->messagesArrived=0;
-                messageStream->messagesDropped=0;
-            }
-            handled=true;
-            break;
-        case 'T':
-            layerPadding=0;
-            handled=true;
-            break;
-    }
+    switch(qtKey) {
+        case Qt::Key_Left:  shiftCenterRight(); break;
+        case Qt::Key_Right: shiftCenterLeft(); break;
+        case Qt::Key_Up:    shiftCenterDown(); break;
+        case Qt::Key_Down:  shiftCenterUp(); break;
+        case Qt::Key_N:     shiftCenterIn(); break; 
+        case Qt::Key_M:     shiftCenterOut(); break;
+        case Qt::Key_Q:     zoomOut(); break;
+        case Qt::Key_W:     zoomIn(); break;
+        case Qt::Key_A:     scaleText++; break;
+        case Qt::Key_S:     scaleText--; if (scaleText<1) scaleText=1; break;
+        case Qt::Key_Z:     compressDistance(); break;
+        case Qt::Key_X:     expandDistance(); break;
+        case Qt::Key_E:     rotateX(-5.0); break;
+        case Qt::Key_R:     rotateX(5.0); break;
+        case Qt::Key_D:     { 
+                                if (kbMods & Qt::ShiftModifier) { 
 
-    if (!handled) {
-        switch(qtKey) {
-            case Qt::Key_Left:  shiftCenterRight(); break;
-            case Qt::Key_Right: shiftCenterLeft(); break;
-            case Qt::Key_Up:    shiftCenterDown(); break;
-            case Qt::Key_Down:  shiftCenterUp(); break;
-            case Qt::Key_N:     shiftCenterIn(); break; 
-            case Qt::Key_M:     shiftCenterOut(); break;
-            case Qt::Key_Q:     zoomOut(); break;
-            case Qt::Key_W:     zoomIn(); break;
-            case Qt::Key_A:     scaleText++; break;
-            case Qt::Key_S:     scaleText--; if (scaleText<1) scaleText=1; break;
-            case Qt::Key_Z:     compressDistance(); break;
-            case Qt::Key_X:     expandDistance(); break;
-            case Qt::Key_E:     rotateX(-5.0); break;
-            case Qt::Key_R:     rotateX(5.0); break;
-            case Qt::Key_D:     rotateY(-5.0); break;
-            case Qt::Key_F:     rotateY(5.0); break;
-            case Qt::Key_C:     rotateZ(-5.0); break;
-            case Qt::Key_V:     rotateZ(5.0); break;
-            case Qt::Key_K:     gpsScale+=10; break;
-            case Qt::Key_L:     gpsScale-=10; break;
-            case Qt::Key_T:     layerPadding+=2; break;
-            case Qt::Key_Y:     layerPadding-=2; if (layerPadding<=0) layerPadding=0; break;
-                                // case Qt::Key_B:     
-                                //     layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
-                                //     emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
-                                //     break;
-            case Qt::Key_Equal:
-            case Qt::Key_Plus: 
-                                autoCenterNodesFlag=true;
-                                scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
-                                autoCenterNodesFlag=false;
-                                break;
-            case Qt::Key_Space:
-                                break;
-                                // globalReplay.runFlag = !globalReplay.runFlag;
-                                // if (globalReplay.runFlag)
-                                //     messageStream.startStream();
-                                // else
-                                //     messageStream.stopStream();
-                                // break;
+                                    LOG_DEBUG("Got cap D turning on debugging info"); 
+                                    showDebugInfo=!showDebugInfo;
+                                    if (messageStream) { 
+                                        messageStream->messagesSent=0;
+                                        messageStream->messagesArrived=0;
+                                        messageStream->messagesDropped=0;
+                                    }
+                                }
+                                else 
+                                    rotateY(-5.0); break;
+                            }
+                            break;
+        case Qt::Key_F:
+                            if (kbMods & Qt::ShiftModifier) {
 
-                                // GTL TODO: add shortcuts for ff/rew, etc. 
-                                // case 't': globalReplay.step = 1000; break;
-                                // case 'a' - 'a' + 1: arrowZoomOut(); break;
-                                // case 's' - 'a' + 1: arrowZoomIn(); break;
-                                // case 'r' - 'a' + 1: textZoomReset(); arrowZoomReset(); viewpointReset(); break;
-            case Qt::Key_Question:
-            case Qt::Key_H:
-                                showKeyboardShortcuts();
-                                break;
+                                LOG_DEBUG("Got cap F in keyPressEvent - spawning font chooser for info string"); 
+                                bool ok;
+                                QFont initial(statusFontName.c_str(), statusFontPointSize); 
+                                QFont font=QFontDialog::getFont(&ok, initial, this); 
+                                if (ok)
+                                {
+                                    statusFontName=font.family().toStdString(); 
+                                    statusFontPointSize=font.pointSize(); 
+                                }
+                            }
+                            else { 
+                                rotateY(5.0);
+                            }
+                            break; 
+        case Qt::Key_C:     { 
+                                if (kbMods & Qt::ShiftModifier) { 
+                                    LOG_DEBUG("Got cap C in keyPressEvent - spawning color chooser for background color"); 
+                                    QRgb rgb=0xffffffff;
+                                    bool ok=false;
+                                    rgb=QColorDialog::getRgba(rgb, &ok);
+                                    if (ok)
+                                        glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
+                                }
+                                else 
+                                    rotateZ(-5.0); 
+                            }
+                            break;
+        case Qt::Key_V:     rotateZ(5.0); break;
+        case Qt::Key_K:     gpsScale+=10; break;
+        case Qt::Key_L:     gpsScale-=10; break;
+        case Qt::Key_T:     {
+                                if (kbMods & Qt::ShiftModifier)  
+                                    layerPadding=0;
+                                else
+                                    layerPadding+=2; break;
+                            }
+                            break;
+        case Qt::Key_Y:     layerPadding-=2; if (layerPadding<=0) layerPadding=0; break;
+                            // case Qt::Key_B:     
+                            //     layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
+                            //     emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
+                            //     break;
+        case Qt::Key_Equal:
+        case Qt::Key_Plus: 
+                            autoCenterNodesFlag=true;
+                            scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
+                            autoCenterNodesFlag=false;
+                            break;
+        case Qt::Key_Space:
+                            break;
+                            // globalReplay.runFlag = !globalReplay.runFlag;
+                            // if (globalReplay.runFlag)
+                            //     messageStream.startStream();
+                            // else
+                            //     messageStream.stopStream();
+                            // break;
 
-            default:
-                                event->ignore();
-        }
+                            // GTL TODO: add shortcuts for ff/rew, etc. 
+                            // case 't': globalReplay.step = 1000; break;
+                            // case 'a' - 'a' + 1: arrowZoomOut(); break;
+                            // case 's' - 'a' + 1: arrowZoomIn(); break;
+                            // case 'r' - 'a' + 1: textZoomReset(); arrowZoomReset(); viewpointReset(); break;
+                            //
+        case Qt::Key_QuoteLeft:     {
+                                    matShine+=0.05; 
+                                    matShine=matShine>1.0 ? 1.0 : matShine; 
+                                    glMaterialf(GL_FRONT, GL_SHININESS, matShine);
+                            }
+                            break;
+        case Qt::Key_AsciiTilde: {
+                                    matShine-=0.05; 
+                                    matShine=matShine<0.0 ? 0.0 : matShine;
+                                    glMaterialf(GL_FRONT, GL_SHININESS, matShine);
+                            }
+                            break;
+        case Qt::Key_1:     {
+                                for (unsigned int i=0; i<3; i++) 
+                                    specReflection[i]+=0.05; 
+                                for (unsigned int i=0; i<3; i++) 
+                                    specReflection[i]=specReflection[i]>1.0 ? 1.0 : specReflection[i]; 
+                                glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
+                            }
+                            break;
+        // there is no way to use Key_1 w/Shift - so we lose portability across keyboard layouts. 
+        case Qt::Key_Exclam: {
+                                for (unsigned int i=0; i<3; i++) 
+                                    specReflection[i]-=0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    specReflection[i]=specReflection[i]<0.0 ? 0.0 : specReflection[i]; 
+                                glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
+                            }
+                            break;
+        case Qt::Key_2:     {
+                                GLenum l=GL_LIGHT0;
+                                GLenum p=GL_SPECULAR;
+                                GLfloat *d=specLight0; 
+                                GLfloat o=0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                                glLightfv(l, p, d); 
+                            }
+                            break;
+        case Qt::Key_At: {
+                                GLenum l=GL_LIGHT0;
+                                GLenum p=GL_SPECULAR;
+                                GLfloat *d=specLight0; 
+                                GLfloat o=-0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                                glLightfv(l, p, d); 
+                            }
+                            break;
+        case Qt::Key_3:     {
+                                GLenum l=GL_LIGHT0;
+                                GLenum p=GL_DIFFUSE;
+                                GLfloat *d=diffLight0; 
+                                GLfloat o=0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                                glLightfv(l, p, d); 
+                            }
+                            break;
+        case Qt::Key_NumberSign: {
+                                GLenum l=GL_LIGHT0;
+                                GLenum p=GL_DIFFUSE;
+                                GLfloat *d=diffLight0; 
+                                GLfloat o=-0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i];
+                                glLightfv(l, p, d); 
+                            }
+                            break;
+        case Qt::Key_4:     {
+                                GLenum l=GL_LIGHT0;
+                                GLenum p=GL_AMBIENT;
+                                GLfloat *d=ambLight0; 
+                                GLfloat o=0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                                glLightfv(l, p, d); 
+                            }
+                            break;
+        case Qt::Key_Dollar: {
+                                GLenum l=GL_LIGHT0;
+                                GLenum p=GL_AMBIENT;
+                                GLfloat *d=ambLight0; 
+                                GLfloat o=-0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i];
+                                glLightfv(l, p, d); 
+                            }
+                            break;
+        case Qt::Key_5:     {
+                                GLenum l=GL_LIGHT_MODEL_AMBIENT;
+                                GLfloat *d=globalAmbientLight; 
+                                GLfloat o=0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                                glLightModelfv(l, d); 
+                            }
+                            break;
+        case Qt::Key_Percent: {
+                                GLenum l=GL_LIGHT_MODEL_AMBIENT;
+                                GLfloat *d=globalAmbientLight; 
+                                GLfloat o=-0.05;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]+=o;
+                                for (unsigned int i=0; i<3; i++) 
+                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                                glLightModelfv(l, d); 
+                            }
+                            break;
+        case Qt::Key_Question:
+        case Qt::Key_H:
+                            showKeyboardShortcuts();
+                            break;
+
+        default:
+                            event->ignore();
     }
 
     update();

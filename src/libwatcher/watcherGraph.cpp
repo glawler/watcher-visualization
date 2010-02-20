@@ -305,18 +305,30 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     if (message->node1Label && !message->node1Label->label.empty())
     {
         LabelDisplayInfoPtr lmp(new LabelDisplayInfo);
+        lmp->foregroundColor=theGraph[ei.first].displayInfo->labelColor;
+        lmp->backgroundColor=watcher::colors::black;
+        lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
+        lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->node1Label); 
         theGraph[*src].labels.push_back(lmp);
     }
     if (message->middleLabel && !message->middleLabel->label.empty())
     {
         LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
+        lmp->foregroundColor=theGraph[ei.first].displayInfo->labelColor;
+        lmp->backgroundColor=watcher::colors::black;
+        lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
+        lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->middleLabel); 
         theGraph[ei.first].labels.push_back(lmp);
     }
     if (message->node2Label && !message->node2Label->label.empty())
     {
         LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
+        lmp->foregroundColor=theGraph[ei.first].displayInfo->labelColor;
+        lmp->backgroundColor=watcher::colors::black;
+        lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
+        lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->node2Label); 
         theGraph[*dest].labels.push_back(lmp);
     }
