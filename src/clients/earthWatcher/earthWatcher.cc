@@ -52,6 +52,7 @@ namespace earthwatcher {
     float Altoff = 0.0;
     float IconScale = 1.0;
     int SplineSteps = 2;
+    bool autoRewind = false;
     std::string IconPath ( "placemark_circle.png") ;
 }
 
@@ -154,6 +155,9 @@ void *process_events(void *)
     bool changed = false;
     bool needTimeRange = RelativeTS;
 
+    watcher::Timestamp currentMessageTimestamp; 
+    watcher::Timestamp playbackRangeEnd; 
+
     const char *cfname = ConfigFilename.c_str();
     struct stat sb;
     time_t cftime;      // time at which config file was last modified
@@ -171,13 +175,14 @@ void *process_events(void *)
             if (trp.get() != 0) {
                 LOG_INFO( "first offset=" << trp->min_ << ", last offset=" << trp->max_ );
                 needTimeRange = false;
+                playbackRangeEnd = trp->max_;
+                currentMessageTimestamp=trp->min_;
 
                 Timestamp off = StartTimestamp + ((StartTimestamp >= 0 ) ? trp->min_ : trp->max_ );
                 ms->setStreamTimeStart(off);
 
-                LOG_INFO("Starting event playback");
+                LOG_INFO("Starting event playback at time " << off);
                 ms->startStream(); 
-
                 continue;
             }
         }
@@ -206,6 +211,21 @@ void *process_events(void *)
                 write_kml(graph, OutputFile);
             }
             changed = false; // reset flag
+        }
+
+        if (autoRewind) {
+            currentMessageTimestamp=mp->timestamp;
+            // LOG_DEBUG("end of data in: " << playbackRangeEnd-currentMessageTimestamp); 
+            if (currentMessageTimestamp==playbackRangeEnd) {
+                LOG_WARN("Autorewind engaged - jumping to start of data...");
+                if (RelativeTS) {
+                    LOG_INFO("Starting event playback from relative start");
+                    needTimeRange = true;
+                    ms->stopStream();
+                    ms->clearMessageCache();
+                    ms->getMessageTimeRange();
+                }
+            }
         }
     }
 
@@ -374,6 +394,23 @@ int main(int argc, char **argv)
             LOG_INFO("'" << ConfigInt[i].configName << "' not found in the configuration file, using default: " << *ConfigInt[i].value
                      << " and adding this to the configuration file.");
             config.getRoot().add(ConfigInt[i].configName, libconfig::Setting::TypeInt) = *ConfigInt[i].value;
+        }
+    }
+
+    struct {
+        const char *configName;
+        bool* value;
+        unsigned int bit;
+    } ConfigBool[] = {
+        { "autorewind", &autoRewind, false },
+        { 0, 0, 0 } // terminator
+    };
+
+    for (size_t i = 0; ConfigBool[i].configName != 0; ++i) {
+        if ((args & ConfigBool[i].bit) == 0 && !config.lookupValue(ConfigBool[i].configName, *ConfigBool[i].value)) {
+            LOG_INFO("'" << ConfigBool[i].configName << "' not found in the configuration file, using default: " << *ConfigBool[i].value
+                     << " and adding this to the configuration file.");
+            config.getRoot().add(ConfigBool[i].configName, libconfig::Setting::TypeBoolean) = *ConfigBool[i].value;
         }
     }
 
