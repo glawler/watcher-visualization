@@ -277,6 +277,21 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     findOrCreateNode(message->node1, src, message->layer); 
     findOrCreateNode(message->node2, dest, message->layer); 
 
+    // only one edge per layer allowed
+    // 
+    outEdgeIterator e, e_end;
+    tie(e, e_end)=out_edges(*src, theGraph);
+    outEdgeIterator re=find_if(e, e_end, GraphFunctors::MatchEdgeLayer(theGraph, message->layer));
+    while (re!=e_end) {
+        vertex t=target(*re, theGraph);
+        if (theGraph[t].nodeId == theGraph[*src].nodeId) {
+            LOG_DEBUG("Removing old edge on same layer \"" << message->layer << "\"");
+            outEdgeIterator newend=re;
+            remove_edge(newend, theGraph);
+        }
+        re++;
+    }
+
     std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
 
     if(!ei.second) 
