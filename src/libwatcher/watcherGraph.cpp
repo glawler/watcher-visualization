@@ -63,12 +63,10 @@ namespace watcher {
             const NodeIdentifier &id;
             public:
             MatchNodeId(const WatcherGraph::Graph &g_, const NodeIdentifier &id_) : g(g_), id(id_) {}
-            bool operator()(boost::graph_traits<WatcherGraph::Graph>::vertex_descriptor const &v)
-            {
+            bool operator()(const WatcherGraph::vertex &v) {
                 return g[v].nodeId == id;
             }
         }; // class MatchNodeId
-
         struct MatchMessageLabelPtr
         {
             MatchMessageLabelPtr(const LabelMessagePtr &l_) : l(l_) {} 
@@ -113,7 +111,7 @@ namespace watcher {
             EdgeExpired(const WatcherGraph::Graph &g_, const Timestamp &t_) : g(g_), t(t_) {}
             const WatcherGraph::Graph &g;
             const Timestamp &t;
-            bool operator()(boost::graph_traits<WatcherGraph::Graph>::edge_descriptor const &e)
+            bool operator()(const WatcherGraph::edge &e)
             {
                 // bool retVal=(g[e].expiration==Infinity) ? false : (t > g[e].expiration);
                 // if (retVal==true) 
@@ -128,10 +126,23 @@ namespace watcher {
             const WatcherGraph::Graph &g;
             const GUILayer &layer;
             MatchEdgeLayer(const WatcherGraph::Graph &g_, const GUILayer &l_) : g(g_), layer(l_) {}
-            bool operator()(const boost::graph_traits<WatcherGraph::Graph>::edge_descriptor &e)
+            bool operator()(const WatcherGraph::edge &e)
             {
                 // LOG_DEBUG("MatchEdgeLayer: " << g[e].displayInfo->layer << " == " << layer << " is " << (g[e].displayInfo->layer==layer?"true":"false")); 
                 return g[e].displayInfo->layer==layer;
+            }
+        };
+        struct MatchEdgeLayerAndTargetNodeId
+        {
+            const WatcherGraph::Graph &g;
+            const GUILayer &layer;
+            const NodeIdentifier &id;
+            MatchEdgeLayerAndTargetNodeId(
+                    const WatcherGraph::Graph &g_, 
+                    const GUILayer &l_,
+                    const NodeIdentifier &n_) : g(g_), layer(l_), id(n_) {} 
+            bool operator()(const WatcherGraph::edge &e) {
+                return g[e].displayInfo->layer==layer && g[target(e, g)].nodeId==id;
             }
         };
 
@@ -154,7 +165,7 @@ namespace watcher {
 
                 out << label.str(); 
                 out << " color=" << g[v].displayInfo->color.toString();
-                
+
                 out << "]"; 
             }
         };
@@ -251,7 +262,7 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
                 }
             }
         }
-        
+
         if (found) // found it so it's not missing. 
             continue;
 
@@ -260,7 +271,7 @@ bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
             remove_edge(e, theGraph);
         }
     }
-    
+
     // THis is expensive.
     // LOG_DEBUG("Graph after adding: " << *this); 
 
@@ -277,19 +288,16 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     findOrCreateNode(message->node1, src, message->layer); 
     findOrCreateNode(message->node2, dest, message->layer); 
 
-    // only one edge per layer allowed
+    // only one edge per layer allowed, remove old one if there
     // 
     outEdgeIterator e, e_end;
     tie(e, e_end)=out_edges(*src, theGraph);
-    outEdgeIterator re=find_if(e, e_end, GraphFunctors::MatchEdgeLayer(theGraph, message->layer));
+    outEdgeIterator re=find_if(e, e_end, GraphFunctors::MatchEdgeLayerAndTargetNodeId(theGraph, message->layer, message->node2));
     while (re!=e_end) {
-        vertex t=target(*re, theGraph);
-        if (theGraph[t].nodeId == theGraph[*src].nodeId) {
-            LOG_DEBUG("Removing old edge on same layer \"" << message->layer << "\"");
-            outEdgeIterator newend=re;
-            remove_edge(newend, theGraph);
-        }
+        LOG_DEBUG("Removing old edge on same layer \"" << message->layer << "\"");
+        outEdgeIterator newend=re;
         re++;
+        remove_edge(newend, theGraph);
     }
 
     std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
@@ -436,16 +444,16 @@ void WatcherGraph::doMaintanence()
 bool WatcherGraph::updateNodeLocation(const GPSMessagePtr &message)
 {
     TRACE_ENTER();
-    
+
     bool retVal;
-    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    vertexIterator nodeIter;
     if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer)) 
     {
         LOG_DEBUG("Updating GPS information for node " << theGraph[*nodeIter].nodeId);
         theGraph[*nodeIter].gpsData=message; 
         retVal=true;
     }
-    
+
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -455,14 +463,14 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
     TRACE_ENTER();
 
     bool retVal;
-    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    vertexIterator nodeIter;
     if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
     {
         LOG_DEBUG("Updating connection status for node " << theGraph[*nodeIter].nodeId);
         theGraph[*nodeIter].connected=message->event==NodeStatusMessage::connect ? true : false;
         retVal=true;
     }
-    
+
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -472,7 +480,7 @@ bool WatcherGraph::updateNodeProperties(const NodePropertiesMessagePtr &message)
     TRACE_ENTER();
 
     bool retVal;
-    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    vertexIterator nodeIter;
     if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
     {
         LOG_DEBUG("Updating properties for node " << theGraph[*nodeIter].nodeId);
@@ -497,7 +505,7 @@ bool WatcherGraph::updateNodeProperties(const NodePropertiesMessagePtr &message)
 
         retVal=true;
     }
-    
+
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -506,7 +514,7 @@ bool WatcherGraph::updateNodeColor(const ColorMessagePtr &message)
 {
     TRACE_ENTER();
     bool retVal;
-    boost::graph_traits<Graph>::vertex_iterator nodeIter;
+    vertexIterator nodeIter;
     if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
     {
         LOG_DEBUG("Updating color information for node " << theGraph[*nodeIter].nodeId);
@@ -518,7 +526,7 @@ bool WatcherGraph::updateNodeColor(const ColorMessagePtr &message)
         }
         retVal=true;
     }
-    
+
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -553,7 +561,7 @@ bool WatcherGraph::addRemoveLabel(const LabelMessagePtr &message)
         retVal=true;
     }
     else {
-        boost::graph_traits<Graph>::vertex_iterator nodeIter;
+        vertexIterator nodeIter;
         if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
         {
             LOG_DEBUG("Updating attached label information for node " << theGraph[*nodeIter].nodeId);
@@ -607,7 +615,7 @@ bool WatcherGraph::updateGraph(const MessageStreamFilter &theFilter)
     bool retVal=false;
     // handle vertices
     {  
-        graph_traits<Graph>::vertex_iterator i, end, next;
+        vertexIterator i, end, next;
         tie(i, end) = vertices(theGraph);
         for(next=i; i!=end; i=next)
         {
@@ -658,7 +666,7 @@ bool WatcherGraph::updateGraph(const MessageStreamFilter &theFilter)
         }
     }
 
-    
+
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
@@ -700,12 +708,11 @@ bool WatcherGraph::updateGraph(const MessagePtr &message)
     return retVal;
 }
 
-bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter)
+bool WatcherGraph::findNode(const NodeIdentifier &id, vertexIterator &retIter)
 {
     TRACE_ENTER();
 
-    graph_traits<Graph>::vertex_iterator beg;
-    graph_traits<Graph>::vertex_iterator end;
+    vertexIterator beg, end;
     tie(beg, end) = vertices(theGraph);
 
     // GTL - may be a way to use boost::bind() here instead
@@ -718,7 +725,7 @@ bool WatcherGraph::findNode(const NodeIdentifier &id, boost::graph_traits<Graph>
     return retVal;
 }
 
-bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter, const GUILayer & /* layer */)
+bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, vertexIterator &retIter, const GUILayer & /* layer */)
 {
     TRACE_ENTER();
     bool retVal=true;
@@ -727,7 +734,7 @@ bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_trait
         // Make sure there is always a PHYSICAL node for every layer
         // if (layer!=PHYSICAL_LAYER)
         // {
-        //     boost::graph_traits<Graph>::vertex_iterator unused;
+        //     vertexIterator unused;
         //     findOrCreateNode(id, unused, PHYSICAL_LAYER); 
         // }
 
@@ -744,7 +751,7 @@ bool WatcherGraph::findOrCreateNode(const NodeIdentifier &id, boost::graph_trait
     return retVal;
 }
 
-bool WatcherGraph::createNode(const NodeIdentifier &id, boost::graph_traits<Graph>::vertex_iterator &retIter)
+bool WatcherGraph::createNode(const NodeIdentifier &id, vertexIterator &retIter)
 {
     TRACE_ENTER();
     graph_traits<Graph>::vertex_descriptor v = add_vertex(theGraph);
@@ -769,7 +776,7 @@ bool WatcherGraph::saveConfig() const
         BOOST_FOREACH(const LabelDisplayInfoPtr &ldip, theGraph[*ei].labels)
             ldip->saveConfiguration();
     }
-        
+
     graph_traits<Graph>::vertex_iterator vi, vEnd;
     for(tie(vi, vEnd)=vertices(theGraph); vi!=vEnd; ++vi) {
         if (theGraph[*vi].displayInfo->layer==PHYSICAL_LAYER) {
@@ -789,40 +796,5 @@ std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph
     return out;
 }
 
-// bool WatcherGraph::pack(ostream &os)
-// {
-//     TRACE_ENTER();
-//     boost::archive::text_oarchive oa(os);
-//     oa << (*this);
-//     TRACE_EXIT();
-//     return true; 
-// }
-// 
-// WatcherGraphPtr WatcherGraph::unpack(std::istream& is)
-// {
-//     boost::archive::text_iarchive ia(is);
-//     WatcherGraph* ret = 0;
-//     try
-//     {
-//         ia >> ret;
-//     }
-//     catch (boost::archive::archive_exception& e)
-//     {
-//         LOG_WARN("Exception thrown while serializing the graph: " << e.what());
-//         return WatcherGraphPtr();
-//     }
-//     return WatcherGraphPtr(ret); 
-// }
-// 
-// template<typename Archive>
-// void WatcherGraph::serialize(Archive &ar, const unsigned int /* file_version */)
-// {
-//     TRACE_ENTER();
-//     ar & theGraph;
-//     TRACE_EXIT();
-// }
-//
-//
-//BOOST_CLASS_EXPORT(watcher::WatcherGraph);
 
 
