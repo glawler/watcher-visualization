@@ -30,9 +30,9 @@ int main(int argc, char **argv)
 
     srand(time(NULL));
 
-    const unsigned int MAX_LAT=1000.0;
-    const unsigned int MAX_LNG=1000.0;
-    const unsigned int MAX_ALT=100.0;
+    const unsigned int MAX_LAT=1000;
+    const unsigned int MAX_LNG=1000;
+    const unsigned int MAX_ALT=100;
 
     po::variables_map &config=rs::getConfig();
     unsigned int nodeNum=config["nodeNum"].as<unsigned int>(); 
