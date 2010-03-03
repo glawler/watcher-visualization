@@ -153,7 +153,7 @@ int main(int argc, char **argv)
     LOG_DEBUG("Args: server: " << serverName << " fromAddr: " << fromNodeAddr << " logProps: " << logProps); 
 
     watcher::Client client(serverName); 
-    client.addMessageHandler(SendMessageHandler::create());
+    client.addMessageHandler(SingleMessageHandler::create());
     printf("Connecting to %s and sending message.\n", serverName);
 
     ConnectivityMessagePtr cm(new ConnectivityMessage); 

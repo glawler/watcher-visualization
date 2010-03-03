@@ -93,6 +93,11 @@ namespace watcher
              */
             bool connect();
 
+            /**
+             * Close the connection.
+             */
+            void close(); 
+
         protected:
         private:
 
