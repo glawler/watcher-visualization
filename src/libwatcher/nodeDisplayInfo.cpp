@@ -81,15 +81,12 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_, const NodeIdenti
     // libconfig path ids cannot start with numbers or contain '.'
     // which is really annoying. So an id for node 192.168.1.123 ends up 
     // looking like "node_192_168_1_123". Sigh.
-    string nodeIdAsConfigId(categoryName);      // default node config is just under this. 
-    if (nid!=NodeIdentifier()) 
-    {
-        nodeId=nid; 
-        nodeIdAsConfigId+="_";
-        string nodeIdAsString(nid.to_string()); 
-        replace(nodeIdAsString.begin(), nodeIdAsString.end(), '.', '_'); 
-        nodeIdAsConfigId+=nodeIdAsString; 
-    }
+    string nodeIdAsConfigId(categoryName + "_");      // default node config is just under this. 
+    string nodeIdAsString(nid.to_string()); 
+    replace(nodeIdAsString.begin(), nodeIdAsString.end(), '.', '_'); 
+    nodeIdAsConfigId+=nodeIdAsString; 
+
+    nodeId=nid;
 
     LOG_DEBUG("Looking up and loading node props for node with id: \"" << nodeIdAsConfigId << "\"");
     categoryName=nodeIdAsConfigId; 
