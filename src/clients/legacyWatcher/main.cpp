@@ -45,9 +45,11 @@ int main(int argc, char *argv[])
 {
     TRACE_ENTER();
 
+    const char *usageString=" -c,--configFile=cfgFile [-s,--server=server][-l,--logLevel=[debug|info|warn|error|fatal|off] -h,--help"; 
+
     for (int i=0; i!=argc; i++)
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help") || !strcmp(argv[i], "-?")) {
-            cout << "Usage : " << basename(argv[0]) << " -c,--configFile=cfgFile -h,--help" << endl;
+            cout << "Usage : " << basename(argv[0]) << usageString << endl;
             exit(EXIT_FAILURE);
         }
 
@@ -58,13 +60,31 @@ int main(int argc, char *argv[])
         if (false==initConfig(config, argc, argv, configFilename))
         {
             cerr << "Error reading configuration file, unable to continue." << endl;
-            cerr << "Usage: " << basename(argv[0]) << " [-f|--configFile] configfile [standard watcher arguments]" << endl;
+            cerr << "Usage: " << basename(argv[0]) << usageString << endl;
             return 1;
         }
         SingletonConfig::setConfigFile(configFilename);
     }
     catch (const SettingException &e) {
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+    }
+
+    // Override config for server if given on the command line
+    for (int i=0; i!=argc; i++) {
+        if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--server")) { 
+            if (i!=argc) { 
+                libconfig::Setting &root=config.getRoot();
+                string prop="server";
+                if (!root.exists(prop))
+                    root.add(prop, Setting::TypeString);
+                root[prop]=argv[i+1]; 
+                i++;
+            }
+            else { 
+                cerr << "Error in \"server\" arguement: you must specify the server!" << endl;
+                exit(EXIT_FAILURE); 
+            }
+        }
     }
 
     SingletonConfig::unlock();
