@@ -60,10 +60,12 @@ int main(int argc, char **argv)
                     cerr << "Error sending gps message #" << i << endl;
 
                 connMess->fromNodeID=nid;
-                for (int n=0; n<nodeNum*(nodeDegreePercentage/100.0); n++) 
-                    connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4(rand()%nodeNum));
+                connMess->layer="ConnectivityMessages";
+                for (int n=0; n<nodeNum*((double)nodeDegreePercentage/100.0); n++) 
+                    connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4((rand()%nodeNum)+1));
                 if (!client.sendMessage(connMess)) 
                     cerr << "Error sending connectivity message #" << i << endl;
+                connMess->neighbors.clear();
         }
 
         if (duration>0)
