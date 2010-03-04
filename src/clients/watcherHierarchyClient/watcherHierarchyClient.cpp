@@ -49,6 +49,8 @@
 #include <sys/time.h>
 #include <string.h>
 
+#include "configuration.h"
+
 #include "idsCommunications.h"
 #include "apisupport.h"
 #include "demolib.h"
@@ -64,12 +66,16 @@
 #include "colors.h"
 #include "client.h"
 #include "logger.h"
+#include "AlertHandlers.h"
 
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost;
 using namespace boost::asio;
+using namespace HierarchyAPI;
+namespace po=boost::program_options;
+namespace whc=watcherHierarchyClient;
 
 DECLARE_GLOBAL_LOGGER("watcherHierarchyClient"); 
 
@@ -271,6 +277,23 @@ void sendEdgeAdd(void *messageHandlerData, const struct MessageInfo * messageInf
     TRACE_EXIT();
 }
 
+void sendIDMEFAlert(void *messageHandlerData, const struct MessageInfo *mi)
+{
+    TRACE_ENTER();
+
+    detector *st=(detector*)messageHandlerData;
+
+    // GTL - put check for root in here. If we're the root issue alert,
+    // otherwise do not.
+    xmlDocPtr payload=messageInfoPayloadGet(mi);
+    AlertHandlers *handlers = AlertHandlers::getAlertHandlers();
+    if(handlers)
+        handlers->handleAlert(payload, st->client); 
+    xmlFreeDoc(payload);
+
+    TRACE_EXIT();
+}
+
 void sendGPS(void *messageHandlerData, const struct MessageInfo *mi) 
 {
     TRACE_ENTER();
@@ -462,7 +485,10 @@ static detector *detectorInit(ManetAddr us, const string &serverName, const char
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_GRAPH, &sendGraph },
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_GRAPH_EDGE, &sendGraphEdge },
         { IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL, &sendFloatinglabelAdd },
-        { IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL_REMOVE, &sendFloatingLabelRemove }
+        { IDSCOMMUNICATIONS_MESSAGE_WATCHER_FLOATINGLABEL_REMOVE, &sendFloatingLabelRemove },
+        { IDSCOMMUNICATIONS_MESSAGE_IDMEF_ALERT, &sendIDMEFAlert }, 
+        { IDSCOMMUNICATIONS_MESSAGE_IDMEF_ALERT_CONSOLIDATED, &sendIDMEFAlert } 
+        // We could do the signed IDMEF alerts as well...
     };
 
     for (unsigned int i = 0; i < sizeof(types)/sizeof(types[0]); i++)
@@ -552,55 +578,28 @@ int main(int argc, char *argv[])
     CommunicationsMessageAccess mode=COMMUNICATIONS_MESSAGE_READONLY;
     string serverName;
 
-    LOAD_LOG_PROPS("watcherHierarchyClient.log.properties"); 
-
-    while((ch=getopt(argc, argv,"t:u:w:r:s:?h"))!=-1)
-    {
-        switch(ch)
-        {
-            case 'u':
-                us=communicationsHostnameLookup(optarg);
-                break;
-            case 's':
-                serverName=optarg;
-                break;
-            case 'w':
-                writelog = optarg;
-                break;
-            case 'r':
-                readlog = optarg;
-                break;
-            case '?':
-            case 'h':
-                fprintf(stderr,
-                        "%s [options]\n"
-                        "options:\n"
-                        "-u addr - connect to a daemon on a remote machine\n"
-                        "-w file - write API events to the given file for later replay (see -r)\n"
-                        "-r file - read API events (e.g., incoming messages) from the given file\n"
-                        "          (\"-\" is stdin) instead of connecting to a daemon\n"
-                        ,
-                        argv[0]);
-                exit(1);
-        }
-    }
-
-    if (!serverName.length())
-    {
-        fprintf(stderr, "You must specify the watcherd server on the command line with the -s option\n"); 
-        TRACE_EXIT_RET(EXIT_FAILURE);
+    // Load config and bail on error. 
+    if (!whc::loadConfiguration(argc, argv))
         return EXIT_FAILURE;
-    }
+
+    whc::printConfiguration(cout); 
+
+    po::variables_map &config=whc::getConfig();
+    LOAD_LOG_PROPS(config["logproperties"].as<string>());
+
+    us=communicationsHostnameLookup(config["hierarchyDaemonAddress"].as<string>().c_str());
+    serverName=config["server"].as<string>();
 
     dt=detectorInit(us,serverName,readlog,writelog,direction,position,mode);	/* In a real detector, us=0.  */
 
-    if (dt==NULL)
-    {
+    if (dt==NULL) {
         fprintf(stderr,"detector init failed, probably could not connect to infrastructure demon.\n");
-        exit(1);
+        exit (EXIT_FAILURE);
     }
+
     printf("%s: starting\n",argv[0]);
     selectLoop(dt);
     detectorDestroy(dt);
-    return 0;
+    
+    return EXIT_SUCCESS;
 }
