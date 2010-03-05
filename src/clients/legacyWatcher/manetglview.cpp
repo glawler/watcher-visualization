@@ -977,7 +977,11 @@ manetGLView::manetGLView(QWidget *parent) :
 
 manetGLView::~manetGLView()
 {
-    TRACE_ENTER();
+    shutdown();
+}
+
+void manetGLView::shutdown() 
+{
     for (vector<StringIndexedMenuItem*>::iterator i=layerMenuItems.begin(); i!=layerMenuItems.end(); ++i)
         delete *i;
 
@@ -990,12 +994,12 @@ manetGLView::~manetGLView()
     };
     for (unsigned int i=0; i<sizeof(threads)/sizeof(threads[0]); i++) {
         if (threads[i]) {
+            threads[i]->interrupt();
+            threads[i]->join();
             delete threads[i];
             threads[i]=NULL;
         }
     }
-
-    TRACE_EXIT();
 }
 
 void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)

@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     ui.menuView->setTearOffEnabled(true);
 
     QObject::connect(ui.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
-    QObject::connect(&app, SIGNAL(aboutToQuit()), ui.manetGLViewWindow, SLOT(saveConfiguration()));
+    QObject::connect(&app, SIGNAL(aboutToQuit()), ui.manetGLViewWindow, SLOT(shutdown()));
 
     // Is there a way to get this from within manetGLView via theApp or something?
     ui.manetGLViewWindow->setLayerMenu(ui.menuLayers);

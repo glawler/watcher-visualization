@@ -102,10 +102,10 @@ public slots:
         void sliderPressedInGUI();
 
         void spawnAboutBox(); 
-
         void saveConfiguration();
-
         void streamFilteringEnabled(bool isEnabled); 
+
+        void shutdown(); 
 
 signals:
         void positionReset();
