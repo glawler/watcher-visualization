@@ -103,3 +103,12 @@ bool Client::connect()
     TRACE_EXIT_RET_BOOL(rv);
     return rv;
 }
+
+void Client::close()
+{
+    TRACE_ENTER();
+    if (clientConnection) 
+        clientConnection->close();
+    TRACE_EXIT();
+}
+

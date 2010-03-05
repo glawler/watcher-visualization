@@ -905,12 +905,12 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
     }
     else // default to lat/long/alt WGS84
     {
-        if (inx > 180)
-            LOG_WARN("Received GPS data that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
+        if (inx > 180) 
+            LOG_WARN("Received GPS data (" << inx << ", " << iny << ", " << inz << ") that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
 
         x=inx*gpsScale;
         y=iny*gpsScale;
-        z=inz*gpsScale;
+        z=inz;
 
         static double xOff=0.0, yOff=0.0;
         static bool xOffInit=false;
@@ -1479,7 +1479,7 @@ void manetGLView::checkIO()
     TRACE_ENTER();
 
     while(true) {
-
+        bool timeRangeMessageSent=false;
         MessagePtr message;
         while(messageStream && messageStream->getNextMessage(message)) {
             static unsigned long long messageCount=0;
@@ -1496,7 +1496,7 @@ void manetGLView::checkIO()
                         currentMessageTimestamp=
                             playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
                             playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
-
+                    timeRangeMessageSent=false;
                 }
 
                 // End of handling non feeder messages. 
@@ -1518,8 +1518,10 @@ void manetGLView::checkIO()
             if (!sliderPressed)
                 playbackSlider->setValue(currentMessageTimestamp/1000); 
 
-            if (currentMessageTimestamp>playbackRangeEnd+1000)
+            if (currentMessageTimestamp>playbackRangeEnd+10000 && !timeRangeMessageSent) { 
                 messageStream->getMessageTimeRange();
+                timeRangeMessageSent=true;
+            }
 
             // Really need to make layers a member of a base class...
             GUILayer layer;

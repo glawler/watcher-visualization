@@ -15,6 +15,7 @@ AX_BOOST_REGEX
 AX_BOOST_THREAD
 AX_BOOST_UNIT_TEST_FRAMEWORK
 AX_BOOST_DATE_TIME
+AX_BOOST_PROGRAM_OPTIONS
 
 PKG_CHECK_MODULES(LOGGER, logger)
 
@@ -213,7 +214,9 @@ AC_CONFIG_FILES([ \
     libwatcher/test/Makefile \
     clients/Makefile \
     clients/routeFeeder/Makefile \
-    clients/commandlineFeeders/Makefile 
+    clients/commandlineFeeders/Makefile \
+    clients/randomScenario/Makefile
+
 ])
 
 if test x$enable_testnodeonly == xno; then

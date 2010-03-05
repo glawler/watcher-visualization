@@ -215,7 +215,7 @@ int main(int argc, char **argv)
 
     watcher::Client client(server); 
     LOG_INFO("Connecting to " << server << " and sending message."); 
-    client.addMessageHandler(SendMessageHandler::create());
+    client.addMessageHandler(SingleMessageHandler::create());
 
     ColorMessagePtr cm(new ColorMessage);
 

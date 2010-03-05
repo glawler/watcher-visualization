@@ -25,6 +25,7 @@ LIBS+=-lwatcher
 LIBS+=-lwatchermsg
 LIBS+=-lwatcher
 LIBS+=@idsCommunications_LIBS@
+LIBS+=$(BOOST_PROGRAM_OPTIONS_LIB)
 
 bin_PROGRAMS=watcherHierarchyClient
 
@@ -34,5 +35,14 @@ watcherHierarchyClient_SOURCES=\
 	legacyWatcherMessageUnmarshal.cpp \
 	legacyWatcherMessageUnmarshal.h \
 	marshal.h \
-	watcherHierarchyClient.cpp
+	watcherHierarchyClient.cpp \
+	configuration.cpp configuration.h \
+	AlertHandler.cpp AlertHandler.h  \
+	AlertHandlerDefault.cpp AlertHandlerDefault.h  \
+	AlertHandlerFictitiousNeighbor.cpp AlertHandlerFictitiousNeighbor.h  \
+	AlertHandlerOmittedNeighbor.cpp AlertHandlerOmittedNeighbor.h  \
+	AlertHandlers.cpp AlertHandlers.h  \
+	AlertHandlerWormhole.cpp AlertHandlerWormhole.h \
+	XPathExtractor.cpp XPathExtractor.h \
+	alertClassifications.h
 

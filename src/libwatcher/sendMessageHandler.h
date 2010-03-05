@@ -24,10 +24,11 @@
 #include "libwatcher/messageHandler.h"
 
 namespace watcher {
-    /** A handler to use in the case where a single message is sent to the server
+    /** 
+     * A handler to use in the case where a single message is sent to the server
      * and the connection should be closed after transmission.
      */
-    class SendMessageHandler : public MessageHandler {
+    class SingleMessageHandler : public MessageHandler {
         public:
             /** Callback to cause the connection to terminate after sending a single
              * message to the server.
@@ -39,7 +40,27 @@ namespace watcher {
             static MessageHandlerPtr create();
     };
 
-    inline MessageHandlerPtr SendMessageHandler::create() {
-        return MessageHandlerPtr(new SendMessageHandler());
+    inline MessageHandlerPtr SingleMessageHandler::create() {
+        return MessageHandlerPtr(new SingleMessageHandler());
+    }
+
+    /** 
+     * A handler to use in the case where a mulitple message are sent.
+     */
+    class MultipleMessageHandler : public MessageHandler {
+        public:
+            /** 
+             * Callback to cause the connection to keep the connection open after any
+             * message is sent to the server.
+             * @param message the message that was sent
+             * @retval true always returns false
+             */
+            bool handleMessageSent(const event::MessagePtr &message) { return false; }
+
+            static MessageHandlerPtr create();
+    };
+
+    inline MessageHandlerPtr MultipleMessageHandler::create() {
+        return MessageHandlerPtr(new MultipleMessageHandler());
     }
 }

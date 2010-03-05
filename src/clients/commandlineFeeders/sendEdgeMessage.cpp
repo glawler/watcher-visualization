@@ -227,7 +227,7 @@ int main(int argc, char **argv)
     LOAD_LOG_PROPS(logProps);
 
     watcher::Client client(server); 
-    client.addMessageHandler(SendMessageHandler::create());
+    client.addMessageHandler(SingleMessageHandler::create());
     LOG_INFO("Connecting to " << server << " and sending message."); 
 
     EdgeMessagePtr em = EdgeMessagePtr(new EdgeMessage);

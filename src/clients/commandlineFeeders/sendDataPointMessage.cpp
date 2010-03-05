@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
     LOAD_LOG_PROPS(logPropsFile.c_str());
 
     watcher::Client client(serverName);
-    client.addMessageHandler(SendMessageHandler::create());
+    client.addMessageHandler(SingleMessageHandler::create());
 
     printf("Connecting to %s and sending message.\n", serverName.c_str());
 

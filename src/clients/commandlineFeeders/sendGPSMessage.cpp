@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 
     watcher::Client client(serverName); 
     printf("Connecting to %s and sending message.\n", serverName);
-    client.addMessageHandler(SendMessageHandler::create());
+    client.addMessageHandler(SingleMessageHandler::create());
     GPSMessagePtr message = GPSMessagePtr(new GPSMessage(latitude, longitude, altitude));
 
     if(NodeIdentifier()!=nodeAddr) // not empty address
