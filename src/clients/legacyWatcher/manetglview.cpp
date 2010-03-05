@@ -994,8 +994,9 @@ void manetGLView::shutdown()
     };
     for (unsigned int i=0; i<sizeof(threads)/sizeof(threads[0]); i++) {
         if (threads[i]) {
-            threads[i]->interrupt();
-            threads[i]->join();
+            // GTL - this does not work. 
+            // threads[i]->interrupt();
+            // threads[i]->join();
             delete threads[i];
             threads[i]=NULL;
         }
