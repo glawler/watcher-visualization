@@ -32,14 +32,15 @@ bool AlertHandlerWormhole::handleAlert(const xmlDoc* alertMessage, watcher::Clie
 	
 	if(attacker1AddrStr && attacker2AddrStr)
 	{
-	    LOG_DEBUG("Marking " << attacker1AddrStr << " and " <<  attacker2AddrStr << " as ends of the wormhole"); 
+	    LOG_DEBUG("Marking " << *attacker1AddrStr << " and " << *attacker2AddrStr << " as ends of the wormhole"); 
 
         const string layer("Alerts"); 
-        LabelMessagePtr lm(new LabelMessage("Wormhole detected"));
+        LabelMessagePtr lm(new LabelMessage("Detected Wormhole"));
         lm->layer=layer;
 
         EdgeMessagePtr em(new EdgeMessage(NodeIdentifier::from_string(*attacker1AddrStr), NodeIdentifier::from_string(*attacker2AddrStr), layer));
         em->expiration=m_alertLabelTimeout*1000;
+        em->middleLabel=(LabelMessagePtr(new LabelMessage("Wormhole"))); 
 
         std::vector<event::MessagePtr> messages;
         messages.push_back(lm);

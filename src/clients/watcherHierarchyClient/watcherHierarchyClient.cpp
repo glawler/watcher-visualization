@@ -283,6 +283,8 @@ void sendIDMEFAlert(void *messageHandlerData, const struct MessageInfo *mi)
 
     detector *st=(detector*)messageHandlerData;
 
+    LOG_DEBUG("Recv'd an IDMEF alert"); 
+
     // GTL - put check for root in here. If we're the root issue alert,
     // otherwise do not.
     xmlDocPtr payload=messageInfoPayloadGet(mi);
