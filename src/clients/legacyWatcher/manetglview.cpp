@@ -53,30 +53,29 @@ using namespace boost::graph;
 using namespace boost::date_time;
 using namespace boost::posix_time;
 
-    namespace watcher { 
-        float fast_arctan2( float y, float x )
-        {
-            const float ONEQTR_PI = M_PI / 4.0;
-            const float THRQTR_PI = 3.0 * M_PI / 4.0;
-            float r, angle;
-            float abs_y = fabs(y) + 1e-10f;      // kludge to prevent 0/0 condition
-            if ( x < 0.0f )
-            {
-                r = (x + abs_y) / (abs_y - x);
-                angle = THRQTR_PI;
-            }
-            else
-            {
-                r = (x - abs_y) / (x + abs_y);
-                angle = ONEQTR_PI;
-            }
-            angle += (0.1963f * r * r - 0.9817f) * r;
-            if ( y < 0.0f )
-                return( -angle );     // negate if in quad III or IV
-            else
-                return( angle );
+namespace watcher 
+{ 
+    float fast_arctan2( float y, float x )
+    {
+        const float ONEQTR_PI = M_PI / 4.0;
+        const float THRQTR_PI = 3.0 * M_PI / 4.0;
+        float r, angle;
+        float abs_y = fabs(y) + 1e-10f;      // kludge to prevent 0/0 condition
+        if ( x < 0.0f ) {
+            r = (x + abs_y) / (abs_y - x);
+            angle = THRQTR_PI;
         }
+        else {
+            r = (x - abs_y) / (x + abs_y);
+            angle = ONEQTR_PI;
+        }
+        angle += (0.1963f * r * r - 0.9817f) * r;
+        if ( y < 0.0f )
+            return( -angle );     // negate if in quad III or IV
+        else
+            return( angle );
     }
+}
 
 /*
  * Get the world coordinate (x,y,z) for the projected coordinates (x, y)
@@ -615,8 +614,7 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
     for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
     {
         WatcherGraphNode &n=wGraph.theGraph[*vi]; 
-        GLdouble x, y, z; 
-        gps2openGLPixels(n.gpsData->dataFormat, n.gpsData->x, n.gpsData->y, n.gpsData->z, x, y, z); 
+        GLdouble x=n.gpsData->x, y=n.gpsData->y, z=n.gpsData->z;
 
         double r = 0;
         if(includeAntenna)
@@ -890,15 +888,14 @@ void manetGLView::rotateZ(float deg)
     if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
-
-void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const double inx, const double iny, const double inz, GLdouble &x, GLdouble &y, GLdouble &z) 
+//static 
+bool manetGLView::gps2openGLPixels(GPSMessagePtr &gpsMess)
 {
-    TRACE_ENTER();
+    // TRACE_ENTER();
 
-    // GTL - this should be done when the message is recv'd - not every time we need to 
-    // compute the points - which is a whole hell of a lot of times.
+    double x, y, z, inx=gpsMess->x, iny=gpsMess->y, inz=gpsMess->z;
 
-    if (format==GPSMessage::UTM)
+    if (gpsMess->dataFormat==GPSMessage::UTM)
     {
         //
         // There is no UTM zone information in the UTM GPS packet, so we assume all data is in a single
@@ -907,8 +904,8 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
         // by the first coord we get. (Nodes are all centered around 0,0 where, 0,0 is defined 
         // by the first coord we receive. 
         //
-        if (iny < 91 && inx > 0) 
-            LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
+        // if (iny < 91 && inx > 0) 
+        //     LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
 
         static double utmXOffset=0.0, utmYOffset=0.0;
         static bool utmOffInit=false;
@@ -933,9 +930,16 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
         if (inx > 180) 
             LOG_WARN("Received GPS data (" << inx << ", " << iny << ", " << inz << ") that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
 
+        Config &cfg=SingletonConfig::instance();
+        SingletonConfig::lock();
+        libconfig::Setting &root=cfg.getRoot();
+        float gpsScale;
+        root.lookupValue("gpsScale", gpsScale);
+        SingletonConfig::unlock();
+
         x=inx*gpsScale;
         y=iny*gpsScale;
-        z=inz;
+        z=inz*gpsScale;
 
         static double xOff=0.0, yOff=0.0;
         static bool xOffInit=false;
@@ -956,7 +960,13 @@ void manetGLView::gps2openGLPixels(const GPSMessage::DataFormat &format, const d
         // LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
     }
     // LOG_DEBUG("Converted GPS from " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
-    TRACE_EXIT();
+
+    gpsMess->x=x;
+    gpsMess->y=y;
+    gpsMess->z=z;
+
+    // TRACE_EXIT();
+    return true;
 }
 
 manetGLView::manetGLView(QWidget *parent) : 
@@ -993,6 +1003,9 @@ manetGLView::manetGLView(QWidget *parent) :
     manetAdjInit.shiftY=0.0;
     manetAdjInit.shiftZ=0.0;
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
+
+    // Translate incoming GPS to opengl locations
+    wGraph.locationTranslationFunction=&manetGLView::gps2openGLPixels; 
 
     // Don't oeverwrite QPAinter...
     setAutoFillBackground(false);
@@ -1970,11 +1983,14 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
 {
     TRACE_ENTER(); 
 
-    GLdouble x1, y1, z1, x2, y2, z2, width;
-    gps2openGLPixels(node1.gpsData->dataFormat, node1.gpsData->x, node1.gpsData->y, node1.gpsData->z, x1, y1, z1); 
-    gps2openGLPixels(node2.gpsData->dataFormat, node2.gpsData->x, node2.gpsData->y, node2.gpsData->z, x2, y2, z2); 
-
-    width=edge.displayInfo->width;
+    GLdouble x1=node1.gpsData->x;
+    GLdouble y1=node1.gpsData->y;
+    GLdouble z1=node1.gpsData->z;
+    GLdouble x2=node2.gpsData->x;
+    GLdouble y2=node2.gpsData->y;
+    GLdouble z2=node2.gpsData->z;
+    
+    double width=edge.displayInfo->width;
 
     GLfloat edgeColor[]={
         edge.displayInfo->color.r/255.0, 
@@ -2095,8 +2111,9 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
 
     // LOG_DEBUG("Drawing node on " << (physical?"non":"") << "physical layer."); 
 
-    GLdouble x, y, z; 
-    gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
+    GLdouble x=node.gpsData->x;
+    GLdouble y=node.gpsData->y;
+    GLdouble z=node.gpsData->z;
 
     glPushMatrix();
     glTranslated(x, y, z);
@@ -2164,11 +2181,6 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
     else
         glColor4fv(nodeColor);
 
-    // GLdouble x, y, z; 
-    // gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, x, y, z); 
-    // renderText(x, y+6, z+5, QString(buf),
-    //             QFont(node.displayInfo->labelFont.c_str(), 
-    //                  (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
     renderText(0, 6, 3, QString(node.displayInfo->get_label().c_str()),
             QFont(node.displayInfo->labelFont.c_str(), 
                 (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
@@ -2231,8 +2243,7 @@ void manetGLView::drawLayer(const GUILayer &layer)
         for ( ; b!=e; ++b) {
             if ((*b)->layer==layer) {
                 // LOG_DEBUG("Displaying floating label: " << *b); 
-                GLdouble x, y, z; 
-                gps2openGLPixels(GPSMessage::LAT_LONG_ALT_WGS84, (*b)->lat, (*b)->lng, (*b)->alt, x, y, z); 
+                GLdouble x=(*b)->lat, y=(*b)->lng, z=(*b)->alt; 
                 LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
                 drawLabel(x, y, z, li);
             }
@@ -2261,10 +2272,7 @@ void manetGLView::drawLayer(const GUILayer &layer)
                 double lx=(node1.gpsData->x+node2.gpsData->x)/2.0; 
                 double ly=(node1.gpsData->y+node2.gpsData->y)/2.0; 
                 double lz=(node1.gpsData->z+node2.gpsData->z)/2.0; 
-
-                GLdouble x, y, z; 
-                gps2openGLPixels(node1.gpsData->dataFormat, lx, ly, lz, x, y, z); 
-                drawLabel(x, y, z, *li);
+                drawLabel(lx, ly, lz, *li);
             }
     }
 
@@ -2284,12 +2292,10 @@ void manetGLView::drawLayer(const GUILayer &layer)
         for( ; li!=lend; ++li)
             if ((*li)->layer==layer)
             {
-                GLdouble x, y, z; 
-                double lx=node.gpsData->x;
-                double ly=node.gpsData->y;
-                double lz=node.gpsData->z;
-                gps2openGLPixels(node.gpsData->dataFormat, lx, ly, lz, x, y, z); 
-                drawLabel(x, y, z, *li); 
+                GLdouble lx=node.gpsData->x;
+                GLdouble ly=node.gpsData->y;
+                GLdouble lz=node.gpsData->z;
+                drawLabel(lx, ly, lz, *li); 
             }
     }
 
@@ -2372,6 +2378,12 @@ void manetGLView::setGPSScale()
     if (ok) {
         LOG_DEBUG("Setting GPS scale to " << value); 
         gpsScale=value;
+
+        Config &cfg=SingletonConfig::instance();
+        SingletonConfig::lock();
+        libconfig::Setting &root=cfg.getRoot();
+        root["gpsScale"]=gpsScale;
+        SingletonConfig::unlock();
     }
     TRACE_EXIT();
 }
@@ -2713,9 +2725,7 @@ unsigned int manetGLView::getNodeIdAtCoords(const int x, const int y)
 
         unsigned int dist;
 
-        // Convert from GPS to 3d pixels
-        GLdouble gx, gy, gz;
-        gps2openGLPixels(node.gpsData->dataFormat, node.gpsData->x, node.gpsData->y, node.gpsData->z, gx, gy, gz);
+        GLdouble gx=node.gpsData->x, gy=node.gpsData->y, gz=node.gpsData->z;
 
         // Convert from 3d pixels to screen coords
         GLdouble sx, sy, sz;

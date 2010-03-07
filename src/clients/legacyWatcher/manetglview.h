@@ -251,7 +251,7 @@ signals:
         watcher::Timestamp playbackStartTime;
 
         void drawNodeLabel(const watcher::WatcherGraphNode &node, bool physical);
-        void gps2openGLPixels(const watcher::GPSMessage::DataFormat &format, const double inx, const double iny, const double inz, GLdouble &x, GLdouble &y, GLdouble &z);
+        static bool gps2openGLPixels(watcher::event::GPSMessagePtr &mess);
         bool isActive(const watcher::GUILayer &layer); 
 
         // drawing stuff

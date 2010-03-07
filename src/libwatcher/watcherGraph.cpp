@@ -145,6 +145,23 @@ namespace watcher {
                 return g[e].displayInfo->layer==layer && g[target(e, g)].nodeId==id;
             }
         };
+        struct MatchEdgeLayerAndNodeIds
+        {
+            const WatcherGraph::Graph &g;
+            const GUILayer &layer;
+            const NodeIdentifier &id1, &id2;
+            MatchEdgeLayerAndNodeIds(
+                    const WatcherGraph::Graph &g_, 
+                    const GUILayer &l_,
+                    const NodeIdentifier &n1_,
+                    const NodeIdentifier &n2_) : g(g_), layer(l_), id1(n1_), id2(n2_) {} 
+            bool operator()(const WatcherGraph::edge &e) {
+                return 
+                    g[e].displayInfo->layer==layer && 
+                    g[source(e, g)].nodeId==id1 &&
+                    g[target(e, g)].nodeId==id2;
+            }
+        };
 
         /** Helper class to print WatcherGraphNodes as graphviz data */
         struct WatcherNodeVertexGraphVizWriter 
@@ -290,15 +307,7 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
 
     // only one edge per layer allowed, remove old one if there
     // 
-    outEdgeIterator e, e_end;
-    tie(e, e_end)=out_edges(*src, theGraph);
-    outEdgeIterator re=find_if(e, e_end, GraphFunctors::MatchEdgeLayerAndTargetNodeId(theGraph, message->layer, message->node2));
-    while (re!=e_end) {
-        LOG_DEBUG("Removing old edge on same layer \"" << message->layer << "\"");
-        outEdgeIterator newend=re;
-        re++;
-        remove_edge(newend, theGraph);
-    }
+    remove_edge_if(GraphFunctors::MatchEdgeLayerAndNodeIds(theGraph, message->layer, message->node1, message->node2), theGraph); 
 
     std::pair<graph_traits<Graph>::edge_descriptor, bool> ei=add_edge(*src, *dest, theGraph);
 
