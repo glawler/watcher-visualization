@@ -25,6 +25,8 @@ testnode-dist:
 	$(RM) $(TMPDISTDIR)/$(bindir)/messageStream2Text
 	$(RM) $(TMPDISTDIR)/$(bindir)/connectivity2dot
 	$(RM) $(TMPDISTDIR)/$(bindir)/watcherd
+	$(RM) $(TMPDISTDIR)/$(bindir)/ogreWatcher
+	$(RM) $(TMPDISTDIR)/$(bindir)/randomScenario
 	@echo Creating $(top_srcdir)/testnode-dist.tbz tar file.
 	tar jcvf $(top_srcdir)/testnode-dist.tbz -C $(TMPDISTDIR) .
 	@echo Removing tmp installation directory

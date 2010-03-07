@@ -53,6 +53,31 @@ using namespace boost::graph;
 using namespace boost::date_time;
 using namespace boost::posix_time;
 
+    namespace watcher { 
+        float fast_arctan2( float y, float x )
+        {
+            const float ONEQTR_PI = M_PI / 4.0;
+            const float THRQTR_PI = 3.0 * M_PI / 4.0;
+            float r, angle;
+            float abs_y = fabs(y) + 1e-10f;      // kludge to prevent 0/0 condition
+            if ( x < 0.0f )
+            {
+                r = (x + abs_y) / (abs_y - x);
+                angle = THRQTR_PI;
+            }
+            else
+            {
+                r = (x - abs_y) / (x + abs_y);
+                angle = ONEQTR_PI;
+            }
+            angle += (0.1963f * r * r - 0.9817f) * r;
+            if ( y < 0.0f )
+                return( -angle );     // negate if in quad III or IV
+            else
+                return( angle );
+        }
+    }
+
 /*
  * Get the world coordinate (x,y,z) for the projected coordinates (x, y)
  * at the world coordinate "z" using the given transformation matrices.
@@ -1966,7 +1991,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
 
     if (!threeDView)
     {
-        double ax=atan2(x1-x2,y1-y2);
+        double ax=fast_arctan2(x1-x2,y1-y2);
         double cmx = sin(ax)*width;   // cos(a-M_PI_2)*width
         double cpx = -cmx;            // cos(a+M_PI_2)*width
         double smx = -cos(ax)*width;  // sin(a-M_PI_2)*width
@@ -2037,7 +2062,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         GLdouble lx=(x1+x2)/2.0; 
         GLdouble ly=(y1+y2)/2.0; 
         GLdouble lz=(z1+z2)/2.0; 
-        GLdouble a=atan2(x1-x2 , y1-y2);
+        GLdouble a=fast_arctan2(x1-x2 , y1-y2);
         GLdouble th=10.0;
         renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, 
                 QString(edge.displayInfo->label.c_str()),

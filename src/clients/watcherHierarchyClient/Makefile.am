@@ -15,7 +15,7 @@ CXXFLAGS+=@LOGGER_CFLAGS@
 CXXFLAGS+=@idsCommunications_CFLAGS@
 CXXFLAGS+=-I../..
 
-CFLAGS=$(CXXFLAGS)
+CFLAGS+=$(CXXFLAGS)
 
 LDFLAGS+=-L../../libwatcher
 LDFLAGS+=-L../../watcherd
