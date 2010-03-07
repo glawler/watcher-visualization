@@ -257,8 +257,7 @@ namespace watcher {
         bool retVal=
             r==other.r && 
             g==other.g && 
-            b==other.b && 
-            a==other.a;
+            b==other.b;
         TRACE_EXIT_RET((retVal ? "true" : "false"));
         return retVal;
     }

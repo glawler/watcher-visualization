@@ -26,6 +26,7 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/function.hpp>
 
 #include "watcherGraphNode.h"
 #include "watcherGraphEdge.h"
@@ -121,6 +122,16 @@ namespace watcher
              * @return if the graph was updated then true, else false.
              */
             bool updateGraph(const MessagePtr &message);
+
+            /**
+             * If you want your GPS coords in watcherGraph to be in a different 
+             * unit (say OpenGL screen coords), set this function pointer and 
+             * watcherGraph will use it to translate all incoming GPS data into
+             * your unit.
+             */
+            typedef boost::function<bool (watcher::event::GPSMessagePtr &m)> LocationTranslateFunction;
+            LocationTranslateFunction locationTranslationFunction;
+
 
             /**
              * Applies the passed filter to the in-memory graph. Read details below. 
