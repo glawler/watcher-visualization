@@ -318,12 +318,10 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         return false;
     }
 
-    Timestamp now=getCurrentTime();
-
     // Set expiration on this edge if needed. 
     if (message->expiration!=Infinity) {
         Timestamp oldExp=theGraph[ei.first].expiration;
-        theGraph[ei.first].expiration=now+message->expiration;  
+        theGraph[ei.first].expiration=message->timestamp+message->expiration;  
         LOG_DEBUG("Set edge expiration. Was: " << oldExp << " now: " << theGraph[ei.first].expiration);
     }
 
@@ -372,7 +370,7 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
             LOG_ERROR("Unable to add edge to graph between " << message->node2 << " and " << message->node1);
 
         if (message->expiration!=Infinity)
-            theGraph[ei.first].expiration=now+message->expiration;  
+            theGraph[ei.first].expiration=message->timestamp+message->expiration;  
 
         theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
     }
@@ -381,11 +379,11 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     return retVal;
 }
 
-void WatcherGraph::doMaintanence()
+void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
 {
     TRACE_ENTER();
 
-    Timestamp now(getCurrentTime());
+    Timestamp now(ts==0?getCurrentTime():ts);
 
     floatingLabels.erase(remove_if(floatingLabels.begin(), floatingLabels.end(), GraphFunctors::LabelExpired(now)), floatingLabels.end());
 

@@ -168,9 +168,10 @@ namespace watcher
 
              /**
               * Update Graph internals (component experations, etc). 
-              * Should be called periodically.
+              * Should be called periodically. If a timestamp is given,
+              * use that for current time.
               */
-            void doMaintanence();
+            void doMaintanence(const watcher::Timestamp &ts=0);
 
             /** Find a node in the graph based on a NodeIdentifier 
              * @param[in] id the id of the node you want to find. 
