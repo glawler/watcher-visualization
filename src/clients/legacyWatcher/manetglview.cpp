@@ -977,7 +977,7 @@ manetGLView::manetGLView(QWidget *parent) :
     streamRate(1.0),
     playbackPaused(false),
     autorewind(false), 
-    messageStreamFiltering(true), 
+    messageStreamFiltering(false), 
     sliderPressed(false),
     currentMessageTimestamp(0),
     playbackRangeEnd(0),
@@ -1170,7 +1170,7 @@ bool manetGLView::loadConfiguration()
             { "showPlaybackRange", true, &showPlaybackRangeString },
             { "showDebugInfo", false, &showDebugInfo },
             { "autorewind", true, &autorewind },
-            { "messageStreamFiltering", true, &messageStreamFiltering }
+            { "messageStreamFiltering", false, &messageStreamFiltering }
         }; 
         for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
         {
