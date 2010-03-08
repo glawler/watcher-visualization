@@ -1115,13 +1115,10 @@ bool manetGLView::loadConfiguration()
     try {
 
         string prop="server";
-        if (!root.lookupValue(prop, serverName))
-        {
-            LOG_FATAL("Please specify the server name in the cfg file");
-            LOG_FATAL("I set the default to localhost, but that may not be what you want."); 
+        if (!root.lookupValue(prop, serverName)) {
+            LOG_WARN("Please specify the server name in the cfg file");
+            LOG_WARN("I set the default to localhost, but that may not be what you want."); 
             root.add(prop, Setting::TypeString)="localhost"; 
-            TRACE_EXIT_RET_BOOL(false); 
-            return false;
         }
 
         prop="layers";
