@@ -132,7 +132,6 @@ namespace watcher
             typedef boost::function<bool (watcher::event::GPSMessagePtr &m)> LocationTranslateFunction;
             LocationTranslateFunction locationTranslationFunction;
 
-
             /**
              * Applies the passed filter to the in-memory graph. Read details below. 
              *
@@ -213,10 +212,6 @@ namespace watcher
               */
              // WatcherGraphPtr unpack(std::istream& is);
 
-            /**
-             * Get current time in milliseconds
-             */
-
         protected:
 
         private:
@@ -275,7 +270,6 @@ namespace watcher
              * @return bool - true if successful, false otherwise
              */
             bool createNode(const NodeIdentifier &id, vertexIterator &retIter);
-
     }; // like a fired school teacher.
 
     /** typedef a shared pointer to this class

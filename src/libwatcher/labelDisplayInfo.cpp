@@ -156,11 +156,9 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 {
     TRACE_ENTER();
 
-    if (mess->expiration!=Infinity)
-    {
-        Timestamp now=getCurrentTime();
-        expiration=now+mess->expiration;
-        LOG_DEBUG("now: " << now << " New label expires in " << mess->expiration << " ms: " << *this);
+    if (mess->expiration!=Infinity) {
+        expiration=mess->timestamp+mess->expiration;
+        LOG_DEBUG(" New label expires at " << mess->expiration << " ms: " << *this);
     }
     else
         expiration=Infinity;

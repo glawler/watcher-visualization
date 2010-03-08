@@ -1022,6 +1022,8 @@ manetGLView::~manetGLView()
 
 void manetGLView::shutdown() 
 {
+    saveConfiguration();
+
     for (vector<StringIndexedMenuItem*>::iterator i=layerMenuItems.begin(); i!=layerMenuItems.end(); ++i)
         delete *i;
 

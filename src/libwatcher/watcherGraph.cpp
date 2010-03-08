@@ -383,7 +383,7 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
 {
     TRACE_ENTER();
 
-    Timestamp now(ts==0?getCurrentTime():ts);
+    Timestamp now=ts==0?watcher::getCurrentTime():ts;
 
     floatingLabels.erase(remove_if(floatingLabels.begin(), floatingLabels.end(), GraphFunctors::LabelExpired(now)), floatingLabels.end());
 
