@@ -87,38 +87,23 @@ namespace watcher {
                 return l == lhs->layer;
             }
         };
-        struct LabelMessageExpired 
-        {
-            LabelMessageExpired(const Timestamp &t) : now(t) {}
-            const Timestamp now;
-            bool operator()(const LabelMessagePtr &lhs)
-            {
-                LOG_DEBUG("LabelMessageExpired - " << lhs->expiration << " vs. " << now << " == " << (((lhs->expiration == Infinity) ? false : (now > lhs->expiration))?"true":"false")); 
-                return (lhs->expiration == Infinity) ? false : (now > lhs->expiration); 
-            }
-        };
         struct LabelExpired
         {
-            LabelExpired(const Timestamp &t) : now(t) {}
+            LabelExpired(const Timestamp &t, bool timeForward) : now(t), direction(timeForward) {}
             const Timestamp now;
-            bool operator()(const LabelDisplayInfoPtr &lhs)
-            {
-                return (lhs->expiration == Infinity) ? false : (now > lhs->expiration); 
+            const bool direction;
+            bool operator()(const LabelDisplayInfoPtr &lhs) {
+                return (lhs->expiration == Infinity) ? false : direction ? (now > lhs->expiration) : (now < lhs->expiration);
             }
         };
         struct EdgeExpired
         {
-            EdgeExpired(const WatcherGraph::Graph &g_, const Timestamp &t_) : g(g_), t(t_) {}
+            EdgeExpired(const WatcherGraph::Graph &g_, const Timestamp &t_, bool timeForward) : g(g_), t(t_), direction(timeForward) {}
             const WatcherGraph::Graph &g;
             const Timestamp &t;
-            bool operator()(const WatcherGraph::edge &e)
-            {
-                // bool retVal=(g[e].expiration==Infinity) ? false : (t > g[e].expiration);
-                // if (retVal==true) 
-                //     LOG_DEBUG("Found expired edge: exp: " << g[e].expiration << " t:" << t << " layer:" << g[e].displayInfo->layer);
-                // else
-                //     LOG_DEBUG("Found unexpired edge: exp: " << g[e].expiration << " t:" << t << " layer:" << g[e].displayInfo->layer);
-                return (g[e].expiration==Infinity) ? false : (t > g[e].expiration); 
+            const bool direction;
+            bool operator()(const WatcherGraph::edge &e) {
+                return (g[e].expiration==Infinity) ? false : direction ? (t > g[e].expiration) : (t < g[e].expiration); 
             }
         };
         struct MatchEdgeLayer
@@ -213,7 +198,7 @@ namespace watcher {
     }
 }
 
-WatcherGraph::WatcherGraph()
+WatcherGraph::WatcherGraph() : timeForward(true)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -224,6 +209,24 @@ WatcherGraph::~WatcherGraph()
 {
     TRACE_ENTER();
     TRACE_EXIT();
+}
+
+void WatcherGraph::setTimeDirectionForward(bool forward)
+{
+    //
+    // If we're changing direction - clear everything but the nodes on the assumption
+    // that it doesn't exist yet. This may be a false assumption for things with 
+    // infinite duration - or it may not, depending. To be on the safe side (or the 
+    // easier side in any case), just clear them. (Note nodes always exist.) 
+    //
+    if (timeForward!=forward) {
+        vertexIterator vi, viend, vj, vjend;
+        for(tie(vi, viend)=vertices(theGraph); vi!=viend; ++vi) {
+            theGraph[*vi].labels.clear();
+            clear_out_edges(*vi, theGraph);  // will clear labels attached to the edges.
+        }
+    }
+    timeForward=forward;
 }
 
 bool WatcherGraph::addNodeNeighbors(const ConnectivityMessagePtr &message)
@@ -321,7 +324,10 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     // Set expiration on this edge if needed. 
     if (message->expiration!=Infinity) {
         Timestamp oldExp=theGraph[ei.first].expiration;
-        theGraph[ei.first].expiration=message->timestamp+message->expiration;  
+        if (timeForward) 
+            theGraph[ei.first].expiration=message->timestamp+message->expiration;  
+        else 
+            theGraph[ei.first].expiration=message->timestamp-message->expiration;  
         LOG_DEBUG("Set edge expiration. Was: " << oldExp << " now: " << theGraph[ei.first].expiration);
     }
 
@@ -332,45 +338,47 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
 
     // If labels are specified, set them up. 
-    if (message->node1Label && !message->node1Label->label.empty())
-    {
+    if (message->node1Label && !message->node1Label->label.empty()) {
         LabelDisplayInfoPtr lmp(new LabelDisplayInfo);
         lmp->foregroundColor=theGraph[ei.first].displayInfo->labelColor;
         lmp->backgroundColor=watcher::colors::black;
         lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
         lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->node1Label); 
+        lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
         theGraph[*src].labels.push_back(lmp);
     }
-    if (message->middleLabel && !message->middleLabel->label.empty())
-    {
+    if (message->middleLabel && !message->middleLabel->label.empty()) {
         LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
         lmp->foregroundColor=theGraph[ei.first].displayInfo->labelColor;
         lmp->backgroundColor=watcher::colors::black;
         lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
         lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->middleLabel); 
+        lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
         theGraph[ei.first].labels.push_back(lmp);
     }
-    if (message->node2Label && !message->node2Label->label.empty())
-    {
+    if (message->node2Label && !message->node2Label->label.empty()) {
         LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
         lmp->foregroundColor=theGraph[ei.first].displayInfo->labelColor;
         lmp->backgroundColor=watcher::colors::black;
         lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
         lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->node2Label); 
+        lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
         theGraph[*dest].labels.push_back(lmp);
     }
 
-    if(message->bidirectional)
-    {
+    if(message->bidirectional) {
         ei=add_edge(*dest, *src, theGraph);
         if(!ei.second) 
             LOG_ERROR("Unable to add edge to graph between " << message->node2 << " and " << message->node1);
 
         if (message->expiration!=Infinity)
-            theGraph[ei.first].expiration=message->timestamp+message->expiration;  
+            if (timeForward)
+                theGraph[ei.first].expiration=message->timestamp+message->expiration;  
+            else
+                theGraph[ei.first].expiration=message->timestamp-message->expiration;  
 
         theGraph[ei.first].displayInfo->loadConfiguration(message->layer); 
     }
@@ -385,9 +393,9 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
 
     Timestamp now=ts==0?watcher::getCurrentTime():ts;
 
-    floatingLabels.erase(remove_if(floatingLabels.begin(), floatingLabels.end(), GraphFunctors::LabelExpired(now)), floatingLabels.end());
+    floatingLabels.erase(remove_if(floatingLabels.begin(), floatingLabels.end(), GraphFunctors::LabelExpired(now, timeForward)), floatingLabels.end());
 
-    remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now), theGraph); 
+    remove_edge_if(GraphFunctors::EdgeExpired(theGraph, now, timeForward), theGraph); 
 
     graph_traits<Graph>::edge_iterator ei, eEnd;
     for(tie(ei, eEnd)=edges(theGraph); ei!=eEnd; ++ei)
@@ -407,7 +415,7 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
 
         WatcherGraphEdge::LabelList::iterator b=edge.labels.begin();
         WatcherGraphEdge::LabelList::iterator e=edge.labels.end();
-        WatcherGraphEdge::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now));
+        WatcherGraphEdge::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now, timeForward));
         edge.labels.erase(newEnd, e);
     }
 
@@ -441,7 +449,7 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
 
         WatcherGraphNode::LabelList::iterator b=node.labels.begin();
         WatcherGraphNode::LabelList::iterator e=node.labels.end();
-        WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now));
+        WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::LabelExpired(now, timeForward));
         node.labels.erase(newEnd, e);
     }
 
@@ -571,17 +579,19 @@ bool WatcherGraph::addRemoveLabel(const LabelMessagePtr &message)
     }
     else {
         vertexIterator nodeIter;
-        if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer))
-        {
+        if(findOrCreateNode(message->fromNodeID, nodeIter, message->layer)) {
             LOG_DEBUG("Updating attached label information for node " << theGraph[*nodeIter].nodeId);
-            if (message->addLabel)
-            {
+            if (message->addLabel) {
                 LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
                 lmp->loadConfiguration(message); 
+                if (timeForward) 
+                    lmp->expiration=message->timestamp+message->expiration;  
+                else 
+                    lmp->expiration=message->timestamp-message->expiration;  
+
                 theGraph[*nodeIter].labels.push_back(lmp);
             }
-            else
-            {
+            else {
                 WatcherGraphNode::LabelList::iterator b=theGraph[*nodeIter].labels.begin();
                 WatcherGraphNode::LabelList::iterator e=theGraph[*nodeIter].labels.end();
                 WatcherGraphNode::LabelList::iterator newEnd=remove_if(b, e, GraphFunctors::MatchMessageLabelPtr(message));

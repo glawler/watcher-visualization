@@ -172,6 +172,17 @@ namespace watcher
               */
             void doMaintanence(const watcher::Timestamp &ts=0);
 
+            /**
+             * If you're using playback time for doMaintanence(), then you must 
+             * notify watcherGraph of the direction of time so it can compute
+             * expirations correctly. If the direction changes, then there are 
+             * no current events as nothing has happened yet, so the entire 
+             * graph is cleared. Note: clients who use threads to read/update the
+             * graph must insure that there is only one thread accessing the 
+             * graph when it clears itself. 
+             */
+            void setTimeDirectionForward(bool forward); 
+
             /** Find a node in the graph based on a NodeIdentifier 
              * @param[in] id the id of the node you want to find. 
              * @param[out] retVal an iterator that points to the found node.
@@ -270,6 +281,10 @@ namespace watcher
              * @return bool - true if successful, false otherwise
              */
             bool createNode(const NodeIdentifier &id, vertexIterator &retIter);
+
+            /** Keep track of which direction we're going in time. */
+            bool timeForward;
+
     }; // like a fired school teacher.
 
     /** typedef a shared pointer to this class

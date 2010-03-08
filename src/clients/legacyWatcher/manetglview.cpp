@@ -2997,13 +2997,15 @@ void manetGLView::toggleLoopPlayback(bool isOn)
 void manetGLView::clearAll()
 {
     TRACE_ENTER();
+    boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when it goes out of scope
     wGraph.theGraph.clear();
     TRACE_EXIT();
 }
+
 void manetGLView::clearAllEdges()
 {
     TRACE_ENTER();
-
+    boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when it goes out of scope
     WatcherGraph::vertexIterator vi, viend, vj, vjend;
     for(tie(vi, viend)=vertices(wGraph.theGraph); vi!=viend; ++vi)
         clear_out_edges(*vi, wGraph.theGraph); 
@@ -3013,6 +3015,7 @@ void manetGLView::clearAllEdges()
 void manetGLView::clearAllLabels()
 {
     TRACE_ENTER();
+    boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when it goes out of scope
     WatcherGraph::edgeIterator ei, eend;
     for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
         if (wGraph.theGraph[*ei].labels.size())
@@ -3603,6 +3606,10 @@ void manetGLView::playbackSetSpeed(double x)
     if (!messageStream) {
         TRACE_EXIT();
         return;
+    }
+    if ((streamRate>0.0 && x<0.0) || (streamRate<0.0 && x>0.0)) {
+            boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when goes out of scope.
+            wGraph.setTimeDirectionForward(x>0.0?true:false); 
     }
     LOG_DEBUG("Setting stream rate to " << x); 
     streamRate=x;
