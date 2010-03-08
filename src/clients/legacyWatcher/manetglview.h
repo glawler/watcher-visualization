@@ -335,6 +335,10 @@ signals:
 
         // updating the graph is a separate function as it's done in it's own thread
         void maintainGraph();
+
+        unsigned int nodesDrawn, edgesDrawn, labelsDrawn;
+        unsigned int framesDrawn, fpsTimeBase;
+        double framesPerSec;
 };
 
 #endif

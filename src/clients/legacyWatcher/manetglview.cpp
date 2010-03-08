@@ -990,7 +990,9 @@ manetGLView::manetGLView(QWidget *parent) :
     statusFontName("Helvetica"),
     hierarchyRingColor(),
     playbackStartTime(SeekMessage::eof),  // live mode
-    autoCenterNodesFlag(false)
+    autoCenterNodesFlag(false),
+    nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
+    framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0)
 {
     TRACE_ENTER();
     manetAdjInit.angleX=0.0;
@@ -1592,7 +1594,7 @@ void manetGLView::checkIO()
                 }
             }
         }
-        // updateGL();  // redraw
+        updateGL();  // redraw
         // usleep(100000);
     }
 
@@ -1645,9 +1647,9 @@ void manetGLView::maintainGraph()
     while (true) {
         if (!playbackPaused) {      // If paused, just keep things as they are.
             boost::lock_guard<boost::mutex> l(graphMutex);
-            wGraph.doMaintanence(); // check expiration, etc. 
+            wGraph.doMaintanence(currentMessageTimestamp); // check expiration, etc. 
         }
-        usleep(500000);
+        usleep(100000);
     }
     TRACE_EXIT();
 }
@@ -1685,6 +1687,18 @@ void manetGLView::drawDebugInfo()
     info << "Messages arrived: " << messageStream->messagesArrived << endl;
     info << "Messages dropped: " << messageStream->messagesDropped << endl;
     info << "Messages queued: " << messageStream->messageQueueSize() << endl;
+
+    info << "N/E/L: " << nodesDrawn << "/" << edgesDrawn << "/" << labelsDrawn << endl;
+    nodesDrawn=edgesDrawn=labelsDrawn=0;
+
+    framesDrawn++;
+    int time=glutGet(GLUT_ELAPSED_TIME);
+    if (time - fpsTimeBase > 1000) {
+        framesPerSec = framesDrawn*1000.0/(time-fpsTimeBase);
+        fpsTimeBase = time;        
+        framesDrawn = 0;
+    }
+    info << "FPS: " << framesPerSec << endl;
     // info << "mat shine: " << matShine << endl;
     // info << "spec reflect: " << specReflection[0] << endl;
     // info << "amb light: " << ambLight0[0] << endl;
@@ -1983,6 +1997,8 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
 {
     TRACE_ENTER(); 
 
+    edgesDrawn++;
+
     GLdouble x1=node1.gpsData->x;
     GLdouble y1=node1.gpsData->y;
     GLdouble z1=node1.gpsData->z;
@@ -2108,6 +2124,7 @@ bool manetGLView::isActive(const watcher::GUILayer &layer)
 void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
 {
     TRACE_ENTER(); 
+    nodesDrawn++;
 
     // LOG_DEBUG("Drawing node on " << (physical?"non":"") << "physical layer."); 
 
@@ -2191,6 +2208,8 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
 void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfoPtr &label)
 {
     TRACE_ENTER(); 
+
+    labelsDrawn++;
     // 
     int fgColor[]={
         label->foregroundColor.r, 
@@ -2218,16 +2237,26 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     // Do cheesy shadow effect as I can't get a proper bounding box around the text as
     // QFontMetric lisea bout how wide/tall the bounding box is. 
-    if (!monochromeMode)
-    {
-        qglColor(QColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])); 
-        QFontMetrics fm(f);
-        double shadowOffset=fm.height()*.02;
-        renderText(inx+offset+shadowOffset, iny+offset+shadowOffset, inz+1.0, label->labelText.c_str(), f); 
-    }
+    // if (!monochromeMode)
+    // {
+    //     qglColor(QColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])); 
+    //     QFontMetrics fm(f);
+    //     double shadowOffset=fm.height()*.02;
+    //     renderText(inx+offset+shadowOffset, iny+offset+shadowOffset, inz+1.0, label->labelText.c_str(), f); 
+    // }
 
     qglColor(QColor(fgColor[0], fgColor[1], fgColor[2], fgColor[3])); 
     renderText(inx+offset, iny+offset, inz+2.0, label->labelText.c_str(), f); 
+
+    // Use GLUT to draw labels, will be much faster.
+    // glColor3f(fgColor[0], fgColor[1], fgColor[2]);
+    // glPushMatrix();
+    // glLoadIdentity();
+    // setOrthographicProjection();
+    // for (char c=label->labelText.c_str(); *c != '\0'; c++) 
+    //     glutStrokeCharacter(GLUT_STROKE_ROMAN, *c);
+    // glPopMatrix();
+    // resetPerspectiveProjection();
 
     TRACE_EXIT(); 
 }
