@@ -20,7 +20,23 @@ namespace randomScenario {
 
     bool validateConfiguration() 
     {
-        // If you need to check existence of format of configuration, do so here. 
+        variables_map &vm=getConfig();
+
+        if (vm.count("nodeDegreePercentage")) { 
+            float tmp=vm["nodeDegreePercentage"].as<float>();
+            if (tmp>100.0 || tmp <0.0) { 
+                cerr << "nodeDegreePercentage must be between 100 and 0." << endl;
+                return false;
+            }
+        }
+                 
+        if (vm.count("nodeLabelPercentage")) { 
+            float tmp=vm["nodeLabelPercentage"].as<float>();
+            if (tmp>100.0 || tmp <0.0) { 
+                cerr << "nodeLabelPercentage must be between 100 and 0." << endl;
+                return false;
+            }
+        }
         return true;
     }
 
@@ -45,8 +61,10 @@ namespace randomScenario {
         options_description config("Command line and configuration file options (command line will override config file)", lineLen);
         config.add_options()
             ("nodeNum,n", value<unsigned int>()->default_value(48), "The number of nodes in the random scenario.")
-            ("nodeDegreePercentage,D", value<unsigned int>()->default_value(20), "The average number of neighbors of each node as percentagei.")
+            ("nodeDegreePercentage,D", value<float>()->default_value(5.0), "The average number of neighbors of each node as percentage.")
+            ("nodeLabelPercentage,L", value<float>()->default_value(5.0), "The average number of node that have labels applied as percentage.")
             ("duration,d", value<int>()->default_value(-1), "The length of the scenario. -1 means go forever.")
+            ("layerNum,l", value<unsigned int>()->default_value(1), "The number of layers to add to the scenario.")
             ("server,s", value<string>()->default_value("localhost"), "Where the watcherd is running.")
             ("logproperties,p", value<string>()->default_value(binName + ".log.properties"), "The log properties file")
             ("logLevel,l", value<string>(&logLevel)->default_value("debug"), "The level to log at. Valid options: trace, debug, info, warn, error, and fatal");

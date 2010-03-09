@@ -36,7 +36,9 @@ int main(int argc, char **argv)
 
     po::variables_map &config=rs::getConfig();
     unsigned int nodeNum=config["nodeNum"].as<unsigned int>(); 
-    unsigned int nodeDegreePercentage=config["nodeDegreePercentage"].as<unsigned int>();
+    float nodeDegreePercentage=config["nodeDegreePercentage"].as<float>();
+    float nodeLabelPercentage=config["nodeLabelPercentage"].as<float>();
+    unsigned int layerNum=config["layerNum"].as<unsigned int>();
     int duration=config["duration"].as<int>(); 
     string server=config["server"].as<string>(); 
 
@@ -59,13 +61,21 @@ int main(int argc, char **argv)
                 if (!client.sendMessage(gpsMess)) 
                     cerr << "Error sending gps message #" << i << endl;
 
-                connMess->fromNodeID=nid;
-                connMess->layer="ConnectivityMessages";
-                for (int n=0; n<nodeNum*((double)nodeDegreePercentage/100.0); n++) 
-                    connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4((rand()%nodeNum)+1));
-                if (!client.sendMessage(connMess)) 
-                    cerr << "Error sending connectivity message #" << i << endl;
-                connMess->neighbors.clear();
+                if (rand()%100 <= (unsigned int)nodeLabelPercentage) { 
+                    LabelMessagePtr lm(new LabelMessage("Label", nid)); 
+                    if (!client.sendMessage(lm)) 
+                        cerr << "Error sending node label message"; 
+                }
+
+                for (unsigned int l=0; l<layerNum; l++) {
+                    connMess->fromNodeID=nid;
+                    connMess->layer="ConnectivityMessages_" + boost::lexical_cast<string>(l);
+                    for (int n=0; n<nodeNum*(nodeDegreePercentage/100.0); n++) 
+                        connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4((rand()%nodeNum)+1));
+                    if (!client.sendMessage(connMess)) 
+                        cerr << "Error sending connectivity message #" << i << endl;
+                    connMess->neighbors.clear();
+                }
         }
 
         if (duration>0)
