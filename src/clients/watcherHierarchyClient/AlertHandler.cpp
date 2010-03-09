@@ -8,7 +8,7 @@ using namespace std;
 
 INIT_LOGGER(AlertHandler, "AlertHandler"); 
 
-AlertHandler::AlertHandler() : m_alertLabelTimeout(12)
+AlertHandler::AlertHandler() : m_alertLabelTimeout(5)
 {
 	// noop
 }
