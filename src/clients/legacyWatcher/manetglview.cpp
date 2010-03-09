@@ -939,7 +939,7 @@ bool manetGLView::gps2openGLPixels(GPSMessagePtr &gpsMess)
 
         x=inx*gpsScale;
         y=iny*gpsScale;
-        z=inz*gpsScale;
+        z=inz;
 
         static double xOff=0.0, yOff=0.0;
         static bool xOffInit=false;
