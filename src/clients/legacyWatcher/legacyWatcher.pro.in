@@ -7,6 +7,7 @@ TARGET = watcher
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include ../../util ../.. ../../watcherd
 INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include
+INCLUDEPATH += /usr/local/qwt-5.1.1/include
 INCLUDEPATH += @QWT_INCLUDES@
 QT += opengl 
 CONFIG += qt x11 
@@ -34,6 +35,7 @@ LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += -lconfig++
 LIBS += @LOGGER_LIBS@
 LIBS += -lwatcherutils
+LIBS += -L/usr/local/qwt-5.1.1/lib -l qwt
 LIBS += @QWT_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_DATE_TIME_LIB@
 
 include(Makefile.local)
