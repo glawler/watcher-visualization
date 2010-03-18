@@ -66,6 +66,9 @@ namespace randomScenario {
             ("duration,d", value<int>()->default_value(-1), "The length of the scenario. -1 means go forever.")
             ("layerNum,l", value<unsigned int>()->default_value(1), "The number of layers to add to the scenario.")
             ("server,s", value<string>()->default_value("localhost"), "Where the watcherd is running.")
+            ("width,W", value<unsigned int>()->default_value(1000), "Max width of the playing field. (East/West)")
+            ("length,G", value<unsigned int>()->default_value(1000), "Max length of the playing field. (North/South)")
+            ("height,H", value<unsigned int>()->default_value(100), "Max height of the playing field. (Up/Down)")
             ("logproperties,p", value<string>()->default_value(binName + ".log.properties"), "The log properties file")
             ("logLevel,l", value<string>(&logLevel)->default_value("debug"), "The level to log at. Valid options: trace, debug, info, warn, error, and fatal");
 
