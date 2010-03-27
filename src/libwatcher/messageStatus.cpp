@@ -104,14 +104,12 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void MessageStatus::serialize(Archive & ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & status;
-            TRACE_EXIT();
-        }
+//        template <typename Archive> void MessageStatus::serialize(Archive & ar, const unsigned int /* file_version */)
+//        {
+//            TRACE_ENTER();
+//            ar & boost::serialization::base_object<Message>(*this);
+//            ar & status;
+//            TRACE_EXIT();
+//        }
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::MessageStatus);

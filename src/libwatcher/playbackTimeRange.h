@@ -45,8 +45,6 @@ namespace watcher {
                 Timestamp min_;
                 Timestamp max_;
             private:
-                template <typename Archive> void serialize(Archive & ar, const unsigned int version);
-                friend class boost::serialization::access;
                 DECLARE_LOGGER();
         };
 

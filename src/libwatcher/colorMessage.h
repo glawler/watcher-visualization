@@ -102,9 +102,10 @@ namespace watcher {
                  */
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+            protected:
+                void readPayload(std::istream&);
+
             private:
-                friend class boost::serialization::access;
-                template <typename Archive> void serialize(Archive& ar, const unsigned int file_version);
                 DECLARE_LOGGER();
         };
 

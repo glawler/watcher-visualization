@@ -84,6 +84,7 @@ bool AlertHandlerDefault::handleAlert(const xmlDoc* alertMessage, watcher::Clien
                         NodeIdentifier::from_string(*victimAddrStr), 
                         "Attackers")); 
             em->edgeColor=watcher::colors::red;
+            em->expiration=m_alertLabelTimeout*1000;
             messages.push_back(em); 
 
             EdgeMessagePtr em2(new EdgeMessage(
@@ -91,6 +92,7 @@ bool AlertHandlerDefault::handleAlert(const xmlDoc* alertMessage, watcher::Clien
                         NodeIdentifier::from_string(*attackerAddrStr), 
                         "Victims")); 
             em2->edgeColor=watcher::colors::blue;
+            em2->expiration=m_alertLabelTimeout*1000;
             messages.push_back(em2); 
         }
         if(detectorAddrStr) {
