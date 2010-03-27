@@ -30,10 +30,6 @@ int main(int argc, char **argv)
 
     srand(time(NULL));
 
-    const unsigned int MAX_LAT=1000;
-    const unsigned int MAX_LNG=1000;
-    const unsigned int MAX_ALT=100;
-
     po::variables_map &config=rs::getConfig();
     unsigned int nodeNum=config["nodeNum"].as<unsigned int>(); 
     float nodeDegreePercentage=config["nodeDegreePercentage"].as<float>();
@@ -41,6 +37,9 @@ int main(int argc, char **argv)
     unsigned int layerNum=config["layerNum"].as<unsigned int>();
     int duration=config["duration"].as<int>(); 
     string server=config["server"].as<string>(); 
+    unsigned int maxWidth=config["width"].as<unsigned int>();
+    unsigned int maxLength=config["length"].as<unsigned int>();
+    unsigned int maxHeight=config["height"].as<unsigned int>();
 
     LOAD_LOG_PROPS(config["logproperties"].as<string>());
 
@@ -54,9 +53,9 @@ int main(int argc, char **argv)
 
         for (int i=1; i<=nodeNum; i++) {
                 NodeIdentifier nid=boost::asio::ip::address_v4::address_v4(i);
-                gpsMess->x=(rand()%MAX_LAT/30000.0);
-                gpsMess->y=(rand()%MAX_LNG/30000.0);
-                gpsMess->z=rand()%MAX_ALT;
+                gpsMess->x=((rand()%maxWidth)/30000.0);
+                gpsMess->y=((rand()%maxLength)/30000.0);
+                gpsMess->z=(rand()%maxHeight);
                 gpsMess->fromNodeID=nid;
                 if (!client.sendMessage(gpsMess)) 
                     cerr << "Error sending gps message #" << i << endl;
