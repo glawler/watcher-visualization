@@ -291,6 +291,15 @@ void sendIDMEFAlert(void *messageHandlerData, const struct MessageInfo *mi)
     AlertHandlers *handlers = AlertHandlers::getAlertHandlers();
     if(handlers)
         handlers->handleAlert(payload, st->client); 
+
+    {   // Dump the alert to the log.
+        xmlChar* dump;
+        int dumpSz;
+        xmlDocDumpFormatMemory(payload, &dump, &dumpSz, 1); 
+        LOG_INFO("Recv'd IDMEF alert:"); 
+        LOG_INFO(dump); 
+        xmlFree(dump);
+    }
     xmlFreeDoc(payload);
 
     TRACE_EXIT();
