@@ -36,6 +36,7 @@ bool AlertHandlerWormhole::handleAlert(const xmlDoc* alertMessage, watcher::Clie
 
         const string layer("Alerts"); 
         LabelMessagePtr lm(new LabelMessage("Detected Wormhole"));
+        lm->expiration=m_alertLabelTimeout*1000;
         lm->layer=layer;
 
         EdgeMessagePtr em(new EdgeMessage(NodeIdentifier::from_string(*attacker1AddrStr), NodeIdentifier::from_string(*attacker2AddrStr), layer));
