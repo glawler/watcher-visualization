@@ -345,7 +345,8 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
         lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->node1Label); 
-        lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
+        if (lmp->expiration!=Infinity) 
+            lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
         theGraph[*src].labels.push_back(lmp);
     }
     if (message->middleLabel && !message->middleLabel->label.empty()) {
@@ -355,7 +356,8 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
         lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->middleLabel); 
-        lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
+        if (lmp->expiration!=Infinity) 
+            lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
         theGraph[ei.first].labels.push_back(lmp);
     }
     if (message->node2Label && !message->node2Label->label.empty()) {
@@ -365,7 +367,8 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
         lmp->fontName=theGraph[ei.first].displayInfo->labelFont;
         lmp->pointSize=theGraph[ei.first].displayInfo->labelPointSize;
         lmp->loadConfiguration(message->node2Label); 
-        lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
+        if (lmp->expiration!=Infinity) 
+            lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
         theGraph[*dest].labels.push_back(lmp);
     }
 
@@ -584,10 +587,12 @@ bool WatcherGraph::addRemoveLabel(const LabelMessagePtr &message)
             if (message->addLabel) {
                 LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
                 lmp->loadConfiguration(message); 
-                if (timeForward) 
-                    lmp->expiration=message->timestamp+message->expiration;  
-                else 
-                    lmp->expiration=message->timestamp-message->expiration;  
+                if (lmp->expiration!=Infinity) {
+                    if (timeForward) 
+                        lmp->expiration=message->timestamp+message->expiration;  
+                    else 
+                        lmp->expiration=message->timestamp-message->expiration;  
+                }
 
                 theGraph[*nodeIter].labels.push_back(lmp);
             }
