@@ -37,7 +37,7 @@ DECLARE_GLOBAL_LOGGER("testLabelMessage");
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
-    LOAD_LOG_PROPS("log.properties"); 
+    LOAD_LOG_PROPS("test.log.properties"); 
 
     LabelMessage lm1;
     lm1.label="Hello world";

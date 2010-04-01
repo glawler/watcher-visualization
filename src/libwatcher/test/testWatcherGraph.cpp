@@ -208,6 +208,9 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
         // GTL - TODO: add a BOOST_CHECK to test this. 
         emp->middleLabel.reset(new LabelMessage("Hello There"));
         emp->middleLabel->expiration=2000;          // all labels expire in 2 seconds, so they should all disapear halfway though. 
+        char buf[16];
+        snprintf(buf, sizeof(buf), "test_layer_%d", i); 
+        emp->layer=string(buf);
 
         wg.updateGraph(emp);
     }
@@ -216,8 +219,7 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
     {
         LOG_INFO("Current edges in graph at " << Timestamp(time(NULL))*1000); 
         WatcherGraph::edgeIterator ei, eEnd; 
-        for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei)
-        {
+        for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei) {
             LOG_INFO("Edge: " << wg.theGraph[*ei]); 
         }
 
@@ -237,11 +239,11 @@ BOOST_AUTO_TEST_CASE( graph_node_floating_label_expiration_test )
 
     struct 
     {
-        char *str;
+        const char *str;
         Timestamp exp;
         float x, y, z;
     } labelData [] = {
-        { "This floating label will never self destruct", -1, 1, 1, 1},
+        { "This floating label will never self destruct", Infinity, 1, 1, 1},
         { "This floating label will self destruct in .5 seconds", 500, 2, 2, 2},
         { "This floating label will self destruct in 1.5 seconds", 1500, 3, 3, 3},
         { "This floating label will self destruct in 2.5 seconds", 2500, 4, 4, 4},
@@ -287,10 +289,10 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
 
     struct 
     {
-        char *str;
+        const char *str;
         Timestamp exp;
     } labelData [] = {
-        { "This message will never self destruct", -1}, 
+        { "This message will never self destruct", Infinity}, 
         { "This message will self destruct in .5 seconds", 500 }, 
         { "This message will self destruct in 1.5 seconds", 1500 }, 
         { "This message will self destruct in 2.5 seconds", 2500 }, 
@@ -305,6 +307,9 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
         LabelMessagePtr lmp(new LabelMessage(labelData[i].str)); 
         lmp->fromNodeID=nodeAddr;
         lmp->expiration=labelData[i].exp; 
+        char buf[16]; 
+        snprintf(buf, sizeof(buf), "layer_%d", i); 
+        lmp->layer=string(buf);
         wg.updateGraph(lmp);
     }
 
