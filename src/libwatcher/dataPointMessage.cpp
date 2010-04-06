@@ -23,9 +23,9 @@
  */
 #include <boost/foreach.hpp>
 
+#include "watcherSerialize.h"
 #include "dataPointMessage.h"
 #include "logger.h"
-#include "watcherMarshal.h"
 
 using namespace std;
 using namespace boost;
@@ -109,13 +109,15 @@ namespace watcher {
             return out;
         }
 
-        void DataPointMessage::readPayload(std::istream& is)
+        template <typename Archive> void DataPointMessage::serialize(Archive& ar, const unsigned int /* file_version */)
         {
             TRACE_ENTER();
-            Marshal::Input in(is);
-            in >> dataName;
-            in.getCollection( std::back_inserter(dataPoints) );
+            ar & boost::serialization::base_object<Message>(*this);
+            ar & dataName;
+            ar & dataPoints;
             TRACE_EXIT();
         }
     }
 }
+
+BOOST_CLASS_EXPORT(watcher::event::DataPointMessage);

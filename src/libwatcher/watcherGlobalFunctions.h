@@ -24,9 +24,15 @@
 #ifndef WATCHER_GLOBAL_FUNCTIONS
 #define WATCHER_GLOBAL_FUNCTIONS
 
+#include <boost/serialization/split_free.hpp>
 #include "watcherTypes.h"
 
-#if 0
+BOOST_SERIALIZATION_SPLIT_FREE(boost::asio::ip::address);
+
+namespace boost 
+{
+    namespace serialization 
+    {
         template<class Archive>
             void save(Archive & ar, const watcher::NodeIdentifier &a, const unsigned int /* version */)
             {
@@ -41,6 +47,7 @@
                 ar & tmp;
                 a=watcher::NodeIdentifier(boost::asio::ip::address_v4(tmp));
             }
-#endif
+    }
+}
 
 #endif //  WATCHER_GLOBAL_FUNCTIONS

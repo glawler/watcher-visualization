@@ -61,6 +61,8 @@ namespace watcher {
                 friend std::ostream& operator<< (std::ostream& o, const SeekMessage& m);
 
             private:
+                friend class boost::serialization::access;
+                template <typename Archive> void serialize(Archive& ar, const unsigned int version);
                 DECLARE_LOGGER();
         };
 

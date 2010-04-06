@@ -8,6 +8,7 @@ PKG_PROG_PKG_CONFIG
 # Boost 1.36 is when asio appeared
 AX_BOOST_BASE(1.36)
 AX_BOOST_SYSTEM
+AX_BOOST_SERIALIZATION
 AX_BOOST_FILESYSTEM
 AX_BOOST_ASIO
 AX_BOOST_REGEX
@@ -187,6 +188,7 @@ else
     #
     AM_CONDITIONAL([ENABLE_OGREWATCHER], [test 1 == 0])
     AM_CONDITIONAL([ENABLE_WATCHER3D], [test 1 == 0])
+    AM_CONDITIONAL([ENABLE_EARTHWATCHER], [test 1 == 0])
 fi
 
 # allow optional disabling of watcherHierarchyClient

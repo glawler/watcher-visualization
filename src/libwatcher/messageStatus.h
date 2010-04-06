@@ -56,6 +56,8 @@ namespace watcher {
 
             protected:
             private:
+                friend class boost::serialization::access;
+                template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
                 DECLARE_LOGGER();
 
         };
