@@ -32,7 +32,10 @@ watcherd_SOURCES=\
 	sqliteDatabase.h \
 	sqliteDatabase.cpp \
 	watcherdConfig.h \
-	watcherdConfig.cpp
+	watcherdConfig.cpp \
+	sharedStream.h \
+	sharedStream.cpp \
+	sharedStreamFwd.h
 
 watcherd_LDADD = ../libwatcher/libwatchermsg.la 
 watcherd_LDADD += ../libwatcher/libwatcher.a 

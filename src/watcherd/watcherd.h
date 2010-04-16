@@ -36,13 +36,14 @@
 #include <boost/utility.hpp>
 #include <boost/thread.hpp>
 
-#include "libwatcher/message_fwd.h"
+#include <libwatcher/watcherMessageFwd.h>
 
 #include "watcherd_fwd.h"
 #include "serverMessageHandler.h"
 #include "server.h"
 #include "libconfig.h++"
 #include "declareLogger.h"
+#include "sharedStreamFwd.h"
 
 namespace watcher
 {
@@ -68,10 +69,10 @@ namespace watcher
             void run(const std::string &address, const std::string &port, const int &threadNum);
 
             /** Subscribe a ServerConnection to the event stream. */
-            void subscribe(ServerConnectionPtr);
+            void subscribe(SharedStreamPtr);
 
             /** Unsubscribe a ServerConnection to the event stream. */
-            void unsubscribe(ServerConnectionPtr);
+            void unsubscribe(SharedStreamPtr);
 
             /** Post an event to all listening clients.
              * @param message message to send
@@ -102,7 +103,7 @@ namespace watcher
             ServerMessageHandlerPtr serverMessageHandlerPtr;
 
             // List of clients subscribed to messages.
-            typedef std::list<ServerConnectionPtr> MessageRequestors;
+            typedef std::list<SharedStreamPtr> MessageRequestors;
             MessageRequestors messageRequestors;
             pthread_rwlock_t messageRequestorsLock;
 

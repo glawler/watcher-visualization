@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009,2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -43,11 +43,10 @@
 
 #include "watcherd_fwd.h"
 #include "serverConnectionFwd.h"
+#include "sharedStreamFwd.h"
 
 namespace watcher 
 {
-    class ReplayState; //fwd decl
-
     /// Represents a single connection from a client.
     class ServerConnection : 
         public Connection,
@@ -91,11 +90,6 @@ namespace watcher
             void read_error(const boost::system::error_code &e);
 
             bool dispatch_gui_event(event::MessagePtr &);
-            void seek(event::MessagePtr& m);
-            void start(event::MessagePtr& m);
-            void stop(event::MessagePtr& m);
-            void speed(event::MessagePtr& m);
-            void range(event::MessagePtr& m);
             void filter(event::MessagePtr& m);
 
             Watcherd& watcher;
@@ -114,19 +108,24 @@ namespace watcher
             enum connection_type { unknown, feeder, gui };
             connection_type conn_type;
 
-            /// state variables for Live and Replay tracking
-            bool isPlaying_;
-            bool isLive_;
-            boost::shared_ptr<ReplayState> replay;
-
             /// If needed, a network address to map incoming message IDs with.
             boost::asio::ip::address_v4 dataNetwork;
 
             typedef std::list<MessageStreamFilter> MessageStreamFilterList;
             MessageStreamFilterList messageStreamFilters;
             bool messageStreamFilterEnabled; 
+
+	    SharedStreamPtr stream;
+	    void seek(event::MessagePtr& m);
+	    void start(event::MessagePtr&);
+	    void stop(event::MessagePtr&);
+	    void speed(event::MessagePtr& m);
+	    void range(event::MessagePtr& m);
+	    void subscribeToStream(MessagePtr&);
+	    void description(MessagePtr&);
+	    void listStreams(MessagePtr&);
     };
 
-} // namespace http
+} // namespace
 
 #endif // WATCHER_SERVER_CONNECTION

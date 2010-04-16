@@ -53,6 +53,9 @@ namespace watcher {
             SPEED_MESSAGE_TYPE        = 0x0000ff03,
             PLAYBACK_TIME_RANGE_MESSAGE_TYPE = 0x0000ff04,
             MESSAGE_STREAM_FILTER_MESSAGE_TYPE = 0x0000ff05,
+	    SUBSCRIBE_STREAM_MESSAGE_TYPE = 0x0000ff06,
+	    STREAM_DESCRIPTION_MESSAGE_TYPE = 0x0000ff07,
+	    LIST_STREAMS_MESSAGE_TYPE = 0x0000ff08,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
@@ -81,6 +84,9 @@ namespace watcher {
         const unsigned int NODE_STATUS_MESSAGE_VERSION  = 1;
         const unsigned int PLAYBACK_TIME_RANGE_MESSAGE_VERSION = 1;
         const unsigned int MESSAGE_STREAM_FILTER_MESSAGE_VERSION = 1;
+	const unsigned int SUBSCRIBE_STREAM_MESSAGE_VERSION = 1;
+	const unsigned int STREAM_DESCRIPTION_MESSAGE_VERSION = 1;
+	const unsigned int LIST_STREAMS_MESSAGE_VERSION = 1;
 
         /**
          * GUI bits in the watcher have a concept of a layer which can be turned on or off.

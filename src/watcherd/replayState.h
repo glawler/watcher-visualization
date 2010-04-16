@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009,2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -16,11 +16,6 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file
- * @author Michael.Elkins@cobham.com
- * @date 2009-05-13
- */
-
 #ifndef replay_state_h
 #define replay_state_h
 
@@ -29,6 +24,7 @@
 
 #include "libwatcher/watcherTypes.h" //for Timestamp
 #include "declareLogger.h"
+#include "sharedStreamFwd.h"
 
 // forward decls
 namespace boost {
@@ -38,10 +34,6 @@ namespace boost {
 }
 
 namespace watcher {
-
-    // forward decls
-    class ServerConnection;
-    typedef boost::shared_ptr<ServerConnection> ServerConnectionPtr;
 
     /** Implements replay of events from the database to a specific client
      * connected to watcherd.
@@ -63,11 +55,12 @@ namespace watcher {
             /** Create an object for replaying events from the database to a specific client
              * connection of watcherd.
              *
+	     * @param[in] the io service object handing the client connections to this stream
              * @param[in] ptr the server connection to send events
              * @param[in] ts the time at which to begin event playback (milliseconds)
              * @param[in] speed event playback speed
              */
-            ReplayState(ServerConnectionPtr ptr, Timestamp ts = 0, float speed = 1.0f);
+            ReplayState(boost::asio::io_service& ios, SharedStreamPtr ptr, Timestamp ts = 0, float speed = 1.0f);
 
             /** Start event playback. */
             void run();

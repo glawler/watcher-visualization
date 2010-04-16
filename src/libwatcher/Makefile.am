@@ -30,7 +30,8 @@ libwatchermsg_la_include_HEADERS=\
 	messageStreamFilter.h \
 	messageStreamFilterMessage.h \
 	nodePropertiesMessage.h \
-	nodeStatusMessage.h 
+	nodeStatusMessage.h \
+	watcherMessageFwd.h
 	
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = watcher.pc watchermsg.pc
@@ -43,6 +44,7 @@ libwatchermsg_la_SOURCES=\
 	edgeMessage.cpp edgeMessage.h \
 	gpsMessage.cpp gpsMessage.h \
 	labelMessage.cpp labelMessage.h \
+	listStreamsMessage.cpp listStreamsMessage.h \
 	messageTypesAndVersions.cpp messageTypesAndVersions.h \
 	messageStreamFilterMessage.h messageStreamFilterMessage.cpp \
 	nodePropertiesMessage.cpp nodePropertiesMessage.h \
@@ -52,6 +54,8 @@ libwatchermsg_la_SOURCES=\
 	speedWatcherMessage.cpp speedWatcherMessage.h \
 	startWatcherMessage.cpp startWatcherMessage.h \
 	stopWatcherMessage.cpp stopWatcherMessage.h \
+	streamDescriptionMessage.cpp streamDescriptionMessage.h \
+	subscribeStreamMessage.cpp subscribeStreamMessage.h \
 	testMessage.cpp testMessage.h
 
 libwatcher_a_SOURCES= \

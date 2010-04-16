@@ -199,6 +199,26 @@ namespace watcher
         unsigned int messagesDropped;
         unsigned int messageQueueSize() { return messageCache.size(); }
 
+	/** Subscribe to an existing message stream on the watcher server.
+	 * @param uid unique identifier of the stream to join
+	 * @retval true message was sent.
+	 * @retval false message send failed.
+	 */
+	bool subscribeToStream(uint32_t uid);
+
+	/** Fetch a list of the available streams from the watcher server.
+	 * @retval true message was sent.
+	 * @retval false message send failed.
+	 */
+	bool listStreams();
+
+	/** Specify a human readable string used to identify this stream.
+	 * Watcher GUI clients can request a list of the shared streams using
+	 * the ListStreamsMessage.  This string will be associated with the UID
+	 * for this stream.
+	 */
+	bool setDescription(const std::string& desc);
+
         protected:
 
         /**

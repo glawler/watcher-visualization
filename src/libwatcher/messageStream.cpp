@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009,2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -25,6 +25,9 @@
 #include "libwatcher/speedWatcherMessage.h"
 #include "libwatcher/playbackTimeRange.h"
 #include "libwatcher/messageStreamFilterMessage.h"
+#include "libwatcher/listStreamsMessage.h"
+#include "libwatcher/subscribeStreamMessage.h"
+#include "libwatcher/streamDescriptionMessage.h"
 #include "logger.h"
 
 using namespace watcher;
@@ -313,4 +316,31 @@ bool MessageStream::connect()
     bool rv = connection->connect();
     TRACE_EXIT_RET_BOOL(rv);
     return rv;
+}
+
+bool MessageStream::subscribeToStream(uint32_t uid)
+{
+    TRACE_ENTER();
+    MessagePtr mess (new SubscribeStreamMessage(uid));
+    bool retVal=connection->sendMessage(mess);
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
+bool MessageStream::listStreams()
+{
+    TRACE_ENTER();
+    MessagePtr mess (new ListStreamsMessage());
+    bool retVal=connection->sendMessage(mess);
+    TRACE_EXIT_RET(retVal);
+    return retVal;
+}
+
+bool MessageStream::setDescription(const std::string& desc)
+{
+    TRACE_ENTER();
+    MessagePtr mess (new StreamDescriptionMessage(desc));
+    bool retVal=connection->sendMessage(mess);
+    TRACE_EXIT_RET(retVal);
+    return retVal;
 }

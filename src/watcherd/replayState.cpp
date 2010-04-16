@@ -22,8 +22,9 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 
-#include "libwatcher/message.h"
-#include "serverConnection.h"
+#include <libwatcher/message.h>
+
+#include "sharedStream.h"
 #include "Assert.h"
 #include "database.h"
 #include "watcherd.h"
@@ -44,7 +45,7 @@ const unsigned int DEFAULT_STEP = 250U /* ms */;
  * members of ReplayState.
  */
 struct ReplayState::impl {
-    boost::weak_ptr<ServerConnection> conn;
+    boost::weak_ptr<SharedStream> conn;
     std::deque<MessagePtr> events;
     boost::asio::deadline_timer timer;
     Timestamp ts; // the current effective time
@@ -62,8 +63,8 @@ struct ReplayState::impl {
      */
     boost::mutex lock;
 
-    impl(ServerConnectionPtr& ptr) :
-        conn(ptr), timer(ptr->io_service()), ts(0), last_event(0), bufsiz(DEFAULT_BUFFER_SIZE),
+    impl(SharedStreamPtr& ptr, boost::asio::io_service& ios) :
+        conn(ptr), timer(ios), ts(0), last_event(0), bufsiz(DEFAULT_BUFFER_SIZE),
         step(DEFAULT_STEP), state(paused), delta(0)
     {
         TRACE_ENTER();
@@ -73,8 +74,8 @@ struct ReplayState::impl {
     }
 };
 
-ReplayState::ReplayState(ServerConnectionPtr ptr, Timestamp t, float playback_speed) :
-    impl_(new impl(ptr))
+ReplayState::ReplayState(boost::asio::io_service& ios, SharedStreamPtr ptr, Timestamp t, float playback_speed) :
+    impl_(new impl(ptr, ios))
 {
     TRACE_ENTER();
     Assert<Bad_arg>(t >= 0);
@@ -306,7 +307,7 @@ void ReplayState::timer_handler(const boost::system::error_code& ec)
             }
         }
 
-        ServerConnectionPtr srv = impl_->conn.lock();
+        SharedStreamPtr srv = impl_->conn.lock();
         if (srv) { /* connection is still alive */
             srv->sendMessage(msgs);
             run(); // reschedule this task

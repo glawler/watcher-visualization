@@ -21,6 +21,7 @@
 #include "watcherd.h"
 #include "singletonConfig.h"
 #include "logger.h"
+#include "sharedStream.h"
 
 using namespace watcher;
 using namespace watcher::event;
@@ -79,7 +80,7 @@ void Watcherd::run(const std::string &address, const std::string &port, const in
     TRACE_EXIT();
 }
 
-void Watcherd::subscribe(ServerConnectionPtr client)
+void Watcherd::subscribe(SharedStreamPtr client)
 {
     TRACE_ENTER();
 
@@ -91,7 +92,7 @@ void Watcherd::subscribe(ServerConnectionPtr client)
     TRACE_EXIT();
 }
 
-void Watcherd::unsubscribe(ServerConnectionPtr client)
+void Watcherd::unsubscribe(SharedStreamPtr client)
 {
     TRACE_ENTER();
     pthread_rwlock_wrlock(&messageRequestorsLock);
@@ -109,7 +110,7 @@ void Watcherd::sendMessage(MessagePtr msg)
     shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
 
     // bind can't handle overloaded functions.  use member function pointer to help
-    void (ServerConnection::*ptr)(MessagePtr) = &ServerConnection::sendMessage;
+    void (SharedStream::*ptr)(MessagePtr) = &SharedStream::sendMessage;
     for_each(messageRequestors.begin(), messageRequestors.end(), bind(ptr, _1, msg));
     TRACE_EXIT();
 }
@@ -122,7 +123,7 @@ void Watcherd::sendMessage(const std::vector<MessagePtr>& msg)
     shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
 
     // bind can't handle overloaded functions.  use member function pointer to help
-    void (ServerConnection::*ptr)(const std::vector<MessagePtr>&) = &ServerConnection::sendMessage;
+    void (SharedStream::*ptr)(const std::vector<MessagePtr>&) = &SharedStream::sendMessage;
     for_each(messageRequestors.begin(), messageRequestors.end(), bind(ptr, _1, msg));
     TRACE_EXIT();
 }

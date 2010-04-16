@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009,2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -19,8 +19,6 @@
 /**
  * Connects to a Watcher server and writes the event stream to a KML file suitable for use
  * with Google Earth.
- *
- * @author michael.elkins@cobham.com
  */
 
 #include <unistd.h>
@@ -75,6 +73,7 @@ const option OPTIONS[] = {
     { "steps", required_argument, 0, 't' },
     { "icon-scale", required_argument, 0, 'i' },
     { "icon-path", required_argument, 0, 'I' },
+    { "join", required_argument, 0, 'j' }
     { 0, 0, 0, 0 }
 };
 
@@ -83,6 +82,8 @@ const char *OUTPUT_FILE = "watcher.kml";
 const char *PROPERTY_FILE = TOOL_NAME ".log.properties";
 const char *DEFAULT_HOST = "127.0.0.1";
 const unsigned int DEFAULT_REFRESH = 1; // SECONDS
+uint32_t StreamUID = -1;
+const char *DEFAULT_DESCRIPTION = "earthWatcher client";
 
 void usage()
 {
@@ -95,6 +96,7 @@ void usage()
         "  -d, --speed SPEED" << SEP << "specify the event playback rate (default: 1.0)\n"
         "  -h, --help\t" << SEP << "display this help message\n"
         "  -i, --icon-scale=NUM" << SEP << "adjust the size of node icons\n"
+	"  -j, --join UID" << SEP << "subscribe to a synchronized stream on the watcher server by UID\n"
         "  -I, --icon-path=STR" << SEP << "specify the node icon to use (default: " << IconPath << ")\n"
         "  -o, --output FILE" << SEP << "specifies the output KML file (default: " << OUTPUT_FILE << ")\n"
         "  -O, --lonoff OFF" << SEP << "translate GPS coordinates relative to a given longitude\n"
@@ -129,6 +131,7 @@ Timestamp StartTimestamp = -1 ; // default to EOF (live playback)
 unsigned int Refresh = DEFAULT_REFRESH;
 float Speed = 1.0;
 bool RelativeTS = false; // when true, start_timestamp is relative to first or last event in the Watcher DB
+std::string Description(DEFAULT_DESCRIPTION); // what this client calls itself
 
 void *process_events(void *)
 {
@@ -143,6 +146,13 @@ void *process_events(void *)
     if (RelativeTS) {
         ms->getMessageTimeRange();
     } else {
+	if (StreamUID != -1) {
+	    LOG_INFO("Joining stream uid " << StreamUID);
+	    ms->subscribeToStream(StreamUID);
+	} else {
+	    LOG_INFO("Setting stream description to: " << Description);
+	    ms->setDescription(Description);
+	}
         LOG_INFO("Starting event playback");
         ms->startStream(); 
     }
@@ -248,13 +258,19 @@ int main(int argc, char **argv)
         argOutputFile = (1<<4),
         argServerName = (1<<5),
         argSplineSteps = (1<<6),
-        argIconPath = (1<<7)
+        argIconPath = (1<<7),
+	argJoin = (1<<8),
+	argDescription = (1<<9)
     };
 
-    for (int i; (i = getopt_long(argc, argv, "a:A:hi:I:c:d:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
+    for (int i; (i = getopt_long(argc, argv, "a:A:d:hi:j:I:c:d:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
         switch (i) {
             case 'c':
                 break; //handled by initConfig()
+
+	    case'd':
+		Description = optarg;
+		break;
 
             case 'a':
                 Latoff = atof(optarg);
@@ -273,6 +289,11 @@ int main(int argc, char **argv)
             case 'i':
                 IconScale = atof(optarg);
                 break;
+
+	    case 'j':
+		streamUID = strtol(optarg, NULL, 10);
+		args |= argJoin;
+		break;
 
             case 'I':
                 IconPath = optarg;

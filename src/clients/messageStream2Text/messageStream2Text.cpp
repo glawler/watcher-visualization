@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009,2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -67,6 +67,8 @@
 #include "libwatcher/messageStream.h"
 #include "logger.h"
 
+#define DEFAULT_DESCRIPTION "messageStream2Text client"
+
 DECLARE_GLOBAL_LOGGER("messageStream2Text"); 
 
 using namespace std;
@@ -77,6 +79,9 @@ using namespace libconfig;
 option Options[] = {
     { "help", 0, NULL, 'h' },
     { "config", 1, NULL, 'c' },
+    { "description", 1, NULL, 'd' },
+    { "join", 1, NULL, 'j' },
+    { "list-streams", 0, NULL, 'l' },
     { "speed", 1, NULL, 's' },
     { "seek", 1, NULL, 'S' },
     { 0, 0, NULL, 0 }
@@ -88,6 +93,9 @@ void usage(const char *progName, bool exitp)
     cout << "Args: " << endl; 
     cout << "   -h, show this messsage and exit." << endl; 
     cout << "   -c configfile - If not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
+    cout << "   -d, --description NAME - use NAME as the description string for this client's event stream." << endl;
+    cout << "   -j, --join UID - join the specified message stream for sync playback." << endl;
+    cout << "   -l, --list-streams - fetch the list of available streams from the watcher server." << endl;
     cout << "   -s, --speed=FLOAT - specify the event playback speed." << endl;
     cout << "   -S, --seek=INT - specify the offset in milliseconds to start event playback (default: live playback)." << endl;
     cout << "If a configuration file is not found on startup, a default one will be created, used, and saved on program exit." << endl;
@@ -106,12 +114,26 @@ int main(int argc, char **argv)
     int i;
     float rate = 1.0; // playback rate
     Timestamp pos = -1; // default to live playback
+    bool do_list = false;
+    bool do_join = false;
+    uint32_t stream_uid = -1; // stream to join (default: new stream)
+    std::string description(DEFAULT_DESCRIPTION);
 
-    while ((i = getopt_long(argc, argv, "hc:s:S:", Options, NULL)) != -1) {
+    while ((i = getopt_long(argc, argv, "hc:d:j:ls:S:", Options, NULL)) != -1) {
         switch (i) {
             case 'c':
                 //handled below
                 break;
+	    case 'd':
+		description = optarg;
+		break;
+	    case 'j':
+		do_join = true;
+		stream_uid = boost::lexical_cast<uint32_t>(optarg);
+		break;
+	    case 'l':
+		do_list = true;
+		break;
             case 's':
                 rate = atof(optarg);
                 break;
@@ -175,6 +197,13 @@ int main(int argc, char **argv)
 
     LOG_INFO("Starting event playback");
     ms->startStream(); 
+
+    if (do_list)
+	ms->listStreams();
+    else if (do_join)
+	ms->subscribeToStream(stream_uid);
+    else
+	ms->setDescription(description);
 
     LOG_INFO("Waiting for events ");
     unsigned int messageNumber=0;

@@ -16,6 +16,7 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sharedStream.h"
 #include "serverConnection.h"
 #include <vector>
 #include <boost/bind.hpp>
@@ -28,6 +29,9 @@
 #include <libwatcher/nodeStatusMessage.h>
 #include <libwatcher/playbackTimeRange.h>
 #include <libwatcher/messageStreamFilterMessage.h>
+#include <libwatcher/subscribeStreamMessage.h>
+#include <libwatcher/listStreamsMessage.h>
+#include <libwatcher/streamDescriptionMessage.h>
 
 #include "watcherd.h"
 #include "writeDBMessageHandler.h"
@@ -63,9 +67,9 @@ namespace watcher {
         strand_(io_service),
         write_strand_(io_service),
         conn_type(unknown),
-        isPlaying_(false), isLive_(true),
         dataNetwork(0),
-        messageStreamFilterEnabled(false)
+        messageStreamFilterEnabled(false),
+	stream(new SharedStream(w, io_service))
     {
         TRACE_ENTER();
         libconfig::Config &cfg=SingletonConfig::instance();
@@ -99,6 +103,7 @@ namespace watcher {
     void ServerConnection::run()
     {
         TRACE_ENTER(); 
+	stream->subscribe(shared_from_this());
         boost::asio::async_read(
                 theSocket, 
                 boost::asio::buffer(incomingBuffer, DataMarshaller::header_length),
@@ -129,7 +134,7 @@ namespace watcher {
         // unsubscribe to event stream, otherwise it will hold a
         // shared_ptr open
         if (conn_type == gui)
-            watcher.unsubscribe(shared_from_this());
+	    stream->unsubscribe(shared_from_this());
 
         TRACE_EXIT();
     }
@@ -148,7 +153,7 @@ namespace watcher {
                 LOG_ERROR("Error parsing incoming message header.");
 
                 if (conn_type == gui)
-                    watcher.unsubscribe(shared_from_this());
+                    stream->unsubscribe(shared_from_this());
             }
             else
             {
@@ -178,26 +183,7 @@ namespace watcher {
         TRACE_ENTER();
         SeekMessagePtr p = boost::dynamic_pointer_cast<SeekMessage>(m);
         if (p) {
-            if (p->offset == SeekMessage::eof) {
-                if (isLive_) {
-                    // nothing to do
-                } else if (replay->speed() >= 0) {
-                    // switch to live stream
-                    isLive_ = true;
-                    replay->pause();
-                    if (isPlaying_)
-                        watcher.subscribe(shared_from_this());
-                } else {
-                    replay->seek( SeekMessage::eof );
-                }
-            } else {
-                replay->seek(p->offset);
-
-                // when switching from live to replay while playing, kick off the replay strand
-                if (isLive_ && isPlaying_)
-                    replay->run();
-                isLive_ = false;
-            }
+	    stream->seek(p);
         } else {
             LOG_WARN("unable to dynamic_pointer_cast to SeekMessage!");
         }
@@ -207,67 +193,26 @@ namespace watcher {
     void ServerConnection::start(event::MessagePtr&)
     {
         TRACE_ENTER();
-        LOG_DEBUG("in: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
-        if (!isPlaying_) {
-            isPlaying_ = true;
-            if (isLive_)
-                watcher.subscribe(shared_from_this());
-            else
-                replay->run();
-        }
-        LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
+	stream->start();
         TRACE_EXIT();
     }
 
     void ServerConnection::stop(event::MessagePtr&)
     {
         TRACE_ENTER();
-        LOG_DEBUG("isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
-        if (isPlaying_) {
-            LOG_DEBUG("stopping playback");
-            if (isLive_) {
-                watcher.unsubscribe(shared_from_this());
-                /* save current Timestamp so we can resume from the database */
-                isLive_ = false;
-                replay->seek( getCurrentTime() );
-            } else
-                replay->pause();
-            isPlaying_ = false;
-        } else
-            LOG_DEBUG("stop message received, but playback is stopped");
-        LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
+	stream->stop();
         TRACE_EXIT();
     }
 
     void ServerConnection::speed(event::MessagePtr& m)
     {
         TRACE_ENTER();
-        LOG_DEBUG("isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         SpeedMessagePtr p = boost::dynamic_pointer_cast<SpeedMessage>(m);
         if (p) {
-            if (p->speed == 0) {
-                /* special case, speed==0 means StopMessage.  This is to avoid
-                 * a Bad_arg exception from ReplayState. */
-                LOG_INFO("got speed==0, emulating StopMessage");
-                stop(m);
-            } else if (isLive_ && p->speed >= 1.0f) {
-                // ignore, can't predict the future
-            } else {
-                replay->speed(p->speed);
-                if (isLive_) {
-                    isLive_ = false;
-                    /* when transitioning from live playback, automatically
-                     * seek to the end of the database.
-                     */
-                    replay->seek( SeekMessage::eof );
-                    if (isPlaying_)
-                        replay->run();
-                }
-            }
+	    stream->speed(p);
         } else {
             LOG_WARN("unable to dynamic_pointer_cast to SpeedMessage!");
         }
-        LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
         TRACE_EXIT();
     }
 
@@ -277,12 +222,9 @@ namespace watcher {
     void ServerConnection::range(event::MessagePtr& m)
     {
         PlaybackTimeRangeMessagePtr p (boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(m));
-        if (p) {
-            TimeRange r(event_range());
-            p->min_ = r.first;
-            p->max_ = r.second;
-            sendMessage(p);
-        } else
+        if (p)
+	    stream->range(p);
+        else
             LOG_WARN("unable to cast to PlaybackTimeRangeMessage");
     }
 
@@ -306,6 +248,34 @@ namespace watcher {
             LOG_WARN("unable to cast to MessageStreamFilterMessagePtr");
     }
 
+    void ServerConnection::subscribeToStream(MessagePtr& m)
+    {
+	TRACE_ENTER();
+	SubscribeStreamMessagePtr p = boost::dynamic_pointer_cast<SubscribeStreamMessage>(m);
+	if (p) {
+	} else
+	    LOG_WARN("unable to cast MessagePtr to SubscribeStreamMessagePtr");
+	TRACE_EXIT();
+    }
+
+    void ServerConnection::description(MessagePtr& m)
+    {
+	TRACE_ENTER();
+	StreamDescriptionMessagePtr p = boost::dynamic_pointer_cast<StreamDescriptionMessage>(m);
+	if (p) {
+	    stream->description = p->desc;
+	    LOG_INFO("set description for stream " << stream->getUID() << ": " << p->desc);
+	} else
+	    LOG_WARN("unable to cast MessagePtr to StreamDescriptionMessagePtr");
+	TRACE_EXIT();
+    }
+
+    void ServerConnection::listStreams(MessagePtr&)
+    {
+	TRACE_ENTER();
+	TRACE_EXIT();
+    }
+
     bool ServerConnection::dispatch_gui_event(MessagePtr& m)
     {
         static const struct {
@@ -318,6 +288,9 @@ namespace watcher {
             { SPEED_MESSAGE_TYPE, &ServerConnection::speed },
             { PLAYBACK_TIME_RANGE_MESSAGE_TYPE, &ServerConnection::range },
             { MESSAGE_STREAM_FILTER_MESSAGE_TYPE, &ServerConnection::filter },
+	    { SUBSCRIBE_STREAM_MESSAGE_TYPE, &ServerConnection::subscribeToStream },
+	    { STREAM_DESCRIPTION_MESSAGE_TYPE, &ServerConnection::description },
+	    { LIST_STREAMS_MESSAGE_TYPE, &ServerConnection::listStreams },
             { UNKNOWN_MESSAGE_TYPE, 0 }
         };
 
@@ -327,7 +300,7 @@ namespace watcher {
             if (m->type == dispatch[i].type) {
                 if (conn_type == unknown) {
                     conn_type = gui;
-                    replay.reset(new ReplayState(shared_from_this()));
+		    stream.reset(new SharedStream(watcher, io_service_, shared_from_this()));
                 }
                 (this->*(dispatch[i].fn)) (m);
                 TRACE_EXIT_RET_BOOL(true);
@@ -479,7 +452,7 @@ namespace watcher {
         {
             LOG_WARN("Error while sending response to client: " << e);
             if (conn_type == gui)
-                watcher.unsubscribe(shared_from_this());
+                stream->unsubscribe(shared_from_this());
         }
 
         // No new asynchronous operations are started. This means that all shared_ptr
