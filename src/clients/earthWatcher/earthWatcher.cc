@@ -63,6 +63,7 @@ const option OPTIONS[] = {
     { "latoff", required_argument, 0, 'a' },
     { "altoff", required_argument, 0, 'A' },
     { "config", required_argument, 0, 'c' },
+    { "description", required_argument, 0, 'D' },
     { "help", no_argument, 0, 'h' },
     { "output", required_argument, 0, 'o' },
     { "lonoff", required_argument, 0, 'O' },
@@ -73,7 +74,7 @@ const option OPTIONS[] = {
     { "steps", required_argument, 0, 't' },
     { "icon-scale", required_argument, 0, 'i' },
     { "icon-path", required_argument, 0, 'I' },
-    { "join", required_argument, 0, 'j' }
+    { "join", required_argument, 0, 'j' },
     { 0, 0, 0, 0 }
 };
 
@@ -94,6 +95,7 @@ void usage()
         "  -A, --altoff OFF" << SEP << "translate GPS coordinates relative to the given altitude\n"
         "  -c, --config FILE" << SEP << "specify a configuration file (default: " << CONFIG_FILE << ")\n"
         "  -d, --speed SPEED" << SEP << "specify the event playback rate (default: 1.0)\n"
+	"  -D, --description NAME" << SEP << "set the description for the event stream\n"
         "  -h, --help\t" << SEP << "display this help message\n"
         "  -i, --icon-scale=NUM" << SEP << "adjust the size of node icons\n"
 	"  -j, --join UID" << SEP << "subscribe to a synchronized stream on the watcher server by UID\n"
@@ -263,12 +265,12 @@ int main(int argc, char **argv)
 	argDescription = (1<<9)
     };
 
-    for (int i; (i = getopt_long(argc, argv, "a:A:d:hi:j:I:c:d:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
+    for (int i; (i = getopt_long(argc, argv, "a:A:hi:j:I:c:d:D:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
         switch (i) {
             case 'c':
                 break; //handled by initConfig()
 
-	    case'd':
+	    case'D':
 		Description = optarg;
 		break;
 
@@ -291,7 +293,7 @@ int main(int argc, char **argv)
                 break;
 
 	    case 'j':
-		streamUID = strtol(optarg, NULL, 10);
+		StreamUID = strtol(optarg, NULL, 10);
 		args |= argJoin;
 		break;
 
