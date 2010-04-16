@@ -28,6 +28,8 @@ namespace watcher {
 
 	class EventStreamInfo {
 	    public:
+		EventStreamInfo();
+		EventStreamInfo(uint32_t, const std::string&);
 		uint32_t uid;			//< unique identifier for this stream
 		std::string description;	//< human readable string describing this event stream
 	    private:

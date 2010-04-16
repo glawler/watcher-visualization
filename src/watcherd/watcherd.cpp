@@ -22,6 +22,9 @@
 #include "singletonConfig.h"
 #include "logger.h"
 #include "sharedStream.h"
+#include <libwatcher/listStreamsMessage.h>
+
+#include <boost/foreach.hpp>
 
 using namespace watcher;
 using namespace watcher::event;
@@ -125,5 +128,20 @@ void Watcherd::sendMessage(const std::vector<MessagePtr>& msg)
     // bind can't handle overloaded functions.  use member function pointer to help
     void (SharedStream::*ptr)(const std::vector<MessagePtr>&) = &SharedStream::sendMessage;
     for_each(messageRequestors.begin(), messageRequestors.end(), bind(ptr, _1, msg));
+    TRACE_EXIT();
+}
+
+void Watcherd::listStreams(ServerConnectionPtr conn)
+{
+    TRACE_ENTER();
+    pthread_rwlock_rdlock(&messageRequestorsLock);
+    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
+
+    ListStreamsMessagePtr msg(new ListStreamsMessage());
+    BOOST_FOREACH(SharedStreamPtr stream, messageRequestors) {
+	    msg->evstreams.push_back( EventStreamInfoPtr(new EventStreamInfo( stream->getUID(), stream->description )) );
+    }
+    conn->sendMessage(msg);
+
     TRACE_EXIT();
 }

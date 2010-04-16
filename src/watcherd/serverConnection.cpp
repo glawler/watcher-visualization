@@ -273,6 +273,7 @@ namespace watcher {
     void ServerConnection::listStreams(MessagePtr&)
     {
 	TRACE_ENTER();
+	watcher.listStreams(shared_from_this());
 	TRACE_EXIT();
     }
 

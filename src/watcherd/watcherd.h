@@ -90,6 +90,9 @@ namespace watcher
             /// determine if this watcher daemon was invoked in read-only event database mode
             bool readOnly() const { return readOnly_; }
 
+	    /// send a list of the current streams to the specified client
+	    void listStreams(ServerConnectionPtr);
+
         protected:
 
         private:

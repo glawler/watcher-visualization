@@ -28,6 +28,16 @@ namespace watcher {
     namespace event {
         INIT_LOGGER(ListStreamsMessage, "Message.ListStreamsMessage");
 
+	EventStreamInfo::EventStreamInfo()
+	    : uid(-1)
+	{
+	}
+
+	EventStreamInfo::EventStreamInfo(uint32_t uid_, const std::string& desc_)
+	    : uid(uid_), description(desc_)
+	{
+	}
+
         ListStreamsMessage::ListStreamsMessage() : Message(LIST_STREAMS_MESSAGE_TYPE, LIST_STREAMS_MESSAGE_VERSION)
         {
             TRACE_ENTER();
