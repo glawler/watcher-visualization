@@ -25,55 +25,63 @@
 #include <boost/foreach.hpp>
 
 namespace watcher {
-    namespace event {
-        INIT_LOGGER(ListStreamsMessage, "Message.ListStreamsMessage");
+namespace event {
 
-	EventStreamInfo::EventStreamInfo()
-	    : uid(-1)
-	{
-	}
+INIT_LOGGER(ListStreamsMessage, "Message.ListStreamsMessage");
 
-	EventStreamInfo::EventStreamInfo(uint32_t uid_, const std::string& desc_)
-	    : uid(uid_), description(desc_)
-	{
-	}
-
-        ListStreamsMessage::ListStreamsMessage() : Message(LIST_STREAMS_MESSAGE_TYPE, LIST_STREAMS_MESSAGE_VERSION)
-        {
-            TRACE_ENTER();
-            TRACE_EXIT();
-        }
-
-        template <typename Archive> void ListStreamsMessage::serialize(Archive& ar, const unsigned int /* version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            TRACE_EXIT();
-        }
-
-        template <typename Archive> void EventStreamInfo::serialize(Archive& ar, const unsigned int /* version */)
-        {
-            //TRACE_ENTER();
-	    ar & uid;
-	    ar & description;
-            //TRACE_EXIT();
-        }
-
-	std::ostream& operator<< (std::ostream& os, const EventStreamInfoPtr& p)
-	{
-	    return os << "[EventStreamInfo uid=" << p->uid << "description=" << p->description << "]\n";
-	}
-
-	std::ostream& operator<< (std::ostream& os, const ListStreamsMessagePtr& p)
-	{
-	    os << "[ListStreamsMessage count=" << p->evstreams.size() << "\n";
-	    BOOST_FOREACH(const EventStreamInfoPtr& streamInfo, p->evstreams) {
-		os << streamInfo;
-	    }
-	    return os << "]\n";
-	}
-    }
+EventStreamInfo::EventStreamInfo() : uid(-1)
+{
 }
+
+EventStreamInfo::EventStreamInfo(uint32_t uid_, const std::string& desc_) : uid(uid_), description(desc_)
+{
+}
+
+ListStreamsMessage::ListStreamsMessage() : Message(LIST_STREAMS_MESSAGE_TYPE, LIST_STREAMS_MESSAGE_VERSION)
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
+
+template <typename Archive> void ListStreamsMessage::serialize(Archive& ar, const unsigned int /* version */)
+{
+    TRACE_ENTER();
+    ar & boost::serialization::base_object<Message>(*this);
+    ar & evstreams;
+    TRACE_EXIT();
+}
+
+template <typename Archive> void EventStreamInfo::serialize(Archive& ar, const unsigned int /* version */)
+{
+    //TRACE_ENTER();
+    ar & uid;
+    ar & description;
+    //TRACE_EXIT();
+}
+
+std::ostream& operator<< (std::ostream& os, const EventStreamInfo& p)
+{
+    return os << "[EventStreamInfo uid=" << p.uid << " description=" << p.description << "]";
+}
+
+std::ostream& operator<< (std::ostream& os, const ListStreamsMessage& p)
+{
+    os << "[ListStreamsMessage count=" << p.evstreams.size();
+    BOOST_FOREACH(const EventStreamInfoPtr& streamInfo, p.evstreams) {
+	os << "\n\t" << *streamInfo;
+    }
+    return os << "]";
+}
+
+// virtual
+std::ostream& ListStreamsMessage::toStream(std::ostream& os) const
+{
+    return Message::toStream(os) << *this;
+}
+
+} // namespace
+
+} // namespace
 
 BOOST_CLASS_EXPORT(watcher::event::EventStreamInfo)
 BOOST_CLASS_EXPORT(watcher::event::ListStreamsMessage)

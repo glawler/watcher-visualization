@@ -139,9 +139,25 @@ void Watcherd::listStreams(ServerConnectionPtr conn)
 
     ListStreamsMessagePtr msg(new ListStreamsMessage());
     BOOST_FOREACH(SharedStreamPtr stream, messageRequestors) {
-	    msg->evstreams.push_back( EventStreamInfoPtr(new EventStreamInfo( stream->getUID(), stream->description )) );
+	    msg->evstreams.push_back( EventStreamInfoPtr(new EventStreamInfo( stream->getUID(), stream->description_ )) );
     }
     conn->sendMessage(msg);
 
     TRACE_EXIT();
+}
+
+SharedStreamPtr Watcherd::getStream(uint32_t uid)
+{
+    TRACE_ENTER();
+    pthread_rwlock_rdlock(&messageRequestorsLock);
+    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
+
+    BOOST_FOREACH(SharedStreamPtr stream, messageRequestors) {
+	if (stream->getUID() == uid)
+	    return stream;
+    }
+
+    TRACE_EXIT_RET("null");
+
+    return SharedStreamPtr(static_cast<SharedStream*>(0));
 }

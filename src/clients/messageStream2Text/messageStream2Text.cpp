@@ -197,13 +197,12 @@ int main(int argc, char **argv)
 
     LOG_INFO("Starting event playback");
     ms->startStream(); 
+    ms->setDescription(description);
 
     if (do_list)
 	ms->listStreams();
     else if (do_join)
 	ms->subscribeToStream(stream_uid);
-    else
-	ms->setDescription(description);
 
     LOG_INFO("Waiting for events ");
     unsigned int messageNumber=0;

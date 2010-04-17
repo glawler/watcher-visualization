@@ -93,6 +93,8 @@ namespace watcher
 	    /// send a list of the current streams to the specified client
 	    void listStreams(ServerConnectionPtr);
 
+	    /// Return a shared stream by UID
+	    SharedStreamPtr getStream(uint32_t);
         protected:
 
         private:

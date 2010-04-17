@@ -44,6 +44,7 @@ namespace watcher {
         class ListStreamsMessage : public Message {
             public:
             ListStreamsMessage(); 
+	    /*virtual*/ std::ostream& toStream(std::ostream&) const;
 
 	    std::vector<EventStreamInfoPtr> evstreams;
 
@@ -55,7 +56,7 @@ namespace watcher {
 
         typedef boost::shared_ptr<ListStreamsMessage> ListStreamsMessagePtr;
 
-	std::ostream& operator<< (std::ostream& os, const EventStreamInfoPtr& p);
+	std::ostream& operator<< (std::ostream& os, const EventStreamInfo& p);
 	std::ostream& operator<< (std::ostream& os, const ListStreamsMessage& p);
     }
 }

@@ -68,8 +68,7 @@ namespace watcher {
         write_strand_(io_service),
         conn_type(unknown),
         dataNetwork(0),
-        messageStreamFilterEnabled(false),
-	stream(new SharedStream(w, io_service))
+        messageStreamFilterEnabled(false)
     {
         TRACE_ENTER();
         libconfig::Config &cfg=SingletonConfig::instance();
@@ -103,7 +102,6 @@ namespace watcher {
     void ServerConnection::run()
     {
         TRACE_ENTER(); 
-	stream->subscribe(shared_from_this());
         boost::asio::async_read(
                 theSocket, 
                 boost::asio::buffer(incomingBuffer, DataMarshaller::header_length),
@@ -182,11 +180,10 @@ namespace watcher {
     {
         TRACE_ENTER();
         SeekMessagePtr p = boost::dynamic_pointer_cast<SeekMessage>(m);
-        if (p) {
+        if (p)
 	    stream->seek(p);
-        } else {
+        else
             LOG_WARN("unable to dynamic_pointer_cast to SeekMessage!");
-        }
         TRACE_EXIT();
     }
 
@@ -253,6 +250,15 @@ namespace watcher {
 	TRACE_ENTER();
 	SubscribeStreamMessagePtr p = boost::dynamic_pointer_cast<SubscribeStreamMessage>(m);
 	if (p) {
+	    SharedStreamPtr newstream = watcher.getStream(p->uid);
+	    if (newstream) {
+		LOG_INFO("client subscribed to stream " << p->uid);
+		stream->unsubscribe(shared_from_this());
+		stream.reset(newstream.get());
+		stream->subscribe(shared_from_this());
+	    }
+	    else
+		LOG_WARN("client attempted to subscribe to non-existant stream uid " << p->uid);
 	} else
 	    LOG_WARN("unable to cast MessagePtr to SubscribeStreamMessagePtr");
 	TRACE_EXIT();
@@ -263,7 +269,7 @@ namespace watcher {
 	TRACE_ENTER();
 	StreamDescriptionMessagePtr p = boost::dynamic_pointer_cast<StreamDescriptionMessage>(m);
 	if (p) {
-	    stream->description = p->desc;
+	    stream->description_ = p->desc;
 	    LOG_INFO("set description for stream " << stream->getUID() << ": " << p->desc);
 	} else
 	    LOG_WARN("unable to cast MessagePtr to StreamDescriptionMessagePtr");
@@ -301,7 +307,8 @@ namespace watcher {
             if (m->type == dispatch[i].type) {
                 if (conn_type == unknown) {
                     conn_type = gui;
-		    stream.reset(new SharedStream(watcher, io_service_, shared_from_this()));
+		    stream.reset(new SharedStream(watcher));
+		    stream->subscribe(shared_from_this());
                 }
                 (this->*(dispatch[i].fn)) (m);
                 TRACE_EXIT_RET_BOOL(true);

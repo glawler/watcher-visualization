@@ -80,7 +80,15 @@ namespace watcher {
                 case MESSAGE_STREAM_FILTER_MESSAGE_TYPE:
                     out << static_cast<int>(MESSAGE_STREAM_FILTER_MESSAGE_TYPE) << " (message stream filter)";
                     break;
-
+		case LIST_STREAMS_MESSAGE_TYPE:
+                    out << static_cast<int>(LIST_STREAMS_MESSAGE_TYPE) << " (list streams)";
+		    break;
+		case SUBSCRIBE_STREAM_MESSAGE_TYPE:
+                    out << static_cast<int>(SUBSCRIBE_STREAM_MESSAGE_TYPE) << " (subscribe stream)";
+		    break;
+		case STREAM_DESCRIPTION_MESSAGE_TYPE:
+                    out << static_cast<int>(STREAM_DESCRIPTION_MESSAGE_TYPE) << " (stream description)";
+		    break;
 
                 case USER_DEFINED_MESSAGE_TYPE: 
                     out << static_cast<int>(USER_DEFINED_MESSAGE_TYPE) << " (user defined)";

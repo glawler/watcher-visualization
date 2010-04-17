@@ -27,25 +27,26 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
-#include <boost/thread.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/scoped_ptr.hpp>
 
+/*
 namespace boost {
     namespace asio {
 	class io_service;
     }
-}
+} */
 
 namespace watcher {
 class ReplayState; //fwd decl
 class Watcherd;
+class SharedStreamImpl;
 
+/** Allows multiple clients to watch the same stream of live or replayed events. */
 class SharedStream : public boost::enable_shared_from_this<SharedStream> {
     public:
-	SharedStream(Watcherd&, boost::asio::io_service&);
-
-	// has the effect of automatically invoking .subscribe()
-	SharedStream(Watcherd&, boost::asio::io_service&, ServerConnectionPtr);
+	SharedStream(Watcherd&);
+	~SharedStream();
 
 	void seek(const event::SeekMessagePtr& m);
 	void start();
@@ -53,30 +54,29 @@ class SharedStream : public boost::enable_shared_from_this<SharedStream> {
 	void speed(const event::SpeedMessagePtr& m);
 	void range(event::PlaybackTimeRangeMessagePtr m);
 
+	/** Add a client to the list which gets events for this stream. */
+	void subscribe(ServerConnectionPtr);
+
+	/** Remove a client to the list which gets events for this stream. */
+	void unsubscribe(ServerConnectionPtr);
+
+	/** send a message to all clients watching this stream. */
+	void sendMessage(event::MessagePtr);
+
+	/** send messages to all clients watching this stream. */
+	void sendMessage(const std::vector<event::MessagePtr>&);
+
 	/// state variables for Live and Replay tracking
 	bool isPlaying_;
 	bool isLive_;
-	boost::shared_ptr<ReplayState> replay;
+	std::string description_;
 
-	void subscribe(ServerConnectionPtr);
-	void unsubscribe(ServerConnectionPtr);
-	void sendMessage(event::MessagePtr);
-	void sendMessage(const std::vector<event::MessagePtr>&);
-
-	std::string description;
-	Watcherd& watcher;
-
-	uint32_t getUID() const { return uid; }
+	uint32_t getUID() const;
 
     private:
-	boost::mutex lock;
-	std::list<ServerConnectionWeakPtr> clients; // clients subscribed to this stream
-
-	uint32_t uid;
+	boost::scoped_ptr<SharedStreamImpl> impl_;
 
 	DECLARE_LOGGER();
-
-	void init(boost::asio::io_service&);
 };
 
 } // namespace

@@ -48,28 +48,34 @@ namespace watcher {
 
 INIT_LOGGER(SharedStream, "SharedStream");
 
+class SharedStreamImpl {
+    public:
+	Watcherd& watcher_;
+	uint32_t uid_;
+	boost::shared_ptr<ReplayState> replay_;
+
+	boost::mutex lock_;
+	std::list<ServerConnectionWeakPtr> clients_; // clients subscribed to this stream
+
+	SharedStreamImpl(Watcherd& wd) : watcher_(wd), uid_(getNextUID()) {}
+};
+
 using namespace watcher::event;
 
-void SharedStream::init(boost::asio::io_service& ios)
+uint32_t SharedStream::getUID() const
 {
-    isPlaying_=false;
-    isLive_=true;
-    uid=getNextUID();
-    replay.reset(new ReplayState(ios, shared_from_this()));
+    return impl_->uid_;
 }
 
-SharedStream::SharedStream(Watcherd& wd, boost::asio::io_service& ios_) : watcher(wd)
+SharedStream::SharedStream(Watcherd& wd) : isPlaying_(false), isLive_(true), impl_(new SharedStreamImpl(wd))
 {
     TRACE_ENTER();
-    init(ios_);
     TRACE_EXIT();
 }
 
-SharedStream::SharedStream(Watcherd& wd, boost::asio::io_service& ios_, ServerConnectionPtr ptr) : watcher(wd)
+SharedStream::~SharedStream()
 {
     TRACE_ENTER();
-    init(ios_);
-    subscribe(ptr);
     TRACE_EXIT();
 }
 
@@ -79,21 +85,21 @@ void SharedStream::seek(const SeekMessagePtr& p)
     if (p->offset == SeekMessage::eof) {
 	if (isLive_) {
 	    // nothing to do
-	} else if (replay->speed() >= 0) {
+	} else if (impl_->replay_->speed() >= 0) {
 	    // switch to live stream
 	    isLive_ = true;
-	    replay->pause();
+	    impl_->replay_->pause();
 	    if (isPlaying_)
-		watcher.subscribe(shared_from_this());
+		impl_->watcher_.subscribe(shared_from_this());
 	} else {
-	    replay->seek( SeekMessage::eof );
+	    impl_->replay_->seek( SeekMessage::eof );
 	}
     } else {
-	replay->seek(p->offset);
+	impl_->replay_->seek(p->offset);
 
 	// when switching from live to replay while playing, kick off the replay strand
 	if (isLive_ && isPlaying_)
-	    replay->run();
+	    impl_->replay_->run();
 	isLive_ = false;
     }
     TRACE_EXIT();
@@ -106,9 +112,9 @@ void SharedStream::start()
     if (!isPlaying_) {
 	isPlaying_ = true;
 	if (isLive_)
-	    watcher.subscribe(shared_from_this());
+	    impl_->watcher_.subscribe(shared_from_this());
 	else
-	    replay->run();
+	    impl_->replay_->run();
     }
     LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
     TRACE_EXIT();
@@ -121,12 +127,12 @@ void SharedStream::stop()
     if (isPlaying_) {
 	LOG_DEBUG("stopping playback");
 	if (isLive_) {
-	    watcher.unsubscribe(shared_from_this());
+	    impl_->watcher_.unsubscribe(shared_from_this());
 	    /* save current Timestamp so we can resume from the database */
 	    isLive_ = false;
-	    replay->seek( getCurrentTime() );
+	    impl_->replay_->seek( getCurrentTime() );
 	} else
-	    replay->pause();
+	    impl_->replay_->pause();
 	isPlaying_ = false;
     } else
 	LOG_DEBUG("stop message received, but playback is stopped");
@@ -147,15 +153,15 @@ void SharedStream::speed(const SpeedMessagePtr& p)
     } else if (isLive_ && p->speed >= 1.0f) {
 	// ignore, can't predict the future
     } else {
-	replay->speed(p->speed);
+	impl_->replay_->speed(p->speed);
 	if (isLive_) {
 	    isLive_ = false;
 	    /* when transitioning from live playback, automatically
 	     * seek to the end of the database.
 	     */
-	    replay->seek( SeekMessage::eof );
+	    impl_->replay_->seek( SeekMessage::eof );
 	    if (isPlaying_)
-		replay->run();
+		impl_->replay_->run();
 	}
     }
 
@@ -182,24 +188,26 @@ void SharedStream::range(PlaybackTimeRangeMessagePtr p)
 void SharedStream::sendMessage(MessagePtr m)
 {
     TRACE_ENTER();
-    boost::mutex::scoped_lock lck(lock);
+    boost::mutex::scoped_lock lck(impl_->lock_);
 
     /* weak_ptr doesn't have an operator== so we can't keep a dead list. */
     std::list<ServerConnectionWeakPtr> alive;
 
-    BOOST_FOREACH(ServerConnectionWeakPtr ptr, clients) {
+    bool dead = false;
+    BOOST_FOREACH(ServerConnectionWeakPtr ptr, impl_->clients_) {
 	ServerConnectionPtr conn = ptr.lock();
 	if (conn) {
 	    conn->sendMessage(m);
 	    alive.push_front(ptr);
-	}
+	} else
+	    dead = true;
     }
 
     if (alive.empty()) {
 	LOG_INFO("no more waiting clients");
-	watcher.unsubscribe(shared_from_this());
-    } else
-	clients = alive;
+	impl_->watcher_.unsubscribe(shared_from_this());
+    } else if (dead)
+	impl_->clients_ = alive;
 
     TRACE_EXIT();
 }
@@ -207,24 +215,26 @@ void SharedStream::sendMessage(MessagePtr m)
 void SharedStream::sendMessage(const std::vector<MessagePtr>& msgs)
 {
     TRACE_ENTER();
-    boost::mutex::scoped_lock lck(lock);
+    boost::mutex::scoped_lock lck(impl_->lock_);
 
     /* weak_ptr doesn't have an operator== so we can't keep a dead list. */
     std::list<ServerConnectionWeakPtr> alive;
 
-    BOOST_FOREACH(ServerConnectionWeakPtr ptr, clients) {
+    bool dead = false;
+    BOOST_FOREACH(ServerConnectionWeakPtr ptr, impl_->clients_) {
 	ServerConnectionPtr conn = ptr.lock();
 	if (conn) {
 	    conn->sendMessage(msgs);
 	    alive.push_front(ptr);
-	}
+	} else
+	    dead = true;
     }
 
     if (alive.empty()) {
 	LOG_INFO("no more waiting clients");
-	watcher.unsubscribe(shared_from_this());
-    } else
-	clients = alive;
+	impl_->watcher_.unsubscribe(shared_from_this());
+    } else if (dead)
+	impl_->clients_ = alive;
 
     TRACE_EXIT();
 }
@@ -232,8 +242,15 @@ void SharedStream::sendMessage(const std::vector<MessagePtr>& msgs)
 void SharedStream::subscribe(ServerConnectionPtr p)
 {
     TRACE_ENTER();
-    boost::mutex::scoped_lock lck(lock);
-    clients.push_front(p);
+
+    boost::mutex::scoped_lock lck(impl_->lock_);
+
+    // shared_from_this() doesn't work in a ctor, so delay creation of the ReplayState until a client subscribes
+    // FIXME: this assumes that all clients are using the same io_service.
+    if (! impl_->replay_.get())
+	impl_->replay_.reset(new ReplayState(p->io_service(), shared_from_this()));
+
+    impl_->clients_.push_front(p);
     TRACE_EXIT();
 }
 
@@ -252,11 +269,11 @@ void weak_ptr_remove(std::list<boost::weak_ptr<T> > l, boost::weak_ptr<T> v)
 void SharedStream::unsubscribe(ServerConnectionPtr p)
 {
     TRACE_ENTER();
-    boost::mutex::scoped_lock lck(lock);
-    weak_ptr_remove(clients, ServerConnectionWeakPtr(p));
-    if (clients.empty()) {
+    boost::mutex::scoped_lock lck(impl_->lock_);
+    weak_ptr_remove(impl_->clients_, ServerConnectionWeakPtr(p));
+    if (impl_->clients_.empty()) {
 	LOG_INFO("no more waiting clients");
-	watcher.unsubscribe(shared_from_this());
+	impl_->watcher_.unsubscribe(shared_from_this());
     }
     TRACE_EXIT();
 }
