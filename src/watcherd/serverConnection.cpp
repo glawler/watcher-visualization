@@ -313,6 +313,7 @@ namespace watcher {
                 if (conn_type == unknown) {
                     conn_type = gui;
 		    stream.reset(new SharedStream(watcher));
+		    watcher.addStream(stream);
 		    stream->subscribe(shared_from_this());
                 }
                 (this->*(dispatch[i].fn)) (m);

@@ -230,21 +230,6 @@ void SharedStream::subscribe(ServerConnectionPtr p)
     TRACE_EXIT();
 }
 
-#if 0
-/* list.remove() requires operator== which weak_ptr does not have */
-template <typename T>
-void weak_ptr_remove(std::list<boost::weak_ptr<T> > l, boost::weak_ptr<T> v)
-{
-    for (typename std::list<boost::weak_ptr<T> >::iterator it = l.begin(); it != l.end();)
-    {
-	if ( !(*it < v) && !(v < *it) )
-	    it = l.erase(it);
-	else
-	    ++it;
-    }
-}
-#endif
-
 void SharedStream::unsubscribe(ServerConnectionPtr p)
 {
     TRACE_ENTER();
@@ -253,7 +238,7 @@ void SharedStream::unsubscribe(ServerConnectionPtr p)
 
     if (impl_->clients_.empty()) {
 	LOG_INFO("no more waiting clients for for stream uid=" << impl_->uid_);
-	impl_->watcher_.unsubscribe(shared_from_this());
+	impl_->watcher_.removeStream(shared_from_this());
     }
     TRACE_EXIT();
 }
