@@ -25,7 +25,6 @@
 #include <libwatcher/speedWatcherMessage.h>
 #include <libwatcher/playbackTimeRange.h>
 
-#include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
 
 #include <list>
@@ -55,7 +54,7 @@ class SharedStreamImpl {
 	boost::shared_ptr<ReplayState> replay_;
 
 	boost::mutex lock_;
-	std::list<ServerConnectionWeakPtr> clients_; // clients subscribed to this stream
+	std::list<ServerConnectionPtr> clients_; // clients subscribed to this stream
 
 	SharedStreamImpl(Watcherd& wd) : watcher_(wd), uid_(getNextUID()) {}
 };
@@ -190,24 +189,13 @@ void SharedStream::sendMessage(MessagePtr m)
     TRACE_ENTER();
     boost::mutex::scoped_lock lck(impl_->lock_);
 
-    /* weak_ptr doesn't have an operator== so we can't keep a dead list. */
-    std::list<ServerConnectionWeakPtr> alive;
-
-    bool dead = false;
-    BOOST_FOREACH(ServerConnectionWeakPtr ptr, impl_->clients_) {
-	ServerConnectionPtr conn = ptr.lock();
-	if (conn) {
-	    conn->sendMessage(m);
-	    alive.push_front(ptr);
-	} else
-	    dead = true;
+    int count = 0;
+    BOOST_FOREACH(ServerConnectionPtr conn, impl_->clients_) {
+	conn->sendMessage(m);
+	++count;
     }
 
-    if (alive.empty()) {
-	LOG_INFO("no more waiting clients");
-	impl_->watcher_.unsubscribe(shared_from_this());
-    } else if (dead)
-	impl_->clients_ = alive;
+    LOG_DEBUG("sent message to " << count << " clients for stream uid " << impl_->uid_);
 
     TRACE_EXIT();
 }
@@ -217,24 +205,12 @@ void SharedStream::sendMessage(const std::vector<MessagePtr>& msgs)
     TRACE_ENTER();
     boost::mutex::scoped_lock lck(impl_->lock_);
 
-    /* weak_ptr doesn't have an operator== so we can't keep a dead list. */
-    std::list<ServerConnectionWeakPtr> alive;
-
-    bool dead = false;
-    BOOST_FOREACH(ServerConnectionWeakPtr ptr, impl_->clients_) {
-	ServerConnectionPtr conn = ptr.lock();
-	if (conn) {
-	    conn->sendMessage(msgs);
-	    alive.push_front(ptr);
-	} else
-	    dead = true;
+    int count = 0;
+    BOOST_FOREACH(ServerConnectionPtr conn, impl_->clients_) {
+	conn->sendMessage(msgs);
+	++count;
     }
-
-    if (alive.empty()) {
-	LOG_INFO("no more waiting clients");
-	impl_->watcher_.unsubscribe(shared_from_this());
-    } else if (dead)
-	impl_->clients_ = alive;
+    LOG_DEBUG("sent messages to " << count << " clients for stream uid " << impl_->uid_);
 
     TRACE_EXIT();
 }
@@ -254,6 +230,7 @@ void SharedStream::subscribe(ServerConnectionPtr p)
     TRACE_EXIT();
 }
 
+#if 0
 /* list.remove() requires operator== which weak_ptr does not have */
 template <typename T>
 void weak_ptr_remove(std::list<boost::weak_ptr<T> > l, boost::weak_ptr<T> v)
@@ -266,13 +243,16 @@ void weak_ptr_remove(std::list<boost::weak_ptr<T> > l, boost::weak_ptr<T> v)
 	    ++it;
     }
 }
+#endif
+
 void SharedStream::unsubscribe(ServerConnectionPtr p)
 {
     TRACE_ENTER();
     boost::mutex::scoped_lock lck(impl_->lock_);
-    weak_ptr_remove(impl_->clients_, ServerConnectionWeakPtr(p));
+    impl_->clients_.remove(p);
+
     if (impl_->clients_.empty()) {
-	LOG_INFO("no more waiting clients");
+	LOG_INFO("no more waiting clients for for stream uid=" << impl_->uid_);
 	impl_->watcher_.unsubscribe(shared_from_this());
     }
     TRACE_EXIT();

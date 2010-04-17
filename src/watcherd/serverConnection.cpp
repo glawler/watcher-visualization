@@ -250,15 +250,20 @@ namespace watcher {
 	TRACE_ENTER();
 	SubscribeStreamMessagePtr p = boost::dynamic_pointer_cast<SubscribeStreamMessage>(m);
 	if (p) {
-	    SharedStreamPtr newstream = watcher.getStream(p->uid);
-	    if (newstream) {
-		LOG_INFO("client subscribed to stream " << p->uid);
-		stream->unsubscribe(shared_from_this());
-		stream.reset(newstream.get());
-		stream->subscribe(shared_from_this());
+	    if (p->uid == stream->getUID())
+		LOG_WARN("client resubscribed to same uid " << p->uid);
+	    else {
+		SharedStreamPtr newstream = watcher.getStream(p->uid);
+		if (newstream) {
+		    LOG_INFO("client unsubscribed from stream " << stream->getUID());
+		    stream->unsubscribe(shared_from_this());
+		    LOG_INFO("client subscribed to stream " << p->uid);
+		    stream = newstream;
+		    stream->subscribe(shared_from_this());
+		}
+		else
+		    LOG_WARN("client attempted to subscribe to non-existant stream uid " << p->uid);
 	    }
-	    else
-		LOG_WARN("client attempted to subscribe to non-existant stream uid " << p->uid);
 	} else
 	    LOG_WARN("unable to cast MessagePtr to SubscribeStreamMessagePtr");
 	TRACE_EXIT();
