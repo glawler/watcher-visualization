@@ -39,6 +39,7 @@ if test x$enable_testnodeonly == xno; then
     PKG_CHECK_MODULES(SQLITE3, [sqlite3 >= 3.5.9])
 
     # allow optional disabling of ogreWatcher
+    AC_MSG_CHECKING(--enable-ogreWatcher)
     AC_ARG_ENABLE(ogreWatcher,
 	      [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
 	      [enable_ogreWatcher=$enableval],
