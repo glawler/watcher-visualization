@@ -12,13 +12,13 @@ CPPFLAGS += -Wno-deprecated
 
 CPPFLAGS += -I$(top_srcdir)
 CPPFLAGS += -I$(top_srcdir)/util
-CPPFLAGS += $(BOOST_CPPFLAGS) @LOGGER_CFLAGS@
+CPPFLAGS += $(BOOST_CPPFLAGS) @LOGGER_CFLAGS@ @LIBCONFIG_CFLAGS@ @LOG4CXX_CFLAGS@
 
 # root of the watcher tree, one directory up from the srcdir
 TOPDIR=$(top_srcdir)/..
 
-LIBS += -lconfig++
-LIBS += -llog4cxx
+LIBS += @LIBCONFIG_LIBS@
+LIBS += @LOG4CXX_LIBS@
 LIBS += $(BOOST_ASIO_LIB) $(BOOST_SERIALIZATION_LIB) $(BOOST_THREAD_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_REGEX_LIB)
 LIBS += $(LOGGER_LIBS)
 

@@ -4,9 +4,10 @@ include $(top_srcdir)/Makefile.top
 -include ../Makefile.local
 
 CPPFLAGS += -I../sqlite_wrapper
+CPPFLAGS += @SQLITE3_CFLAGS@
 
 # system libraries
-LIBS += -lsqlite3
+LIBS += @SQLITE3_LIBS@
 
 # 
 # .cfg and .log.properties build rules are below

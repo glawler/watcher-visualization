@@ -28,50 +28,17 @@ AC_ARG_ENABLE(testnodeonly,
 AC_MSG_RESULT($enable_testnodeonly)
 AM_CONDITIONAL([ENABLE_TESTNODEONLY], [test x$enable_testnodeonly != xno])
 
+# Things we always want
+PKG_CHECK_MODULES(LOG4CXX, [liblog4cxx >= 0.10.0])
+PKG_CHECK_MODULES(LIBCONFIG, [libconfig++ >= 1.3.2])
+
 if test x$enable_testnodeonly == xno; then
     #
     # Normal, full build section
     #
-    AC_DEFUN([AX_PATH_LIB],
-	    [AC_MSG_CHECKING(for $1)
-    	ac_cv_sqlite_path=false
-	    # check std locations
-    	for d in /usr/local /usr; do
-	    	if test -e $d/include/$1; then
-		    	ac_cv_sqlite_path=$d
-    		fi
-	    done
-    	# if not found try in $(TOPDIR)/{include,lib}
-	    if test $ac_cv_sqlite_path = false; then
-		    if test -e "include/$1"; then
-			    ac_cv_sqlite_path='$(TOPDIR)'
-    			LDFLAGS="$LDFLAGS -L${ac_cv_sqlite_path}/lib"
-	    		CPPFLAGS="$CPPFLAGS -I${ac_cv_sqlite_path}/include"
-		    else
-    			AC_MSG_ERROR(could not locate $1)
-	    	fi
-    	fi
-	    AC_MSG_RESULT($ac_cv_sqlite_path)])
-
-    AX_PATH_LIB(sqlite3.h)
-    AX_PATH_LIB(log4cxx)
-    AX_PATH_LIB(libconfig.h)
-
-    # check for recent version of sqlite3
-    AC_MSG_CHECKING([for sqlite3 >= 3.5.9])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[@%:@include <sqlite3.h>
-		]],
-        [[#if SQLITE_VERSION_NUMBER >= 3005009
-    //OK
-    #else
-    #  error sqlite version is too old
-    #endif
-    ]])],
-		[AC_MSG_RESULT(ok)],
-		[AC_MSG_ERROR(sqlite is too old)])
+    PKG_CHECK_MODULES(SQLITE3, [sqlite3 >= 3.5.9])
 
     # allow optional disabling of ogreWatcher
-    AC_MSG_CHECKING(--enable-ogreWatcher)
     AC_ARG_ENABLE(ogreWatcher,
 	      [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
 	      [enable_ogreWatcher=$enableval],
@@ -113,14 +80,16 @@ if test x$enable_testnodeonly == xno; then
 		    done
 	    fi
 	    if test x$ac_cv_kml = xno; then
-		    AC_MSG_ERROR("unable to locate libkml")
-	    fi
-	    AC_MSG_RESULT($ac_cv_kml)
-	    KML_INCLUDES="-I$ac_cv_kml/include"
-	    KML_LDFLAGS="-L$ac_cv_kml/lib"
-	    KML_LDADD="-lkmlbase -lkmlconvenience -lkmlengine -lkmldom"
-	    AC_SUBST(KML_INCLUDES)
-	    AC_SUBST(KML_LDFLAGS)
+		    AC_MSG_WARN("unable to locate libkml. You will have to specify CFLAGS and LDFLAGS by hand...")
+        else
+	        AC_MSG_RESULT($ac_cv_kml)
+    	    KML_INCLUDES="-I$ac_cv_kml/include"
+	        KML_LDFLAGS="-L$ac_cv_kml/lib"
+	        AC_SUBST(KML_INCLUDES)
+	        AC_SUBST(KML_LDFLAGS)
+        fi
+	    
+        KML_LDADD="-lkmlbase -lkmlconvenience -lkmlengine -lkmldom"
 	    AC_SUBST(KML_LDADD)
     fi
 

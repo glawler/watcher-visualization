@@ -302,3 +302,9 @@ share/info/dir
 ^src/libwatcher/watchermsg.pc
 ^src/logger/logger.pc
 
+^src/clients/legacyWatcher/legacyWatcher.pro
+^src/clients/randomScenario/Makefile
+^src/clients/randomScenario/randomScenario
+^src/libtool
+^src/util/watcherutils.pc
+
