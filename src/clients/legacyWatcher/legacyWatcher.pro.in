@@ -6,8 +6,6 @@ TEMPLATE = app
 TARGET = watcher
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include ../../util ../.. ../../watcherd
-INCLUDEPATH += /usr/include/libxml2 /usr/local/include /usr/local/include/libxml2 /usr/X11R6/include
-INCLUDEPATH += /usr/local/qwt-5.1.1/include
 INCLUDEPATH += @QWT_INCLUDES@
 QT += opengl 
 CONFIG += qt x11 
@@ -16,15 +14,15 @@ DEFINES += GRAPHICS MODULE_MOBILITY
 # DEFINES += GRAPHICS MODULE_MOBILITY DISABLE_LOGGING
 
 # log4cxx issues warnings without this. 
-QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb
-QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb
-QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated
-QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated
+QMAKE_CFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb 
+QMAKE_CXXFLAGS_DEBUG += -fno-strict-aliasing -O0 -Wno-deprecated -ggdb 
+QMAKE_CFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated 
+QMAKE_CXXFLAGS_RELEASE += -fno-strict-aliasing -Wno-deprecated 
 
-QMAKE_CFLAGS_DEBUG += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@
-QMAKE_CXXFLAGS_DEBUG += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@
-QMAKE_CFLAGS_RELEASE += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@
-QMAKE_CXXFLAGS_RELEASE += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@
+QMAKE_CFLAGS_DEBUG += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@ @LIBCONFIG_CFLAGS@
+QMAKE_CXXFLAGS_DEBUG += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@ @LIBCONFIG_CFLAGS@
+QMAKE_CFLAGS_RELEASE += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@ @LIBCONFIG_CFLAGS@
+QMAKE_CXXFLAGS_RELEASE += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@ @LIBCONFIG_CFLAGS@
 
 # Leave in odd -llwatchermsg -lwatcher -llwatchermsg construct. 
 LIBS += -L../../util
@@ -32,11 +30,11 @@ LIBS += -L../../libwatcher/.libs -lwatchermsg
 LIBS += -L../../libwatcher -lwatcher
 LIBS += -lwatchermsg
 LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
-LIBS += -lconfig++
+LIBS += @LIBCONFIG_LIBS@
 LIBS += @LOGGER_LIBS@
 LIBS += -lwatcherutils
-LIBS += -L/usr/local/qwt-5.1.1/lib -l qwt
-LIBS += @QWT_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_DATE_TIME_LIB@
+LIBS += @QWT_LIB@ 
+LIBS += @BOOST_FILESYSTEM_LIB@ @BOOST_DATE_TIME_LIB@
 
 include(Makefile.local)
 
