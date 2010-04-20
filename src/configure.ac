@@ -115,22 +115,10 @@ if test x$enable_testnodeonly == xno; then
         # AC_SUBST(CEGUI-OGRE_LIBS)
     fi
 
-	# qmake-qt4 seems to set the correct includes and libs, we just need to determine where it is for the QWT detection
-    # if we can't find it, assume that it is already set in CXXFLAGS, LDFLAGS, etc...
-	AC_MSG_CHECKING(for qt4)
-	ac_cv_qt=
-	if test -d /usr/local/include/qt; then
-	    AC_MSG_RESULT(/usr/local/include/qt)
-	elif test -d /usr/include/qt4; then
-	    AC_MSG_RESULT(/usr/include/qt4)
-	    ac_cv_qt='-qt4'
-	elif test -d /usr/include/qt; then
-	    AC_MSG_RESULT(/usr/include/qt)
-	elif test -d /usr/include/Qt; then
-	    AC_MSG_RESULT(/usr/include)
-	else
-        AC_MSG_WARN([Did not find QT4 in "standard" locations. QT4 LDFLAGS and CFLAGS must be given in environment variables.])
-	fi
+    # Check for Qt, even if we use qmake to find/link to it.
+    PKG_CHECK_MODULES(QTGUI, [QtGui >= 4.3.0])
+    PKG_CHECK_MODULES(QTCORE, [QtCore >= 4.3.0])
+    PKG_CHECK_MODULES(QTOPENGL, [QtOpenGL >= 4.3.0])
 
     ac_cv_qwt=no
     AC_ARG_WITH([qwt], 
