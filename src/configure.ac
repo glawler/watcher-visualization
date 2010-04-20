@@ -144,7 +144,7 @@ if test x$enable_testnodeonly == xno; then
         QWT_LIB="-L/usr/local/qwt/lib -lqwt"
     else 
         AC_MSG_RESULT($ac_cv_qwt)
-        QWT_INCLUDES="$ac_cv_qwt/include"
+        QWT_INCLUDES="$ac_cv_qwt/include/qwt $ac_cv_qwt/include"
         QWT_LIB="-L/$ac_cv_qwt/lib -lqwt"
     fi
 
