@@ -127,7 +127,9 @@ if test x$enable_testnodeonly == xno; then
 
     AC_MSG_CHECKING(for qwt)
     if test x$ac_cv_qwt = xno; then
-        AC_MSG_WARN("QWT prefix not defined via --with-qwt. Assuming, /usr/local/qwt, which is almost certainly incorrect...")
+        AC_MSG_RESULT(/usr/local/qwt)
+        AC_MSG_WARN("QWT prefix not defined via --with-qwt.")
+        AC_MSG_WARN(["Assuming /usr/local/qwt, which is almost certainly incorrect..."])
         QWT_INCLUDES="/usr/local/qwt/include"
         QWT_LIB="-L/usr/local/qwt/lib -lqwt"
     else 
