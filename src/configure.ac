@@ -30,7 +30,7 @@ AM_CONDITIONAL([ENABLE_TESTNODEONLY], [test x$enable_testnodeonly != xno])
 
 # Things we always want
 PKG_CHECK_MODULES(LOG4CXX, [liblog4cxx >= 0.10.0])
-PKG_CHECK_MODULES(LIBCONFIG, [libconfig++ >= 1.3.2])
+PKG_CHECK_MODULES(LIBCONFIG, [libconfig++ >= 1.3.1])
 
 if test x$enable_testnodeonly == xno; then
     #
