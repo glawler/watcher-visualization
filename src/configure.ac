@@ -132,20 +132,20 @@ if test x$enable_testnodeonly == xno; then
         AC_MSG_WARN([Did not find QT4 in "standard" locations. QT4 LDFLAGS and CFLAGS must be given in environment variables.])
 	fi
 
-    qwt_prefix=""
+    ac_cv_qwt=no
     AC_ARG_WITH([qwt], 
                 [AS_HELP_STRING([--with-qwt=PREFIX],[use the Qwt lib installed in the PREFIX directory])],
-    	    	[qwt_prefix=$withval])
+    	    	[ac_cv_qwt=$withval])
 
     AC_MSG_CHECKING(for qwt)
-    if test -d $qwt_prefix/include/qwt; then
-        AC_MSG_RESULT($qwt_prefix/include/qwt)
-        QWT_INCLUDES="$qwt_prefix/include/qwt"
-        QWT_LIB="-L/$qwt_prefix/lib -lqwt"
-    else
-        AC_MSG_WARN([QWT Prefix, not defined. Assuming, /usr/local/qwt, which is almost certainly incorrect...]
-        QWT_INCLUDES="/usr/local/qwt/include/qwt"
+    if test x$ac_cv_qwt = xno; then
+        AC_MSG_WARN("QWT prefix not defined via --with-qwt. Assuming, /usr/local/qwt, which is almost certainly incorrect...")
+        QWT_INCLUDES="/usr/local/qwt/include"
         QWT_LIB="-L/usr/local/qwt/lib -lqwt"
+    else 
+        AC_MSG_RESULT($ac_cv_qwt)
+        QWT_INCLUDES="$ac_cv_qwt/include"
+        QWT_LIB="-L/$ac_cv_qwt/lib -lqwt"
     fi
 
     AC_SUBST(QWT_INCLUDES)
