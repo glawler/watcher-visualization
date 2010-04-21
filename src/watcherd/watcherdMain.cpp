@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
     LOG_INFO("Logger initialized from file \"" << logConf << "\"");
 
-    string address("glory");
+    string address("localhost");
     string port("8095");
     size_t numThreads=8;
 
