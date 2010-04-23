@@ -53,9 +53,13 @@ There are a few options to ./configure that control what gets built:
                         you don't want this. 
 
 cd src
+./autogen
 ./configure --enable-earthWatcher
 make 
-make doc (optional)
+
+# optional
+make doc 
+
 # To make the make GUI (legacyWatcher)
 cd clients/legacyWatcher
 qmake-qt4   (or just qmake if only qt4 is installed on your machine)
