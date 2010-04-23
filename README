@@ -37,10 +37,26 @@ along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
 
 To build: 
 ---------
+There are a few options to ./configure that control what gets built:
+--enable-testnodeonly   only configure and build test node components
+                        No GUI is built, just test node watcher feeders
+--enable-ogreWatcher    enable compilation of ogreWatcher, a prototype
+                        GUI written using the OGRE framework.
+--enable-watcher3d      enable compilation of watcher3d GUI, a prototype
+                        based on the Delta-3D engine. May not build.
+--enable-earthWatcher   enable compilation of earthWatcher, a command line
+                        daemon that feeds watcher data to GoogleEarth via
+                        a KML file.
+--enable-hierarchy_client  enable compilation of hierarchy_client, 
+                        a test node daemon that handles watcher hierarchy
+                        messages. If you aren't using the dynamic hierachy, 
+                        you don't want this. 
+
 cd src
-./configure
+./configure --enable-earthWatcher
 make 
 make doc (optional)
+# To make the make GUI (legacyWatcher)
 cd clients/legacyWatcher
 qmake-qt4   (or just qmake if only qt4 is installed on your machine)
 make
@@ -85,6 +101,8 @@ yum install uriparser.x86_64 uriparser-devel.x86_64 libkml.x86_64 libkml-devel.x
 In order to find the libkml libs on 64 bit you must set LDFLAGS="-L[path-to-libkml]", then 
 put that same directoty path into a file in /etc/ld.so.conf.d/libkml-x86_64.conf and rerun
 ldconfig as root. 
+
+For building the legacyWatcher GUI you need libqwt, Qt, and other things. :) 
 
 
 
