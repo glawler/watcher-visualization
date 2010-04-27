@@ -1,0 +1,12 @@
+--- logmanager.cpp.orig	2010-04-27 14:32:38.000000000 +0000
++++ logmanager.cpp	2010-04-27 14:34:06.000000000 +0000
+@@ -57,7 +57,8 @@
+    //     call to initialize APR and trigger "start" of logging clock
+    //
+    APRInitializer::initialize();
+-   static spi::RepositorySelectorPtr selector;
++   static spi::RepositorySelectorPtr *pselector=new spi::RepositorySelectorPtr;
++   static spi::RepositorySelectorPtr &selector=*pselector;
+    return selector;
+ }
+ 
