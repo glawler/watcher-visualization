@@ -116,20 +116,6 @@ share/info/dir
 ^share/aclocal/log4cpp.m4
 ^share/man/man3/log4cpp*
 
-# ignore log4cxx files
-^src/apache-log4cxx*
-^src/apr-*
-^include/log4cxx*
-^include/apr-*
-^bin/apr-*
-^lib/pkgconfig/*
-^lib/libapr*
-^lib/apr*
-^lib/liblog4cxx*
-^share/log4cxx*
-^bin/apu-1-config
-^build-1/*
-
 # ignore Pyro files.
 ^src/Pyro-3.8.1/*
 
