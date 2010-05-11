@@ -125,6 +125,12 @@ if test x$enable_testnodeonly == xno; then
                 [AS_HELP_STRING([--with-qwt=PREFIX],[use the Qwt lib installed in the PREFIX directory])],
     	    	[ac_cv_qwt=$withval])
 
+    # ubuntu 10.04 is /usr/include/qwt-qt4/ and -lqwt-qt4
+    ac_cv_qwt_ext=''
+    AC_ARG_WITH([qwt-ext],
+		[AS_HELP_STRING([--with-qwt-ext=STRING],[use the Qwt library named qwt-STRING])],
+		[ac_cv_qwt_ext=$withval])
+
     AC_MSG_CHECKING(for qwt)
     if test x$ac_cv_qwt = xno; then
         AC_MSG_WARN("QWT prefix not defined via --with-qwt. Assuming, /usr/local/qwt, which is almost certainly incorrect...")
@@ -132,8 +138,11 @@ if test x$enable_testnodeonly == xno; then
         QWT_LIB="-L/usr/local/qwt/lib -lqwt"
     else 
         AC_MSG_RESULT($ac_cv_qwt)
-        QWT_INCLUDES="$ac_cv_qwt/include/qwt $ac_cv_qwt/include"
-        QWT_LIB="-L/$ac_cv_qwt/lib -lqwt"
+	if test x$ac_cv_qwt_ext != x; then
+	    ac_cv_qwt_ext="-$ac_cv_qwt_ext"
+	fi
+	QWT_INCLUDES="$ac_cv_qwt/include/qwt$ac_cv_qwt_ext $ac_cv_qwt/include"
+        QWT_LIB="-L/$ac_cv_qwt/lib -lqwt$ac_cv_qwt_ext"
     fi
 
     AC_SUBST(QWT_INCLUDES)
