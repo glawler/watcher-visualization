@@ -16,7 +16,7 @@ def connect():
         else:
             return session
 
-def main(serverName):
+def main(serverName, dataAddress):
     session=connect()
     while 1:
         while 1:
@@ -51,11 +51,12 @@ def main(serverName):
         if session.fix.latitude and session.fix.longitude:
             try:
                 # GTL -- need to check the return val here. 
-                retCode=subprocess.call(['sendGPSMessage',
-                                         '-x', str(session.fix.longitude), 
-                                         '-y', str(session.fix.latitude), 
-                                         '-z', str(session.fix.altitude),
-                                         '-s', str(serverName) ])
+                sendGPSArgs=['sendGPSMessage','-x', str(session.fix.longitude),'-y', str(session.fix.latitude),'-z', str(session.fix.altitude),'-s', str(serverName)];
+                if dataAddress != None:
+                    sendGPSArgs.append('-n')
+                    sendGPSArgs.append(dataAddress)
+                    # retCode=subprocess.call(sendGPSArgs);
+                print "cl: ", sendGPSArgs
             except OSError:
                 print 'Caught exception when trying to run gpsMessageTest, is it in your $PATH?'
                 print 'If not, type \'export PATH=$PATH:/path/to/dir/with/gpsMessageTest/in/it\' in this shell'
@@ -68,8 +69,9 @@ if __name__ == '__main__':
     from optparse import OptionParser
     parser=OptionParser('Usage: %prog -s watcherdServerName')
     parser.add_option('-s', '--serverName', dest='serverName', help='machine name/ip address where watcherd is running')
+    parser.add_option('-a', '--address', dest='dataAddress', help='local host data interface address, where the gps data "comes from"')
     (options, args)=parser.parse_args()
     if options.serverName==None:
         print 'You must give a servername on the command line: use the \'-s server\' option to do so.'
     else:
-        main(options.serverName)
+        main(options.serverName, options.dataAddress)
