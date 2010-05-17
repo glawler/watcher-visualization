@@ -55,8 +55,7 @@ def main(serverName, dataAddress):
                 if dataAddress != None:
                     sendGPSArgs.append('-n')
                     sendGPSArgs.append(dataAddress)
-                    # retCode=subprocess.call(sendGPSArgs);
-                print "cl: ", sendGPSArgs
+                retCode=subprocess.call(sendGPSArgs);
             except OSError:
                 print 'Caught exception when trying to run gpsMessageTest, is it in your $PATH?'
                 print 'If not, type \'export PATH=$PATH:/path/to/dir/with/gpsMessageTest/in/it\' in this shell'
