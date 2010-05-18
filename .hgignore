@@ -95,6 +95,7 @@ share/info/dir
 ^src/clients/legacyWatcher/moc_*
 ^src/clients/legacyWatcher/watcher
 ^src/clients/legacyWatcher/ui_watcher.h
+^src/clients/legacyWatcher/ui_aboutDialog.h
 ^src/clients/legacyWatcher/qrc_watcherResources.cpp
 
 # ignore libconfig files
@@ -114,20 +115,6 @@ share/info/dir
 ^lib/pkgconfig/log4cpp.pc
 ^share/aclocal/log4cpp.m4
 ^share/man/man3/log4cpp*
-
-# ignore log4cxx files
-^src/apache-log4cxx*
-^src/apr-*
-^include/log4cxx*
-^include/apr-*
-^bin/apr-*
-^lib/pkgconfig/*
-^lib/libapr*
-^lib/apr*
-^lib/liblog4cxx*
-^share/log4cxx*
-^bin/apu-1-config
-^build-1/*
 
 # ignore Pyro files.
 ^src/Pyro-3.8.1/*
