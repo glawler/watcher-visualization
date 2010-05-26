@@ -1447,11 +1447,13 @@ void manetGLView::initializeGL()
     TRACE_ENTER();
 
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS); 
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE); 
     
-    glEnable(GL_TEXTURE_2D);
+    // glEnable(GL_TEXTURE_2D);
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientLight);
 
@@ -1659,19 +1661,25 @@ void manetGLView::paintGL()
 
     if (!messageStream)
         drawNotConnectedState();
-    else {
-
+    else 
+    {
         {
             boost::lock_guard<boost::mutex> l(graphMutex);
             drawManet();
         }
-        
+
+        glPushMatrix();
+        glPushAttrib(GL_ALL_ATTRIB_BITS); 
+
         // drawStatusString uses QPainter so must be called 
         // after all openGL calls
         drawStatusString(); 
 
         if (showDebugInfo)
             drawDebugInfo();
+        
+        glPopAttrib(); 
+        glPopMatrix();
     }
 
     TRACE_EXIT();
