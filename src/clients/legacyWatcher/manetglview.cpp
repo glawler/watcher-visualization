@@ -1453,7 +1453,7 @@ void manetGLView::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE); 
     
-    // glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientLight);
 
