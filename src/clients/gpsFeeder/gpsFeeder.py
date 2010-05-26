@@ -66,7 +66,7 @@ def main(serverName, dataAddress):
 if __name__ == '__main__': 
     import sys
     from optparse import OptionParser
-    parser=OptionParser('Usage: %prog -s watcherdServerName')
+    parser=OptionParser('Usage: %prog -s watcherdServerName [-a localNodeAddress]')
     parser.add_option('-s', '--serverName', dest='serverName', help='machine name/ip address where watcherd is running')
     parser.add_option('-a', '--address', dest='dataAddress', help='local host data interface address, where the gps data "comes from"')
     (options, args)=parser.parse_args()
