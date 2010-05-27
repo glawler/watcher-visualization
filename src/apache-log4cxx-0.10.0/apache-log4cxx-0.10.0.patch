@@ -1,0 +1,129 @@
+--- src/main/cpp/inputstreamreader.cpp	2008-03-31 18:34:09.000000000 -0400
++++ src/main/cpp/inputstreamreader.cpp	2010-01-14 09:40:02.345170181 -0500
+@@ -20,6 +20,7 @@
+ #include <log4cxx/helpers/exception.h>
+ #include <log4cxx/helpers/pool.h>
+ #include <log4cxx/helpers/bytebuffer.h>
++#include <string.h>
+ 
+ using namespace log4cxx;
+ using namespace log4cxx::helpers;
+--- src/main/cpp/socketoutputstream.cpp	2008-03-31 18:34:09.000000000 -0400
++++ src/main/cpp/socketoutputstream.cpp	2010-01-14 09:40:02.345170181 -0500
+@@ -19,6 +19,7 @@
+ #include <log4cxx/helpers/socketoutputstream.h>
+ #include <log4cxx/helpers/socket.h>
+ #include <log4cxx/helpers/bytebuffer.h>
++#include <string.h>
+ 
+ using namespace log4cxx;
+ using namespace log4cxx::helpers;
+--- src/examples/cpp/console.cpp	2008-03-31 18:34:52.000000000 -0400
++++ src/examples/cpp/console.cpp	2010-01-14 09:40:02.329170851 -0500
+@@ -22,6 +22,8 @@
+ #include <log4cxx/logmanager.h>
+ #include <iostream>
+ #include <locale.h>
++#include <string.h>
++#include <cstdio>
+ 
+ using namespace log4cxx;
+ using namespace log4cxx::helpers;
+
+--- src/main/cpp/aprinitializer.cpp	2010-05-27 14:12:21.000000000 -0400
++++ src/main/cpp/aprinitializer.cpp	2010-05-27 14:12:03.000000000 -0400
+@@ -43,5 +43,5 @@
+ 
+ APRInitializer::~APRInitializer() {
+-    apr_terminate();
++    // apr_terminate();
+     isDestructed = true;
+ }
+
+--- src/main/cpp/logmanager.cpp	2008-03-31 18:34:09.000000000 -0400
++++ src/main/cpp/logmanager.cpp	2010-05-27 14:18:55.000000000 -0400
+@@ -58,5 +58,6 @@
+    //
+    APRInitializer::initialize();
+-   static spi::RepositorySelectorPtr selector;
++   static spi::RepositorySelectorPtr *pselector=new spi::RepositorySelectorPtr;
++   static spi::RepositorySelectorPtr &selector=*pselector;
+    return selector;
+ }
+
+--- src/main/cpp/level.cpp	2010-05-27 14:20:49.000000000 -0400
++++ src/main/cpp/level.cpp	2010-05-27 14:23:29.000000000 -0400
+@@ -31,42 +31,42 @@
+ 
+ LevelPtr Level::getOff() {
+-   static LevelPtr level(new Level(Level::OFF_INT, LOG4CXX_STR("OFF"), 0));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::OFF_INT, LOG4CXX_STR("OFF"), 0));
++   return *level;
+ }
+ 
+ LevelPtr Level::getFatal() {
+-   static LevelPtr level(new Level(Level::FATAL_INT, LOG4CXX_STR("FATAL"), 0));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::FATAL_INT, LOG4CXX_STR("FATAL"), 0));
++   return *level;
+ }
+ 
+ LevelPtr Level::getError() {
+-   static LevelPtr level(new Level(Level::ERROR_INT, LOG4CXX_STR("ERROR"), 3));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::ERROR_INT, LOG4CXX_STR("ERROR"), 3));
++   return *level;
+ }
+ 
+ LevelPtr Level::getWarn() {
+-   static LevelPtr level(new Level(Level::WARN_INT, LOG4CXX_STR("WARN"), 4));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::WARN_INT, LOG4CXX_STR("WARN"), 4));
++   return *level;
+ }
+ 
+ LevelPtr Level::getInfo() {
+-   static LevelPtr level(new Level(Level::INFO_INT, LOG4CXX_STR("INFO"), 6));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::INFO_INT, LOG4CXX_STR("INFO"), 6));
++   return *level;
+ }
+ 
+ LevelPtr Level::getDebug() {
+-   static LevelPtr level(new Level(Level::DEBUG_INT, LOG4CXX_STR("DEBUG"), 7));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::DEBUG_INT, LOG4CXX_STR("DEBUG"), 7));
++   return *level;
+ }
+ 
+ LevelPtr Level::getTrace() {
+-   static LevelPtr level(new Level(Level::TRACE_INT, LOG4CXX_STR("TRACE"), 7));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::TRACE_INT, LOG4CXX_STR("TRACE"), 7));
++   return *level;
+ }
+ 
+ 
+ LevelPtr Level::getAll() {
+-   static LevelPtr level(new Level(Level::ALL_INT, LOG4CXX_STR("ALL"), 7));
+-   return level;
++   static LevelPtr *level=new LevelPtr(new Level(Level::ALL_INT, LOG4CXX_STR("ALL"), 7));
++   return *level;
+ }
+
+--- src/main/include/log4cxx/helpers/objectptr.h	2008-03-31 18:34:26.000000000 -0400
++++ src/main/include/log4cxx/helpers/objectptr.h	2010-05-27 14:29:05.000000000 -0400
+@@ -170,6 +170,11 @@
+          }
+        T* exchange(const T* newValue) {
++             // Avoid GCC strict aliasing warnings
++             union {
++                 T **in;
++                 void **out;
++             } temp = { &p }; 
+              return static_cast<T*>(ObjectPtrBase::exchange(
+-                 reinterpret_cast<void**>(&p), 
++                 temp.out, 
+                  const_cast<T*>(newValue)));
+        }

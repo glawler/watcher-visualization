@@ -1,0 +1,18 @@
+This patch fixes segfault issues when log4cxx is used in multithreaded apps, e.g. all watcher apps.
+
+To use:
+
+# get log4cxx 0.10.0 source
+wget http://apache.mirrors.tds.net/logging/log4cxx/0.10.0/apache-log4cxx-0.10.0.tar.gz
+tar zxvf apache-log4cxx-0.10.0.tar.gz
+cd apache-log4cxx-0.10.0/
+
+# cp [the patch file in this dir] [whereever the apache-log4cxx-0.10.0 dir is]
+cp ~/src/watcher/src/apache-log4cxx-0.10.0 .
+patch -N -p0 < apache-log4cxx-0.10.0.patch
+
+./configure
+make
+sudo make install
+
+
