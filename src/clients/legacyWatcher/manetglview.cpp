@@ -43,7 +43,6 @@
 #include "backgroundImage.h"
 #include "logger.h"
 #include "watcherStreamListDialog.h"
-#include "watcherStreamDescriptionDialog.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -3661,23 +3660,17 @@ void manetGLView::selectStream(unsigned long uid)
     TRACE_EXIT();
 }
 
+/** Blocks while user is entering the new stream description.  */
 void manetGLView::spawnStreamDescription()
 {
     TRACE_ENTER();
-    WatcherStreamDescriptionDialog *dia = new WatcherStreamDescriptionDialog;
-    connect(dia, SIGNAL(streamDescriptionChanged(const std::string&)), this, SLOT(setStreamDescription(const std::string&)));
-    dia->show();
-    TRACE_EXIT();
-}
-
-void manetGLView::setStreamDescription(const std::string& s)
-{
-    TRACE_ENTER();
     if (!messageStream) {
-        TRACE_EXIT();
-        return;
+	TRACE_EXIT();
+	return;
     }
-    messageStream->setDescription(s);
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Set Stream Description"), tr("Description:"), QLineEdit::Normal, QString(), &ok);
+    if (ok && !text.isEmpty())
+	messageStream->setDescription(text.toStdString());
     TRACE_EXIT();
 }
-

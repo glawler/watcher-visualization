@@ -54,14 +54,12 @@ HEADERS += \
     watcherGraphDialog.h \
     watcherMainWindow.h \
     watcherScrollingGraphControl.h \
-    watcherStreamListDialog.h \
-    watcherStreamDescriptionDialog.h
+    watcherStreamListDialog.h
 
 FORMS += \
     watcher.ui \
     aboutDialog.ui \
-    streamlist.ui \
-    streamdesc.ui
+    streamlist.ui
 
 SOURCES += \
     backgroundImage.cpp \
@@ -75,7 +73,6 @@ SOURCES += \
     watcherGraphDialog.cpp  \
     watcherMainWindow.cpp   \
     watcherScrollingGraphControl.cpp \
-    watcherStreamListDialog.cpp \
-    watcherStreamDescriptionDialog.cpp
+    watcherStreamListDialog.cpp
 
 RESOURCES += watcherResources.qrc
