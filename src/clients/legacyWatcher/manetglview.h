@@ -343,6 +343,8 @@ signals:
         void drawCircle(GLdouble radius); 
         void drawFrownyCircle(GLdouble); 
 
+	void changeSpeed(double);
+
         // updating the graph is a separate function as it's done in it's own thread
         void maintainGraph();
 

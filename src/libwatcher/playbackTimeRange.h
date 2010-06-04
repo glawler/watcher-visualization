@@ -40,7 +40,7 @@ namespace watcher {
          */
         class PlaybackTimeRangeMessage : public Message {
             public:
-                PlaybackTimeRangeMessage(); 
+                PlaybackTimeRangeMessage(Timestamp tmin = 0, Timestamp tmax = 0); 
 
                 Timestamp min_;
                 Timestamp max_;

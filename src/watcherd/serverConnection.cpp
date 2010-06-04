@@ -220,7 +220,7 @@ namespace watcher {
     {
         PlaybackTimeRangeMessagePtr p (boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(m));
         if (p)
-	    stream->range(p);
+	    stream->range(shared_from_this());
         else
             LOG_WARN("unable to cast to PlaybackTimeRangeMessage");
     }

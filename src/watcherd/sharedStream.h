@@ -52,7 +52,7 @@ class SharedStream : public boost::enable_shared_from_this<SharedStream> {
 	void start();
 	void stop();
 	void speed(const event::SpeedMessagePtr& m);
-	void range(event::PlaybackTimeRangeMessagePtr m);
+	void range(ServerConnectionPtr);
 
 	/** Add a client to the list which gets events for this stream. */
 	void subscribe(ServerConnectionPtr);

@@ -143,6 +143,7 @@ void SharedStream::speed(const SpeedMessagePtr& p)
 {
     TRACE_ENTER();
     LOG_DEBUG("isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
+    bool resend = true;
 
     if (p->speed == 0) {
 	/* special case, speed==0 means StopMessage.  This is to avoid
@@ -151,6 +152,7 @@ void SharedStream::speed(const SpeedMessagePtr& p)
 	stop();
     } else if (isLive_ && p->speed >= 1.0f) {
 	// ignore, can't predict the future
+	resend = false;
     } else {
 	impl_->replay_->speed(p->speed);
 	if (isLive_) {
@@ -164,6 +166,10 @@ void SharedStream::speed(const SpeedMessagePtr& p)
 	}
     }
 
+    /* Resend this message to all clients watching this stream. */
+    if (resend)
+	sendMessage(p);
+
     LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
     TRACE_EXIT();
 }
@@ -171,14 +177,13 @@ void SharedStream::speed(const SpeedMessagePtr& p)
 /** Returns a PlaybackTimeRangeMessage event to the sender with the timestamps of
  * the first and last event in the database.
  */
-void SharedStream::range(PlaybackTimeRangeMessagePtr p)
+void SharedStream::range(ServerConnectionPtr conn)
 {
     TRACE_ENTER();
 
     TimeRange r(event_range());
-    p->min_ = r.first;
-    p->max_ = r.second;
-    sendMessage(p);
+    PlaybackTimeRangeMessagePtr p(new PlaybackTimeRangeMessage(r.first, r.second));
+    conn->sendMessage(p);
 
     TRACE_EXIT();
 }
@@ -227,6 +232,13 @@ void SharedStream::subscribe(ServerConnectionPtr p)
 	impl_->replay_.reset(new ReplayState(p->io_service(), shared_from_this()));
 
     impl_->clients_.push_front(p);
+
+    // send the current state to the new subscribe
+    {
+	SpeedMessagePtr msg(new SpeedMessage(impl_->replay_->speed()));
+	p->sendMessage(msg);
+    }
+
     TRACE_EXIT();
 }
 

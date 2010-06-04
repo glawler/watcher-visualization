@@ -35,6 +35,7 @@
 #include <libwatcher/seekWatcherMessage.h>  // for epoch, eof
 #include <libwatcher/playbackTimeRange.h>  // for epoch, eof
 #include <libwatcher/listStreamsMessage.h>
+#include <libwatcher/speedWatcherMessage.h>
 
 #include "watcherAboutDialog.h"
 #include "manetglview.h"
@@ -1546,6 +1547,10 @@ void manetGLView::checkIO()
 			BOOST_FOREACH(EventStreamInfoPtr ev, m->evstreams) {
 				streamsDialog->addStream(ev->uid, ev->description);
 			}
+		} else if (message->type == SPEED_MESSAGE_TYPE) {
+		    // notification from the watcher daemon that the shared stream speed has changed
+		    SpeedMessagePtr sm(dynamic_pointer_cast<SpeedMessage>(message));
+		    changeSpeed(sm->speed);
 		}
 
                 // End of handling non feeder messages. 
@@ -3612,6 +3617,19 @@ void manetGLView::forwardToEndOfPlayback()
     TRACE_EXIT();
 }
 
+/** Called either when the user has changed the speed, or when a message from
+ * the watcher daemon is received notifying us that the stream rate has
+ * changed.
+ */
+void manetGLView::changeSpeed(double x)
+{
+    if ((streamRate > 0.0 && x < 0.0) || (streamRate < 0.0 && x > 0.0)) {
+	boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when goes out of scope.
+	wGraph.setTimeDirectionForward(x > 0.0);
+    }
+    streamRate = x;
+}
+
 void manetGLView::playbackSetSpeed(double x)
 {
     TRACE_ENTER();
@@ -3619,12 +3637,8 @@ void manetGLView::playbackSetSpeed(double x)
         TRACE_EXIT();
         return;
     }
-    if ((streamRate>0.0 && x<0.0) || (streamRate<0.0 && x>0.0)) {
-            boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when goes out of scope.
-            wGraph.setTimeDirectionForward(x>0.0?true:false); 
-    }
+    changeSpeed(x);
     LOG_DEBUG("Setting stream rate to " << x); 
-    streamRate=x;
     messageStream->setStreamRate(streamRate);
     emit streamRateSet(streamRate);
     TRACE_EXIT();
@@ -3657,6 +3671,7 @@ void manetGLView::selectStream(unsigned long uid)
         return;
     }
     messageStream->subscribeToStream(uid);
+    messageStream->getMessageTimeRange(); // get info for new stream
     TRACE_EXIT();
 }
 
