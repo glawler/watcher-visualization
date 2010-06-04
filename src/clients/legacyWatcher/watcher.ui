@@ -56,7 +56,7 @@
        <number>6</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetMinimumSize</enum>
         </property>
@@ -222,6 +222,13 @@ p, li { white-space: pre-wrap; }
          </spacer>
         </item>
         <item>
+         <widget class="QPushButton" name="changeStreamButton">
+          <property name="text">
+           <string>Change Stream</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="fitToWindowButton">
           <property name="minimumSize">
            <size>
@@ -297,7 +304,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>930</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLayers">
@@ -483,6 +490,9 @@ p, li { white-space: pre-wrap; }
    <extends>QWidget</extends>
    <header location="global">manetglview.h</header>
    <container>1</container>
+   <slots>
+    <slot>listStreams()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -890,8 +900,8 @@ p, li { white-space: pre-wrap; }
    <slot>resetPosition()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>760</x>
-     <y>572</y>
+     <x>827</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>454</x>
@@ -906,8 +916,8 @@ p, li { white-space: pre-wrap; }
    <slot>fitToWindow()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>647</x>
-     <y>572</y>
+     <x>705</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>454</x>
@@ -922,8 +932,8 @@ p, li { white-space: pre-wrap; }
    <slot>rewindToStartOfPlayback()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>24</x>
-     <y>661</y>
+     <x>35</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>463</x>
@@ -938,8 +948,8 @@ p, li { white-space: pre-wrap; }
    <slot>reversePlayback()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>64</x>
-     <y>661</y>
+     <x>92</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>463</x>
@@ -954,8 +964,8 @@ p, li { white-space: pre-wrap; }
    <slot>pausePlayback()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>144</x>
-     <y>661</y>
+     <x>180</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>463</x>
@@ -970,8 +980,8 @@ p, li { white-space: pre-wrap; }
    <slot>forwardPlayback()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>661</y>
+     <x>224</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>463</x>
@@ -986,8 +996,8 @@ p, li { white-space: pre-wrap; }
    <slot>forwardToEndOfPlayback()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>661</y>
+     <x>268</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>463</x>
@@ -1056,6 +1066,22 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>464</x>
      <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>changeStreamButton</sender>
+   <signal>clicked()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>listStreams()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>532</x>
+     <y>730</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>

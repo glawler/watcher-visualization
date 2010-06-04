@@ -62,6 +62,8 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include "initConfig.h"
 #include "singletonConfig.h"
 #include "libwatcher/messageStream.h"

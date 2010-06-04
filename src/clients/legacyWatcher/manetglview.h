@@ -35,6 +35,10 @@
 
 #include "stringIndexedMenuItem.h"
 
+namespace watcher {
+	class WatcherStreamListDialog;
+}
+
 class manetGLView : public QGLWidget
 {
     Q_OBJECT
@@ -91,6 +95,8 @@ public slots:
         void rewindToStartOfPlayback();
         void forwardToEndOfPlayback();
         void playbackSetSpeed(double speed);
+	void listStreams();
+	void selectStream(unsigned long uid);
 
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
@@ -165,6 +171,9 @@ signals:
 
         /** The GUI slider which shows and controls backback location */
         QSlider *playbackSlider;
+
+	/** dialog for display list of streams */
+	watcher::WatcherStreamListDialog *streamsDialog;
 
         std::vector<watcher::StringIndexedMenuItem*> layerMenuItems;
         void addLayerMenuItem(const watcher::GUILayer &layer, bool active);

@@ -34,6 +34,7 @@
 #include <libwatcher/watcherGraph.h>
 #include <libwatcher/seekWatcherMessage.h>  // for epoch, eof
 #include <libwatcher/playbackTimeRange.h>  // for epoch, eof
+#include <libwatcher/listStreamsMessage.h>
 
 #include "watcherAboutDialog.h"
 #include "manetglview.h"
@@ -41,6 +42,7 @@
 #include "singletonConfig.h"
 #include "backgroundImage.h"
 #include "logger.h"
+#include "watcherStreamListDialog.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -1483,8 +1485,8 @@ void manetGLView::connectStream()
     TRACE_ENTER();
     while(1) {
         if (!messageStream) {
-            messageStream=MessageStream::createNewMessageStream(serverName);     // This blocks until connected
-            messageStream->setStreamTimeStart(playbackStartTime);
+            messageStream=MessageStream::createNewMessageStream(serverName);     // This blocks until connected messageStream->setStreamTimeStart(playbackStartTime);
+	    messageStream->setDescription("legacy watcher gui");
             messageStream->startStream();
             messageStream->getMessageTimeRange();
             messageStream->enableFiltering(messageStreamFiltering);
@@ -1539,7 +1541,12 @@ void manetGLView::checkIO()
                             playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
                             playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
                     timeRangeMessageSent=false;
-                }
+                } else if (message->type == LIST_STREAMS_MESSAGE_TYPE) {
+			ListStreamsMessagePtr m(dynamic_pointer_cast<ListStreamsMessage>(message));
+			BOOST_FOREACH(EventStreamInfoPtr ev, m->evstreams) {
+				streamsDialog->addStream(ev->uid, ev->description);
+			}
+		}
 
                 // End of handling non feeder messages. 
                 continue;
@@ -3623,4 +3630,32 @@ void manetGLView::playbackSetSpeed(double x)
     TRACE_EXIT();
 }
 
+void manetGLView::listStreams()
+{
+    TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
+    if (!streamsDialog) {
+	streamsDialog = new WatcherStreamListDialog;
+	connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
+	connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
+    }
+    streamsDialog->treeWidget->clear();
+    streamsDialog->show();
 
+    messageStream->listStreams();
+    TRACE_EXIT();
+}
+
+void manetGLView::selectStream(unsigned long uid)
+{
+    TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
+    messageStream->subscribeToStream(uid);
+    TRACE_EXIT();
+}
