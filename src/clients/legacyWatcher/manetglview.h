@@ -97,6 +97,8 @@ public slots:
         void playbackSetSpeed(double speed);
 	void listStreams();
 	void selectStream(unsigned long uid);
+	void setStreamDescription(const std::string&);
+	void spawnStreamDescription();
 
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);

@@ -43,6 +43,7 @@
 #include "backgroundImage.h"
 #include "logger.h"
 #include "watcherStreamListDialog.h"
+#include "watcherStreamDescriptionDialog.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -3659,3 +3660,24 @@ void manetGLView::selectStream(unsigned long uid)
     messageStream->subscribeToStream(uid);
     TRACE_EXIT();
 }
+
+void manetGLView::spawnStreamDescription()
+{
+    TRACE_ENTER();
+    WatcherStreamDescriptionDialog *dia = new WatcherStreamDescriptionDialog;
+    connect(dia, SIGNAL(streamDescriptionChanged(const std::string&)), this, SLOT(setStreamDescription(const std::string&)));
+    dia->show();
+    TRACE_EXIT();
+}
+
+void manetGLView::setStreamDescription(const std::string& s)
+{
+    TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
+    messageStream->setDescription(s);
+    TRACE_EXIT();
+}
+
