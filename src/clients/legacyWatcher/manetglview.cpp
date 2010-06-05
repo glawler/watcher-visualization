@@ -3628,6 +3628,7 @@ void manetGLView::changeSpeed(double x)
 	wGraph.setTimeDirectionForward(x > 0.0);
     }
     streamRate = x;
+    emit streamRateSet(streamRate); // update the gui's display
 }
 
 void manetGLView::playbackSetSpeed(double x)
@@ -3637,10 +3638,9 @@ void manetGLView::playbackSetSpeed(double x)
         TRACE_EXIT();
         return;
     }
-    changeSpeed(x);
     LOG_DEBUG("Setting stream rate to " << x); 
     messageStream->setStreamRate(streamRate);
-    emit streamRateSet(streamRate);
+    changeSpeed(x);
     TRACE_EXIT();
 }
 
