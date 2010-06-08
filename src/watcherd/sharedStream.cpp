@@ -16,18 +16,22 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sharedStream.h"
-#include "replayState.h"
-#include "watcherd.h"
-#include "database.h"
+#include <list>
+
+#include <boost/foreach.hpp>
 
 #include <libwatcher/seekWatcherMessage.h>
 #include <libwatcher/speedWatcherMessage.h>
 #include <libwatcher/playbackTimeRange.h>
+#include <libwatcher/streamDescriptionMessage.h>
+#include <libwatcher/streamDescriptionMessage.h>
+#include <libwatcher/startWatcherMessage.h>
+#include <libwatcher/stopWatcherMessage.h>
 
-#include <boost/foreach.hpp>
-
-#include <list>
+#include "sharedStream.h"
+#include "replayState.h"
+#include "watcherd.h"
+#include "database.h"
 
 namespace {
 
@@ -52,6 +56,7 @@ class SharedStreamImpl {
 	Watcherd& watcher_;
 	uint32_t uid_;
 	boost::shared_ptr<ReplayState> replay_;
+	std::string description_;
 
 	boost::mutex lock_;
 	std::list<ServerConnectionPtr> clients_; // clients subscribed to this stream
@@ -116,6 +121,7 @@ void SharedStream::start()
 	    impl_->replay_->run();
     }
     LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
+    sendMessage(StartMessagePtr(new StartMessage())); // relay to all subscribers
     TRACE_EXIT();
 }
 
@@ -136,6 +142,7 @@ void SharedStream::stop()
     } else
 	LOG_DEBUG("stop message received, but playback is stopped");
     LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
+    sendMessage(StopMessagePtr(new StopMessage())); // relay to all subscribers
     TRACE_EXIT();
 }
 
@@ -238,6 +245,10 @@ void SharedStream::subscribe(ServerConnectionPtr p)
 	SpeedMessagePtr msg(new SpeedMessage(impl_->replay_->speed()));
 	p->sendMessage(msg);
     }
+    {
+	StreamDescriptionMessagePtr msg(new StreamDescriptionMessage(impl_->description_));
+	p->sendMessage(msg);
+    }
 
     TRACE_EXIT();
 }
@@ -253,6 +264,19 @@ void SharedStream::unsubscribe(ServerConnectionPtr p)
 	impl_->watcher_.removeStream(shared_from_this());
     }
     TRACE_EXIT();
+}
+
+void SharedStream::setDescription(StreamDescriptionMessagePtr p)
+{
+    TRACE_ENTER();
+    impl_->description_ = p->desc;
+    sendMessage(p); // resend to all clients
+    TRACE_EXIT();
+}
+
+std::string SharedStream::getDescription() const
+{
+    return impl_->description_;
 }
 
 } // namespace

@@ -241,6 +241,7 @@ signals:
         bool showPlaybackRangeString;
         bool showVerboseStatusString;
         bool showDebugInfo;
+	bool showStreamDescription;
 
         float scaleText;
         float scaleLine;
@@ -351,6 +352,8 @@ signals:
         unsigned int nodesDrawn, edgesDrawn, labelsDrawn;
         unsigned int framesDrawn, fpsTimeBase;
         double framesPerSec;
+
+	std::string streamDescription;
 };
 
 #endif

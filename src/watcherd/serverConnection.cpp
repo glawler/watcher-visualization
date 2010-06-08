@@ -274,7 +274,7 @@ namespace watcher {
 	TRACE_ENTER();
 	StreamDescriptionMessagePtr p = boost::dynamic_pointer_cast<StreamDescriptionMessage>(m);
 	if (p) {
-	    stream->description_ = p->desc;
+	    stream->setDescription(p);
 	    LOG_INFO("set description for stream " << stream->getUID() << ": " << p->desc);
 	} else
 	    LOG_WARN("unable to cast MessagePtr to StreamDescriptionMessagePtr");
