@@ -347,33 +347,24 @@ namespace watcher {
                         (arrivedMessages.size()>1?"s":"") << " from " <<
                         ep.address()); 
 
-                // Add the incoming address to the Message so everyone
-                // knows who the message came from. If there is a dataNetwork, use that 
-                // to mask/modify the incoming ip address to be in the correct network.
                 BOOST_FOREACH(MessagePtr m, arrivedMessages) {
                     if (isFeederEvent(m->type)) {
+			// sanity check
+			if (conn_type == gui) {
+			    LOG_ERROR("received feeder event from a detected GUI client!  Closing connection.");
+			    TRACE_EXIT();
+			    return;
+			}
+
+			// Add the incoming address to the Message so everyone
+			// knows who the message came from. If there is a dataNetwork, use that 
+			// to mask/modify the incoming ip address to be in the correct network.
                         if (m->fromNodeID==NodeIdentifier() && dataNetwork.to_ulong()!=0) { 
                             unsigned long mask=ip::address_v4::netmask(dataNetwork).to_ulong();
                             m->fromNodeID=ip::address_v4((ep.address().to_v4().to_ulong() & ~mask) | (mask & dataNetwork.to_ulong()));
                         }
-                    }
-                }
 
-                /*
-                 * If this connection type is unknown or gui, then traverse the
-                 * list of arrived messages.  For GUI clients, look for the
-                 * STOP_MESSAGE to unsubscribe from the event stream.
-                 *
-                 * For unknown clients, infer the type from the message
-                 * received:
-                 * START_MESSAGE => gui
-                 * isFeederMessage => feeder
-                 */
-                if (conn_type == unknown || conn_type == gui) {
-                    BOOST_FOREACH(MessagePtr& i, arrivedMessages) {
-                        if (dispatch_gui_event(i)) {
-                            //empty
-                        } else if (isFeederEvent(i->type)) {
+			if (conn_type == unknown) {
                             conn_type = feeder;
 
                             if (! watcher.readOnly()) {
@@ -384,8 +375,13 @@ namespace watcher {
                                  */
                                 addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
                             }
-                        }
-                    }
+			}
+                    } else if (conn_type == feeder) { // sanity check, anything else should be a gui control event
+			LOG_ERROR("received GUI control event from a detected feeder daemon!  Closing connection.");
+			TRACE_EXIT();
+			return;
+		    } else // otherwise must be a GUI control event
+			dispatch_gui_event(m);
                 }
 
                 /* Flag indicating whether to continue reading from this
