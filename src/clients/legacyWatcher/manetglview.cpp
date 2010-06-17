@@ -34,6 +34,9 @@
 #include <libwatcher/watcherGraph.h>
 #include <libwatcher/seekWatcherMessage.h>  // for epoch, eof
 #include <libwatcher/playbackTimeRange.h>  // for epoch, eof
+#include <libwatcher/listStreamsMessage.h>
+#include <libwatcher/speedWatcherMessage.h>
+#include <libwatcher/streamDescriptionMessage.h>
 
 #include "watcherAboutDialog.h"
 #include "manetglview.h"
@@ -41,6 +44,7 @@
 #include "singletonConfig.h"
 #include "backgroundImage.h"
 #include "logger.h"
+#include "watcherStreamListDialog.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -986,6 +990,7 @@ manetGLView::manetGLView(QWidget *parent) :
     showPlaybackTimeInStatusString(true),
     showPlaybackRangeString(true),
     showVerboseStatusString(false),
+    showStreamDescription(true),
     statusFontPointSize(10),
     statusFontName("Helvetica"),
     hierarchyRingColor(),
@@ -1483,8 +1488,8 @@ void manetGLView::connectStream()
     TRACE_ENTER();
     while(1) {
         if (!messageStream) {
-            messageStream=MessageStream::createNewMessageStream(serverName);     // This blocks until connected
-            messageStream->setStreamTimeStart(playbackStartTime);
+            messageStream=MessageStream::createNewMessageStream(serverName);     // This blocks until connected messageStream->setStreamTimeStart(playbackStartTime);
+	    messageStream->setDescription("legacy watcher gui");
             messageStream->startStream();
             messageStream->getMessageTimeRange();
             messageStream->enableFiltering(messageStreamFiltering);
@@ -1539,11 +1544,32 @@ void manetGLView::checkIO()
                             playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
                             playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
                     timeRangeMessageSent=false;
-                }
+                } else if (message->type == LIST_STREAMS_MESSAGE_TYPE) {
+		    ListStreamsMessagePtr m(dynamic_pointer_cast<ListStreamsMessage>(message));
+		    BOOST_FOREACH(EventStreamInfoPtr ev, m->evstreams) {
+			streamsDialog->addStream(ev->uid, ev->description);
+		    }
+		} else if (message->type == SPEED_MESSAGE_TYPE) {
+		    // notification from the watcher daemon that the shared stream speed has changed
+		    SpeedMessagePtr sm(dynamic_pointer_cast<SpeedMessage>(message));
+		    changeSpeed(sm->speed);
+		    if (sm->speed == 0)
+			playbackPaused = true;
+		} else if (message->type == STOP_MESSAGE_TYPE) {
+		    playbackPaused = true;
+		} else if (message->type == START_MESSAGE_TYPE) {
+		    playbackPaused = false;
+		} else if (message->type == STREAM_DESCRIPTION_MESSAGE_TYPE) {
+		    StreamDescriptionMessagePtr m(dynamic_pointer_cast<StreamDescriptionMessage>(message));
+		    streamDescription = m->desc;
+		}
 
                 // End of handling non feeder messages. 
                 continue;
             }
+
+	    // When control reaches this point, events are being streamed
+	    playbackPaused = false;
 
             {
                 boost::lock_guard<boost::mutex> l(graphMutex);
@@ -1895,6 +1921,11 @@ void manetGLView::drawStatusString()
         buf="(end of data)";
     else
         buf="(playback)";
+
+    if (showStreamDescription) {
+	buf += "\nDescription: ";
+	buf += streamDescription;
+    }
 
     if (showWallTimeinStatusString)
     {
@@ -3510,11 +3541,10 @@ void manetGLView::pausePlayback()
         TRACE_EXIT();
         return;
     }
-    playbackPaused=true;
-//    messageStream->clearMessageCache();
     messageStream->stopStream(); 
     TRACE_EXIT();
 }
+
 void manetGLView::normalPlayback()
 {
     TRACE_ENTER();
@@ -3522,12 +3552,11 @@ void manetGLView::normalPlayback()
         TRACE_EXIT();
         return;
     }
-    playbackPaused=false;
     playbackSetSpeed(1.0);
-    messageStream->clearMessageCache();
     messageStream->startStream(); 
     TRACE_EXIT();
 }
+
 void manetGLView::reversePlayback()
 {
     TRACE_ENTER();
@@ -3536,18 +3565,16 @@ void manetGLView::reversePlayback()
         return;
     }
     pausePlayback(); 
-    messageStream->clearMessageCache();
-    if (streamRate!=0.0)
-    {
-        if (streamRate<0.0)
+    if (streamRate != 0.0) {
+        if (streamRate < 0.0)
             playbackSetSpeed(-abs(streamRate*2));
         else
             playbackSetSpeed(-abs(streamRate));
-        playbackPaused=false;
         messageStream->startStream(); 
     }
     TRACE_EXIT();
 }
+
 void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
@@ -3556,18 +3583,16 @@ void manetGLView::forwardPlayback()
         return;
     }
     pausePlayback(); 
-    messageStream->clearMessageCache();
-    if (streamRate!=0.0)
-    {
-        if (streamRate>0.0)
+    if (streamRate != 0.0) {
+        if (streamRate > 0.0)
             playbackSetSpeed(abs(streamRate*2));
         else
             playbackSetSpeed(abs(streamRate));
-        playbackPaused=false;
         messageStream->startStream(); 
     }
     TRACE_EXIT();
 }
+
 void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
@@ -3576,17 +3601,14 @@ void manetGLView::rewindToStartOfPlayback()
         return;
     }
     pausePlayback(); 
-    messageStream->clearMessageCache();
     messageStream->setStreamTimeStart(SeekMessage::epoch); 
-    if (streamRate<0.0)
+    if (streamRate < 0.0)
         normalPlayback();
     else
         messageStream->startStream(); 
-    playbackPaused=false;
-    currentMessageTimestamp=playbackRangeStart;
-    playbackSlider->setValue(currentMessageTimestamp/1000); 
     TRACE_EXIT();
 }
+
 void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
@@ -3594,15 +3616,23 @@ void manetGLView::forwardToEndOfPlayback()
         TRACE_EXIT();
         return;
     }
-    pausePlayback(); 
-    messageStream->clearMessageCache();
+    pausePlayback();
     messageStream->setStreamTimeStart(SeekMessage::eof); 
-    playbackSetSpeed(1.0);
-    playbackPaused=false;
-    messageStream->startStream(); 
-    currentMessageTimestamp=playbackRangeEnd;
-    playbackSlider->setValue(currentMessageTimestamp/1000); 
+    normalPlayback();
     TRACE_EXIT();
+}
+
+/** Called when a message from the watcher daemon is received notifying us that
+ * the stream rate has changed.
+ */
+void manetGLView::changeSpeed(double x)
+{
+    if ((streamRate > 0.0 && x < 0.0) || (streamRate < 0.0 && x > 0.0)) {
+	boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when goes out of scope.
+	wGraph.setTimeDirectionForward(x > 0.0);
+    }
+    streamRate = x;
+    emit streamRateSet(streamRate); // update the gui's display
 }
 
 void manetGLView::playbackSetSpeed(double x)
@@ -3612,15 +3642,52 @@ void manetGLView::playbackSetSpeed(double x)
         TRACE_EXIT();
         return;
     }
-    if ((streamRate>0.0 && x<0.0) || (streamRate<0.0 && x>0.0)) {
-            boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when goes out of scope.
-            wGraph.setTimeDirectionForward(x>0.0?true:false); 
-    }
-    LOG_DEBUG("Setting stream rate to " << x); 
-    streamRate=x;
-    messageStream->setStreamRate(streamRate);
-    emit streamRateSet(streamRate);
+    messageStream->setStreamRate(x);
     TRACE_EXIT();
 }
 
+void manetGLView::listStreams()
+{
+    TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
+    if (!streamsDialog) {
+	streamsDialog = new WatcherStreamListDialog;
+	connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
+	connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
+    }
+    streamsDialog->treeWidget->clear();
+    streamsDialog->show();
 
+    messageStream->listStreams();
+    TRACE_EXIT();
+}
+
+void manetGLView::selectStream(unsigned long uid)
+{
+    TRACE_ENTER();
+    if (!messageStream) {
+        TRACE_EXIT();
+        return;
+    }
+    messageStream->subscribeToStream(uid);
+    messageStream->getMessageTimeRange(); // get info for new stream
+    TRACE_EXIT();
+}
+
+/** Blocks while user is entering the new stream description.  */
+void manetGLView::spawnStreamDescription()
+{
+    TRACE_ENTER();
+    if (!messageStream) {
+	TRACE_EXIT();
+	return;
+    }
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Set Stream Description"), tr("Description:"), QLineEdit::Normal, QString(), &ok);
+    if (ok && !text.isEmpty())
+	messageStream->setDescription(text.toStdString());
+    TRACE_EXIT();
+}

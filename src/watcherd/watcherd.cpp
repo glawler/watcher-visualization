@@ -138,7 +138,7 @@ void Watcherd::listStreams(ServerConnectionPtr conn)
 
     ListStreamsMessagePtr msg(new ListStreamsMessage());
     BOOST_FOREACH(SharedStreamPtr stream, allStreams) {
-	msg->evstreams.push_back( EventStreamInfoPtr(new EventStreamInfo( stream->getUID(), stream->description_ )) );
+	msg->evstreams.push_back( EventStreamInfoPtr(new EventStreamInfo( stream->getUID(), stream->getDescription() )) );
     }
     conn->sendMessage(msg);
 

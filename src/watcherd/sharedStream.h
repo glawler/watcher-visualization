@@ -30,13 +30,6 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/scoped_ptr.hpp>
 
-/*
-namespace boost {
-    namespace asio {
-	class io_service;
-    }
-} */
-
 namespace watcher {
 class ReplayState; //fwd decl
 class Watcherd;
@@ -52,7 +45,7 @@ class SharedStream : public boost::enable_shared_from_this<SharedStream> {
 	void start();
 	void stop();
 	void speed(const event::SpeedMessagePtr& m);
-	void range(event::PlaybackTimeRangeMessagePtr m);
+	void range(ServerConnectionPtr);
 
 	/** Add a client to the list which gets events for this stream. */
 	void subscribe(ServerConnectionPtr);
@@ -66,10 +59,12 @@ class SharedStream : public boost::enable_shared_from_this<SharedStream> {
 	/** send messages to all clients watching this stream. */
 	void sendMessage(const std::vector<event::MessagePtr>&);
 
+	void setDescription(event::StreamDescriptionMessagePtr);
+	std::string getDescription() const;
+
 	/// state variables for Live and Replay tracking
 	bool isPlaying_;
 	bool isLive_;
-	std::string description_;
 
 	uint32_t getUID() const;
 

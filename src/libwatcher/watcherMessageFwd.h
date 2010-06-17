@@ -30,11 +30,13 @@ namespace event {
     class SeekMessage;
     class SpeedMessage;
     class PlaybackTimeRangeMessage;
+    class StreamDescriptionMessage;
 
     typedef boost::shared_ptr<Message> MessagePtr;
     typedef boost::shared_ptr<SeekMessage> SeekMessagePtr;
     typedef boost::shared_ptr<SpeedMessage> SpeedMessagePtr;
     typedef boost::shared_ptr<PlaybackTimeRangeMessage> PlaybackTimeRangeMessagePtr;
+    typedef boost::shared_ptr<StreamDescriptionMessage> StreamDescriptionMessagePtr;
 } // namespace
 
 } // namespace

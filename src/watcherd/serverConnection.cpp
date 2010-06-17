@@ -220,7 +220,7 @@ namespace watcher {
     {
         PlaybackTimeRangeMessagePtr p (boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(m));
         if (p)
-	    stream->range(p);
+	    stream->range(shared_from_this());
         else
             LOG_WARN("unable to cast to PlaybackTimeRangeMessage");
     }
@@ -274,7 +274,7 @@ namespace watcher {
 	TRACE_ENTER();
 	StreamDescriptionMessagePtr p = boost::dynamic_pointer_cast<StreamDescriptionMessage>(m);
 	if (p) {
-	    stream->description_ = p->desc;
+	    stream->setDescription(p);
 	    LOG_INFO("set description for stream " << stream->getUID() << ": " << p->desc);
 	} else
 	    LOG_WARN("unable to cast MessagePtr to StreamDescriptionMessagePtr");

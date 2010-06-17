@@ -261,9 +261,9 @@ void ReplayState::run()
             impl_->delta = 0;
 
         LOG_DEBUG("Next event in " << impl_->delta << " ms");
+        impl_->state = impl::running;
         impl_->timer.expires_from_now(boost::posix_time::millisec(impl_->delta));
         impl_->timer.async_wait(boost::bind(&ReplayState::timer_handler, shared_from_this(), boost::asio::placeholders::error));
-        impl_->state = impl::running;
     } else {
         /*
          * FIXME what should happen when the end of the event stream is reached?
