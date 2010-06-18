@@ -36,6 +36,8 @@ log4j.logger.WatcherGraph=fatal
 # log4j.logger.LabelDisplayInfo=trace
 # log4j.logger.Database.SqliteDatabase=info
 # log4j.logger.BackgroundImage=debug
+# log4j.logger.SharedStream=trace
+# log4j.logger.ReplayState=trace
 
 
 #
