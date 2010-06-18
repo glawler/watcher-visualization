@@ -86,6 +86,7 @@ SharedStream::~SharedStream()
 void SharedStream::seek(const SeekMessagePtr& p)
 {
     TRACE_ENTER();
+    LOG_DEBUG("in: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
     if (p->offset == SeekMessage::eof) {
 	if (isLive_) {
 	    // nothing to do
@@ -106,6 +107,7 @@ void SharedStream::seek(const SeekMessagePtr& p)
 	    impl_->replay_->run();
 	isLive_ = false;
     }
+    LOG_DEBUG("out: isPlaying_=" << isPlaying_ << ", isLive_=" << isLive_);
     TRACE_EXIT();
 }
 

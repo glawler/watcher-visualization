@@ -59,6 +59,7 @@ namespace watcher {
                 bool operator== (const SeekMessage &rhs) const;
 
                 friend std::ostream& operator<< (std::ostream& o, const SeekMessage& m);
+		std::ostream& toStream(std::ostream&) const;
 
             private:
                 friend class boost::serialization::access;

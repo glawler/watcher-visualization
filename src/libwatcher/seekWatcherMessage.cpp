@@ -43,9 +43,15 @@ namespace watcher {
             TRACE_EXIT();
         }
 
+        std::ostream& SeekMessage::toStream (std::ostream& o) const
+        {
+	    Message::toStream(o);
+            return o << " offset=" << offset << ", rel=" << rel;
+        }
+
         std::ostream& operator<< (std::ostream& o, const SeekMessage& m)
         {
-            return o << "SeekMessage(offset=" << m.offset << " , rel=" << m.rel << ')';
+	    return m.toStream(o);
         }
 
         template <typename Archive>
@@ -57,7 +63,6 @@ namespace watcher {
             ar & rel;
             TRACE_EXIT();
         }
-
     }
 }
 

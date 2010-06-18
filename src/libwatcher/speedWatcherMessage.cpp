@@ -37,9 +37,15 @@ namespace watcher {
             TRACE_EXIT();
         }
        
+	std::ostream& SpeedMessage::toStream(std::ostream& os) const
+	{
+	    Message::toStream(os);
+            return os << " speed=" << speed;
+	}
+
         std::ostream& operator<< (std::ostream& o, const SpeedMessage& rhs)
         {
-            return o << "SpeedMessage(speed=" << rhs.speed << ')';
+	    return rhs.toStream(o);
         }
 
         template <typename Archive>

@@ -44,6 +44,8 @@ namespace watcher {
                 SpeedMessage(float speed = 1.0);
                 bool operator== (const SpeedMessage& rhs) const { return speed == rhs.speed; }
                 friend std::ostream& operator<< (std::ostream& o, const SpeedMessage& rhs);
+
+		virtual std::ostream& toStream(std::ostream&) const;
         };
 
         typedef boost::shared_ptr<SpeedMessage> SpeedMessagePtr;
