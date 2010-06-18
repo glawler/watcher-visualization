@@ -242,7 +242,7 @@ void SharedStream::subscribe(ServerConnectionPtr p)
 
     // send the current state to the new subscribe
     {
-	SpeedMessagePtr msg(new SpeedMessage(impl_->replay_->speed()));
+	SpeedMessagePtr msg(new SpeedMessage(isLive_ ? 1.0 : impl_->replay_->speed()));
 	p->sendMessage(msg);
     }
     {
