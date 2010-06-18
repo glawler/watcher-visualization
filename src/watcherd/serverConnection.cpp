@@ -373,6 +373,7 @@ namespace watcher {
                                  * Add a message handler to write its event
                                  * stream to the database.
                                  */
+				    LOG_DEBUG("adding handle to write to event db");
                                 addMessageHandler(MessageHandlerPtr(new WriteDBMessageHandler()));
                             }
 			}
