@@ -57,9 +57,12 @@ void WatcherStreamListDialog::addStream(unsigned long uid, const std::string& de
 void WatcherStreamListDialog::selectStream()
 {
     TRACE_ENTER();
-    unsigned long uid = treeWidget->currentItem()->text(0).toULong();
-    LOG_DEBUG("Switching to stream uid " << uid);
-    emit streamChanged(uid);
+    QTreeWidgetItem *item = treeWidget->currentItem();
+    if (item) {
+	unsigned long uid = item->text(0).toULong();
+	LOG_DEBUG("Switching to stream uid " << uid);
+	emit streamChanged(uid);
+    }
     hide();
     TRACE_EXIT();
 }
