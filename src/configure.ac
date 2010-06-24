@@ -71,6 +71,7 @@ if test x$enable_testnodeonly == xno; then
     	    	[ac_cv_kml=$withval])
 
     if test x$enable_earthWatcher != xno; then
+            PKG_CHECK_MODULES(LIBURIPARSER, liburiparser)
 	    AC_MSG_CHECKING(for libkml)
 	    if test x$ac_cv_kml = xno; then
 		    #not specified by the user, look in the standard locations
@@ -85,7 +86,7 @@ if test x$enable_testnodeonly == xno; then
         else
 	        AC_MSG_RESULT($ac_cv_kml)
     	    KML_INCLUDES="-I$ac_cv_kml/include"
-	        KML_LDFLAGS="-L$ac_cv_kml/lib"
+	        KML_LDFLAGS="-L$ac_cv_kml/lib/libkml"
 	        AC_SUBST(KML_INCLUDES)
 	        AC_SUBST(KML_LDFLAGS)
         fi
@@ -192,6 +193,8 @@ if test x$enable_testnodeonly == xno; then
     AC_CONFIG_FILES([ \
        sqlite_wrapper/Makefile \
        watcherd/Makefile \
+       watcherd/init.d/Makefile \
+       watcherd/sysconfig/Makefile \
        clients/messageStream2Text/Makefile \
        clients/connectivity2dot/Makefile \
        clients/legacyWatcher/legacyWatcher.pro

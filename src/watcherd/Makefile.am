@@ -1,5 +1,7 @@
 include $(top_srcdir)/Makefile.top
 
+SUBDIRS=init.d sysconfig
+
 # melkins - compilation for Fedora 10
 -include ../Makefile.local
 
@@ -16,7 +18,7 @@ BUILT_SOURCES= \
 	watcherd.cfg \
 	watcherd.log.properties 
 
-bin_PROGRAMS=watcherd 
+sbin_PROGRAMS=watcherd 
 
 watcherd_SOURCES=\
 	watcherdMain.cpp \
