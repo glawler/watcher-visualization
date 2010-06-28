@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -17,7 +17,6 @@
  */
 
 /**@file
- * @author Michael.Elkins@cobham.com
  * @date 2009-05-04
  */
 
@@ -52,8 +51,8 @@ SqliteDatabase::SqliteDatabase(const std::string& path) :
     /* Added to enable higher insert rate.
      * More concerned with performance than crash integrity
      */
-    conn_->execute("PRAGMA synchronous = 0;");
-    conn_->execute("PRAGMA journal_mode = 0;");
+    conn_->execute("PRAGMA synchronous = OFF;");
+    conn_->execute("PRAGMA journal_mode = OFF;");
 
     /*
      * This must come after the db creation otherwise it will fail saying that
@@ -131,3 +130,5 @@ TimeRange SqliteDatabase::eventRange()
 
     return TimeRange(begin, end);
 }
+
+// vim:sw=4 ts=8
