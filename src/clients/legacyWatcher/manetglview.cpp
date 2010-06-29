@@ -997,7 +997,8 @@ manetGLView::manetGLView(QWidget *parent) :
     playbackStartTime(SeekMessage::eof),  // live mode
     autoCenterNodesFlag(false),
     nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
-    framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0)
+    framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0),
+    streamsDialog(NULL)
 {
     TRACE_ENTER();
     manetAdjInit.angleX=0.0;
