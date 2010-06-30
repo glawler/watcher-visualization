@@ -1,7 +1,5 @@
 include $(top_srcdir)/Makefile.top
 
-SUBDIRS=init.d sysconfig
-
 # melkins - compilation for Fedora 10
 -include ../Makefile.local
 
