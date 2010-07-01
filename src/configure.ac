@@ -193,8 +193,6 @@ if test x$enable_testnodeonly == xno; then
     AC_CONFIG_FILES([ \
        sqlite_wrapper/Makefile \
        watcherd/Makefile \
-       watcherd/init.d/Makefile \
-       watcherd/sysconfig/Makefile \
        clients/messageStream2Text/Makefile \
        clients/connectivity2dot/Makefile \
        clients/legacyWatcher/legacyWatcher.pro
