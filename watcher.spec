@@ -2,10 +2,6 @@
 %define	_name		watcher
 %define	_prefix		/usr/%{_project}
 
-# To create source tar-ball:
-#	tar --exclude logger --exclude .hg -C @@dir_above_watcher@@ \
-#		-czvmf cta-watcher-@@Version@@.tar.gz watcher
-
 Summary:	ARL1X/CTA Watcher
 Name:		%{_project}-%{_name}
 Version:	20100624
@@ -79,15 +75,7 @@ fi
 %{_bindir}/sendLabelMessage
 %{_bindir}/sendNodePropertiesMessage
 %{_bindir}/showClock
-
-%dir %{_sbindir}
-%{_sbindir}/%{_name}d
-
-%dir %{_initrddir}
-%{_initrddir}/%{_name}d
-
-%dir %{_sysconfdir}/sysconfig
-%{_sysconfdir}/sysconfig/%{_name}d
+%{_bindir}/%{_name}d
 
 %files devel
 %defattr(444,root,root,755)
