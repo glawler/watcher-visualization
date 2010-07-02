@@ -4,7 +4,7 @@
 
 Summary:	ARL1X/CTA
 Name:		%{_project}-%{_name}
-Version:	20100624
+Version:	20100702
 Release:	1
 License:	Other
 Group:		Development/CTA
@@ -19,6 +19,7 @@ BuildRequires:	automake
 BuildRequires:	autoconf
 BuildRequires:  pkgconfig
 BuildRequires:	log4cxx-devel
+BuildRequires:	libtool
 
 %description
 
@@ -31,11 +32,11 @@ fi
 
 %build
 ./autogen.sh
-./configure --prefix=%{_prefix}
-make DESTDIR=$RPM_BUILD_ROOT LIBDIR=%{_libdir} BINDIR=%{_bindir} SBINDIR=%{_sbindir} INCLUDEDIR=%{_includedir}
+%configure
+make DESTDIR=$RPM_BUILD_ROOT
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT LIBDIR=%{_libdir} BINDIR=%{_bindir} SBINDIR=%{_sbindir} INCLUDEDIR=%{_includedir} install
+make DESTDIR=$RPM_BUILD_ROOT install
 
 %clean
 if [ "$RPM_BUILD_ROOT" ] && [ "$RPM_BUILD_ROOT" != "/" ]; then
