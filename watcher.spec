@@ -4,7 +4,7 @@
 
 Summary:	ARL1X/CTA Watcher
 Name:		%{_project}-%{_name}
-Version:	20100624
+Version:	20100702
 Release:	1
 License:	Other
 Group:		Applications/CTA
@@ -44,14 +44,15 @@ fi
 %setup -n %{_name}
 
 %build
+export PKG_CONFIG_PATH=%{_libdir}/pkgconfig
 cd src
 ./autogen.sh
-env PKG_CONFIG_PATH=%{_libdir}/pkgconfig ./configure --prefix=%{_prefix} --enable-earthWatcher
-make DESTDIR=$RPM_BUILD_ROOT LIBDIR=%{_libdir} BINDIR=%{_bindir} SBINDIR=%{_sbindir} INCLUDEDIR=%{_includedir}
+%configure --enable-earthWatcher
+make DESTDIR=$RPM_BUILD_ROOT
 
 %install
 cd src
-make DESTDIR=$RPM_BUILD_ROOT LIBDIR=%{_libdir} BINDIR=%{_bindir} SBINDIR=%{_sbindir} INCLUDEDIR=%{_includedir} install
+make DESTDIR=$RPM_BUILD_ROOT install
 
 %clean
 if [ "$RPM_BUILD_ROOT" ] && [ "$RPM_BUILD_ROOT" != "/" ]; then
