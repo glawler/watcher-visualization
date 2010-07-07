@@ -32,6 +32,12 @@ AM_CONDITIONAL([ENABLE_TESTNODEONLY], [test x$enable_testnodeonly != xno])
 PKG_CHECK_MODULES(LOG4CXX, [liblog4cxx >= 0.10.0])
 PKG_CHECK_MODULES(LIBCONFIG, [libconfig++ >= 1.3.1])
 
+# Not entirely correct.
+libsubdir="lib"
+if test "$(uname -m)" = "x86_64"; then
+	libsubdir="lib64"
+fi
+
 if test x$enable_testnodeonly == xno; then
     #
     # Normal, full build section
@@ -86,7 +92,7 @@ if test x$enable_testnodeonly == xno; then
         else
 	        AC_MSG_RESULT($ac_cv_kml)
     	    KML_INCLUDES="-I$ac_cv_kml/include"
-	        KML_LDFLAGS="-L$ac_cv_kml/lib/libkml"
+	        KML_LDFLAGS="-L$ac_cv_kml/$libsubdir/libkml"
 	        AC_SUBST(KML_INCLUDES)
 	        AC_SUBST(KML_LDFLAGS)
         fi
@@ -138,14 +144,14 @@ if test x$enable_testnodeonly == xno; then
         AC_MSG_WARN("QWT prefix not defined via --with-qwt.")
         AC_MSG_WARN(["Assuming /usr/local/qwt, which is almost certainly incorrect..."])
         QWT_INCLUDES="/usr/local/qwt/include"
-        QWT_LIB="-L/usr/local/qwt/lib -lqwt"
+        QWT_LIB="-L/usr/local/qwt/$libsubdir -lqwt"
     else 
         AC_MSG_RESULT($ac_cv_qwt)
 	if test x$ac_cv_qwt_ext != x; then
 	    ac_cv_qwt_ext="-$ac_cv_qwt_ext"
 	fi
 	QWT_INCLUDES="$ac_cv_qwt/include/qwt$ac_cv_qwt_ext $ac_cv_qwt/include"
-        QWT_LIB="-L/$ac_cv_qwt/lib -lqwt$ac_cv_qwt_ext"
+        QWT_LIB="-L/$ac_cv_qwt/$libsubdir -lqwt$ac_cv_qwt_ext"
     fi
 
     AC_SUBST(QWT_INCLUDES)
