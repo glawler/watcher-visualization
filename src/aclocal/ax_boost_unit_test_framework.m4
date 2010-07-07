@@ -1,6 +1,6 @@
-# ===========================================================================
-#      http://autoconf-archive.cryp.to/ax_boost_unit_test_framework.html
-# ===========================================================================
+# ================================================================================
+#  http://www.gnu.org/software/autoconf-archive/ax_boost_unit_test_framework.html
+# ================================================================================
 #
 # SYNOPSIS
 #
@@ -20,17 +20,16 @@
 #
 #     HAVE_BOOST_UNIT_TEST_FRAMEWORK
 #
-# LAST MODIFICATION
-#
-#   2008-04-12
-#
-# COPYLEFT
+# LICENSE
 #
 #   Copyright (c) 2008 Thomas Porschberg <thomas@randspringer.de>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
-#   and this notice are preserved.
+#   and this notice are preserved. This file is offered as-is, without any
+#   warranty.
+
+#serial 9
 
 AC_DEFUN([AX_BOOST_UNIT_TEST_FRAMEWORK],
 [
