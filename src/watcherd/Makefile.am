@@ -16,7 +16,7 @@ BUILT_SOURCES= \
 	watcherd.cfg \
 	watcherd.log.properties 
 
-sbin_PROGRAMS=watcherd 
+bin_PROGRAMS=watcherd 
 
 watcherd_SOURCES=\
 	watcherdMain.cpp \
