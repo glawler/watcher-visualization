@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -118,16 +118,11 @@ namespace watcher {
     {
         TRACE_ENTER();
 
-        if (e == boost::asio::error::eof)
-        {
+        if (e == boost::asio::error::eof) {
             LOG_DEBUG("Received empty message from client or client closed connection.");
             LOG_INFO("Connection to client closed."); 
-
-        }
-        else
-        {
+        } else
             LOG_ERROR("Error reading socket: " << e.message());
-        }
 
         // unsubscribe to event stream, otherwise it will hold a
         // shared_ptr open
@@ -313,8 +308,8 @@ namespace watcher {
                 if (conn_type == unknown) {
                     conn_type = gui;
 		    stream.reset(new SharedStream(watcher));
-		    watcher.addStream(stream);
 		    stream->subscribe(shared_from_this());
+		    watcher.addStream(stream);
                 }
                 (this->*(dispatch[i].fn)) (m);
                 TRACE_EXIT_RET_BOOL(true);
@@ -400,20 +395,6 @@ namespace watcher {
                     // initiate request to read next message
                     LOG_DEBUG("Waiting for next message.");
                     run();
-                }
-
-                if (conn_type == feeder) {
-                    /* relay feeder message to any client requesting the live stream.
-                     * Warning: currently there is no check to make sure that a client doesn't
-                     * receive a message it just sent.  This should be OK since we are just
-                     * relaying feeder messages only, and the GUIs should not be sending
-                     * them. */
-                    vector<MessagePtr> feeder;
-                    remove_copy_if(arrivedMessages.begin(), arrivedMessages.end(), back_inserter(feeder), not_feeder_message);
-                    if (! feeder.empty()) {
-                        LOG_DEBUG("Sending " << feeder.size() << " feeder messages to clients.");
-                        watcher.sendMessage(feeder);
-                    }
                 }
             }
         }
@@ -558,3 +539,5 @@ namespace watcher {
     }
 
 }
+
+// vim:sw=4 ts=8
