@@ -19,21 +19,21 @@
 #ifndef shared_stream_h
 #define shared_stream_h
 
-#include "logger.h"
-#include "libwatcher/watcherMessageFwd.h"
-#include "sharedStreamFwd.h"
-#include "serverConnectionFwd.h"
-
 #include <string>
 #include <vector>
 #include <stdint.h>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include "logger.h"
+#include "libwatcher/watcherMessageFwd.h"
+#include "sharedStreamFwd.h"
+#include "serverConnectionFwd.h"
+
 namespace watcher {
 class ReplayState; //fwd decl
-class Watcherd;
 class SharedStreamImpl;
+class Watcherd;
 
 /** Allows multiple clients to watch the same stream of live or replayed events. */
 class SharedStream : public boost::enable_shared_from_this<SharedStream> {
@@ -64,7 +64,6 @@ class SharedStream : public boost::enable_shared_from_this<SharedStream> {
 
 	/// state variables for Live and Replay tracking
 	bool isPlaying_;
-	bool isLive_;
 
 	uint32_t getUID() const;
 
@@ -77,3 +76,5 @@ class SharedStream : public boost::enable_shared_from_this<SharedStream> {
 } // namespace
 
 #endif
+
+// vim:sw=4 ts=8

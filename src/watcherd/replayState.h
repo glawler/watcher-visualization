@@ -63,7 +63,7 @@ namespace watcher {
             ReplayState(boost::asio::io_service& ios, SharedStreamPtr ptr, Timestamp ts = 0, float speed = 1.0f);
 
             /** Start event playback. */
-            void run();
+            ReplayState& play();
 
             /** Pause event playback.
              *
@@ -113,12 +113,16 @@ namespace watcher {
 
         private:
             struct impl;
-            //impl* impl_;
             boost::scoped_ptr<impl> impl_;
+
+	    void run();
             void timer_handler(const boost::system::error_code& error);
+
             DECLARE_LOGGER();
     };
 
 }
 
 #endif /* replay_state_h */
+
+// vim:sw=4 ts=8

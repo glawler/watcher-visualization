@@ -39,14 +39,12 @@ Watcherd::Watcherd(bool ro) :
     readOnly_(ro)
 {
     TRACE_ENTER();
-    pthread_rwlock_init(&messageRequestorsLock, 0);
     TRACE_EXIT();
 }
 
 Watcherd::~Watcherd()
 {
     TRACE_ENTER();
-    pthread_rwlock_destroy(&messageRequestorsLock);
     TRACE_EXIT();
 }
 
@@ -83,62 +81,18 @@ void Watcherd::run(const std::string &address, const std::string &port, const in
     TRACE_EXIT();
 }
 
-void Watcherd::subscribe(SharedStreamPtr client)
-{
-    TRACE_ENTER();
-
-    pthread_rwlock_wrlock(&messageRequestorsLock);
-    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
-
-    messageRequestors.push_front(client);
-
-    TRACE_EXIT();
-}
-
-void Watcherd::unsubscribe(SharedStreamPtr client)
-{
-    TRACE_ENTER();
-    pthread_rwlock_wrlock(&messageRequestorsLock);
-    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
-
-    messageRequestors.remove(client);
-    TRACE_EXIT();
-}
-
-/** Send a single message to all clients subscribed to the live stream */
-void Watcherd::sendMessage(MessagePtr msg)
-{
-    TRACE_ENTER();
-    pthread_rwlock_rdlock(&messageRequestorsLock);
-    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
-
-    // bind can't handle overloaded functions.  use member function pointer to help
-    void (SharedStream::*ptr)(MessagePtr) = &SharedStream::sendMessage;
-    for_each(messageRequestors.begin(), messageRequestors.end(), bind(ptr, _1, msg));
-    TRACE_EXIT();
-}
-
-/** Send a set of messages to all clients subscribed to the live stream */
-void Watcherd::sendMessage(const std::vector<MessagePtr>& msg)
-{
-    TRACE_ENTER();
-    pthread_rwlock_rdlock(&messageRequestorsLock);
-    shared_ptr<pthread_rwlock_t> lock(&messageRequestorsLock, pthread_rwlock_unlock);
-
-    // bind can't handle overloaded functions.  use member function pointer to help
-    void (SharedStream::*ptr)(const std::vector<MessagePtr>&) = &SharedStream::sendMessage;
-    for_each(messageRequestors.begin(), messageRequestors.end(), bind(ptr, _1, msg));
-    TRACE_EXIT();
-}
-
 void Watcherd::listStreams(ServerConnectionPtr conn)
 {
     TRACE_ENTER();
-    boost::shared_lock<boost::shared_mutex> lock(allStreamsLock);
 
     ListStreamsMessagePtr msg(new ListStreamsMessage());
-    BOOST_FOREACH(SharedStreamPtr stream, allStreams) {
-	msg->evstreams.push_back( EventStreamInfoPtr(new EventStreamInfo( stream->getUID(), stream->getDescription() )) );
+    {
+	boost::shared_lock<boost::shared_mutex> lock(allStreamsLock);
+	BOOST_FOREACH(SharedStreamPtr stream, allStreams) {
+	    msg->evstreams.push_back(
+		    EventStreamInfoPtr(
+			new EventStreamInfo(stream->getUID(), stream->getDescription() )));
+	}
     }
     conn->sendMessage(msg);
 
@@ -148,11 +102,13 @@ void Watcherd::listStreams(ServerConnectionPtr conn)
 SharedStreamPtr Watcherd::getStream(uint32_t uid)
 {
     TRACE_ENTER();
-    boost::shared_lock<boost::shared_mutex> lock(allStreamsLock);
-    BOOST_FOREACH(SharedStreamPtr stream, allStreams) {
-	if (stream->getUID() == uid) {
-	    TRACE_EXIT_RET(true);
-	    return stream;
+    {
+	boost::shared_lock<boost::shared_mutex> lock(allStreamsLock);
+	BOOST_FOREACH(SharedStreamPtr stream, allStreams) {
+	    if (stream->getUID() == uid) {
+		TRACE_EXIT_RET(true);
+		return stream;
+	    }
 	}
     }
     TRACE_EXIT_RET(false);
@@ -166,11 +122,11 @@ void Watcherd::addStream(SharedStreamPtr p)
     allStreams.push_front(p);
 }
 
-/** remove a stream from the list of all known streams.  also removes from the subscribed list. */
+/** remove a stream from the list of all known streams. */
 void Watcherd::removeStream(SharedStreamPtr p)
 {
-    unsubscribe(p);
-
     boost::unique_lock<boost::shared_mutex> lock(allStreamsLock);
     allStreams.remove(p);
 }
+
+// vim:sw=4 ts=8

@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -25,19 +25,17 @@
 #include <libwatcher/message.h>
 
 #include "sharedStream.h"
-#include "Assert.h"
 #include "database.h"
 #include "watcherd.h"
 #include "logger.h"
 
-using namespace util;
 using namespace watcher;
 using namespace watcher::event;
 
 INIT_LOGGER(ReplayState, "ReplayState"); 
 
 //< default value for number of events to prefetch from the database
-const unsigned int DEFAULT_BUFFER_SIZE = 20U; /* db rows */
+const unsigned int DEFAULT_BUFFER_SIZE = 50U; /* db rows */
 const unsigned int DEFAULT_STEP = 250U /* ms */;
 
 /** Internal structure used for implementing the class.  Used to avoid
@@ -64,8 +62,8 @@ struct ReplayState::impl {
     boost::mutex lock;
 
     impl(SharedStreamPtr& ptr, boost::asio::io_service& ios) :
-        conn(ptr), timer(ios), ts(0), last_event(0), bufsiz(DEFAULT_BUFFER_SIZE),
-        step(DEFAULT_STEP), state(paused), delta(0)
+        conn(ptr), timer(ios), ts(0), last_event(0), speed(1.0),
+	bufsiz(DEFAULT_BUFFER_SIZE), step(DEFAULT_STEP), state(paused), delta(0)
     {
         TRACE_ENTER();
         wall_time.tv_sec = 0;
@@ -74,11 +72,11 @@ struct ReplayState::impl {
     }
 };
 
-ReplayState::ReplayState(boost::asio::io_service& ios, SharedStreamPtr ptr, Timestamp t, float playback_speed) :
+ReplayState::ReplayState(boost::asio::io_service& ios, SharedStreamPtr ptr,
+	Timestamp t, float playback_speed) :
     impl_(new impl(ptr, ios))
 {
     TRACE_ENTER();
-    Assert<Bad_arg>(t >= 0);
     impl_->ts = t;
     impl_->last_event = t;
 
@@ -96,9 +94,13 @@ Timestamp ReplayState::tell() const
 ReplayState& ReplayState::pause()
 {
     TRACE_ENTER();
-    LOG_DEBUG("cancelling timer");
-    impl_->timer.cancel();
-    impl_->state = impl::paused;
+    boost::mutex::scoped_lock L(impl_->lock);
+    if (impl_->state != impl::paused) {
+	LOG_DEBUG("cancelling timer");
+	impl_->timer.cancel();
+	impl_->state = impl::paused;
+    } else
+	LOG_DEBUG("pause was called, but timer is not running");
     TRACE_EXIT();
     return *this;
 }
@@ -106,21 +108,16 @@ ReplayState& ReplayState::pause()
 ReplayState& ReplayState::seek(Timestamp t)
 {
     TRACE_ENTER();
+    boost::mutex::scoped_lock L(impl_->lock);
+    LOG_DEBUG("seeking to " << t);
+    impl_->events.clear();
+    impl_->ts = t;
+    if (t == -1) {
+	TimeRange r = event_range(); // pull ts of last event from db
+	impl_->last_event = r.second;
+    } else
+	impl_->last_event = t;
 
-    impl::run_state oldstate;
-    {
-        boost::mutex::scoped_lock L(impl_->lock);
-        oldstate = impl_->state;
-        pause();
-        impl_->events.clear();
-        impl_->ts = t;
-        if (t == -1)
-            impl_->last_event = std::numeric_limits<Timestamp>::max();
-        else
-            impl_->last_event = t;
-    }
-    if (oldstate == impl::running)
-        run();
     TRACE_EXIT();
     return *this;
 }
@@ -128,34 +125,46 @@ ReplayState& ReplayState::seek(Timestamp t)
 ReplayState& ReplayState::speed(float f)
 {
     TRACE_ENTER();
-    Assert<Bad_arg>(f != 0);
-    /* If speed changes direction, need to clear the event list.
+    boost::mutex::scoped_lock L(impl_->lock);
+    LOG_DEBUG("set speed to " << f);
+
+    /*
+     * If speed changes direction, need to clear the event list.
      * Check for sign change by noting that positive*negative==negative
      */
-    if (impl_->speed * f < 0) {
-        impl::run_state oldstate;
-        {
-            boost::mutex::scoped_lock L(impl_->lock);
+    bool changed = (impl_->speed * f < 0);
 
-            oldstate = impl_->state;
-            pause();
+    /*
+     * change the speed ahead of the block below, since the call to run()
+     * depends on the new value being set.
+     */
+    impl_->speed = f;
 
-            impl_->events.clear();
+    if (changed) {
+	LOG_DEBUG("direction of playback changed, clearing event queue");
 
-            /*
-             * Avoid setting .last_event when SpeedMessage is received
-             * prior to the first StartMessage.
-             */
-            if (impl_->ts != 0 && impl_->ts != -1)
-                impl_->last_event = impl_->ts;
+	impl_->events.clear();
 
-            impl_->speed = f;
-        }
-        if (oldstate == impl::running)
-            run();
-    } else
-        impl_->speed = f;
-    LOG_DEBUG("ts=" << impl_->ts << " last_event=" << impl_->last_event);
+	/*
+	 * Avoid setting .last_event when SpeedMessage is received
+	 * prior to the first StartMessage.
+	 */
+	if (impl_->ts != 0 && impl_->ts != -1)
+	    impl_->last_event = impl_->ts;
+
+	LOG_DEBUG("ts=" << impl_->ts << " last_event=" << impl_->last_event);
+
+	/*
+	 * If the timer is currently running, cancel it since the event queue
+	 * was discarded since it was playing in the opposite direction.
+	 */
+	if (impl_->state == impl::running) {
+	    LOG_DEBUG("timer is running, cancelling it");
+	    impl_->timer.cancel();
+	    run(); // re-read from the current ts
+	}
+    }
+
     TRACE_EXIT();
     return *this;
 }
@@ -163,7 +172,6 @@ ReplayState& ReplayState::speed(float f)
 ReplayState& ReplayState::buffer_size(unsigned int n)
 {
     TRACE_ENTER();
-    Assert<Bad_arg>(n != 0);
     impl_->bufsiz = n;
     TRACE_EXIT();
     return *this;
@@ -172,10 +180,22 @@ ReplayState& ReplayState::buffer_size(unsigned int n)
 ReplayState& ReplayState::time_step(unsigned int n)
 {
     TRACE_ENTER();
-    Assert<Bad_arg>(n != 0);
     impl_->step = n;
     TRACE_EXIT();
     return *this;
+}
+
+ReplayState& ReplayState::play()
+{
+    TRACE_ENTER();
+    boost::mutex::scoped_lock L(impl_->lock);
+    if (impl_->state != impl::running) {
+	LOG_DEBUG("starting playback timer");
+	impl_->state = impl::running;
+	run(); // kick off event timer
+    } else
+	LOG_DEBUG("play was called but timer is already running");
+    TRACE_EXIT();
 }
 
 namespace {
@@ -193,11 +213,12 @@ namespace {
  *
  * The code is written such that it will work when playing events forward or in
  * reverse.
+ *
+ * NOTE: this function assumes that impl_->lock has been acquired!!!
  */
 void ReplayState::run()
 {
     TRACE_ENTER();
-    boost::mutex::scoped_lock L(impl_->lock);
 
     if (impl_->events.empty()) {
         // queue is empty, pre-fetch more items from the DB
@@ -211,12 +232,12 @@ void ReplayState::run()
 
         if (!impl_->events.empty()) {
             LOG_DEBUG("got " << impl_->events.size() << " events from the db query");
-            /* When starting to replay, assume that time T=0 is the time of the
-             * first event in the stream.
-             * T= -1 is EOF.
-             * Convert to timestamp of first item in the returned events.
+	    /* When starting to replay, assume that time T=0 is the time of the
+	     * first event in the stream, and T= -1 is EOF.  Then convert to
+	     * timestamp of first item in the returned events.
              *
-             * When playing in reverse, the first item in the list is the last event in the database.
+	     * When playing in reverse, the first item in the list is the last
+	     * event in the database.
              */
             if (impl_->ts == 0 || impl_->ts == -1)
                 impl_->ts = impl_->events.front()->timestamp;
@@ -228,14 +249,15 @@ void ReplayState::run()
 
     if (! impl_->events.empty()) {
         /*
-         * Calculate for the skew introduced by the time required to process the events.  Skew is calculated
-         * as the difference between the actual time taken and the expected time.  This gets 
-         * subtracted from the wait for the next event to catch up.
+	 * Calculate for the skew introduced by the time required to process
+	 * the events.  Skew is calculated as the difference between the actual
+	 * time taken and the expected time.  This gets subtracted from the
+	 * wait for the next event to catch up.
          */
         timeval tv;
         gettimeofday(&tv, 0);
         Timestamp skew = (tv.tv_sec - impl_->wall_time.tv_sec) * 1000 + (tv.tv_usec - impl_->wall_time.tv_usec) / 1000;
-        LOG_DEBUG("skew=" << skew << " delta=" << impl_->delta);
+        //LOG_DEBUG("skew=" << skew << " delta=" << impl_->delta);
         skew -= impl_->delta;
         LOG_DEBUG("calculated skew of " << skew << " ms");
         if (skew < 0) {
@@ -260,18 +282,29 @@ void ReplayState::run()
         if (impl_->delta < 0)
             impl_->delta = 0;
 
-        LOG_DEBUG("Next event in " << impl_->delta << " ms");
-        impl_->state = impl::running;
-        impl_->timer.expires_from_now(boost::posix_time::millisec(impl_->delta));
-        impl_->timer.async_wait(boost::bind(&ReplayState::timer_handler, shared_from_this(), boost::asio::placeholders::error));
     } else {
-        /*
-         * FIXME what should happen when the end of the event stream is reached?
-         * One option would be to convert to live stream at this point.
-         */
-        LOG_DEBUG("reached end of database, pausing playback");
-        impl_->state = impl::paused;
+        gettimeofday(&impl_->wall_time, 0);
+
+        LOG_DEBUG("reached end of database");
+
+        /* End of database reached.  Schedule the timer to wake up in the future to check for
+	 * additional events starting from the current last position. */
+	impl_->delta = impl_->step;
+
+	/* Use the timestamp of the next message received in the database as the current
+	 * timestamp so it will be sent immediately.  */
+	impl_->ts = -1;
+
+	/* a weird corner case is when  0 < speed < 1.0 and we reach the end of the database.
+	 * currently this *increases* the speed to 1.0. */
+	if (impl_->speed > 0.0)
+	    impl_->speed = 1.0; // FIXME shared stream subscribers must be notified of this change
     }
+
+    impl_->timer.expires_from_now(boost::posix_time::millisec(impl_->delta));
+    impl_->timer.async_wait(boost::bind(&ReplayState::timer_handler, shared_from_this(), boost::asio::placeholders::error));
+    LOG_DEBUG("Next event in " << impl_->delta << " ms");
+
     TRACE_EXIT();
 }
 
@@ -286,33 +319,38 @@ void ReplayState::run()
 void ReplayState::timer_handler(const boost::system::error_code& ec)
 {
     TRACE_ENTER();
+
+    boost::mutex::scoped_lock L(impl_->lock);
+
     if (ec == boost::asio::error::operation_aborted)
         LOG_DEBUG("timer was cancelled");
-    else if (impl_->state == impl::paused) {
-        LOG_DEBUG("timer expired but state is paused!");
-    } else {
+    else if (impl_->state == impl::paused)
+        LOG_WARN("timer expired but state is paused!");
+    else {
         std::vector<MessagePtr> msgs;
-        {
-            boost::mutex::scoped_lock L(impl_->lock);
 
-            while (! impl_->events.empty()) {
-                MessagePtr m = impl_->events.front();
-                /* Replay all events in the current time step.  Use the absolute value
-                 * of the difference in order for forward and reverse replay to work
-                 * properly. */
-                if (abs(m->timestamp - impl_->ts) >= impl_->step)
-                    break;
-                msgs.push_back(m);
-                impl_->events.pop_front();
-            }
-        }
+	while (! impl_->events.empty()) {
+	    MessagePtr m = impl_->events.front();
+	    /* Replay all events in the current time step.  Use the absolute value
+	     * of the difference in order for forward and reverse replay to work
+	     * properly. */
+	    if (abs(m->timestamp - impl_->ts) >= impl_->step)
+		break;
+	    msgs.push_back(m);
+	    impl_->events.pop_front();
+	}
 
         SharedStreamPtr srv = impl_->conn.lock();
         if (srv) { /* connection is still alive */
-            srv->sendMessage(msgs);
+	    if (!msgs.empty())
+		srv->sendMessage(msgs);
             run(); // reschedule this task
-        }
+        } else {
+	    LOG_WARN("timer expired but the SharedStream is dead - pausing");
+	    impl_->state = impl::paused; // nobody listening?
+	}
     }
+
     TRACE_EXIT();
 }
 
@@ -325,7 +363,12 @@ ReplayState::~ReplayState()
     TRACE_EXIT();
 }
 
+/** Return the current replay speed. */
 float ReplayState::speed() const
 {
+    TRACE_ENTER();
+    TRACE_EXIT_RET(impl_->speed);
     return impl_->speed;
 }
+
+// vim:sw=4 ts=8

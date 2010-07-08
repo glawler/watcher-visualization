@@ -68,23 +68,6 @@ namespace watcher
              */
             void run(const std::string &address, const std::string &port, const int &threadNum);
 
-            /** Subscribe a ServerConnection to the event stream. */
-            void subscribe(SharedStreamPtr);
-
-            /** Unsubscribe a ServerConnection to the event stream. */
-            void unsubscribe(SharedStreamPtr);
-
-            /** Post an event to all listening clients.
-             * @param message message to send
-             */
-            void sendMessage(event::MessagePtr message);
-
-            /** Post events to all listening clients.
-             * @param messages messages to send
-             */
-            void sendMessage(const std::vector<event::MessagePtr>& messages);
-
-            /** return a reference to the singleton config associated with this watcher daemon instance */
             libconfig::Config& config() { return config_; }
 
             /** determine if this watcher daemon was invoked in read-only event database mode. */
@@ -112,11 +95,6 @@ namespace watcher
 
             ServerMessageHandlerPtr serverMessageHandlerPtr;
 
-            // List of streams subscribed to live events
-            typedef std::list<SharedStreamPtr> MessageRequestors;
-            MessageRequestors messageRequestors;
-            pthread_rwlock_t messageRequestorsLock;
-
             bool readOnly_; // control whether or not the event db is writable
 
 	    // List of *all* shared streams.
@@ -126,3 +104,5 @@ namespace watcher
 }
 
 #endif // WATCHERD_H
+
+// vim:sw=4 ts=8
