@@ -45,6 +45,18 @@ LabelDisplayInfo::LabelDisplayInfo() :
     TRACE_EXIT();
 }
 
+LabelDisplayInfo::LabelDisplayInfo(const std::string &label) : 
+    DisplayInfo("label"),
+    backgroundColor(black),
+    foregroundColor(white),
+    fontName("Times New Roman"),
+    pointSize(20), 
+    labelText(label),
+    expiration(Infinity) 
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
 // virtual
 LabelDisplayInfo::~LabelDisplayInfo()
 {
@@ -52,7 +64,29 @@ LabelDisplayInfo::~LabelDisplayInfo()
     TRACE_EXIT();
 }
 
-
+LabelDisplayInfo::LabelDisplayInfo(const LabelDisplayInfo &copy) : DisplayInfo(copy)
+{
+    *this=copy;
+}
+LabelDisplayInfo &LabelDisplayInfo::operator=(const LabelDisplayInfo &rhs)
+{
+    DisplayInfo::operator=(rhs); 
+    backgroundColor=rhs.backgroundColor;
+    foregroundColor=rhs.foregroundColor;
+    fontName=rhs.fontName; 
+    pointSize=rhs.pointSize;
+    labelText=rhs.labelText;
+    expiration=rhs.expiration;
+}
+void LabelDisplayInfo::initialize(const watcher::event::LabelMessagePtr &m)
+{
+    // Commented out as we want to use the cfg settings fir these fields. 
+    // backgroundColor=m->background;
+    // foregroundColor=m->foreground;
+    // pointSize=m->fontSize?m->fontSize:pointSize;
+    labelText=m->label;
+    expiration=m->expiration;
+}
 bool LabelDisplayInfo::loadConfiguration(const GUILayer &layer_)
 {
     TRACE_ENTER();
@@ -62,8 +96,6 @@ bool LabelDisplayInfo::loadConfiguration(const GUILayer &layer_)
     Config &cfg=SingletonConfig::instance();
 
     Setting &labelSettings=cfg.lookup(getBasePath(layer)); 
-
-    SingletonConfig::lock();
 
     try {
 
@@ -103,20 +135,23 @@ bool LabelDisplayInfo::loadConfiguration(const GUILayer &layer_)
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
     }
 
-    SingletonConfig::unlock(); 
+    LOG_DEBUG("loaded label display information from cfg for layer " << layer << ":"); 
+    LOG_DEBUG(
+        "     foregroundColor: " << foregroundColor.toString() <<
+        "     backgroundColor: " << backgroundColor.toString() <<
+        "     fontName: " << fontName <<
+        "     pointSize: " << pointSize); 
 
     TRACE_EXIT();
     return true; 
 }
 
-void LabelDisplayInfo::saveConfiguration()
+void LabelDisplayInfo::saveConfiguration() const
 {
     TRACE_ENTER();
 
     Config &cfg=SingletonConfig::instance();
     Setting &labelSetting=cfg.lookup(getBasePath(layer)); 
-
-    SingletonConfig::lock();
 
     try {
         labelSetting["backgroundColor"]=backgroundColor.toString(); 
@@ -127,8 +162,6 @@ void LabelDisplayInfo::saveConfiguration()
     catch (const SettingException &e) {
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
     }
-
-    SingletonConfig::unlock();
 
     TRACE_EXIT();
 }
@@ -152,6 +185,11 @@ bool LabelDisplayInfo::operator==(const LabelDisplayInfo &other)
     return labelText==other.labelText && backgroundColor==other.backgroundColor && foregroundColor==other.foregroundColor; 
 }
 
+bool LabelDisplayInfo::operator<(const LabelDisplayInfo &lhs) const
+{
+    return labelText<lhs.labelText;
+}
+
 bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 {
     TRACE_ENTER();
@@ -165,6 +203,7 @@ bool LabelDisplayInfo::loadConfiguration(const LabelMessagePtr &mess)
 
     backgroundColor=mess->background;
     foregroundColor=mess->foreground;
+    // no fontName in labelMessage? 
     if (mess->fontSize)
         pointSize=mess->fontSize; 
     layer=mess->layer; 

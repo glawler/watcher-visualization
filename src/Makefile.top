@@ -2,9 +2,9 @@
 
 # "Fixes" warning in log4cxx about type punning. 
 CPPFLAGS += -fno-strict-aliasing
-CPPFLAGS += -O3
-CXXFLAGS += -O3
-CFLAGS += -O3
+# CPPFLAGS += -O3
+# CXXFLAGS += -O3
+# CFLAGS += -O3
 
 
 # "Fixes" warning about old headers

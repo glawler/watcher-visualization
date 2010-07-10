@@ -84,6 +84,8 @@ const char *PROPERTY_FILE = TOOL_NAME ".log.properties";
 const char *DEFAULT_HOST = "127.0.0.1";
 const unsigned int DEFAULT_REFRESH = 1; // SECONDS
 uint32_t StreamUID = -1;
+uint32_t maxNodes = 0; 
+uint32_t maxLayers = 0; 
 const char *DEFAULT_DESCRIPTION = "earthWatcher client";
 
 void usage()
@@ -95,11 +97,13 @@ void usage()
         "  -A, --altoff OFF" << SEP << "translate GPS coordinates relative to the given altitude\n"
         "  -c, --config FILE" << SEP << "specify a configuration file (default: " << CONFIG_FILE << ")\n"
         "  -d, --speed SPEED" << SEP << "specify the event playback rate (default: 1.0)\n"
-	"  -D, --description NAME" << SEP << "set the description for the event stream\n"
+        "  -D, --description NAME" << SEP << "set the description for the event stream\n"
         "  -h, --help\t" << SEP << "display this help message\n"
         "  -i, --icon-scale=NUM" << SEP << "adjust the size of node icons\n"
-	"  -j, --join UID" << SEP << "subscribe to a synchronized stream on the watcher server by UID\n"
+        "  -j, --join UID" << SEP << "subscribe to a synchronized stream on the watcher server by UID\n"
+        "  -l, --maxLayers=NUM" << SEP << "maximum number of layers used in the test run\n"
         "  -I, --icon-path=STR" << SEP << "specify the node icon to use (default: " << IconPath << ")\n"
+        "  -n, --maxNodes=NUM" << SEP << "maximum number of nodes used in the test run\n"
         "  -o, --output FILE" << SEP << "specifies the output KML file (default: " << OUTPUT_FILE << ")\n"
         "  -O, --lonoff OFF" << SEP << "translate GPS coordinates relative to a given longitude\n"
         "  -r, --refresh SECS" << SEP << "write the the output every SECS seconds (default: " << DEFAULT_REFRESH << ")\n"
@@ -159,7 +163,7 @@ void *process_events(void *)
         ms->startStream(); 
     }
 
-    WatcherGraph graph;
+    WatcherGraph graph(maxNodes, maxLayers);
 
     unsigned int messageNumber = 0;
     MessagePtr mp;
@@ -261,18 +265,21 @@ int main(int argc, char **argv)
         argServerName = (1<<5),
         argSplineSteps = (1<<6),
         argIconPath = (1<<7),
-	argJoin = (1<<8),
-	argDescription = (1<<9)
+        argJoin = (1<<8),
+        argDescription = (1<<9),
+        argMaxNodes = (1<<0xa),
+        argMaxLayers = (1<<0xb),
+
     };
 
-    for (int i; (i = getopt_long(argc, argv, "a:A:hi:j:I:c:d:D:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
+    for (int i; (i = getopt_long(argc, argv, "a:A:hi:j:I:c:d:D:l:n:o:O:r:s:S:t:", OPTIONS, 0)) != -1; ) {
         switch (i) {
             case 'c':
                 break; //handled by initConfig()
 
-	    case'D':
-		Description = optarg;
-		break;
+            case'D':
+                Description = optarg;
+                break;
 
             case 'a':
                 Latoff = atof(optarg);
@@ -292,14 +299,24 @@ int main(int argc, char **argv)
                 IconScale = atof(optarg);
                 break;
 
-	    case 'j':
-		StreamUID = strtol(optarg, NULL, 10);
-		args |= argJoin;
-		break;
+            case 'j':
+                StreamUID = strtol(optarg, NULL, 10);
+                args |= argJoin;
+                break;
+
+            case 'l':
+                maxLayers = strtol(optarg, NULL, 10); 
+                args |= argMaxLayers;
+                break;
 
             case 'I':
                 IconPath = optarg;
                 args |= argIconPath;
+                break;
+
+            case 'n':
+                maxNodes = strtol(optarg, NULL, 10); 
+                args |= argMaxNodes;
                 break;
 
             case 'o': // output-file
@@ -409,6 +426,8 @@ int main(int argc, char **argv)
         unsigned int bit;
     } ConfigInt[] = {
         { "splineSteps", &SplineSteps, argSplineSteps },
+        { "maxNodes", (int*)&maxNodes, argMaxNodes },
+        { "maxLayers", (int*)&maxLayers, argMaxLayers },
         { 0, 0, 0 } // terminator
     };
 
@@ -418,6 +437,12 @@ int main(int argc, char **argv)
                      << " and adding this to the configuration file.");
             config.getRoot().add(ConfigInt[i].configName, libconfig::Setting::TypeInt) = *ConfigInt[i].value;
         }
+    }
+
+    if (!maxLayers || !maxNodes) { 
+        LOG_FATAL("You must specify both maxNodes and maxLayers in the cfg file.");
+        TRACE_EXIT_RET(EXIT_FAILURE);
+        exit (EXIT_FAILURE);
     }
 
     struct {

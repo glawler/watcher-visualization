@@ -49,15 +49,27 @@ namespace watcher
 
             /** The node's ID. */
             NodeIdentifier nodeId;
-            
+           
+            /** If the node is active or not (display if active, else don't); */
+            bool isActive; 
+
+            /** If the node is connected **/
+            bool isConnected; 
+
             /** Item's shape */
             event::NodePropertiesMessage::NodeShape shape;
 
             /** Item's properties */
             event::NodePropertiesMessage::NodePropertyList nodeProperties;
 
+            /** current the coordinates of the node */
+            double x;
+            double y;
+            double z;
+
+
             /** Item's effects */
-// #warning GTL TODO: make these effects into array like properties (above) are. 
+            // #warning GTL TODO: make these effects into array like properties (above) are. 
             bool sparkle; ///< display effects for a node - may not all be supported in GUI
             bool spin; ///< display effects for a node - may not all be supported in GUI
             bool flash; ///< display effects for a node - may not all be supported in GUI
@@ -88,12 +100,11 @@ namespace watcher
              */
             enum LabelDefault { FOUR_OCTETS, THREE_OCTETS, TWO_OCTETS, LAST_OCTET, HOSTNAME, FREE_FORM }; 
             static std::string labelDefault2String(const NodeDisplayInfo::LabelDefault &labDef);
-            std::string label;
             std::string labelFont;
             double labelPointSize;
             watcher::Color labelColor;
 
-            std::string get_label();
+            const std::string &get_label() const;
 
             /** Node's color */
             watcher::Color color; 
@@ -118,11 +129,14 @@ namespace watcher
 
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 
-            void saveConfiguration(); 
+            void saveConfiguration() const;
 
         protected:
 
         private:
+
+            void buildLabel();  // call once to generate the static label
+            std::string label;
 
             DECLARE_LOGGER();
     };

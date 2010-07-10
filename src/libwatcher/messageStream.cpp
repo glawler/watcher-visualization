@@ -135,11 +135,8 @@ bool MessageStream::getNextMessage(MessagePtr &newMessage)
 
     unique_lock<mutex> lock(messageCacheMutex); 
     while(false==readReady)
-    {
         messageCacheCond.wait(lock); 
-    }
-
-    assert(messageCache.size() > 0); 
+    // assert(messageCache.size() > 0); 
     newMessage=messageCache.front();
     messageCache.pop_front();
     readReady=messageCache.size()>0; 
@@ -228,24 +225,24 @@ bool MessageStream::handleMessageArrive(ConnectionPtr conn, const MessagePtr &me
 
     messagesArrived++; 
 
-    if (messageCache.size()>750)  { // Whoa, start dropping messages - the GUI cannot keep up.
-        // messagesDropped++;
-        // TRACE_EXIT_RET_BOOL(false);
-        // return false;
-        // usleep(100000);
-    }
+    // if (messageCache.size()>750)  { // Whoa, start dropping messages - the GUI cannot keep up.
+    //     // messagesDropped++;
+    //     // TRACE_EXIT_RET_BOOL(false);
+    //     // return false;
+    //     // usleep(100000);
+    // }
 
     // We don't really add anything yet to a generic watcherdAPI client.
     bool retVal=WatcherdAPIMessageHandler::handleMessageArrive(conn, message); 
     {
         lock_guard<mutex> lock(messageCacheMutex);
         messageCache.push_back(message); 
-        // let lock go out of scope
+        LOG_DEBUG("MessageCache size=" << messageCache.size());
+        readReady=true;
     }
-    readReady=true;
-    LOG_DEBUG("MessageCache size=" << messageCache.size());
-    LOG_DEBUG("Notifing all waiting threads that there is data to be read"); 
     messageCacheCond.notify_all();
+    this_thread::interruption_point();
+    LOG_DEBUG("Notified all waiting threads that there is data to be read"); 
 
     TRACE_EXIT_RET((retVal==true?"true":"false"));
     return retVal;

@@ -17,10 +17,24 @@ AX_BOOST_UNIT_TEST_FRAMEWORK
 AX_BOOST_DATE_TIME
 AX_BOOST_PROGRAM_OPTIONS
 
+# handle DEBUG enabled builds.
+AC_MSG_CHECKING(whether to enable debugging)
+debug_default="yes"
+AC_ARG_ENABLE(debug, [  --enable-debug=[no/yes] turn on debugging [default=$debug_default]],, enable_debug=$debug_default)
+if test "x$enable_debug" = "xyes"; then
+    CFLAGS="$CXXFLAGS -ggdb -O0 -DDEBUG -pthread"
+    CXXFLAGS="$CFLAGS -ggdb -O0 -DDEBUG -pthread"
+    AC_MSG_RESULT(yes)
+else
+    CFLAGS=${CFLAGS=""};
+    CXXFLAGS=${CXXFLAGS=""}; 
+    AC_MSG_RESULT(no)
+fi
+
 PKG_CHECK_MODULES(LOGGER, logger)
 
 # allow optional 'test node only' build which builds just test node components.
-AC_MSG_CHECKING(--enable-testnodeonly)
+AC_MSG_CHECKING(whether to enable a test node only build)
 AC_ARG_ENABLE(testnodeonly,
 	      [AS_HELP_STRING([--enable-testnodeonly],[only configure and build test node components])],
 	      [enable_testnodeonly=$enableval],
@@ -39,7 +53,7 @@ if test x$enable_testnodeonly == xno; then
     PKG_CHECK_MODULES(SQLITE3, [sqlite3 >= 3.5.9])
 
     # allow optional disabling of ogreWatcher
-    AC_MSG_CHECKING(--enable-ogreWatcher)
+    AC_MSG_CHECKING(whether to build ogreWatcher)
     AC_ARG_ENABLE(ogreWatcher,
 	      [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
 	      [enable_ogreWatcher=$enableval],
@@ -48,7 +62,7 @@ if test x$enable_testnodeonly == xno; then
     AM_CONDITIONAL([ENABLE_OGREWATCHER], [test x$enable_ogreWatcher != xno])
 
     # allow optional disabling of watcher3d
-    AC_MSG_CHECKING(--enable-watcher3d)
+    AC_MSG_CHECKING(whether to build watcher3d)
     AC_ARG_ENABLE(watcher3d,
 	      [AS_HELP_STRING([--enable-watcher3d],[enable compilation of watcher3d GUI])],
 	      [enable_watcher3d=$enableval],
@@ -57,7 +71,7 @@ if test x$enable_testnodeonly == xno; then
     AM_CONDITIONAL([ENABLE_WATCHER3D], [test x$enable_watcher3d != xno])
 
     # allow optional disabling of earthWatcher
-    AC_MSG_CHECKING(--enable-earthWatcher)
+    AC_MSG_CHECKING(whether to build earthWatcher)
     AC_ARG_ENABLE(earthWatcher,
 	      [AS_HELP_STRING([--enable-earthWatcher],[enable compilation of earthWatcher])],
 	      [enable_earthWatcher=$enableval],
@@ -161,7 +175,7 @@ else
 fi
 
 # allow optional disabling of watcherHierarchyClient
-AC_MSG_CHECKING(--enable-hierarchy_client)
+AC_MSG_CHECKING(whether to build a hierarchy client enabled build)
 AC_ARG_ENABLE(hierarchy_client,
     [AS_HELP_STRING([--enable-hierarchy_client],[enable compilation of hierarchy_client])],
     [enable_hierarchy_client=$enableval],

@@ -57,7 +57,7 @@ namespace watcher
 
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 
-            void saveConfiguration(); 
+            void saveConfiguration() const;
 
         protected:
 

@@ -83,17 +83,17 @@ typedef vector<Route> RouteList;
 #if DEBUG
 static void routeDump(const RouteList &r)
 {
-    TRACE_ENTER();
+    // TRACE_ENTER();
 
-    if (r.size()) {
-        for (RouteList::const_iterator i=r.begin(); i!=r.end(); i++) {
-            ostringstream out;
-            out << *i; 
-        }
-        LOG_DEBUG("%s", out.str().c_str());
-    }
-        
-    TRACE_EXIT();
+    // if (r.size()) {
+    //     for (RouteList::const_iterator i=r.begin(); i!=r.end(); i++) {
+    //         ostringstream out;
+    //         out << *i; 
+    //     }
+    //     LOG_DEBUG(" " << out.str());
+    // }
+    //     
+    // TRACE_EXIT();
 }
 #endif // DEBUG
 

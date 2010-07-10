@@ -50,7 +50,8 @@ namespace watcher
                 /**
                  * List of neighbors at the time the message is sent.
                  */
-                std::vector<watcher::NodeIdentifier> neighbors;
+                typedef std::vector<watcher::NodeIdentifier> NeighborList;
+                NeighborList neighbors;
 
                 /**
                  * Which layer this is on.

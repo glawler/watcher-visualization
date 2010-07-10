@@ -46,14 +46,23 @@ DisplayInfo::~DisplayInfo()
     TRACE_EXIT();
 }
 
-const string DisplayInfo::getBasePath(const GUILayer &layer)
+DisplayInfo::DisplayInfo(const DisplayInfo &copy)
+{
+    *this=copy;
+}
+
+DisplayInfo &DisplayInfo::operator=(const DisplayInfo &lhs)
+{
+    layer=lhs.layer;
+    categoryName=lhs.categoryName;
+}
+
+const string DisplayInfo::getBasePath(const GUILayer &layer) const
 {
     TRACE_ENTER();
 
     Config &cfg=SingletonConfig::instance();
     Setting &root=cfg.getRoot();
-
-    SingletonConfig::lock();
 
     string retVal;
     try {
@@ -89,8 +98,6 @@ const string DisplayInfo::getBasePath(const GUILayer &layer)
     catch (const SettingException &e) {
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
     }
-
-    SingletonConfig::unlock();
 
     TRACE_EXIT_RET(true);
     return retVal;

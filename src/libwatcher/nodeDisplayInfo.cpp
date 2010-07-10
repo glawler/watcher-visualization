@@ -38,6 +38,8 @@ INIT_LOGGER(NodeDisplayInfo, "DisplayInfo.NodeDisplayInfo");
 
 NodeDisplayInfo::NodeDisplayInfo() : 
     DisplayInfo("node"), 
+    isActive(false),
+    x(0.0), y(0.0), z(0.0), 
     shape(NodePropertiesMessage::CIRCLE),
     nodeProperties(),
     sparkle(false),
@@ -52,17 +54,13 @@ NodeDisplayInfo::NodeDisplayInfo() :
     flashInterval(500),
     nextFlashUpdate(0),
     isFlashed(false),
-    label(NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET)),
     labelFont("Helvetica"), 
     labelPointSize(12.5),
     labelColor(blue),
-    color(red)
+    color(red),
+    label("")
 {
     TRACE_ENTER();
-
-    // create the "default" layer if it's not already there.
-    loadConfiguration(layer); 
-
     TRACE_EXIT();
 }
 
@@ -108,8 +106,6 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
 
     // "DisplayOptions.layer.[LAYERNAME].node_123_123_123_123"
     Setting &nodeSetting=cfg.lookup(getBasePath(layer)); 
-
-    SingletonConfig::lock();
 
     try {
 
@@ -180,7 +176,8 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
     }
 
-    SingletonConfig::unlock(); 
+    buildLabel(); 
+    isActive=true;
 
     TRACE_EXIT_RET_BOOL(true); 
     return true; 
@@ -205,7 +202,7 @@ string NodeDisplayInfo::labelDefault2String(const NodeDisplayInfo::LabelDefault 
     return retVal;
 }
 
-void NodeDisplayInfo::saveConfiguration()
+void NodeDisplayInfo::saveConfiguration() const
 {
     TRACE_ENTER();
 
@@ -214,8 +211,6 @@ void NodeDisplayInfo::saveConfiguration()
     // "DisplayOptions.layer.[LAYERNAME].node"
     string basePath=getBasePath(layer); 
     Setting &nodeSetting=cfg.lookup(basePath); 
-
-    SingletonConfig::lock();
 
     try {
         nodeSetting["label"]=label;
@@ -232,35 +227,43 @@ void NodeDisplayInfo::saveConfiguration()
     catch (const SettingException &e) {
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
     }
-
-    SingletonConfig::unlock();
 }
 
-/**
- * Return the label for this node.  The NodeIdentifier for the associated node is passed in order to use the
- * IP address as a basis.
- * @param nodeId the node associated with this label
- * @return the label to use for this node
- */
-std::string NodeDisplayInfo::get_label()
+const std::string &NodeDisplayInfo::get_label() const
 {
+    return label;
+}
+
+void NodeDisplayInfo::buildLabel()
+{    
+    LOG_INFO("Node label for node " << nodeId << " was " << label); 
     // a little awkward since we're mixing enums, reserved strings, and free form strings
     if (!nodeId.is_v4())
-        return nodeId.to_string(); //punt
+        label=nodeId.to_string(); //punt
 
     unsigned long addr = nodeId.to_v4().to_ulong(); // host byte order. 
     char buf[64]; 
 
-    if (label == NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::FOUR_OCTETS))
+    if (label == NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::FOUR_OCTETS)) {
         snprintf(buf, sizeof(buf), "%lu.%lu.%lu.%lu", ((addr)>>24)&0xFF,((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
-    else if (label == labelDefault2String(NodeDisplayInfo::THREE_OCTETS))
+        label=buf;
+    }
+    else if (label == labelDefault2String(NodeDisplayInfo::THREE_OCTETS)) {
         snprintf(buf, sizeof(buf), "%lu.%lu.%lu", ((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
-    else if (label == labelDefault2String(NodeDisplayInfo::TWO_OCTETS))
+        label=buf;
+    }
+    else if (label == labelDefault2String(NodeDisplayInfo::TWO_OCTETS)) {
         snprintf(buf, sizeof(buf), "%lu.%lu", ((addr)>>8)&0xFF,(addr)&0xFF); 
-    else if (label == labelDefault2String(NodeDisplayInfo::LAST_OCTET))
+        label=buf;
+    }
+    else if (label == labelDefault2String(NodeDisplayInfo::LAST_OCTET)) {
         snprintf(buf, sizeof(buf), "%lu", (addr)&0xFF); 
-    else if (label == "none")
+        label=buf;
+    }
+    else if (label == "none") {
         buf[0]='\0';
+        label=buf;
+    }
     else if (label == labelDefault2String(NodeDisplayInfo::HOSTNAME)) {
         in_addr saddr; 
         saddr.s_addr = htonl(addr); 
@@ -272,9 +275,7 @@ std::string NodeDisplayInfo::get_label()
             LOG_WARN("Unable to get hostnmae for node " << nodeId); 
             label = "UnableToGetHostNameSorry";
         }
-        return label;
-    } else
-        return label;  // use what is ever there. 
-
-    return std::string(buf);
+    } 
+    // else use what was ever in the conf file.
+    LOG_INFO("Node label for node " << nodeId << " set to " << label); 
 }

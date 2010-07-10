@@ -33,9 +33,6 @@ libwatchermsg_la_include_HEADERS=\
 	nodeStatusMessage.h \
 	watcherMessageFwd.h
 	
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = watcher.pc watchermsg.pc
-
 libwatchermsg_la_SOURCES=\
 	message.h message.cpp \
 	colorMessage.cpp colorMessage.h \
@@ -76,12 +73,17 @@ libwatcher_a_SOURCES= \
 	nodeDisplayInfo.cpp nodeDisplayInfo.h \
 	watcherGlobalFunctions.cpp watcherGlobalFunctions.h \
 	watcherGraph.cpp watcherGraph.h \
-	watcherGraphEdge.cpp watcherGraphEdge.h \
-	watcherGraphNode.cpp watcherGraphNode.h \
+	watcherLayerData.cpp watcherLayerData.h \
 	watcherRegion.h watcherRegion.cpp \
 	watcherdAPIMessageHandler.h watcherdAPIMessageHandler.cpp \
 	watcherTypes.cpp watcherTypes.h \
 	watcherSerialize.h \
 	watcherColors.cpp watcherColors.h \
 	colors.cpp colors.h 
+
+# enable tr1 functionality for libwatcher
+# libwatcher_a_CXXFLAGS=-std=gnu++0x
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = watcher.pc watchermsg.pc
 

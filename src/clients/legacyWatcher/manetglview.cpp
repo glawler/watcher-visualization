@@ -27,6 +27,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/regex.hpp>
 #include <boost/foreach.hpp>
+#include <algorithm>        // for fill_n()
 #include <values.h>  // DBL_MAX
 #include <GL/glut.h>
 #include <sstream>
@@ -53,7 +54,6 @@ using namespace watcher::event;
 using namespace std;
 using namespace libconfig;
 using namespace boost;
-using namespace boost::graph;
 using namespace boost::date_time;
 using namespace boost::posix_time;
 
@@ -614,39 +614,31 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
     // bool includeHierarchy = isActive(HIERARCHY_LAYER); 
 
     // find drawing extents
-    WatcherGraph::vertexIterator vi, vend;
-    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
+    for (size_t i=0; i<wGraph->numValidNodes; i++) 
     {
-        WatcherGraphNode &n=wGraph.theGraph[*vi]; 
-        GLdouble x=n.gpsData->x, y=n.gpsData->y, z=n.gpsData->z;
+        if (!wGraph->nodes[i].isActive) 
+            continue;
 
         double r = 0;
         if(includeAntenna)
             r = antennaRadius; 
 
-        // if(includeHierarchy)
-        // {
-        //     double hr = HIERARCHY_RADIUS(m->nlist[i].level);
-        //     if(r < hr)
-        //     {
-        //         r = hr;
-        //     }
-        // }
         {
-            double nodeXMin = x - r;
-            double nodeXMax = x + r;
-            double nodeYMin = y - r;
-            double nodeYMax = y + r;
+            double nodeXMin = wGraph->nodes[i].x - r;
+            double nodeXMax = wGraph->nodes[i].x + r;
+            double nodeYMin = wGraph->nodes[i].y - r;
+            double nodeYMax = wGraph->nodes[i].y + r;
             if(nodeXMin < xMin) xMin = nodeXMin;
             if(nodeXMax > xMax) xMax = nodeXMax;
             if(nodeYMin < yMin) yMin = nodeYMin;
             if(nodeYMax > yMax) yMax = nodeYMax;
         }
-        if(z < zMin)
-            zMin = z;
+        if(wGraph->nodes[i].z < zMin)
+            zMin = wGraph->nodes[i].z;
     }
     scaleAndShiftToSeeOnManet(xMin, yMin, xMax, yMax, zMin, onChangeOrAlways);
 } // scaleAndShiftToCenter
+
 
 void manetGLView::getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
 {
@@ -893,13 +885,13 @@ void manetGLView::rotateZ(float deg)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
 //static 
-bool manetGLView::gps2openGLPixels(GPSMessagePtr &gpsMess)
+bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMessage::DataFormat &format)
 {
     // TRACE_ENTER();
 
-    double x, y, z, inx=gpsMess->x, iny=gpsMess->y, inz=gpsMess->z;
+    double inx=x, iny=y, inz=z;
 
-    if (gpsMess->dataFormat==GPSMessage::UTM)
+    if (format==GPSMessage::UTM)
     {
         //
         // There is no UTM zone information in the UTM GPS packet, so we assume all data is in a single
@@ -934,13 +926,6 @@ bool manetGLView::gps2openGLPixels(GPSMessagePtr &gpsMess)
         if (inx > 180) 
             LOG_WARN("Received GPS data (" << inx << ", " << iny << ", " << inz << ") that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
 
-        Config &cfg=SingletonConfig::instance();
-        SingletonConfig::lock();
-        libconfig::Setting &root=cfg.getRoot();
-        float gpsScale;
-        root.lookupValue("gpsScale", gpsScale);
-        SingletonConfig::unlock();
-
         x=inx*gpsScale;
         y=iny*gpsScale;
         z=inz;
@@ -964,17 +949,14 @@ bool manetGLView::gps2openGLPixels(GPSMessagePtr &gpsMess)
         // LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
     }
     // LOG_DEBUG("Converted GPS from " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
-
-    gpsMess->x=x;
-    gpsMess->y=y;
-    gpsMess->z=z;
-
     // TRACE_EXIT();
     return true;
 }
 
 manetGLView::manetGLView(QWidget *parent) : 
     QGLWidget(QGLFormat(QGL::SampleBuffers), parent),
+    streamsDialog(NULL),
+    wGraph(NULL),
     watcherdConnectionThread(NULL),
     maintainGraphThread(NULL),
     checkIOThread(NULL),
@@ -992,13 +974,13 @@ manetGLView::manetGLView(QWidget *parent) :
     showVerboseStatusString(false),
     showStreamDescription(true),
     statusFontPointSize(10),
+    maxNodes(48),
     statusFontName("Helvetica"),
     hierarchyRingColor(),
     playbackStartTime(SeekMessage::eof),  // live mode
     autoCenterNodesFlag(false),
     nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
-    framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0),
-    streamsDialog(NULL)
+    framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0)
 {
     TRACE_ENTER();
     manetAdjInit.angleX=0.0;
@@ -1011,9 +993,6 @@ manetGLView::manetGLView(QWidget *parent) :
     manetAdjInit.shiftY=0.0;
     manetAdjInit.shiftZ=0.0;
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
-
-    // Translate incoming GPS to opengl locations
-    wGraph.locationTranslationFunction=&manetGLView::gps2openGLPixels; 
 
     // Don't oeverwrite QPAinter...
     setAutoFillBackground(false);
@@ -1030,37 +1009,40 @@ void manetGLView::shutdown()
 {
     saveConfiguration();
 
-    for (vector<StringIndexedMenuItem*>::iterator i=layerMenuItems.begin(); i!=layerMenuItems.end(); ++i)
-        delete *i;
-
-    // Grab the lock and kill the threads.
-    boost::lock_guard<boost::mutex> l(graphMutex);
+    // order is important here. Destroy in dependency order. 
     boost::thread *threads[]={
-        watcherdConnectionThread, 
+        checkIOThread,
         maintainGraphThread, 
-        checkIOThread
+        watcherdConnectionThread, 
     };
     for (unsigned int i=0; i<sizeof(threads)/sizeof(threads[0]); i++) {
         if (threads[i]) {
-            // GTL - this does not work. 
-            // threads[i]->interrupt();
-            // threads[i]->join();
+            threads[i]->interrupt();
+            threads[i]->join();
             delete threads[i];
             threads[i]=NULL;
         }
     }
+    if (wGraph) {
+        delete wGraph;
+        wGraph=NULL;
+    }
+
+    for (vector<StringIndexedMenuItem*>::iterator i=layerMenuItems.begin(); i!=layerMenuItems.end(); ++i)
+        delete *i;
 }
 
 void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
 {
     TRACE_ENTER();
-    LayerListItemPtr item(new LayerListItem);
-    item->layer=layer;
-    item->active=active;
-    knownLayers.push_back(item);
 
-    if (layerMenu)
-    {
+    // name2Layer() creates layer, loads configuration, and sets as active
+    if (!wGraph->layerExists(layer)) {
+        size_t l=wGraph->name2LayerIndex(layer);
+        wGraph->layers[l].isActive=active;
+    }
+
+    if (layerMenu) {
         QAction *action=new QAction(QString::fromStdString(layer), (QObject*)this);
         action->setCheckable(true);
 
@@ -1069,14 +1051,12 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
         connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(layerToggle(QString, bool)));
         connect(this, SIGNAL(layerToggled(QString, bool)), item, SLOT(setChecked(QString, bool)));
         connect(item, SIGNAL(setChecked(bool)), action, SLOT(setChecked(bool)));
-
         layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
-
         layerMenu->addAction(action); 
     }
 
     // Could use a few more type conversions for string here...
-    emit layerToggled(QString::fromStdString(string(item->layer)), item->active);
+    emit layerToggled(QString::fromStdString(string(layer)), active);
 
     TRACE_EXIT();
 }
@@ -1111,12 +1091,28 @@ bool manetGLView::loadConfiguration()
     backgroundImage = true;
     bool retVal=true;
 
+
     //
     // Check configuration for GUI settings.
     //
     Config &cfg=SingletonConfig::instance();
     SingletonConfig::lock();
     libconfig::Setting &root=cfg.getRoot();
+
+    if (!root.lookupValue("maxNodes", maxNodes)) { 
+        LOG_FATAL("Please specify maximum number of nodes for this test bed in watcher.cfg file (\"maxNodes = XX;\")."); 
+        exit(EXIT_FAILURE); 
+    }
+    if (!root.lookupValue("maxLayers", maxLayers)) { 
+        LOG_FATAL("Please specify maximum number of layers for this test bed in watcher.cfg file (\"maxLayers = XX;\")."); 
+        exit(EXIT_FAILURE); 
+    }
+
+    // WatcherGraph() grabs the Config lock, so it must be unlocked when created.
+    SingletonConfig::unlock();
+    wGraph=new WatcherGraph(maxNodes, maxLayers); 
+    wGraph->locationTranslationFunction=boost::bind(&manetGLView::gps2openGLPixels, this, _1, _2, _3, _4); 
+    SingletonConfig::lock();
 
     try {
 
@@ -1127,17 +1123,20 @@ bool manetGLView::loadConfiguration()
             root.add(prop, Setting::TypeString)="localhost"; 
         }
 
+
         prop="layers";
         if (!root.exists(prop))
             root.add(prop, libconfig::Setting::TypeGroup);
 
         libconfig::Setting &layers=cfg.lookup(prop);
 
-        // We cheat a little here and always make sure there's an antenna radius "layer"
-        if (!layers.exists(ANTENNARADIUS_LAYER))
-            layers.add(ANTENNARADIUS_LAYER, Setting::TypeBoolean)=false;
+        // antenna radius is not a layer, move to 'view' menu or elsewhere
+        // // We cheat a little here and always make sure there's an antenna radius "layer"
+        // if (!layers.exists(ANTENNARADIUS_LAYER))
+        //     layers.add(ANTENNARADIUS_LAYER, Setting::TypeBoolean)=false;
 
         LOG_INFO("Reading layer states from cfg file");
+        bool foundPhy=false;
         int layerNum=layers.getLength();
         for (int i=0; i<layerNum; i++)
         {
@@ -1147,13 +1146,9 @@ bool manetGLView::loadConfiguration()
             if (!layers.lookupValue(name, val))
                 layers.add(name, Setting::TypeBoolean)=val;  // Shouldn't happen unless misformed cfg file. 
             addLayerMenuItem(name, val);
-        }
-
-        // Force a PHYSICAL_LAYER to at least be an option in the menu.
-        bool foundPhy=false;
-        BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-            if (llip->layer==PHYSICAL_LAYER)
+            if (name==PHYSICAL_LAYER) 
                 foundPhy=true;
+        }
         if (!foundPhy)
             addLayerMenuItem(PHYSICAL_LAYER, true);
 
@@ -1488,19 +1483,20 @@ void manetGLView::connectStream()
 {
     TRACE_ENTER();
     while(1) {
+        this_thread::interruption_point();
         if (!messageStream) {
             messageStream=MessageStream::createNewMessageStream(serverName);     // This blocks until connected messageStream->setStreamTimeStart(playbackStartTime);
-	    messageStream->setDescription("legacy watcher gui");
+            messageStream->setDescription("legacy watcher gui");
             messageStream->startStream();
             messageStream->getMessageTimeRange();
             messageStream->enableFiltering(messageStreamFiltering);
 
             // Tell the watcherd that we want/don't want messages for this layer.
             if (messageStreamFiltering) { 
-                BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
+                for (size_t l=0; l<wGraph->numValidLayers; l++) { 
                     MessageStreamFilterPtr f(new MessageStreamFilter);
-                    f->setLayer(llip->layer);
-                    if (llip->active)
+                    f->setLayer(wGraph->layers[l].layerName); 
+                    if (wGraph->layers[l].isActive) 
                         messageStream->addMessageFilter(f);
                     else
                         messageStream->removeMessageFilter(f);
@@ -1512,7 +1508,6 @@ void manetGLView::connectStream()
                 checkIOThread=new boost::thread(boost::bind(&manetGLView::checkIO, this));
             if (!maintainGraphThread) 
                 maintainGraphThread=new boost::thread(boost::bind(&manetGLView::maintainGraph, this));
-
         }
         else  {
             // There needs to be some test connection, reconnect logic here.
@@ -1527,6 +1522,7 @@ void manetGLView::checkIO()
     TRACE_ENTER();
 
     while(true) {
+        this_thread::interruption_point();
         bool timeRangeMessageSent=false;
         MessagePtr message;
         while(messageStream && messageStream->getNextMessage(message)) {
@@ -1546,36 +1542,34 @@ void manetGLView::checkIO()
                             playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
                     timeRangeMessageSent=false;
                 } else if (message->type == LIST_STREAMS_MESSAGE_TYPE) {
-		    ListStreamsMessagePtr m(dynamic_pointer_cast<ListStreamsMessage>(message));
-		    BOOST_FOREACH(EventStreamInfoPtr ev, m->evstreams) {
-			streamsDialog->addStream(ev->uid, ev->description);
-		    }
-		} else if (message->type == SPEED_MESSAGE_TYPE) {
-		    // notification from the watcher daemon that the shared stream speed has changed
-		    SpeedMessagePtr sm(dynamic_pointer_cast<SpeedMessage>(message));
-		    changeSpeed(sm->speed);
-		    if (sm->speed == 0)
-			playbackPaused = true;
-		} else if (message->type == STOP_MESSAGE_TYPE) {
-		    playbackPaused = true;
-		} else if (message->type == START_MESSAGE_TYPE) {
-		    playbackPaused = false;
-		} else if (message->type == STREAM_DESCRIPTION_MESSAGE_TYPE) {
-		    StreamDescriptionMessagePtr m(dynamic_pointer_cast<StreamDescriptionMessage>(message));
-		    streamDescription = m->desc;
-		}
+                    ListStreamsMessagePtr m(dynamic_pointer_cast<ListStreamsMessage>(message));
+                    BOOST_FOREACH(EventStreamInfoPtr ev, m->evstreams) {
+                        streamsDialog->addStream(ev->uid, ev->description);
+                    }
+                } else if (message->type == SPEED_MESSAGE_TYPE) {
+                    // notification from the watcher daemon that the shared stream speed has changed
+                    SpeedMessagePtr sm(dynamic_pointer_cast<SpeedMessage>(message));
+                    changeSpeed(sm->speed);
+                    if (sm->speed == 0)
+                        playbackPaused = true;
+                } else if (message->type == STOP_MESSAGE_TYPE) {
+                    playbackPaused = true;
+                } else if (message->type == START_MESSAGE_TYPE) {
+                    playbackPaused = false;
+                } else if (message->type == STREAM_DESCRIPTION_MESSAGE_TYPE) {
+                    StreamDescriptionMessagePtr m(dynamic_pointer_cast<StreamDescriptionMessage>(message));
+                    streamDescription = m->desc;
+                }
 
                 // End of handling non feeder messages. 
                 continue;
             }
 
-	    // When control reaches this point, events are being streamed
-	    playbackPaused = false;
+            // When control reaches this point, events are being streamed
+            playbackPaused = false;
 
-            {
-                boost::lock_guard<boost::mutex> l(graphMutex);
-                wGraph.updateGraph(message);
-            }
+            // update graph is now thread-safe
+            wGraph->updateGraph(message);
 
             // DataPoint data is handled directly by the scrolling graph thing.
             if (message->type==DATA_POINT_MESSAGE_TYPE) {
@@ -1605,28 +1599,17 @@ void manetGLView::checkIO()
             }
 
             if (!layer.empty()) {
-                LOG_DEBUG("Seeing if " << layer << " is known to us or not."); 
-                bool found=false;
-                BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-                {
-                    if (llip->layer==layer)
-                    {
-                        found=true;
-                        break;
-                    }
-                }
-                if(!found)
-                {
-                    LOG_DEBUG("Adding new layer to known layers: " << layer); 
+                if (!wGraph->layerExists(layer)) {
+                    LOG_DEBUG("Adding new layer to layer menu: " << layer); 
                     addLayerMenuItem(layer, true); 
                 }
             }
+            // updateGL();  // redraw
+            // usleep(100000);
         }
-        updateGL();  // redraw
-        // usleep(100000);
-    }
 
-    TRACE_EXIT();
+        TRACE_EXIT();
+    }
 }
 
 void manetGLView::updatePlaybackSliderRange()
@@ -1673,10 +1656,9 @@ void manetGLView::maintainGraph()
 {
     TRACE_ENTER();
     while (true) {
-        if (!playbackPaused) {      // If paused, just keep things as they are.
-            boost::lock_guard<boost::mutex> l(graphMutex);
-            wGraph.doMaintanence(currentMessageTimestamp); // check expiration, etc. 
-        }
+        this_thread::interruption_point(); 
+        if (!playbackPaused)       // If paused, just keep things as they are.
+            wGraph->doMaintanence(currentMessageTimestamp); // check expiration, etc. 
         usleep(100000);
     }
     TRACE_EXIT();
@@ -1690,10 +1672,7 @@ void manetGLView::paintGL()
         drawNotConnectedState();
     else 
     {
-        {
-            boost::lock_guard<boost::mutex> l(graphMutex);
-            drawManet();
-        }
+        drawManet();
 
         glPushMatrix();
         glPushAttrib(GL_ALL_ATTRIB_BITS); 
@@ -1704,7 +1683,7 @@ void manetGLView::paintGL()
 
         if (showDebugInfo)
             drawDebugInfo();
-        
+
         glPopAttrib(); 
         glPopMatrix();
     }
@@ -1745,7 +1724,7 @@ void manetGLView::drawDebugInfo()
     QFont font(statusFontName.c_str(), statusFontPointSize); 
     QFontMetrics metrics = QFontMetrics(font);
     int border = qMax(4, metrics.leading());
-    QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
+    QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignLeft | Qt::TextWordWrap, text);
     painter.setRenderHint(QPainter::TextAntialiasing);
     painter.setFont(font);
     painter.setPen(Qt::white); 
@@ -1881,26 +1860,51 @@ void manetGLView::drawManet(void)
         bgi.drawImage(); 
     }
 
-    bool first=true;
-    for (LayerList::iterator li=knownLayers.begin(); li!=knownLayers.end(); ++li)
-    {
-        if ((*li)->layer==ANTENNARADIUS_LAYER)
-            continue;
+    drawGraph(wGraph); 
+}
 
-        if ((*li)->active)
-        {
-            // each layer is 'layerPadding' above the rest. 
-            // layer order is currently defined by order of appearance
-            // in the cfg file. Only offset after the first layer.
-            if (!first)
-                glTranslatef(0.0, 0.0, layerPadding);  
-            else
-                first=false;
-            glPushMatrix();
-            // LOG_DEBUG("Drawing layer: " << (*li)->layer); 
-            drawLayer((*li)->layer); 
-            glPopMatrix();
+void manetGLView::drawGraph(WatcherGraph *&graph) 
+{
+    // draw all physical layer nodes
+    for (size_t n=0; n<graph->numValidNodes; n++) 
+        if (graph->nodes[n].isActive)
+            drawNode(graph->nodes[n], true);
+
+    // draw all edges and labels on all active layers
+    // (must grab read lock around dynamic data like label lists)
+    for (size_t l=0; l<graph->numValidLayers; l++) { 
+        if (!graph->layers[l].isActive) 
+            continue;
+        bool layerEmpty=true;
+        for (size_t i=0; i<graph->numValidNodes; i++) {
+            if (graph->nodes[i].isActive) {
+                // drawNode(graph->nodes[i], false);      // "ghost" nodes
+                for (unsigned int j=0; j<graph->numValidNodes; j++) 
+                    if (graph->nodes[j].isActive && graph->layers[l].edges[i][j]) {
+                        drawEdge(graph->layers[l].edgeDisplayInfo, graph->nodes[i], graph->nodes[j]);
+                        layerEmpty=false;
+                    }
+            }
         }
+
+        {
+            shared_lock<shared_mutex> readLock(graph->layers[l].floatingLabelsMutex); 
+            BOOST_FOREACH(const WatcherLayerData::FloatingLabels::value_type &label, graph->layers[l].floatingLabels)  {
+                drawLabel(label.lat, label.lng, label.alt, label); 
+            }
+        }
+
+        for (unsigned int n=0; n<graph->numValidNodes; n++) {
+            if (graph->nodes[n].isActive) {
+                shared_lock<shared_mutex> readLock(graph->layers[l].nodeLabelsMutexes[n]); 
+                BOOST_FOREACH(const WatcherLayerData::NodeLabels::value_type &label, graph->layers[l].nodeLabels[n]) {
+                    drawLabel(graph->nodes[n].x, graph->nodes[n].y, graph->nodes[n].z, label); 
+                }
+            }
+        }
+        // move up "layerPadding" units before drawing the next layer if the previous layer was not empty.
+        if (!layerEmpty) 
+            glTranslatef(0.0, 0.0, layerPadding);  
     }
 }
 
@@ -2032,26 +2036,25 @@ void manetGLView::updatePlaybackSliderFromGUI()
     TRACE_EXIT();
 }
 
-void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode &node1, const WatcherGraphNode &node2)
+void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &node1, const NodeDisplayInfo &node2)
 {
     TRACE_ENTER(); 
-
     edgesDrawn++;
 
-    GLdouble x1=node1.gpsData->x;
-    GLdouble y1=node1.gpsData->y;
-    GLdouble z1=node1.gpsData->z;
-    GLdouble x2=node2.gpsData->x;
-    GLdouble y2=node2.gpsData->y;
-    GLdouble z2=node2.gpsData->z;
+    GLdouble x1=node1.x;
+    GLdouble y1=node1.y;
+    GLdouble z1=node1.z;
+    GLdouble x2=node2.x;
+    GLdouble y2=node2.y;
+    GLdouble z2=node2.z;
     
-    double width=edge.displayInfo->width;
+    double width=edge.width;
 
     GLfloat edgeColor[]={
-        edge.displayInfo->color.r/255.0, 
-        edge.displayInfo->color.g/255.0, 
-        edge.displayInfo->color.b/255.0, 
-        edge.displayInfo->color.a/255.0, 
+        edge.color.r/255.0, 
+        edge.color.g/255.0, 
+        edge.color.b/255.0, 
+        edge.color.a/255.0, 
     };
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
@@ -2097,6 +2100,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
             ax = -ax;
         float rx = -vy*vz;
         float ry = vx*vz;
+
         glPushMatrix();
 
         //draw the cylinder body
@@ -2111,7 +2115,7 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
     }
 
     // draw the edge's label, if there is one.
-    if (edge.displayInfo->label!="none")
+    if (edge.label!="none")
     {
         if (monochromeMode)
         {
@@ -2122,10 +2126,10 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         {
             // This color should be cfg-erable.
             const GLfloat clr[]={
-                edge.displayInfo->labelColor.r/255.0, 
-                edge.displayInfo->labelColor.g/255.0, 
-                edge.displayInfo->labelColor.b/255.0, 
-                edge.displayInfo->labelColor.a/255.0
+                edge.labelColor.r/255.0, 
+                edge.labelColor.g/255.0, 
+                edge.labelColor.b/255.0, 
+                edge.labelColor.a/255.0
             };
             glColor4fv(clr);
         }
@@ -2136,8 +2140,8 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
         GLdouble a=fast_arctan2(x1-x2 , y1-y2);
         GLdouble th=10.0;
         renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, 
-                QString(edge.displayInfo->label.c_str()),
-                QFont(QString(edge.displayInfo->labelFont.c_str()), (int)(edge.displayInfo->labelPointSize*manetAdj.scaleX*scaleText)));
+                QString(edge.label.c_str()),
+                QFont(QString(edge.labelFont.c_str()), (int)(edge.labelPointSize*manetAdj.scaleX*scaleText)));
     }
 
     TRACE_EXIT(); 
@@ -2146,40 +2150,32 @@ void manetGLView::drawEdge(const WatcherGraphEdge &edge, const WatcherGraphNode 
 bool manetGLView::isActive(const watcher::GUILayer &layer)
 {
     TRACE_ENTER();
-
-    // GTL fix this
-    // LayerList::const_iterator li=std::find(knownLayers.begin(), knownLayers.end(), layer); 
-    bool retVal=false;
-    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-        if (llip->layer==layer) {
-            retVal=llip->active;
-            break;
-        }
-
+    bool retVal=wGraph->layers[wGraph->name2LayerIndex(layer)].isActive;
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
 }
 
-void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
+void manetGLView::drawNode(const NodeDisplayInfo &node, bool physical)
 {
     TRACE_ENTER(); 
-    nodesDrawn++;
+    if (physical)
+        nodesDrawn++;
 
     // LOG_DEBUG("Drawing node on " << (physical?"non":"") << "physical layer."); 
 
-    GLdouble x=node.gpsData->x;
-    GLdouble y=node.gpsData->y;
-    GLdouble z=node.gpsData->z;
+    GLdouble x=node.x;
+    GLdouble y=node.y;
+    GLdouble z=node.z;
 
     glPushMatrix();
     glTranslated(x, y, z);
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     GLfloat nodeColor[]={
-        node.displayInfo->color.r/255.0, 
-        node.displayInfo->color.g/255.0, 
-        node.displayInfo->color.b/255.0, 
-        physical ? node.displayInfo->color.a/255.0 : ghostLayerTransparency
+        node.color.r/255.0, 
+        node.color.g/255.0, 
+        node.color.b/255.0, 
+        physical ? node.color.a/255.0 : ghostLayerTransparency
     };
 
     drawNodeLabel(node, physical);
@@ -2189,23 +2185,23 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
     else
         glColor4fv(nodeColor);
 
-    if (isActive(ANTENNARADIUS_LAYER)) { 
-        // 30.86666666666666666666 meters == 1 second of latitude
-        // 1/30.86666666666666666666 of a second of lat == 1 meter
-        // 0.000278 is a second in decimal degrees
-        // 0.000278*(1/30.86666)=.00000900648142688583==change in lat for one meter.
-        // This is still wrong though - or at least does not match MANE's idea of distance.
-        // drawWireframeSphere(antennaRadius*0.00000900648142688583*gpsScale);
-        // The number below is just an eyeball value.
-        drawWireframeSphere(antennaRadius*0.000015*gpsScale);
-    }
+    // if (isActive(ANTENNARADIUS_LAYER)) { 
+    //     // 30.86666666666666666666 meters == 1 second of latitude
+    //     // 1/30.86666666666666666666 of a second of lat == 1 meter
+    //     // 0.000278 is a second in decimal degrees
+    //     // 0.000278*(1/30.86666)=.00000900648142688583==change in lat for one meter.
+    //     // This is still wrong though - or at least does not match MANE's idea of distance.
+    //     // drawWireframeSphere(antennaRadius*0.00000900648142688583*gpsScale);
+    //     // The number below is just an eyeball value.
+    //     drawWireframeSphere(antennaRadius*0.000015*gpsScale);
+    // }
 
     // Handle size after drawing antenna so as to not scale it
-    handleSize(node.displayInfo);
-    handleProperties(node.displayInfo);
+    handleSize(node);
+    handleProperties(node);
 
-    handleSpin(threeDView, node.displayInfo);
-    switch(node.displayInfo->shape)
+    handleSpin(threeDView, node);
+    switch(node.shape)
     {
         case NodePropertiesMessage::CIRCLE: drawSphere(4); break;
         case NodePropertiesMessage::SQUARE: drawCube(4); break;
@@ -2220,16 +2216,16 @@ void manetGLView::drawNode(const WatcherGraphNode &node, bool physical)
     TRACE_EXIT(); 
 }
 
-void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
+void manetGLView::drawNodeLabel(const NodeDisplayInfo &node, bool physical)
 {
     TRACE_ENTER();
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     GLfloat nodeColor[]={
-        node.displayInfo->labelColor.r/255.0, 
-        node.displayInfo->labelColor.g/255.0, 
-        node.displayInfo->labelColor.b/255.0, 
-        physical ? node.displayInfo->labelColor.a/255.0 : ghostLayerTransparency
+        node.labelColor.r/255.0, 
+        node.labelColor.g/255.0, 
+        node.labelColor.b/255.0, 
+        physical ? node.labelColor.a/255.0 : ghostLayerTransparency
     };
 
     if (monochromeMode)
@@ -2237,30 +2233,29 @@ void manetGLView::drawNodeLabel(const WatcherGraphNode &node, bool physical)
     else
         glColor4fv(nodeColor);
 
-    renderText(0, 6, 3, QString(node.displayInfo->get_label().c_str()),
-            QFont(node.displayInfo->labelFont.c_str(), 
-                (int)(node.displayInfo->labelPointSize*manetAdj.scaleX*scaleText))); 
+    renderText(0, 6, 3, QString(node.get_label().c_str()),
+            QFont(node.labelFont.c_str(), 
+                (int)(node.labelPointSize*manetAdj.scaleX*scaleText))); 
 
     TRACE_EXIT();
 }
 
-void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfoPtr &label)
+void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfo &label)
 {
     TRACE_ENTER(); 
-
     labelsDrawn++;
     // 
     int fgColor[]={
-        label->foregroundColor.r, 
-        label->foregroundColor.g, 
-        label->foregroundColor.b, 
-        label->foregroundColor.a
+        label.foregroundColor.r, 
+        label.foregroundColor.g, 
+        label.foregroundColor.b, 
+        label.foregroundColor.a
     };
     int bgColor[]={
-        label->backgroundColor.r, 
-        label->backgroundColor.g, 
-        label->backgroundColor.b, 
-        label->backgroundColor.a
+        label.backgroundColor.r, 
+        label.backgroundColor.g, 
+        label.backgroundColor.b, 
+        label.backgroundColor.a
     };
 
     if (monochromeMode)
@@ -2272,7 +2267,8 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     float offset=4.0;
 
-    QFont f(label->fontName.c_str(), (int)(label->pointSize*manetAdj.scaleX*scaleText)); 
+    // LOG_DEBUG("Building QFont for label \"" << label.labelText << "\": name: " << label.fontName << ", size: " <<  label.pointSize <<  " (adj:" << (int)(label.pointSize*manetAdj.scaleX*scaleText) << ")"); 
+    QFont f(label.fontName.c_str(), (int)(label.pointSize*manetAdj.scaleX*scaleText)); 
 
     // Do cheesy shadow effect as I can't get a proper bounding box around the text as
     // QFontMetric lisea bout how wide/tall the bounding box is. 
@@ -2285,7 +2281,7 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     // }
 
     qglColor(QColor(fgColor[0], fgColor[1], fgColor[2], fgColor[3])); 
-    renderText(inx+offset, iny+offset, inz+2.0, label->labelText.c_str(), f); 
+    renderText(inx+offset, iny+offset, inz+2.0, label.labelText.c_str(), f); 
 
     // Use GLUT to draw labels, will be much faster.
     // glColor3f(fgColor[0], fgColor[1], fgColor[2]);
@@ -2300,75 +2296,74 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     TRACE_EXIT(); 
 }
 
-void manetGLView::drawLayer(const GUILayer &layer)
-{
-    TRACE_ENTER();
-
-    {
-        // LOG_DEBUG("Drawing floating labels..."); 
-        WatcherGraph::FloatingLabelList::const_iterator b=wGraph.floatingLabels.begin(); 
-        WatcherGraph::FloatingLabelList::const_iterator e=wGraph.floatingLabels.end(); 
-        for ( ; b!=e; ++b) {
-            if ((*b)->layer==layer) {
-                // LOG_DEBUG("Displaying floating label: " << *b); 
-                GLdouble x=(*b)->lat, y=(*b)->lng, z=(*b)->alt; 
-                LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
-                drawLabel(x, y, z, li);
-            }
-        }
-    }
-
-    WatcherGraph::edgeIterator ei, eend;
-    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
-    {
-        WatcherGraphEdge &edge=wGraph.theGraph[*ei]; 
-        if (edge.displayInfo->layer==layer)
-        {
-            const WatcherGraphNode &node1=wGraph.theGraph[source(*ei, wGraph.theGraph)]; 
-            const WatcherGraphNode &node2=wGraph.theGraph[target(*ei, wGraph.theGraph)]; 
-            drawEdge(edge, node1, node2); 
-        }
-
-        WatcherGraphEdge::LabelList::iterator li=edge.labels.begin(); 
-        WatcherGraphEdge::LabelList::iterator lend=edge.labels.end(); 
-        for( ; li!=lend; ++li)
-            if ((*li)->layer==layer)
-            {
-                const WatcherGraphNode &node1=wGraph.theGraph[source(*ei, wGraph.theGraph)]; 
-                const WatcherGraphNode &node2=wGraph.theGraph[target(*ei, wGraph.theGraph)]; 
-
-                double lx=(node1.gpsData->x+node2.gpsData->x)/2.0; 
-                double ly=(node1.gpsData->y+node2.gpsData->y)/2.0; 
-                double lz=(node1.gpsData->z+node2.gpsData->z)/2.0; 
-                drawLabel(lx, ly, lz, *li);
-            }
-    }
-
-    WatcherGraph::vertexIterator vi, vend;
-    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
-    {
-        WatcherGraphNode &node=wGraph.theGraph[*vi]; 
-
-        if (layer==PHYSICAL_LAYER)
-            drawNode(node, true); 
-        else
-            if (layerPadding>6 || !isActive(PHYSICAL_LAYER))
-                drawNode(node, false); 
-
-        WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
-        WatcherGraphEdge::LabelList::iterator lend=node.labels.end(); 
-        for( ; li!=lend; ++li)
-            if ((*li)->layer==layer)
-            {
-                GLdouble lx=node.gpsData->x;
-                GLdouble ly=node.gpsData->y;
-                GLdouble lz=node.gpsData->z;
-                drawLabel(lx, ly, lz, *li); 
-            }
-    }
-
-    TRACE_EXIT();
-}
+// void manetGLView::drawLayer(const GUILayer &layer)
+// {
+//     TRACE_ENTER();
+//     {
+//         // LOG_DEBUG("Drawing floating labels..."); 
+//         WatcherGraph::FloatingLabelList::const_iterator b=wGraph->floatingLabels.begin(); 
+//         WatcherGraph::FloatingLabelList::const_iterator e=wGraph->floatingLabels.end(); 
+//         for ( ; b!=e; ++b) {
+//             if ((*b)->layer==layer) {
+//                 // LOG_DEBUG("Displaying floating label: " << *b); 
+//                 GLdouble x=(*b)->lat, y=(*b)->lng, z=(*b)->alt; 
+//                 LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
+//                 drawLabel(x, y, z, li);
+//             }
+//         }
+//     }
+// 
+//     WatcherGraph::edgeIterator ei, eend;
+//     for(tie(ei, eend)=edges(wGraph->theGraph); ei!=eend; ++ei)
+//     {
+//         WatcherGraphEdge &edge=wGraph->theGraph[*ei]; 
+//         if (edge.displayInfo->layer==layer)
+//         {
+//             const WatcherGraphNode &node1=wGraph->theGraph[source(*ei, wGraph->theGraph)]; 
+//             const WatcherGraphNode &node2=wGraph->theGraph[target(*ei, wGraph->theGraph)]; 
+//             drawEdge(edge, node1, node2); 
+//         }
+// 
+//         WatcherGraphEdge::LabelList::iterator li=edge.labels.begin(); 
+//         WatcherGraphEdge::LabelList::iterator lend=edge.labels.end(); 
+//         for( ; li!=lend; ++li)
+//             if ((*li)->layer==layer)
+//             {
+//                 const WatcherGraphNode &node1=wGraph->theGraph[source(*ei, wGraph->theGraph)]; 
+//                 const WatcherGraphNode &node2=wGraph->theGraph[target(*ei, wGraph->theGraph)]; 
+// 
+//                 double lx=(node1.gpsData->x+node2.gpsData->x)/2.0; 
+//                 double ly=(node1.gpsData->y+node2.gpsData->y)/2.0; 
+//                 double lz=(node1.gpsData->z+node2.gpsData->z)/2.0; 
+//                 drawLabel(lx, ly, lz, *li);
+//             }
+//     }
+// 
+//     WatcherGraph::vertexIterator vi, vend;
+//     for(tie(vi, vend)=vertices(wGraph->theGraph); vi!=vend; ++vi)
+//     {
+//         WatcherGraphNode &node=wGraph->theGraph[*vi]; 
+// 
+//         if (layer==PHYSICAL_LAYER)
+//             drawNode(node, true); 
+//         else
+//             if (layerPadding>6 || !isActive(PHYSICAL_LAYER))
+//                 drawNode(node, false); 
+// 
+//         WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
+//         WatcherGraphEdge::LabelList::iterator lend=node.labels.end(); 
+//         for( ; li!=lend; ++li)
+//             if ((*li)->layer==layer)
+//             {
+//                 GLdouble lx=node.gpsData->x;
+//                 GLdouble ly=node.gpsData->y;
+//                 GLdouble lz=node.gpsData->z;
+//                 drawLabel(lx, ly, lz, *li); 
+//             }
+//     }
+// 
+//     TRACE_EXIT();
+// }
 
 void manetGLView::resizeGL(int width, int height)
 {
@@ -2440,7 +2435,7 @@ void manetGLView::setGPSScale()
 {
     TRACE_ENTER();
     bool ok;
-    double value=QInputDialog::getDouble(this, tr("GPS Scale"), tr("Plese enter the new GPS Scale value"), 
+    double value=QInputDialog::getDouble(this, tr("GPS Scale"), tr("Please enter the new GPS Scale value"), 
             gpsScale, 1, DBL_MAX, 1, &ok);
 
     if (ok) {
@@ -2466,9 +2461,8 @@ void manetGLView::setEdgeWidth()
 
     if (ok) {
         LOG_DEBUG("Setting all edge widths to " << value); 
-        WatcherGraph::edgeIterator ei, eend;
-        for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
-            wGraph.theGraph[*ei].displayInfo->width=value;
+        for (size_t l=0; l<wGraph->numValidLayers; l++) 
+            wGraph->layers[l].edgeDisplayInfo.width=value;
     }
 
     TRACE_EXIT();
@@ -2765,12 +2759,6 @@ unsigned int manetGLView::getNodeIdAtCoords(const int x, const int y)
 {
     TRACE_ENTER();
 
-    if (!num_vertices(wGraph.theGraph))
-    {
-        TRACE_EXIT_RET(0);
-        return 0;
-    }
-
     unsigned int retVal=0;
     unsigned long min_dist = ULONG_MAX; // distance squared to closest
     unsigned r=15;      // Shrug, seems to do the trick
@@ -2786,14 +2774,14 @@ unsigned int manetGLView::getNodeIdAtCoords(const int x, const int y)
     // convert y-from-top to y-from-bottom
     int convy = viewport[3] - y;
 
-    WatcherGraph::vertexIterator vi, vend;
-    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
+    for (size_t i=0; i<wGraph->numValidNodes; i++) 
     {
-        WatcherGraphNode &node=wGraph.theGraph[*vi]; 
+        if (!wGraph->nodes[i].isActive) 
+            continue;
 
         unsigned int dist;
 
-        GLdouble gx=node.gpsData->x, gy=node.gpsData->y, gz=node.gpsData->z;
+        GLdouble gx=wGraph->nodes[i].x, gy=wGraph->nodes[i].y, gz=wGraph->nodes[i].z;
 
         // Convert from 3d pixels to screen coords
         GLdouble sx, sy, sz;
@@ -2818,7 +2806,7 @@ unsigned int manetGLView::getNodeIdAtCoords(const int x, const int y)
 
         dist=dist>r2 ? dist-r2 : 0; 
         if (dist < min_dist)
-            found=(unsigned int)node.nodeId.to_v4().to_ulong();
+            found=(unsigned int)wGraph->nodes[i].nodeId.to_v4().to_ulong();
     }
     if (min_dist < ULONG_MAX)
         retVal=found;
@@ -2857,14 +2845,14 @@ void manetGLView::streamFilteringEnabled(bool isEnabled)
 
     messageStreamFiltering=isEnabled;
 
-    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
+    for (size_t l=0; l<wGraph->numValidLayers; l++) { 
         if (messageStream) {
             messageStream->enableFiltering(isEnabled); 
             MessageStreamFilterPtr f(new MessageStreamFilter);
-            f->setLayer(llip->layer);
+            f->setLayer(wGraph->layers[l].layerName); 
             // If enabling filtering turn on all currently active filters
             // else remove them all
-            if (isEnabled && llip->active)
+            if (isEnabled && wGraph->layers[l].isActive) 
                 messageStream->addMessageFilter(f);
             else
                 messageStream->removeMessageFilter(f);
@@ -2957,31 +2945,18 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
 {
     TRACE_ENTER();
 
-    GUILayer layer=layerName.toStdString();
-
-    bool found=false;
-    BOOST_FOREACH(LayerListItemPtr &llip, knownLayers) {
-        if (llip->layer==layer) {
-            llip->active=turnOn;
-            found=true;
-
-            if (messageStreamFiltering && messageStream) {
-                // Tell the watcherd that we want/don't want messages for this layer.
-                MessageStreamFilterPtr f(new MessageStreamFilter);
-                f->setLayer(llip->layer);
-                if (turnOn)
-                    messageStream->addMessageFilter(f);
-                else
-                    messageStream->removeMessageFilter(f);
-            }
-        }
-    }
-    if(!found) {
-        LOG_DEBUG("Adding new layer to known layers: " << layer); 
-        LayerListItemPtr item(new LayerListItem);
-        item->layer=layer;
-        item->active=turnOn;
-        knownLayers.push_back(item); 
+    GUILayer name=layerName.toStdString();
+    size_t layerIndex=wGraph->name2LayerIndex(name);
+    wGraph->layers[layerIndex].isActive=turnOn;
+    LOG_DEBUG("Turned layer " << name << " (" << layerIndex << ") " << (turnOn ? "on" : "off")); 
+    if (messageStreamFiltering && messageStream) {
+        // Tell the watcherd that we want/don't want messages for this layer.
+        MessageStreamFilterPtr f(new MessageStreamFilter);
+        f->setLayer(name); 
+        if (turnOn)
+            messageStream->addMessageFilter(f);
+        else
+            messageStream->removeMessageFilter(f);
     }
 
     TRACE_EXIT();
@@ -2993,13 +2968,11 @@ void manetGLView::toggleMonochrome(bool isOn)
     static GLfloat previousBackgroundColor[4]={0.0, 0.0, 0.0, 0.0}; 
     monochromeMode=isOn;
     emit monochromeToggled(isOn); 
-    if (isOn)
-    {
+    if (isOn) {
         glGetFloatv(GL_COLOR_CLEAR_VALUE, previousBackgroundColor);
         glClearColor(1, 1, 1, 1.0);
     }
-    else
-    {
+    else {
         glClearColor(previousBackgroundColor[0], previousBackgroundColor[1], previousBackgroundColor[2], previousBackgroundColor[3]); 
     }
     updateGL();
@@ -3034,71 +3007,64 @@ void manetGLView::toggleLoopPlayback(bool isOn)
 void manetGLView::clearAll()
 {
     TRACE_ENTER();
-    boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when it goes out of scope
-    wGraph.theGraph.clear();
+    wGraph->clear();
     TRACE_EXIT();
 }
 
 void manetGLView::clearAllEdges()
 {
     TRACE_ENTER();
-    boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when it goes out of scope
-    WatcherGraph::vertexIterator vi, viend, vj, vjend;
-    for(tie(vi, viend)=vertices(wGraph.theGraph); vi!=viend; ++vi)
-        clear_out_edges(*vi, wGraph.theGraph); 
-
+    for (size_t l=0; l<wGraph->numValidLayers; l++) {
+        for (size_t n=0; n<wGraph->numValidNodes; n++) { 
+            std::fill_n(wGraph->layers[l].edges[n], maxNodes, 0); 
+            std::fill_n(wGraph->layers[l].edgeExpirations[n], maxNodes, watcher::Infinity); 
+        }
+    }
+    emit edgesCleared(); 
     TRACE_EXIT();
 }
 void manetGLView::clearAllLabels()
 {
     TRACE_ENTER();
-    boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when it goes out of scope
-    WatcherGraph::edgeIterator ei, eend;
-    for(tie(ei, eend)=edges(wGraph.theGraph); ei!=eend; ++ei)
-        if (wGraph.theGraph[*ei].labels.size())
-            wGraph.theGraph[*ei].labels.clear();
-
-    WatcherGraph::vertexIterator vi, vend;
-    for(tie(vi, vend)=vertices(wGraph.theGraph); vi!=vend; ++vi)
-        if (wGraph.theGraph[*vi].labels.size())
-            wGraph.theGraph[*vi].labels.clear();
-
+    // GTL do this
     emit labelsCleared();
     TRACE_EXIT();
 }
 
 // Should be called after a glTranslate()
-void manetGLView::handleSpin(int threeD, const NodeDisplayInfoPtr &ndi)
+void manetGLView::handleSpin(int threeD, const NodeDisplayInfo &ndi)
 {
-    if (ndi->spin)
+    if (ndi.spin)
     {
         if (threeD)
         {
-            glRotatef(ndi->spinRotation_x, 1.0f, 0.0f, 0.0f);
-            glRotatef(ndi->spinRotation_y, 0.0f, 1.0f, 0.0f);
+            glRotatef(ndi.spinRotation_x, 1.0f, 0.0f, 0.0f);
+            glRotatef(ndi.spinRotation_y, 0.0f, 1.0f, 0.0f);
         }
-        glRotatef(ndi->spinRotation_z, 0.0f, 0.0f, 1.0f);
+        glRotatef(ndi.spinRotation_z, 0.0f, 0.0f, 1.0f);
     }
 }
 
 // Should be called after a glTranslate()
-void manetGLView::handleSize(const NodeDisplayInfoPtr &ndi)
+void manetGLView::handleSize(const NodeDisplayInfo &ndi)
 {
-    glScalef(ndi->size, ndi->size, ndi->size);
+    glScalef(ndi.size, ndi.size, ndi.size);
 }
 
-void manetGLView::handleProperties(const NodeDisplayInfoPtr &ndi)
+void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
 {
     const GLfloat black[]={0.0,0.0,0.0,1.0};
-    BOOST_FOREACH(NodePropertiesMessage::NodeProperty &p, ndi->nodeProperties) {
+    BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &p, ndi.nodeProperties) {
         switch(p) { 
             case NodePropertiesMessage::NOPROPERTY: 
                 break;
 
             case NodePropertiesMessage::ROOT:         
                 if (isActive(HIERARCHY_LAYER)) { 
-                    if (monochromeMode) glColor4fv(black); 
-                    else glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
+                    if (monochromeMode) 
+                        glColor4fv(black); 
+                    else 
+                        glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
                     drawTorus(1, 13);
                     drawTorus(1, 10);
                     drawTorus(1, 7); 
@@ -3106,16 +3072,20 @@ void manetGLView::handleProperties(const NodeDisplayInfoPtr &ndi)
                 break;
             case NodePropertiesMessage::REGIONAL:     
                 if (isActive(HIERARCHY_LAYER)) { 
-                    if (monochromeMode) glColor4fv(black); 
-                    else glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
+                    if (monochromeMode) 
+                        glColor4fv(black); 
+                    else 
+                        glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
                     drawTorus(1, 10);
                     drawTorus(1, 7);
                 }
                 break;
             case NodePropertiesMessage::NEIGHBORHOOD: 
                 if (isActive(HIERARCHY_LAYER)) {
-                    if (monochromeMode) glColor4fv(black); 
-                    else glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
+                    if (monochromeMode) 
+                        glColor4fv(black); 
+                    else 
+                        glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
                     drawTorus(1, 7);
                 }
                 break;
@@ -3419,30 +3389,33 @@ void manetGLView::saveConfiguration()
         for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
             root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
 
-        string prop="layers";
-        libconfig::Setting &layers=cfg.lookup(prop);
+        // 
+        // GTL - this should be done inside WatcherGraph::saveConfiguration()
+        //
+        // string prop="layers";
+        // libconfig::Setting &layers=cfg.lookup(prop);
 
-        // We have to create cfg layers here as we may've gotten new dynamic layers while we were running.
-        // I am beginning (ha!) to dislike libconfig...
-        BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-        {
-            int i, numCfgLayers=layers.getLength();
-            LOG_DEBUG("numCfgLayers=" << numCfgLayers);
-            for (i=0; i<numCfgLayers; i++)
-            {
-                string layerName=string(layers[i].getName());
-                if (layerName==llip->layer)
-                {
-                    layers[i]=llip->active;
-                    break;
-                }
-            }
-            if (i==numCfgLayers) 
-            {
-                LOG_DEBUG("Adding layer " << llip->layer << " with value " << llip->active << " to " << layers.getName() << " cfg"); 
-                layers.add(string(llip->layer), Setting::TypeBoolean)=llip->active;
-            }
-        }
+        // // We have to create cfg layers here as we may've gotten new dynamic layers while we were running.
+        // // I am beginning (ha!) to dislike libconfig...
+        // BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
+        // {
+        //     int i, numCfgLayers=layers.getLength();
+        //     LOG_DEBUG("numCfgLayers=" << numCfgLayers);
+        //     for (i=0; i<numCfgLayers; i++)
+        //     {
+        //         string layerName=string(layers[i].getName());
+        //         if (layerName==llip->layer)
+        //         {
+        //             layers[i]=llip->active;
+        //             break;
+        //         }
+        //     }
+        //     if (i==numCfgLayers) 
+        //     {
+        //         LOG_DEBUG("Adding layer " << llip->layer << " with value " << llip->active << " to " << layers.getName() << " cfg"); 
+        //         layers.add(string(llip->layer), Setting::TypeBoolean)=llip->active;
+        //     }
+        // }
 
         struct 
         {
@@ -3479,7 +3452,9 @@ void manetGLView::saveConfiguration()
             int *val; 
         } intVals[] = 
         {
-            { "statusFontPointSize", &statusFontPointSize }
+            { "statusFontPointSize", &statusFontPointSize },
+            { "maxNodes", (int*)&maxNodes },
+            { "maxLayers", (int*)&maxLayers }
         }; 
         for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
             root[intVals[i].prop]=*intVals[i].val;
@@ -3528,7 +3503,7 @@ void manetGLView::saveConfiguration()
 
     SingletonConfig::unlock();
 
-    wGraph.saveConfig(); 
+    wGraph->saveConfiguration(); 
 
     SingletonConfig::saveConfig();
 
@@ -3629,8 +3604,7 @@ void manetGLView::forwardToEndOfPlayback()
 void manetGLView::changeSpeed(double x)
 {
     if ((streamRate > 0.0 && x < 0.0) || (streamRate < 0.0 && x > 0.0)) {
-	boost::lock_guard<boost::mutex> l(graphMutex); // unlocks when goes out of scope.
-	wGraph.setTimeDirectionForward(x > 0.0);
+        wGraph->setTimeDirectionForward(x > 0.0);
     }
     streamRate = x;
     emit streamRateSet(streamRate); // update the gui's display

@@ -117,12 +117,12 @@ class Render {
         void output_nodes();
         void output_edges();
         void output_floating_labels();
-        void add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng, double alt);
-        void add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng, double alt);
-        void add_labels(const std::list<LabelDisplayInfoPtr>&, double lat, double lng, double alt);
+        void add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, const double &lat, const double &lng, const double &alt);
+        void add_label(const LabelDisplayInfo &dispInfo, const double &lat, const double &lng, const double &alt);
+        void add_labels(const WatcherLayerData::NodeLabels &labels, const double &lat, const double &lng, const double &alt);
         PointPtr create_point(double lat, double lng, double alt);
         std::string get_label_style(const watcher::Color&);
-        std::string get_edge_style(const WatcherGraphEdge& edge, unsigned int edgenum);
+        std::string get_edge_style(const EdgeDisplayInfo& edge, unsigned int edgenum);
 };
 
 /*
@@ -251,7 +251,7 @@ std::string Render::get_label_style(const watcher::Color& color)
     return url;
 }
 
-void Render::add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, double lat, double lng, double alt)
+void Render::add_label(const GUILayer& layer, const std::string& label, const watcher::Color& color, const double & lat, const double & lng, const double & alt)
 {
     const LayerInfo& li (get_layer(layer));
 
@@ -265,15 +265,15 @@ void Render::add_label(const GUILayer& layer, const std::string& label, const wa
     }
 }
 
-void Render::add_label(LabelDisplayInfoPtr dispInfo, double lat, double lng, double alt)
+void Render::add_label(const LabelDisplayInfo &dispInfo, const double & lat, const double & lng, const double & alt)
 {
-    add_label(dispInfo->layer, dispInfo->labelText, dispInfo->foregroundColor, lat, lng, alt);
+    add_label(dispInfo.layer, dispInfo.labelText, dispInfo.foregroundColor, lat, lng, alt);
 }
 
 // create a placemark for each label, putting into the appropriate layer
-void Render::add_labels(const std::list<LabelDisplayInfoPtr>& labels, double lat, double lng, double alt)
+void Render::add_labels(const WatcherLayerData::NodeLabels &labels, const double &lat, const double &lng, const double &alt)
 {
-    BOOST_FOREACH(LabelDisplayInfoPtr dispInfo, labels) {
+    BOOST_FOREACH(const WatcherLayerData::NodeLabels::value_type &dispInfo, labels) {
         add_label(dispInfo, lat, lng, alt);
     }
 }
@@ -296,79 +296,86 @@ PointPtr Render::create_point(double lat, double lng, double alt)
 
 void Render::output_floating_labels()
 {
-    WatcherGraph::FloatingLabelList::const_iterator b = graph.floatingLabels.begin(); 
-    WatcherGraph::FloatingLabelList::const_iterator e = graph.floatingLabels.end(); 
-    for ( ; b != e; ++b) {
-        add_label((*b)->layer, (*b)->labelText, (*b)->foregroundColor, (*b)->lat, (*b)->lng, (*b)->alt);
-    }
+    for (size_t l=0; l<graph.numValidLayers; l++) 
+        if (graph.layers[l].isActive) {
+            boost::shared_lock<boost::shared_mutex> readLock(graph.layers[l].floatingLabelsMutex); 
+            if (graph.layers[l].floatingLabels.size())  
+                BOOST_FOREACH(const WatcherLayerData::FloatingLabels::value_type &label, graph.layers[l].floatingLabels) 
+                    add_label(graph.layers[l].layerName, label.labelText, label.foregroundColor, label.lat, label.lng, label.alt);
+        }
 }
 
 void Render::output_nodes()
 {
-    int nodecount = 0;
+    // output icons for active nodes and labels for active nodes. 
+    for (size_t n=0; n<graph.numValidNodes; n++) { 
+        if (graph.nodes[n].isActive) {
 
-    // iterate over all nodes in the graph
-    WatcherGraph::vertexIterator vi, vend;
-    for (tie(vi, vend) = vertices(graph.theGraph); vi != vend; ++vi, ++nodecount) {
-        const WatcherGraphNode &node = graph.theGraph[*vi]; 
+            const NodeDisplayInfo &node=graph.nodes[n];
+            const GUILayer &layerName=PHYSICAL_LAYER;     // nodes are on physcal layer by definition
+            const LayerInfo& layer(get_layer(layerName));  
+            
+            if (layer.visible) { 
+                PlacemarkPtr ptr = kmlFac->CreatePlacemark();
+                //ptr->set_name(node.get_label()); // textual label, can be html
+                //ptr->set_geometry(create_point(node.y, node.x, node.z + layer.zpad));
+                ptr->set_geometry(create_point(node.y, node.x, layer.zpad));
+                ptr->set_id(node.nodeId.to_string());
+                // target id is required when changing some attribute of a feature already in the dom
+                //ptr->set_targetid("node0");
 
-        const LayerInfo& layer(get_layer(node.displayInfo->layer));
+                // create style for the icon
+                IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
+                std::string url(BASE_ICON_URL + IconPath);
+                icon->set_href(url.c_str());
 
-        if (layer.visible) {
-            PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-            //ptr->set_name(node.displayInfo->get_label()); // textual label, can be html
-            //ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, node.gpsData->z + layer.zpad));
-            ptr->set_geometry(create_point(node.gpsData->y, node.gpsData->x, layer.zpad));
-            ptr->set_id(node.nodeId.to_string());
-            // target id is required when changing some attribute of a feature already in the dom
-            //ptr->set_targetid("node0");
+                IconStylePtr iconStyle(kmlFac->CreateIconStyle());
+                iconStyle->set_icon(icon);
+                iconStyle->set_color(watcher_color_to_kml(node.color));
+                iconStyle->set_scale(IconScale);
 
-            // create style for the icon
-            IconStyleIconPtr icon(kmlFac->CreateIconStyleIcon());
-            std::string url(BASE_ICON_URL + IconPath);
-            icon->set_href(url.c_str());
+                LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
+                labelStyle->set_scale(0); // hide the label, we use separate placemarks for the labels so they can have their own style
 
-            IconStylePtr iconStyle(kmlFac->CreateIconStyle());
-            iconStyle->set_icon(icon);
-            iconStyle->set_color(watcher_color_to_kml(node.displayInfo->color));
-            iconStyle->set_scale(IconScale);
+                StylePtr style(kmlFac->CreateStyle());
+                style->set_iconstyle(iconStyle);
+                style->set_labelstyle(labelStyle);
 
-            LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
-            labelStyle->set_scale(0); // hide the label, we use separate placemarks for the labels so they can have their own style
+                std::string styleId("node-style-" + boost::lexical_cast<std::string>(n));
+                style->set_id(styleId);
 
-            StylePtr style(kmlFac->CreateStyle());
-            style->set_iconstyle(iconStyle);
-            style->set_labelstyle(labelStyle);
+                doc->add_styleselector(style);
 
-            std::string styleId("node-style-" + boost::lexical_cast<std::string>(nodecount));
-            style->set_id(styleId);
+                ptr->set_styleurl("#" + styleId);
 
-            doc->add_styleselector(style);
+                layer.folder->add_feature(ptr); // add placemark to DOM
 
-            ptr->set_styleurl("#" + styleId);
-
-            layer.folder->add_feature(ptr); // add placemark to DOM
-
-            // add a label for the node separate from its placemark icon
-            add_label(node.displayInfo->layer, node.displayInfo->get_label(), node.displayInfo->labelColor, node.gpsData->y, node.gpsData->x, 0);
+                // add a label for the node separate from its placemark icon
+                add_label(layerName, node.get_label(), node.labelColor, node.y, node.x, 0);
+            }
         }
+    }
 
-        /*
-         * Create a placemark for each label, putting into the appropriate layer.
-         * Each label has an independant layer, so this call occurs outside the
-         * check for the node layer's visibility.
-         */
-        add_labels(node.labels, node.gpsData->y, node.gpsData->x, 0);
+    // now output all labels on active nodes on active layers. 
+    for (size_t n=0; n<graph.numValidNodes; n++) { 
+        if (graph.nodes[n].isActive) {
+            for (size_t l=0; l<graph.numValidLayers; l++) { 
+                if (graph.layers[l].isActive) { 
+                    boost::shared_lock<boost::shared_mutex> readLock(graph.layers[l].nodeLabelsMutexes[n]); 
+                    add_labels(graph.layers[l].nodeLabels[n], graph.nodes[n].y, graph.nodes[n].x, 0);
+                }
+            }
+        }
     }
 }
 
-std::string Render::get_edge_style(const WatcherGraphEdge& edge, unsigned int edgenum)
+std::string Render::get_edge_style(const EdgeDisplayInfo& edge, unsigned int edgenum)
 {
         std::string edgeid = "edge-style-" + boost::lexical_cast<std::string>(edgenum);
 
         LineStylePtr lineStyle(kmlFac->CreateLineStyle());
-        lineStyle->set_color(watcher_color_to_kml(edge.displayInfo->color));
-        lineStyle->set_width(edge.displayInfo->width);
+        lineStyle->set_color(watcher_color_to_kml(edge.color));
+        lineStyle->set_width(edge.width);
 
         IconStylePtr iconStyle(kmlFac->CreateIconStyle());
         iconStyle->set_scale(0); // scale to 0 means hide it
@@ -379,10 +386,10 @@ std::string Render::get_edge_style(const WatcherGraphEdge& edge, unsigned int ed
         style->set_iconstyle(iconStyle);
 
         kmldom::LabelStylePtr labelStyle(kmlFac->CreateLabelStyle());
-        if (edge.displayInfo->label == "none") {
+        if (edge.label == "none") {
             labelStyle->set_scale(0); // hide the label
         }
-        labelStyle->set_color(watcher_color_to_kml(edge.displayInfo->labelColor));
+        labelStyle->set_color(watcher_color_to_kml(edge.labelColor));
         style->set_labelstyle(labelStyle);
 
         doc->add_styleselector(style);
@@ -391,13 +398,13 @@ std::string Render::get_edge_style(const WatcherGraphEdge& edge, unsigned int ed
 }
 
 // Draw a spline between the given points at the given altitude
-void drawSpline(const GPSMessagePtr& a, const GPSMessagePtr& b, float alt, CoordinatesPtr& coords)
+void drawSpline(const double &x1, const double &y1, const double &x2, const double &y2, const float &alt, CoordinatesPtr& coords)
 {
     /* SplineSteps is the number of points, so SplineSteps-1 is the number of segments */
-    float xstep = ( b->x - a->x ) / (SplineSteps - 1);
-    float ystep = ( b->y - a->y ) / (SplineSteps - 1);
-    float x = a->x;
-    float y = a->y;
+    float xstep = ( x2 - x1 ) / (SplineSteps - 1);
+    float ystep = ( y2 - y1 ) / (SplineSteps - 1);
+    float x = x1;
+    float y = y1;
 
     for (int i = 0; i < SplineSteps; ++i, x += xstep, y += ystep) {
         coords->add_latlngalt(y + Latoff, x + Lonoff, alt);
@@ -406,50 +413,58 @@ void drawSpline(const GPSMessagePtr& a, const GPSMessagePtr& b, float alt, Coord
 
 void Render::output_edges()
 {
-    WatcherGraph::edgeIterator ei, eend;
     int edgenum = 0;
 
-    for (tie(ei, eend) = edges(graph.theGraph); ei != eend; ++ei, ++edgenum) {
-        const WatcherGraphEdge &edge = graph.theGraph[*ei]; 
-        const WatcherGraphNode &node1 = graph.theGraph[source(*ei, graph.theGraph)]; 
-        const WatcherGraphNode &node2 = graph.theGraph[target(*ei, graph.theGraph)]; 
+    for (size_t l=0; l<graph.numValidLayers; l++) { 
+        if (graph.layers[l].isActive) {
+            const LayerInfo& layer(get_layer(graph.layers[l].layerName)); 
+            if (layer.visible) {
+                for (size_t i=0; i<graph.numValidNodes; i++) { 
+                    if (graph.nodes[i].isActive) {
+                        for (size_t j=0; j<graph.numValidNodes; j++) { 
+                            if (graph.nodes[j].isActive) {
+                                if (graph.layers[l].edges[i][j]) {
+                                    // If we're here, then the edge exists and both nodes and the layer are active. 
+                                    const EdgeDisplayInfo &edge = graph.layers[l].edgeDisplayInfo; 
+                                    const NodeDisplayInfo &node1 = graph.nodes[i];
+                                    const NodeDisplayInfo &node2 = graph.nodes[j];
 
-        const LayerInfo& layer(get_layer(edge.displayInfo->layer));
+                                    CoordinatesPtr coords = kmlFac->CreateCoordinates();
+                                    drawSpline(node1.x, node1.y, node2.x, node2.y, layer.zpad, coords);
 
-        if (layer.visible) {
-            CoordinatesPtr coords = kmlFac->CreateCoordinates();
-            drawSpline(node1.gpsData, node2.gpsData, layer.zpad, coords);
+                                    LineStringPtr lineString = kmlFac->CreateLineString();
+                                    lineString->set_coordinates(coords);
+                                    //lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
+                                    //lineString->set_tessellate(true);
+                                    lineString->set_altitudemode(kmldom::ALTITUDEMODE_RELATIVETOGROUND);    // avoid clamping points to the ground
 
-            LineStringPtr lineString = kmlFac->CreateLineString();
-            lineString->set_coordinates(coords);
-            //lineString->set_altitudemode(kmldom::ALTITUDEMODE_ABSOLUTE);    // avoid clamping points to the ground
-            //lineString->set_tessellate(true);
-            lineString->set_altitudemode(kmldom::ALTITUDEMODE_RELATIVETOGROUND);    // avoid clamping points to the ground
+                                    // place label at the midpoint on the line between the two nodes
+                                    PointPtr point(create_point((node1.y + node2.y)/2,(node1.x + node2.x)/2, layer.zpad ));
 
-            // place label at the midpoint on the line between the two nodes
-            PointPtr point(create_point((node1.gpsData->y + node2.gpsData->y)/2,(node1.gpsData->x + node2.gpsData->x)/2, layer.zpad ));
+                                    /*
+                                     * Google Earth doesn't allow a label to be attached to something without a Point, so
+                                     * we need to create a container with the LineString and the Point at which to attach
+                                     * the label/icon.
+                                     * TODO: this could be optimized in the case where the label is "none", since the Point can
+                                     * be omitted.
+                                     */
+                                    MultiGeometryPtr multiGeo(kmlFac->CreateMultiGeometry());
+                                    multiGeo->add_geometry(lineString);
+                                    multiGeo->add_geometry(point);
 
-            /*
-             * Google Earth doesn't allow a label to be attached to something without a Point, so
-             * we need to create a container with the LineString and the Point at which to attach
-             * the label/icon.
-             * TODO: this could be optimized in the case where the label is "none", since the Point can
-             * be omitted.
-             */
-            MultiGeometryPtr multiGeo(kmlFac->CreateMultiGeometry());
-            multiGeo->add_geometry(lineString);
-            multiGeo->add_geometry(point);
+                                    PlacemarkPtr ptr = kmlFac->CreatePlacemark();
+                                    ptr->set_geometry(multiGeo);
+                                    ptr->set_name(edge.label);
+                                    ptr->set_styleurl(get_edge_style(edge, edgenum++));
 
-            PlacemarkPtr ptr = kmlFac->CreatePlacemark();
-            ptr->set_geometry(multiGeo);
-            ptr->set_name(edge.displayInfo->label);
-            ptr->set_styleurl(get_edge_style(edge, edgenum));
-
-            layer.folder->add_feature(ptr);
+                                    layer.folder->add_feature(ptr);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-
-        // add additional placemarks for each label on this edge
-        add_labels(edge.labels, (node1.gpsData->y + node2.gpsData->y)/2, (node1.gpsData->x + node2.gpsData->x)/2, 0);
     }
 }
 

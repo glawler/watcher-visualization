@@ -68,8 +68,6 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
 
     Setting &edgeSetting=cfg.lookup(getBasePath(layer)); 
 
-    SingletonConfig::lock();
-
     try {
 
         string key="label"; 
@@ -114,20 +112,16 @@ bool EdgeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
     }
 
-    SingletonConfig::unlock();
-
     TRACE_EXIT(); 
     return true; 
 }
     
-void EdgeDisplayInfo::saveConfiguration()
+void EdgeDisplayInfo::saveConfiguration() const
 {
     TRACE_ENTER();
 
     Config &cfg=SingletonConfig::instance();
     Setting &edgeSetting=cfg.lookup(getBasePath(layer)); 
-
-    SingletonConfig::lock();
 
     try {
         edgeSetting["label"]=label; 
@@ -142,8 +136,6 @@ void EdgeDisplayInfo::saveConfiguration()
     catch (const SettingException &e) {
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
     }
-
-    SingletonConfig::unlock();
 
     TRACE_EXIT();
 }

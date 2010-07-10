@@ -37,11 +37,12 @@ namespace watcher
      * Keep track of display information for a Label.
      * @author Geoff.Lawler <Geoff.Lawler@cobham.com> 
      */
-    class LabelDisplayInfo : 
-        public DisplayInfo
+    class LabelDisplayInfo : public DisplayInfo
     {
         public:
             LabelDisplayInfo();
+            LabelDisplayInfo(const std::string &label);
+            LabelDisplayInfo(const LabelDisplayInfo &copy);
             virtual ~LabelDisplayInfo(); 
 
             watcher::Color backgroundColor;
@@ -58,15 +59,21 @@ namespace watcher
 
             bool operator==(const LabelDisplayInfo &other); 
 
+            LabelDisplayInfo &operator=(const LabelDisplayInfo &lhs);
+
+            /** operator<() is implemented, so we can use instances of LabelDisplayInfo in stl ordered containers */
+            bool operator<(const LabelDisplayInfo &) const; 
+
             /** load configuration from a LabelMessage.
              * @retval true configuration succeeded
              * @retval false failed
              */
             bool loadConfiguration(const watcher::event::LabelMessagePtr &labelMessage); 
-
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 
-            void saveConfiguration(); 
+            void initialize(const watcher::event::LabelMessagePtr &m); 
+
+            void saveConfiguration() const;
 
             virtual std::ostream &toStream(std::ostream &out) const;
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
