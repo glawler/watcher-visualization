@@ -32,6 +32,7 @@
 #include "declareLogger.h"
 #include "libwatcher/watcherGraph.h"
 #include "libwatcher/messageStream.h"
+#include "libwatcher/gpsMessage.h"
 
 #include "stringIndexedMenuItem.h"
 
@@ -59,7 +60,7 @@ class manetGLView : public QGLWidget
         /** Update the slider based on current values */
         void updatePlaybackSliderRange();
 
-public slots:
+    public slots:
 
         void resetPosition();
         void fitToWindow();
@@ -95,9 +96,9 @@ public slots:
         void rewindToStartOfPlayback();
         void forwardToEndOfPlayback();
         void playbackSetSpeed(double speed);
-	void listStreams();
-	void selectStream(unsigned long uid);
-	void spawnStreamDescription();
+        void listStreams();
+        void selectStream(unsigned long uid);
+        void spawnStreamDescription();
 
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
@@ -153,7 +154,7 @@ signals:
         void paintGL();
 
         void resizeGL(int width, int height);
-        
+
         void mouseDoubleClickEvent(QMouseEvent *event);
         void mousePressEvent(QMouseEvent *event);
         void mouseMoveEvent(QMouseEvent *event);
@@ -173,14 +174,14 @@ signals:
         /** The GUI slider which shows and controls backback location */
         QSlider *playbackSlider;
 
-	/** dialog for display list of streams */
-	watcher::WatcherStreamListDialog *streamsDialog;
+        /** dialog for display list of streams */
+        watcher::WatcherStreamListDialog *streamsDialog;
 
         std::vector<watcher::StringIndexedMenuItem*> layerMenuItems;
         void addLayerMenuItem(const watcher::GUILayer &layer, bool active);
 
         watcher::MessageStreamPtr messageStream;
-        watcher::WatcherGraph wGraph;
+        watcher::WatcherGraph *wGraph;
         std::string serverName; 
 
         void connectStream(); // connect to watherd and init the message stream. blocking...
@@ -196,21 +197,12 @@ signals:
         bool sliderPressed;
 
         watcher::event::GPSMessage gpsDataFormat;
-        
+
         QPoint lastPos;
 
         watcher::Timestamp currentMessageTimestamp;
         watcher::Timestamp playbackRangeEnd;
         watcher::Timestamp playbackRangeStart;
-
-        /** 
-         * Layer list is an ordered list of known layers. If the layer is currently
-         * active, active==true;
-         */
-        struct LayerListItem { watcher::event::GUILayer layer; bool active; }; 
-        typedef boost::shared_ptr<LayerListItem> LayerListItemPtr; 
-        typedef std::list<LayerListItemPtr> LayerList;
-        LayerList knownLayers; 
 
         struct DisplayStatus
         {
@@ -241,7 +233,7 @@ signals:
         bool showPlaybackRangeString;
         bool showVerboseStatusString;
         bool showDebugInfo;
-	bool showStreamDescription;
+        bool showStreamDescription;
 
         float scaleText;
         float scaleLine;
@@ -251,6 +243,8 @@ signals:
         float ghostLayerTransparency;
 
         int statusFontPointSize; 
+        size_t maxNodes;
+        size_t maxLayers;
 
         bool monochromeMode;
         bool threeDView;
@@ -261,23 +255,23 @@ signals:
 
         watcher::Timestamp playbackStartTime;
 
-        void drawNodeLabel(const watcher::WatcherGraphNode &node, bool physical);
-        static bool gps2openGLPixels(watcher::event::GPSMessagePtr &mess);
+        void drawNodeLabel(const watcher::NodeDisplayInfo &node, bool physical);
+        bool gps2openGLPixels(double &x, double &y, double &z, const watcher::event::GPSMessage::DataFormat &format);
         bool isActive(const watcher::GUILayer &layer); 
 
         // drawing stuff
         void drawNotConnectedState(); 
         bool autoCenterNodesFlag; 
         void drawManet(void);
+        void drawGraph(watcher::WatcherGraph *&graph); 
         struct QuadranglePoint
         {
             double x;
             double y;
         };
         void drawText(GLdouble x, GLdouble y, GLdouble z, GLdouble scale, char *text, GLdouble lineWidth=1.0);
-        void drawLayer(const watcher::GUILayer &layer); 
-        void drawEdge(const watcher::WatcherGraphEdge &edge, const watcher::WatcherGraphNode &node1, const watcher::WatcherGraphNode &node2); 
-        void drawNode(const watcher::WatcherGraphNode &node, bool physical);
+        void drawEdge(const watcher::EdgeDisplayInfo &edge, const watcher::NodeDisplayInfo &node1, const watcher::NodeDisplayInfo &node2); 
+        void drawNode(const watcher::NodeDisplayInfo &node, bool physical);
         struct Quadrangle
         {
             QuadranglePoint p[4];
@@ -330,10 +324,10 @@ signals:
         void rotateY(float deg);
         void rotateZ(float deg);
 
-        void drawLabel(GLfloat x, GLfloat y, GLfloat z, const watcher::LabelDisplayInfoPtr &label);
-        void handleSpin(int threeD, const watcher::NodeDisplayInfoPtr &ndi); 
-        void handleSize(const watcher::NodeDisplayInfoPtr &ndi); 
-        void handleProperties(const watcher::NodeDisplayInfoPtr &ndi); 
+        void drawLabel(GLfloat x, GLfloat y, GLfloat z, const watcher::LabelDisplayInfo &label);
+        void handleSpin(int threeD, const watcher::NodeDisplayInfo &ndi); 
+        void handleSize(const watcher::NodeDisplayInfo &ndi); 
+        void handleProperties(const watcher::NodeDisplayInfo &ndi); 
 
         void drawWireframeSphere(GLdouble radius); 
         void drawPyramid(GLdouble radius); 
@@ -344,7 +338,7 @@ signals:
         void drawCircle(GLdouble radius); 
         void drawFrownyCircle(GLdouble); 
 
-	void changeSpeed(double);
+        void changeSpeed(double);
 
         // updating the graph is a separate function as it's done in it's own thread
         void maintainGraph();
@@ -353,7 +347,7 @@ signals:
         unsigned int framesDrawn, fpsTimeBase;
         double framesPerSec;
 
-	std::string streamDescription;
+        std::string streamDescription;
 };
 
 #endif

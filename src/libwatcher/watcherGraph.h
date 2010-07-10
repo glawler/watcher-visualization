@@ -24,30 +24,26 @@
 #ifndef WATCHER_GRAPH_H_WHAT_DO_VEGAN_ZOMBIES_EAT_____GRAINS__GRAINS
 #define WATCHER_GRAPH_H_WHAT_DO_VEGAN_ZOMBIES_EAT_____GRAINS__GRAINS
 
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/function.hpp>
 
-#include "watcherGraphNode.h"
-#include "watcherGraphEdge.h"
+#include <map>
+// #include <unordered_map>        // TR1 requires extra compile flag to get functionality
 
-// GTL - How do I hide the message types from clients of WatcherGraph. I tried ME's 'class impl'
-// trick, but it did not work. It's very possible that I did not do it correctly. 
+#include "watcherLayerData.h"
+#include "nodeDisplayInfo.h"
+
 #include "connectivityMessage.h"
 #include "gpsMessage.h"
 #include "nodeStatusMessage.h"
 #include "edgeMessage.h"
-#include "floatingLabelDisplayInfo.h"
 #include "nodePropertiesMessage.h"
+#include "colorMessage.h"
+
 
 namespace watcher
 {
     using namespace event;      // for libwatcher and messages. 
     class MessageStreamFilter;  // 
-
-    // Forward decl for Ptr typedef
-    class WatcherGraph;
-    typedef boost::shared_ptr<WatcherGraph> WatcherGraphPtr; 
 
     /** 
      * @class WatcherGraph
@@ -69,9 +65,9 @@ namespace watcher
         public:
 
             /** 
-             * WatcherGraph
+             * WatcherGraph. Must specify the maximum number of nodes in the test.
              */
-            WatcherGraph();
+            WatcherGraph(const size_t &maxNodes, const size_t &maxLayers);
 
             /**
              * On a large enough time line, the survival rate for everyone drops to zero.
@@ -79,39 +75,83 @@ namespace watcher
             virtual ~WatcherGraph();
 
             /**
-             * The graph is a boost directed adjacency_list. This interface is public
-             * so GUI developers can get direct access if needed. 
+             * Fixed-size array of nodeDisplayInfos. 
+             *
+             * To get the index into the array for a particular node, 
+             * call nid2Index(node's address). To iterate over all known nodes,
+             * interate from 0..maxNodesIndex. The array is filled in as new nodes are
+             * heard from and maxNodesIndex is set to the last "valid" nodeDisplayInfo
+             * index.
+             *
+             * ex: 
+             * for (size_t i=0; i!=graph.numValidNodes; i++) 
+             *      doSomethingWithNode(nodes[i]); 
+             *
+             * or to access a node directly if you know the ip address:
+             * node[nid2Index(address)]
+             *
              */
-                typedef boost::adjacency_list<
-                    boost::listS,               // may want to make this a set
-                    boost::vecS, 
-                    boost::directedS,
-                    WatcherGraphNode, 
-                    WatcherGraphEdge
-                > Graph;
+            NodeDisplayInfo *nodes;
 
-                typedef boost::graph_traits<Graph>::vertex_descriptor  vertex;
-                typedef boost::graph_traits<Graph>::vertices_size_type vertexInt;
-                typedef boost::graph_traits<Graph>::vertex_iterator    vertexIterator;
-                typedef boost::graph_traits<Graph>::edge_descriptor    edge;
-                typedef boost::graph_traits<Graph>::edges_size_type    edgeInt;
-                typedef boost::graph_traits<Graph>::edge_iterator      edgeIterator;
-                typedef boost::graph_traits<Graph>::out_edge_iterator  outEdgeIterator;
+            /** numner of valid nodes in nodes */
+            size_t numValidNodes;
 
             /**
-             * The actual boost::graph.
+             * Convert a watcher nodeId into an integer that cna be used to index
+             * into the various arrays of nodes, edges, and labels. This function 
+             * takes O(1) time to do the mapping.
+             *
+             * ex: 
+             * cout << nodes[nid2Index(message->fromNodeId)] << endl;
+             *
+             * ex:
+             * int nid=nid2Index(message->fromNodeId);
+             * nodes[nid].label="wello horld"; 
+             * nodes[nid].color=watcher::colors::darkorange;
+             *
+             * size_t nid1=nid2Index(message->node1);
+             * size_t nid2=nid2Index(message->node2);
+             * layers[message->layer].edges[nid1][nid2]=true;
+             *
              */
-            Graph theGraph;
+            size_t nid2Index(const NodeIdentifier &nid);
 
-            /** List of floating labels */
-            typedef std::vector<FloatingLabelDisplayInfoPtr> FloatingLabelList;
+            /**
+             * @param the index to be mapped back to a ipv4 address
+             * @return the ipv4 address as size_t in network byte order. 
+             *
+             * ex:
+             * struct in_addr addr;
+             * char buf[24];
+             * addr.s_addr=graph.index2Nid(i);
+             * printf("addr: %s\n", inet_ntop(AF_INET, addr, buf, sizeof(buf)));
+             *
+             */
+            unsigned int index2Nid(const size_t index) const; 
+
+            /**
+             * all layer data, including edges and labels on a per layer instance. 
+             *
+             * Inside each layer is an array of lables on nodes, floating labels, 
+             * and edges for that layer. Edge existence between two nodes is stored
+             * in a boolean matrix. See WatcherLayerData.h for more info.
+             */
+            WatcherLayerData *layers;
+
+            /** largest index into layers array that is currently valid */
+            size_t numValidLayers;
 
             /** 
-             * List of floating labels. These are not attached to any node. 
-             * coordinates are still in coordinates.
+             * Get the layer named name. This initializes the layer if it does not 
+             * exist! Returns an index into layers where layer "name" exists. Exits if
+             * creating the layer would go past numLayers so be careful. 
              */
-            FloatingLabelList floatingLabels;
+            size_t name2LayerIndex(const std::string &name); 
 
+            /**
+             * @return true if layer exists
+             */
+            bool layerExists(const std::string &name) const; 
 
             /**
              * updateGraph takes a message, and if it the message applicable to the state of the 
@@ -129,47 +169,14 @@ namespace watcher
              * watcherGraph will use it to translate all incoming GPS data into
              * your unit.
              */
-            typedef boost::function<bool (watcher::event::GPSMessagePtr &m)> LocationTranslateFunction;
+            typedef boost::function<bool (double &x, double &y, double &z, const GPSMessage::DataFormat &f)> LocationTranslateFunction;
             LocationTranslateFunction locationTranslationFunction;
 
             /**
-             * Applies the passed filter to the in-memory graph. Read details below. 
-             *
-             * When a filter is applied to the MessageStream feeding the graph, 
-             * it should also be applied to the graph instance, otherwise old data that does
-             * not match the new stream may still be in the in-memory graph.
-             *
-             * Note: that there are problems with filtering by message type for in-memory graphs.
-             * The graphs are built from incoming message, but the message themselves may not be
-             * kept. The message type->graph may be a one way operation: how do we know that an edge
-             * was created with a edgeMessage or a connectivityMessage? So filtering by message type 
-             * is not supported. 
-             *
-             * Filtering by layer works, with certain understandings. Unless it is a base layer (like 
-             * the physical layer), a layer sits on top of another layer. When a layer is removed, 
-             * all layers above that layer are removed as well. For instance if a layer that contains
-             * an edge is removed, all labels attached to that edge regardless of layer, are removed 
-             * as well. This may not be what you expect. The problem is what location do you draw a label
-             * at that is attached to a now non-existant edge? 
-             *
-             * The best approach for GUI developers may be to just clear this graph, apply the filter
-             * to the message stream, and let the filtered-message stream rebuild the graph. This may not
-             * work well for region filters though if the region is being filtered/updated more often 
-             * than the GPS messages are recieved. 
-             *
-             * It's a whole thing, you see? 
-             *
-             * @param filter the filter to apply to the stream
-             * @retval true the graph was updated
-             * @retval false the graph was unchanged
+             * Update Graph internals (component experations, etc). 
+             * Should be called periodically. If a timestamp is given,
+             * use that for current time.
              */
-             bool updateGraph(const MessageStreamFilter &filter); 
-
-             /**
-              * Update Graph internals (component experations, etc). 
-              * Should be called periodically. If a timestamp is given,
-              * use that for current time.
-              */
             void doMaintanence(const watcher::Timestamp &ts=0);
 
             /**
@@ -179,25 +186,21 @@ namespace watcher
              * no current events as nothing has happened yet, so the entire 
              * graph is cleared. Note: clients who use threads to read/update the
              * graph must insure that there is only one thread accessing the 
-             * graph when it clears itself. 
+             * the labels on any layer when it clears itself. 
              */
             void setTimeDirectionForward(bool forward); 
 
-            /** Find a node in the graph based on a NodeIdentifier 
-             * @param[in] id the id of the node you want to find. 
-             * @param[out] retVal an iterator that points to the found node.
-             * @retval true if successful
-             * @retval false otherwise
+            /**
+             * clear all data.
              */
-            bool findNode(const NodeIdentifier &id, vertexIterator &retVal);
+            void clear();
 
             /**
              * Save current configuration of all labels, nodes, and edges to the SingletonCconfig 
              * instance. Call this before saving system configuration to a cfg file. 
              * @retval true
              */
-            bool saveConfig() const; 
-
+            bool saveConfiguration(void); 
 
             /**
              * Write an instance of this class as a human readable stream to the otream given
@@ -231,6 +234,12 @@ namespace watcher
             // template <typename Archive> void serialize(Archive & ar, const unsigned int /* file_version */);
 
             DECLARE_LOGGER();
+
+            /** max number of supported nodes. */
+            size_t maxNumNodes; 
+
+            /** max number of supported layers. */
+            size_t maxNumLayers; 
 
             /**
              * Update the graph with a list of neighbors addes or removed.
@@ -267,32 +276,35 @@ namespace watcher
              */
             bool updateNodeProperties(const NodePropertiesMessagePtr &message);
 
-            /** Find a node, if it doesn't exist, create it. Returns iterator to the node 
-             * @param[in] id - the id of the node you want to find/create.
-             * @param[out] retIter - an iterator that points to the found node.
-             * @param[in] layer - if the node is created, load this layers display information into it. 
-             * @return bool - true if successful, false otherwise
-             */
-            bool findOrCreateNode(const NodeIdentifier &id, vertexIterator &retIter, const GUILayer &layer);
-
-            /** Create a node and return an iterator to it. 
-             * @param[in] id - the id of the node you want to create. 
-             * @param[out] retIter - an iterator that points to the found node.
-             * @return bool - true if successful, false otherwise
-             */
-            bool createNode(const NodeIdentifier &id, vertexIterator &retIter);
-
             /** Keep track of which direction we're going in time. */
             bool timeForward;
 
+            /** Build a map of ipv4 addresses to indexes. These indexes are used to index into 
+             * the node array and the edges arrays. 
+             */
+            // GTL - move to unordered_map to get constant time lookups. 
+            // typedef std::unordered_map<unsigned int, size_t> NID2IndexMap;
+            typedef std::map<unsigned int, size_t> NID2IndexMap;
+            NID2IndexMap nid2IndexMap; 
+
+            /** in case anyone needs to map an index back to an address, we keep the
+             * addresses in a big array indexed by the index. :)
+             */
+            unsigned int *index2nidMap;
+
+            typedef std::map<std::string, size_t> Name2LayerIndexMap; 
+            Name2LayerIndexMap layerIndexMap; 
+
     }; // like a fired school teacher.
 
-    /** typedef a shared pointer to this class
-    */
+    /** 
+     * typedef a shared pointer to this class
+     */
     typedef boost::shared_ptr<WatcherGraph> WatcherGraphPtr;
 
-    /** write a human readable version of the WatcherGraph class to the ostream given
-    */
+    /** 
+     * write a human readable version of the WatcherGraph class to the ostream given
+     */
     std::ostream &operator<<(std::ostream &out, const WatcherGraph &watcherGraph);
 
 }

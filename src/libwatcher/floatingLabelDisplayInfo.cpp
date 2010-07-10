@@ -31,11 +31,16 @@ FloatingLabelDisplayInfo::FloatingLabelDisplayInfo() :
     alt(0.0)
 {
     TRACE_ENTER();
-
-    // create the "default" layer if it's not already there.
-    LabelDisplayInfo::loadConfiguration(layer); 
-
     TRACE_EXIT();
+}
+
+FloatingLabelDisplayInfo::FloatingLabelDisplayInfo(const FloatingLabelDisplayInfo &copy) :
+    LabelDisplayInfo(copy), 
+    lat(copy.lat),
+    lng(copy.lng),
+    alt(copy.alt)
+{
+
 }
 
 // virtual
@@ -43,6 +48,28 @@ FloatingLabelDisplayInfo::~FloatingLabelDisplayInfo()
 {
     TRACE_ENTER();
     TRACE_EXIT();
+}
+
+void FloatingLabelDisplayInfo::initialize(const watcher::event::LabelMessagePtr &m)
+{
+    LabelDisplayInfo::initialize(m); 
+    lat=m->lat;
+    lng=m->lng;
+    alt=m->alt;
+}
+
+void FloatingLabelDisplayInfo::saveConfiguration() const
+{
+    LabelDisplayInfo::saveConfiguration();
+    // NOOP for us.
+}
+
+FloatingLabelDisplayInfo &FloatingLabelDisplayInfo::operator=(const FloatingLabelDisplayInfo &lhs)
+{
+    LabelDisplayInfo::operator=(lhs);
+    lat=lhs.lat;    
+    lng=lhs.lng;    
+    alt=lhs.alt;    
 }
 
 // virtual 

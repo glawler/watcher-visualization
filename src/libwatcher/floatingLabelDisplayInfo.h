@@ -35,14 +35,21 @@ namespace watcher
     class FloatingLabelDisplayInfo : public LabelDisplayInfo
     {
         public:
-            FloatingLabelDisplayInfo();
+            FloatingLabelDisplayInfo(); 
+            FloatingLabelDisplayInfo(const FloatingLabelDisplayInfo &copy); 
             virtual ~FloatingLabelDisplayInfo(); 
+
+            FloatingLabelDisplayInfo &operator=(const FloatingLabelDisplayInfo &lhs);
+
+            void initialize(const watcher::event::LabelMessagePtr &m); 
 
             /** The coordinates of the floating label */
             float lat, lng, alt;
 
             virtual std::ostream &toStream(std::ostream &out) const;
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
+
+            void saveConfiguration() const; 
 
         protected:
 

@@ -36,8 +36,7 @@ namespace watcher
      * track of the state of the display of the object. 
      * @author Geoff Lawler <Geoff.Lawler@cobham.com> 
      */
-    class DisplayInfo : 
-        public boost::noncopyable   // for now, may change later
+    class DisplayInfo 
     {
         public:
 
@@ -49,13 +48,16 @@ namespace watcher
 
             virtual ~DisplayInfo(); 
 
+            DisplayInfo(const DisplayInfo &);
+            DisplayInfo &operator=(const DisplayInfo &);
+
             /** 
              * Make sure the lower level of the cfg structure exists 
              * and pass back a path to it. Uses layerName and current 
              * value in categoryName to build the path. 
              * @param[in] layerName the target layer name
              */
-            const std::string getBasePath(const watcher::event::GUILayer &layerName); 
+            const std::string getBasePath(const watcher::event::GUILayer &layerName) const;
 
             /**
              * Given a layer, load the configuration found there. Search is by 
@@ -74,7 +76,7 @@ namespace watcher
              * The cfg info is saved to the layer specified in the loadConfiguration() call 
              * or the default layer, if loadConfiguration is never called. 
              */
-            virtual void saveConfiguration() = 0; 
+            virtual void saveConfiguration() const = 0; 
 
             /** The layer that this info is displayed on. */
             watcher::event::GUILayer layer; 

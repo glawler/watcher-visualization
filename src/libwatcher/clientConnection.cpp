@@ -272,10 +272,22 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             //                 this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
 
             bool closeConnection = false;
-
-            if (payloadSize != asio::read(theSocket, asio::buffer(incomingBuffer, payloadSize))) {
-                LOG_ERROR("Unable to read " << payloadSize << " bytes from server. Giving up on message.");
-                closeConnection = true;
+            size_t bytesRead=0;
+            if (payloadSize != (bytesRead=asio::read(theSocket, asio::buffer(incomingBuffer, payloadSize)))) {
+                LOG_ERROR("Read " << bytesRead << " bytes when we wanted to read " << payloadSize << " bytes from server.");
+                if (bytesRead==incomingBuffer.size() && bytesRead < payloadSize) { 
+                    // just read the rest of the messages into the buffer and do nothing. We can't parse messages larger than the buffer size
+                    // GTL -- or can we? Look into dynamic sized arrays for this. 
+                    // asio::read() can take a basic_stream_buf instance - maybe use that instead of a statically 
+                    // sized array?
+                    size_t bytesRemaining=payloadSize-bytesRead; 
+                    while (bytesRead=asio::read(theSocket, asio::buffer(incomingBuffer, bytesRemaining))) { 
+                        LOG_ERROR("Read " << bytesRead << " more bytes, " << payloadSize << " remaining to read"); 
+                        bytesRemaining-=bytesRead; 
+                    }
+                }
+                else 
+                    closeConnection=true;
             } else {
                 vector<MessagePtr> arrivedMessages; 
                 if(!DataMarshaller::unmarshalPayload(arrivedMessages, messageNum, &incomingBuffer[0], payloadSize)) {

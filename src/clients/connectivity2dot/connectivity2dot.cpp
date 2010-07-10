@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 
     ms->startStream(); 
 
-    WatcherGraph theGraph;
+    WatcherGraph theGraph(1000, 50); 
     MessagePtr mp(new Message);
 
     while(1)
