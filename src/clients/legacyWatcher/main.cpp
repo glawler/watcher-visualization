@@ -164,7 +164,6 @@ int main(int argc, char *argv[])
     }
     SingletonConfig::unlock();
 
-
     if (!boost::filesystem::exists(logPropsFilename)) {
         cerr << "Log properties file not found - logging disabled." << endl;
         Logger::getRootLogger()->setLevel(Level::getOff());

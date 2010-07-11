@@ -1100,11 +1100,13 @@ bool manetGLView::loadConfiguration()
     libconfig::Setting &root=cfg.getRoot();
 
     if (!root.lookupValue("maxNodes", maxNodes)) { 
-        LOG_FATAL("Please specify maximum number of nodes for this test bed in watcher.cfg file (\"maxNodes = XX;\") or on the command line."); 
+        LOG_FATAL("Please specify maximum number of nodes for this test bed in watcher.cfg file (\"maxNodes = XX;\") "
+                "or on the command line, --maxNodes=XX"); 
         exit(EXIT_FAILURE); 
     }
     if (!root.lookupValue("maxLayers", maxLayers)) { 
-        LOG_FATAL("Please specify maximum number of layers for this test bed in watcher.cfg file (\"maxLayers = XX;\") or on the command line."); 
+        LOG_FATAL("Please specify maximum number of layers for this test bed in watcher.cfg file (\"maxLayers = XX;\") "
+                "or on the command line, --maxLayers=XX."); 
         exit(EXIT_FAILURE); 
     }
 
@@ -1118,9 +1120,10 @@ bool manetGLView::loadConfiguration()
 
         string prop="server";
         if (!root.lookupValue(prop, serverName)) {
+            serverName="localhost"; 
             LOG_WARN("Please specify the server name in the cfg file");
             LOG_WARN("I set the default to localhost, but that may not be what you want."); 
-            root.add(prop, Setting::TypeString)="localhost"; 
+            root.add(prop, Setting::TypeString)=serverName;
         }
 
 
@@ -1485,7 +1488,7 @@ void manetGLView::connectStream()
     while(1) {
         this_thread::interruption_point();
         if (!messageStream) {
-            messageStream=MessageStream::createNewMessageStream(serverName);     // This blocks until connected messageStream->setStreamTimeStart(playbackStartTime);
+            messageStream=MessageStream::createNewMessageStream(serverName); 
             messageStream->setDescription("legacy watcher gui");
             messageStream->startStream();
             messageStream->getMessageTimeRange();
@@ -1511,7 +1514,7 @@ void manetGLView::connectStream()
         }
         else  {
             // There needs to be some test connection, reconnect logic here.
-            sleep(10);
+            sleep(2);
         }
     }
     TRACE_EXIT();
@@ -1796,7 +1799,10 @@ void manetGLView::drawNotConnectedState()
     }
 
 
-    renderText(12, height()-12, QString("Not connected to watcher daemon. Trying to connect every 5 seconds."));
+    QString errMess("Unable to connect to watcher daemon on ");
+    errMess+=serverName.c_str();
+    errMess+=". Trying every 5 seconds.";
+    renderText(12, height()-12, errMess); 
 
     glPopMatrix();
 
