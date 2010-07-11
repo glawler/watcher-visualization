@@ -40,6 +40,7 @@
 #include <libwatcher/streamDescriptionMessage.h>
 
 #include "watcherAboutDialog.h"
+#include "watcherConfigurationDialog.h"
 #include "manetglview.h"
 #include "watcherScrollingGraphControl.h"
 #include "singletonConfig.h"
@@ -974,7 +975,8 @@ manetGLView::manetGLView(QWidget *parent) :
     showVerboseStatusString(false),
     showStreamDescription(true),
     statusFontPointSize(10),
-    maxNodes(48),
+    maxNodes(0),
+    maxLayers(0),
     statusFontName("Helvetica"),
     hierarchyRingColor(),
     playbackStartTime(SeekMessage::eof),  // live mode
@@ -1099,15 +1101,35 @@ bool manetGLView::loadConfiguration()
     SingletonConfig::lock();
     libconfig::Setting &root=cfg.getRoot();
 
-    if (!root.lookupValue("maxNodes", maxNodes)) { 
-        LOG_FATAL("Please specify maximum number of nodes for this test bed in watcher.cfg file (\"maxNodes = XX;\") "
-                "or on the command line, --maxNodes=XX"); 
-        exit(EXIT_FAILURE); 
+    root.lookupValue("maxNodes", maxNodes);
+    root.lookupValue("maxLayers", maxLayers); 
+
+    if (!root.lookupValue("server", serverName)) {
+        serverName="localhost"; 
+        LOG_WARN("Please specify the server name in the cfg file");
+        LOG_WARN("I set the default to localhost, but that may not be what you want."); 
+        root.add("server", Setting::TypeString)=serverName;
     }
-    if (!root.lookupValue("maxLayers", maxLayers)) { 
-        LOG_FATAL("Please specify maximum number of layers for this test bed in watcher.cfg file (\"maxLayers = XX;\") "
-                "or on the command line, --maxLayers=XX."); 
-        exit(EXIT_FAILURE); 
+
+    while (maxNodes==0 || maxLayers==0 || serverName.empty()) { 
+       WatcherConfigurationDialog *d=new WatcherConfigurationDialog(serverName, maxNodes, maxLayers);  
+       d->setModal(true); 
+       d->exec();
+       if (d->result()==QDialog::Rejected) { 
+           LOG_FATAL("User did not give needed info to start, exiting."); 
+           shutdown();
+           return false;
+       }
+       LOG_DEBUG("Got values from conf dialog - server: " << serverName << ", maxNodes: " << maxNodes << ", maxLayers: " << maxLayers); 
+       if (!root.exists("server"))
+           root.add("server", Setting::TypeString);
+       root["server"]=serverName;
+       if (!root.exists("maxNodes"))
+           root.add("maxNodes", Setting::TypeInt);
+       root["maxNodes"]=static_cast<int>(maxNodes);
+       if (!root.exists("maxLayers"))
+           root.add("maxLayers", Setting::TypeInt);
+       root["maxLayers"]=static_cast<int>(maxLayers);
     }
 
     // WatcherGraph() grabs the Config lock, so it must be unlocked when created.
@@ -1118,16 +1140,9 @@ bool manetGLView::loadConfiguration()
 
     try {
 
-        string prop="server";
-        if (!root.lookupValue(prop, serverName)) {
-            serverName="localhost"; 
-            LOG_WARN("Please specify the server name in the cfg file");
-            LOG_WARN("I set the default to localhost, but that may not be what you want."); 
-            root.add(prop, Setting::TypeString)=serverName;
-        }
 
 
-        prop="layers";
+        string prop="layers";
         if (!root.exists(prop))
             root.add(prop, libconfig::Setting::TypeGroup);
 

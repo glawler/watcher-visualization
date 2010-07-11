@@ -145,19 +145,19 @@ int main(int argc, char *argv[])
         root["logProperties"]=logPropsFilename;
 
     if (!server.empty()) {
-        if (!root.lookupValue("server", server))
+        if (!root.exists("server"))
             root.add("server", Setting::TypeString)=server;
         else
             root["server"]=server;
     }
     if (-1!=maxNodes) {
-        if (!root.lookupValue("maxNodes", maxNodes))
+        if (!root.exists("maxNodes"))
             root.add("maxNodes", Setting::TypeInt)=maxNodes;
         else
             root["maxNodes"]=maxNodes;
     }
     if (-1!=maxLayers) {
-        if (!root.lookupValue("maxLayers", maxLayers))
+        if (!root.exists("maxLayers"))
             root.add("maxLayers", Setting::TypeInt)=maxLayers;
         else
             root["maxLayers"]=maxLayers;
