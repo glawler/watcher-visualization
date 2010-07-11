@@ -1100,11 +1100,11 @@ bool manetGLView::loadConfiguration()
     libconfig::Setting &root=cfg.getRoot();
 
     if (!root.lookupValue("maxNodes", maxNodes)) { 
-        LOG_FATAL("Please specify maximum number of nodes for this test bed in watcher.cfg file (\"maxNodes = XX;\")."); 
+        LOG_FATAL("Please specify maximum number of nodes for this test bed in watcher.cfg file (\"maxNodes = XX;\") or on the command line."); 
         exit(EXIT_FAILURE); 
     }
     if (!root.lookupValue("maxLayers", maxLayers)) { 
-        LOG_FATAL("Please specify maximum number of layers for this test bed in watcher.cfg file (\"maxLayers = XX;\")."); 
+        LOG_FATAL("Please specify maximum number of layers for this test bed in watcher.cfg file (\"maxLayers = XX;\") or on the command line."); 
         exit(EXIT_FAILURE); 
     }
 
