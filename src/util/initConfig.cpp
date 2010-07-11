@@ -70,7 +70,7 @@ bool watcher::initConfig(
     };
 
     opterr=0; // Don't print message just because we see an option we don't understand.
-    optind=0; // reset so getopt starts at the start again.
+    optind=1; // reset so getopt starts at the start again.
 
     char args[] = { configFileChar, ':', '\0' };
 
@@ -95,6 +95,9 @@ bool watcher::initConfig(
         else
             configFilename="";
     }
+
+    opterr=1; 
+    optind=1; // reset so getopt starts at the start again in case someone else calls getopt()...
 
     return retVal;
 }
