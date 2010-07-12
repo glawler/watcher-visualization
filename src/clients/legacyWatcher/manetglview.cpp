@@ -1025,8 +1025,8 @@ void manetGLView::shutdown()
     };
     for (unsigned int i=0; i<sizeof(threads)/sizeof(threads[0]); i++) {
         if (threads[i]) {
-            // threads[i]->interrupt(); // this does not seem to work
-            // threads[i]->join();
+            threads[i]->interrupt(); // this does not seem to work
+            threads[i]->join();
             delete threads[i];
             threads[i]=NULL;
         }
@@ -1506,46 +1506,47 @@ void manetGLView::connectStream()
 {
     TRACE_ENTER();
     while(1) {
-        this_thread::interruption_point();
-        if (!messageStream) {
-            // messageStream=MessageStream::createNewMessageStream(serverName); 
+
+        if (!messageStream) 
             messageStream=MessageStreamPtr(new MessageStream(serverName)); 
 
-            do { 
-                this_thread::interruption_point();
-                if (!messageStream->connect(true)) { 
-                    LOG_WARN("Unable to connect to server at " << serverName << ". Trying again in 2 seconds");
-                    sleep(2); 
-                }
-            } while (!messageStream->connected());
-
-            messageStream->setDescription("legacy watcher gui");
-            messageStream->startStream();
-            messageStream->getMessageTimeRange();
-            messageStream->enableFiltering(messageStreamFiltering);
-
-            // Tell the watcherd that we want/don't want messages for this layer.
-            if (messageStreamFiltering) { 
-                for (size_t l=0; l<wGraph->numValidLayers; l++) { 
-                    MessageStreamFilterPtr f(new MessageStreamFilter);
-                    f->setLayer(wGraph->layers[l].layerName); 
-                    if (wGraph->layers[l].isActive) 
-                        messageStream->addMessageFilter(f);
-                    else
-                        messageStream->removeMessageFilter(f);
-                }
+        while (!messageStream->connected()) {
+            this_thread::interruption_point();
+            if (!messageStream->connect(true)) { 
+                LOG_WARN("Unable to connect to server at " << serverName << ". Trying again in 2 seconds");
+                sleep(2); 
             }
+        }
 
-            // spawn work threads
-            if (!checkIOThread) 
-                checkIOThread=new boost::thread(boost::bind(&manetGLView::checkIO, this));
-            if (!maintainGraphThread) 
-                maintainGraphThread=new boost::thread(boost::bind(&manetGLView::maintainGraph, this));
+        messageStream->setDescription("legacy watcher gui");
+        messageStream->startStream();
+        messageStream->getMessageTimeRange();
+        messageStream->enableFiltering(messageStreamFiltering);
+
+        // Tell the watcherd that we want/don't want messages for this layer.
+        if (messageStreamFiltering) { 
+            for (size_t l=0; l<wGraph->numValidLayers; l++) { 
+                MessageStreamFilterPtr f(new MessageStreamFilter);
+                f->setLayer(wGraph->layers[l].layerName); 
+                if (wGraph->layers[l].isActive) 
+                    messageStream->addMessageFilter(f);
+                else
+                    messageStream->removeMessageFilter(f);
+            }
         }
-        else  {
-            // There needs to be some test connection, reconnect logic here.
-            sleep(2);
-        }
+
+        // spawn work threads
+        if (!checkIOThread) 
+            checkIOThread=new boost::thread(boost::bind(&manetGLView::checkIO, this));
+        if (!maintainGraphThread) 
+            maintainGraphThread=new boost::thread(boost::bind(&manetGLView::maintainGraph, this));
+
+        do {
+            sleep(2); 
+            this_thread::interruption_point();
+            if (!messageStream->connected())
+                break;
+        } while(1);
     }
     TRACE_EXIT();
 }
@@ -1701,7 +1702,7 @@ void manetGLView::paintGL()
 {
     TRACE_ENTER();
 
-    if (!messageStream)
+    if (!messageStream || !messageStream->connected())
         drawNotConnectedState();
     else 
     {
