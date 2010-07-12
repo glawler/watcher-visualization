@@ -48,6 +48,8 @@ namespace watcher
             /** Set the filename to save this configuration to */
             static void setConfigFile(const std::string &filename_); 
 
+            std::string getConfigFile() { return filename; } 
+
             /** Save the configuration to the file */
             static void saveConfig();
 

@@ -52,6 +52,7 @@ namespace watcher
         public WatcherdAPIMessageHandler, 
         public boost::enable_shared_from_this<MessageStream>
     {
+        public:
         /** 
          * Create a message stream. 
          * @param serverName the machine name running the message server. 
@@ -181,11 +182,18 @@ namespace watcher
         std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
         /**
-         * Perform a synchronous connection attempt to the server.
+         * Connect to the server.
+         * @param async, If true, connect() will attempt to connect once, and return true/false on success/failure.
+         *          If false, connect() will not return until connected, retrying every 2 seconds. Returns true.
          * @retval true connection was established
          * @retval false connection failed
          */
-        bool connect();
+        bool connect(bool async=false); 
+
+        /**
+         * @retval true if connected, false otherwise
+         */
+        bool connected() const { return connection->connected(); }
 
         /**
          * Clear the message cache. Can be used to clear the cache if the GUI is overloaded

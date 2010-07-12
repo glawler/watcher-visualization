@@ -56,6 +56,7 @@ MessageStream::MessageStream(
     readReady(false)
 {
     TRACE_ENTER();
+    connection=ClientPtr(new Client(serverName, serviceName, true)); 
     TRACE_EXIT();
 }
 
@@ -90,8 +91,9 @@ MessageStreamPtr MessageStream::createNewMessageStream(
 void MessageStream::initConnection(bool reconnect_) 
 {
     TRACE_ENTER();
-    connection=ClientPtr(new Client(serverName, serviceName, reconnect_)); 
+    connection->removeMessageHandler(shared_from_this()); 
     connection->addMessageHandler(shared_from_this()); 
+    // sending a message will attempt connection if not connected. 
     setStreamTimeStart(streamStartTime);
     setStreamRate(streamRate);
     TRACE_EXIT();
@@ -307,10 +309,12 @@ std::ostream &watcher::operator<<(std::ostream &out, const MessageStream & /*mes
     return out;
 }
 
-bool MessageStream::connect()
+bool MessageStream::connect(bool async)
 {
     TRACE_ENTER();
-    bool rv = connection->connect();
+    connection->removeMessageHandler(shared_from_this());  // cannot do this in ctor as "this" is not well formed at the time. 
+    connection->addMessageHandler(shared_from_this()); 
+    bool rv = connection->connect(async);
     TRACE_EXIT_RET_BOOL(rv);
     return rv;
 }

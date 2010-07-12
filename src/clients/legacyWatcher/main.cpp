@@ -218,8 +218,8 @@ int main(int argc, char *argv[])
     if (!ui.manetGLViewWindow->loadConfiguration())
     {
         LOG_FATAL("Error in cfg file, unable to continue"); 
-        // write out what we have.
-        SingletonConfig::saveConfig();
+        // writes what confugration we have
+        delete ui.manetGLViewWindow;
         TRACE_EXIT();
         return EXIT_FAILURE; 
     }

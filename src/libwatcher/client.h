@@ -82,6 +82,11 @@ namespace watcher
             void addMessageHandler(MessageHandlerPtr messageHandler); 
 
             /**
+             * Does what it says on the tin.
+             */
+            void removeMessageHandler(MessageHandlerPtr messageHandler); 
+
+            /**
              * wait until all work is done in the client.
              */
             void wait();
@@ -91,7 +96,12 @@ namespace watcher
              * @retval true connection succeeded
              * @retval false connection failed
              */
-            bool connect();
+            bool connect(bool async=false);
+
+            /**
+             * @return true if connected, false otherwise.
+             */
+            bool connected() const;
 
             /**
              * Close the connection.

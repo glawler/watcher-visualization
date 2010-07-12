@@ -83,6 +83,13 @@ void Client::addMessageHandler(MessageHandlerPtr messageHandler)
     TRACE_EXIT();
 }
 
+void Client::removeMessageHandler(MessageHandlerPtr messageHandler)
+{
+    TRACE_ENTER();
+    clientConnection->removeMessageHandler(messageHandler); 
+    TRACE_EXIT();
+}
+
 void Client::wait()
 {
     TRACE_ENTER();
@@ -96,12 +103,17 @@ void Client::wait()
     TRACE_EXIT(); 
 }
 
-bool Client::connect()
+bool Client::connect(bool async)
 {
     TRACE_ENTER();
-    bool rv = clientConnection->connect();
+    bool rv = clientConnection->connect(async);
     TRACE_EXIT_RET_BOOL(rv);
     return rv;
+}
+
+bool Client::connected() const
+{
+    return clientConnection->isConnected();
 }
 
 void Client::close()

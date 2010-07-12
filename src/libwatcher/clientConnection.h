@@ -80,10 +80,14 @@ namespace watcher
 
             /**
              * Perform a synchronous connection attempt to the server.
+             * @param async, If true, connect() will attempt to connect once, and return true/false on success/failure.
+             *          If false, connect() will not return until connected, retrying every 2 seconds. Returns true.
              * @retval true connection succeeded
              * @retval false connection failed
              */
-            bool connect();
+            bool connect(bool async=false); 
+
+            bool isConnected() const { return connected; }
 
             /**
              * close the connection to the server.
@@ -95,11 +99,6 @@ namespace watcher
             DECLARE_LOGGER();
 
             void doClose();
-            /** 
-             * Connect to the server. This function will not return until connected.
-             * Will loop until connected, trying every X seconds.
-             */
-            void doConnect(); 
 
             /**
              * Attempt connection to server. Will set 'connected' to true, if successful. Will

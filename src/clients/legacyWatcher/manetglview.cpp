@@ -1009,6 +1009,12 @@ manetGLView::~manetGLView()
 
 void manetGLView::shutdown() 
 {
+    if (messageStream) { 
+        if (messageStream->connected())  
+            messageStream->stopStream();
+        messageStream.reset(); 
+    }
+
     saveConfiguration();
 
     // order is important here. Destroy in dependency order. 
@@ -1019,8 +1025,8 @@ void manetGLView::shutdown()
     };
     for (unsigned int i=0; i<sizeof(threads)/sizeof(threads[0]); i++) {
         if (threads[i]) {
-            threads[i]->interrupt();
-            threads[i]->join();
+            // threads[i]->interrupt(); // this does not seem to work
+            // threads[i]->join();
             delete threads[i];
             threads[i]=NULL;
         }
@@ -1112,24 +1118,23 @@ bool manetGLView::loadConfiguration()
     }
 
     while (maxNodes==0 || maxLayers==0 || serverName.empty()) { 
-       WatcherConfigurationDialog *d=new WatcherConfigurationDialog(serverName, maxNodes, maxLayers);  
-       d->setModal(true); 
-       d->exec();
-       if (d->result()==QDialog::Rejected) { 
-           LOG_FATAL("User did not give needed info to start, exiting."); 
-           shutdown();
-           return false;
-       }
-       LOG_DEBUG("Got values from conf dialog - server: " << serverName << ", maxNodes: " << maxNodes << ", maxLayers: " << maxLayers); 
-       if (!root.exists("server"))
-           root.add("server", Setting::TypeString);
-       root["server"]=serverName;
-       if (!root.exists("maxNodes"))
-           root.add("maxNodes", Setting::TypeInt);
-       root["maxNodes"]=static_cast<int>(maxNodes);
-       if (!root.exists("maxLayers"))
-           root.add("maxLayers", Setting::TypeInt);
-       root["maxLayers"]=static_cast<int>(maxLayers);
+        WatcherConfigurationDialog *d=new WatcherConfigurationDialog(serverName, maxNodes, maxLayers);  
+        d->setModal(true); 
+        d->exec();
+        if (d->result()==QDialog::Rejected) { 
+            LOG_FATAL("User did not give needed info to start, exiting."); 
+            return false;
+        }
+        LOG_DEBUG("Got values from conf dialog - server: " << serverName << ", maxNodes: " << maxNodes << ", maxLayers: " << maxLayers); 
+        if (!root.exists("server"))
+            root.add("server", Setting::TypeString);
+        root["server"]=serverName;
+        if (!root.exists("maxNodes"))
+            root.add("maxNodes", Setting::TypeInt);
+        root["maxNodes"]=static_cast<int>(maxNodes);
+        if (!root.exists("maxLayers"))
+            root.add("maxLayers", Setting::TypeInt);
+        root["maxLayers"]=static_cast<int>(maxLayers);
     }
 
     // WatcherGraph() grabs the Config lock, so it must be unlocked when created.
@@ -1471,7 +1476,7 @@ void manetGLView::initializeGL()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE); 
-    
+
     glEnable(GL_TEXTURE_2D);
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientLight);
@@ -1503,7 +1508,17 @@ void manetGLView::connectStream()
     while(1) {
         this_thread::interruption_point();
         if (!messageStream) {
-            messageStream=MessageStream::createNewMessageStream(serverName); 
+            // messageStream=MessageStream::createNewMessageStream(serverName); 
+            messageStream=MessageStreamPtr(new MessageStream(serverName)); 
+
+            do { 
+                this_thread::interruption_point();
+                if (!messageStream->connect(true)) { 
+                    LOG_WARN("Unable to connect to server at " << serverName << ". Trying again in 2 seconds");
+                    sleep(2); 
+                }
+            } while (!messageStream->connected());
+
             messageStream->setDescription("legacy watcher gui");
             messageStream->startStream();
             messageStream->getMessageTimeRange();
@@ -1949,8 +1964,8 @@ void manetGLView::drawStatusString()
         buf="(playback)";
 
     if (showStreamDescription) {
-	buf += "\nDescription: ";
-	buf += streamDescription;
+        buf += "\nDescription: ";
+        buf += streamDescription;
     }
 
     if (showWallTimeinStatusString)
@@ -2068,7 +2083,7 @@ void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &n
     GLdouble x2=node2.x;
     GLdouble y2=node2.y;
     GLdouble z2=node2.z;
-    
+
     double width=edge.width;
 
     GLfloat edgeColor[]={
@@ -2593,17 +2608,17 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             // case 'r' - 'a' + 1: textZoomReset(); arrowZoomReset(); viewpointReset(); break;
                             //
         case Qt::Key_QuoteLeft:     {
-                                    matShine+=0.05; 
-                                    matShine=matShine>1.0 ? 1.0 : matShine; 
-                                    glMaterialf(GL_FRONT, GL_SHININESS, matShine);
-                            }
-                            break;
+                                        matShine+=0.05; 
+                                        matShine=matShine>1.0 ? 1.0 : matShine; 
+                                        glMaterialf(GL_FRONT, GL_SHININESS, matShine);
+                                    }
+                                    break;
         case Qt::Key_AsciiTilde: {
-                                    matShine-=0.05; 
-                                    matShine=matShine<0.0 ? 0.0 : matShine;
-                                    glMaterialf(GL_FRONT, GL_SHININESS, matShine);
-                            }
-                            break;
+                                     matShine-=0.05; 
+                                     matShine=matShine<0.0 ? 0.0 : matShine;
+                                     glMaterialf(GL_FRONT, GL_SHININESS, matShine);
+                                 }
+                                 break;
         case Qt::Key_1:     {
                                 for (unsigned int i=0; i<3; i++) 
                                     specReflection[i]+=0.05; 
@@ -2612,15 +2627,15 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                                 glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
                             }
                             break;
-        // there is no way to use Key_1 w/Shift - so we lose portability across keyboard layouts. 
+                            // there is no way to use Key_1 w/Shift - so we lose portability across keyboard layouts. 
         case Qt::Key_Exclam: {
-                                for (unsigned int i=0; i<3; i++) 
-                                    specReflection[i]-=0.05;
-                                for (unsigned int i=0; i<3; i++) 
-                                    specReflection[i]=specReflection[i]<0.0 ? 0.0 : specReflection[i]; 
-                                glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
-                            }
-                            break;
+                                 for (unsigned int i=0; i<3; i++) 
+                                     specReflection[i]-=0.05;
+                                 for (unsigned int i=0; i<3; i++) 
+                                     specReflection[i]=specReflection[i]<0.0 ? 0.0 : specReflection[i]; 
+                                 glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
+                             }
+                             break;
         case Qt::Key_2:     {
                                 GLenum l=GL_LIGHT0;
                                 GLenum p=GL_SPECULAR;
@@ -2634,17 +2649,17 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             }
                             break;
         case Qt::Key_At: {
-                                GLenum l=GL_LIGHT0;
-                                GLenum p=GL_SPECULAR;
-                                GLfloat *d=specLight0; 
-                                GLfloat o=-0.05;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]+=o;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
-                                glLightfv(l, p, d); 
-                            }
-                            break;
+                             GLenum l=GL_LIGHT0;
+                             GLenum p=GL_SPECULAR;
+                             GLfloat *d=specLight0; 
+                             GLfloat o=-0.05;
+                             for (unsigned int i=0; i<3; i++) 
+                                 d[i]+=o;
+                             for (unsigned int i=0; i<3; i++) 
+                                 d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                             glLightfv(l, p, d); 
+                         }
+                         break;
         case Qt::Key_3:     {
                                 GLenum l=GL_LIGHT0;
                                 GLenum p=GL_DIFFUSE;
@@ -2658,17 +2673,17 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             }
                             break;
         case Qt::Key_NumberSign: {
-                                GLenum l=GL_LIGHT0;
-                                GLenum p=GL_DIFFUSE;
-                                GLfloat *d=diffLight0; 
-                                GLfloat o=-0.05;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]+=o;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i];
-                                glLightfv(l, p, d); 
-                            }
-                            break;
+                                     GLenum l=GL_LIGHT0;
+                                     GLenum p=GL_DIFFUSE;
+                                     GLfloat *d=diffLight0; 
+                                     GLfloat o=-0.05;
+                                     for (unsigned int i=0; i<3; i++) 
+                                         d[i]+=o;
+                                     for (unsigned int i=0; i<3; i++) 
+                                         d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i];
+                                     glLightfv(l, p, d); 
+                                 }
+                                 break;
         case Qt::Key_4:     {
                                 GLenum l=GL_LIGHT0;
                                 GLenum p=GL_AMBIENT;
@@ -2682,17 +2697,17 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             }
                             break;
         case Qt::Key_Dollar: {
-                                GLenum l=GL_LIGHT0;
-                                GLenum p=GL_AMBIENT;
-                                GLfloat *d=ambLight0; 
-                                GLfloat o=-0.05;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]+=o;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i];
-                                glLightfv(l, p, d); 
-                            }
-                            break;
+                                 GLenum l=GL_LIGHT0;
+                                 GLenum p=GL_AMBIENT;
+                                 GLfloat *d=ambLight0; 
+                                 GLfloat o=-0.05;
+                                 for (unsigned int i=0; i<3; i++) 
+                                     d[i]+=o;
+                                 for (unsigned int i=0; i<3; i++) 
+                                     d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i];
+                                 glLightfv(l, p, d); 
+                             }
+                             break;
         case Qt::Key_5:     {
                                 GLenum l=GL_LIGHT_MODEL_AMBIENT;
                                 GLfloat *d=globalAmbientLight; 
@@ -2705,23 +2720,23 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             }
                             break;
         case Qt::Key_Percent: {
-                                GLenum l=GL_LIGHT_MODEL_AMBIENT;
-                                GLfloat *d=globalAmbientLight; 
-                                GLfloat o=-0.05;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]+=o;
-                                for (unsigned int i=0; i<3; i++) 
-                                    d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
-                                glLightModelfv(l, d); 
-                            }
-                            break;
+                                  GLenum l=GL_LIGHT_MODEL_AMBIENT;
+                                  GLfloat *d=globalAmbientLight; 
+                                  GLfloat o=-0.05;
+                                  for (unsigned int i=0; i<3; i++) 
+                                      d[i]+=o;
+                                  for (unsigned int i=0; i<3; i++) 
+                                      d[i]=d[i]>1.0 ? 1.0 : d[i]<0.0 ? 0.0 : d[i]; 
+                                  glLightModelfv(l, d); 
+                              }
+                              break;
         case Qt::Key_Question:
         case Qt::Key_H:
-                            showKeyboardShortcuts();
-                            break;
+                              showKeyboardShortcuts();
+                              break;
 
         default:
-                            event->ignore();
+                              event->ignore();
     }
 
     update();
@@ -2866,8 +2881,8 @@ void manetGLView::streamFilteringEnabled(bool isEnabled)
 
     messageStreamFiltering=isEnabled;
 
-    for (size_t l=0; l<wGraph->numValidLayers; l++) { 
-        if (messageStream) {
+    if (messageStream && messageStream->connected()) { 
+        for (size_t l=0; l<wGraph->numValidLayers; l++) { 
             messageStream->enableFiltering(isEnabled); 
             MessageStreamFilterPtr f(new MessageStreamFilter);
             f->setLayer(wGraph->layers[l].layerName); 
@@ -2970,7 +2985,7 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
     size_t layerIndex=wGraph->name2LayerIndex(name);
     wGraph->layers[layerIndex].isActive=turnOn;
     LOG_DEBUG("Turned layer " << name << " (" << layerIndex << ") " << (turnOn ? "on" : "off")); 
-    if (messageStreamFiltering && messageStream) {
+    if (messageStreamFiltering && messageStream && messageStream->connected()) {
         // Tell the watcherd that we want/don't want messages for this layer.
         MessageStreamFilterPtr f(new MessageStreamFilter);
         f->setLayer(name); 
@@ -3534,7 +3549,7 @@ void manetGLView::saveConfiguration()
 void manetGLView::pausePlayback()
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3545,7 +3560,7 @@ void manetGLView::pausePlayback()
 void manetGLView::normalPlayback()
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3557,7 +3572,7 @@ void manetGLView::normalPlayback()
 void manetGLView::reversePlayback()
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3575,7 +3590,7 @@ void manetGLView::reversePlayback()
 void manetGLView::forwardPlayback()
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3593,7 +3608,7 @@ void manetGLView::forwardPlayback()
 void manetGLView::rewindToStartOfPlayback()
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3609,7 +3624,7 @@ void manetGLView::rewindToStartOfPlayback()
 void manetGLView::forwardToEndOfPlayback()
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3634,7 +3649,7 @@ void manetGLView::changeSpeed(double x)
 void manetGLView::playbackSetSpeed(double x)
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3645,14 +3660,14 @@ void manetGLView::playbackSetSpeed(double x)
 void manetGLView::listStreams()
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
     if (!streamsDialog) {
-	streamsDialog = new WatcherStreamListDialog;
-	connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
-	connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
+        streamsDialog = new WatcherStreamListDialog;
+        connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
+        connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
     }
     streamsDialog->treeWidget->clear();
     streamsDialog->show();
@@ -3664,7 +3679,7 @@ void manetGLView::listStreams()
 void manetGLView::selectStream(unsigned long uid)
 {
     TRACE_ENTER();
-    if (!messageStream) {
+    if (!messageStream || !messageStream->connected()) {
         TRACE_EXIT();
         return;
     }
@@ -3677,13 +3692,13 @@ void manetGLView::selectStream(unsigned long uid)
 void manetGLView::spawnStreamDescription()
 {
     TRACE_ENTER();
-    if (!messageStream) {
-	TRACE_EXIT();
-	return;
+    if (!messageStream || !messageStream->connected()) {
+        TRACE_EXIT();
+        return;
     }
     bool ok;
     QString text = QInputDialog::getText(this, tr("Set Stream Description"), tr("Description:"), QLineEdit::Normal, QString(), &ok);
     if (ok && !text.isEmpty())
-	messageStream->setDescription(text.toStdString());
+        messageStream->setDescription(text.toStdString());
     TRACE_EXIT();
 }

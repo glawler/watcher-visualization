@@ -79,16 +79,23 @@ void ClientConnection::close()
     TRACE_EXIT();
 }
 
-void ClientConnection::doConnect()
+bool ClientConnection::connect(bool async)
 {
     TRACE_ENTER();
-    // Don't exit this function until we're connected. doConnect() is synchronus
+
+    if (async) {
+        TRACE_EXIT();
+        return tryConnect(); 
+    }
+
+    // Don't exit this function until we're connected. connect(false) is synchronus
     while(false==tryConnect())
     {
-        LOG_WARN("Unable to connect to server, trying again in 5 seconds.");
-        sleep(5);
+        LOG_WARN("Unable to connect to server, trying again in 2 seconds.");
+        sleep(2);
     }
     TRACE_EXIT();
+    return true;
 }
 
 bool ClientConnection::tryConnect()
@@ -156,16 +163,6 @@ bool ClientConnection::tryConnect()
     return connected;
 }
 
-bool ClientConnection::connect()
-{
-    TRACE_ENTER();
-    bool retVal = true;
-    if (!connected)
-        retVal = tryConnect();
-    TRACE_EXIT_RET_BOOL(retVal);
-    return retVal;
-}
-
 bool ClientConnection::sendMessage(const MessagePtr message)
 {
     TRACE_ENTER();
@@ -184,7 +181,7 @@ bool ClientConnection::sendMessages(const vector<event::MessagePtr> &messages)
     TRACE_ENTER();
 
     if (!connected)
-        doConnect();
+        connect();
 
     LOG_DEBUG("Marshaling outbound message"); 
     DataMarshaller::NetworkMarshalBuffers outBuffers;
@@ -212,7 +209,7 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
     TRACE_ENTER();
 
     if (!connected)
-        doConnect();
+        connect();
 
     if (!e) {
         LOG_DEBUG("Sucessfully sent message " << messages.front()); 
@@ -251,7 +248,7 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
     TRACE_ENTER();
 
     if (!connected)
-        doConnect();
+        connect();
 
     if (!e) {
         LOG_DEBUG("Recv'd header"); 

@@ -34,8 +34,9 @@ WatcherConfigurationDialog::WatcherConfigurationDialog(std::string &sn, size_t &
 {
     TRACE_ENTER();
     setupUi(this);
+
     maxNodesBox->setValue(maxNodes); 
-    maxLayersBox->setValue(maxNodes); 
+    maxLayersBox->setValue(maxLayers); 
     serverNameEditBox->setText(serverName.c_str());
 
     connect(maxNodesBox, SIGNAL(valueChanged(int)), this, SLOT(maxNodesChanged(int))); 
