@@ -110,9 +110,8 @@ size_t WatcherGraph::name2LayerIndex(const std::string &name)
 void WatcherGraph::clear() 
 {
     // set nodes as inactive.
-    for (size_t i=0; i<numValidNodes; i++) 
-        nodes[i].isActive=false;        // may want to actually clear the data inside nodes?
-    numValidNodes=0;
+    // for (size_t i=0; i<numValidNodes; i++) 
+    //     nodes[i].isActive=false;        // may want to actually clear the data inside nodes?
 
     // clear layers.
     for (size_t i=0; i<numValidLayers; i++) 
