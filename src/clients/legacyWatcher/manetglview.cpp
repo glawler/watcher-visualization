@@ -1832,7 +1832,7 @@ void manetGLView::drawNotConnectedState()
 
     QString errMess("Unable to connect to watcher daemon on ");
     errMess+=serverName.c_str();
-    errMess+=". Trying every 5 seconds.";
+    errMess+=". Trying to reconnect every 2 seconds.";
     renderText(12, height()-12, errMess); 
 
     glPopMatrix();
