@@ -333,6 +333,12 @@ bool WatcherGraph::updateNodeStatus(const NodeStatusMessagePtr &message)
 bool WatcherGraph::updateNodeProperties(const NodePropertiesMessagePtr &message)
 {
     LOG_DEBUG("Updating properties for node " << message->fromNodeID); 
+    
+    // create the layer if needed. This is odd though as the layer is empty and only 
+    // ever modifies node settings. But it still needs to exist, so a GUI can toggle it 
+    // on and off, etc. 
+    name2LayerIndex(message->layer); 
+    
     size_t index=nid2Index(message->fromNodeID); 
     if (message->useColor)
         nodes[index].color=message->color; 

@@ -3441,34 +3441,6 @@ void manetGLView::saveConfiguration()
                 root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
         }
 
-        // 
-        // GTL - this should be done inside WatcherGraph::saveConfiguration()
-        //
-        // string prop="layers";
-        // libconfig::Setting &layers=cfg.lookup(prop);
-
-        // // We have to create cfg layers here as we may've gotten new dynamic layers while we were running.
-        // // I am beginning (ha!) to dislike libconfig...
-        // BOOST_FOREACH(LayerListItemPtr &llip, knownLayers)
-        // {
-        //     int i, numCfgLayers=layers.getLength();
-        //     LOG_DEBUG("numCfgLayers=" << numCfgLayers);
-        //     for (i=0; i<numCfgLayers; i++)
-        //     {
-        //         string layerName=string(layers[i].getName());
-        //         if (layerName==llip->layer)
-        //         {
-        //             layers[i]=llip->active;
-        //             break;
-        //         }
-        //     }
-        //     if (i==numCfgLayers) 
-        //     {
-        //         LOG_DEBUG("Adding layer " << llip->layer << " with value " << llip->active << " to " << layers.getName() << " cfg"); 
-        //         layers.add(string(llip->layer), Setting::TypeBoolean)=llip->active;
-        //     }
-        // }
-
         struct 
         {
             const char *prop; 
