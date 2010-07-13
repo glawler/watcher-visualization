@@ -1009,6 +1009,8 @@ manetGLView::manetGLView(QWidget *parent) :
     // Don't oeverwrite QPAinter...
     setAutoFillBackground(false);
 
+    connect(this, SIGNAL(connectNewLayer(const QString)), this, SLOT(newLayerConnect(const QString)));
+
     TRACE_EXIT();
 }
 
@@ -1051,6 +1053,20 @@ void manetGLView::shutdown()
         delete *i;
 }
 
+void manetGLView::newLayerConnect(const QString &name) 
+{
+    QAction *action=new QAction(name, (QObject*)this);
+    action->setCheckable(true);
+
+    StringIndexedMenuItem *item = new StringIndexedMenuItem(name); 
+    connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
+    connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(layerToggle(QString, bool)));
+    connect(this, SIGNAL(layerToggled(QString, bool)), item, SLOT(setChecked(QString, bool)));
+    connect(item, SIGNAL(setChecked(bool)), action, SLOT(setChecked(bool)));
+    layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
+    layerMenu->addAction(action); 
+}
+
 void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
 {
     TRACE_ENTER();
@@ -1062,16 +1078,7 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
     }
 
     if (layerMenu) {
-        QAction *action=new QAction(QString::fromStdString(layer), (QObject*)this);
-        action->setCheckable(true);
-
-        StringIndexedMenuItem *item = new StringIndexedMenuItem(QString::fromStdString(layer)); 
-        connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
-        connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(layerToggle(QString, bool)));
-        connect(this, SIGNAL(layerToggled(QString, bool)), item, SLOT(setChecked(QString, bool)));
-        connect(item, SIGNAL(setChecked(bool)), action, SLOT(setChecked(bool)));
-        layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
-        layerMenu->addAction(action); 
+        emit connectNewLayer(QString(layer.c_str())); 
     }
 
     // Could use a few more type conversions for string here...
@@ -1650,9 +1657,6 @@ void manetGLView::checkIO()
 
             // update graph is now thread-safe
             wGraph->updateGraph(message);
-
-            // updateGL();  // redraw
-            // usleep(100000);
         }
 
         TRACE_EXIT();
