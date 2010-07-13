@@ -58,7 +58,8 @@ NodeDisplayInfo::NodeDisplayInfo() :
     labelPointSize(12.5),
     labelColor(blue),
     color(red),
-    label("")
+    label(""),
+    configLabel(labelDefault2String(NodeDisplayInfo::LAST_OCTET))
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -112,8 +113,8 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
         string strVal, key;
 
         key="label"; 
-        if (!nodeSetting.lookupValue(key, label))
-            nodeSetting.add(key, Setting::TypeString)=label;
+        if (!nodeSetting.lookupValue(key, configLabel))
+            nodeSetting.add(key, Setting::TypeString)=configLabel;
 
         strVal=color.toString();
         key="color"; 
@@ -213,7 +214,7 @@ void NodeDisplayInfo::saveConfiguration() const
     Setting &nodeSetting=cfg.lookup(basePath); 
 
     try {
-        nodeSetting["label"]=label;
+        nodeSetting["label"]=configLabel;
         nodeSetting["color"]=color.toString(); 
         nodeSetting["shape"]=NodePropertiesMessage::nodeShapeToString(shape);
         nodeSetting["sparkle"]=sparkle;
@@ -236,7 +237,7 @@ const std::string &NodeDisplayInfo::get_label() const
 
 void NodeDisplayInfo::buildLabel()
 {    
-    LOG_INFO("Node label for node " << nodeId << " was " << label); 
+    LOG_INFO("Node label for node " << nodeId << " was " << configLabel); 
     // a little awkward since we're mixing enums, reserved strings, and free form strings
     if (!nodeId.is_v4())
         label=nodeId.to_string(); //punt
@@ -244,27 +245,27 @@ void NodeDisplayInfo::buildLabel()
     unsigned long addr = nodeId.to_v4().to_ulong(); // host byte order. 
     char buf[64]; 
 
-    if (label == NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::FOUR_OCTETS)) {
+    if (configLabel == NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::FOUR_OCTETS)) {
         snprintf(buf, sizeof(buf), "%lu.%lu.%lu.%lu", ((addr)>>24)&0xFF,((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
         label=buf;
     }
-    else if (label == labelDefault2String(NodeDisplayInfo::THREE_OCTETS)) {
+    else if (configLabel == labelDefault2String(NodeDisplayInfo::THREE_OCTETS)) {
         snprintf(buf, sizeof(buf), "%lu.%lu.%lu", ((addr)>>16)&0xFF,((addr)>>8)&0xFF,(addr)&0xFF); 
         label=buf;
     }
-    else if (label == labelDefault2String(NodeDisplayInfo::TWO_OCTETS)) {
+    else if (configLabel == labelDefault2String(NodeDisplayInfo::TWO_OCTETS)) {
         snprintf(buf, sizeof(buf), "%lu.%lu", ((addr)>>8)&0xFF,(addr)&0xFF); 
         label=buf;
     }
-    else if (label == labelDefault2String(NodeDisplayInfo::LAST_OCTET)) {
+    else if (configLabel == labelDefault2String(NodeDisplayInfo::LAST_OCTET)) {
         snprintf(buf, sizeof(buf), "%lu", (addr)&0xFF); 
         label=buf;
     }
-    else if (label == "none") {
+    else if (configLabel == "none") {
         buf[0]='\0';
         label=buf;
     }
-    else if (label == labelDefault2String(NodeDisplayInfo::HOSTNAME)) {
+    else if (configLabel == labelDefault2String(NodeDisplayInfo::HOSTNAME)) {
         in_addr saddr; 
         saddr.s_addr = htonl(addr); 
         hostent *he = gethostbyaddr((const void *)saddr.s_addr, sizeof(saddr.s_addr), AF_INET); 
@@ -276,6 +277,8 @@ void NodeDisplayInfo::buildLabel()
             label = "UnableToGetHostNameSorry";
         }
     } 
-    // else use what was ever in the conf file.
+    else 
+        label=configLabel;
+
     LOG_INFO("Node label for node " << nodeId << " set to " << label); 
 }
