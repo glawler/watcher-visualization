@@ -973,12 +973,22 @@ manetGLView::manetGLView(QWidget *parent) :
     showPlaybackTimeInStatusString(true),
     showPlaybackRangeString(true),
     showVerboseStatusString(false),
+    showDebugInfo(false), 
     showStreamDescription(true),
+    scaleText(20.0), 
+    scaleLine(1.0), 
+    gpsScale(60000), 
+    layerPadding(2.0), 
+    antennaRadius(100.0),
+    ghostLayerTransparency(0.15),
     statusFontPointSize(10),
     maxNodes(0),
     maxLayers(0),
+    monochromeMode(false), 
+    threeDView(false),
+    backgroundImage(false), 
     statusFontName("Helvetica"),
-    hierarchyRingColor(),
+    hierarchyRingColor(colors::blue),
     playbackStartTime(SeekMessage::eof),  // live mode
     autoCenterNodesFlag(false),
     nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
@@ -1012,7 +1022,8 @@ void manetGLView::shutdown()
     if (messageStream) { 
         if (messageStream->connected())  
             messageStream->stopStream();
-        messageStream.reset(); 
+        // Don't do this as the thread may still use it.
+        // messageStream.reset(); 
     }
 
     saveConfiguration();
@@ -1121,7 +1132,9 @@ bool manetGLView::loadConfiguration()
         WatcherConfigurationDialog *d=new WatcherConfigurationDialog(serverName, maxNodes, maxLayers);  
         d->setModal(true); 
         d->exec();
+        LOG_DEBUG("WatcherConfigDialog result: " << ((d->result()==QDialog::Rejected)?"Rejected":"Accepted")); 
         if (d->result()==QDialog::Rejected) { 
+            SingletonConfig::unlock();
             LOG_FATAL("User did not give needed info to start, exiting."); 
             return false;
         }
@@ -1144,9 +1157,6 @@ bool manetGLView::loadConfiguration()
     SingletonConfig::lock();
 
     try {
-
-
-
         string prop="layers";
         if (!root.exists(prop))
             root.add(prop, libconfig::Setting::TypeGroup);
@@ -1250,11 +1260,11 @@ bool manetGLView::loadConfiguration()
         for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
         {
             prop=floatVals[i].prop;
-            float floatVal=floatVals[i].def; 
+            float floatVal=floatVals[i].def;
             if (!root.lookupValue(prop, floatVal))
-                root.add(prop, libconfig::Setting::TypeFloat)=floatVal;
-            *floatVals[i].val=floatVal; 
-            LOG_DEBUG("Setting " << floatVals[i].prop << " to " << floatVal);
+                root.add(prop, libconfig::Setting::TypeFloat)=floatVals[i].def;
+            *floatVals[i].val=floatVal;
+            LOG_DEBUG("Setting " << floatVals[i].prop << " to " << *floatVals[i].val); 
         }
 
         struct 
@@ -1507,6 +1517,7 @@ void manetGLView::connectStream()
     TRACE_ENTER();
     while(1) {
 
+        this_thread::interruption_point();
         if (!messageStream) 
             messageStream=MessageStreamPtr(new MessageStream(serverName)); 
 
@@ -1544,7 +1555,7 @@ void manetGLView::connectStream()
         do {
             sleep(2); 
             this_thread::interruption_point();
-            if (!messageStream->connected())
+            if (!messageStream || !messageStream->connected())
                 break;
         } while(1);
     }
@@ -3423,8 +3434,12 @@ void manetGLView::saveConfiguration()
             { "messageStreamFiltering", messageStreamFiltering }
         };
 
-        for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++)
-            root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
+        for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++) {
+            if (!root.exists(boolConfigs[i].prop))
+                root.add(boolConfigs[i].prop, Setting::TypeBoolean)=boolConfigs[i].boolVal;
+            else
+                root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
+        }
 
         // 
         // GTL - this should be done inside WatcherGraph::saveConfiguration()
@@ -3467,8 +3482,12 @@ void manetGLView::saveConfiguration()
             { "antennaRadius", &antennaRadius },
             { "ghostLayerTransparency", &ghostLayerTransparency }
         }; 
-        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
-            root[floatVals[i].prop]=*floatVals[i].val;
+        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++) {
+            if (!root.exists(floatVals[i].prop))
+                root.add(floatVals[i].prop, Setting::TypeFloat)=*floatVals[i].val;
+            else
+                root[floatVals[i].prop]=*floatVals[i].val;
+        }
 
         string hrc(hierarchyRingColor.toString());
         struct 
@@ -3480,8 +3499,12 @@ void manetGLView::saveConfiguration()
             { "statusFontName", &statusFontName },
             { "hierarchyRingColor", &hrc }
         }; 
-        for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++)
-            root[strVals[i].prop]=*strVals[i].val;
+        for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++) {
+            if (!root.exists(strVals[i].prop))  
+                root.add(strVals[i].prop, Setting::TypeString)=*strVals[i].val;
+            else
+                root[strVals[i].prop]=*strVals[i].val;
+        }
 
         struct 
         {
@@ -3493,8 +3516,12 @@ void manetGLView::saveConfiguration()
             { "maxNodes", (int*)&maxNodes },
             { "maxLayers", (int*)&maxLayers }
         }; 
-        for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
-            root[intVals[i].prop]=*intVals[i].val;
+        for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++) {
+            if (!root.exists(intVals[i].prop))
+                root.add(intVals[i].prop, Setting::TypeInt)=*intVals[i].val;
+            else
+                root[intVals[i].prop]=*intVals[i].val;
+        }
 
         struct 
         {
@@ -3504,9 +3531,35 @@ void manetGLView::saveConfiguration()
         {
             { "playbackStartTime", &playbackStartTime } 
         }; 
-        for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++)
-            root[longlongIntVals[i].prop]=*longlongIntVals[i].val;
+        for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++) {
+            if (!root.exists(longlongIntVals[i].prop)) 
+                root.add(longlongIntVals[i].prop, Setting::TypeInt64)=(int)(*longlongIntVals[i].val); 
+            else
+                root[longlongIntVals[i].prop]=*longlongIntVals[i].val;
+        }
 
+        string prop="viewPoint";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeGroup);
+        libconfig::Setting &vp=cfg.lookup(prop); 
+
+        struct 
+        {
+            const char *type;
+            float *data[3];
+        } viewPoints[] =
+        {
+            { "angle", { &manetAdj.angleX, &manetAdj.angleY, &manetAdj.angleZ }},
+            { "scale", { &manetAdj.scaleX, &manetAdj.scaleY, &manetAdj.scaleZ }},
+            { "shift", { &manetAdj.shiftX, &manetAdj.shiftY, &manetAdj.shiftZ }}
+        };
+        for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++) {
+            if (!vp.exists(viewPoints[i].type)) {
+                vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
+                for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
+                    vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
+            }
+        }
         root["viewPoint"]["angle"][0]=fpclassify(manetAdj.angleX)==FP_NAN ? 0.0 : manetAdj.angleX;
         root["viewPoint"]["angle"][1]=fpclassify(manetAdj.angleY)==FP_NAN ? 0.0 : manetAdj.angleY;
         root["viewPoint"]["angle"][2]=fpclassify(manetAdj.angleZ)==FP_NAN ? 0.0 : manetAdj.angleZ;
@@ -3520,11 +3573,46 @@ void manetGLView::saveConfiguration()
         BackgroundImage &bg=BackgroundImage::getInstance();
         float bgfloatVals[5];
         bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
+
+        prop="backgroundImage";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeGroup);
+        libconfig::Setting &bgset=cfg.lookup(prop);
+
+        prop="imageFile"; 
+        if (!bgset.exists(prop))
+            bgset.add(prop, libconfig::Setting::TypeString);
+        prop="coordinates";
+        if (!bgset.exists(prop))
+            bgset.add(prop, libconfig::Setting::TypeArray);
+            for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
+                bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
+
         root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
         root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
         root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
         root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
         root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
+
+        prop="backgroundColor";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeGroup);
+        libconfig::Setting &bgColSet=cfg.lookup(prop);
+
+        struct 
+        {
+            const char *name;
+            float val;
+        } bgColors[] = 
+        {
+            { "r", 0.0 }, 
+            { "g", 0.0 }, 
+            { "b", 0.0 }, 
+            { "a", 255.0 }
+        };
+        for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
+            if (!bgColSet.exists(bgColors[i].name))
+                bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
 
         GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
         glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
@@ -3540,7 +3628,8 @@ void manetGLView::saveConfiguration()
 
     SingletonConfig::unlock();
 
-    wGraph->saveConfiguration(); 
+    if (wGraph) 
+        wGraph->saveConfiguration(); 
 
     SingletonConfig::saveConfig();
 
