@@ -2289,6 +2289,8 @@ void manetGLView::drawNodeLabel(const NodeDisplayInfo &node, bool physical)
     else
         glColor4fv(nodeColor);
 
+    // LOG_DEBUG("drawing node - font: " << node.labelFont << ", size: " << node.labelPointSize); 
+
     renderText(0, 6, 3, QString(node.get_label().c_str()),
             QFont(node.labelFont.c_str(), 
                 (int)(node.labelPointSize*manetAdj.scaleX*scaleText))); 
@@ -2351,75 +2353,6 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     TRACE_EXIT(); 
 }
-
-// void manetGLView::drawLayer(const GUILayer &layer)
-// {
-//     TRACE_ENTER();
-//     {
-//         // LOG_DEBUG("Drawing floating labels..."); 
-//         WatcherGraph::FloatingLabelList::const_iterator b=wGraph->floatingLabels.begin(); 
-//         WatcherGraph::FloatingLabelList::const_iterator e=wGraph->floatingLabels.end(); 
-//         for ( ; b!=e; ++b) {
-//             if ((*b)->layer==layer) {
-//                 // LOG_DEBUG("Displaying floating label: " << *b); 
-//                 GLdouble x=(*b)->lat, y=(*b)->lng, z=(*b)->alt; 
-//                 LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
-//                 drawLabel(x, y, z, li);
-//             }
-//         }
-//     }
-// 
-//     WatcherGraph::edgeIterator ei, eend;
-//     for(tie(ei, eend)=edges(wGraph->theGraph); ei!=eend; ++ei)
-//     {
-//         WatcherGraphEdge &edge=wGraph->theGraph[*ei]; 
-//         if (edge.displayInfo->layer==layer)
-//         {
-//             const WatcherGraphNode &node1=wGraph->theGraph[source(*ei, wGraph->theGraph)]; 
-//             const WatcherGraphNode &node2=wGraph->theGraph[target(*ei, wGraph->theGraph)]; 
-//             drawEdge(edge, node1, node2); 
-//         }
-// 
-//         WatcherGraphEdge::LabelList::iterator li=edge.labels.begin(); 
-//         WatcherGraphEdge::LabelList::iterator lend=edge.labels.end(); 
-//         for( ; li!=lend; ++li)
-//             if ((*li)->layer==layer)
-//             {
-//                 const WatcherGraphNode &node1=wGraph->theGraph[source(*ei, wGraph->theGraph)]; 
-//                 const WatcherGraphNode &node2=wGraph->theGraph[target(*ei, wGraph->theGraph)]; 
-// 
-//                 double lx=(node1.gpsData->x+node2.gpsData->x)/2.0; 
-//                 double ly=(node1.gpsData->y+node2.gpsData->y)/2.0; 
-//                 double lz=(node1.gpsData->z+node2.gpsData->z)/2.0; 
-//                 drawLabel(lx, ly, lz, *li);
-//             }
-//     }
-// 
-//     WatcherGraph::vertexIterator vi, vend;
-//     for(tie(vi, vend)=vertices(wGraph->theGraph); vi!=vend; ++vi)
-//     {
-//         WatcherGraphNode &node=wGraph->theGraph[*vi]; 
-// 
-//         if (layer==PHYSICAL_LAYER)
-//             drawNode(node, true); 
-//         else
-//             if (layerPadding>6 || !isActive(PHYSICAL_LAYER))
-//                 drawNode(node, false); 
-// 
-//         WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
-//         WatcherGraphEdge::LabelList::iterator lend=node.labels.end(); 
-//         for( ; li!=lend; ++li)
-//             if ((*li)->layer==layer)
-//             {
-//                 GLdouble lx=node.gpsData->x;
-//                 GLdouble ly=node.gpsData->y;
-//                 GLdouble lz=node.gpsData->z;
-//                 drawLabel(lx, ly, lz, *li); 
-//             }
-//     }
-// 
-//     TRACE_EXIT();
-// }
 
 void manetGLView::resizeGL(int width, int height)
 {

@@ -178,6 +178,9 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
     }
 
     buildLabel(); 
+
+    LOG_DEBUG("loaded node config - font: " << labelFont << ", font size: " << labelPointSize << ", size: " << size << ", color: " << labelColor.toString());
+
     isActive=true;
 
     TRACE_EXIT_RET_BOOL(true); 
