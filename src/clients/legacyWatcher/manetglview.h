@@ -71,6 +71,7 @@ class manetGLView : public QGLWidget
 
         // void layerToggled(QString, bool);
         void layerToggle(const QString &layer, const bool turnOn);
+        void newLayerConnect(const QString &name); 
 
         void clearAllLabels();
         void clearAllEdges();
@@ -119,6 +120,7 @@ signals:
         void positionReset();
 
         void layerToggled(const QString &, bool);
+        void connectNewLayer(const QString); 
 
         void labelsCleared();
         void edgesCleared(); 

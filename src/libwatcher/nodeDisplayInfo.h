@@ -137,6 +137,7 @@ namespace watcher
 
             void buildLabel();  // call once to generate the static label
             std::string label;
+            std::string configLabel;    // the label from the configuration. 
 
             DECLARE_LOGGER();
     };

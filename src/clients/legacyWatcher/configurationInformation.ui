@@ -39,6 +39,9 @@
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
+     <property name="maximum">
+      <number>65536</number>
+     </property>
      <property name="intMaxNodes" stdset="0">
       <number>0</number>
      </property>
@@ -55,6 +58,9 @@
     <widget class="QSpinBox" name="maxLayersBox">
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="maximum">
+      <number>65536</number>
      </property>
     </widget>
    </item>
@@ -84,6 +90,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>maxNodesBox</tabstop>
+  <tabstop>maxLayersBox</tabstop>
+  <tabstop>serverNameEditBox</tabstop>
+  <tabstop>ConfigurationInput</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

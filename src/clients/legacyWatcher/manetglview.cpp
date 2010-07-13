@@ -611,7 +611,7 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
     double yMin = DBL_MAX;
     double yMax = -DBL_MAX;
     double zMin = DBL_MAX;
-    bool includeAntenna = isActive(ANTENNARADIUS_LAYER); 
+    bool includeAntenna = false;     // antenna currently broken
     // bool includeHierarchy = isActive(HIERARCHY_LAYER); 
 
     // find drawing extents
@@ -1009,6 +1009,8 @@ manetGLView::manetGLView(QWidget *parent) :
     // Don't oeverwrite QPAinter...
     setAutoFillBackground(false);
 
+    connect(this, SIGNAL(connectNewLayer(const QString)), this, SLOT(newLayerConnect(const QString)));
+
     TRACE_EXIT();
 }
 
@@ -1051,6 +1053,20 @@ void manetGLView::shutdown()
         delete *i;
 }
 
+void manetGLView::newLayerConnect(const QString &name) 
+{
+    QAction *action=new QAction(name, (QObject*)this);
+    action->setCheckable(true);
+
+    StringIndexedMenuItem *item = new StringIndexedMenuItem(name); 
+    connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
+    connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(layerToggle(QString, bool)));
+    connect(this, SIGNAL(layerToggled(QString, bool)), item, SLOT(setChecked(QString, bool)));
+    connect(item, SIGNAL(setChecked(bool)), action, SLOT(setChecked(bool)));
+    layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
+    layerMenu->addAction(action); 
+}
+
 void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
 {
     TRACE_ENTER();
@@ -1062,16 +1078,7 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
     }
 
     if (layerMenu) {
-        QAction *action=new QAction(QString::fromStdString(layer), (QObject*)this);
-        action->setCheckable(true);
-
-        StringIndexedMenuItem *item = new StringIndexedMenuItem(QString::fromStdString(layer)); 
-        connect(action, SIGNAL(triggered(bool)), item, SLOT(showMenuItem(bool)));
-        connect(item, SIGNAL(showMenuItem(QString, bool)), this, SLOT(layerToggle(QString, bool)));
-        connect(this, SIGNAL(layerToggled(QString, bool)), item, SLOT(setChecked(QString, bool)));
-        connect(item, SIGNAL(setChecked(bool)), action, SLOT(setChecked(bool)));
-        layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
-        layerMenu->addAction(action); 
+        emit connectNewLayer(QString(layer.c_str())); 
     }
 
     // Could use a few more type conversions for string here...
@@ -1613,9 +1620,6 @@ void manetGLView::checkIO()
             // When control reaches this point, events are being streamed
             playbackPaused = false;
 
-            // update graph is now thread-safe
-            wGraph->updateGraph(message);
-
             // DataPoint data is handled directly by the scrolling graph thing.
             if (message->type==DATA_POINT_MESSAGE_TYPE) {
                 WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
@@ -1643,14 +1647,16 @@ void manetGLView::checkIO()
                 default: break;
             }
 
+            // do this before calling updateGraph() as it will create the layer if not found. 
             if (!layer.empty()) {
                 if (!wGraph->layerExists(layer)) {
                     LOG_DEBUG("Adding new layer to layer menu: " << layer); 
                     addLayerMenuItem(layer, true); 
                 }
             }
-            // updateGL();  // redraw
-            // usleep(100000);
+
+            // update graph is now thread-safe
+            wGraph->updateGraph(message);
         }
 
         TRACE_EXIT();
@@ -2198,7 +2204,9 @@ void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &n
 bool manetGLView::isActive(const watcher::GUILayer &layer)
 {
     TRACE_ENTER();
-    bool retVal=wGraph->layers[wGraph->name2LayerIndex(layer)].isActive;
+    bool retVal=false;
+    if (wGraph->layerExists(layer))
+        retVal=wGraph->layers[wGraph->name2LayerIndex(layer)].isActive;
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
 }
@@ -2281,6 +2289,8 @@ void manetGLView::drawNodeLabel(const NodeDisplayInfo &node, bool physical)
     else
         glColor4fv(nodeColor);
 
+    // LOG_DEBUG("drawing node - font: " << node.labelFont << ", size: " << node.labelPointSize); 
+
     renderText(0, 6, 3, QString(node.get_label().c_str()),
             QFont(node.labelFont.c_str(), 
                 (int)(node.labelPointSize*manetAdj.scaleX*scaleText))); 
@@ -2343,75 +2353,6 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     TRACE_EXIT(); 
 }
-
-// void manetGLView::drawLayer(const GUILayer &layer)
-// {
-//     TRACE_ENTER();
-//     {
-//         // LOG_DEBUG("Drawing floating labels..."); 
-//         WatcherGraph::FloatingLabelList::const_iterator b=wGraph->floatingLabels.begin(); 
-//         WatcherGraph::FloatingLabelList::const_iterator e=wGraph->floatingLabels.end(); 
-//         for ( ; b!=e; ++b) {
-//             if ((*b)->layer==layer) {
-//                 // LOG_DEBUG("Displaying floating label: " << *b); 
-//                 GLdouble x=(*b)->lat, y=(*b)->lng, z=(*b)->alt; 
-//                 LabelDisplayInfoPtr li=dynamic_pointer_cast<LabelDisplayInfo>(*b);
-//                 drawLabel(x, y, z, li);
-//             }
-//         }
-//     }
-// 
-//     WatcherGraph::edgeIterator ei, eend;
-//     for(tie(ei, eend)=edges(wGraph->theGraph); ei!=eend; ++ei)
-//     {
-//         WatcherGraphEdge &edge=wGraph->theGraph[*ei]; 
-//         if (edge.displayInfo->layer==layer)
-//         {
-//             const WatcherGraphNode &node1=wGraph->theGraph[source(*ei, wGraph->theGraph)]; 
-//             const WatcherGraphNode &node2=wGraph->theGraph[target(*ei, wGraph->theGraph)]; 
-//             drawEdge(edge, node1, node2); 
-//         }
-// 
-//         WatcherGraphEdge::LabelList::iterator li=edge.labels.begin(); 
-//         WatcherGraphEdge::LabelList::iterator lend=edge.labels.end(); 
-//         for( ; li!=lend; ++li)
-//             if ((*li)->layer==layer)
-//             {
-//                 const WatcherGraphNode &node1=wGraph->theGraph[source(*ei, wGraph->theGraph)]; 
-//                 const WatcherGraphNode &node2=wGraph->theGraph[target(*ei, wGraph->theGraph)]; 
-// 
-//                 double lx=(node1.gpsData->x+node2.gpsData->x)/2.0; 
-//                 double ly=(node1.gpsData->y+node2.gpsData->y)/2.0; 
-//                 double lz=(node1.gpsData->z+node2.gpsData->z)/2.0; 
-//                 drawLabel(lx, ly, lz, *li);
-//             }
-//     }
-// 
-//     WatcherGraph::vertexIterator vi, vend;
-//     for(tie(vi, vend)=vertices(wGraph->theGraph); vi!=vend; ++vi)
-//     {
-//         WatcherGraphNode &node=wGraph->theGraph[*vi]; 
-// 
-//         if (layer==PHYSICAL_LAYER)
-//             drawNode(node, true); 
-//         else
-//             if (layerPadding>6 || !isActive(PHYSICAL_LAYER))
-//                 drawNode(node, false); 
-// 
-//         WatcherGraphEdge::LabelList::iterator li=node.labels.begin(); 
-//         WatcherGraphEdge::LabelList::iterator lend=node.labels.end(); 
-//         for( ; li!=lend; ++li)
-//             if ((*li)->layer==layer)
-//             {
-//                 GLdouble lx=node.gpsData->x;
-//                 GLdouble ly=node.gpsData->y;
-//                 GLdouble lz=node.gpsData->z;
-//                 drawLabel(lx, ly, lz, *li); 
-//             }
-//     }
-// 
-//     TRACE_EXIT();
-// }
 
 void manetGLView::resizeGL(int width, int height)
 {
@@ -3555,10 +3496,11 @@ void manetGLView::saveConfiguration()
         if (!bgset.exists(prop))
             bgset.add(prop, libconfig::Setting::TypeString);
         prop="coordinates";
-        if (!bgset.exists(prop))
+        if (!bgset.exists(prop)) { 
             bgset.add(prop, libconfig::Setting::TypeArray);
-            for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
-                bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
+            // for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
+            //     bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
+        }
 
         root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
         root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
