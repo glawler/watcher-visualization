@@ -28,6 +28,7 @@
 #include <GL/glut.h>
 #include <getopt.h>
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "watcherMainWindow.h"
 #include "watcherScrollingGraphControl.h"
