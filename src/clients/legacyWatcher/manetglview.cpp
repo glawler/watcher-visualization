@@ -3496,10 +3496,11 @@ void manetGLView::saveConfiguration()
         if (!bgset.exists(prop))
             bgset.add(prop, libconfig::Setting::TypeString);
         prop="coordinates";
-        if (!bgset.exists(prop))
+        if (!bgset.exists(prop)) { 
             bgset.add(prop, libconfig::Setting::TypeArray);
-            for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
-                bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
+            // for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
+            //     bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
+        }
 
         root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
         root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
