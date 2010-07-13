@@ -30,6 +30,7 @@
 #include "nodeStatusMessage.h"
 #include "edgeMessage.h"
 #include "colorMessage.h"
+#include "singletonConfig.h"
 
 using namespace std;
 using namespace boost;
@@ -424,6 +425,23 @@ bool WatcherGraph::saveConfiguration(void)
         nodes[n].saveConfiguration(); 
     for (size_t l=0; l!=numValidLayers; l++)  
         layers[l].saveConfiguration(); 
+
+    // Graph remembers which layers there are and which are active.
+    if (numValidLayers) { 
+        SingletonConfig::lock(); 
+        libconfig::Config &cfg=SingletonConfig::instance();
+        string prop("layers"); 
+        if (!cfg.getRoot().exists(prop))
+            cfg.getRoot().add(prop, libconfig::Setting::TypeGroup);
+        libconfig::Setting &layerCfg=cfg.lookup(prop); 
+        for (size_t l=0; l!=numValidLayers; l++)  {
+            if (!layerCfg.exists(layers[l].layerName))
+                layerCfg.add(layers[l].layerName, libconfig::Setting::TypeBoolean);
+            layerCfg[layers[l].layerName]=layers[l].isActive;
+        }
+        SingletonConfig::unlock();
+    }
+
     return true;
 }
 std::ostream &watcher::operator<<(std::ostream &out, const watcher::WatcherGraph &watcherGraph)
