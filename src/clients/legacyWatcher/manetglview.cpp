@@ -611,7 +611,7 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
     double yMin = DBL_MAX;
     double yMax = -DBL_MAX;
     double zMin = DBL_MAX;
-    bool includeAntenna = isActive(ANTENNARADIUS_LAYER); 
+    bool includeAntenna = false;     // antenna currently broken
     // bool includeHierarchy = isActive(HIERARCHY_LAYER); 
 
     // find drawing extents
@@ -2204,7 +2204,9 @@ void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &n
 bool manetGLView::isActive(const watcher::GUILayer &layer)
 {
     TRACE_ENTER();
-    bool retVal=wGraph->layers[wGraph->name2LayerIndex(layer)].isActive;
+    bool retVal=false;
+    if (wGraph->layerExists(layer))
+        retVal=wGraph->layers[wGraph->name2LayerIndex(layer)].isActive;
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
 }
