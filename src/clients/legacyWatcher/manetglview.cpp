@@ -1613,9 +1613,6 @@ void manetGLView::checkIO()
             // When control reaches this point, events are being streamed
             playbackPaused = false;
 
-            // update graph is now thread-safe
-            wGraph->updateGraph(message);
-
             // DataPoint data is handled directly by the scrolling graph thing.
             if (message->type==DATA_POINT_MESSAGE_TYPE) {
                 WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
@@ -1643,12 +1640,17 @@ void manetGLView::checkIO()
                 default: break;
             }
 
+            // do this before calling updateGraph() as it will create the layer if not found. 
             if (!layer.empty()) {
                 if (!wGraph->layerExists(layer)) {
                     LOG_DEBUG("Adding new layer to layer menu: " << layer); 
                     addLayerMenuItem(layer, true); 
                 }
             }
+
+            // update graph is now thread-safe
+            wGraph->updateGraph(message);
+
             // updateGL();  // redraw
             // usleep(100000);
         }
