@@ -202,16 +202,20 @@ int main(int argc, char **argv)
     };
     while (true)  // draw everything all the time as we don't know when watcher will start
     {
+        vector<MessagePtr> messages; 
+
         // Draw center node
         GPSMessagePtr gpsMess(new GPSMessage(gpsScale*(offsetLong+radius), gpsScale*(offsetLat+radius), 0));
         gpsMess->layer=layer;
         gpsMess->fromNodeID=centerId;
-        if(!client.sendMessage(gpsMess))
-        {
-            LOG_ERROR("Error sending gps message: " << *gpsMess);
-            TRACE_EXIT_RET(EXIT_FAILURE);
-            return EXIT_FAILURE;
-        }
+
+        messages.push_back(gpsMess); 
+        // if(!client.sendMessage(gpsMess))
+        // {
+        //     LOG_ERROR("Error sending gps message: " << *gpsMess);
+        //     TRACE_EXIT_RET(EXIT_FAILURE);
+        //     return EXIT_FAILURE;
+        // }
         // draw hour, min, and second nodes, connecting them to center.
         for (unsigned int i=0; i<sizeof(nodeData)/sizeof(nodeData[0]); i++)
         {
@@ -232,12 +236,14 @@ int main(int argc, char **argv)
                         (double)i));
             gpsMess->layer=layer;
             gpsMess->fromNodeID=*nodeData[i].id;
-            if(!client.sendMessage(gpsMess))
-            {
-                LOG_ERROR("Error sending gps message: " << *gpsMess);
-                TRACE_EXIT_RET(EXIT_FAILURE);
-                return EXIT_FAILURE;
-            }
+
+            messages.push_back(gpsMess); 
+            // if(!client.sendMessage(gpsMess))
+            // {
+            //     LOG_ERROR("Error sending gps message: " << *gpsMess);
+            //     TRACE_EXIT_RET(EXIT_FAILURE);
+            //     return EXIT_FAILURE;
+            // }
 
             LabelMessagePtr labMess(new LabelMessage(nodeData[i].label));
             labMess->layer=layer;
@@ -245,12 +251,14 @@ int main(int argc, char **argv)
             EdgeMessagePtr edgeMess(new EdgeMessage(centerId, *nodeData[i].id, layer, nodeData[i].color, 2));
             edgeMess->middleLabel=labMess;
             edgeMess->expiration=expireHands?loopTime*2000:0;
-            if(!client.sendMessage(edgeMess))
-            {
-                LOG_ERROR("Error sending edge message: " << *edgeMess);
-                TRACE_EXIT_RET(EXIT_FAILURE);
-                return EXIT_FAILURE;
-            }
+
+            messages.push_back(edgeMess); 
+            // if(!client.sendMessage(edgeMess))
+            // {
+            //     LOG_ERROR("Error sending edge message: " << *edgeMess);
+            //     TRACE_EXIT_RET(EXIT_FAILURE);
+            //     return EXIT_FAILURE;
+            // }
         }
 
         if (showHourRing)
@@ -266,12 +274,14 @@ int main(int argc, char **argv)
                             0.0));
                 gpsMess->layer=layer;
                 gpsMess->fromNodeID=thisId;
-                if(!client.sendMessage(gpsMess))
-                {
-                    LOG_ERROR("Error sending gps message: " << *gpsMess);
-                    TRACE_EXIT_RET(EXIT_FAILURE);
-                    return EXIT_FAILURE;
-                }
+
+                messages.push_back(gpsMess); 
+                // if(!client.sendMessage(gpsMess))
+                // {
+                //     LOG_ERROR("Error sending gps message: " << *gpsMess);
+                //     TRACE_EXIT_RET(EXIT_FAILURE);
+                //     return EXIT_FAILURE;
+                // }
             }
         }
 
@@ -288,14 +298,24 @@ int main(int argc, char **argv)
                             gpsScale*(offsetLat+((cos(theta)*faceRad)+radius)), 0.0)); 
                 gpsMess->layer=layer;
                 gpsMess->fromNodeID=thisId;
-                if(!client.sendMessage(gpsMess))
-                {
-                    LOG_ERROR("Error sending gps message: " << *gpsMess);
-                    TRACE_EXIT_RET(EXIT_FAILURE);
-                    return EXIT_FAILURE;
-                }
+
+                messages.push_back(gpsMess); 
+                // if(!client.sendMessage(gpsMess))
+                // {
+                //     LOG_ERROR("Error sending gps message: " << *gpsMess);
+                //     TRACE_EXIT_RET(EXIT_FAILURE);
+                //     return EXIT_FAILURE;
+                // }
             }
         }
+        if (!messages.empty()) { 
+            if(!client.sendMessages(messages)) {
+                LOG_ERROR("Error sending " << messages.size() << " messages.");
+                TRACE_EXIT_RET(EXIT_FAILURE);
+                return EXIT_FAILURE;
+            }
+        }
+
         sleep(loopTime); 
     }
 

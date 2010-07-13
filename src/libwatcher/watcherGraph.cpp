@@ -271,10 +271,11 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
             // shared_lock<shared_mutex> readLock(layers[l].floatingLabelsMutex); 
             upgrade_lock<shared_mutex> lock(layers[l].floatingLabelsMutex); 
             upgrade_to_unique_lock<shared_mutex> writeLock(lock); 
-            for (WatcherLayerData::FloatingLabels::iterator label=layers[l].floatingLabels.begin(); label!=layers[l].floatingLabels.end(); label++) {
-                if (label->expiration!=Infinity && (timeForward ? (now > label->expiration) : (now < label->expiration))) {
-                    layers[l].floatingLabels.erase(label); 
-                }
+            for (WatcherLayerData::FloatingLabels::iterator label=layers[l].floatingLabels.begin(); label!=layers[l].floatingLabels.end(); ) {
+                if (label->expiration!=Infinity && (timeForward ? (now > label->expiration) : (now < label->expiration))) 
+                    layers[l].floatingLabels.erase(label++); 
+                else
+                    ++label;
             }
         }
         for (size_t n=0; n<numValidNodes; n++)  {
@@ -293,10 +294,11 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
                 // shared_lock<shared_mutex> readLock(layers[l].nodeLabelsMutexes[n]);
                 upgrade_lock<shared_mutex> lock(layers[l].nodeLabelsMutexes[n]); 
                 upgrade_to_unique_lock<shared_mutex> writeLock(lock); 
-                for (WatcherLayerData::NodeLabels::iterator label=layers[l].nodeLabels[n].begin(); label!=layers[l].nodeLabels[n].end(); label++) {
-                    if (label->expiration!=Infinity && (timeForward ? (now > label->expiration) : (now < label->expiration))) {
-                        layers[l].nodeLabels[n].erase(label); 
-                    }
+                for (WatcherLayerData::NodeLabels::iterator label=layers[l].nodeLabels[n].begin(); label!=layers[l].nodeLabels[n].end(); ) {
+                    if (label->expiration!=Infinity && (timeForward ? (now > label->expiration) : (now < label->expiration))) 
+                        layers[l].nodeLabels[n].erase(label++); 
+                    else
+                        ++label;
                 }
             }
         }
