@@ -1,0 +1,47 @@
+Version 0.6.3:
+- legacy watcher
+    - rewrote internal graph structure, should be able to handle 1000's of nodes now. 
+    Users now need to tell the GUI how many nodes and layers to expect at start time
+    though. This is so the structure can be optimized. 
+    - cleaned up command line arguments. Now cleaner and work.
+    - cleaned up configuration file writing and reading.
+    - added working "logLevel" command line argument
+    - If watcher does not have needed configuration at start time, it now diplays
+    a popup dialog requesting this information from the user. The information
+    provided is then saved to the cfg file on exit.
+
+- watcherd
+    - removed "live mode" internals. Everything plays from the database now. Stops 
+    messages from backing when GUIs don't process messages fast enough. 
+
+Version 0.6.2.2:
+- all 
+    - This release has fully implemented synced stream functionality. The legacy 
+    watcher now has full GUI support for naming the local stream and subscribing to an 
+    external stream. Still to do: adding 'break stream' functionality to disconnect 
+    from a stream. 
+
+- watcherd 
+    - This release also has a few performance bug fixes in the watcherd 
+    that were done on-site at ARL when testing on a large scale test.
+
+- other
+    - There is also  now (untested) support for RPM builds of the watcher, although 
+    that is less important at ARL as they use NiCE. There are RPM spec files for
+    all watcher packages. May roll out a yum repo at some point for watcher. 
+
+- legacy watcher
+    - minor bug fixes
+    - fix to revert a bug introduced while adding the debug overlay which caused 
+    OpenGL errors in color and depth testing. Colors were not transparent even if 
+    specified to be and objects were being incorrectly drawn on top of each other. 
+
+Version 0.6.2.1:
+- stuff!
+
+Older:
+If you really need to know, contact the AUTHORs.
+
+
+
+
