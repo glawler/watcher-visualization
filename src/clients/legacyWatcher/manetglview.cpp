@@ -1075,7 +1075,6 @@ void manetGLView::newLayerConnect(const QString &name)
     layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
     layerMenu->addAction(action); 
 
-
     string layer(name.toStdString()); 
     size_t l=wGraph->name2LayerIndex(layer); 
     if (!layerConfigurationDialog) 
@@ -1084,6 +1083,7 @@ void manetGLView::newLayerConnect(const QString &name)
     if (!wGraph->layers[l].configured) {
         emit spawnLayerConfigureDialog();
     }
+    emit layerToggled(name, true);
 }
 
 void manetGLView::configureLayers()
@@ -1106,9 +1106,6 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
         // dialog if needed. 
         emit connectNewLayer(QString(layer.c_str())); 
     }
-
-    // Could use a few more type conversions for string here...
-    emit layerToggled(QString::fromStdString(string(layer)), active);
 
     TRACE_EXIT();
 }
