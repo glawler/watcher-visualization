@@ -1,3 +1,11 @@
+Version 0.6.4:
+- legacy watcher
+    - Added layer configuration dialog. This allows the user to modify layer settings 
+    on the fly via a dialog. The dialog can be assessed via Configuration->Layers. The 
+    dialog will also pop-up when it sees a new layer for the very first time. This does 
+    not include layers that have been read from the cfg file - just layers it has not 
+    seen from the watcher daemon.
+
 Version 0.6.3:
 - legacy watcher
     - rewrote internal graph structure, should be able to handle 1000's of nodes now. 

@@ -52,7 +52,7 @@ namespace watcher
 
             std::string label;                  ///< written next to the edge, not used often
             std::string labelFont; 
-            double labelPointSize; 
+            float labelPointSize; 
             watcher::Color labelColor;
 
             bool loadConfiguration(const watcher::event::GUILayer &layer); 

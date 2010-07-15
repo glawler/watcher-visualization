@@ -33,7 +33,8 @@ DisplayInfo::DisplayInfo(const std::string &category) :
     categoryName(category),
     baseName("displayOptions"), 
     separator("."),
-    layerCfgId("layer")
+    layerCfgId("layer"), 
+    layerExisted(false)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -83,8 +84,12 @@ const string DisplayInfo::getBasePath(const GUILayer &layer) const
         string replace("_"); 
         string layerName=regex_replace(layer, rx, replace);
 
-        if (!layerCfgSetting.exists(layerName))
+        if (!layerCfgSetting.exists(layerName)) {
             layerCfgSetting.add(layerName, Setting::TypeGroup);
+            layerExisted=false;
+        }
+        else 
+            layerExisted=true;
 
         // "DisplayOptions.layer.[LAYERNAME]" group
         Setting &layerSetting=cfg.lookup(layerCfgSetting.getPath() + separator + layerName); 

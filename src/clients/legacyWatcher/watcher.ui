@@ -56,7 +56,7 @@
        <number>6</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetMinimumSize</enum>
         </property>
@@ -222,13 +222,6 @@ p, li { white-space: pre-wrap; }
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="changeStreamButton">
-          <property name="text">
-           <string>Change Stream</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QPushButton" name="fitToWindowButton">
           <property name="minimumSize">
            <size>
@@ -304,7 +297,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>930</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLayers">
@@ -353,6 +346,8 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionStreamFiltering"/>
     <addaction name="actionLoopPlayback"/>
     <addaction name="actionSetStreamName"/>
+    <addaction name="actionChangeStream"/>
+    <addaction name="actionLayers"/>
    </widget>
    <addaction name="menuLayers"/>
    <addaction name="menuView"/>
@@ -489,6 +484,16 @@ p, li { white-space: pre-wrap; }
     <string>Set Stream Name</string>
    </property>
   </action>
+  <action name="actionLayers">
+   <property name="text">
+    <string>La&amp;yers</string>
+   </property>
+  </action>
+  <action name="actionChangeStream">
+   <property name="text">
+    <string>&amp;Change Stream</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -499,6 +504,9 @@ p, li { white-space: pre-wrap; }
    <slots>
     <slot>listStreams()</slot>
     <slot>spawnStreamDescription()</slot>
+    <slot>clearAllEdges()</slot>
+    <slot>resetPosition()</slot>
+    <slot>configureLayers()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -1077,22 +1085,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>changeStreamButton</sender>
-   <signal>clicked()</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>listStreams()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>532</x>
-     <y>730</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>464</x>
-     <y>370</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionSetStreamName</sender>
    <signal>activated()</signal>
    <receiver>manetGLViewWindow</receiver>
@@ -1105,6 +1097,38 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>464</x>
      <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionChangeStream</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>listStreams()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>373</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLayers</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>configureLayers()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>373</y>
     </hint>
    </hints>
   </connection>

@@ -38,6 +38,7 @@
 
 namespace watcher {
 	class WatcherStreamListDialog;
+    class LayerConfigurationDialog;
 }
 
 class manetGLView : public QGLWidget
@@ -76,6 +77,8 @@ class manetGLView : public QGLWidget
         void clearAllLabels();
         void clearAllEdges();
         void clearAll();
+
+        void configureLayers(); 
 
         void toggleMonochrome(bool isOn);
         void toggleThreeDView(bool isOn);
@@ -121,6 +124,7 @@ signals:
 
         void layerToggled(const QString &, bool);
         void connectNewLayer(const QString); 
+        void spawnLayerConfigureDialog(); 
 
         void labelsCleared();
         void edgesCleared(); 
@@ -350,6 +354,8 @@ signals:
         double framesPerSec;
 
         std::string streamDescription;
+
+        watcher::LayerConfigurationDialog *layerConfigurationDialog;
 };
 
 #endif

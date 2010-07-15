@@ -4,6 +4,7 @@
 #include <string>
 #include <set>
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
 
 #include "logger.h"
 #include "edgeDisplayInfo.h"
@@ -28,7 +29,10 @@ namespace watcher {
             WatcherLayerData(const std::string &layerName, const size_t &nodeNum); 
             virtual ~WatcherLayerData();
 
-            /** like a a constructor, malloc all memory, initialize all values */
+            /** 
+             * like a a constructor, malloc all memory, then initialize all values 
+             * from ambient SingletonConfig instance. 
+             */
             void initialize(const std::string &name, const size_t &nn);
 
             /**
@@ -53,11 +57,12 @@ namespace watcher {
              */
             EdgeDisplayInfo edgeDisplayInfo;
 
-            /** wrapper for locking dynamic lists on the layer: node labels, floating labels */
+            /** Small typedef wrappers around or choice of mutex type. */
             typedef boost::shared_mutex WatcherLayerMutex;
-            enum LockModCommand { READ_LOCK, READ_UNLOCK, WRITE_LOCK, WRITE_UNLOCK };
-            void modifyLock(WatcherLayerMutex &m, const LockModCommand &c); 
-            
+            typedef boost::shared_lock<WatcherLayerMutex> ReadLock;
+            typedef boost::upgrade_lock<WatcherLayerMutex> UpgradeLock;
+            typedef boost::upgrade_to_unique_lock<WatcherLayerMutex> WriteLock;
+
             /** 
              * nodeLabels is a fixed size array (numNodes long) of label display infos, 
              * i.e. each node can have up to numNodeLabels labels attached to it.
@@ -72,17 +77,7 @@ namespace watcher {
              * one for each node, thus there are N mutexes, one for each list. 
              *
              * access as all node labels for the layer, "layer", as follows:
-             * for (size_t n=0; n<nodeNum; n++) {
-             *     if (nodes[n].isActive) { 
-             *         if (!layer->nodeLabels[n].empty()) {
-             *             layer->lockNodeLabels(n); 
-             *             for (NodeLabels::const_iterator lab=layer->nodeLabels[n].begin(); lab!=layer->nodeLabels[n].end(); lab++) {
-             *                 doSomthingWithLabel(*lab);
-             *             }
-             *             layer->unlockNodeLabels(n); 
-             *         }
-             *     }
-             * }
+             *   [GTL - IOU one example]
              */
             typedef std::set<LabelDisplayInfo> NodeLabels;
             NodeLabels *nodeLabels; 
@@ -116,14 +111,12 @@ namespace watcher {
             /** The name of this layer */
             std::string layerName;
 
-        protected:
-        private:
-
-            DECLARE_LOGGER();
-            
-            /** max numner of nodes supported by this layer. */
-            size_t numNodes; 
-
+            /*
+             * Set to false if this layer did not exist in the current configuration, 
+             * true otherwise. 
+             */
+            bool configured;
+   
             /** 
              * This label is loaded from the config file, then used to 
              * initialize all subsequently created LabelDisplayInfos. 
@@ -134,6 +127,14 @@ namespace watcher {
             LabelDisplayInfo referenceLabelDisplayInfo; 
             FloatingLabelDisplayInfo referenceFloatingLabelDisplayInfo; 
 
+        protected:
+        private:
+
+            DECLARE_LOGGER();
+            
+            /** max numner of nodes supported by this layer. */
+            size_t numNodes; 
+
             /** free all memory, set all values to zero/empty */
             void deinitialize();
 
@@ -142,6 +143,8 @@ namespace watcher {
 
             /** Not implemenented. */
             WatcherLayerData &operator=(const WatcherLayerData &noCopiesThanks); 
+
+            boost::mutex initMutex;
 
     }; // end of class
 }

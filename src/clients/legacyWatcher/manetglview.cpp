@@ -47,6 +47,7 @@
 #include "backgroundImage.h"
 #include "logger.h"
 #include "watcherStreamListDialog.h"
+#include "layerConfigurationDialog.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -992,7 +993,8 @@ manetGLView::manetGLView(QWidget *parent) :
     playbackStartTime(SeekMessage::eof),  // live mode
     autoCenterNodesFlag(false),
     nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
-    framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0)
+    framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0),
+    layerConfigurationDialog(NULL)
 {
     TRACE_ENTER();
     manetAdjInit.angleX=0.0;
@@ -1010,6 +1012,7 @@ manetGLView::manetGLView(QWidget *parent) :
     setAutoFillBackground(false);
 
     connect(this, SIGNAL(connectNewLayer(const QString)), this, SLOT(newLayerConnect(const QString)));
+    connect(this, SIGNAL(spawnLayerConfigureDialog()), this, SLOT(configureLayers())); 
 
     TRACE_EXIT();
 }
@@ -1021,6 +1024,12 @@ manetGLView::~manetGLView()
 
 void manetGLView::shutdown() 
 {
+    if (layerConfigurationDialog)
+        delete layerConfigurationDialog; 
+
+    if (streamsDialog)
+        delete streamsDialog;
+
     if (messageStream) { 
         if (messageStream->connected())  
             messageStream->stopStream();
@@ -1065,19 +1074,36 @@ void manetGLView::newLayerConnect(const QString &name)
     connect(item, SIGNAL(setChecked(bool)), action, SLOT(setChecked(bool)));
     layerMenuItems.push_back(item);     // We have to keep 'item' alive somewhere. 
     layerMenu->addAction(action); 
+
+
+    string layer(name.toStdString()); 
+    size_t l=wGraph->name2LayerIndex(layer); 
+    if (!layerConfigurationDialog) 
+        layerConfigurationDialog=new LayerConfigurationDialog(NULL); 
+    layerConfigurationDialog->addLayer(&wGraph->layers[l]); 
+    if (!wGraph->layers[l].configured) {
+        emit spawnLayerConfigureDialog();
+    }
+}
+
+void manetGLView::configureLayers()
+{
+    if (!layerConfigurationDialog) 
+        layerConfigurationDialog=new LayerConfigurationDialog(NULL);
+    layerConfigurationDialog->show(); 
 }
 
 void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
 {
     TRACE_ENTER();
 
-    // name2Layer() creates layer, loads configuration, and sets as active
-    if (!wGraph->layerExists(layer)) {
-        size_t l=wGraph->name2LayerIndex(layer);
-        wGraph->layers[l].isActive=active;
-    }
-
     if (layerMenu) {
+        if (!wGraph->layerExists(layer)) {
+            size_t l=wGraph->name2LayerIndex(layer);
+            wGraph->layers[l].isActive=active;
+        }
+        // this will add it to the menu and spawn a layer configuration 
+        // dialog if needed. 
         emit connectNewLayer(QString(layer.c_str())); 
     }
 
@@ -1185,12 +1211,17 @@ bool manetGLView::loadConfiguration()
             bool val=true;
             if (!layers.lookupValue(name, val))
                 layers.add(name, Setting::TypeBoolean)=val;  // Shouldn't happen unless misformed cfg file. 
+            SingletonConfig::unlock();
             addLayerMenuItem(name, val);
+            SingletonConfig::lock();
             if (name==PHYSICAL_LAYER) 
                 foundPhy=true;
         }
-        if (!foundPhy)
+        if (!foundPhy) {
+            SingletonConfig::unlock();
             addLayerMenuItem(PHYSICAL_LAYER, true);
+            SingletonConfig::lock();
+        }
 
         struct 
         {
@@ -1917,7 +1948,7 @@ void manetGLView::drawManet(void)
     drawGraph(wGraph); 
 }
 
-void manetGLView::drawGraph(WatcherGraph *&graph) 
+void manetGLView::drawGraph(WatcherGraph *&graph)
 {
     // draw all physical layer nodes
     for (size_t n=0; n<graph->numValidNodes; n++) 
@@ -1942,7 +1973,7 @@ void manetGLView::drawGraph(WatcherGraph *&graph)
         }
 
         {
-            shared_lock<shared_mutex> readLock(graph->layers[l].floatingLabelsMutex); 
+            WatcherLayerData::ReadLock readLock(graph->layers[l].floatingLabelsMutex); 
             BOOST_FOREACH(const WatcherLayerData::FloatingLabels::value_type &label, graph->layers[l].floatingLabels)  {
                 drawLabel(label.lat, label.lng, label.alt, label); 
             }
@@ -1950,7 +1981,7 @@ void manetGLView::drawGraph(WatcherGraph *&graph)
 
         for (unsigned int n=0; n<graph->numValidNodes; n++) {
             if (graph->nodes[n].isActive) {
-                shared_lock<shared_mutex> readLock(graph->layers[l].nodeLabelsMutexes[n]); 
+                WatcherLayerData::ReadLock readLock(graph->layers[l].nodeLabelsMutexes[n]); 
                 BOOST_FOREACH(const WatcherLayerData::NodeLabels::value_type &label, graph->layers[l].nodeLabels[n]) {
                     drawLabel(graph->nodes[n].x, graph->nodes[n].y, graph->nodes[n].z, label); 
                 }
@@ -2195,7 +2226,7 @@ void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &n
         GLdouble th=10.0;
         renderText(lx+sin(a-M_PI_2),ly+cos(a-M_PI_2)*th, lz, 
                 QString(edge.label.c_str()),
-                QFont(QString(edge.labelFont.c_str()), (int)(edge.labelPointSize*manetAdj.scaleX*scaleText)));
+                QFont(QString(edge.labelFont.c_str()), (int)edge.labelPointSize));
     }
 
     TRACE_EXIT(); 
@@ -2241,22 +2272,11 @@ void manetGLView::drawNode(const NodeDisplayInfo &node, bool physical)
     else
         glColor4fv(nodeColor);
 
-    // if (isActive(ANTENNARADIUS_LAYER)) { 
-    //     // 30.86666666666666666666 meters == 1 second of latitude
-    //     // 1/30.86666666666666666666 of a second of lat == 1 meter
-    //     // 0.000278 is a second in decimal degrees
-    //     // 0.000278*(1/30.86666)=.00000900648142688583==change in lat for one meter.
-    //     // This is still wrong though - or at least does not match MANE's idea of distance.
-    //     // drawWireframeSphere(antennaRadius*0.00000900648142688583*gpsScale);
-    //     // The number below is just an eyeball value.
-    //     drawWireframeSphere(antennaRadius*0.000015*gpsScale);
-    // }
-
     // Handle size after drawing antenna so as to not scale it
     handleSize(node);
     handleProperties(node);
-
     handleSpin(threeDView, node);
+
     switch(node.shape)
     {
         case NodePropertiesMessage::CIRCLE: drawSphere(4); break;
@@ -2293,7 +2313,7 @@ void manetGLView::drawNodeLabel(const NodeDisplayInfo &node, bool physical)
 
     renderText(0, 6, 3, QString(node.get_label().c_str()),
             QFont(node.labelFont.c_str(), 
-                (int)(node.labelPointSize*manetAdj.scaleX*scaleText))); 
+                (int)(node.labelPointSize*scaleText))); 
 
     TRACE_EXIT();
 }
@@ -2325,31 +2345,9 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     float offset=4.0;
 
-    // LOG_DEBUG("Building QFont for label \"" << label.labelText << "\": name: " << label.fontName << ", size: " <<  label.pointSize <<  " (adj:" << (int)(label.pointSize*manetAdj.scaleX*scaleText) << ")"); 
-    QFont f(label.fontName.c_str(), (int)(label.pointSize*manetAdj.scaleX*scaleText)); 
-
-    // Do cheesy shadow effect as I can't get a proper bounding box around the text as
-    // QFontMetric lisea bout how wide/tall the bounding box is. 
-    // if (!monochromeMode)
-    // {
-    //     qglColor(QColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])); 
-    //     QFontMetrics fm(f);
-    //     double shadowOffset=fm.height()*.02;
-    //     renderText(inx+offset+shadowOffset, iny+offset+shadowOffset, inz+1.0, label->labelText.c_str(), f); 
-    // }
-
+    QFont f(label.fontName.c_str(), (int)label.pointSize); 
     qglColor(QColor(fgColor[0], fgColor[1], fgColor[2], fgColor[3])); 
     renderText(inx+offset, iny+offset, inz+2.0, label.labelText.c_str(), f); 
-
-    // Use GLUT to draw labels, will be much faster.
-    // glColor3f(fgColor[0], fgColor[1], fgColor[2]);
-    // glPushMatrix();
-    // glLoadIdentity();
-    // setOrthographicProjection();
-    // for (char c=label->labelText.c_str(); *c != '\0'; c++) 
-    //     glutStrokeCharacter(GLUT_STROKE_ROMAN, *c);
-    // glPopMatrix();
-    // resetPerspectiveProjection();
 
     TRACE_EXIT(); 
 }
@@ -2389,7 +2387,7 @@ void manetGLView::showKeyboardShortcuts()
         "T   - reset layer padding to 0\n"
         "D   - Display debugging information\n"
         "k/l - increase/decrease gps scale\n"
-        "a/s - increase/decrease node label font size\n"
+        "a/s - increase/decrease node label and information font size\n"
         "t/y - increase/decrease padding between layers\n" 
         "n/m - shift center in/out\n"
         "z/x - compress/decompress field distance\n"
@@ -2947,6 +2945,8 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
         else
             messageStream->removeMessageFilter(f);
     }
+    if (layerConfigurationDialog)
+        layerConfigurationDialog->layerToggle(name); 
 
     TRACE_EXIT();
 }

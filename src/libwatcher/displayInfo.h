@@ -81,6 +81,11 @@ namespace watcher
             /** The layer that this info is displayed on. */
             watcher::event::GUILayer layer; 
 
+            /** 
+             * returns true if this layer exists in the configuration.
+             */
+            bool configurationExisted() const { return layerExisted; }
+
         protected:
 
             /** The 2nd level of the cfg path, usually "node" or "edge" */
@@ -92,12 +97,15 @@ namespace watcher
             /** The string that separates levels in teh cfg path */
             const std::string separator; 
 
+            mutable bool layerExisted;
+
         private:
 
             DECLARE_LOGGER();
 
             /** The "layer" level string */
             const std::string layerCfgId;
+
     };
 }
 

@@ -1,5 +1,4 @@
 #include <errno.h>
-#include <boost/thread/locks.hpp>
 #include <algorithm>            // for fill_n
 
 #include "labelMessage.h"
@@ -10,11 +9,11 @@ namespace watcher {
 
     INIT_LOGGER(WatcherLayerData, "WatcherLayerData"); 
 
-    WatcherLayerData::WatcherLayerData() : numNodes(0), layerName(""), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL)
+    WatcherLayerData::WatcherLayerData() : numNodes(0), layerName(""), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL), configured(false)
     {
     }
     WatcherLayerData::WatcherLayerData(const string &name, const size_t &nn) : 
-        numNodes(nn), layerName(name), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL)
+        numNodes(nn), layerName(name), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL), configured(false)
     {
         initialize(name, nn); 
     }
@@ -25,8 +24,6 @@ namespace watcher {
     }
     void WatcherLayerData::deinitialize() 
     {
-        clear(); 
-
         if (edges) {
             for (size_t i=0; i<numNodes; i++)  
                 if (edges[i])  
@@ -53,6 +50,7 @@ namespace watcher {
         numNodes=0;
         layerName="";
         isActive=false;
+        configured=false;
     }
     void WatcherLayerData::initialize(const string &name, const size_t &nn)  
     {
@@ -69,9 +67,9 @@ namespace watcher {
             exit(EXIT_FAILURE);
         }
 
-        nodeLabelsMutexes=new boost::shared_mutex[numNodes];
+        nodeLabelsMutexes=new WatcherLayerMutex[numNodes];
         if (!nodeLabelsMutexes) { 
-            LOG_FATAL("Unable to allocate " << (sizeof(boost::shared_mutex)*numNodes) << " bytes to store per node label mutexes on layer "
+            LOG_FATAL("Unable to allocate " << (sizeof(WatcherLayerMutex)*numNodes) << " bytes to store per node label mutexes on layer "
                     << layerName << ": " << strerror(errno)); 
             exit(EXIT_FAILURE);
         }
@@ -105,10 +103,18 @@ namespace watcher {
             std::fill_n(edgeExpirations[i], numNodes, watcher::Infinity); 
         }
 
+        clear(); 
+
         if (!edgeDisplayInfo.loadConfiguration(layerName)) { 
             LOG_FATAL("Unable to load display information for edge layer " << name); 
             exit(EXIT_FAILURE); 
         }
+        // The first thing we load from this layer is the edge. 
+        // When we load something else from this layer, then 
+        // the configuration will exist and this will return
+        // true - so, only check this after the first thing
+        // you load from a possibly new layer.
+        configured=edgeDisplayInfo.configurationExisted();
 
         referenceLabelDisplayInfo.loadConfiguration(layerName); 
         referenceFloatingLabelDisplayInfo.loadConfiguration(layerName); 
@@ -121,34 +127,15 @@ namespace watcher {
             std::fill_n(edgeExpirations[i], numNodes, watcher::Infinity); 
 
         {
-            boost::upgrade_lock<boost::shared_mutex> lock(floatingLabelsMutex); 
-            boost::upgrade_to_unique_lock<boost::shared_mutex> writeLock(lock); 
+            UpgradeLock lock(floatingLabelsMutex); 
+            WriteLock writeLock(lock); 
             floatingLabels.clear(); 
         }
 
         for (size_t n=0; n<numNodes; n++) {
-            boost::upgrade_lock<boost::shared_mutex> lock(nodeLabelsMutexes[n]); 
-            boost::upgrade_to_unique_lock<boost::shared_mutex> writeLock(lock); 
+            UpgradeLock lock(nodeLabelsMutexes[n]); 
+            WriteLock writeLock(lock); 
             nodeLabels[n].clear();
-        }
-    }
-    void WatcherLayerData::modifyLock(boost::shared_mutex &m, const LockModCommand &c)
-    {
-        switch(c) {
-            case READ_LOCK:
-                m.lock_shared();
-                break;
-            case READ_UNLOCK:
-                m.unlock_shared();
-                break;
-            case WRITE_LOCK: 
-                m.lock_upgrade(); 
-                m.unlock_upgrade_and_lock(); 
-                break;
-            case WRITE_UNLOCK:
-                m.unlock_and_lock_upgrade();
-                m.unlock_upgrade(); 
-                break;
         }
     }
     bool WatcherLayerData::addRemoveFloatingLabel(const event::LabelMessagePtr &m, const bool &timeForward)
@@ -156,8 +143,8 @@ namespace watcher {
         FloatingLabelDisplayInfo fldi(referenceFloatingLabelDisplayInfo);  // load default label info
         fldi.initialize(m);       // update with specific settings from this message (label text, etc)
         fldi.labelText=m->label;
-        boost::upgrade_lock<boost::shared_mutex> lock(floatingLabelsMutex); 
-        boost::upgrade_to_unique_lock<boost::shared_mutex> writeLock(lock); 
+        UpgradeLock lock(floatingLabelsMutex); 
+        WriteLock writeLock(lock); 
         if (m->addLabel) { 
             LOG_DEBUG("Adding floating label: " << *m); 
             if (fldi.expiration!=Infinity) {
@@ -178,8 +165,8 @@ namespace watcher {
     {
         LabelDisplayInfo ldi(referenceLabelDisplayInfo);  // load default label info
         ldi.initialize(m);       // update with specific settings from this message (label text, etc)
-        boost::upgrade_lock<boost::shared_mutex> lock(nodeLabelsMutexes[nodeNum]); 
-        boost::upgrade_to_unique_lock<boost::shared_mutex> writeLock(lock); 
+        UpgradeLock lock(nodeLabelsMutexes[nodeNum]); 
+        WriteLock writeLock(lock); 
         if (m->addLabel) { 
             LOG_DEBUG("Adding label: " << *m); 
             if (ldi.expiration!=Infinity) {
