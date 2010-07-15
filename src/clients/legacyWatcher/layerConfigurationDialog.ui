@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>layerConfigurationDialog</class>
+ <widget class="QDialog" name="layerConfigurationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>508</width>
+    <height>516</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Layer Configuration</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>470</y>
+     <width>171</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="layerActiveCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>470</y>
+     <width>111</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Layer Active</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="layerListWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>201</width>
+     <height>491</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="alternatingRowColors">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="edgeGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>221</x>
+     <y>1</y>
+     <width>271</width>
+     <height>241</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Edge Settings</string>
+   </property>
+   <layout class="QFormLayout" name="formLayout_2">
+    <item row="1" column="0">
+     <widget class="QLabel" name="edgeLabelColorLabel">
+      <property name="text">
+       <string>Label Color</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QToolButton" name="edgeLabelColorButton">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="edgeColorLabel">
+      <property name="text">
+       <string>Color</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QToolButton" name="edgeColorButton">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="QCheckBox" name="edgeFlashingCheckBox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Edge Flash</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <widget class="QPushButton" name="edgeLabelFontButton">
+      <property name="styleSheet">
+       <string notr="true">font: 10pt &quot;Sans Serif&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Label Font</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Edge Flash Rate</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="1">
+     <widget class="QSpinBox" name="edgeFlashingRateSpinBox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QSpinBox" name="edgeWidthSpinBox">
+      <property name="specialValueText">
+       <string/>
+      </property>
+      <property name="value">
+       <number>2</number>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Width</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="edgeLabelEditBox">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Label</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="nodeLabelGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>250</y>
+     <width>271</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Node Attached Label Settings</string>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <property name="fieldGrowthPolicy">
+     <enum>QFormLayout::ExpandingFieldsGrow</enum>
+    </property>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Foreground Color</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="edgeFlashingCheckBox_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Node Flash</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="nodeLabelFontButton">
+      <property name="text">
+       <string>Label Font</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QToolButton" name="nodeLabelColorButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="floatingLabelGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>360</y>
+     <width>271</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Free Floating Label Settings</string>
+   </property>
+   <layout class="QFormLayout" name="formLayout_3">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Foreground Color</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QToolButton" name="floatingLabelColorButton">
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="edgeFlashingCheckBox_3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Flash</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="floatingLabelFontButton">
+      <property name="text">
+       <string>Font</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>layerListWidget</sender>
+   <signal>itemClicked(QListWidgetItem*)</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setCurrentLayer(QListWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>110</x>
+     <y>175</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edgeLabelEditBox</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>updateEdgeLabel(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>385</x>
+     <y>131</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nodeLabelColorButton</sender>
+   <signal>released()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setNodeLabelColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>386</x>
+     <y>242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edgeColorButton</sender>
+   <signal>released()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setEdgeColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>366</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>floatingLabelColorButton</sender>
+   <signal>released()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setFloatingLabelColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>386</x>
+     <y>282</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edgeLabelColorButton</sender>
+   <signal>released()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setEdgeLabelColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>366</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edgeWidthSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setEdgeWidth(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edgeLabelFontButton</sender>
+   <signal>clicked()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setEdgeLabelFont()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>290</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>floatingLabelFontButton</sender>
+   <signal>released()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setFloatingLabelFont()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>390</x>
+     <y>436</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nodeLabelFontButton</sender>
+   <signal>released()</signal>
+   <receiver>layerConfigurationDialog</receiver>
+   <slot>setNodeLabelFont()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>392</x>
+     <y>326</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>setCurrentLayer(QListWidgetItem*)</slot>
+  <slot>setEdgeLabelFont()</slot>
+  <slot>setEdgeLabelColor()</slot>
+  <slot>setFloatingLabelColor()</slot>
+  <slot>setNodeLabelColor()</slot>
+  <slot>setEdgeWidth(int)</slot>
+  <slot>updateEdgeLabel(QString)</slot>
+  <slot>setEdgeColor()</slot>
+  <slot>setNodeLabelFont()</slot>
+  <slot>setFloatingLabelFont()</slot>
+ </slots>
+</ui>
