@@ -41,14 +41,11 @@
  * @arg <b>-S, --hideSecondRing</b>        Don't send message to draw the outer, second hand ring.
  * @arg <b>-H, --hideHourRing</b>          Don't send message to draw the inner, hour hand ring.
  * @arg <b>-p, --logProps=file</b>, log.properties file, which controls logging for this program
- * @arg <b>-e, --expireHands</b>           When drawing the hands, set them to expire after a short time.
  * @arg <b>-h, --help</b>, Show help message
  */
 #include <getopt.h>
 #include <string>
 #include <math.h>
-
-#include <boost/lexical_cast.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
@@ -81,7 +78,6 @@ void usage(const char *progName)
     fprintf(stderr, "   -r, --radius                The radius of the circle in some unknown unit\n"); 
     fprintf(stderr, "   -S, --hideSecondRing        Don't send message to draw the outer, second hand ring\n");
     fprintf(stderr, "   -H, --hideHourRing          Don't send message to draw the inner, hour hand ring\n");
-    fprintf(stderr, "   -e, --expireHands           When drawing edges for the hands, set an expiration on the edges.\n"); 
     fprintf(stderr, "   -t, --latitude              Place the clock at this latitude (def==0).\n"); 
     fprintf(stderr, "   -g, --longitude             Place the clock at this longitude (def==0).\n"); 
     fprintf(stderr, "   -x, --gpsScale              Factor the GPS positions by this much (def==1)\n"); 
@@ -99,7 +95,7 @@ int main(int argc, char **argv)
     string server;
     string logProps(string(basename(argv[0]))+string(".log.properties"));
     double radius=50.0; 
-    bool showSecondRing=true, showHourRing=true, expireHands=false;
+    bool showSecondRing=true, showHourRing=true;
     double offsetLong=0, offsetLat=0;
     double gpsScale=1;
 
@@ -112,7 +108,6 @@ int main(int argc, char **argv)
             {"radius", no_argument, 0, 'r'},
             {"hideSecondRing", no_argument, 0, 'S'},
             {"hideHourRing", no_argument, 0, 'H'},
-            {"expireHands", no_argument, 0, 'e'},
             {"latitude", required_argument, 0, 't'}, 
             {"longitude", required_argument, 0, 'g'}, 
             {"gpsScale", required_argument, 0, 'x'}, 
@@ -141,9 +136,6 @@ int main(int argc, char **argv)
                 break;
             case 'H':
                 showHourRing=false;
-                break;
-            case 'e':
-                expireHands=true;
                 break;
             case 'g':
                 offsetLong=lexical_cast<double>(optarg); 
@@ -185,38 +177,37 @@ int main(int argc, char **argv)
     NodeIdentifier minId=NodeIdentifier::from_string("192.168.1.102");
     NodeIdentifier secId=NodeIdentifier::from_string("192.168.1.103");
 
-    const GUILayer layer("Clock"); 
+    const GUILayer hourLayer("Hour"); 
+    const GUILayer minLayer("Min"); 
+    const GUILayer secLayer("Sec"); 
+    const GUILayer hourRingLayer("HourRing"); 
+    const GUILayer secRingLayer("SecondRing"); 
+
     const double step=(2*PI)/60;
     struct 
     {
         double theta;
         NodeIdentifier *id;
         const char *label;
-        Color color;
         double length;
+        const GUILayer layer;
     } nodeData[]=
     {
-        { 0,   &hourId, "hour", colors::red,   radius*0.7 }, 
-        { 0,    &minId,  "min", colors::blue,  radius }, 
-        { 0,    &secId,  "sec", colors::green, radius}, 
+        { 0,   &hourId, "hour", radius*0.7, hourLayer }, 
+        { 0,    &minId,  "min", radius, minLayer }, 
+        { 0,    &secId,  "sec", radius, secLayer }, 
     };
+
     while (true)  // draw everything all the time as we don't know when watcher will start
     {
         vector<MessagePtr> messages; 
 
         // Draw center node
         GPSMessagePtr gpsMess(new GPSMessage(gpsScale*(offsetLong+radius), gpsScale*(offsetLat+radius), 0));
-        gpsMess->layer=layer;
+        gpsMess->layer=hourLayer; // meh.
         gpsMess->fromNodeID=centerId;
 
         messages.push_back(gpsMess); 
-        // if(!client.sendMessage(gpsMess))
-        // {
-        //     LOG_ERROR("Error sending gps message: " << *gpsMess);
-        //     TRACE_EXIT_RET(EXIT_FAILURE);
-        //     return EXIT_FAILURE;
-        // }
-        // draw hour, min, and second nodes, connecting them to center.
         for (unsigned int i=0; i<sizeof(nodeData)/sizeof(nodeData[0]); i++)
         {
             // update location offsets by current time.
@@ -234,31 +225,31 @@ int main(int argc, char **argv)
                         gpsScale*(offsetLong+(sin(nodeData[i].theta)*nodeData[i].length)+radius), 
                         gpsScale*(offsetLat+(cos(nodeData[i].theta)*nodeData[i].length)+radius), 
                         (double)i));
-            gpsMess->layer=layer;
+            gpsMess->layer=nodeData[i].layer;
             gpsMess->fromNodeID=*nodeData[i].id;
 
             messages.push_back(gpsMess); 
-            // if(!client.sendMessage(gpsMess))
-            // {
-            //     LOG_ERROR("Error sending gps message: " << *gpsMess);
-            //     TRACE_EXIT_RET(EXIT_FAILURE);
-            //     return EXIT_FAILURE;
-            // }
+
+            EdgeMessagePtr edge(new EdgeMessage(centerId, *nodeData[i].id, nodeData[i].layer, 
+                        colors::blue, 2.0, false, loopTime*1500, true)); 
 
             LabelMessagePtr labMess(new LabelMessage(nodeData[i].label));
-            labMess->layer=layer;
-            labMess->expiration=expireHands?loopTime*2000:0; 
-            EdgeMessagePtr edgeMess(new EdgeMessage(centerId, *nodeData[i].id, layer, nodeData[i].color, 2));
-            edgeMess->middleLabel=labMess;
-            edgeMess->expiration=expireHands?loopTime*2000:0;
+            labMess->layer=nodeData[i].layer;
+            labMess->expiration=loopTime*1500; 
+            edge->middleLabel=labMess;
 
-            messages.push_back(edgeMess); 
-            // if(!client.sendMessage(edgeMess))
-            // {
-            //     LOG_ERROR("Error sending edge message: " << *edgeMess);
-            //     TRACE_EXIT_RET(EXIT_FAILURE);
-            //     return EXIT_FAILURE;
-            // }
+            LabelMessagePtr numLabMess(new LabelMessage);
+            if (*nodeData[i].id==hourId)
+                numLabMess->label=boost::lexical_cast<string>(now->tm_hour%12); 
+            else if(*nodeData[i].id==minId)
+                numLabMess->label=boost::lexical_cast<string>(now->tm_min); 
+            else if(*nodeData[i].id==secId)
+                numLabMess->label=boost::lexical_cast<string>(now->tm_sec); 
+            numLabMess->layer=nodeData[i].layer;
+            numLabMess->expiration=loopTime*1500; 
+            edge->node2Label=numLabMess;
+
+            messages.push_back(edge);
         }
 
         if (showHourRing)
@@ -272,16 +263,10 @@ int main(int argc, char **argv)
                             gpsScale*(offsetLong+((sin(theta)*radius)+radius)), 
                             gpsScale*(offsetLat+((cos(theta)*radius)+radius)), 
                             0.0));
-                gpsMess->layer=layer;
+                gpsMess->layer=hourRingLayer;
                 gpsMess->fromNodeID=thisId;
 
                 messages.push_back(gpsMess); 
-                // if(!client.sendMessage(gpsMess))
-                // {
-                //     LOG_ERROR("Error sending gps message: " << *gpsMess);
-                //     TRACE_EXIT_RET(EXIT_FAILURE);
-                //     return EXIT_FAILURE;
-                // }
             }
         }
 
@@ -296,16 +281,10 @@ int main(int argc, char **argv)
                 GPSMessagePtr gpsMess(new GPSMessage(
                             gpsScale*(offsetLong+((sin(theta)*faceRad)+radius)), 
                             gpsScale*(offsetLat+((cos(theta)*faceRad)+radius)), 0.0)); 
-                gpsMess->layer=layer;
+                gpsMess->layer=secRingLayer;
                 gpsMess->fromNodeID=thisId;
 
                 messages.push_back(gpsMess); 
-                // if(!client.sendMessage(gpsMess))
-                // {
-                //     LOG_ERROR("Error sending gps message: " << *gpsMess);
-                //     TRACE_EXIT_RET(EXIT_FAILURE);
-                //     return EXIT_FAILURE;
-                // }
             }
         }
         if (!messages.empty()) { 

@@ -41,7 +41,7 @@ namespace watcher
         public:
 
             explicit LayerConfigurationDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
-            ~LayerConfigurationDialog(); 
+            virtual ~LayerConfigurationDialog(); 
 
         public slots:
 
@@ -65,7 +65,11 @@ namespace watcher
             void setFloatingLabelColor();
             void setFloatingLabelFont();
 
+            void layerToggled(bool toggled);
+
         signals:
+
+            void layerToggled(QString, bool);
 
         protected:
     
@@ -84,7 +88,7 @@ namespace watcher
 
             WatcherLayerData *currentLayer;
 
-            LayerPreviewWindow previewWindow;
+            // LayerPreviewWindow previewWindow;
 
         private:
 

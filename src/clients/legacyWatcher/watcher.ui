@@ -20,7 +20,7 @@
    <string comment="Who watches the watcher?">Legacy Watcher</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="watcherResources.qrc">
+   <iconset>
     <normaloff>:/icons/resources/watcher.png</normaloff>:/icons/resources/watcher.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -78,7 +78,7 @@ p, li { white-space: pre-wrap; }
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="watcherResources.qrc">
+           <iconset>
             <normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</iconset>
           </property>
          </widget>
@@ -95,7 +95,7 @@ p, li { white-space: pre-wrap; }
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="watcherResources.qrc">
+           <iconset>
             <normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</iconset>
           </property>
          </widget>
@@ -115,7 +115,7 @@ p, li { white-space: pre-wrap; }
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="watcherResources.qrc">
+           <iconset>
             <normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</iconset>
           </property>
          </widget>
@@ -132,7 +132,7 @@ p, li { white-space: pre-wrap; }
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="watcherResources.qrc">
+           <iconset>
             <normaloff>:/buttonImages/resources/gtk-media-pause.png</normaloff>:/buttonImages/resources/gtk-media-pause.png</iconset>
           </property>
          </widget>
@@ -149,7 +149,7 @@ p, li { white-space: pre-wrap; }
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="watcherResources.qrc">
+           <iconset>
             <normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</iconset>
           </property>
          </widget>
@@ -172,7 +172,7 @@ p, li { white-space: pre-wrap; }
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="watcherResources.qrc">
+           <iconset>
             <normaloff>:/buttonImages/resources/gtk-media-next-ltr.png</normaloff>:/buttonImages/resources/gtk-media-next-ltr.png</iconset>
           </property>
          </widget>
@@ -297,7 +297,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>930</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLayers">
@@ -348,6 +348,8 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionSetStreamName"/>
     <addaction name="actionChangeStream"/>
     <addaction name="actionLayers"/>
+    <addaction name="actionLoadBackgroundImageFromFile"/>
+    <addaction name="actionNodeConfiguration"/>
    </widget>
    <addaction name="menuLayers"/>
    <addaction name="menuView"/>
@@ -481,7 +483,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSetStreamName">
    <property name="text">
-    <string>Set Stream Name</string>
+    <string>&amp;Set Stream Name</string>
    </property>
   </action>
   <action name="actionLayers">
@@ -494,6 +496,16 @@ p, li { white-space: pre-wrap; }
     <string>&amp;Change Stream</string>
    </property>
   </action>
+  <action name="actionLoadBackgroundImageFromFile">
+   <property name="text">
+    <string>&amp;Background Image</string>
+   </property>
+  </action>
+  <action name="actionNodeConfiguration">
+   <property name="text">
+    <string>&amp;Node Configuration</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -502,11 +514,14 @@ p, li { white-space: pre-wrap; }
    <header location="global">manetglview.h</header>
    <container>1</container>
    <slots>
+    <signal>nodeClicked(int)</signal>
     <slot>listStreams()</slot>
     <slot>spawnStreamDescription()</slot>
     <slot>clearAllEdges()</slot>
     <slot>resetPosition()</slot>
     <slot>configureLayers()</slot>
+    <slot>loadBackgroundImage()</slot>
+    <slot>spawnNodeConfigurationDialog()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -1129,6 +1144,38 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>464</x>
      <y>373</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoadBackgroundImageFromFile</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>loadBackgroundImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>365</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNodeConfiguration</sender>
+   <signal>activated()</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>spawnNodeConfigurationDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>365</y>
     </hint>
    </hints>
   </connection>

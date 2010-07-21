@@ -9,11 +9,11 @@ namespace watcher {
 
     INIT_LOGGER(WatcherLayerData, "WatcherLayerData"); 
 
-    WatcherLayerData::WatcherLayerData() : numNodes(0), layerName(""), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL), configured(false)
+    WatcherLayerData::WatcherLayerData() : numNodes(0), layerName(""), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL), configured(false), edgeLabels(NULL), edgeLabelsMutexes(NULL)
     {
     }
     WatcherLayerData::WatcherLayerData(const string &name, const size_t &nn) : 
-        numNodes(nn), layerName(name), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL), configured(false)
+        numNodes(nn), layerName(name), isActive(false), edges(NULL), edgeExpirations(NULL), nodeLabels(NULL), nodeLabelsMutexes(NULL), configured(false), edgeLabels(NULL), edgeLabelsMutexes(NULL)
     {
         initialize(name, nn); 
     }
@@ -45,6 +45,18 @@ namespace watcher {
         if (nodeLabelsMutexes) { 
             delete [] nodeLabelsMutexes;
             nodeLabelsMutexes=NULL;
+        }
+        if (edgeLabels) {
+            for (size_t i=0; i<numNodes; i++)
+                if (edgeLabels[i])
+                    delete [] edgeLabels[i];
+            delete [] edgeLabels;
+        }
+        if (edgeLabelsMutexes) {
+            for (size_t i=0; i<numNodes; i++)
+                if (edgeLabelsMutexes[i])
+                    delete [] edgeLabelsMutexes[i];
+            delete [] edgeLabelsMutexes;
         }
 
         numNodes=0;
@@ -102,6 +114,30 @@ namespace watcher {
             }
             std::fill_n(edgeExpirations[i], numNodes, watcher::Infinity); 
         }
+        edgeLabels=new EdgeLabels*[numNodes];
+        if (!edgeLabels) {
+            LOG_FATAL("Unable to allocate memory for edgeLabels on layer " << layerName); 
+            exit(EXIT_FAILURE);
+        }
+        for (size_t i=0; i<numNodes; i++) {
+            edgeLabels[i]=new EdgeLabels[numNodes]; 
+            if (!edgeLabels[i]) { 
+                LOG_FATAL("Unable to allocate space for edge labels [" << i << "] on layer " << layerName); 
+                exit(EXIT_FAILURE);
+            }
+        }
+        edgeLabelsMutexes=new WatcherLayerMutex*[numNodes];
+        if (!edgeLabelsMutexes) {
+            LOG_FATAL("Unable to allocate memory for edgeLabels mutexes on layer " << layerName); 
+            exit(EXIT_FAILURE);
+        }
+        for (size_t i=0; i<numNodes; i++) {
+            edgeLabelsMutexes[i]=new WatcherLayerMutex[numNodes]; 
+            if (!edgeLabelsMutexes[i]) { 
+                LOG_FATAL("Unable to allocate space for edge labels mutexes [" << i << "] on layer " << layerName); 
+                exit(EXIT_FAILURE);
+            }
+        }
 
         clear(); 
 
@@ -137,6 +173,12 @@ namespace watcher {
             WriteLock writeLock(lock); 
             nodeLabels[n].clear();
         }
+        for (size_t i=0; i<numNodes; i++)  
+            for (size_t j=0; j<numNodes; j++) {
+                UpgradeLock lock(edgeLabelsMutexes[i][j]);
+                WriteLock writeLock(lock);
+                edgeLabels[i][j].clear();
+            }
     }
     bool WatcherLayerData::addRemoveFloatingLabel(const event::LabelMessagePtr &m, const bool &timeForward)
     {
@@ -163,12 +205,13 @@ namespace watcher {
 
     bool WatcherLayerData::addRemoveLabel(const event::LabelMessagePtr &m, const bool &timeForward, const size_t &nodeNum)
     {
-        LabelDisplayInfo ldi(referenceLabelDisplayInfo);  // load default label info
+        LabelDisplayInfo ldi(referenceLabelDisplayInfo); 
         ldi.initialize(m);       // update with specific settings from this message (label text, etc)
+
         UpgradeLock lock(nodeLabelsMutexes[nodeNum]); 
         WriteLock writeLock(lock); 
         if (m->addLabel) { 
-            LOG_DEBUG("Adding label: " << *m); 
+            LOG_DEBUG("Adding (node) label: " << *m); 
             if (ldi.expiration!=Infinity) {
                 if (timeForward) 
                     ldi.expiration=m->timestamp+m->expiration;
@@ -179,6 +222,29 @@ namespace watcher {
         }
         else 
             nodeLabels[nodeNum].erase(ldi); 
+        
+        return true;
+    }
+
+    bool WatcherLayerData::addRemoveEdgeLabel(const event::LabelMessagePtr &m, const bool &timeForward, const size_t &node1, const size_t &node2)
+    {
+        LabelDisplayInfo ldi(referenceLabelDisplayInfo); 
+        ldi.initialize(m);       // update with specific settings from this message (label text, etc)
+
+        UpgradeLock lock(edgeLabelsMutexes[node1][node2]); 
+        WriteLock writeLock(lock); 
+        if (m->addLabel) { 
+            LOG_DEBUG("Adding (edge) label: " << *m); 
+            if (ldi.expiration!=Infinity) {
+                if (timeForward) 
+                    ldi.expiration=m->timestamp+m->expiration;
+                else 
+                    ldi.expiration=m->timestamp-m->expiration;
+            }
+            edgeLabels[node1][node2].insert(ldi); 
+        }
+        else 
+            edgeLabels[node1][node2].erase(ldi); 
         
         return true;
     }

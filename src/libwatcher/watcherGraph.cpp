@@ -215,7 +215,6 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
             layers[l].edges[b][a]=false;
             layers[l].edgeExpirations[b][a]=watcher::Infinity;
         }
-        return true;
     }
 
     if (message->expiration!=Infinity) {
@@ -226,6 +225,15 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
             layers[l].edgeExpirations[a][b]=message->timestamp-message->expiration;  
         // LOG_DEBUG("Set edge expiration. Was: " << oldExp << " now: " << theGraph[ei.first].expiration);
     }
+
+    if (layers[l].edges[a][b] && message->middleLabel && !message->middleLabel->label.empty()) 
+        layers[l].addRemoveEdgeLabel(message->middleLabel, timeForward, a, b); 
+
+    if (nodes[a].isActive && message->node1Label && !message->node1Label->label.empty()) 
+        layers[l].addRemoveLabel(message->node1Label, timeForward, a); 
+
+    if (nodes[b].isActive && message->node2Label && !message->node2Label->label.empty()) 
+        layers[l].addRemoveLabel(message->node2Label, timeForward, b); 
 
     // if you want dynamic colors and widths (i.e. controlled by the test nodes at run time), 
     // uncomment the following. Is it worth doing this copy for every edge message we get
@@ -241,23 +249,10 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
             layers[l].edgeExpirations[b][a]=message->timestamp+message->expiration;  
         else 
             layers[l].edgeExpirations[b][a]=message->timestamp-message->expiration;  
-    }
 
-    // Does not work - there is no storage space in WatcherLayer for 
-    // labels on the edges. Unsupported for now. 
-    // // Uncomment if you want to support dynamic edge lables.
-    // // only support middle lables for now. Others are the same pattern.
-    // // if (message->middleLabel && !message->middleLabel->label.empty()) {
-    // //     LabelDisplayInfoPtr lmp(new LabelDisplayInfo); 
-    // //     lmp->foregroundColor=l->edgeDisplayInfo.displayInfo->labelColor;
-    // //     lmp->backgroundColor=watcher::colors::black;
-    // //     lmp->fontName=l->edgeDisplayInfo->labelFont;
-    // //     lmp->pointSize=l->edgeDisplayInfo->labelPointSize;
-    // //     lmp->loadConfiguration(message->middleLabel); 
-    // //     if (lmp->expiration!=Infinity) 
-    // //         lmp->expiration=message->timestamp+(timeForward?message->expiration:-message->expiration); 
-    // //     l->edgeLabels[a][b].labels.push_back(lmp);
-    // // }
+        if (layers[l].edges[b][a] && message->middleLabel && !message->middleLabel->label.empty()) 
+            layers[l].addRemoveEdgeLabel(message->middleLabel, timeForward, b, a); 
+    }
 
     return true;
 }
@@ -269,9 +264,8 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
         if (!layers[l].isActive) 
             continue;
         {
-            // shared_lock<shared_mutex> readLock(layers[l].floatingLabelsMutex); 
-            upgrade_lock<shared_mutex> lock(layers[l].floatingLabelsMutex); 
-            upgrade_to_unique_lock<shared_mutex> writeLock(lock); 
+            WatcherLayerData::UpgradeLock lock(layers[l].floatingLabelsMutex); 
+            WatcherLayerData::WriteLock writeLock(lock); 
             for (WatcherLayerData::FloatingLabels::iterator label=layers[l].floatingLabels.begin(); label!=layers[l].floatingLabels.end(); ) {
                 if (label->expiration!=Infinity && (timeForward ? (now > label->expiration) : (now < label->expiration))) 
                     layers[l].floatingLabels.erase(label++); 
@@ -284,17 +278,25 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
                 continue;
             {
                 for (size_t n2=0; n2<numValidNodes; n2++)  {
-                    if (nodes[n2].isActive) 
-                        if (layers[l].edges[n][n2] && layers[l].edgeExpirations[n][n2]!=Infinity)
+                    if (nodes[n2].isActive) {
+                        if (layers[l].edges[n][n2] && layers[l].edgeExpirations[n][n2]!=Infinity) {
                             if ((timeForward ? (now > layers[l].edgeExpirations[n][n2]) : (now < layers[l].edgeExpirations[n][n2]))) { 
                                 layers[l].edges[n][n2]=0; 
                                 layers[l].edgeExpirations[n][n2]=Infinity; 
                             }
+                        }
+                    }
+                    WatcherLayerData::UpgradeLock lock(layers[l].edgeLabelsMutexes[n][n2]);
+                    WatcherLayerData::WriteLock writeLock(lock);
+                    for (WatcherLayerData::EdgeLabels::iterator label=layers[l].edgeLabels[n][n2].begin(); label!=layers[l].edgeLabels[n][n2].end(); ) {
+                        if (label->expiration!=Infinity && (timeForward ? (now > label->expiration) : (now < label->expiration))) 
+                            layers[l].edgeLabels[n][n2].erase(label++); 
+                        else
+                            ++label;
+                    }
                 }
-                
-                // shared_lock<shared_mutex> readLock(layers[l].nodeLabelsMutexes[n]);
-                upgrade_lock<shared_mutex> lock(layers[l].nodeLabelsMutexes[n]); 
-                upgrade_to_unique_lock<shared_mutex> writeLock(lock); 
+                WatcherLayerData::UpgradeLock lock(layers[l].nodeLabelsMutexes[n]); 
+                WatcherLayerData::WriteLock writeLock(lock); 
                 for (WatcherLayerData::NodeLabels::iterator label=layers[l].nodeLabels[n].begin(); label!=layers[l].nodeLabels[n].end(); ) {
                     if (label->expiration!=Infinity && (timeForward ? (now > label->expiration) : (now < label->expiration))) 
                         layers[l].nodeLabels[n].erase(label++); 

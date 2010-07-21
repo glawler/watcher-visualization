@@ -29,7 +29,7 @@ LIBS += -L../../util
 LIBS += -L../../libwatcher/.libs -lwatchermsg
 LIBS += -L../../libwatcher -lwatcher
 LIBS += -lwatchermsg
-LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
+LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut -lGLcore
 LIBS += @LIBCONFIG_LIBS@
 LIBS += @LOGGER_LIBS@
 LIBS += -lwatcherutils
@@ -57,14 +57,16 @@ HEADERS += \
     watcherScrollingGraphControl.h \
     watcherStreamListDialog.h \
     watcherConfigurationDialog.h \
-    layerConfigurationDialog.cpp
+    layerConfigurationDialog.h \
+    nodeConfigurationDialog.h
 
 FORMS += \
     watcher.ui \
     aboutDialog.ui \
     streamlist.ui \
     configurationInformation.ui \
-    layerConfigurationDialog.ui
+    layerConfigurationDialog.ui \
+    nodeConfigurationDialog.ui
 
 SOURCES += \
     backgroundImage.cpp \
@@ -80,6 +82,7 @@ SOURCES += \
     watcherScrollingGraphControl.cpp \
     watcherStreamListDialog.cpp \
     watcherConfigurationDialog.cpp \
-    layerConfigurationDialog.cpp
+    layerConfigurationDialog.cpp \
+    nodeConfigurationDialog.cpp
 
 RESOURCES += watcherResources.qrc

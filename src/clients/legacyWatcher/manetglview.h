@@ -39,6 +39,7 @@
 namespace watcher {
 	class WatcherStreamListDialog;
     class LayerConfigurationDialog;
+    class NodeConfigurationDialog;
 }
 
 class manetGLView : public QGLWidget
@@ -72,7 +73,7 @@ class manetGLView : public QGLWidget
 
         // void layerToggled(QString, bool);
         void layerToggle(const QString &layer, const bool turnOn);
-        void newLayerConnect(const QString &name); 
+        void newLayerConnect(const QString name); 
 
         void clearAllLabels();
         void clearAllEdges();
@@ -114,8 +115,10 @@ class manetGLView : public QGLWidget
         void sliderPressedInGUI();
 
         void spawnAboutBox(); 
+        void spawnNodeConfigurationDialog();
         void saveConfiguration();
         void streamFilteringEnabled(bool isEnabled); 
+        void loadBackgroundImage(void);
 
         void shutdown(); 
 
@@ -141,6 +144,8 @@ signals:
 
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
+
+        void nodeClicked(size_t nodeId);
 
         // Emitted when the rate of the stream is changed.
         void streamRateSet(double); 
@@ -168,7 +173,7 @@ signals:
 
         void keyPressEvent(QKeyEvent * event);
 
-        unsigned int getNodeIdAtCoords(const int x, const int y);
+        size_t getNodeIdAtCoords(const int x, const int y);
         void drawStatusString(); 
         void drawDebugInfo();
 
@@ -330,7 +335,7 @@ signals:
         void rotateY(float deg);
         void rotateZ(float deg);
 
-        void drawLabel(GLfloat x, GLfloat y, GLfloat z, const watcher::LabelDisplayInfo &label);
+        void drawLabel(GLfloat x, GLfloat y, GLfloat z, const watcher::LabelDisplayInfo &label, int labelCount);
         void handleSpin(int threeD, const watcher::NodeDisplayInfo &ndi); 
         void handleSize(const watcher::NodeDisplayInfo &ndi); 
         void handleProperties(const watcher::NodeDisplayInfo &ndi); 
@@ -356,6 +361,7 @@ signals:
         std::string streamDescription;
 
         watcher::LayerConfigurationDialog *layerConfigurationDialog;
+        watcher::NodeConfigurationDialog *nodeConfigurationDialog;
 };
 
 #endif

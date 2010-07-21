@@ -45,6 +45,15 @@ namespace watcher {
         TRACE_EXIT();
     }
 
+    void LayerConfigurationDialog::addLayer(WatcherLayerData *l)
+    {
+        layers.push_back(l);
+        QListWidgetItem *item=new QListWidgetItem(l->layerName.c_str(), layerListWidget); 
+        QFont f(item->font());
+        f.setBold(l->isActive); 
+        item->setFont(f); 
+    }
+
     LayerConfigurationDialog::~LayerConfigurationDialog()
     {
         TRACE_ENTER();
@@ -52,26 +61,22 @@ namespace watcher {
         TRACE_EXIT();
     }
 
-    void LayerConfigurationDialog::addLayer(WatcherLayerData *l)
-    {
-        layers.push_back(l);
-        QListWidgetItem *item=new QListWidgetItem(l->layerName.c_str(), layerListWidget); 
-        if (l->isActive) {
-            QFont f(item->font());
-            f.setBold(true); 
-            item->setFont(f); 
-        }
-    }
-
     void LayerConfigurationDialog::layerToggle(std::string &name)
     {
         QString layerName(name.c_str()); 
         QList<QListWidgetItem *> items=layerListWidget->findItems(layerName, Qt::MatchExactly); 
         BOOST_FOREACH(QListWidgetItem *item, items) { 
-            QFont f(item->font());
-            f.setBold(!f.bold()); 
-            item->setFont(f); 
+            BOOST_FOREACH(WatcherLayerData *layer, layers) {
+                if (layer->layerName==item->text().toStdString()) {
+                    QFont f(item->font());
+                    f.setBold(layer->isActive); 
+                    item->setFont(f); 
+                }
+            }
         }
+        if (currentLayer && currentLayer->layerName==name)
+            layerActiveCheckBox->setCheckState(currentLayer->isActive ? Qt::Checked : Qt::Unchecked);
+
     }
 
     bool LayerConfigurationDialog::checkForValidCurrentLayer()
@@ -146,6 +151,17 @@ namespace watcher {
         }
         // set edit boxes
         edgeLabelEditBox->setText(currentLayer->edgeDisplayInfo.label.c_str()); 
+
+        // set spinners
+        edgeWidthSpinBox->setValue(currentLayer->edgeDisplayInfo.width); 
+
+        // isActive checkbox
+        layerActiveCheckBox->setCheckState(currentLayer->isActive ? Qt::Checked : Qt::Unchecked);
+    }
+
+    void LayerConfigurationDialog::layerToggled(bool toggled) 
+    {
+        emit layerToggled(currentLayer->layerName.c_str(), toggled);
     }
 
     void LayerConfigurationDialog::setColor(Color &c, QToolButton *b)
@@ -153,18 +169,17 @@ namespace watcher {
         if (!checkForValidCurrentLayer()) 
             return;
         if (currentLayer) { 
-            QRgb rgb=0x00000000;
-            rgb |= (0x00ff0000 & c.r); 
-            rgb |= (0x0000ff00 & c.g); 
-            rgb |= (0x000000ff & c.b); 
-            rgb |= (0xff000000 & c.a); 
-
-            bool ok=false;
-            rgb=QColorDialog::getRgba(rgb, &ok);
-            if (ok) {
-                c=Color(qRed(rgb), qGreen(rgb), qBlue(rgb), qAlpha(rgb)); 
+            QColor clr(c.r, c.g, c.b, c.a);
+            QColorDialog *d = new QColorDialog(clr, this);
+            d->setOption(QColorDialog::ShowAlphaChannel, true); 
+            d->exec();
+            if (QDialog::Accepted==d->result()) {
+                clr=d->currentColor();
+                c=Color(clr.red(), clr.green(), clr.blue(), clr.alpha()); 
                 QString ss;
-                ss.sprintf("background-color: #%02x%02x%02x", qRed(rgb), qGreen(rgb), qBlue(rgb)); 
+                ss.sprintf("background-color: #%02x%02x%02x; color: #%02x%02x%02x", 
+                        clr.red(), clr.green(), clr.blue(), 
+                        (~clr.red())&0xFF, (~clr.green())&0xFF, (~clr.blue())&0xFF);  
                 b->setStyleSheet(ss); 
             }
         }

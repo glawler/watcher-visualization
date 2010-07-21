@@ -57,7 +57,8 @@ BackgroundImage::BackgroundImage() :
     imageWidth(0),
     imageHeight(0),
     imageFormat(GL_BITMAP),
-    imageType(GL_UNSIGNED_BYTE)
+    imageType(GL_UNSIGNED_BYTE),
+    imageFile("")
 {
     TRACE_ENTER();
 
@@ -83,6 +84,31 @@ BackgroundImage::~BackgroundImage()
     imageData=NULL; 
 
     TRACE_EXIT();
+}
+
+bool BackgroundImage::loadImageFile(const std::string &filename)
+{
+    const char *ext=rindex(filename.data(), '.');
+    if (!ext) {
+        LOG_ERROR("I have no idea what kind of file the background image " << filename << " is. I only support BMP and PPM"); 
+        return false;
+    }
+    else if (0==strncasecmp(ext+sizeof(char), "bmp", 3)) {
+        if (!loadBMPFile(filename.data())) {
+            LOG_FATAL("Unable to load background BMP image in watcher from file: " << filename); 
+            TRACE_EXIT_RET_BOOL(false);
+            return false;
+        }
+    }
+    else if (0==strncmp("ppm", ext+sizeof(char), 3)) {
+        if (!loadPPMFile(filename.data())) {
+            LOG_FATAL("Unable to load background PPM image in watcher from file: " << filename); 
+            TRACE_EXIT_RET_BOOL(false);
+            return false;
+        }
+    }
+    imageFile=filename;
+    return true;
 }
 
 bool BackgroundImage::loadBMPFile(const char *filename)

@@ -63,6 +63,10 @@ namespace watcher {
             typedef boost::upgrade_lock<WatcherLayerMutex> UpgradeLock;
             typedef boost::upgrade_to_unique_lock<WatcherLayerMutex> WriteLock;
 
+            bool addRemoveFloatingLabel(const event::LabelMessagePtr &m, const bool &timeForward);
+            bool addRemoveLabel(const event::LabelMessagePtr &m, const bool &timeForward, const size_t &nodeNum);
+            bool addRemoveEdgeLabel(const event::LabelMessagePtr &m, const bool &timeForward, const size_t &n1, const size_t &n2);
+
             /** 
              * nodeLabels is a fixed size array (numNodes long) of label display infos, 
              * i.e. each node can have up to numNodeLabels labels attached to it.
@@ -93,8 +97,13 @@ namespace watcher {
             FloatingLabels floatingLabels;
             WatcherLayerMutex floatingLabelsMutex;
 
-            bool addRemoveFloatingLabel(const event::LabelMessagePtr &m, const bool &timeForward);
-            bool addRemoveLabel(const event::LabelMessagePtr &m, const bool &timeForward, const size_t &nodeNum);
+            /**
+             * labels attached to edges. If edgeLabels[a][b] is not empty, there are one or more lables
+             * attached to the edge. 
+             */
+            typedef std::set<LabelDisplayInfo> EdgeLabels;
+            EdgeLabels **edgeLabels;
+            WatcherLayerMutex **edgeLabelsMutexes;
 
             /** 
              * clear all data from the layer. Do not mark as inActive or deallocate any memory.

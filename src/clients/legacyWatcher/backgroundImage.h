@@ -23,7 +23,7 @@
  */
 #ifndef WATCHER_BG_IMAGRE_H
 #define WATCHER_BG_IMAGRE_H
-
+#include <string>
 #include "declareLogger.h"
 
 namespace watcher 
@@ -33,6 +33,15 @@ namespace watcher
         public:
             // is a singleton
             static BackgroundImage &getInstance(); 
+
+            /** 
+             * Load a file into the backgroundImage instance. 
+             * Parses the filename and calls either loadBMP() or
+             * loadPPM(). No other formats are currently supported. 
+             *
+             * @return bool, true if image loaded, false otherwise.
+             */
+            bool loadImageFile(const std::string &filename);
 
             // returns false if unable to load image.
             // Or bad image format.
@@ -52,6 +61,8 @@ namespace watcher
             // (Hacky - only used when executing the self-centering code in the watcher)
             void centerImage(bool); 
             bool centerImage() const; 
+
+            std::string getImageFile() const { return imageFile; }
 
         protected:
 
@@ -77,6 +88,8 @@ namespace watcher
 
             BackgroundImage();
             virtual ~BackgroundImage(); 
+
+            std::string imageFile;
     };
 }
 

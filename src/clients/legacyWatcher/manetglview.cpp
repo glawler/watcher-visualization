@@ -48,6 +48,7 @@
 #include "logger.h"
 #include "watcherStreamListDialog.h"
 #include "layerConfigurationDialog.h"
+#include "nodeConfigurationDialog.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -994,7 +995,8 @@ manetGLView::manetGLView(QWidget *parent) :
     autoCenterNodesFlag(false),
     nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
     framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0),
-    layerConfigurationDialog(NULL)
+    layerConfigurationDialog(NULL),
+    nodeConfigurationDialog(new NodeConfigurationDialog(wGraph, NULL, NULL))
 {
     TRACE_ENTER();
     manetAdjInit.angleX=0.0;
@@ -1013,6 +1015,7 @@ manetGLView::manetGLView(QWidget *parent) :
 
     connect(this, SIGNAL(connectNewLayer(const QString)), this, SLOT(newLayerConnect(const QString)));
     connect(this, SIGNAL(spawnLayerConfigureDialog()), this, SLOT(configureLayers())); 
+    connect(this, SIGNAL(nodeClicked(size_t)), nodeConfigurationDialog, SLOT(nodeClicked(size_t)));
 
     TRACE_EXIT();
 }
@@ -1062,7 +1065,7 @@ void manetGLView::shutdown()
         delete *i;
 }
 
-void manetGLView::newLayerConnect(const QString &name) 
+void manetGLView::newLayerConnect(const QString name) 
 {
     QAction *action=new QAction(name, (QObject*)this);
     action->setCheckable(true);
@@ -1077,22 +1080,28 @@ void manetGLView::newLayerConnect(const QString &name)
 
     string layer(name.toStdString()); 
     size_t l=wGraph->name2LayerIndex(layer); 
-    if (!layerConfigurationDialog) 
+    if (!layerConfigurationDialog) {
         layerConfigurationDialog=new LayerConfigurationDialog(NULL); 
+        connect(layerConfigurationDialog, SIGNAL(layerToggled(QString, bool)), this, SLOT(layerToggle(QString, bool)));
+    }
+    connect(layerConfigurationDialog, SIGNAL(layerToggled(QString, bool)), item, SLOT(setChecked(QString, bool)));
     layerConfigurationDialog->addLayer(&wGraph->layers[l]); 
     if (!wGraph->layers[l].configured) {
         emit spawnLayerConfigureDialog();
     }
-    emit layerToggled(name, true);
+    emit layerToggled(name, wGraph->layers[l].isActive);
 }
 
 void manetGLView::configureLayers()
 {
-    if (!layerConfigurationDialog) 
-        layerConfigurationDialog=new LayerConfigurationDialog(NULL);
     layerConfigurationDialog->show(); 
 }
 
+void manetGLView::spawnNodeConfigurationDialog()
+{
+    nodeConfigurationDialog->configureDialog(); 
+    nodeConfigurationDialog->show(); 
+}
 void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
 {
     TRACE_ENTER();
@@ -1104,7 +1113,8 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
         }
         // this will add it to the menu and spawn a layer configuration 
         // dialog if needed. 
-        emit connectNewLayer(QString(layer.c_str())); 
+        QString name(layer.c_str());
+        emit connectNewLayer(name); 
     }
 
     TRACE_EXIT();
@@ -1184,6 +1194,7 @@ bool manetGLView::loadConfiguration()
     SingletonConfig::unlock();
     wGraph=new WatcherGraph(maxNodes, maxLayers); 
     wGraph->locationTranslationFunction=boost::bind(&manetGLView::gps2openGLPixels, this, _1, _2, _3, _4); 
+    nodeConfigurationDialog->setGraph(wGraph);
     SingletonConfig::lock();
 
     try {
@@ -1358,32 +1369,9 @@ bool manetGLView::loadConfiguration()
             toggleBackgroundImage(false);
             emit enableBackgroundImage(false);
         }
-        else
-        {
-            BackgroundImage &bgImage=BackgroundImage::getInstance(); 
-            const char *ext=rindex(strVal.data(), '.');
-            if (!ext)
-            {
-                LOG_ERROR("I have no idea what kind of file the background image " << strVal << " is. I only support BMP and PPM"); 
-                exit(1);
-            }
-            else if (0==strncasecmp(ext+sizeof(char), "bmp", 3))
-            {
-                if (!bgImage.loadBMPFile(strVal.data()))
-                {
-                    LOG_FATAL("Unable to load background BMP image in watcher from file: " << strVal); 
-                    TRACE_EXIT_RET_BOOL(false);
-                    return false;
-                }
-            }
-            else if (0==strncmp("ppm", ext+sizeof(char), 3))
-            {
-                if (!bgImage.loadPPMFile(strVal.data()))
-                {
-                    LOG_FATAL("Unable to load background PPM image in watcher from file: " << strVal); 
-                    TRACE_EXIT_RET_BOOL(false);
-                    return false;
-                }
+        else {
+            if (!BackgroundImage::getInstance().loadImageFile(strVal)) {
+                LOG_WARN("Error loading background image file, " << strVal); 
             }
         }
         // bg image location and size.
@@ -1948,9 +1936,10 @@ void manetGLView::drawManet(void)
 void manetGLView::drawGraph(WatcherGraph *&graph)
 {
     // draw all physical layer nodes
-    for (size_t n=0; n<graph->numValidNodes; n++) 
-        if (graph->nodes[n].isActive)
-            drawNode(graph->nodes[n], true);
+    if (isActive(PHYSICAL_LAYER))
+        for (size_t n=0; n<graph->numValidNodes; n++) 
+            if (graph->nodes[n].isActive)
+                drawNode(graph->nodes[n], true);
 
     // draw all edges and labels on all active layers
     // (must grab read lock around dynamic data like label lists)
@@ -1965,22 +1954,32 @@ void manetGLView::drawGraph(WatcherGraph *&graph)
                     if (graph->nodes[j].isActive && graph->layers[l].edges[i][j]) {
                         drawEdge(graph->layers[l].edgeDisplayInfo, graph->nodes[i], graph->nodes[j]);
                         layerEmpty=false;
+                        WatcherLayerData::ReadLock readLock(graph->layers[l].edgeLabelsMutexes[i][j]);
+                        int labelCount=0;
+                        BOOST_FOREACH(const WatcherLayerData::EdgeLabels::value_type &label, graph->layers[l].edgeLabels[i][j]) {
+                            GLdouble lx=(graph->nodes[i].x+graph->nodes[j].x)/2.0;  
+                            GLdouble ly=(graph->nodes[i].y+graph->nodes[j].y)/2.0;  
+                            GLdouble lz=(graph->nodes[i].z+graph->nodes[j].z)/2.0;  
+                            drawLabel(lx, ly, lz, label, labelCount++); 
+                        }
                     }
             }
         }
 
         {
+            int labelCount=0;
             WatcherLayerData::ReadLock readLock(graph->layers[l].floatingLabelsMutex); 
             BOOST_FOREACH(const WatcherLayerData::FloatingLabels::value_type &label, graph->layers[l].floatingLabels)  {
-                drawLabel(label.lat, label.lng, label.alt, label); 
+                drawLabel(label.lat, label.lng, label.alt, label, labelCount++); 
             }
         }
 
         for (unsigned int n=0; n<graph->numValidNodes; n++) {
             if (graph->nodes[n].isActive) {
+                int labelCount=0;
                 WatcherLayerData::ReadLock readLock(graph->layers[l].nodeLabelsMutexes[n]); 
                 BOOST_FOREACH(const WatcherLayerData::NodeLabels::value_type &label, graph->layers[l].nodeLabels[n]) {
-                    drawLabel(graph->nodes[n].x, graph->nodes[n].y, graph->nodes[n].z, label); 
+                    drawLabel(graph->nodes[n].x, graph->nodes[n].y, graph->nodes[n].z, label, labelCount++); 
                 }
             }
         }
@@ -2225,7 +2224,6 @@ void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &n
                 QString(edge.label.c_str()),
                 QFont(QString(edge.labelFont.c_str()), (int)edge.labelPointSize));
     }
-
     TRACE_EXIT(); 
 }
 
@@ -2315,7 +2313,7 @@ void manetGLView::drawNodeLabel(const NodeDisplayInfo &node, bool physical)
     TRACE_EXIT();
 }
 
-void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfo &label)
+void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDisplayInfo &label, int labelCount)
 {
     TRACE_ENTER(); 
     labelsDrawn++;
@@ -2344,9 +2342,26 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 
     QFont f(label.fontName.c_str(), (int)label.pointSize); 
     qglColor(QColor(fgColor[0], fgColor[1], fgColor[2], fgColor[3])); 
-    renderText(inx+offset, iny+offset, inz+2.0, label.labelText.c_str(), f); 
+    renderText(inx+offset, iny, inz+(labelCount*label.pointSize), label.labelText.c_str(), f); 
 
     TRACE_EXIT(); 
+}
+
+void manetGLView::loadBackgroundImage(void)
+{
+    QString filename;
+    filename=QFileDialog::getOpenFileName(this, "Choose a background image file", ".", "*.bmp"); 
+    if (!filename.isEmpty()) {
+        if (!BackgroundImage::getInstance().loadImageFile(filename.toStdString())) {
+            if (QMessageBox::Yes==QMessageBox::question(NULL, 
+                        tr("Error loading file"), tr("Error loading the image file. Try again?"), QMessageBox::Yes, QMessageBox::No))
+                loadBackgroundImage();
+        }
+        else {
+            toggleBackgroundImage(true);
+            emit enableBackgroundImage(true);
+        }
+    }
 }
 
 void manetGLView::resizeGL(int width, int height)
@@ -2729,21 +2744,21 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     }
     else
     {
-        unsigned int nodeId=getNodeIdAtCoords(event->x(), event->y());
-        if(nodeId)
-        {
+        size_t nodeId=getNodeIdAtCoords(event->x(), event->y());
+        if(nodeId) {
             emit nodeDataInGraphsToggled(nodeId);
+            emit nodeClicked(nodeId);
         }
     }
     update();
     TRACE_EXIT();
 }
 
-unsigned int manetGLView::getNodeIdAtCoords(const int x, const int y)
+size_t manetGLView::getNodeIdAtCoords(const int x, const int y)
 {
     TRACE_ENTER();
 
-    unsigned int retVal=0;
+    size_t retVal=0;
     unsigned long min_dist = ULONG_MAX; // distance squared to closest
     unsigned r=15;      // Shrug, seems to do the trick
     unsigned long r2 = r*r;
@@ -2790,7 +2805,7 @@ unsigned int manetGLView::getNodeIdAtCoords(const int x, const int y)
 
         dist=dist>r2 ? dist-r2 : 0; 
         if (dist < min_dist)
-            found=(unsigned int)wGraph->nodes[i].nodeId.to_v4().to_ulong();
+            found=i;
     }
     if (min_dist < ULONG_MAX)
         retVal=found;
@@ -3012,7 +3027,26 @@ void manetGLView::clearAllEdges()
 void manetGLView::clearAllLabels()
 {
     TRACE_ENTER();
-    // GTL do this
+    for (size_t l=0; l<wGraph->numValidLayers; l++) {
+        {
+            WatcherLayerData::UpgradeLock lock(wGraph->layers[l].floatingLabelsMutex);
+            WatcherLayerData::WriteLock writeLock(lock); 
+            wGraph->layers[l].floatingLabels.clear();
+        }
+        for (size_t a=0; a<wGraph->numValidNodes; a++) { 
+            {
+                WatcherLayerData::UpgradeLock lock(wGraph->layers[l].nodeLabelsMutexes[a]);
+                WatcherLayerData::WriteLock writeLock(lock); 
+                wGraph->layers[l].nodeLabels[a].clear(); 
+            }
+            for (size_t b=0; b<wGraph->numValidNodes; b++) { 
+                // Should we bother to see if the edge is active first? 
+                WatcherLayerData::UpgradeLock lock(wGraph->layers[l].edgeLabelsMutexes[a][b]);
+                WatcherLayerData::WriteLock writeLock(lock); 
+                wGraph->layers[l].edgeLabels[a][b].clear();
+            }
+        }
+    }
     emit labelsCleared();
     TRACE_EXIT();
 }
@@ -3492,6 +3526,12 @@ void manetGLView::saveConfiguration()
         prop="imageFile"; 
         if (!bgset.exists(prop))
             bgset.add(prop, libconfig::Setting::TypeString);
+        string imageFile=bg.getImageFile();
+        if (!imageFile.empty() || imageFile=="none") 
+            root["backgroundImage"]["imageFile"]=bg.getImageFile();
+        else 
+            root["backgroundImage"]["imageFile"]="none";
+
         prop="coordinates";
         if (!bgset.exists(prop)) { 
             bgset.add(prop, libconfig::Setting::TypeArray);
@@ -3504,6 +3544,7 @@ void manetGLView::saveConfiguration()
         root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
         root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
         root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
+
 
         prop="backgroundColor";
         if (!root.exists(prop))

@@ -96,6 +96,12 @@ bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_, const NodeIdenti
     return retVal;
 }
 
+void NodeDisplayInfo::rebuildLabel(const string &l) 
+{
+    configLabel=l;
+    buildLabel();
+}
+
 // virtual
 bool NodeDisplayInfo::loadConfiguration(const GUILayer &layer_)
 {
@@ -269,12 +275,13 @@ void NodeDisplayInfo::buildLabel()
         label=buf;
     }
     else if (configLabel == labelDefault2String(NodeDisplayInfo::HOSTNAME)) {
-        in_addr saddr; 
-        saddr.s_addr = htonl(addr); 
-        hostent *he = gethostbyaddr((const void *)saddr.s_addr, sizeof(saddr.s_addr), AF_INET); 
-        if (he) {
-            snprintf(buf, sizeof(buf), "%s", he->h_name); 
-            label = buf; // only do the lookup one time successfully per host. 
+        char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+        struct sockaddr saddr; 
+        saddr.sa_family=AF_INET;
+        addr=htonl(addr);
+        memcpy(&saddr.sa_data, &addr, sizeof(addr));
+        if (getnameinfo(&saddr, sizeof(saddr), hbuf, sizeof(hbuf), NULL, 0, NI_NAMEREQD)) {
+            label = hbuf; // only do the lookup one time successfully per host. 
         } else {
             LOG_WARN("Unable to get hostnmae for node " << nodeId); 
             label = "UnableToGetHostNameSorry";

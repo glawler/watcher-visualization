@@ -130,6 +130,9 @@ namespace watcher
             bool loadConfiguration(const watcher::event::GUILayer &layer); 
 
             void saveConfiguration() const;
+            
+            /** Allow changing the label dynamically. */
+            void rebuildLabel(const std::string &l);
 
         protected:
 
