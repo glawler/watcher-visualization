@@ -1014,7 +1014,7 @@ manetGLView::manetGLView(QWidget *parent) :
     framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0),
     layerConfigurationDialog(NULL),
     nodeConfigurationDialog(new NodeConfigurationDialog(wGraph, NULL, NULL)),
-    prevClickedNodeId(0)
+    prevClickedNodeId(-1) // since unsigned, will set to large value.
 {
     TRACE_ENTER();
     manetAdjInit.angleX=0.0;
@@ -2740,10 +2740,10 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
         if(nodeId) {
             emit nodeDataInGraphsToggled(nodeId);
             emit nodeClicked(nodeId);
-            if (!prevClickedNodeId || prevClickedNodeId!=nodeId)
+            if (prevClickedNodeId<=maxNodes && prevClickedNodeId!=nodeId)
                 toggleNodeProperty(wGraph, prevClickedNodeId, NodePropertiesMessage::CHOSEN);
             toggleNodeProperty(wGraph, nodeId, NodePropertiesMessage::CHOSEN);
-            prevClickedNodeId=(nodeId!=prevClickedNodeId?nodeId:0);
+            prevClickedNodeId=(nodeId!=prevClickedNodeId?nodeId:-1);
         }
     }
     update();
