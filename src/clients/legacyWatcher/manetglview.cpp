@@ -82,6 +82,23 @@ namespace watcher
         else
             return( angle );
     }
+    void toggleNodeProperty(WatcherGraph *g, size_t nodeId, NodePropertiesMessage::NodeProperty p)
+    {
+        // GTL do this the proper STL waty once I have access to documentation again.
+        // But realistically this list will most likely be empty or have only one 
+        // or two elements, so this may be OK.
+        bool found=false;
+        NodePropertiesMessage::NodePropertyList &l=g->nodes[nodeId].nodeProperties;
+        for (NodePropertiesMessage::NodePropertyList::iterator pi=l.begin(); pi!=l.end(); pi++)
+            if (*pi==p) {
+                // GTL -- should be a lock around access to node properties!
+                g->nodes[nodeId].nodeProperties.erase(pi);
+                found=true;
+                break;
+            }
+        if (!found) // GTL -- SHould be a lock around access to a node's properties!
+            g->nodes[nodeId].nodeProperties.push_back(p);
+    }
 }
 
 /*
@@ -996,7 +1013,8 @@ manetGLView::manetGLView(QWidget *parent) :
     nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
     framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0),
     layerConfigurationDialog(NULL),
-    nodeConfigurationDialog(new NodeConfigurationDialog(wGraph, NULL, NULL))
+    nodeConfigurationDialog(new NodeConfigurationDialog(wGraph, NULL, NULL)),
+    prevClickedNodeId(0)
 {
     TRACE_ENTER();
     manetAdjInit.angleX=0.0;
@@ -2713,41 +2731,19 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
 
     // Check for shift click and move bg image if shifted
     Qt::KeyboardModifiers mods=event->modifiers();
-    if (mods & Qt::ShiftModifier)
-    {
-        // This should work - but doesn't.
-        //
-        // GLdouble modelmatrix[16];
-        // GLdouble projmatrix[16];
-        // GLint viewport[4];
-
-        // glGetDoublev(GL_MODELVIEW_MATRIX, modelmatrix);
-        // glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-        // glGetIntegerv(GL_VIEWPORT, viewport);
-
-        // GLfloat winx=event->x(), winy=event->y(), winz=0.0;
-        // winy=viewport[3]-winy;
-
-        // BackgroundImage &bg=BackgroundImage::getInstance();
-        // GLfloat x,y,w,h,z;
-        // bg.getDrawingCoords(x, w, y, h, z);
-
-        // GLdouble objx, objy, objz;
-        // if (gluUnProject(winx, winy, winz, modelmatrix, projmatrix, viewport, &objx, &objy, &objz)==GL_TRUE)
-        // {
-        //     bg.setDrawingCoords(x+objx, w, y+objy, h, z);
-        // }
-
-        // hack - let the centering code center the BG image.
+    if (mods & Qt::ShiftModifier) {
         BackgroundImage &bg=BackgroundImage::getInstance();
         bg.centerImage(true); 
     }
-    else
-    {
+    else {
         size_t nodeId=getNodeIdAtCoords(event->x(), event->y());
         if(nodeId) {
             emit nodeDataInGraphsToggled(nodeId);
             emit nodeClicked(nodeId);
+            if (!prevClickedNodeId || prevClickedNodeId!=nodeId)
+                toggleNodeProperty(wGraph, prevClickedNodeId, NodePropertiesMessage::CHOSEN);
+            toggleNodeProperty(wGraph, nodeId, NodePropertiesMessage::CHOSEN);
+            prevClickedNodeId=(nodeId!=prevClickedNodeId?nodeId:0);
         }
     }
     update();
@@ -3075,6 +3071,9 @@ void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
 {
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &p, ndi.nodeProperties) {
+        // Remember old color.
+        GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+        glGetFloatv(GL_CURRENT_COLOR, cols);
         switch(p) { 
             case NodePropertiesMessage::NOPROPERTY: 
                 break;
@@ -3115,7 +3114,16 @@ void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
                 break;
             case NodePropertiesMessage::VICTIM: 
                 break;
+            case NodePropertiesMessage::CHOSEN:
+                if (monochromeMode) 
+                    glColor4fv(black); 
+                else 
+                    glColor4ub(255, 255, 255, 255); 
+                glutWireCube(12);   
+                break;
         }
+        // switch back to old color.
+        glColor4fv(cols);
     }
 }
 

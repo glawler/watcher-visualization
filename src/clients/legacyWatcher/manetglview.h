@@ -362,6 +362,8 @@ signals:
 
         watcher::LayerConfigurationDialog *layerConfigurationDialog;
         watcher::NodeConfigurationDialog *nodeConfigurationDialog;
+
+        size_t prevClickedNodeId;
 };
 
 #endif

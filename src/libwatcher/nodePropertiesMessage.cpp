@@ -214,6 +214,7 @@ namespace watcher {
                 case ROOT: retVal="root"; break;
                 case ATTACKER: retVal="attacker"; break;
                 case VICTIM: retVal="victim"; break;
+                case CHOSEN: retVal="chosen"; break;
             }
             TRACE_EXIT_RET(retVal);
             return retVal;
@@ -231,6 +232,7 @@ namespace watcher {
             else if (iequals(s,"root")) p=ROOT;
             else if (iequals(s,"attacker")) p=ATTACKER;
             else if (iequals(s,"victim")) p=VICTIM;
+            else if (iequals(s,"chosen")) p=CHOSEN;
             else  {
                 LOG_ERROR("I don't know what property " << s << " represents."); 
                 retVal=false;
