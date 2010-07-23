@@ -116,9 +116,12 @@ class manetGLView : public QGLWidget
 
         void spawnAboutBox(); 
         void spawnNodeConfigurationDialog();
+        void spawnBackgroundColorDialog();
         void saveConfiguration();
         void streamFilteringEnabled(bool isEnabled); 
         void loadBackgroundImage(void);
+
+        void toggleGroundGrid(bool);
 
         void shutdown(); 
 
@@ -141,6 +144,8 @@ signals:
         void checkPlaybackRange(bool isOn);
         void checkWallTime(bool isOn);
 
+        void changeBackgroundColor();
+
 
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
@@ -154,6 +159,7 @@ signals:
         void enableBackgroundImage(bool);
 
         void enableStreamFiltering(bool); 
+        void groundGridToggled(bool show);
 
     protected:
         DECLARE_LOGGER();
@@ -260,6 +266,7 @@ signals:
         bool monochromeMode;
         bool threeDView;
         bool backgroundImage; 
+        bool showGroundGrid;
 
         std::string statusFontName;
         watcher::Color hierarchyRingColor;

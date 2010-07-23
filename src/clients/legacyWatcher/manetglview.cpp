@@ -49,6 +49,7 @@
 #include "watcherStreamListDialog.h"
 #include "layerConfigurationDialog.h"
 #include "nodeConfigurationDialog.h"
+#include "skybox.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -1006,6 +1007,7 @@ manetGLView::manetGLView(QWidget *parent) :
     monochromeMode(false), 
     threeDView(false),
     backgroundImage(false), 
+    showGroundGrid(false),
     statusFontName("Helvetica"),
     hierarchyRingColor(colors::blue),
     playbackStartTime(SeekMessage::eof),  // live mode
@@ -1034,6 +1036,7 @@ manetGLView::manetGLView(QWidget *parent) :
     connect(this, SIGNAL(connectNewLayer(const QString)), this, SLOT(newLayerConnect(const QString)));
     connect(this, SIGNAL(spawnLayerConfigureDialog()), this, SLOT(configureLayers())); 
     connect(this, SIGNAL(nodeClicked(size_t)), nodeConfigurationDialog, SLOT(nodeClicked(size_t)));
+    connect(this, SIGNAL(changeBackgroundColor()), this, SLOT(spawnBackgroundColorDialog()));
 
     TRACE_EXIT();
 }
@@ -1166,6 +1169,7 @@ bool manetGLView::loadConfiguration()
     monochromeMode = false;
     threeDView = true;
     backgroundImage = true;
+    showGroundGrid=false;
     bool retVal=true;
 
 
@@ -1259,6 +1263,7 @@ bool manetGLView::loadConfiguration()
             { "nodes3d", true, &threeDView },
             { "monochrome", false, &monochromeMode }, 
             { "displayBackgroundImage", true, &backgroundImage },
+            { "showGroundGrid", false, &showGroundGrid },
             { "showVerboseStatusString", false, &showVerboseStatusString }, 
             { "showWallTime", true, &showWallTimeinStatusString }, 
             { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
@@ -1279,6 +1284,7 @@ bool manetGLView::loadConfiguration()
         emit threeDViewToggled(threeDView);
         emit monochromeToggled(monochromeMode);
         emit backgroundImageToggled(backgroundImage);
+        emit groundGridToggled(showGroundGrid);
         emit loopPlaybackToggled(autorewind);
         emit enableStreamFiltering(messageStreamFiltering);
         emit checkPlaybackTime(showPlaybackTimeInStatusString);
@@ -1392,6 +1398,7 @@ bool manetGLView::loadConfiguration()
                 LOG_WARN("Error loading background image file, " << strVal); 
             }
         }
+
         // bg image location and size.
         prop="coordinates";
         float coordVals[5]={0.0, 0.0, 0.0, 0.0, 0.0};
@@ -1922,10 +1929,6 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
 
 void manetGLView::drawManet(void)
 {
-    // watcher::Skybox *sb=watcher::Skybox::getSkybox();
-    // if (sb)
-    //     sb->drawSkybox(manetAdj.angleX, manetAdj.angleY, manetAdj.angleZ);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -1936,6 +1939,12 @@ void manetGLView::drawManet(void)
     glRotatef(manetAdj.angleY, 0.0, 1.0, 0.0);
     glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
     glTranslatef(manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ);
+
+    if (showGroundGrid) {
+        watcher::Skybox *sb=watcher::Skybox::getSkybox();
+        if (sb)
+            sb->drawSkybox(manetAdj.angleX, manetAdj.angleY, manetAdj.angleZ);
+    }
 
     if (backgroundImage)        // need to draw this fisrt for transparency to work properly. 
     {
@@ -2468,6 +2477,15 @@ void manetGLView::setGPSScale()
     TRACE_EXIT();
 }
 
+void manetGLView::spawnBackgroundColorDialog()
+{
+    QRgb rgb=0xffffffff;
+    bool ok=false;
+    rgb=QColorDialog::getRgba(rgb, &ok);
+    if (ok)
+        glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
+}
+
 void manetGLView::setEdgeWidth()
 {
     TRACE_ENTER();
@@ -2541,12 +2559,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             break; 
         case Qt::Key_C:     { 
                                 if (kbMods & Qt::ShiftModifier) { 
-                                    LOG_DEBUG("Got cap C in keyPressEvent - spawning color chooser for background color"); 
-                                    QRgb rgb=0xffffffff;
-                                    bool ok=false;
-                                    rgb=QColorDialog::getRgba(rgb, &ok);
-                                    if (ok)
-                                        glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
+                                    emit changeBackgroundColor();
                                 }
                                 else 
                                     rotateZ(-5.0); 
@@ -2833,6 +2846,11 @@ void manetGLView::toggleNodeSelectedForGraph(unsigned int)
     TRACE_EXIT();
 }
 
+void manetGLView::toggleGroundGrid(bool show)
+{
+    showGroundGrid=show;
+}
+
 void manetGLView::streamFilteringEnabled(bool isEnabled) 
 {
     TRACE_ENTER();
@@ -3117,8 +3135,14 @@ void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
             case NodePropertiesMessage::CHOSEN:
                 if (monochromeMode) 
                     glColor4fv(black); 
-                else 
-                    glColor4ub(255, 255, 255, 255); 
+                else  {
+                    // GTL - Doesn't work - figure out why
+                    // GLint cols[4]={0.0, 0.0, 0.0, 0.0}; 
+                    // glGetIntegerv(GL_COLOR_CLEAR_VALUE, cols);
+                    // LOG_INFO("chosen color: " << cols[0] << " " << cols[1] << " " << cols[2] << " " << ~cols[0] << " " << ~cols[1] << " " << cols[2]); 
+                    // glColor3i(~cols[0], ~cols[1], ~cols[2]);  // inverse of background color
+                    glColor3f(1.0, 1.0, 1.0); 
+                }
                 glutWireCube(12);   
                 break;
         }
@@ -3405,6 +3429,7 @@ void manetGLView::saveConfiguration()
             { "nodes3d",        threeDView },
             { "monochrome",     monochromeMode },
             { "displayBackgroundImage", backgroundImage },
+            { "showGroundGrid", showGroundGrid },
             { "showVerboseStatusString", showVerboseStatusString }, 
             { "showWallTime", showWallTimeinStatusString }, 
             { "showPlaybackTime", showPlaybackTimeInStatusString },
@@ -3553,6 +3578,10 @@ void manetGLView::saveConfiguration()
         root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
         root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
 
+        prop="showGroundGrid";
+        if (!root.exists(prop))
+            root.add(prop, libconfig::Setting::TypeBoolean);
+        root[prop]=showGroundGrid;
 
         prop="backgroundColor";
         if (!root.exists(prop))
