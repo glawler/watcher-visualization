@@ -98,6 +98,8 @@ share/info/dir
 ^src/clients/legacyWatcher/ui_aboutDialog.h
 ^src/clients/legacyWatcher/ui_streamlist.h
 ^src/clients/legacyWatcher/ui_configurationInformation.h
+^src/clients/legacyWatcher/ui_layerConfigurationDialog.h
+^src/clients/legacyWatcher/ui_nodeConfigurationDialog.h
 ^src/clients/legacyWatcher/qrc_watcherResources.cpp
 
 # ignore libconfig files
