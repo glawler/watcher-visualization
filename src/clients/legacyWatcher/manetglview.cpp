@@ -2737,7 +2737,7 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     }
     else {
         size_t nodeId=getNodeIdAtCoords(event->x(), event->y());
-        if(nodeId) {
+        if(nodeId<maxNodes) {
             emit nodeDataInGraphsToggled(nodeId);
             emit nodeClicked(nodeId);
             if (prevClickedNodeId<=maxNodes && prevClickedNodeId!=nodeId)
@@ -2754,11 +2754,11 @@ size_t manetGLView::getNodeIdAtCoords(const int x, const int y)
 {
     TRACE_ENTER();
 
-    size_t retVal=0;
+    size_t retVal=ULONG_MAX;
     unsigned long min_dist = ULONG_MAX; // distance squared to closest
     unsigned r=15;      // Shrug, seems to do the trick
     unsigned long r2 = r*r;
-    size_t found = 0;    // index of closest
+    size_t found = ULONG_MAX;    // index of closest
     GLdouble modelmatrix[16];
     GLdouble projmatrix[16];
     GLint viewport[4];
