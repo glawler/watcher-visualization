@@ -281,6 +281,7 @@ signals:
         void drawNotConnectedState(); 
         bool autoCenterNodesFlag; 
         void drawManet(void);
+        void drawGroundGrid();
         void drawGraph(watcher::WatcherGraph *&graph); 
         struct QuadranglePoint
         {

@@ -1927,6 +1927,35 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
 
 }
 
+void manetGLView::drawGroundGrid()
+{
+    if (showGroundGrid) {
+        glPushMatrix();
+        GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+        glGetFloatv(GL_CURRENT_COLOR, cols);
+        const GLfloat black[]={0.0,0.0,0.0,1.0};
+        if (monochromeMode)
+            glColor4fv(black);
+        else
+            glColor4f(0.0, 1.0, 0.0, 0.5);
+        const int offset=50;
+        const int w=1000;
+        glTranslatef(-w, -w, -20); 
+        glBegin(GL_LINES);
+        for (int i=0; i<32*offset; i+=offset) {
+            // east to west
+            glVertex2f(0, i); 
+            glVertex2f(i*2*w, i); 
+            // south to north
+            glVertex2f(i, 0); 
+            glVertex2f(i, i*2*w); 
+        }
+        glEnd(); 
+        glColor4fv(cols);
+        glPopMatrix();
+    }
+}
+
 void manetGLView::drawManet(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1940,11 +1969,11 @@ void manetGLView::drawManet(void)
     glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
     glTranslatef(manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ);
 
-    if (showGroundGrid) {
-        watcher::Skybox *sb=watcher::Skybox::getSkybox();
-        if (sb)
-            sb->drawSkybox(manetAdj.angleX, manetAdj.angleY, manetAdj.angleZ);
-    }
+    drawGroundGrid();
+
+    // watcher::Skybox *sb=watcher::Skybox::getSkybox();
+    // if (sb)
+    //     sb->drawSkybox(manetAdj.angleX, manetAdj.angleY, manetAdj.angleZ);
 
     if (backgroundImage)        // need to draw this fisrt for transparency to work properly. 
     {
