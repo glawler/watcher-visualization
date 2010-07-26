@@ -24,6 +24,8 @@
 #include "layerPreviewWindow.h"
 #include "libwatcher/labelMessage.h"
 
+#define UNUSED(e) do { (void)(e); } while (0)
+
 namespace watcher
 {
     using namespace event; 
@@ -44,6 +46,7 @@ namespace watcher
 
     void LayerPreviewWindow::setLayerData(WatcherLayerData *l) 
     {
+        UNUSED(l);
         // layer=l;
         // layer->clear(); 
 
@@ -110,6 +113,8 @@ namespace watcher
     }
     void LayerPreviewWindow::resizeGL(int w, int h)
     {
+        UNUSED(w);
+        UNUSED(h);
         // glViewport(0, 0, w, h);
         // glMatrixMode(GL_PROJECTION);
         // glLoadIdentity();
@@ -138,6 +143,7 @@ namespace watcher
     }
     void LayerPreviewWindow::drawNode(const NodeDisplayInfo &node) 
     {
+        UNUSED(node);
         // GLdouble x=node.x;
         // GLdouble y=node.y;
         // GLdouble z=node.z;
@@ -163,6 +169,9 @@ namespace watcher
     }
     void LayerPreviewWindow::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &node1, const NodeDisplayInfo &node2)
     {
+        UNUSED(edge);
+        UNUSED(node1);
+        UNUSED(node2);
         // GLdouble x1=node1.x;
         // GLdouble y1=node1.y;
         // GLdouble z1=node1.z;
@@ -234,6 +243,10 @@ namespace watcher
 
     void LayerPreviewWindow::drawLabel(const GLfloat &x, const GLfloat &y, const GLfloat &z, const LabelDisplayInfo &l) 
     {
+        UNUSED(x);
+        UNUSED(y);
+        UNUSED(z);
+        UNUSED(l);
         // int fgColor[]={
         //     l.foregroundColor.r, 
         //     l.foregroundColor.g, 
