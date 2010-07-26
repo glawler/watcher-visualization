@@ -1,3 +1,18 @@
+Version 0.6.4.1:
+- legacy watcher
+    - Added a node configuration dialog. This allows the user to modify the node configuration
+    via the GUI. The configuration that can be changed is color, label, label color, label
+    font, label font color, and node shape. The dialog has two modes, global mode and single
+    node mode. In global mode configuration changes in the dialog affect all nodes. In 
+    single node mode, the changes only affect the selected node. To go from global (the
+    default) to single node mode, the user double-clicks a node in the main GUI window. To 
+    go back to global mode, the user double-clicks the selected node. The selected node is 
+    highlighted in the main window by having a white cube drawn around it. Thhe dialog 
+    is not modal and all changes made are immediately rendered in the main window.
+    - Added a "background grid" option. The option can be found under the 'view' menu. 
+    If toggled, a green grid is drawn at just below ground level. This is to help the user
+    clearly see which way is up when running configurations with large z-axis differences. 
+
 Version 0.6.4:
 - legacy watcher
     - Added layer configuration dialog. This allows the user to modify layer settings 
