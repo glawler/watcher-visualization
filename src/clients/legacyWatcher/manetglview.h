@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -104,6 +104,7 @@ class manetGLView : public QGLWidget
         void listStreams();
         void selectStream(unsigned long uid);
         void spawnStreamDescription();
+	void reconnect();
 
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
@@ -202,6 +203,7 @@ signals:
         std::string serverName; 
 
         void connectStream(); // connect to watherd and init the message stream. blocking...
+	void setupStream();
         boost::thread *watcherdConnectionThread;
         boost::thread *maintainGraphThread;
         boost::thread *checkIOThread;
@@ -375,3 +377,5 @@ signals:
 };
 
 #endif
+
+// vim:sw=4

@@ -28,12 +28,11 @@ INIT_LOGGER(Client, "Client");
 
 Client::Client(
         const std::string& server_, 
-        const std::string& service_,
-        bool reconnect_) :
+        const std::string& service_) :
     ioService(),
     server(server_),
     service(service_),
-    clientConnection(new ClientConnection(ioService, server, service, reconnect_))
+    clientConnection(new ClientConnection(ioService, server, service))
 {
     TRACE_ENTER();
     
@@ -124,3 +123,4 @@ void Client::close()
     TRACE_EXIT();
 }
 
+// vim:sw=4

@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -77,17 +77,15 @@ namespace watcher
         static MessageStreamPtr createNewMessageStream(
                 const std::string &serverName, 
                 const Timestamp &startTime=0, 
-                const float streamRate=1.0,
-                bool reconnect=false);
+                const float streamRate=1.0);
 
         static MessageStreamPtr createNewMessageStream(
                 const std::string &serverName, 
                 const std::string &portNumber,  // Connect on a non-standard port (different port than watcherd service)
                 const Timestamp &startTime=0, 
-                const float streamRate=1.0,
-                bool reconnect=false);
+                const float streamRate=1.0);
 
-        void initConnection(bool reconnect);
+        void initConnection();
 
         /**
          * Death to all humans
@@ -193,7 +191,7 @@ namespace watcher
         /**
          * @retval true if connected, false otherwise
          */
-        bool connected() const { return connection->connected(); }
+        bool connected() const;
 
         /**
          * Clear the message cache. Can be used to clear the cache if the GUI is overloaded
@@ -226,6 +224,10 @@ namespace watcher
 	 * for this stream.
 	 */
 	bool setDescription(const std::string& desc);
+
+	/** Closes the connection to the server and reconnects.
+	 */
+	void reconnect();
 
         protected:
 

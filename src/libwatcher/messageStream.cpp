@@ -1,4 +1,4 @@
-/* Copyright 2009,2010 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -56,19 +56,18 @@ MessageStream::MessageStream(
     readReady(false)
 {
     TRACE_ENTER();
-    connection=ClientPtr(new Client(serverName, serviceName, true)); 
+    connection=ClientPtr(new Client(serverName, serviceName)); 
     TRACE_EXIT();
 }
 
 // static 
 MessageStreamPtr MessageStream::createNewMessageStream(const string &serverName_,
                                                        const Timestamp &startTime_,
-                                                       const float streamRate_,
-                                                       bool reconnect_)
+                                                       const float streamRate_)
 {
     TRACE_ENTER();
     MessageStreamPtr retVal(new MessageStream(serverName_,"watcherd",startTime_,streamRate_));
-    retVal->initConnection(reconnect_); 
+    retVal->initConnection();
     TRACE_EXIT();
     return retVal;
 }
@@ -78,17 +77,16 @@ MessageStreamPtr MessageStream::createNewMessageStream(
                     const std::string &serverName, 
                     const std::string &portNum,  // Connect on a non-standard port (different port than watcherd service)
                     const Timestamp &startTime, 
-                    const float streamRate,
-                    bool reconnect_)
+                    const float streamRate)
 {
     TRACE_ENTER();
     MessageStreamPtr retVal(new MessageStream(serverName, portNum, startTime, streamRate));
-    retVal->initConnection(reconnect_); 
+    retVal->initConnection();
     TRACE_EXIT();
     return retVal;
 }
 
-void MessageStream::initConnection(bool reconnect_) 
+void MessageStream::initConnection()
 {
     TRACE_ENTER();
     connection->removeMessageHandler(shared_from_this()); 
@@ -345,3 +343,23 @@ bool MessageStream::setDescription(const std::string& desc)
     TRACE_EXIT_RET(retVal);
     return retVal;
 }
+
+void MessageStream::reconnect()
+{
+    TRACE_ENTER();
+    // close existing connection and create a new one.
+    connection->close();
+    connection = ClientPtr(new Client(serverName, serviceName)); 
+    initConnection();
+    TRACE_EXIT();
+}
+
+bool MessageStream::connected() const
+{
+    TRACE_ENTER();
+    bool rv = connection && connection->connected();
+    TRACE_EXIT_RET(rv);
+    return rv;
+}
+
+// vim:sw=4

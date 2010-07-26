@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -49,12 +49,10 @@ namespace watcher
              * to send messages. Default service is "watcherd" - a watcherd running somewhere.
              * @param[in] server the host to connect to
              * @param[in] service the service/port on the server
-             * @param[in] reconnect when true, attempt to reconnect to server when connection is lost
              */
             explicit Client(
                     const std::string& server, 
-                    const std::string& service="watcherd",
-                    bool reconnect = false);
+                    const std::string& service="watcherd");
 
             virtual ~Client();
 
@@ -129,3 +127,5 @@ namespace watcher
 } // namespace watcher
 
 #endif // WATCHER_CLIENT_HPP
+
+// vim:sw=4

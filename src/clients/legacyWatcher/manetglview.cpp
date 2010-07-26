@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -1560,10 +1560,34 @@ void manetGLView::initializeGL()
     TRACE_EXIT();
 }
 
+void manetGLView::setupStream()
+{
+    TRACE_ENTER();
+
+    messageStream->setDescription("legacy watcher gui");
+    messageStream->startStream();
+    messageStream->getMessageTimeRange();
+    messageStream->enableFiltering(messageStreamFiltering);
+
+    // Tell the watcherd that we want/don't want messages for this layer.
+    if (messageStreamFiltering) { 
+	for (size_t l=0; l<wGraph->numValidLayers; l++) { 
+	    MessageStreamFilterPtr f(new MessageStreamFilter);
+	    f->setLayer(wGraph->layers[l].layerName); 
+	    if (wGraph->layers[l].isActive) 
+		messageStream->addMessageFilter(f);
+	    else
+		messageStream->removeMessageFilter(f);
+	}
+    }
+
+    TRACE_EXIT();
+}
+
 void manetGLView::connectStream() 
 {
     TRACE_ENTER();
-    while(1) {
+    while (true) {
 
         this_thread::interruption_point();
         if (!messageStream) 
@@ -1577,22 +1601,7 @@ void manetGLView::connectStream()
             }
         }
 
-        messageStream->setDescription("legacy watcher gui");
-        messageStream->startStream();
-        messageStream->getMessageTimeRange();
-        messageStream->enableFiltering(messageStreamFiltering);
-
-        // Tell the watcherd that we want/don't want messages for this layer.
-        if (messageStreamFiltering) { 
-            for (size_t l=0; l<wGraph->numValidLayers; l++) { 
-                MessageStreamFilterPtr f(new MessageStreamFilter);
-                f->setLayer(wGraph->layers[l].layerName); 
-                if (wGraph->layers[l].isActive) 
-                    messageStream->addMessageFilter(f);
-                else
-                    messageStream->removeMessageFilter(f);
-            }
-        }
+	setupStream();
 
         // spawn work threads
         if (!checkIOThread) 
@@ -1600,12 +1609,15 @@ void manetGLView::connectStream()
         if (!maintainGraphThread) 
             maintainGraphThread=new boost::thread(boost::bind(&manetGLView::maintainGraph, this));
 
+	/* check every two seconds that the connection is still alive */
         do {
             sleep(2); 
             this_thread::interruption_point();
-            if (!messageStream || !messageStream->connected())
+            if (!messageStream || !messageStream->connected()) {
+		LOG_INFO("connection to server lost, reconnecting");
                 break;
-        } while(1);
+	    }
+        } while (true);
     }
     TRACE_EXIT();
 }
@@ -1614,7 +1626,7 @@ void manetGLView::checkIO()
 {
     TRACE_ENTER();
 
-    while(true) {
+    while (true) {
         this_thread::interruption_point();
         bool timeRangeMessageSent=false;
         MessagePtr message;
@@ -1699,9 +1711,8 @@ void manetGLView::checkIO()
             // update graph is now thread-safe
             wGraph->updateGraph(message);
         }
-
-        TRACE_EXIT();
     }
+    /* not reached */
 }
 
 void manetGLView::updatePlaybackSliderRange()
@@ -3776,6 +3787,7 @@ void manetGLView::listStreams()
         streamsDialog = new WatcherStreamListDialog;
         connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
         connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
+	connect(streamsDialog, SIGNAL(reconnect()), this, SLOT(reconnect()));
     }
     streamsDialog->treeWidget->clear();
     streamsDialog->show();
@@ -3810,3 +3822,16 @@ void manetGLView::spawnStreamDescription()
         messageStream->setDescription(text.toStdString());
     TRACE_EXIT();
 }
+
+void manetGLView::reconnect()
+{
+    TRACE_ENTER();
+    LOG_INFO("reconnecting to server upon user request");
+    messageStream->clearMessageCache();
+    messageStream->reconnect();
+    setupStream();
+
+    TRACE_EXIT();
+}
+
+// vim:sw=4

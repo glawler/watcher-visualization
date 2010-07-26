@@ -35,6 +35,7 @@ WatcherStreamListDialog::WatcherStreamListDialog(QWidget *parent, Qt::WindowFlag
     setupUi(this);
     QObject::connect(treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(selectStream(QTreeWidgetItem*, int)));
     QObject::connect(ok_btn, SIGNAL(clicked()), this, SLOT(selectStream()));
+    QObject::connect(newStreamButton, SIGNAL(clicked()), this, SLOT(newStream()));
     TRACE_EXIT();
 }
 
@@ -76,3 +77,13 @@ void WatcherStreamListDialog::selectStream(QTreeWidgetItem *item, int /* column 
     hide();
     TRACE_EXIT();
 }
+
+void WatcherStreamListDialog::newStream()
+{
+    TRACE_ENTER();
+    emit reconnect();
+    hide();
+    TRACE_EXIT();
+}
+
+// vim:sw=4

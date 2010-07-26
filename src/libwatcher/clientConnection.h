@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -18,11 +18,6 @@
 
 /**
  * @file clientConnection.h
- * @author Geoff Lawler <geoff.lawler@cobham.com> 
- * @date 2009-07-15
- */
-/**
- * @file message.h
  * @author Geoff Lawler <geoff.lawler@cobham.com> 
  * @date 2009-07-15
  */
@@ -58,8 +53,7 @@ namespace watcher
             ClientConnection(
                     boost::asio::io_service& io_service, 
                     const std::string &server, 
-                    const std::string &service,
-                    bool reconnect = false);
+                    const std::string &service);
 
             virtual ~ClientConnection(); 
 
@@ -123,7 +117,6 @@ namespace watcher
 
             std::string server;
             std::string service;
-            bool reconnect;
     };
 
     typedef boost::shared_ptr<ClientConnection> ClientConnectionPtr;
@@ -131,3 +124,5 @@ namespace watcher
 } // namespace watcher
 
 #endif // WATCHERD_CLIENT_CONECTION_HPP
+
+// vim:sw=4

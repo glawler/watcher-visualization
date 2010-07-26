@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -40,16 +40,14 @@ INIT_LOGGER(ClientConnection, "Connection.ClientConnection");
 ClientConnection::ClientConnection(
         boost::asio::io_service& io_service, 
         const std::string &server_, 
-        const std::string &service_,
-        bool reconnect_) : 
+        const std::string &service_) :
     Connection(io_service),
     connected(false),
     ioService(io_service),
     theStrand(io_service),
     writeStrand(io_service),
     server(server_),
-    service(service_),
-    reconnect(reconnect_)
+    service(service_)
 {
     TRACE_ENTER(); 
     TRACE_EXIT();
@@ -67,15 +65,17 @@ void ClientConnection::doClose()
     TRACE_ENTER();
     LOG_DEBUG("Closing the socket"); 
     getSocket().close();
-    if (reconnect)
-        connected = false;
+    connected = false;
     TRACE_EXIT();
 }
 
 void ClientConnection::close()
 {
     TRACE_ENTER();
-    ioService.post(boost::bind(&ClientConnection::doClose, this));
+    if (connected) {
+	LOG_DEBUG("posting call to doClose()");
+	ioService.post(boost::bind(&ClientConnection::doClose, this));
+    }
     TRACE_EXIT();
 }
 
@@ -83,18 +83,20 @@ bool ClientConnection::connect(bool async)
 {
     TRACE_ENTER();
 
-    if (async) {
-        TRACE_EXIT();
-        return tryConnect(); 
-    }
+    if (!connected) {
+	if (async) {
+	    bool rv = tryConnect();
+	    TRACE_EXIT_RET(rv);
+	    return rv;
+	}
 
-    // Don't exit this function until we're connected. connect(false) is synchronus
-    while(false==tryConnect())
-    {
-        LOG_WARN("Unable to connect to server, trying again in 2 seconds.");
-        sleep(2);
+	// Don't exit this function until we're connected. connect(false) is synchronous
+	while (! tryConnect()) {
+	    LOG_WARN("Unable to connect to server, trying again in 2 seconds.");
+	    sleep(2);
+	}
     }
-    TRACE_EXIT();
+    TRACE_EXIT_RET(true);
     return true;
 }
 
@@ -208,9 +210,6 @@ void ClientConnection::handle_write_message(const boost::system::error_code &e, 
 {
     TRACE_ENTER();
 
-    if (!connected)
-        connect();
-
     if (!e) {
         LOG_DEBUG("Sucessfully sent message " << messages.front()); 
 
@@ -247,9 +246,6 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
 {
     TRACE_ENTER();
 
-    if (!connected)
-        connect();
-
     if (!e) {
         LOG_DEBUG("Recv'd header"); 
         size_t payloadSize;
@@ -259,14 +255,6 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
         } else {
             LOG_DEBUG("Parsed header - now reading " << messageNum << " message" << (messageNum>1?"s":"") 
                     << " from a buffer of " << payloadSize << " bytes."); 
-
-            // GTL - Wanted to do an async read for the payload, but kept getting handle_read_header called before handle_read_payload.
-            // So now the payload is read in sync, which should still be fast as the payload always directly follows the header. 
-            //
-            // boost::asio::async_read(theSocket, 
-            //         asio::buffer(dataPtr->incomingBuffer, payloadSize), 
-            //         theStrand.wrap(boost::bind(&ClientConnection::handle_read_payload, 
-            //                 this, asio::placeholders::error, asio::placeholders::bytes_transferred, dataPtr)));
 
             bool closeConnection = false;
             size_t bytesRead=0;
@@ -316,3 +304,4 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
     TRACE_EXIT(); 
 }
 
+// vim:sw=4

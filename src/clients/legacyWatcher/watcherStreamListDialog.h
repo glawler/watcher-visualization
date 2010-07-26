@@ -48,9 +48,13 @@ namespace watcher
 	    // select the current stream
 	    void selectStream();
 
+	    // create a new stream
+	    void newStream();
+
         signals:
 
 	    void streamChanged(unsigned long uid);
+	    void reconnect();
 
         protected:
 
