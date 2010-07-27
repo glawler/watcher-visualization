@@ -9,6 +9,7 @@ Version 0.6.4.1:
     go back to global mode, the user double-clicks the selected node. The selected node is 
     highlighted in the main window by having a white cube drawn around it. Thhe dialog 
     is not modal and all changes made are immediately rendered in the main window.
+
     - Added a "background grid" option. The option can be found under the 'view' menu. 
     If toggled, a green grid is drawn at just below ground level. This is to help the user
     clearly see which way is up when running configurations with large z-axis differences. 
@@ -19,7 +20,11 @@ Version 0.6.4:
     on the fly via a dialog. The dialog can be assessed via Configuration->Layers. The 
     dialog will also pop-up when it sees a new layer for the very first time. This does 
     not include layers that have been read from the cfg file - just layers it has not 
-    seen from the watcher daemon.
+    seen from the watcher daemon. Changes made in the layer configuration dialog are 
+    immediately visible in the main window. Layers can be toggled from dialog. 
+    All changes made to the layers are remembered and written out to the watcher 
+    configuration file so that the next time watcher is run, the changes are still 
+    there. 
 
 Version 0.6.3:
 - legacy watcher
