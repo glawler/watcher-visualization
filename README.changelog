@@ -28,6 +28,10 @@ Version 0.6.4:
     All changes made to the layers are remembered and written out to the watcher 
     configuration file so that the next time watcher is run, the changes are still 
     there. 
+    - The GUI now handles a disconnnect from teh daemon correctly, or at least better.
+    If the daemon disconnects, the GUI will display the frowny-face and attempt
+    to re-connect every 2 seconds. Once the daemon comes back up, the GUI connects
+    and restarts playing at the start of the database. 
 
 Version 0.6.3:
 - legacy watcher
