@@ -14,6 +14,9 @@ Version 0.6.4.1:
     If toggled, a green grid is drawn at just below ground level. This is to help the user
     clearly see which way is up when running configurations with large z-axis differences. 
 
+    - Added a "new stream" button on the list streams dialog. If pushed a new stream is created 
+    for the GUI - if joined to an existing stream, the connection will be broken.
+
 Version 0.6.4:
 - legacy watcher
     - Added layer configuration dialog. This allows the user to modify layer settings 
