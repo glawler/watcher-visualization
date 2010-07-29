@@ -257,8 +257,8 @@
   <widget class="QGroupBox" name="nodeLabelGroupBox">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>240</y>
+     <x>220</x>
+     <y>250</y>
      <width>271</width>
      <height>101</height>
     </rect>
