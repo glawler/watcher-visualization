@@ -4,7 +4,7 @@
 
 Summary:	ARL1X/CTA Watcher
 Name:		%{_project}-%{_name}
-Version:	20100702
+Version:	20100803
 Release:	1
 License:	Other
 Group:		Applications/CTA
@@ -22,7 +22,7 @@ BuildRequires:	pkgconfig
 BuildRequires:  boost-devel
 BuildRequires:	libconfig-devel
 BuildRequires:	sqlite-devel
-BuildRequires:	cta-logger
+BuildRequires:	cta-logger-devel
 BuildRequires:	libkml-devel
 BuildRequires:	uriparser-devel
 
@@ -30,9 +30,16 @@ BuildRequires:	qt-devel
 
 %description
 
+%package lib
+Summary:	ARL1X/CTA Watcher library files.
+Group:		Libraries/CTA
+
+%description lib
+
 %package devel
 Summary:	ARL1X/CTA Watcher development files.
 Group:		Development/CTA
+Requires:	%{name}-lib = %{version}
 
 %description devel
 
@@ -78,6 +85,14 @@ fi
 %{_bindir}/showClock
 %{_bindir}/%{_name}d
 
+%files lib
+%defattr(444,root,root,755)
+
+%dir %{_libdir}
+%{_libdir}/lib%{_name}msg.so
+%{_libdir}/lib%{_name}msg.so.0
+%{_libdir}/lib%{_name}msg.so.0.0.0
+
 %files devel
 %defattr(444,root,root,755)
 
@@ -112,9 +127,6 @@ fi
 %{_libdir}/lib%{_name}.a
 %{_libdir}/lib%{_name}msg.a
 %{_libdir}/lib%{_name}msg.la
-%{_libdir}/lib%{_name}msg.so
-%{_libdir}/lib%{_name}msg.so.0
-%{_libdir}/lib%{_name}msg.so.0.0.0
 %{_libdir}/lib%{_name}utils.a
 
 %dir %{_libdir}/pkgconfig

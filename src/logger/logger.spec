@@ -2,12 +2,12 @@
 %define	_name		logger
 %define	_prefix		/usr/%{_project}
 
-Summary:	ARL1X/CTA
+Summary:	A small wrapper around Apache's log4cxx library.
 Name:		%{_project}-%{_name}
-Version:	20100702
+Version:	20100803
 Release:	1
 License:	Other
-Group:		Development/CTA
+Group:		Libraries/CTA
 URL:		http://fill.me.in/
 Vendor:		SPARTA
 Source:		%{name}-%{version}.tar.gz
@@ -22,6 +22,13 @@ BuildRequires:	log4cxx-devel
 BuildRequires:	libtool
 
 %description
+
+%package devel
+Group:		Development/CTA
+Summary:	A small wrapper around Apache's log4cxx library.
+Requires:	%{name}	= %{version}
+
+%description devel
 
 %prep
 if [ "$RPM_BUILD_ROOT" ] && [ "$RPM_BUILD_ROOT" != "/" ]; then
@@ -46,13 +53,20 @@ fi
 %files
 %defattr(-,root,root,-)
 
-%{_includedir}/declareLogger.h
-%{_includedir}/%{_name}.h
-%{_libdir}/lib%{_name}.a
-%{_libdir}/lib%{_name}.la
 %{_libdir}/lib%{_name}.so
 %{_libdir}/lib%{_name}.so.1
 %{_libdir}/lib%{_name}.so.1.0.0
+
+%files devel
+%defattr(-,root,root,-)
+
+%dir %{_includedir}
+%{_includedir}/declareLogger.h
+%{_includedir}/%{_name}.h
+
+%dir %{_libdir}
+%{_libdir}/lib%{_name}.a
+%{_libdir}/lib%{_name}.la
 %{_libdir}/pkgconfig/%{_name}.pc
 
 %changelog
