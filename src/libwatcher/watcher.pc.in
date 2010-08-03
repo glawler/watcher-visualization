@@ -9,6 +9,6 @@ Requires: watchermsg
 Version: @VERSION@
 # Manually put wathermsg first as it depends on things in watcher and older 
 # g++s seem to have problem resolving things otherwise. 
-Libs: -L${libdir} -lwatchermsg -lwatcher 
+Libs: -L${libdir} -Wl,-rpath=${libdir} -lwatchermsg -lwatcher 
 Cflags: -I${includedir}
 

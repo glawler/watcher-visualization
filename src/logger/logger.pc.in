@@ -7,6 +7,6 @@ Name: watcher
 Description: A small wrapper around Apache's log4cxx library.  
 Requires: liblog4cxx 
 Version: @VERSION@
-Libs: -L${libdir} -llogger
+Libs: -L${libdir} -Wl,-rpath=${libdir} -llogger
 Cflags: -I${includedir}
 

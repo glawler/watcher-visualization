@@ -7,6 +7,6 @@ Name: watcher
 Description: A few utilities that watcher uses. 
 Requires: 
 Version: @VERSION@
-Libs: -L${libdir} -lwatcherutils
+Libs: -L${libdir} -Wl,-rpath=${libdir} -lwatcherutils
 Cflags: -I${includedir}
 
