@@ -76,8 +76,8 @@ int main(int argc, char *argv[])
     po::variables_map &config=Gps2EventDb::getConfig();
     string scenFile=config["scenario"].as<string>();
     double rad=config["radius"].as<double>();
+    string dbName=config["database"].as<string>();
 
-    string dbName("event.db"); 
     Database *db=Database::connect(dbName); 
     if (!db) {
         fprintf(stderr, "Unable to create database.\n"); 

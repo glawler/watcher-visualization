@@ -61,6 +61,7 @@ namespace Gps2EventDb {
         config.add_options()
             ("radius,r", value<double>()->default_value(180.0), "The radius, in meters, in which nodes can hear each other")
             ("scenario,s", value<string>(), "The MANE scenario file to use. Required arguement.")
+            ("database,d", value<string>()->default_value("event.db"), "The name of the created watcher event datbase.")
             ;
 
         variables_map &vm=getConfig();
