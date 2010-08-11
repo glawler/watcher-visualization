@@ -60,7 +60,7 @@ namespace Gps2EventDb {
         options_description config("Functional Options. (Allowed on command line or in configuration file.)", lineLen); 
         config.add_options()
             ("radius,r", value<double>()->default_value(180.0), "The radius, in meters, in which nodes can hear each other")
-            ("scenario,s", value<string>(), "The MANE scenario file to use. Required arguement.")
+            ("scenario,s", value<string>(), "The MANE scenario file to use. Required argument.")
             ("database,d", value<string>()->default_value("event.db"), "The name of the created watcher event datbase.")
             ;
 
