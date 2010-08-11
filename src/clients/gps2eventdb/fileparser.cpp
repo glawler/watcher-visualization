@@ -21,65 +21,72 @@ namespace watcher {
             fprintf(stderr, "Unable to open file %s for reading.\n", filename.c_str());
             return false;
         }
+        char buf[256];
+        if(!fgets(buf, sizeof(buf), theFile))
+            return false;
+        double x, y, z;
+        Timestamp ts;
+        if (parseSpec(buf, sizeof(buf), x, y, z, ts))
+            fileType=SPEC;
+        else if (parseLog(buf, sizeof(buf), x, y, z, ts))
+            fileType=LOG;
+        else {
+            closeFile();
+            return false;
+        }
+        rewind(theFile);
+            
         return true;
     }
     void GpsFileParser::closeFile() 
     {
-        if (theFile)
+        if (theFile) {
             fclose(theFile);
+            theFile=NULL;
+        }
     }
-    ManeSpecFileParser::ManeSpecFileParser() : GpsFileParser()
-    {
-    }
-    ManeSpecFileParser::~ManeSpecFileParser()
-    {
-    }
-    bool ManeSpecFileParser::yield(Timestamp &ts, double &x, double &y, double &z)
+    bool GpsFileParser::yield(Timestamp &ts, double &x, double &y, double &z)
     {
         if (!theFile)
             return false;
+        char buf[256];
+        if(!fgets(buf, sizeof(buf), theFile))
+            return false;
+        bool retVal;
+        switch (fileType) {
+            case SPEC:
+                retVal=parseSpec(buf, sizeof(buf), x, y, z, ts);
+                break;
+            case LOG:
+                retVal=parseLog(buf, sizeof(buf), x, y, z, ts);
+                break;
+        }
+        return retVal;
+    }
+    bool GpsFileParser::parseSpec(const char *buf, size_t size, double &x, double &y, double &z, Timestamp &ts)
+    {
         static time_t now=0;
         if (!now)
             now=time(NULL);
-        char buf[256];
-        if(!fgets(buf, sizeof(buf), theFile))
+        unsigned long fts;
+        if (4!=sscanf(buf, "%lu,%lf,%lf,%lf\n", &fts, &x, &y, &z))
             return false;
-        float fx, fy, fz;
-        int fts;
-        if (4!=sscanf(buf, "%d,%f,%f,%f\n", &fts, &fx, &fy, &fz))
-            return false;
-        x=fx;
-        y=fy;
-        z=fz;
-        ts=fts+now;  // offset from "now" as spec file starts at time of test, not absolute time.
+        ts=(Timestamp)fts+now;  // offset from "now" as spec file starts at time of test, not absolute time.
+        ts*=1000;
         return true;
     }
-    ManeLogFileParser::ManeLogFileParser() : GpsFileParser()
+    bool GpsFileParser::parseLog(const char *buf, size_t size, double &x, double &y, double &z, Timestamp &ts)
     {
-    }
-    ManeLogFileParser::~ManeLogFileParser()
-    {
-    }
-    bool ManeLogFileParser::yield(Timestamp &ts, double &x, double &y, double &z)
-    {
-        if (!theFile)
-            return false;
-        char buf[256];
-        if(!fgets(buf, sizeof(buf), theFile))
-            return false;
         // time>14:40:14.000000 position>0.000259,0.001400,0.000000
         unsigned int h, m;
         float s, fx, fy, fz;
-        if (6!=sscanf(buf, "time>%2u:%2u:%f position>%f,%f,%f\n", &h, &m, &s, &fx, &fy, &fz)) 
+        if (6!=sscanf(buf, "time>%2u:%2u:%f position>%lf,%lf,%lf\n", &h, &m, &s, &x, &y, &z)) 
             return false;
         if (!getElapsedTime(h, m, s, ts))
             return false;
-        x=fx;
-        y=fy;
-        z=fz;
         return true;
     }
-    bool ManeLogFileParser::getElapsedTime(int h, int m, int s, Timestamp &ts) 
+    bool GpsFileParser::getElapsedTime(int h, int m, int s, Timestamp &ts) 
     {
         static bool gotNow=false;
         static struct tm now;
@@ -94,6 +101,7 @@ namespace watcher {
         t.tm_min=m;
         t.tm_hour=h;
         ts=(Timestamp)timegm(&t); 
+        ts*=1000;
         return true;
     }
 }

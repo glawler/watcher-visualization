@@ -11,8 +11,8 @@ int main(void)
         GpsFileParser *parser;
         const char *filename;
     } parseData [] = {
-        { new ManeLogFileParser, "test.log" }, 
-        { new ManeSpecFileParser, "test.spec" }
+        { new GpsFileParser, "test.log" }, 
+        { new GpsFileParser, "test.spec" }
     };
    
     for (size_t i=0; i<(sizeof(parseData)/sizeof(parseData[0])); i++) {

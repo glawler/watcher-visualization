@@ -60,20 +60,19 @@ namespace Gps2EventDb {
         options_description config("Functional Options. (Allowed on command line or in configuration file.)", lineLen); 
         config.add_options()
             ("radius,r", value<double>()->default_value(180.0), "The radius, in meters, in which nodes can hear each other")
+            ("scenario,s", value<string>(), "The MANE scenario file to use. Required arguement.")
             ;
 
-        options_description cmdline_options(lineLen);
-        cmdline_options.add(generic).add(config);
-
-        options_description config_file_options(lineLen);
-        config_file_options.add(config);
-
         variables_map &vm=getConfig();
+        options_description cmdline_options(lineLen);
+        options_description config_file_options(lineLen);
 
         // Try to sort out all options and complain/exit on error
         try {
+            cmdline_options.add(generic).add(config);
+            config_file_options.add(config);
             store(parse_command_line(argc, argv, cmdline_options), vm);
-            ifstream confFile(vm["configFile"].as<string>().c_str());  // GTL god this is ugly.
+            ifstream confFile(vm["configFile"].as<string>().c_str()); 
             if (confFile.is_open()) {
                 store(parse_config_file(confFile, config_file_options), vm); 
                 confFile.close();
@@ -94,7 +93,11 @@ namespace Gps2EventDb {
             cerr << cmdline_options << endl;
             return false;
         }
-
+        if (!vm.count("scenario")) {
+            cerr << cmdline_options << endl;
+            cerr << endl << "scenario is a required argument." << endl << endl;
+            exit(EXIT_FAILURE);
+        }
         return true;
     }
 }
