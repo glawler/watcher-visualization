@@ -24,6 +24,7 @@ SUBDIRS=\
 	routeFeeder \
 	commandlineFeeders \
 	randomScenario \
+	gps2eventdb \
 	$(WHC_DIR) \
 	$(FULL_DIRS) \
 	$(W3D_DIR) \
