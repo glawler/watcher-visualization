@@ -205,8 +205,9 @@ AC_CONFIG_FILES([ \
     clients/Makefile \
     clients/routeFeeder/Makefile \
     clients/commandlineFeeders/Makefile \
-    clients/randomScenario/Makefile
-
+    clients/randomScenario/Makefile \
+    clients/gps2eventdb/Makefile \
+    clients/gps2eventdb/test/Makefile
 ])
 
 if test x$enable_testnodeonly == xno; then

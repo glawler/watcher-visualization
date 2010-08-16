@@ -299,3 +299,7 @@ share/info/dir
 ^src/libtool
 ^src/util/watcherutils.pc
 
+^src/clients/gps2eventdb/Makefile
+^src/clients/gps2eventdb/gps2eventdb
+^src/clients/gps2eventdb/test/Makefile
+^src/clients/gps2eventdb/test/testFileParser
