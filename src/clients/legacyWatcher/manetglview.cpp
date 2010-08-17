@@ -1490,7 +1490,7 @@ bool manetGLView::loadConfiguration()
     //
     QTimer *watcherIdleTimer = new QTimer(this);
     QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-    watcherIdleTimer->start(100); 
+    watcherIdleTimer->start(40);  // This is ~25 FPS
 
     // start work threads
     watcherdConnectionThread=new boost::thread(boost::bind(&manetGLView::connectStream, this));
