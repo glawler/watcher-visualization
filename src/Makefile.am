@@ -6,7 +6,7 @@ if !ENABLE_TESTNODEONLY
 FULL_BUILD_DIRS = sqlite_wrapper watcherd 
 endif
 
-SUBDIRS=util libwatcher clients $(FULL_BUILD_DIRS) 
+SUBDIRS=util libwatcher $(FULL_BUILD_DIRS) clients
 
 .PHONY: doc
 
