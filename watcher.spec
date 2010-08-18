@@ -4,7 +4,7 @@
 
 Summary:	ARL1X/CTA Watcher
 Name:		%{_project}-%{_name}
-Version:	20100803
+Version:	20100818
 Release:	1
 License:	Other
 Group:		Applications/CTA
@@ -72,6 +72,7 @@ fi
 %dir %{_bindir}
 %{_bindir}/connectivity2dot
 %{_bindir}/earthWatcher
+%{_bindir}/gps2eventdb
 %{_bindir}/messageStream2Text
 %{_bindir}/randomScenario
 %{_bindir}/routeFeeder
