@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -14,11 +14,6 @@
  * 
  *     You should have received a copy of the GNU Affero General Public License
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/**@file
- * @author Michael.Elkins@cobham.com
- * @date 2009-05-04
  */
 
 #ifndef database_h
@@ -54,9 +49,9 @@ namespace watcher {
              * @param output a function which accepts the individual events returned from the DB
              * @param[in] t time offset at which to start retrieving events
              * @param[in] d direction of the event stream
-             * @param[in] count the max number of events to retrieve
+             * @param[in] count the soft limit on number of events to retrieve
              */
-            virtual void getEvents( boost::function<void(event::MessagePtr)> output, Timestamp t, Direction d, unsigned int count ) = 0;
+            virtual void getEvents(boost::function<void(event::MessagePtr)> output, Timestamp t, Direction d, unsigned int count) = 0;
 
             virtual TimeRange eventRange() = 0;
 
