@@ -90,22 +90,39 @@ void SqliteDatabase::getEvents(boost::function<void(event::MessagePtr)> output,
                                Timestamp t, Direction d, unsigned int count)
 {
     TRACE_ENTER();
+
+    /* the count of how many events we've processed thus far for this query */
+    unsigned int nevents = 0;
+
     std::ostringstream os;
     os << "SELECT data FROM events WHERE ts" << (d == forward ? ">" : "<") << t <<
-        " ORDER BY ts " << (d == forward ? "ASC" : "DESC") <<
-        " LIMIT " << count;
+	" ORDER BY ts " << (d == forward ? "ASC" : "DESC");
     LOG_DEBUG(os.str());
 
     // read each serialized event from a row, unpack and pass to callback function
+    Timestamp last_event = 0;
     Statement st(*conn_, os.str());
-    for (Row r(st.rows()); r; ++r) {
-        Column c(r.columns());
-        std::string data;
-        c >> data;
-        LOG_DEBUG("attempting to deserialize data from db: " << data);
-        std::istringstream is(data);
-        output(Message::unpack(is));
+    for (Row r(st.rows()); r; ++r, ++nevents) {
+	Column c(r.columns());
+	std::string data;
+	c >> data;
+	LOG_DEBUG("attempting to deserialize data from db: " << data);
+	std::istringstream is(data);
+	event::MessagePtr msg(Message::unpack(is));
+
+	/* In the case where more than `count` events occurred during the same
+	 * millisecond, make sure all events are read, even if there are more than
+	 * the user requested.
+	 */
+	if (msg->timestamp > last_event && nevents >= count) {
+	    LOG_DEBUG("stopping at ts " << msg->timestamp << " after reading " << nevents << " events");
+	    break;
+	}
+
+	output(msg);
+	last_event = msg->timestamp;
     }
+
     TRACE_EXIT();
 }
 
