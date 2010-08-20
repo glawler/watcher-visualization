@@ -1,0 +1,146 @@
+#!/usr/bin/perl -w
+use strict;
+use Getopt::Std;
+
+# Default values.
+my $color="0.255.128"; 
+my $alpha="255"; 
+my $pathEnd="";
+my $width=2;
+my $timeout=5;
+my $colluderNetwork="10.0.1"; 
+my $manetNetwork="192.168.2"; 
+my $server="192.168.1.1"; 
+my $usePing=0;
+
+my %options;
+if(!getopts('C:T:M:a:c:e:w:t:s:pHhd', \%options))  { usage(); }
+if(defined $options{h} || defined $options{H}) { usage(); }
+if(!defined $options{e}) { usage(); }
+
+if(defined $options{a}) { $alpha=$options{a}; } 
+if(defined $options{c}) { $color=$options{c}; }
+if(defined $options{e}) { $pathEnd=$options{e}; } 
+if(defined $options{w}) { $width=$options{w}; } 
+if(defined $options{t}) { $timeout=$options{t}; } 
+if(defined $options{C}) { $colluderNetwork=$options{C}; } 
+if(defined $options{M}) { $manetNetwork=$options{M}; }
+if(defined $options{p}) { $usePing=1; }
+if(defined $options{s}) { $server=$options{s}; }
+
+my @path; 
+
+#
+# Run ping to get the path.
+#
+if ($usePing) {
+    my $pingStr="ping -c 3 -n -R $pathEnd"; 
+    getPathFromPing($pingStr, \@path); 
+}
+else {
+    my $traceCmd="traceroute -n $pathEnd";
+    getPathFromTraceroute($traceCmd, \@path); 
+}
+
+if(defined $options{d}) { print "Path=@path\n"; } 
+
+$timeout*=1000; 
+$color=$color . "." . $alpha;
+
+
+# now loop over path and call edgeTest to display them in the watcher
+for my $i ( 0 .. $#path-1 )
+{
+	# draw one directions
+	if (($i > 0) && ($path[$i] eq $path[$i-1])) {
+	  last ;
+	}
+
+    # my $sysStr="./edgetest -h $path[$i] -t $path[$i+1] -e $timeout -w $width -c $color"; 
+    my $sysStr="sendEdgeMessage --server $server --head $path[$i] --tail $path[$i+1] --width $width --color $color --expiration $timeout 2>/dev/null 1>/dev/null"; 
+	print "sysStr=$sysStr\n" unless !defined $options{d};
+    # system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
+
+    # $sysStr="./edgetest -h $path[$i+1] -t $path[$i] -e $timeout -w $width -c $color"; 
+    $sysStr="sendEdgeMessage --server $server --head $path[$i+1] --tail $path[$i] --width $width --color $color --expiration $timeout 2>/dev/null 1>/dev/null"; 
+	print "sysStr=$sysStr\n" unless !defined $options{d};
+    # system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
+}
+
+#
+# End of "main"
+#
+	
+sub usage
+{
+	print "$0 [flags]\n"; 
+	print "-c red.green.blue	- rgb color of the path to be drawn, default = $color\n";  
+	print "-a alpha			- transparency of path 255=opaque, 0=invisible, Default = $alpha\n"; 
+	print "-e xxx.xxx.xxx.xxx	- end of path. Start of path is always localhost. This is a req. flag.\n"; 
+	print "-w int			- width of path, default = $width\n"; 
+	print "-t seconds		- expiration time in seconds for drawn path, default = $timeout\n"; 
+	print "-C network		- colluder network in XX.XX.XX format, default = $colluderNetwork\n"; 
+	print "-M network		- MANET network in XX.XX.XX format, default = $manetNetwork\n"; 
+    print "-p               - Use ping instead of traceroute to determine the path\n"; 
+    print "-s server        - The address/name of the machine running watcherd\n"; 
+	exit(); 
+}
+
+# args - ping command, path array
+sub getPathFromPing
+{
+	my ($pingCommand, $pathArrayRef) = @_; 
+	my $prevId; 
+	open(FD, "$pingCommand |") || die "Unable to run \"$pingCommand\""; 
+	if($options{d}) { print "Output of $pingCommand:\n"; } 
+	while(<FD>)
+	{
+		chomp;
+		if($options{d}) { print "$_\n"; }
+
+		if(/^[RR:|\s]+(\d{1,3}\.\d{1,3}\.\d{1,3}\.)(\d{1,3})$/)
+		{
+			my $id=$2; 
+			my $addr=$1 . $2; 
+			$addr =~ s/$colluderNetwork/$manetNetwork/; 
+			push @$pathArrayRef, $addr;
+		}
+	}
+	close FD; 
+}
+
+# Example 1 traceroute output
+# traceroute to 192.168.2.115 (192.168.2.115), 30 hops max, 40 byte packets
+#  1  192.168.2.121 (192.168.2.121)  1.756 ms   0.291 ms   0.499 ms
+#  2  192.168.2.103 (192.168.2.103)  1.042 ms   0.728 ms   0.731 ms
+#  3  192.168.2.129 (192.168.2.129)  0.992 ms   1.043 ms   1.137 ms
+#  4  192.168.2.134 (192.168.2.134)  1.561 ms   1.339 ms   1.249 ms
+#  5  192.168.2.115 (192.168.2.115)  3.398 ms   3.697 ms   3.062 ms
+#
+#  Example 2 of traceroute output:
+#  traceroute to google.com (72.14.204.104), 30 hops max, 60 byte packets
+#   1  192.168.1.1  0.350 ms  0.447 ms  0.457 ms
+#   2  66.114.64.253  23.636 ms  24.906 ms  26.131 ms
+#   3  64.125.180.74  26.350 ms  27.510 ms  28.538 ms
+#
+sub getPathFromTraceroute
+{
+	my ($cmd, $pathArrayRef) = @_; 
+	open(FD, "$cmd |") || die "Unable to run \"$cmd\""; 
+	if($options{d}) { print "Output of $cmd:\n"; } 
+	while(<FD>) {
+		chomp;
+		if($options{d}) { 
+            print "$_\n"; 
+        }
+        # ex 1
+		if (/^\s*\d+\s+([\d\.]+)\s+\([\d\.]+\)\s+[\d\.]+\s+ms/) {
+			push @$pathArrayRef, $1;
+		}
+        # ex 2
+        elsif (/^\s*\d+\s+([\d\.]+)\s+[\d\.]+\s+ms/) {
+			push @$pathArrayRef, $1;
+        }
+	}
+	close FD; 
+}
