@@ -207,53 +207,42 @@ bool WatcherGraph::addEdge(const EdgeMessagePtr &message)
     size_t b=nid2Index(message->node2);
     size_t l=name2LayerIndex(message->layer);
 
-    layers[l].edges[a][b]=message->addEdge;
+    bool doBothDirs=message->bidirectional;
+    while (1) { 
+        layers[l].edges[a][b]=message->addEdge;
 
-    if (!message->addEdge) {
-        layers[l].edgeExpirations[a][b]=watcher::Infinity;
-        if (message->bidirectional) { 
-            layers[l].edges[b][a]=false;
-            layers[l].edgeExpirations[b][a]=watcher::Infinity;
+        if (!message->addEdge) 
+            layers[l].edgeExpirations[a][b]=watcher::Infinity;
+        else if (message->expiration!=Infinity) {
+            if (timeForward) 
+                layers[l].edgeExpirations[a][b]=message->timestamp+message->expiration;  
+            else 
+                layers[l].edgeExpirations[a][b]=message->timestamp-message->expiration;  
         }
+
+        if (layers[l].edges[a][b] && message->middleLabel && !message->middleLabel->label.empty()) 
+            layers[l].addRemoveEdgeLabel(message->middleLabel, timeForward, a, b); 
+
+        if (nodes[a].isActive && message->node1Label && !message->node1Label->label.empty()) 
+            layers[l].addRemoveLabel(message->node1Label, timeForward, a); 
+
+        if (nodes[b].isActive && message->node2Label && !message->node2Label->label.empty()) 
+            layers[l].addRemoveLabel(message->node2Label, timeForward, b); 
+
+        // if you want dynamic colors and widths (i.e. controlled by the test nodes at run time), 
+        // uncomment the following. Is it worth doing this copy for every edge message we get
+        // when the vast majority of the time the edges do not change attributes 
+        // dynamically?
+        // layers[l].edgeDisplayInfo.color=message->color;
+        // layers[l].edgeDisplayInfo.width=message->width;
+
+        if (!doBothDirs)
+            break;
+        doBothDirs=false; // break next time.
+        size_t tmp=a;
+        a=b;
+        b=tmp;
     }
-
-    if (message->expiration!=Infinity) {
-        // Timestamp oldExp=layers[l].edgeExpirations[a][b];
-        if (timeForward) 
-            layers[l].edgeExpirations[a][b]=message->timestamp+message->expiration;  
-        else 
-            layers[l].edgeExpirations[a][b]=message->timestamp-message->expiration;  
-        // LOG_DEBUG("Set edge expiration. Was: " << oldExp << " now: " << theGraph[ei.first].expiration);
-    }
-
-    if (layers[l].edges[a][b] && message->middleLabel && !message->middleLabel->label.empty()) 
-        layers[l].addRemoveEdgeLabel(message->middleLabel, timeForward, a, b); 
-
-    if (nodes[a].isActive && message->node1Label && !message->node1Label->label.empty()) 
-        layers[l].addRemoveLabel(message->node1Label, timeForward, a); 
-
-    if (nodes[b].isActive && message->node2Label && !message->node2Label->label.empty()) 
-        layers[l].addRemoveLabel(message->node2Label, timeForward, b); 
-
-    // if you want dynamic colors and widths (i.e. controlled by the test nodes at run time), 
-    // uncomment the following. Is it worth doing this copy for every edge message we get
-    // when the vast majority of the time the edges do not change attributes 
-    // dynamically?
-    // layers[l].edgeDisplayInfo.color=message->color;
-    // layers[l].edgeDisplayInfo.width=message->width;
-
-    if (message->bidirectional) { 
-        layers[l].edges[b][a]=true;
-        // Timestamp oldExp=layers[l].edgeExpirations[b][a];
-        if (timeForward) 
-            layers[l].edgeExpirations[b][a]=message->timestamp+message->expiration;  
-        else 
-            layers[l].edgeExpirations[b][a]=message->timestamp-message->expiration;  
-
-        if (layers[l].edges[b][a] && message->middleLabel && !message->middleLabel->label.empty()) 
-            layers[l].addRemoveEdgeLabel(message->middleLabel, timeForward, b, a); 
-    }
-
     return true;
 }
 
