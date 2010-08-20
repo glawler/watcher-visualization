@@ -11,10 +11,11 @@ my $timeout=5;
 my $colluderNetwork="10.0.1"; 
 my $manetNetwork="192.168.2"; 
 my $server="192.168.1.1"; 
+my $layer="dynamic_layer"; 
 my $usePing=0;
 
 my %options;
-if(!getopts('C:T:M:a:c:e:w:t:s:pHhd', \%options))  { usage(); }
+if(!getopts('C:l:M:a:c:e:w:t:s:pHhd', \%options))  { usage(); }
 if(defined $options{h} || defined $options{H}) { usage(); }
 if(!defined $options{e}) { usage(); }
 
@@ -27,6 +28,7 @@ if(defined $options{C}) { $colluderNetwork=$options{C}; }
 if(defined $options{M}) { $manetNetwork=$options{M}; }
 if(defined $options{p}) { $usePing=1; }
 if(defined $options{s}) { $server=$options{s}; }
+if(defined $options{l}) { $layer=$options{l}; }
 
 my @path; 
 
@@ -57,14 +59,9 @@ for my $i ( 0 .. $#path-1 )
 	}
 
     # my $sysStr="./edgetest -h $path[$i] -t $path[$i+1] -e $timeout -w $width -c $color"; 
-    my $sysStr="sendEdgeMessage --server $server --head $path[$i] --tail $path[$i+1] --width $width --color $color --expiration $timeout 2>/dev/null 1>/dev/null"; 
+    my $sysStr="sendEdgeMessage --bidirectional true --layer $layer --server $server --head $path[$i] --tail $path[$i+1] --width $width --color $color --expiration $timeout 2>/dev/null 1>/dev/null"; 
 	print "sysStr=$sysStr\n" unless !defined $options{d};
-    # system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
-
-    # $sysStr="./edgetest -h $path[$i+1] -t $path[$i] -e $timeout -w $width -c $color"; 
-    $sysStr="sendEdgeMessage --server $server --head $path[$i+1] --tail $path[$i] --width $width --color $color --expiration $timeout 2>/dev/null 1>/dev/null"; 
-	print "sysStr=$sysStr\n" unless !defined $options{d};
-    # system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
+    system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
 }
 
 #
@@ -83,6 +80,7 @@ sub usage
 	print "-M network		- MANET network in XX.XX.XX format, default = $manetNetwork\n"; 
     print "-p               - Use ping instead of traceroute to determine the path\n"; 
     print "-s server        - The address/name of the machine running watcherd\n"; 
+    print "-l layer         - The watcher layer of the path. Default \"dynamic_path\"\n"; 
 	exit(); 
 }
 
