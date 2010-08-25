@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <getopt.h>
+#include <boost/filesystem.hpp>
 
 #include "server.h"
 #include "logger.h"
@@ -36,6 +37,8 @@ option Options[] = {
     { "config", 1, NULL, 'c' },
     { "database", 1, NULL, 'd' },
     { "read-only", 1, NULL, 'r' },
+    { "logLevel", 1, NULL, 'l' },
+    { "logProperties", 1, NULL, 'L' },
     { 0, 0, NULL, 0 }
 };
 
@@ -43,10 +46,13 @@ void usage(const char *progName, bool exitp)
 {
     cout << "Usage: " << basename(progName) << " [-c config filename]" << endl;
     cout << "Args: " << endl; 
-    cout << "   -h, show this messsage and exit." << endl; 
-    cout << "   -d database, use this event database when running watcherd" << endl; 
-    cout << "   -c configfile - If not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
-    cout << "   -r, --read-only - do not write events to the database." << endl;
+    cout << "\t-h\t\tshow this messsage and exit." << endl; 
+    cout << "\t-d database\t\t use this event database when running watcherd" << endl; 
+    cout << "\t-c configfile\t\tIf not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
+    cout << "\t-r, --read-only\t\t do not write events to the database." << endl;
+    cout << "\t-l,--logLevel level\t\tSet the default log level. Must be one of\n";
+    cout << "\t                     \t\t\toff, fatal, error, warn, info, debug, or trace.\n";
+    cout << "\t-L,--logProperties filename\t\tThe log.properties filename\n";
     cout << "If a configuration file is not found on startup, a default one will be created, used, and saved on program exit." << endl;
 
     if (exitp)
@@ -61,8 +67,8 @@ int main(int argc, char* argv[])
 
     int i;
     bool readOnly = false;
-    std::string dbPath;
-    while ((i = getopt_long(argc, argv, "hc:d:r", Options, NULL)) != -1) {
+    std::string dbPath, logLevel, logPropsFilename;
+    while ((i = getopt_long(argc, argv, "hc:d:rl:L:", Options, NULL)) != -1) {
         switch (i) {
             case 'c':
                 //handled below
@@ -72,6 +78,18 @@ int main(int argc, char* argv[])
                 break;
             case 'd':
                 dbPath=string(optarg);
+                break;
+            case 'l':
+                logLevel=optarg;
+                if (logLevel!="off" && logLevel!="fatal" && logLevel!="error" && logLevel!="warn" && 
+                        logLevel!="info" && logLevel!="debug" && logLevel!="trace") { 
+                    cout << endl << "logLevel must be one of off, fatal, error, warn, info, debug, or trace." << endl;
+                    usage(basename(argv[0]), true); 
+                    exit(EXIT_FAILURE);
+                }
+                break;
+            case 'L':
+                logPropsFilename=optarg;
                 break;
             default:
                 usage(argv[0], true); 
@@ -90,6 +108,8 @@ int main(int argc, char* argv[])
     SingletonConfig::unlock();
 
     string logConf("log.properties");
+    if (!logPropsFilename.empty())
+        logConf=logPropsFilename;
     if (!config.lookupValue("logPropertiesFile", logConf))
     {
         cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf 
@@ -97,9 +117,18 @@ int main(int argc, char* argv[])
         config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
     }
 
-    LOAD_LOG_PROPS(logConf);
-
-    LOG_INFO("Logger initialized from file \"" << logConf << "\"");
+    if (!boost::filesystem::exists(logConf)) {
+        cerr << "Log properties file not found - logging disabled." << endl;
+        Logger::getRootLogger()->setLevel(Level::getOff());
+    }
+    else {
+        LOAD_LOG_PROPS(logConf);
+        LOG_INFO("Logger initialized from file \"" << logConf << "\"");
+    }
+    if (!logLevel.empty()) {
+        cout << "Setting default log level to " << logLevel << endl;
+        Logger::getRootLogger()->setLevel(Level::toLevel(logLevel)); 
+    }
 
     string address("localhost");
     string port("8095");
