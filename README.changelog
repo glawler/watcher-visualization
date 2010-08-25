@@ -8,6 +8,12 @@ Version 0.6.4.2:
     the data network. Must be run on the src of the path. Uses traceroute to get the 
     dynamic path, then sendEdgeMessage to draw the path. So both must be installed and 
     in the $PATH.
+- watcherd
+    - added two new args to watcherd, both for logging. -l loglevel and -L log.props.file. 
+    This will give move control over logging (even turning it off via '-l off') and stop the 
+    confusing log4cxx errors on start when the log.props file is not found. These arguments
+    are exactly the same as the equiv args to legacy watcher. 
+
 Version 0.6.4.1:
 - legacy watcher
     - Added a node configuration dialog. This allows the user to modify the node configuration
