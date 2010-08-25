@@ -5,6 +5,7 @@ include $(top_srcdir)/Makefile.top
 
 CPPFLAGS += -I$(top_srcdir)/clients/include
 
+AM_LDFLAGS=-Wl,-rpath=$(libdir)
 LDADD = $(top_srcdir)/libwatcher/libwatchermsg.la 
 LDADD += $(top_srcdir)/libwatcher/libwatcher.a 
 LDADD += $(top_srcdir)/util/libwatcherutils.a 
