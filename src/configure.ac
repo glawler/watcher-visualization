@@ -36,8 +36,8 @@ PKG_CHECK_MODULES(LOGGER, logger)
 # allow optional 'test node only' build which builds just test node components.
 AC_MSG_CHECKING(whether to enable a test node only build)
 AC_ARG_ENABLE(testnodeonly,
-	      [AS_HELP_STRING([--enable-testnodeonly],[only configure and build test node components])],
-	      [enable_testnodeonly=$enableval],
+          [AS_HELP_STRING([--enable-testnodeonly],[only configure and build test node components])],
+          [enable_testnodeonly=$enableval],
           [enable_testnodeonly="no"])
 AC_MSG_RESULT($enable_testnodeonly)
 AM_CONDITIONAL([ENABLE_TESTNODEONLY], [test x$enable_testnodeonly != xno])
@@ -46,10 +46,11 @@ AM_CONDITIONAL([ENABLE_TESTNODEONLY], [test x$enable_testnodeonly != xno])
 PKG_CHECK_MODULES(LOG4CXX, [liblog4cxx >= 0.10.0])
 PKG_CHECK_MODULES(LIBCONFIG, [libconfig++ >= 1.3.1])
 
-# Not entirely correct.
-libsubdir="lib"
+# Not entirely correct. Will break if 3rd party libs not installed in standard locations
+# relative to that lib's PREFIX. Will also break when doing 64/32 bit cross compilation.
+local_libsubdir="lib"
 if test "$(uname -m)" = "x86_64"; then
-	libsubdir="lib64"
+    local_libsubdir="lib64"
 fi
 
 if test x$enable_testnodeonly == xno; then
@@ -61,8 +62,8 @@ if test x$enable_testnodeonly == xno; then
     # allow optional disabling of ogreWatcher
     AC_MSG_CHECKING(whether to build ogreWatcher)
     AC_ARG_ENABLE(ogreWatcher,
-	      [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
-	      [enable_ogreWatcher=$enableval],
+          [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
+          [enable_ogreWatcher=$enableval],
           [enable_ogreWatcher="no"])
     AC_MSG_RESULT($enable_ogreWatcher)
     AM_CONDITIONAL([ENABLE_OGREWATCHER], [test x$enable_ogreWatcher != xno])
@@ -70,8 +71,8 @@ if test x$enable_testnodeonly == xno; then
     # allow optional disabling of watcher3d
     AC_MSG_CHECKING(whether to build watcher3d)
     AC_ARG_ENABLE(watcher3d,
-	      [AS_HELP_STRING([--enable-watcher3d],[enable compilation of watcher3d GUI])],
-	      [enable_watcher3d=$enableval],
+          [AS_HELP_STRING([--enable-watcher3d],[enable compilation of watcher3d GUI])],
+          [enable_watcher3d=$enableval],
           [enable_watcher3d="no"])
     AC_MSG_RESULT($enable_watcher3d)
     AM_CONDITIONAL([ENABLE_WATCHER3D], [test x$enable_watcher3d != xno])
@@ -79,8 +80,8 @@ if test x$enable_testnodeonly == xno; then
     # allow optional disabling of earthWatcher
     AC_MSG_CHECKING(whether to build earthWatcher)
     AC_ARG_ENABLE(earthWatcher,
-	      [AS_HELP_STRING([--enable-earthWatcher],[enable compilation of earthWatcher])],
-	      [enable_earthWatcher=$enableval],
+          [AS_HELP_STRING([--enable-earthWatcher],[enable compilation of earthWatcher])],
+          [enable_earthWatcher=$enableval],
           [enable_earthWatcher="no"])
     AC_MSG_RESULT($enable_earthWatcher)
     AM_CONDITIONAL([ENABLE_EARTHWATCHER], [test x$enable_earthWatcher != xno])
@@ -88,31 +89,39 @@ if test x$enable_testnodeonly == xno; then
     ac_cv_kml=no
     AC_ARG_WITH([kml], 
                 [AS_HELP_STRING([--with-kml=PREFIX],[use the libkml installed in the PREFIX directory])],
-    	    	[ac_cv_kml=$withval])
+                [ac_cv_kml=$withval])
+
+    AC_ARG_WITH([kml-libdir], 
+                [AS_HELP_STRING([--with-kml-libdir=dir],[use the libdir installed in PREFIX/$libdir when looking for kml libs])],
+                [ac_cv_kml_libdir=$withval])
 
     if test x$enable_earthWatcher != xno; then
-            PKG_CHECK_MODULES(LIBURIPARSER, liburiparser)
-	    AC_MSG_CHECKING(for libkml)
-	    if test x$ac_cv_kml = xno; then
-		    #not specified by the user, look in the standard locations
-		    for d in /usr /usr/local; do
-			    if test -d $d/include/kml; then
-				    ac_cv_kml=$d
-			    fi
-		    done
-	    fi
-	    if test x$ac_cv_kml = xno; then
-		    AC_MSG_WARN("unable to locate libkml. You will have to specify CFLAGS and LDFLAGS by hand...")
-        else
-	        AC_MSG_RESULT($ac_cv_kml)
-                KML_INCLUDES="-I$ac_cv_kml/include"
-	        KML_LDFLAGS="-L$ac_cv_kml/$libsubdir/libkml -Wl,-rpath=$ac_cv_kml/$libsubdir/libkml"
-	        AC_SUBST(KML_INCLUDES)
-	        AC_SUBST(KML_LDFLAGS)
+        PKG_CHECK_MODULES(LIBURIPARSER, liburiparser)
+        AC_MSG_CHECKING(for libkml)
+        if test x$ac_cv_kml = xno; then
+            #not specified by the user, look in the standard locations
+            for d in /usr /usr/local; do
+                if test -d $d/include/kml; then
+                    ac_cv_kml=$d
+                fi
+            done
         fi
-	    
+        if test x$ac_cv_kml = xno; then
+            AC_MSG_WARN("unable to locate libkml. You will have to specify CFLAGS and LDFLAGS by hand...")
+        else
+            AC_MSG_RESULT($ac_cv_kml)
+            KML_INCLUDES="-I$ac_cv_kml/include"
+            if test x$ac_cv_kml_libdir = xno; then
+                KML_LDFLAGS="-L$ac_cv_kml/$local_libsubdir/libkml -Wl,-rpath=$ac_cv_kml/$local_libsubdir/libkml"
+            else 
+                KML_LDFLAGS="-L$ac_cv_kml/$ac_cv_kml_libdir/libkml -Wl,-rpath=$ac_cv_kml/$ac_cv_kml_libdir/libkml"
+            fi
+            AC_SUBST(KML_INCLUDES)
+            AC_SUBST(KML_LDFLAGS)
+        fi
+        
         KML_LDADD="-lkmlbase -lkmlconvenience -lkmlengine -lkmldom"
-	    AC_SUBST(KML_LDADD)
+        AC_SUBST(KML_LDADD)
     fi
 
     # OGRE, OIS, and CEGUI
@@ -144,13 +153,17 @@ if test x$enable_testnodeonly == xno; then
     ac_cv_qwt=no
     AC_ARG_WITH([qwt], 
                 [AS_HELP_STRING([--with-qwt=PREFIX],[use the Qwt lib installed in the PREFIX directory])],
-    	    	[ac_cv_qwt=$withval])
+                [ac_cv_qwt=$withval])
+
+    AC_ARG_WITH([qwt-libdir], 
+                [AS_HELP_STRING([--with-qwt-libdir=dir],[use the libdir installed in PREFIX/$libdir when looking for qwt libs])],
+                [ac_cv_qwt_libdir=$withval])
 
     # ubuntu 10.04 is /usr/include/qwt-qt4/ and -lqwt-qt4
     ac_cv_qwt_ext=''
     AC_ARG_WITH([qwt-ext],
-		[AS_HELP_STRING([--with-qwt-ext=STRING],[use the Qwt library named qwt-STRING])],
-		[ac_cv_qwt_ext=$withval])
+        [AS_HELP_STRING([--with-qwt-ext=STRING],[use the Qwt library named qwt-STRING])],
+        [ac_cv_qwt_ext=$withval])
 
     AC_MSG_CHECKING(for qwt)
     if test x$ac_cv_qwt = xno; then
@@ -158,14 +171,22 @@ if test x$enable_testnodeonly == xno; then
         AC_MSG_WARN("QWT prefix not defined via --with-qwt.")
         AC_MSG_WARN(["Assuming /usr/local/qwt, which is almost certainly incorrect..."])
         QWT_INCLUDES="/usr/local/qwt/include"
-        QWT_LIB="-L/usr/local/qwt/$libsubdir -lqwt"
+        if test x$ac_cv_qwt_libdir = xno; then
+            QWT_LIB="-L/usr/local/qwt/$local_libsubdir -lqwt"
+        else
+            QWT_LIB="-L/usr/local/qwt/$ac_cv_qwt_libdir -lqwt"
+        fi
     else 
         AC_MSG_RESULT($ac_cv_qwt)
-	if test x$ac_cv_qwt_ext != x; then
-	    ac_cv_qwt_ext="-$ac_cv_qwt_ext"
-	fi
-	QWT_INCLUDES="$ac_cv_qwt/include/qwt$ac_cv_qwt_ext $ac_cv_qwt/include"
-        QWT_LIB="-L/$ac_cv_qwt/$libsubdir -lqwt$ac_cv_qwt_ext"
+        if test x$ac_cv_qwt_ext != x; then
+            ac_cv_qwt_ext="-$ac_cv_qwt_ext"
+        fi
+        QWT_INCLUDES="$ac_cv_qwt/include/qwt$ac_cv_qwt_ext $ac_cv_qwt/include"
+        if test x$ac_cv_qwt_libdir = xno; then
+            QWT_LIB="-L/$ac_cv_qwt/$local_libsubdir -lqwt$ac_cv_qwt_ext"
+        else
+            QWT_LIB="-L/usr/local/qwt/$ac_cv_qwt_libdir -lqwt$ac_cv_qwt_ext"
+        fi
     fi
 
     AC_SUBST(QWT_INCLUDES)
