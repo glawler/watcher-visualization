@@ -13,6 +13,13 @@ Version 0.6.4.2:
     This will give move control over logging (even turning it off via '-l off') and stop the 
     confusing log4cxx errors on start when the log.props file is not found. These arguments
     are exactly the same as the equiv args to legacy watcher. 
+    - bugfix: removed LIMIT from sql statement that gathered messages to send. This fixes
+    bug that caused not all messages to be sent if there were many messages at the same
+    timestamp
+- other
+    - new client: gps2eventdb. This binary takes a MANE scenario file and related GPS 
+    data files (log or spec format) and generates an event.db with GPS messages and connectivity
+    messages. Connectivity is based on user supplied radio radius and is a binary loss model.
 
 Version 0.6.4.1:
 - legacy watcher
