@@ -92,7 +92,7 @@ if test x$enable_testnodeonly == xno; then
                 [ac_cv_kml=$withval])
 
     AC_ARG_WITH([kml-libdir], 
-                [AS_HELP_STRING([--with-kml-libdir=dir],[use the libdir installed in PREFIX/$libdir when looking for kml libs])],
+                [AS_HELP_STRING([--with-kml-libdir=LIBDIR],[use the libdir installed in LIBDIR/libkml when looking for kml libs])],
                 [ac_cv_kml_libdir=$withval])
 
     if test x$enable_earthWatcher != xno; then
@@ -114,7 +114,7 @@ if test x$enable_testnodeonly == xno; then
             if test x$ac_cv_kml_libdir = xno; then
                 KML_LDFLAGS="-L$ac_cv_kml/$local_libsubdir/libkml -Wl,-rpath=$ac_cv_kml/$local_libsubdir/libkml"
             else 
-                KML_LDFLAGS="-L$ac_cv_kml/$ac_cv_kml_libdir/libkml -Wl,-rpath=$ac_cv_kml/$ac_cv_kml_libdir/libkml"
+                KML_LDFLAGS="-L$ac_cv_kml_libdir/libkml -Wl,-rpath=$ac_cv_kml_libdir/libkml"
             fi
             AC_SUBST(KML_INCLUDES)
             AC_SUBST(KML_LDFLAGS)
@@ -156,7 +156,7 @@ if test x$enable_testnodeonly == xno; then
                 [ac_cv_qwt=$withval])
 
     AC_ARG_WITH([qwt-libdir], 
-                [AS_HELP_STRING([--with-qwt-libdir=dir],[use the libdir installed in PREFIX/$libdir when looking for qwt libs])],
+                [AS_HELP_STRING([--with-qwt-libdir=LIBDIR],[use the libdir installed in LIBDIR when looking for qwt libs])],
                 [ac_cv_qwt_libdir=$withval])
 
     # ubuntu 10.04 is /usr/include/qwt-qt4/ and -lqwt-qt4
@@ -174,7 +174,7 @@ if test x$enable_testnodeonly == xno; then
         if test x$ac_cv_qwt_libdir = xno; then
             QWT_LIB="-L/usr/local/qwt/$local_libsubdir -lqwt"
         else
-            QWT_LIB="-L/usr/local/qwt/$ac_cv_qwt_libdir -lqwt"
+            QWT_LIB="-L$ac_cv_qwt_libdir -lqwt"
         fi
     else 
         AC_MSG_RESULT($ac_cv_qwt)
@@ -185,7 +185,7 @@ if test x$enable_testnodeonly == xno; then
         if test x$ac_cv_qwt_libdir = xno; then
             QWT_LIB="-L/$ac_cv_qwt/$local_libsubdir -lqwt$ac_cv_qwt_ext"
         else
-            QWT_LIB="-L/$ac_cv_qwt/$ac_cv_qwt_libdir -lqwt$ac_cv_qwt_ext"
+            QWT_LIB="-L$ac_cv_qwt_libdir -lqwt$ac_cv_qwt_ext"
         fi
     fi
 
