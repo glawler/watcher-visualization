@@ -185,7 +185,7 @@ if test x$enable_testnodeonly == xno; then
         if test x$ac_cv_qwt_libdir = xno; then
             QWT_LIB="-L/$ac_cv_qwt/$local_libsubdir -lqwt$ac_cv_qwt_ext"
         else
-            QWT_LIB="-L/usr/local/qwt/$ac_cv_qwt_libdir -lqwt$ac_cv_qwt_ext"
+            QWT_LIB="-L/$ac_cv_qwt/$ac_cv_qwt_libdir -lqwt$ac_cv_qwt_ext"
         fi
     fi
 
