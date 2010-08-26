@@ -112,9 +112,11 @@ if test x$enable_testnodeonly == xno; then
             AC_MSG_RESULT($ac_cv_kml)
             KML_INCLUDES="-I$ac_cv_kml/include"
             if test x$ac_cv_kml_libdir = xno; then
-                KML_LDFLAGS="-L$ac_cv_kml/$local_libsubdir/libkml -Wl,-rpath=$ac_cv_kml/$local_libsubdir/libkml"
+                # ARL puts it in ./lib or ./lib64 not lib/libkml or lib64libkml 
+                KML_LDFLAGS="-L$ac_cv_kml/$local_libsubdir/libkml -L$ac_cv_kml/$local_libsubdir -Wl,-rpath=$ac_cv_kml/$local_libsubdir/libkml"
             else 
-                KML_LDFLAGS="-L$ac_cv_kml_libdir/libkml -Wl,-rpath=$ac_cv_kml_libdir/libkml"
+                # ARL puts it in ./lib or ./lib64 not lib/libkml or lib64libkml 
+                KML_LDFLAGS="-L$ac_cv_kml_libdir/libkml -L$ac_cv_kml_libdir -Wl,-rpath=$ac_cv_kml_libdir/libkml"
             fi
             AC_SUBST(KML_INCLUDES)
             AC_SUBST(KML_LDFLAGS)
