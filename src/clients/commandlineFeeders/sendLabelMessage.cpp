@@ -106,6 +106,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -f, --foreground=color      The foreground color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n"); 
     fprintf(stderr, "   -b, --background=color      The background color of the label. Can be ROYGBIV or RGBA format, string or hex value.\n");
     fprintf(stderr, "   -e, --expiration=seconds    How long in secondt to diplay the label\n");
+    fprintf(stderr, "   -T, --timestamp=ms          Optionally specify a timestamp for this event\n"); 
     fprintf(stderr, "   -r, --remove                Remove the label if it is attached\n"); 
     fprintf(stderr, "   -L, --layer=layer           Which layer the label is part of. Default is physical\n"); 
 
@@ -125,6 +126,7 @@ int main(int argc, char **argv)
     Color bg=colors::black;
     Color fg=colors::white;
     uint32_t expiration=Infinity;
+	Timestamp timestamp = 0;
     float lat=0.0, lng=0.0, alt=0.0;
     bool remove=false;
     GUILayer layer=PHYSICAL_LAYER;
@@ -144,13 +146,14 @@ int main(int argc, char **argv)
             {"foreground", required_argument, 0, 'f'},
             {"background", required_argument, 0, 'b'},
             {"expiration", required_argument, 0, 'e'},
+            {"timestamp", required_argument, 0, 'T'},
             {"remove", no_argument, 0, 'r'},
             {"layer", required_argument, 0, 'L'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "l:s:n:x:y:t:p:z:f:b:e:L:rhH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "l:s:n:x:y:t:p:z:f:b:e:T:L:rhH?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -164,6 +167,7 @@ int main(int argc, char **argv)
             case 'f': { bool val=fg.fromString(optarg); if (!val) { printf("\nBad argument for fg color\n\n"); usage(argv[0]); } break; }
             case 'b': { bool val=bg.fromString(optarg); if (!val) { printf("\nBad argument for bg color\n\n"); usage(argv[0]); } break; }
             case 'e': expiration=lexical_cast<uint32_t>(optarg); break;
+            case 'T': timestamp=lexical_cast<Timestamp>(optarg); break;
             case 'n': 
                       {
                           boost::system::error_code e;
@@ -214,6 +218,8 @@ int main(int argc, char **argv)
     lm->foreground=fg;
     lm->background=bg;
     lm->expiration=expiration;
+	if (timestamp > 0)
+	    lm->timestamp=timestamp;
     lm->lat=lat;
     lm->lng=lng;
     lm->alt=alt;
