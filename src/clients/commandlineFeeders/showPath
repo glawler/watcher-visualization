@@ -86,19 +86,19 @@ do {
 sub usage
 {
 	print "$0 [flags]\n"; 
-	print "-c red.green.blue	- rgb color of the path to be drawn, default = $color\n";  
-	print "-a alpha			- transparency of path 255=opaque, 0=invisible, Default = $alpha\n"; 
-	print "-e xxx.xxx.xxx.xxx	- end of path. Start of path is always localhost. This is a req. flag.\n"; 
-	print "-w int			- width of path, default = $width\n"; 
-	print "-t seconds		- expiration time in seconds for drawn path, default = $timeout\n"; 
-	print "-C network		- colluder network in XX.XX.XX format, default = $colluderNetwork\n"; 
-	print "-M network		- MANET network in XX.XX.XX format, default = $manetNetwork\n"; 
-    print "-l address       - The address of the first hop. Need to use with traceroute as traceroute does not give you first hop.\n";
-    print "-p               - Use ping instead of traceroute to determine the path\n"; 
-    print "-s server        - The address/name of the machine running watcherd\n"; 
-    print "-L layer         - The watcher layer of the path. Default \"dynamic_path\"\n"; 
-    print "-b               - If given, show the edges as bidirectional instead of unidirectional.\n"; 
-    print "-R seconds       - Repeat. If given, loop every 'seconds' seconds.\n"; 
+	print "-c red.green.blue    - rgb color of the path to be drawn, default = $color\n";  
+	print "-a alpha             - transparency of path 255=opaque, 0=invisible, Default = $alpha\n"; 
+	print "-e xxx.xxx.xxx.xxx   - end of path. Start of path is always localhost. This is a req. flag.\n"; 
+	print "-w int               - width of path, default = $width\n"; 
+	print "-t seconds           - expiration time in seconds for drawn path, default = $timeout\n"; 
+	print "-C network           - colluder network in XX.XX.XX format, default = $colluderNetwork\n"; 
+	print "-M network           - MANET network in XX.XX.XX format, default = $manetNetwork\n"; 
+    print "-l address           - The address of the first hop. Need to use with traceroute as traceroute does not give you first hop.\n";
+    print "-p                   - Use ping instead of traceroute to determine the path\n"; 
+    print "-s server            - The address/name of the machine running watcherd\n"; 
+    print "-L layer             - The watcher layer of the path. Default \"dynamic_path\"\n"; 
+    print "-b                   - If given, show the edges as bidirectional instead of unidirectional.\n"; 
+    print "-R seconds           - Repeat. If given, loop every 'seconds' seconds.\n"; 
 	exit(); 
 }
 
