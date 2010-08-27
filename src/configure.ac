@@ -91,6 +91,7 @@ if test x$enable_testnodeonly == xno; then
                 [AS_HELP_STRING([--with-kml=PREFIX],[use the libkml installed in the PREFIX directory])],
                 [ac_cv_kml=$withval])
 
+    ac_cv_kml_libdir=no
     AC_ARG_WITH([kml-libdir], 
                 [AS_HELP_STRING([--with-kml-libdir=LIBDIR],[use the libdir installed in LIBDIR/libkml when looking for kml libs])],
                 [ac_cv_kml_libdir=$withval])
