@@ -11,12 +11,14 @@ my $timeout=5;
 my $colluderNetwork="10.0.1"; 
 my $manetNetwork="192.168.2"; 
 my $server="192.168.1.1"; 
-my $layer="dynamic_layer"; 
+my $layer="dynamic_path"; 
 my $bidirectional="false"; 
+my $localaddr="";
 my $usePing=0;
+my $repeat=0;
 
 my %options;
-if(!getopts('C:l:M:a:c:e:w:t:s:pHhdb', \%options))  { usage(); }
+if(!getopts('C:l:M:a:c:e:w:t:s:R:pHhdb', \%options))  { usage(); }
 if(defined $options{h} || defined $options{H}) { usage(); }
 if(!defined $options{e}) { usage(); }
 
@@ -29,41 +31,53 @@ if(defined $options{C}) { $colluderNetwork=$options{C}; }
 if(defined $options{M}) { $manetNetwork=$options{M}; }
 if(defined $options{p}) { $usePing=1; }
 if(defined $options{s}) { $server=$options{s}; }
-if(defined $options{l}) { $layer=$options{l}; }
+if(defined $options{L}) { $layer=$options{L}; }
+if(defined $options{l}) { $localaddr=$options{l}; }
 if(defined $options{b}) { $bidirectional="true"; }
+if(defined $options{R}) { $repeat=$options{R}; }
 
-my @path; 
-
-#
-# Run ping to get the path.
-#
-if ($usePing) {
-    my $pingStr="ping -c 3 -n -R $pathEnd"; 
-    getPathFromPing($pingStr, \@path); 
-}
-else {
-    my $traceCmd="traceroute -n $pathEnd";
-    getPathFromTraceroute($traceCmd, \@path); 
+if ($usePing!=1 && $localaddr eq "") {
+    print "You must specify the first hop of the path (using -l) when using traceroute. Ex: showPath -l 192.168.1.100\n\n"; 
+    usage();
 }
 
-if(defined $options{d}) { print "Path=@path\n"; } 
+do { 
+    my @path; 
 
-$timeout*=1000; 
-$color=$color . "." . $alpha;
+    #
+    # Run ping to get the path.
+    #
+    if ($usePing) {
+        my $pingStr="ping -c 3 -n -R $pathEnd"; 
+        getPathFromPing($pingStr, \@path); 
+    }
+    else {
+        my $traceCmd="traceroute -n $pathEnd";
+        getPathFromTraceroute($traceCmd, \@path); 
+    }
 
+    if(defined $options{d}) { print "Path=@path\n"; } 
 
-# now loop over path and call edgeTest to display them in the watcher
-for my $i ( 0 .. $#path-1 )
-{
-	# draw one directions
-	if (($i > 0) && ($path[$i] eq $path[$i-1])) {
-	  last ;
-	}
+    $timeout*=1000; 
+    $color=$color . "." . $alpha;
+    
+    
+    # now loop over path and call edgeTest to display them in the watcher
+    for my $i ( 0 .. $#path-1 )
+    {
+        # draw one directions
+        if (($i > 0) && ($path[$i] eq $path[$i-1])) {
+            last ;
+        }
+    
+        my $sysStr="sendEdgeMessage --bidirectional $bidirectional --layer $layer --server $server --head $path[$i] --tail $path[$i+1] --width $width --color $color --expiration $timeout 2>/dev/null 1>/dev/null"; 
+        print "sysStr=$sysStr\n" unless !defined $options{d};
+        system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
+    }
+    
+    sleep($repeat);
 
-    my $sysStr="sendEdgeMessage --bidirectional $bidirectional --layer $layer --server $server --head $path[$i] --tail $path[$i+1] --width $width --color $color --expiration $timeout 2>/dev/null 1>/dev/null"; 
-	print "sysStr=$sysStr\n" unless !defined $options{d};
-    system($sysStr) == 0 || die "Unable to call \"$sysStr\""; 
-}
+} while ($repeat); 
 
 #
 # End of "main"
@@ -79,10 +93,12 @@ sub usage
 	print "-t seconds		- expiration time in seconds for drawn path, default = $timeout\n"; 
 	print "-C network		- colluder network in XX.XX.XX format, default = $colluderNetwork\n"; 
 	print "-M network		- MANET network in XX.XX.XX format, default = $manetNetwork\n"; 
+    print "-l address       - The address of the first hop. Need to use with traceroute as traceroute does not give you first hop.\n";
     print "-p               - Use ping instead of traceroute to determine the path\n"; 
     print "-s server        - The address/name of the machine running watcherd\n"; 
-    print "-l layer         - The watcher layer of the path. Default \"dynamic_path\"\n"; 
+    print "-L layer         - The watcher layer of the path. Default \"dynamic_path\"\n"; 
     print "-b               - If given, show the edges as bidirectional instead of unidirectional.\n"; 
+    print "-R seconds       - Repeat. If given, loop every 'seconds' seconds.\n"; 
 	exit(); 
 }
 
