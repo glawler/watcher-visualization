@@ -106,6 +106,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -z, --fontSize=size      The font size of the middle label\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "   -x, --expiration=milliseconds How long in milliseconds to diplay the edge\n");
+    fprintf(stderr, "   -T, --timestamp=ms       Optionally specify the timestamp for the event\n");
     fprintf(stderr, "   -r, --remove             Remove the edge if it exists.\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "   -p, --logProps           log.properties file, which controls logging for this program\n");
@@ -134,6 +135,7 @@ int main(int argc, char **argv)
     LabelMessagePtr lm(new LabelMessage); 
 
     uint32_t expiration=watcher::Infinity;
+    Timestamp timestamp=0;
 
     string logProps("sendMessage.log.properties");
 
@@ -158,13 +160,14 @@ int main(int argc, char **argv)
             {"fontSize", required_argument, 0, 'z'},
 
             {"expiration", required_argument, 0, 'x'},
+            {"timestamp", required_argument, 0, 'T'},
             {"remove",  no_argument,           0, 'r'}, 
 
             {"logProps", required_argument, 0, 'p'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "s:h:t:c:w:y:d:l:f:b:z:x:p:rH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "s:h:t:c:w:y:d:l:f:b:z:x:T:p:rH?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -210,6 +213,7 @@ int main(int argc, char **argv)
             case 'z': lm->fontSize=lexical_cast<unsigned int>(optarg); break;
 
             case 'x': expiration=lexical_cast<uint32_t>(optarg); break;
+            case 'T': timestamp=lexical_cast<Timestamp>(optarg); break;
             case 'r': remove=true; break;
             case 'p': logProps=optarg; break;
             case 'H':
@@ -239,6 +243,8 @@ int main(int argc, char **argv)
     em->node2=tail;
     em->edgeColor=edgeColor;
     em->expiration=expiration;
+	if (timestamp > 0)
+		em->timestamp=timestamp;
     em->width=width;
     em->layer=layer;
     em->setMiddleLabel(lm); 
