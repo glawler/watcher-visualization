@@ -18,7 +18,7 @@ my $usePing=0;
 my $repeat=0;
 
 my %options;
-if(!getopts('C:l:M:a:c:e:w:t:s:R:pHhdb', \%options))  { usage(); }
+if(!getopts('C:l:L:M:a:c:e:w:t:s:R:pHhdb', \%options))  { usage(); }
 if(defined $options{h} || defined $options{H}) { usage(); }
 if(!defined $options{e}) { usage(); }
 
