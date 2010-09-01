@@ -41,6 +41,9 @@ if ($usePing!=1 && $localaddr eq "") {
     usage();
 }
 
+$timeout*=1000; 
+$color=$color . "." . $alpha;
+
 do { 
     my @path; 
 
@@ -54,13 +57,10 @@ do {
     else {
         my $traceCmd="traceroute -n $pathEnd";
         getPathFromTraceroute($traceCmd, \@path); 
+		unshift(@path, $localaddr);
     }
 
     if(defined $options{d}) { print "Path=@path\n"; } 
-
-    $timeout*=1000; 
-    $color=$color . "." . $alpha;
-    
     
     # now loop over path and call edgeTest to display them in the watcher
     for my $i ( 0 .. $#path-1 )
