@@ -158,6 +158,7 @@ if test x$enable_testnodeonly == xno; then
                 [AS_HELP_STRING([--with-qwt=PREFIX],[use the Qwt lib installed in the PREFIX directory])],
                 [ac_cv_qwt=$withval])
 
+    ac_cv_qwt_libdir=no
     AC_ARG_WITH([qwt-libdir], 
                 [AS_HELP_STRING([--with-qwt-libdir=LIBDIR],[use the libdir installed in LIBDIR when looking for qwt libs])],
                 [ac_cv_qwt_libdir=$withval])
