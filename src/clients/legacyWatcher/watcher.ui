@@ -297,7 +297,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>930</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLayers">
@@ -344,14 +344,18 @@ p, li { white-space: pre-wrap; }
     </property>
     <addaction name="actionSetGPSScale"/>
     <addaction name="actionSetEdgeWidth"/>
+    <addaction name="separator"/>
     <addaction name="actionStreamFiltering"/>
     <addaction name="actionLoopPlayback"/>
-    <addaction name="actionSetStreamName"/>
+    <addaction name="separator"/>
     <addaction name="actionChangeStream"/>
-    <addaction name="actionLayers"/>
-    <addaction name="actionLoadBackgroundImageFromFile"/>
+    <addaction name="actionSetStreamName"/>
+    <addaction name="separator"/>
     <addaction name="actionNodeConfiguration"/>
+    <addaction name="actionLayers"/>
+    <addaction name="separator"/>
     <addaction name="actionBackgroundColor"/>
+    <addaction name="actionLoadBackgroundImageFromFile"/>
    </widget>
    <addaction name="menuLayers"/>
    <addaction name="menuView"/>
@@ -490,7 +494,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionLayers">
    <property name="text">
-    <string>La&amp;yers</string>
+    <string>La&amp;yer Properties</string>
    </property>
   </action>
   <action name="actionChangeStream">
@@ -505,7 +509,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionNodeConfiguration">
    <property name="text">
-    <string>&amp;Node Configuration</string>
+    <string>&amp;Node Properties</string>
    </property>
   </action>
   <action name="actionBackgroundColor">

@@ -147,6 +147,8 @@ namespace watcher {
             s=NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::LAST_OCTET);
         else if(str=="hostname")
             s=NodeDisplayInfo::labelDefault2String(NodeDisplayInfo::HOSTNAME);
+        else if(str=="none")
+            s="none"; 
         else {
             bool ok;
             QString text = QInputDialog::getText(this, tr("Node Label"), tr("Node Label:"), QLineEdit::Normal, QString(), &ok);
