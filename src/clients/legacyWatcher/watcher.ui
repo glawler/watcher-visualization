@@ -326,6 +326,9 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionPlaybackTime"/>
    </widget>
    <widget class="QMenu" name="menuGraph">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>&amp;Graph</string>
     </property>
@@ -339,8 +342,14 @@ p, li { white-space: pre-wrap; }
     <addaction name="action_About"/>
    </widget>
    <widget class="QMenu" name="menuConfiguration">
+    <property name="tearOffEnabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>&amp;Configuration</string>
+    </property>
+    <property name="separatorsCollapsible">
+     <bool>true</bool>
     </property>
     <addaction name="actionSetGPSScale"/>
     <addaction name="actionSetEdgeWidth"/>
