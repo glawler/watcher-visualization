@@ -241,7 +241,8 @@ if test x$enable_testnodeonly == xno; then
        watcherd/Makefile \
        clients/messageStream2Text/Makefile \
        clients/connectivity2dot/Makefile \
-       clients/legacyWatcher/legacyWatcher.pro
+       clients/legacyWatcher/legacyWatcher.pro \
+       clients/dataWatcher/Makefile.config
     ])
 
     if test x$enable_watcher3d != xno; then
