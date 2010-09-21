@@ -44,10 +44,11 @@ class MainWindow : public QMainWindow, public Ui::MainWindow {
 	void checkIO();
 
     signals:
-	void data_point_rcvd(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
+	void dataPointReceived(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
+	void clockTick();
 
     public slots:
-	void data_point_handler(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
+	void dataPointHandler(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
 
     public:
         void setup();

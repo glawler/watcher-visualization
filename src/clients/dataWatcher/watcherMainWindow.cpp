@@ -16,11 +16,14 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "libwatcher/messageStream.h"
-#include "libwatcher/dataPointMessage.h"
-#include "libwatcher/playbackTimeRange.h"
+#include <libwatcher/messageStream.h>
+#include <libwatcher/dataPointMessage.h>
+#include <libwatcher/playbackTimeRange.h>
+#include <libwatcher/speedWatcherMessage.h>
+#include <libwatcher/seekWatcherMessage.h>
+#include <libwatcher/messageTypesAndVersions.h>
 
-#include "logger.h"
+#include <logger.h>
 
 #include "watcherMainWindow.h"
 #include "watcherConfig.h"
@@ -37,8 +40,9 @@ namespace ui {
 INIT_LOGGER(MainWindow, "MainWindow");
 
 Timestamp EpochTS; // the timestamp of the first message in the event stream
+Timestamp CurrentTS;
 
-void MainWindow::data_point_handler(const QString& dataName, const QString& fromID, const QString& /*layer*/, qlonglong when, double value)
+void MainWindow::dataPointHandler(const QString& dataName, const QString& fromID, const QString& /*layer*/, qlonglong when, double value)
 {
     TRACE_ENTER();
 
@@ -50,10 +54,11 @@ void MainWindow::data_point_handler(const QString& dataName, const QString& from
 	series = new SeriesGraphDialog(dataName);
 	seriesMap[dataName] = series;
 	menuSeries->addAction(dataName, series, SLOT(show()));
+	QObject::connect(this, SIGNAL(clockTick()), series, SLOT(handleClock()));
     } else {
 	series = it->second;
     }
-    series->data_point(fromID, when, value);
+    series->dataPoint(fromID, when, value);
 
     TRACE_EXIT();
 }
@@ -81,7 +86,7 @@ void MainWindow::checkIO()
 	    // TODO:
 	    // - add layer when DataPointMessage supports its
 	    // - support data point messages for edges as well
-	    emit data_point_rcvd(QString::fromStdString(dp->dataName),
+	    emit dataPointReceived(QString::fromStdString(dp->dataName),
 		    QString::fromStdString(dp->fromNodeID.to_string()),
 		    layer, dp->timestamp, dp->dataPoints.front());
 	} else if (msg->type == PLAYBACK_TIME_RANGE_MESSAGE_TYPE) {
@@ -89,6 +94,13 @@ void MainWindow::checkIO()
 	    watcher::event::PlaybackTimeRangeMessagePtr m = boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(msg);
 	    EpochTS = m->min_;
 	    LOG_INFO("epoch TS = " << EpochTS);
+	} else if (msg->type == SPEED_MESSAGE_TYPE) {
+	    watcher::event::SpeedMessagePtr sm = boost::dynamic_pointer_cast<SpeedMessage>(msg);
+	} else if (msg->type == SEEK_MESSAGE_TYPE) {
+	    watcher::event::SeekMessagePtr sm = boost::dynamic_pointer_cast<SeekMessage>(msg);
+	} else if (watcher::event::isFeederEvent(msg->type)) {
+	    CurrentTS = msg->timestamp;
+	    emit clockTick();
 	}
     }
 
@@ -101,9 +113,9 @@ void MainWindow::setup()
 
     setupUi(this);
     QObject::connect(this,
-	SIGNAL(data_point_rcvd(const QString& , const QString& , const QString& , qlonglong , double )),
+	SIGNAL(dataPointReceived(const QString& , const QString& , const QString& , qlonglong , double )),
        	this,
-	SLOT( data_point_handler(const QString& , const QString& , const QString& , qlonglong , double )));
+	SLOT(dataPointHandler(const QString& , const QString& , const QString& , qlonglong , double )));
 
     LOG_INFO("spawning checkIO thread");
     checkIOThread = new boost::thread(&MainWindow::checkIO, this);

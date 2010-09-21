@@ -17,8 +17,13 @@
  */
 
 #include <tr1/memory>
-#include "ui_seriesGraphDialog.h"
-#include "declareLogger.h"
+
+#include <libwatcher/watcherTypes.h>
+#include <declareLogger.h>
+
+#include "ui_graph.h"
+
+class QwtPlotMarker; // forward decl
 
 namespace watcher {
 namespace ui {
@@ -27,20 +32,38 @@ class NodeInfo; //forward decl
 typedef std::tr1::shared_ptr<NodeInfo> NodeInfoPtr;
 
 /** Dialog box for plotting data from multiple nodes for a single data series.  */
-class SeriesGraphDialog : public QDialog, Ui::seriesDialog {
+class SeriesGraphDialog : public QWidget, Ui::Form {
     private:
+	Q_OBJECT
 	DECLARE_LOGGER();
 
 	SeriesGraphDialog(const SeriesGraphDialog&);
 	SeriesGraphDialog& operator=(const SeriesGraphDialog&);
+	void adjustDetail();
 
 	typedef std::map<QString, NodeInfoPtr> NodeMap;
 	NodeMap nodeMap; // set of all nodes with data for this series
 
+	QwtPlotMarker* globalTimeMarker;
+	QwtPlotMarker* detailTimeMarker; // vline indicating current simulation time
+	QwtPlotMarker* detailBeginMarker; // marker showing the starting offset of the detail graph in the global plot
+	QwtPlotMarker* detailEndMarker; // marker showing the ending offset of the detail graph in the global plot
+	
+	Timestamp firstEvent; // lowest timestamp received
+	Timestamp lastEvent; // highest timestamp received
+	int detailBegin; // lower bound on timestamp for detail graph
+	int detailEnd; // upper bound on timestamp for detail graph
+
     public:
 	explicit SeriesGraphDialog(const QString&);
 	~SeriesGraphDialog();
-	void data_point(const QString&, qlonglong, double);
+	void dataPoint(const QString&, qlonglong, double);
+	void updateTime(Timestamp t);
+
+    public slots:
+	void handleClock();
+	void setDetailBegin(int val);
+	void setDetailEnd(int val);
 };
 
 } // namespace
