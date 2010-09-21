@@ -10,7 +10,9 @@ bin_PROGRAMS= \
 	sendConnectivityMessage \
 	sendDataPointMessage \
 	sendNodePropertiesMessage \
-	showClock
+	showClock 
+
+bin_SCRIPTS=watcherClientLoadAverage.py watcherClientBandwidth.py
 
 # How do we tell the make system that the default foo_PROGRAM file is foo.cpp instead of foo.c? 
 sendGPSMessage_SOURCES=sendGPSMessage.cpp
