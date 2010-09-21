@@ -31,12 +31,12 @@ def getLoadAverage():
         return float(la.group(1))
     return -1.0
 
-def doMain():
+def doMain(server_address):
     while 1:
         la=getLoadAverage()
         print 'Sending load average:', la, ' to the watcher'
         try:
-            retCode=subprocess.call(['watchergraphtest', '-g', 'Load Average', '-d', str(la)])
+            retCode=subprocess.call(['sendDataPointMessage', '-s', str(server_address), '-g', 'Load Average', '-d', str(la)])
         except OSError:
             print 'Caught exception when trying to run watchergraphtest, is it in your $PATH?'
             print 'If not, type \'export PATH=$PATH:/path/to/dir/with/watchergraphtest/in/it\' in this shell'
@@ -44,6 +44,10 @@ def doMain():
         time.sleep(1)
 
 if __name__ == "__main__":
-    doMain()
+    import sys
+    if len(sys.argv)!=2:
+        print 'Usage:', sys.argv[0], ' watcher_server_addr'
+        sys.exit(1)
+    doMain(sys.argv[1])
 
 

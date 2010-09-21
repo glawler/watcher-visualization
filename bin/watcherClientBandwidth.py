@@ -49,7 +49,7 @@ def listIfaces():
                 print found.group(1)
 
 
-def doLoop(iface):
+def doLoop(iface, serverAddr):
     prevBytesTx=getBytesTx(iface)
     while 1:
         time.sleep(1)
@@ -57,7 +57,7 @@ def doLoop(iface):
         bw=(currBytesTx-prevBytesTx)/8.0
         print 'Sending ', str(bw), 'bytes transfered to the watcher'
         try:
-            retCode=subprocess.call(['watchergraphtest', '-g', 'Bandwidth', '-d', str(bw)])
+            retCode=subprocess.call(['sendDataPointMessage', '-s', str(serverAddr), '-g', 'Bandwidth', '-d', str(bw)])
         except OSError:
             print 'Caught exception when trying to run watchergraphtest, is it in your $PATH?'
             print 'If not, type \'export PATH=$PATH:/path/to/dir/with/watchergraphtest/in/it\' in this shell'
@@ -66,10 +66,10 @@ def doLoop(iface):
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv)!=2:
-        print 'Usage:', sys.argv[0], ' network_interface'
+    if len(sys.argv)!=3:
+        print 'Usage:', sys.argv[0], ' network_interface watcher_server_addr'
         listIfaces()
         sys.exit(1)
-    doLoop(sys.argv[1])
+    doLoop(sys.argv[1], sys.argv[2]) 
 
 
