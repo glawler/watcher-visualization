@@ -1,4 +1,4 @@
-/* Copyright 2009 SPARTA, Inc., dba Cobham Analytic Solutions
+/* Copyright 2009, 2010 SPARTA, Inc., dba Cobham Analytic Solutions
  * 
  * This file is part of WATCHER.
  * 
@@ -57,6 +57,7 @@
 #include <libwatcher/colors.h>
 #include "logger.h"
 #include <libwatcher/sendMessageHandler.h>
+#include <libwatcher/dataPointMessage.h>
 
 DECLARE_GLOBAL_LOGGER("showClock"); 
 
@@ -98,6 +99,9 @@ int main(int argc, char **argv)
     bool showSecondRing=true, showHourRing=true;
     double offsetLong=0, offsetLat=0;
     double gpsScale=1;
+    // dataPoint values for each node
+    int minuteDP[60] = {0,};
+    int secDP[60] = {0,};
 
     while (true) 
     {
@@ -191,11 +195,12 @@ int main(int argc, char **argv)
         const char *label;
         double length;
         const GUILayer layer;
+	double dataPoint[2];
     } nodeData[]=
     {
-        { 0,   &hourId, "hour", radius*0.7, hourLayer }, 
-        { 0,    &minId,  "min", radius, minLayer }, 
-        { 0,    &secId,  "sec", radius, secLayer }, 
+        { 0,   &hourId, "hour", radius*0.7, hourLayer, { 0, 0 } }, 
+        { 0,    &minId,  "min", radius, minLayer, { 0, 0 } }, 
+        { 0,    &secId,  "sec", radius, secLayer, { 0, 0 } }, 
     };
 
     while (true)  // draw everything all the time as we don't know when watcher will start
@@ -250,6 +255,22 @@ int main(int argc, char **argv)
             edge->node2Label=numLabMess;
 
             messages.push_back(edge);
+
+	    int unit = (rand() <= RAND_MAX/2) ? -1 : +1;
+	    DataPointMessagePtr dataMess0(new DataPointMessage);
+	    nodeData[i].dataPoint[0] += unit;
+	    dataMess0->fromNodeID = *nodeData[i].id;
+	    dataMess0->dataPoints.push_back(nodeData[i].dataPoint[0]);
+	    dataMess0->dataName = "data0";
+            messages.push_back(dataMess0);
+
+	    unit = (rand() <= RAND_MAX/2) ? -1 : +1;
+	    nodeData[i].dataPoint[1] += unit;
+	    DataPointMessagePtr dataMess1(new DataPointMessage);
+	    dataMess1->fromNodeID = *nodeData[i].id;
+	    dataMess1->dataPoints.push_back(nodeData[i].dataPoint[1]);
+	    dataMess1->dataName = "data1";
+            messages.push_back(dataMess1);
         }
 
         if (showHourRing)
