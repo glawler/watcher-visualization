@@ -22,4 +22,8 @@ sendDataPointMessage_SOURCES=sendDataPointMessage.cpp
 sendNodePropertiesMessage_SOURCES=sendNodePropertiesMessage.cpp
 showClock_SOURCES=showClock.cpp
 
+# GTL - pingWatcher is not ready for prime time.
+# pingWatcher_SOURCES=pingWatcher.cpp
+# pingWatcher_LDFLAGS=-lpcap
+
 
