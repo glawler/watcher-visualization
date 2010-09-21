@@ -39,7 +39,7 @@ def doMain(server_address):
             retCode=subprocess.call(['sendDataPointMessage', '-s', str(server_address), '-g', 'Load Average', '-d', str(la)])
         except OSError:
             print 'Caught exception when trying to run watchergraphtest, is it in your $PATH?'
-            print 'If not, type \'export PATH=$PATH:/path/to/dir/with/watchergraphtest/in/it\' in this shell'
+            print 'If not, type \'export PATH=$PATH:/path/to/dir/with/sendDataPointMessage\' in this shell'
             sys.exit(1)
         time.sleep(1)
 

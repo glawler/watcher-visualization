@@ -60,7 +60,7 @@ def doLoop(iface, serverAddr):
             retCode=subprocess.call(['sendDataPointMessage', '-s', str(serverAddr), '-g', 'Bandwidth', '-d', str(bw)])
         except OSError:
             print 'Caught exception when trying to run watchergraphtest, is it in your $PATH?'
-            print 'If not, type \'export PATH=$PATH:/path/to/dir/with/watchergraphtest/in/it\' in this shell'
+            print 'If not, type \'export PATH=$PATH:/path/to/dir/with/sendDataPointMessage\' in this shell'
             sys.exit(1)
         prevBytesTx=currBytesTx
 
