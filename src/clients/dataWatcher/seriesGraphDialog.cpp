@@ -127,6 +127,7 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
     TRACE_ENTER();
 
     setupUi(this);
+    setWindowTitle(QString::fromUtf8("DataWatcher: ") + name);
 
     globalPlot->insertLegend(new QwtLegend);
     globalPlot->setAxisTitle(QwtPlot::xBottom, QString::fromUtf8("time (s)"));
