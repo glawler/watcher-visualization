@@ -16,11 +16,13 @@
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdlib>
+#include <tr1/memory>
+
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
 #include <qwt_legend.h>
 #include <qwt_plot_picker.h>
-#include <cstdlib>
 
 #include <logger.h>
 
@@ -59,9 +61,14 @@ class NodeInfo {
     QString id;
     std::vector<double> xdata;
     std::vector<double> ydata;
-    QwtPlotCurve *detailCurve;
-    QwtPlotCurve *globalCurve;
-    QListWidgetItem* item; // widget item for this node
+
+    //QwtPlotCurve is not a QObject, so QPointer is not an option.
+    std::tr1::shared_ptr<QwtPlotCurve> detailCurve;
+    std::tr1::shared_ptr<QwtPlotCurve> globalCurve;
+
+    //this pointer is owned by the listWidget, and should be destroyed when the listWidget is destroyed
+    QListWidgetItem *item; // widget item for this node
+
     bool attached; // are the QwtPlotCurve(s) attached to the QwtPlot?
 
     public:
@@ -69,10 +76,10 @@ class NodeInfo {
     NodeInfo(const QString& id_, QwtPlot *detailPlot, QwtPlot *globalPlot) : id(id_), attached(false) {
 	QPen pen(QColor(random() % 256, random() % 256, random() % 256));
 
-	detailCurve = new QwtPlotCurve(id_);
+	detailCurve.reset(new QwtPlotCurve(id_));
 	detailCurve->setPen(pen);
 
-	globalCurve = new QwtPlotCurve(id_);
+	globalCurve.reset(new QwtPlotCurve(id_));
 	globalCurve->setPen(pen);
 
 	attachPlot(detailPlot, globalPlot);
@@ -131,22 +138,22 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
     detailPlot->setAxisTitle(QwtPlot::yLeft, name);
     detailPlot->setCanvasBackground(PlotBackgroundColor);
 
-    detailTimeMarker = new QwtPlotMarker;
+    detailTimeMarker.reset(new QwtPlotMarker);
     detailTimeMarker->setLineStyle(QwtPlotMarker::VLine);
     detailTimeMarker->setLinePen(QPen(QColor(0, 255, 0)));
     detailTimeMarker->attach(detailPlot);
 
-    detailBeginMarker = new QwtPlotMarker;
+    detailBeginMarker.reset(new QwtPlotMarker);
     detailBeginMarker->setLineStyle(QwtPlotMarker::VLine);
     detailBeginMarker->setLinePen(QPen(QColor(0, 0, 255)));
     detailBeginMarker->attach(globalPlot);
 
-    detailEndMarker = new QwtPlotMarker;
+    detailEndMarker.reset(new QwtPlotMarker);
     detailEndMarker->setLineStyle(QwtPlotMarker::VLine);
     detailEndMarker->setLinePen(QPen(QColor(0, 0, 255)));
     detailEndMarker->attach(globalPlot);
 
-    globalTimeMarker = new QwtPlotMarker;
+    globalTimeMarker.reset(new QwtPlotMarker);
     globalTimeMarker->setLineStyle(QwtPlotMarker::VLine);
     globalTimeMarker->setLinePen(QPen(QColor(0, 255, 0)));
     globalTimeMarker->attach(globalPlot);
@@ -162,12 +169,12 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
     //endSlider->setTickPosition(QSlider::TicksBelow);
     endSlider->setTracking(true);
 
-    detailPicker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, detailPlot->canvas());
+    detailPicker.reset(new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, detailPlot->canvas()));
     detailPicker->setSelectionFlags(QwtPicker::PointSelection);
-    globalPicker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, globalPlot->canvas());
+    globalPicker.reset(new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, globalPlot->canvas()));
     globalPicker->setSelectionFlags(QwtPicker::PointSelection);
-    QObject::connect(detailPicker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
-    QObject::connect(globalPicker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
+    QObject::connect(detailPicker.get(), SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
+    QObject::connect(globalPicker.get(), SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
 
     QObject::connect(listWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()));
 

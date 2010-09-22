@@ -28,6 +28,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionChange_Stream"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuSeries">
@@ -41,6 +42,11 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionChange_Stream">
+   <property name="text">
+    <string>Change Stream</string>
    </property>
   </action>
  </widget>

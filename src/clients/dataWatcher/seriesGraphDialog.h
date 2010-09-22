@@ -46,14 +46,14 @@ class SeriesGraphDialog : public QWidget, Ui::Form {
 	typedef std::map<QString, NodeInfoPtr> NodeMap;
 	NodeMap nodeMap; // set of all nodes with data for this series
 
-	QwtPlotMarker* globalTimeMarker;
-	QwtPlotMarker* detailTimeMarker; // vline indicating current simulation time
-	QwtPlotMarker* detailBeginMarker; // marker showing the starting offset of the detail graph in the global plot
-	QwtPlotMarker* detailEndMarker; // marker showing the ending offset of the detail graph in the global plot
+	std::tr1::shared_ptr<QwtPlotMarker> globalTimeMarker;
+	std::tr1::shared_ptr<QwtPlotMarker> detailTimeMarker; // vline indicating current simulation time
+	std::tr1::shared_ptr<QwtPlotMarker> detailBeginMarker; // marker showing the starting offset of the detail graph in the global plot
+	std::tr1::shared_ptr<QwtPlotMarker> detailEndMarker; // marker showing the ending offset of the detail graph in the global plot
 
 	// used to allow the user to click on a plot to seek
-	QwtPlotPicker* detailPicker;
-	QwtPlotPicker* globalPicker;
+	std::tr1::shared_ptr<QwtPlotPicker> detailPicker;
+	std::tr1::shared_ptr<QwtPlotPicker> globalPicker;
 	
 	Timestamp firstEvent; // lowest timestamp received
 	Timestamp lastEvent; // highest timestamp received

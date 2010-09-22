@@ -27,6 +27,7 @@ namespace watcher {
 namespace ui {
 
 class SeriesGraphDialog; //forward decl
+class WatcherStreamListDialog; //forward decl
 
 /** The Main Window for the DataWatcher application.  This is just a wrapper
  * around Ui::MainWindow for the purpose of attaching our own slots.
@@ -41,7 +42,10 @@ class MainWindow : public QMainWindow, public Ui::MainWindow {
 	SeriesMap seriesMap;
 
 	boost::thread *checkIOThread;
+	WatcherStreamListDialog *streamsDialog;
+
 	void checkIO();
+	void closeAllGraphs();
 
     signals:
 	void dataPointReceived(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
@@ -49,9 +53,13 @@ class MainWindow : public QMainWindow, public Ui::MainWindow {
 
     public slots:
 	void dataPointHandler(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
+        void listStreams();
+	void reconnect();
         void seekStream(qlonglong);
+	void selectStream(unsigned long);
 
     public:
+	MainWindow();
         void setup();
 };
 

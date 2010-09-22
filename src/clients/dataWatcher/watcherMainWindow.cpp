@@ -22,12 +22,14 @@
 #include <libwatcher/speedWatcherMessage.h>
 #include <libwatcher/seekWatcherMessage.h>
 #include <libwatcher/messageTypesAndVersions.h>
+#include <libwatcher/listStreamsMessage.h>
 
 #include <logger.h>
 
 #include "watcherMainWindow.h"
 #include "watcherConfig.h"
 #include "seriesGraphDialog.h"
+#include "watcherStreamListDialog.h"
 
 namespace watcher {
 
@@ -42,6 +44,12 @@ INIT_LOGGER(MainWindow, "MainWindow");
 Timestamp EpochTS; // the timestamp of the first message in the event stream
 Timestamp CurrentTS;
 MessageStreamPtr MsgStream;
+
+MainWindow::MainWindow() : checkIOThread(0), streamsDialog(0)
+{
+    TRACE_ENTER();
+    TRACE_EXIT();
+}
 
 void MainWindow::dataPointHandler(const QString& dataName, const QString& fromID, const QString& /*layer*/, qlonglong when, double value)
 {
@@ -100,6 +108,12 @@ void MainWindow::checkIO()
 	    watcher::event::SpeedMessagePtr sm = boost::dynamic_pointer_cast<SpeedMessage>(msg);
 	} else if (msg->type == SEEK_MESSAGE_TYPE) {
 	    watcher::event::SeekMessagePtr sm = boost::dynamic_pointer_cast<SeekMessage>(msg);
+	} else if (msg->type == LIST_STREAMS_MESSAGE_TYPE) {
+	    watcher::event::ListStreamsMessagePtr lsm = boost::dynamic_pointer_cast<ListStreamsMessage>(msg);
+	    for (size_t i = 0; i < lsm->evstreams.size(); ++i) {
+		EventStreamInfoPtr ev ( lsm->evstreams[i] );
+		streamsDialog->addStream(ev->uid, ev->description);
+	    }
 	} else if (watcher::event::isFeederEvent(msg->type)) {
 	    CurrentTS = msg->timestamp;
 	    emit clockTick(msg->timestamp);
@@ -119,6 +133,8 @@ void MainWindow::setup()
        	this,
 	SLOT(dataPointHandler(const QString& , const QString& , const QString& , qlonglong , double )));
 
+    QObject::connect(actionChange_Stream, SIGNAL(triggered()), this, SLOT(listStreams()));
+
     LOG_INFO("spawning checkIO thread");
     checkIOThread = new boost::thread(&MainWindow::checkIO, this);
 
@@ -133,6 +149,55 @@ void MainWindow::seekStream(qlonglong t)
     TRACE_ENTER();
     LOG_INFO("seeking to " << t);
     MsgStream->setStreamTimeStart(t);
+    TRACE_EXIT();
+}
+
+/** Slot to open the change stream dialog. */
+void MainWindow::listStreams()
+{
+    TRACE_ENTER();
+    if (!streamsDialog) {
+	streamsDialog = new WatcherStreamListDialog;
+	connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
+	connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
+	connect(streamsDialog, SIGNAL(reconnect()), this, SLOT(reconnect()));
+    }
+    streamsDialog->treeWidget->clear();
+    streamsDialog->show();
+
+    MsgStream->listStreams();
+    TRACE_EXIT();
+}
+
+/** Slot to select a new stream. */
+void MainWindow::selectStream(unsigned long uid)
+{
+    TRACE_ENTER();
+    LOG_INFO("subscribing to new stream uid " << uid);
+    MsgStream->clearMessageCache();
+    MsgStream->subscribeToStream(uid);
+    closeAllGraphs();
+    TRACE_EXIT();
+}
+
+/** Slot for receiving the reconnect stream signal from the change stream dialog. */
+void MainWindow::reconnect()
+{
+    TRACE_ENTER();
+    LOG_INFO("reconnecting to server upon user request");
+    MsgStream->clearMessageCache();
+    MsgStream->reconnect();
+    closeAllGraphs();
+    TRACE_EXIT();
+}
+
+void MainWindow::closeAllGraphs()
+{
+    TRACE_ENTER();
+    for (SeriesMap::iterator it = seriesMap.begin(); it != seriesMap.end(); ++it)
+	it->second->close();
+    seriesMap.clear();
+    menuSeries->clear();
     TRACE_EXIT();
 }
 
