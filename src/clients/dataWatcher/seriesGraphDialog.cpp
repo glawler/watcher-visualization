@@ -39,7 +39,9 @@ extern Timestamp EpochTS;
 namespace {
 
     const int MinDetail = 5; // the smallest x-range the detail graph can display
+    const QColor PlotBackgroundColor(255, 255, 255); // white
 
+/** Convert a Watcher Timestamp to the offset from the first event in the database in seconds. */
 double tsToOffset(watcher::Timestamp t)
 {
     return (t - watcher::ui::EpochTS) / 1000.0;
@@ -52,24 +54,30 @@ namespace ui {
 
 INIT_LOGGER(SeriesGraphDialog, "SeriesGraphDialog");
 
+/** Contains information for each node in the dialog. */
 class NodeInfo {
     QString id;
     std::vector<double> xdata;
     std::vector<double> ydata;
     QwtPlotCurve *detailCurve;
     QwtPlotCurve *globalCurve;
+    QListWidgetItem* item; // widget item for this node
+    bool attached; // are the QwtPlotCurve(s) attached to the QwtPlot?
 
     public:
-    NodeInfo(const QString& id_, QwtPlot *detailPlot, QwtPlot *globalPlot) : id(id_) {
+
+    NodeInfo(const QString& id_, QwtPlot *detailPlot, QwtPlot *globalPlot) : id(id_), attached(false) {
 	QPen pen(QColor(random() % 256, random() % 256, random() % 256));
 
 	detailCurve = new QwtPlotCurve(id_);
-	detailCurve->attach(detailPlot);
 	detailCurve->setPen(pen);
 
 	globalCurve = new QwtPlotCurve(id_);
-	globalCurve->attach(globalPlot);
 	globalCurve->setPen(pen);
+
+	attachPlot(detailPlot, globalPlot);
+
+	item = new QListWidgetItem(id_, 0, QListWidgetItem::UserType);
     }
 
     void data_point(qlonglong when, double value) {
@@ -85,7 +93,27 @@ class NodeInfo {
 	detailCurve->setRawData(&xdata[0], &ydata[0], xdata.size());
 	globalCurve->setRawData(&xdata[0], &ydata[0], xdata.size());
     }
-};
+
+    void attachPlot(QwtPlot *detailPlot, QwtPlot *globalPlot) {
+	if (!attached) {
+	    detailCurve->attach(detailPlot);
+	    globalCurve->attach(globalPlot);
+	    attached = true;
+	}
+    }
+
+    void detachPlot() {
+	if (attached) {
+	    detailCurve->detach();
+	    globalCurve->detach();
+	    attached = false;
+	}
+    }
+
+    QListWidgetItem* getItem() { return item; }
+    QString& getId() { return id; }
+
+}; // NodeInfo
 
 SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), lastEvent(0), detailBegin(0), detailEnd(0)
 {
@@ -96,10 +124,12 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
     globalPlot->insertLegend(new QwtLegend);
     globalPlot->setAxisTitle(QwtPlot::xBottom, QString::fromUtf8("time (s)"));
     globalPlot->setAxisTitle(QwtPlot::yLeft, name);
+    globalPlot->setCanvasBackground(PlotBackgroundColor);
 
     detailPlot->insertLegend(new QwtLegend);
     detailPlot->setAxisTitle(QwtPlot::xBottom, QString::fromUtf8("time (s)"));
     detailPlot->setAxisTitle(QwtPlot::yLeft, name);
+    detailPlot->setCanvasBackground(PlotBackgroundColor);
 
     detailTimeMarker = new QwtPlotMarker;
     detailTimeMarker->setLineStyle(QwtPlotMarker::VLine);
@@ -139,6 +169,8 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
     QObject::connect(detailPicker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
     QObject::connect(globalPicker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
 
+    QObject::connect(listWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()));
+
     TRACE_EXIT();
 }
 
@@ -167,7 +199,10 @@ void SeriesGraphDialog::dataPoint(const QString& fromID, qlonglong when, double 
 	    // not found
 	    nodeInfo = NodeInfoPtr(new NodeInfo(fromID, detailPlot, globalPlot));
 	    nodeMap[fromID] = nodeInfo;
-	    listWidget->addItem(fromID);
+	    listWidget->addItem(nodeInfo->getItem());
+	    // automatically select new nodes
+	    int row = listWidget->row(nodeInfo->getItem());
+	    listWidget->setCurrentRow(row, QItemSelectionModel::SelectCurrent);
 	} else {
 	    nodeInfo = it->second;
 	}
@@ -205,10 +240,8 @@ void SeriesGraphDialog::handleClock(qlonglong t)
     TRACE_ENTER();
 
     globalTimeMarker->setXValue(tsToOffset(t));
-    globalPlot->replot();
-
     detailTimeMarker->setXValue(tsToOffset(t));
-    detailPlot->replot();
+    replot();
 
     TRACE_EXIT();
 }
@@ -219,11 +252,11 @@ void SeriesGraphDialog::adjustDetail()
     if (detailEnd - detailBegin < MinDetail)
 	detailEnd = detailBegin + MinDetail;
     detailPlot->setAxisScale(QwtPlot::xBottom, detailBegin, detailEnd);
-    detailPlot->replot();
 
     detailBeginMarker->setXValue(detailBegin);
     detailEndMarker->setXValue(detailEnd);
-    globalPlot->replot();
+
+    replot();
 }
 
 /** Slot for receiving the value from the slider that controls the starting offset of the detail graph. */
@@ -250,6 +283,33 @@ void SeriesGraphDialog::plotClicked(const QwtDoublePoint& p)
     TRACE_ENTER();
     LOG_INFO("user clicked on the point (" << p.x() << ", " << p.y() << ")");
     emit seekStream(EpochTS + p.x() * 1000.0);
+    TRACE_EXIT();
+}
+
+/** Slot for handling changes to the node list widget selection. */
+void SeriesGraphDialog::selectionChanged()
+{
+    TRACE_ENTER();
+    QList<QListWidgetItem *> selection = listWidget->selectedItems();
+    for (NodeMap::iterator it = nodeMap.begin(); it != nodeMap.end(); ++it) {
+	NodeInfoPtr node = it->second;
+
+	if (selection.contains(node->getItem())) {
+	    LOG_INFO("selection contains " << node->getId().toStdString());
+	    node->attachPlot(detailPlot, globalPlot);
+	} else
+	    node->detachPlot();
+    }
+    replot();
+    TRACE_EXIT();
+}
+
+/** Update both graphs. */
+void SeriesGraphDialog::replot()
+{
+    TRACE_ENTER();
+    detailPlot->replot();
+    globalPlot->replot();
     TRACE_EXIT();
 }
 

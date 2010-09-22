@@ -41,6 +41,7 @@ class SeriesGraphDialog : public QWidget, Ui::Form {
 	SeriesGraphDialog(const SeriesGraphDialog&);
 	SeriesGraphDialog& operator=(const SeriesGraphDialog&);
 	void adjustDetail();
+	void replot();
 
 	typedef std::map<QString, NodeInfoPtr> NodeMap;
 	NodeMap nodeMap; // set of all nodes with data for this series
@@ -66,9 +67,10 @@ class SeriesGraphDialog : public QWidget, Ui::Form {
 
     public slots:
 	void handleClock(qlonglong);
+	void plotClicked(const QwtDoublePoint&);
+	void selectionChanged();
 	void setDetailBegin(int val);
 	void setDetailEnd(int val);
-	void plotClicked(const QwtDoublePoint&);
 	
     signals:
 	void seekStream(qlonglong);
