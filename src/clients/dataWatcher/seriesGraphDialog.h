@@ -24,6 +24,7 @@
 #include "ui_graph.h"
 
 class QwtPlotMarker; // forward decl
+class QwtPlotPicker; // forward decl
 
 namespace watcher {
 namespace ui {
@@ -48,6 +49,10 @@ class SeriesGraphDialog : public QWidget, Ui::Form {
 	QwtPlotMarker* detailTimeMarker; // vline indicating current simulation time
 	QwtPlotMarker* detailBeginMarker; // marker showing the starting offset of the detail graph in the global plot
 	QwtPlotMarker* detailEndMarker; // marker showing the ending offset of the detail graph in the global plot
+
+	// used to allow the user to click on a plot to seek
+	QwtPlotPicker* detailPicker;
+	QwtPlotPicker* globalPicker;
 	
 	Timestamp firstEvent; // lowest timestamp received
 	Timestamp lastEvent; // highest timestamp received
@@ -58,12 +63,15 @@ class SeriesGraphDialog : public QWidget, Ui::Form {
 	explicit SeriesGraphDialog(const QString&);
 	~SeriesGraphDialog();
 	void dataPoint(const QString&, qlonglong, double);
-	void updateTime(Timestamp t);
 
     public slots:
-	void handleClock();
+	void handleClock(qlonglong);
 	void setDetailBegin(int val);
 	void setDetailEnd(int val);
+	void plotClicked(const QwtDoublePoint&);
+	
+    signals:
+	void seekStream(qlonglong);
 };
 
 } // namespace

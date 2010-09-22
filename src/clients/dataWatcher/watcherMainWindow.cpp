@@ -41,6 +41,7 @@ INIT_LOGGER(MainWindow, "MainWindow");
 
 Timestamp EpochTS; // the timestamp of the first message in the event stream
 Timestamp CurrentTS;
+MessageStreamPtr MsgStream;
 
 void MainWindow::dataPointHandler(const QString& dataName, const QString& fromID, const QString& /*layer*/, qlonglong when, double value)
 {
@@ -54,7 +55,8 @@ void MainWindow::dataPointHandler(const QString& dataName, const QString& fromID
 	series = new SeriesGraphDialog(dataName);
 	seriesMap[dataName] = series;
 	menuSeries->addAction(dataName, series, SLOT(show()));
-	QObject::connect(this, SIGNAL(clockTick()), series, SLOT(handleClock()));
+	QObject::connect(this, SIGNAL(clockTick(qlonglong)), series, SLOT(handleClock(qlonglong)));
+	QObject::connect(series, SIGNAL(seekStream(qlonglong)), this, SLOT(seekStream(qlonglong)));
     } else {
 	series = it->second;
     }
@@ -67,19 +69,19 @@ void MainWindow::checkIO()
 {
     TRACE_ENTER();
 
-    MessageStreamPtr msgStream(new MessageStream(watcher::config::Server));
-    msgStream->connect(true);
-    msgStream->getMessageTimeRange();
+    MsgStream = MessageStreamPtr(new MessageStream(watcher::config::Server));
+    MsgStream->connect(true);
+    MsgStream->getMessageTimeRange();
     if (watcher::config::StreamUid == -1) {
-	msgStream->setDescription("data Watcher");
-	msgStream->startStream();
+	MsgStream->setDescription("data Watcher");
+	MsgStream->startStream();
     } else {
-	msgStream->subscribeToStream(watcher::config::StreamUid);
+	MsgStream->subscribeToStream(watcher::config::StreamUid);
     }
 
     MessagePtr msg;
     QString layer;
-    while (msgStream->getNextMessage(msg)) {
+    while (MsgStream->getNextMessage(msg)) {
 	if (msg->type == DATA_POINT_MESSAGE_TYPE) {
 	    LOG_DEBUG("got DataPointMessage");
 	    watcher::event::DataPointMessagePtr dp = boost::dynamic_pointer_cast<DataPointMessage>(msg);
@@ -100,7 +102,7 @@ void MainWindow::checkIO()
 	    watcher::event::SeekMessagePtr sm = boost::dynamic_pointer_cast<SeekMessage>(msg);
 	} else if (watcher::event::isFeederEvent(msg->type)) {
 	    CurrentTS = msg->timestamp;
-	    emit clockTick();
+	    emit clockTick(msg->timestamp);
 	}
     }
 
@@ -120,6 +122,17 @@ void MainWindow::setup()
     LOG_INFO("spawning checkIO thread");
     checkIOThread = new boost::thread(&MainWindow::checkIO, this);
 
+    TRACE_EXIT();
+}
+
+/** Slot for receiving seek requests
+ * @param t the watcher::Timestamp value to seek to (milliseconds)
+ */
+void MainWindow::seekStream(qlonglong t)
+{
+    TRACE_ENTER();
+    LOG_INFO("seeking to " << t);
+    MsgStream->setStreamTimeStart(t);
     TRACE_EXIT();
 }
 

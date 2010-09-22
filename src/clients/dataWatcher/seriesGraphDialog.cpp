@@ -19,6 +19,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
 #include <qwt_legend.h>
+#include <qwt_plot_picker.h>
 #include <cstdlib>
 
 #include <logger.h>
@@ -31,7 +32,6 @@ namespace watcher {
 namespace ui {
 
 extern Timestamp EpochTS;
-extern Timestamp CurrentTS;
 
 } //namespace
 } //namespace
@@ -132,6 +132,13 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
     //endSlider->setTickPosition(QSlider::TicksBelow);
     endSlider->setTracking(true);
 
+    detailPicker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, detailPlot->canvas());
+    detailPicker->setSelectionFlags(QwtPicker::PointSelection);
+    globalPicker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, globalPlot->canvas());
+    globalPicker->setSelectionFlags(QwtPicker::PointSelection);
+    QObject::connect(detailPicker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
+    QObject::connect(globalPicker, SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(plotClicked(const QwtDoublePoint&)));
+
     TRACE_EXIT();
 }
 
@@ -186,14 +193,14 @@ void SeriesGraphDialog::dataPoint(const QString& fromID, qlonglong when, double 
 	}
     }
 
-    updateTime(when);
+    handleClock(when);
     TRACE_EXIT();
 }
 
 /** Updates the current time and redraws the plot.
  * @param t timestamp to use as the current time.
  */
-void SeriesGraphDialog::updateTime(Timestamp t)
+void SeriesGraphDialog::handleClock(qlonglong t)
 {
     TRACE_ENTER();
 
@@ -203,14 +210,6 @@ void SeriesGraphDialog::updateTime(Timestamp t)
     detailTimeMarker->setXValue(tsToOffset(t));
     detailPlot->replot();
 
-    TRACE_EXIT();
-}
-
-/** Slot for handling updating the current time. */
-void SeriesGraphDialog::handleClock()
-{
-    TRACE_ENTER();
-    updateTime(CurrentTS);
     TRACE_EXIT();
 }
 
@@ -245,6 +244,15 @@ void SeriesGraphDialog::setDetailEnd(int val)
     TRACE_EXIT();
 }
  
+/** Slot for receiving the coordinates when the user clicks on the plot. */
+void SeriesGraphDialog::plotClicked(const QwtDoublePoint& p)
+{
+    TRACE_ENTER();
+    LOG_INFO("user clicked on the point (" << p.x() << ", " << p.y() << ")");
+    emit seekStream(EpochTS + p.x() * 1000.0);
+    TRACE_EXIT();
+}
+
 } // namespace
 } // namespace
 

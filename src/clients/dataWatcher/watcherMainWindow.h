@@ -45,10 +45,11 @@ class MainWindow : public QMainWindow, public Ui::MainWindow {
 
     signals:
 	void dataPointReceived(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
-	void clockTick();
+	void clockTick(qlonglong);
 
     public slots:
 	void dataPointHandler(const QString& dataName, const QString& fromID, const QString& layer, qlonglong when, double value);
+        void seekStream(qlonglong);
 
     public:
         void setup();
