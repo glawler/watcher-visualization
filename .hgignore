@@ -169,6 +169,7 @@ share/info/dir
 ^src/clients/commandlineFeeders/sendDataPointMessage
 ^src/clients/commandlineFeeders/sendNodePropertiesMessage
 ^src/clients/commandlineFeeders/showClock
+^src/clients/commandlineFeeders/pingWatcher
 ^src/clients/messageStream2Text/Makefile
 ^src/clients/messageStream2Text/messageStream2Text
 ^src/clients/routeFeeder/Makefile
