@@ -14,6 +14,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ctype.h>
+#include <sys/types.h>
 
 // watcher includes.
 #include <libwatcher/client.h>
@@ -22,6 +23,7 @@
 #include <libwatcher/sendMessageHandler.h>
 
 watcher::Client *watcher_client=NULL;
+struct in_addr localhost_addr;
 
 /* default snap length (maximum bytes per packet to capture) */
 #define SNAP_LEN 1518
@@ -168,8 +170,8 @@ void print_payload(const u_char *payload, int len)
 void showPingInWatcher(const struct in_addr &src, const struct in_addr &dst, char layer_data[5])
 {
     watcher::event::EdgeMessagePtr em = watcher::event::EdgeMessagePtr(new watcher::event::EdgeMessage);
-    em->node1=boost::asio::ip::address_v4((unsigned long)src.s_addr); 
-    em->node2=boost::asio::ip::address_v4((unsigned long)dst.s_addr); 
+    em->node1=boost::asio::ip::address_v4(htonl(src.s_addr)); 
+    em->node2=boost::asio::ip::address_v4(htonl(dst.s_addr)); 
     em->edgeColor=watcher::colors::red;
     em->expiration=5000;
     em->width=2;
@@ -190,9 +192,11 @@ void showPingInWatcher(const struct in_addr &src, const struct in_addr &dst, cha
         fprintf(stdout, "Connected, but not sending out of date edge messages to the watcher.\n"); 
         return; 
     }
-    else 
+    else  {
+        std::cout << "Sending edge message: " << *em;
         if(!watcher_client->sendMessage(em))
             fprintf(stderr, "Error sending edge message.\n"); 
+    }
     return;
 }
 
@@ -245,10 +249,15 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
     // The types we accept are somewhat arbitrary, just what seemed to work 
     // when I played around with ping -p
+    struct in_addr from_addr, to_addr;
     switch (icmp->type) {
         case 0: printf("ping is echo reply\n"); 
+                memcpy(&from_addr, &ip->ip_src, sizeof(from_addr)); 
+                memcpy(&to_addr, &localhost_addr, sizeof(to_addr)); 
                 break;
         case 8: printf("ping is echo request\n"); 
+                memcpy(&to_addr, &localhost_addr, sizeof(from_addr)); 
+                memcpy(&from_addr, &ip->ip_dst, sizeof(from_addr)); 
                 break;
         default:
                 printf("unhandled ping type\n"); 
@@ -277,20 +286,24 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
     for (int i=0; i<sizeof(layer_data)-1; i++) 
         layer_data[i]=(i%2==0) ? hex_vals[payload[i/2]>>4] : hex_vals[payload[i/2]&0x0f];
     
-    printf("sending watcher edge message: %s --> %s, exp: 5, layer=%s", src_addr_char_buf, dst_addr_char_buf, layer_data); 
-    showPingInWatcher(ip->ip_src, ip->ip_dst, layer_data); 
+    showPingInWatcher(from_addr, to_addr, layer_data); 
 }
 
 int main(int argc, char **argv) 
 {
-    if (argc!=3) { 
-        fprintf(stdout, "Usage: %s interface_name watcherd_server_address\n", basename(argv[0])); 
+    if (argc!=4) { 
+        fprintf(stdout, "Usage: %s interface_name localhost_address watcherd_server_address\n", basename(argv[0])); 
         exit(EXIT_FAILURE);
     }
 
     char *dev=argv[1];
 
-    watcher_client=new watcher::Client(argv[2]); 
+    if (inet_pton(AF_INET, argv[2], &localhost_addr)<=0) { 
+        fprintf(stderr, "Error parsing %s as an ip address. It should be the address of the localhost on the interface given.\n"); 
+        exit(EXIT_FAILURE);
+    }
+
+    watcher_client=new watcher::Client(argv[3]); 
     if (!watcher_client) {
         fprintf(stderr, "Error allocating new wathcer client connection.\n"); 
         exit (EXIT_FAILURE); 
@@ -299,12 +312,12 @@ int main(int argc, char **argv)
         fprintf(stdout, "Attempting to connect to the watcher daemon...\n"); 
         watcher_client->connect(true); 
         if (!watcher_client->connected()) { 
-            fprintf(stderr, "Unable to connect to the watcher daemon at %s. Trying again in 2 seconds.\n", argv[2]); 
+            fprintf(stderr, "Unable to connect to the watcher daemon at %s. Trying again in 2 seconds.\n", argv[3]); 
             sleep(2); 
         }
     }
-    fprintf(stdout, "Connected to the watcher daemon at %s.\n", argv[2]); 
-    watcher_client->addMessageHandler(watcher::SingleMessageHandler::create());
+    fprintf(stdout, "Connected to the watcher daemon at %s.\n", argv[3]); 
+    watcher_client->addMessageHandler(watcher::MultipleMessageHandler::create());
 
     char errbuf[PCAP_ERRBUF_SIZE]; 
     pcap_t *handle=NULL;

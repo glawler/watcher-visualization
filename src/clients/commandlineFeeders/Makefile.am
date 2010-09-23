@@ -10,8 +10,7 @@ bin_PROGRAMS= \
 	sendConnectivityMessage \
 	sendDataPointMessage \
 	sendNodePropertiesMessage \
-	showClock \
-	pingWatcher
+	showClock 
 
 bin_SCRIPTS=watcherClientLoadAverage.py watcherClientBandwidth.py
 
@@ -25,9 +24,13 @@ sendDataPointMessage_SOURCES=sendDataPointMessage.cpp
 sendNodePropertiesMessage_SOURCES=sendNodePropertiesMessage.cpp
 showClock_SOURCES=showClock.cpp
 
-# GTL - assumes cpap installed and accessible. May be an issue 
-# for NiCE and ARL. 
-pingWatcher_SOURCES=pingWatcher.cpp
-pingWatcher_LDFLAGS=-lpcap
+# GTL - pingWatcher is fundamentally flawed. Just looking 
+# at pings you cannot determine anything other than
+# src and dst - no intermediate hops. Possibly be able to 
+# parse the internals of a ping -R, but, that seems wrong. 
+# Maybe traceroute IMCP packets would be a better candidate.
+# In the meantime, don't build pingWatcher.
+#pingWatcher_SOURCES=pingWatcher.cpp
+#pingWatcher_LDFLAGS=-lpcap
 
 
