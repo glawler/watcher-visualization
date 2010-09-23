@@ -7,43 +7,13 @@
  * and: http://www.tcpdump.org/sniffex.c
  *
  */
-
-
-
-
-
-
-
-
-
-
-
-
-/***********************************************
- * This code is not complete and does not work.
- ***********************************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#include <string.h>
 #include <stdlib.h>
 #include <pcap.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ctype.h>
-#include <string.h>
 
 // watcher includes.
 #include <libwatcher/client.h>
@@ -195,9 +165,40 @@ void print_payload(const u_char *payload, int len)
     return;
 }
 
+void showPingInWatcher(const struct in_addr &src, const struct in_addr &dst, char layer_data[5])
+{
+    watcher::event::EdgeMessagePtr em = watcher::event::EdgeMessagePtr(new watcher::event::EdgeMessage);
+    em->node1=boost::asio::ip::address_v4((unsigned long)src.s_addr); 
+    em->node2=boost::asio::ip::address_v4((unsigned long)dst.s_addr); 
+    em->edgeColor=watcher::colors::red;
+    em->expiration=5000;
+    em->width=2;
+    em->layer=std::string("ping_")+std::string(layer_data); 
+    em->bidirectional=false;
+    em->addEdge=true;
+
+    bool was_connected=watcher_client->connected();
+    while (!watcher_client->connected()) { 
+        fprintf(stdout, "Attempting to connect to the watcher daemon...\n"); 
+        watcher_client->connect(true); 
+        if (!watcher_client->connected()) { 
+            fprintf(stderr, "Unable to connect to the watcher daemon. Trying again in 2 seconds.\n"); 
+            sleep(2); 
+        }
+    }
+    if (!was_connected) { 
+        fprintf(stdout, "Connected, but not sending out of date edge messages to the watcher.\n"); 
+        return; 
+    }
+    else 
+        if(!watcher_client->sendMessage(em))
+            fprintf(stderr, "Error sending edge message.\n"); 
+    return;
+}
+
 void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
-    static int count = 1;                   /* packet counter */
+    static int count = 0;                   /* packet counter */
 
     /* declare pointers to packet headers */
     const struct sniff_ethernet *ethernet;  /* The ethernet header [1] */
@@ -212,8 +213,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
     char src_addr_char_buf[INET_ADDRSTRLEN];
     char dst_addr_char_buf[INET_ADDRSTRLEN];
 
-    printf("\nPacket number %d:\n", count);
-    count++;
+    printf("\nPacket number %d:\n", ++count);
 
     /* define ethernet header */
     ethernet = (struct sniff_ethernet*)(packet);
@@ -239,10 +239,12 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
     inet_ntop(AF_INET, &ip->ip_src, src_addr_char_buf, sizeof(src_addr_char_buf));
     inet_ntop(AF_INET, &ip->ip_dst, dst_addr_char_buf, sizeof(dst_addr_char_buf));
 
-    printf("Found ping with %s --> %s\n", src_addr_char_buf, dst_addr_char_buf); 
+    printf("Found ping %s --> %s\n", src_addr_char_buf, dst_addr_char_buf); 
 
     icmp=(struct sniff_icmp*)(packet + SIZE_ETHERNET + size_ip);
 
+    // The types we accept are somewhat arbitrary, just what seemed to work 
+    // when I played around with ping -p
     switch (icmp->type) {
         case 0: printf("ping is echo reply\n"); 
                 break;
@@ -256,10 +258,10 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
     payload=(const u_char*)&icmp->payload[0];
 
-    // struct timeval is added by ping. Not sure what the extra 4 bytes are.
+    // struct timeval is added by ping. Not sure what the extra 4 bytes are...
     payload+=sizeof(struct timeval)+4;
     size_payload=ICMP_PAYLOAD_LEN-(payload-icmp->payload); 
-    print_payload(payload, size_payload); 
+    // print_payload(payload, size_payload); 
 
     if (payload[0]==0xff && payload[1]==0xff) 
         printf("Found watcher-enabled ping packet\n"); 
@@ -272,36 +274,36 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
     const char hex_vals[]="0123456789abcdef"; 
     char layer_data[5]; 
     memset(layer_data, 0, sizeof(layer_data)); 
-    for (int i=0; i<sizeof(layer_data)-1; i++) {
+    for (int i=0; i<sizeof(layer_data)-1; i++) 
         layer_data[i]=(i%2==0) ? hex_vals[payload[i/2]>>4] : hex_vals[payload[i/2]&0x0f];
-        printf("layer_data: %s\n", layer_data); 
-    }
-
+    
     printf("sending watcher edge message: %s --> %s, exp: 5, layer=%s", src_addr_char_buf, dst_addr_char_buf, layer_data); 
-
-    watcher::event::EdgeMessagePtr em = watcher::event::EdgeMessagePtr(new watcher::event::EdgeMessage);
-    em->node1=asio::((unsigned int)ip->ip_src.s_addr); 
-    em->node2=watcher::NodeIdentifier((unsigned int)ip->ip_dst.s_addr); 
-    em->edgeColor=watcher::colors::red;
-    em->expiration=5000;
-    em->width=2;
-    em->layer=string("ping_")+string(layer_data); 
-    em->bidirectional=false;
-    em->addEdge=true;
-
-    if(!watcher_client->sendMessage(em))
-        fprintf(stderr, "Error sending edge message.\n"); 
+    showPingInWatcher(ip->ip_src, ip->ip_dst, layer_data); 
 }
 
 int main(int argc, char **argv) 
 {
+    if (argc!=3) { 
+        fprintf(stdout, "Usage: %s interface_name watcherd_server_address\n", basename(argv[0])); 
+        exit(EXIT_FAILURE);
+    }
+
     char *dev=argv[1];
 
     watcher_client=new watcher::Client(argv[2]); 
     if (!watcher_client) {
-        fprintf(stderr, "Error connecting to watcher daemon at %s\n", argv[2]); 
+        fprintf(stderr, "Error allocating new wathcer client connection.\n"); 
         exit (EXIT_FAILURE); 
     }
+    while (!watcher_client->connected()) { 
+        fprintf(stdout, "Attempting to connect to the watcher daemon...\n"); 
+        watcher_client->connect(true); 
+        if (!watcher_client->connected()) { 
+            fprintf(stderr, "Unable to connect to the watcher daemon at %s. Trying again in 2 seconds.\n", argv[2]); 
+            sleep(2); 
+        }
+    }
+    fprintf(stdout, "Connected to the watcher daemon at %s.\n", argv[2]); 
     watcher_client->addMessageHandler(watcher::SingleMessageHandler::create());
 
     char errbuf[PCAP_ERRBUF_SIZE]; 

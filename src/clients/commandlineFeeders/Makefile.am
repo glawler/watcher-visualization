@@ -10,7 +10,8 @@ bin_PROGRAMS= \
 	sendConnectivityMessage \
 	sendDataPointMessage \
 	sendNodePropertiesMessage \
-	showClock 
+	showClock \
+	pingWatcher
 
 bin_SCRIPTS=watcherClientLoadAverage.py watcherClientBandwidth.py
 
@@ -24,8 +25,9 @@ sendDataPointMessage_SOURCES=sendDataPointMessage.cpp
 sendNodePropertiesMessage_SOURCES=sendNodePropertiesMessage.cpp
 showClock_SOURCES=showClock.cpp
 
-# GTL - pingWatcher is not ready for prime time.
-# pingWatcher_SOURCES=pingWatcher.cpp
-# pingWatcher_LDFLAGS=-lpcap
+# GTL - assumes cpap installed and accessible. May be an issue 
+# for NiCE and ARL. 
+pingWatcher_SOURCES=pingWatcher.cpp
+pingWatcher_LDFLAGS=-lpcap
 
 
