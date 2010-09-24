@@ -42,6 +42,7 @@ namespace ui {
 INIT_LOGGER(MainWindow, "MainWindow");
 
 Timestamp EpochTS; // the timestamp of the first message in the event stream
+Timestamp MaxTS; // the timestamp of the last event in the stream
 Timestamp CurrentTS;
 MessageStreamPtr MsgStream;
 
@@ -92,6 +93,9 @@ void MainWindow::checkIO()
     while (MsgStream->getNextMessage(msg)) {
 	if (msg->type == DATA_POINT_MESSAGE_TYPE) {
 	    LOG_DEBUG("got DataPointMessage");
+	    CurrentTS = msg->timestamp;
+	    if (CurrentTS > MaxTS)
+		MaxTS = CurrentTS;
 	    watcher::event::DataPointMessagePtr dp = boost::dynamic_pointer_cast<DataPointMessage>(msg);
 	    // TODO:
 	    // - add layer when DataPointMessage supports its
@@ -103,7 +107,8 @@ void MainWindow::checkIO()
 	    LOG_DEBUG("got playback time range");
 	    watcher::event::PlaybackTimeRangeMessagePtr m = boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(msg);
 	    EpochTS = m->min_;
-	    LOG_INFO("epoch TS = " << EpochTS);
+	    MaxTS = m->max_;
+	    LOG_INFO("epoch TS = " << EpochTS << ", max TS = " << MaxTS);
 	} else if (msg->type == SPEED_MESSAGE_TYPE) {
 	    watcher::event::SpeedMessagePtr sm = boost::dynamic_pointer_cast<SpeedMessage>(msg);
 	} else if (msg->type == SEEK_MESSAGE_TYPE) {
@@ -116,6 +121,8 @@ void MainWindow::checkIO()
 	    }
 	} else if (watcher::event::isFeederEvent(msg->type)) {
 	    CurrentTS = msg->timestamp;
+	    if (CurrentTS > MaxTS)
+		MaxTS = CurrentTS;
 	    emit clockTick(msg->timestamp);
 	}
     }
