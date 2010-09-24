@@ -53,7 +53,7 @@ There are a few options to ./configure that control what gets built:
                         you don't want this. 
 
 cd src
-./autogen
+./autogen.sh
 ./configure --enable-earthWatcher
 make 
 
