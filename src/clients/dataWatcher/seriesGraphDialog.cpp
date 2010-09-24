@@ -75,6 +75,9 @@ class NodeInfo {
 
     NodeInfo(const QString& id_, QwtPlot *detailPlot, QwtPlot *globalPlot) : id(id_), attached(false) {
 	QPen pen(QColor(random() % 256, random() % 256, random() % 256));
+	// randomly assign a different pen style
+	const int numStyles = Qt::DashDotDotLine - Qt::SolidLine;
+	pen.setStyle(Qt::PenStyle(Qt::SolidLine + rand() % numStyles));
 
 	detailCurve.reset(new QwtPlotCurve(id_));
 	detailCurve->setPen(pen);
