@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Layer Configuration</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="watcherResources.qrc">
+    <normaloff>:/icons/resources/watcher.png</normaloff>:/icons/resources/watcher.png</iconset>
+  </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
@@ -391,7 +395,9 @@
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="watcherResources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

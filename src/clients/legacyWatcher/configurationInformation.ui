@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Configuration Information</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="watcherResources.qrc">
+    <normaloff>:/icons/resources/watcher.png</normaloff>:/icons/resources/watcher.png</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">
     <widget class="QLabel" name="label_4">
@@ -96,7 +100,9 @@
   <tabstop>serverNameEditBox</tabstop>
   <tabstop>ConfigurationInput</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="watcherResources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>ConfigurationInput</sender>

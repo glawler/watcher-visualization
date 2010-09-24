@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Select Stream</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="watcherResources.qrc">
+    <normaloff>:/icons/resources/watcher.png</normaloff>:/icons/resources/watcher.png</iconset>
+  </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
@@ -99,7 +103,9 @@
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="watcherResources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>cancelButton</sender>
