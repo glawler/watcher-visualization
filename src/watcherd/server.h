@@ -34,8 +34,8 @@ namespace watcher
             // Construct the Server to listen on the specified TCP address and port.
             explicit Server(
                             Watcherd&,
-                    const std::string& address, 
-                    const std::string& port,
+                    const std::string& hostsvc, 
+                    const std::string& service,
                     std::size_t thread_pool_size,
                     MessageHandlerPtr messageHandler);
 

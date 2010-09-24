@@ -23,8 +23,8 @@ INIT_LOGGER(watcher::Server, "Server");
 
 Server::Server(
                Watcherd& w,
-        const std::string& address, 
-        const std::string& port, 
+        const std::string& hostsvc, 
+        const std::string& service, 
         std::size_t thread_pool_size,
         MessageHandlerPtr messageHandler_) :
     watcher(w),
@@ -39,7 +39,8 @@ Server::Server(
 
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::resolver resolver(io_service_);
-    boost::asio::ip::tcp::resolver::query query(address, port);
+    boost::asio::ip::tcp::resolver::query query(Connection::getServerHost(hostsvc),
+						Connection::getServerService(hostsvc, service));
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
 
     acceptor_.open(endpoint.protocol());

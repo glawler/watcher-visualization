@@ -69,6 +69,26 @@ namespace watcher
              */
             const boost::asio::ip::tcp::endpoint remoteEndpoint() const { return theSocket.remote_endpoint(); }
 
+	    /**
+	     * Returns the part of the 'hostsvc' string preceding the ':' 
+	     * (or the whole hostsvc if it contains no ':').
+	     * If the hostname part is empty, returns localhost.
+	     *
+	     * @param hostsvc a [<host>][:<service>] string
+	     */
+	    static std::string getServerHost(const std::string& hostsvc);
+
+	    /**
+	     * Returns the service (a name or port string) to use, 
+	     * given a hostsvc and optional explicit service.
+	     * If no service is given in either argument, returns
+	     * the default service name "watcherd".
+	     *
+	     * @param hostsvc a [<host>][:<service>] string
+	     * @param service if nonempty, this overrides service
+	     */
+	    static std::string getServerService(const std::string& hostsvc, const std::string& service);
+
         protected:
 
             typedef std::list<MessageHandlerPtr> MessageHandlerList;

@@ -71,3 +71,43 @@ void Connection::removeMessageHandler(MessageHandlerPtr messageHandler)
     TRACE_EXIT();
 }
 
+// static member function
+std::string Connection::getServerHost(const std::string& hostsvc)
+{
+    size_t pos;
+    if ((pos = hostsvc.find(':')) == std::string::npos)
+    {
+	// no colon -- return whole hostsvc string
+	return hostsvc;
+    }
+    else if (pos == 0)
+    {
+	// empty hostname -- return default hostname
+	return "localhost";
+    }
+    else
+    {
+	// return part preceding ':'
+	return hostsvc.substr(0, pos);
+    }
+}
+
+// static member function
+std::string Connection::getServerService(const std::string& hostsvc, const std::string& service)
+{
+    size_t pos;
+    if (service != "")
+    {
+	return service;
+    }
+    else if ((pos = hostsvc.find(':')) != std::string::npos)
+    {
+	return hostsvc.substr(pos + 1);
+    }
+    else
+    {
+	return "watcherd";	// default service name
+    }
+}
+
+
