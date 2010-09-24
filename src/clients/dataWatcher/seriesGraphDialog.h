@@ -57,6 +57,7 @@ class SeriesGraphDialog : public QWidget, Ui::Form {
 	
 	Timestamp firstEvent; // lowest timestamp received
 	Timestamp lastEvent; // highest timestamp received
+	Timestamp globalMax; // upper time bound in the global graph
 	int detailBegin; // lower bound on timestamp for detail graph
 	int detailEnd; // upper bound on timestamp for detail graph
 

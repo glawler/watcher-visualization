@@ -34,6 +34,7 @@ namespace watcher {
 namespace ui {
 
 extern Timestamp EpochTS;
+extern Timestamp MaxTS;
 
 } //namespace
 } //namespace
@@ -133,6 +134,7 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
     globalPlot->setAxisTitle(QwtPlot::xBottom, QString::fromUtf8("time (s)"));
     globalPlot->setAxisTitle(QwtPlot::yLeft, name);
     globalPlot->setCanvasBackground(PlotBackgroundColor);
+    globalPlot->setAxisScale(QwtPlot::xBottom, 0, tsToOffset(MaxTS));
 
     detailPlot->insertLegend(new QwtLegend);
     detailPlot->setAxisTitle(QwtPlot::xBottom, QString::fromUtf8("time (s)"));
@@ -249,6 +251,13 @@ void SeriesGraphDialog::handleClock(qlonglong t)
 
     globalTimeMarker->setXValue(tsToOffset(t));
     detailTimeMarker->setXValue(tsToOffset(t));
+
+    // scroll the global plot if necessary
+    if (MaxTS > globalMax) {
+	globalMax = MaxTS;
+	globalPlot->setAxisScale(QwtPlot::xBottom, 0, tsToOffset(globalMax));
+    }
+
     replot();
 
     TRACE_EXIT();
