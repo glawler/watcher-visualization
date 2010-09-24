@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>384</width>
-    <height>252</height>
+    <height>206</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,234 +17,189 @@
    <iconset resource="watcherResources.qrc">
     <normaloff>:/icons/resources/watcher.png</normaloff>:/icons/resources/watcher.png</iconset>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>190</x>
-     <y>210</y>
-     <width>183</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QToolButton" name="nodeColorButton">
-   <property name="geometry">
-    <rect>
-     <x>240</x>
-     <y>160</y>
-     <width>88</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Node Color</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="labelFontButton">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>160</y>
-     <width>89</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Label Font</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="labelComboBox">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>50</y>
-     <width>241</width>
-     <height>27</height>
-    </rect>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <property name="text">
-     <string>last octet</string>
-    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Node Affected: </string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="2">
+      <widget class="QLabel" name="labelWhichNode">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Label  Text:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QComboBox" name="labelComboBox">
+       <item>
+        <property name="text">
+         <string>last octet</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>two octets</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>three octets</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>four octets</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>hostname</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>free form</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>none</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="nodeShapeLabel">
+       <property name="text">
+        <string>Node Shape:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" colspan="2">
+      <widget class="QComboBox" name="nodeShapeComboBox">
+       <item>
+        <property name="text">
+         <string>Sphere (Circle)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cube (Square)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Torus (Circle)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Teapot (Square)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Pyramid (Triangle)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="nodeShapeLabel_2">
+       <property name="text">
+        <string>Node Size:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" colspan="2">
+      <widget class="QSpinBox" name="nodeSizeSpinBox"/>
+     </item>
+    </layout>
    </item>
    <item>
-    <property name="text">
-     <string>two octets</string>
-    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QToolButton" name="labelColorButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Label Color</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="labelFontButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>27</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Label Font</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="nodeColorButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Node Color</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
-    <property name="text">
-     <string>three octets</string>
-    </property>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
    </item>
-   <item>
-    <property name="text">
-     <string>four octets</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>hostname</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>free form</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>none</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>9</x>
-     <y>55</y>
-     <width>79</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Label  Text:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labelWhichNode">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>20</y>
-     <width>231</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>TextLabel</string>
-   </property>
-  </widget>
-  <widget class="QToolButton" name="labelColorButton">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>160</y>
-     <width>89</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Label Color</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>108</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Node Affected: </string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="nodeShapeLabel">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>80</y>
-     <width>91</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Node Shape:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="nodeShapeComboBox">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>80</y>
-     <width>241</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <item>
-    <property name="text">
-     <string>Sphere (Circle)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Cube (Square)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Torus (Circle)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Teapot (Square)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Pyramid (Triangle)</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QSpinBox" name="nodeSizeSpinBox">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>120</y>
-     <width>55</width>
-     <height>27</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="nodeShapeLabel_2">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>120</y>
-     <width>91</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Node Size:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
+  </layout>
  </widget>
  <resources>
   <include location="watcherResources.qrc"/>
