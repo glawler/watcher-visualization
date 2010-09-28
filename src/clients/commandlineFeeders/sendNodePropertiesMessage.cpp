@@ -68,6 +68,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -c, --color=color           Set the node's color to color. Color can be string, e.g. \"blue\", or \n"); 
     fprintf(stderr, "                                   hex RRGGBBAA (red, green, blue, alpha) value, \"0xff00ff64\"\n"); 
     fprintf(stderr, "   -z, --size=float            How large (or small) to make the node relative to other nodes.\n"); 
+    fprintf(stderr, "   -T, --timestamp=ms          Optionally specify a timestamp for this event\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "   -r, --logProps              log.properties file, which controls logging for this program\n");
     fprintf(stderr, "                                    Default value is sendMessage.log.properties.\n"); 
@@ -103,11 +104,12 @@ int main(int argc, char **argv)
             {"color", required_argument, 0, 'c'},
             {"size", required_argument, 0, 'z'},
             {"logProps", required_argument, 0, 'r'},
+            {"timestamp", required_argument, 0, 'T'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "s:n:l:a:e:p:x:c:z:r:hH?", long_options, &option_index);
+        c = getopt_long(argc, argv, "s:n:l:a:e:p:x:c:z:r:hHT:?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -198,6 +200,9 @@ int main(int argc, char **argv)
                       break;
             case 'r': logProps=optarg; 
                       break;
+            case 'T':
+				message->timestamp=lexical_cast<Timestamp>(optarg); break;
+				break;
             case 'h':
             case 'H':
             case '?':
