@@ -69,6 +69,8 @@ namespace randomScenario {
             ("width,W", value<unsigned int>()->default_value(1000), "Max width of the playing field. (East/West)")
             ("length,G", value<unsigned int>()->default_value(1000), "Max length of the playing field. (North/South)")
             ("height,H", value<unsigned int>()->default_value(100), "Max height of the playing field. (Up/Down)")
+            ("radius,r", value<unsigned int>()->default_value(20), "Distance in which two nodes are neighbors.\n")
+            ("debug", value<bool>()->default_value(false), "If given, show debug information on stdout.\n")
             ("logproperties,p", value<string>()->default_value(binName + ".log.properties"), "The log properties file")
             ("logLevel,l", value<string>(&logLevel)->default_value("debug"), "The level to log at. Valid options: trace, debug, info, warn, error, and fatal");
 
