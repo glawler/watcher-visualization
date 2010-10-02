@@ -27,10 +27,14 @@ typedef struct {
     double phi;
 } NodePos;
 
-void computeEdges(unsigned int *edges, const NodePos *nodes, const unsigned int nodeNum, const unsigned int radius);
-void doMobility(NodePos *nodes, const unsigned int nodeNum, const unsigned int maxWidth, const unsigned int maxLength, const unsigned int maxHeight);
+void computeEdges(unsigned int *edges, const NodePos *nodes, const unsigned int nodeNum);
+void doMobility(NodePos *nodes, const unsigned int nodeNum);
 
 static bool debug=false;
+static unsigned int maxWidth=0;
+static unsigned int maxHeight=0;
+static unsigned int maxDepth=0; 
+static unsigned int radius=0;
 
 int main(int argc, char **argv) 
 {
@@ -49,10 +53,10 @@ int main(int argc, char **argv)
     unsigned int layerNum=config["layerNum"].as<unsigned int>();
     int duration=config["duration"].as<int>(); 
     string server=config["server"].as<string>(); 
-    unsigned int maxWidth=config["width"].as<unsigned int>();
-    unsigned int maxLength=config["length"].as<unsigned int>();
-    unsigned int maxHeight=config["height"].as<unsigned int>();
-    unsigned int radius=config["radius"].as<unsigned int>();
+    maxWidth=config["width"].as<unsigned int>();
+    maxHeight=config["height"].as<unsigned int>();
+    maxDepth=config["depth"].as<unsigned int>();
+    radius=config["radius"].as<unsigned int>();
     debug=config["debug"].as<bool>();
 
     const int maxSpeed=10;
@@ -70,14 +74,11 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    unsigned int *edges=new unsigned int[nodeNum*nodeNum];
-    memset(edges, 0, nodeNum*nodeNum); 
-
     // init positions
     for (int i=0; i<nodeNum; i++) {
         positions[i].x=rand()%maxWidth; 
-        positions[i].y=rand()%maxLength; 
-        positions[i].z=rand()%maxHeight; 
+        positions[i].y=rand()%maxHeight; 
+        positions[i].z=rand()%maxDepth; 
         positions[i].speed=(rand()%(maxSpeed-minSpeed))+minSpeed; 
         positions[i].theta=((rand()%(((int)M_PI*100)*2))-((int)M_PI*100))/100.0;     // random # between -PI..PI w/2 sig digits
         positions[i].phi=((rand()%(((int)M_PI*50)*2))-((int)M_PI*50))/100.0;         // random # between -PI/2..PI/2 w/2 sig digits
@@ -86,18 +87,21 @@ int main(int argc, char **argv)
         cout << " at speed " << positions[i].speed << " and direction (" << positions[i].theta << ", " << positions[i].phi << ")" << endl;
     }
 
+    unsigned int *edges=new unsigned int[nodeNum*nodeNum];
+    memset(edges, 0, nodeNum*nodeNum); 
+
     while (duration) { 
 
-        doMobility(positions, nodeNum, maxWidth, maxLength, maxHeight);
-        computeEdges(edges, positions, nodeNum, radius); 
+        doMobility(positions, nodeNum);
+        computeEdges(edges, positions, nodeNum); 
 
         GPSMessagePtr gpsMess(GPSMessagePtr(new GPSMessage)); 
         ConnectivityMessagePtr connMess(ConnectivityMessagePtr(new ConnectivityMessage));
 
         for (int i=0; i<nodeNum; i++) {
             NodeIdentifier nid=boost::asio::ip::address_v4::address_v4(i+1);
-            gpsMess->x=(positions[i].x)/30000.0;
-            gpsMess->y=(positions[i].y)/30000.0;
+            gpsMess->x=positions[i].x;
+            gpsMess->y=positions[i].y;
             gpsMess->z=positions[i].z; 
             gpsMess->fromNodeID=nid;
             if (!client.sendMessage(gpsMess)) 
@@ -109,15 +113,19 @@ int main(int argc, char **argv)
                     cerr << "Error sending node label message"; 
             }
 
+            // All layers have the same edges. How to fix this? radius per layer maybe?
             for (unsigned int l=0; l<layerNum; l++) {
                 connMess->fromNodeID=nid;
                 connMess->layer="ConnectivityMessages_" + boost::lexical_cast<string>(l);
-                // for (int n=0; n<nodeNum*(nodeDegreePercentage/100.0); n++) 
-                //     connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4((rand()%nodeNum)+1));
-                for (int i=0; i<nodeNum; i++)  
-                    for (int j=0; j<nodeNum; j++)  
-                        if (*(edges+(i*nodeNum)+j)) 
-                            connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4(j+1)); 
+                for (int j=0; j<nodeNum; j++)  
+                    if (*(edges+(i*nodeNum)+j)) 
+                        connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4(j+1)); 
+                if (debug) {
+                    cout << "Nbrs of node " << i+1 << ": ";
+                    for (ConnectivityMessage::NeighborList::const_iterator nbr=connMess->neighbors.begin(); nbr!=connMess->neighbors.end(); nbr++)
+                        cout << nbr->to_string() << " ";
+                    cout << endl;
+                }
                 if (!client.sendMessage(connMess)) 
                     cerr << "Error sending connectivity message." << endl;
                 connMess->neighbors.clear();
@@ -151,26 +159,35 @@ double computeDistance(const NodePos &n1, const NodePos &n2)
     return sqrt( ((n2.x-n1.x)*(n2.x-n1.x)) + ((n2.y-n1.y)*(n2.y-n1.y)) + ((n2.z-n1.z)*(n2.z-n1.z)) );
 }
 
-void computeEdges(unsigned int *edges, const NodePos *nodes, const unsigned int nodeNum, const unsigned int radius)
+void computeEdges(unsigned int *edges, const NodePos *nodes, const unsigned int nodeNum)
 {
     for (int i=0; i<nodeNum; i++) 
         for (int j=0; j<nodeNum; j++) {
             if (i==j)
                 continue;
             double dist=computeDistance(nodes[i], nodes[j]); 
-            if (debug)
-                cout << "Distance between " << i+1 << " <--> " << j+1 << " is " << dist << endl;
+            // if (debug)
+            //     cout << "Distance between " << i+1 << " <--> " << j+1 << " is " << dist << endl;
             *(edges+(i*nodeNum)+j)=(radius>=dist)?1:0;
         }
     if (debug)
         dumpEdges(edges, nodeNum); 
 }
 
-void doMobility(NodePos *nodes, const unsigned int nodeNum, const unsigned int maxWidth, const unsigned int maxLength, const unsigned int maxHeight)
+void doMobility(NodePos *nodes, const unsigned int nodeNum)
 {
+    if (debug) 
+        cout << "node 1 old position: " << nodes[0].x << ", " << nodes[0].y << ", " << nodes[0].z << endl;
+
     for (int i=0; i<nodeNum; i++) {
-        nodes[i].x+=rand()%2?nodes[i].speed:-nodes[i].speed;
-        nodes[i].y+=rand()%2?nodes[i].speed:-nodes[i].speed;
-        nodes[i].z+=rand()%2?nodes[i].speed:-nodes[i].speed;
+        nodes[i].x+=cos(nodes[i].theta)*nodes[i].speed;
+        nodes[i].y+=sin(nodes[i].theta)*nodes[i].speed;
+        nodes[i].z+=sin(nodes[i].phi)*nodes[i].speed;
+
+        nodes[i].x=nodes[i].x>maxWidth ?nodes[i].x-maxWidth :nodes[i].x<0? maxWidth-nodes[i].x:nodes[i].x;
+        nodes[i].y=nodes[i].y>maxHeight?nodes[i].y-maxHeight:nodes[i].y<0?maxHeight-nodes[i].y:nodes[i].y;
+        nodes[i].z=nodes[i].z>maxDepth ?nodes[i].z-maxDepth :nodes[i].z<0? maxDepth-nodes[i].z:nodes[i].z;
     }
+    if (debug) 
+        cout << "node 1 new position: " << nodes[0].x << ", " << nodes[0].y << ", " << nodes[0].z << endl;
 }
