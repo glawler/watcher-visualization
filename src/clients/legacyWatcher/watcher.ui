@@ -325,14 +325,6 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionPlaybackRange"/>
     <addaction name="actionPlaybackTime"/>
    </widget>
-   <widget class="QMenu" name="menuGraph">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string>&amp;Graph</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
      <string>&amp;Help</string>
@@ -368,7 +360,6 @@ p, li { white-space: pre-wrap; }
    </widget>
    <addaction name="menuLayers"/>
    <addaction name="menuView"/>
-   <addaction name="menuGraph"/>
    <addaction name="menuConfiguration"/>
    <addaction name="menu_Help"/>
   </widget>

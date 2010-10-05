@@ -42,7 +42,6 @@
 #include "watcherAboutDialog.h"
 #include "watcherConfigurationDialog.h"
 #include "manetglview.h"
-#include "watcherScrollingGraphControl.h"
 #include "singletonConfig.h"
 #include "backgroundImage.h"
 #include "logger.h"
@@ -1673,12 +1672,6 @@ void manetGLView::checkIO()
             // When control reaches this point, events are being streamed
             playbackPaused = false;
 
-            // DataPoint data is handled directly by the scrolling graph thing.
-            if (message->type==DATA_POINT_MESSAGE_TYPE) {
-                WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
-                sgc->handleDataPointMessage(dynamic_pointer_cast<DataPointMessage>(message));
-            }
-
             currentMessageTimestamp=message->timestamp;
             if (!sliderPressed)
                 playbackSlider->setValue(currentMessageTimestamp/1000); 
@@ -1940,31 +1933,29 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
 
 void manetGLView::drawGroundGrid()
 {
-    if (showGroundGrid) {
-        glPushMatrix();
-        GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
-        glGetFloatv(GL_CURRENT_COLOR, cols);
-        const GLfloat black[]={0.0,0.0,0.0,1.0};
-        if (monochromeMode)
-            glColor4fv(black);
-        else
-            glColor4f(0.0, 1.0, 0.0, 0.5);
-        const int offset=50;
-        const int w=1000;
-        glTranslatef(-w, -w, -20); 
-        glBegin(GL_LINES);
-        for (int i=0; i<32*offset; i+=offset) {
-            // east to west
-            glVertex2f(0, i); 
-            glVertex2f(i*2*w, i); 
-            // south to north
-            glVertex2f(i, 0); 
-            glVertex2f(i, i*2*w); 
-        }
-        glEnd(); 
-        glColor4fv(cols);
-        glPopMatrix();
+    glPushMatrix();
+    GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+    glGetFloatv(GL_CURRENT_COLOR, cols);
+    const GLfloat black[]={0.0,0.0,0.0,1.0};
+    if (monochromeMode)
+        glColor4fv(black);
+    else
+        glColor4f(0.0, 1.0, 0.0, 0.5);
+    const int offset=50;
+    const int w=1000;
+    glTranslatef(-w, -w, -20); 
+    glBegin(GL_LINES);
+    for (int i=0; i<32*offset; i+=offset) {
+        // east to west
+        glVertex2f(0, i); 
+        glVertex2f(i*2*w, i); 
+        // south to north
+        glVertex2f(i, 0); 
+        glVertex2f(i, i*2*w); 
     }
+    glEnd(); 
+    glColor4fv(cols);
+    glPopMatrix();
 }
 
 void manetGLView::drawManet(void)
@@ -1972,6 +1963,7 @@ void manetGLView::drawManet(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
     glTranslatef(0.0, 0.0, -20.0);
 
     glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
@@ -1980,7 +1972,8 @@ void manetGLView::drawManet(void)
     glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
     glTranslatef(manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ);
 
-    drawGroundGrid();
+    if (showGroundGrid)
+        drawGroundGrid();
 
     // watcher::Skybox *sb=watcher::Skybox::getSkybox();
     // if (sb)
@@ -3650,17 +3643,16 @@ void manetGLView::saveConfiguration()
         root["backgroundColor"]["b"]=cols[2];
         root["backgroundColor"]["a"]=cols[3];
 
+        SingletonConfig::unlock();
+
+        if (wGraph) 
+            wGraph->saveConfiguration(); 
+
+        SingletonConfig::saveConfig();
     }
     catch (const libconfig::SettingException &e) {
-        LOG_ERROR("Error loading configuration at " << e.getPath() << ": " << e.what());
+        LOG_ERROR("Error saving configuration at " << e.getPath() << ": " << e.what() << "  " << __FILE__ << ":" << __LINE__); 
     }
-
-    SingletonConfig::unlock();
-
-    if (wGraph) 
-        wGraph->saveConfiguration(); 
-
-    SingletonConfig::saveConfig();
 
     TRACE_EXIT();
 }

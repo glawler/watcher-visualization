@@ -31,7 +31,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include "watcherMainWindow.h"
-#include "watcherScrollingGraphControl.h"
 
 #include "logger.h"
 #include "libconfig.h++"
@@ -194,22 +193,6 @@ int main(int argc, char *argv[])
     // Is there a way to get this from within manetGLView via theApp or something?
     ui.manetGLViewWindow->setLayerMenu(ui.menuLayers);
     ui.manetGLViewWindow->setPlaybackSlider(ui.playbackSlider);
-
-    // 
-    // Connect the scrolling graph dialog controller to other bits.
-    //
-    {
-        WatcherScrollingGraphControl *sgc=WatcherScrollingGraphControl::getWatcherScrollingGraphControl();
-
-        // Add the dyanmic graphs to this menu.
-        sgc->setMenu(ui.menuGraph);
-
-        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsToggled(unsigned int)), sgc, SLOT(toggleNodeDataInGraphs(unsigned int)));
-        QObject::connect(sgc, SIGNAL(nodeDataInGraphsToggled(unsigned int)), ui.manetGLViewWindow, SLOT(toggleNodeSelectedForGraph(unsigned int)));
-
-        QObject::connect(ui.manetGLViewWindow, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), sgc, SLOT(showNodeDataInGraphs(unsigned int, bool)));
-        QObject::connect(sgc, SIGNAL(nodeDataInGraphsShowed(unsigned int, bool)), ui.manetGLViewWindow, SLOT(showNodeSelectedForGraph(unsigned int, bool)));
-    }
 
     srand(time(NULL));
 
