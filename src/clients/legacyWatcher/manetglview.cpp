@@ -1764,8 +1764,10 @@ void manetGLView::paintGL()
 {
     TRACE_ENTER();
 
-    if (!messageStream || !messageStream->connected())
+    if (!messageStream || !messageStream->connected()) {
+        clearAll();
         drawNotConnectedState();
+    }
     else 
     {
         drawManet();
