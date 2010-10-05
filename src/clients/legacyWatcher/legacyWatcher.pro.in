@@ -6,7 +6,6 @@ TEMPLATE = app
 TARGET = watcher
 DEPENDPATH += .
 INCLUDEPATH += . ../../../include ../../util ../.. ../../watcherd
-INCLUDEPATH += @QWT_INCLUDES@
 QT += opengl 
 CONFIG += qt x11 
 OBJECTS_DIR = ./objs
@@ -33,7 +32,6 @@ LIBS += -L/usr/X11R6/lib -lGL -lGLU -lglut
 LIBS += @LIBCONFIG_LIBS@
 LIBS += @LOGGER_LIBS@
 LIBS += -lwatcherutils
-LIBS += @QWT_LIB@ 
 LIBS += @BOOST_LDFLAGS@ @BOOST_FILESYSTEM_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_SYSTEM_LIB@
 LIBS += @BOOST_SERIALIZATION_LIB@ @BOOST_THREAD_LIB@ @BOOST_REGEX_LIB@
 
@@ -47,14 +45,11 @@ win32 {
 HEADERS += \
     backgroundImage.h \
     bitmap.h \
-    graphPlot.h \
     manetglview.h \
     skybox.h \
     stringIndexedMenuItem.h \
     watcherAboutDialog.h \
-    watcherGraphDialog.h \
     watcherMainWindow.h \
-    watcherScrollingGraphControl.h \
     watcherStreamListDialog.h \
     watcherConfigurationDialog.h \
     layerConfigurationDialog.h \
@@ -71,15 +66,12 @@ FORMS += \
 SOURCES += \
     backgroundImage.cpp \
     bitmap.cpp  \
-    graphPlot.cpp   \
     main.cpp    \
     manetglview.cpp \
     skybox.cpp  \
     stringIndexedMenuItem.cpp \
     watcherAboutDialog.cpp \
-    watcherGraphDialog.cpp  \
     watcherMainWindow.cpp   \
-    watcherScrollingGraphControl.cpp \
     watcherStreamListDialog.cpp \
     watcherConfigurationDialog.cpp \
     layerConfigurationDialog.cpp \
