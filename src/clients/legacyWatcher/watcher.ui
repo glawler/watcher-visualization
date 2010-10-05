@@ -123,10 +123,10 @@ p, li { white-space: pre-wrap; }
         <item>
          <widget class="QPushButton" name="pauseButton">
           <property name="toolTip">
-           <string>Pause playback</string>
+           <string>Pause/Unpause playback</string>
           </property>
           <property name="whatsThis">
-           <string>Pause playback</string>
+           <string>Pause/Unpause playback</string>
           </property>
           <property name="text">
            <string/>

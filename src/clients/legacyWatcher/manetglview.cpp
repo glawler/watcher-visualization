@@ -3666,7 +3666,11 @@ void manetGLView::pausePlayback()
         TRACE_EXIT();
         return;
     }
-    messageStream->stopStream(); 
+    if (!playbackPaused)
+        messageStream->stopStream(); 
+    else 
+        messageStream->startStream();
+
     TRACE_EXIT();
 }
 
