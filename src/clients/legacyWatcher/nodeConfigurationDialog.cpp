@@ -200,7 +200,7 @@ namespace watcher {
     {
         if (!graph || !graph->numValidNodes)
             return;
-        configureDialog(0); 
+        configureDialog(curNodeId); 
     }
     void NodeConfigurationDialog::configureDialog(size_t nodeId)
     {

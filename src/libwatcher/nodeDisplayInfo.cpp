@@ -233,6 +233,9 @@ void NodeDisplayInfo::saveConfiguration() const
         nodeSetting["flash"]=flash;
         nodeSetting["flashInterval"]=(int)flashInterval; // GTL loss of precision here. 
         nodeSetting["size"]=size;
+        nodeSetting["labelColor"]=labelColor.toString();
+        nodeSetting["labelFont"]=labelFont;
+        nodeSetting["labelPointSize"]=labelPointSize;
     }
     catch (const SettingException &e) {
         LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
