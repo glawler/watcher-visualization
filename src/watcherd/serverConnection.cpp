@@ -66,6 +66,7 @@ namespace watcher {
         io_service_(io_service),
         strand_(io_service),
         write_strand_(io_service),
+	incomingBuffer(DataMarshaller::header_length), // ensure enough space to read the payload header
         conn_type(unknown),
         dataNetwork(0),
         messageStreamFilterEnabled(false)
@@ -87,6 +88,7 @@ namespace watcher {
         catch (const libconfig::SettingException &e) {
             LOG_ERROR("Error reading \"dataNetwork\" from configuration at " << e.getPath() << ": " << e.what());
         }
+
         TRACE_EXIT();
     }
 
@@ -141,7 +143,7 @@ namespace watcher {
 
             size_t payloadSize;
             unsigned short numOfMessages;
-            if (!DataMarshaller::unmarshalHeader(incomingBuffer.begin(), bytes_transferred, payloadSize, numOfMessages))
+            if (!DataMarshaller::unmarshalHeader(&incomingBuffer[0], bytes_transferred, payloadSize, numOfMessages))
             {
                 LOG_ERROR("Error parsing incoming message header.");
 
@@ -152,6 +154,12 @@ namespace watcher {
             {
                 LOG_DEBUG("Reading packet payload of " << payloadSize << " bytes.");
 
+		// ensure there is enough space to read the full payload
+		if (incomingBuffer.size() < payloadSize)
+		{
+		    LOG_INFO("increasing incomingBuffer to " << payloadSize << " bytes.");
+		    incomingBuffer.resize(payloadSize);
+		}
                 boost::asio::async_read(
                         theSocket, 
                         boost::asio::buffer(
@@ -327,7 +335,7 @@ namespace watcher {
         if (!e)
         {
             vector<MessagePtr> arrivedMessages; 
-            if (DataMarshaller::unmarshalPayload(arrivedMessages, numOfMessages, incomingBuffer.begin(), bytes_transferred))
+            if (DataMarshaller::unmarshalPayload(arrivedMessages, numOfMessages, &incomingBuffer[0], bytes_transferred))
             {
                 boost::system::error_code err;
                 boost::asio::ip::tcp::endpoint ep = getSocket().remote_endpoint(err);

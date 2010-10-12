@@ -101,7 +101,7 @@ namespace watcher
             boost::asio::io_service::strand write_strand_;
 
             /// Buffer for incoming data.
-            typedef boost::array<char, 32768> IncomingBuffer;
+            typedef std::vector<char> IncomingBuffer;
             IncomingBuffer incomingBuffer;
 
             /// What type of connection is this?
