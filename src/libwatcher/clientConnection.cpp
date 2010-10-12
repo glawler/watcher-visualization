@@ -46,6 +46,7 @@ ClientConnection::ClientConnection(
     ioService(io_service),
     theStrand(io_service),
     writeStrand(io_service),
+    incomingBuffer(DataMarshaller::header_length),
     server(server_),
     service(service_)
 {
@@ -256,6 +257,12 @@ void ClientConnection::handle_read_header(const boost::system::error_code &e, st
             LOG_DEBUG("Parsed header - now reading " << messageNum << " message" << (messageNum>1?"s":"") 
                     << " from a buffer of " << payloadSize << " bytes."); 
 
+	    // ensure buffer is large enough to get entire payload in one asio::read()
+	    if (incomingBuffer.size() < payloadSize)
+	    {
+		LOG_INFO("increaing incoming buffer size to " << payloadSize << " bytes.");
+		incomingBuffer.resize(payloadSize);
+	    }
             bool closeConnection = false;
             size_t bytesRead=0;
             if (payloadSize != (bytesRead=asio::read(theSocket, asio::buffer(incomingBuffer, payloadSize)))) {
