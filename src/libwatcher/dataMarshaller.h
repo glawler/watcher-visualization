@@ -142,7 +142,7 @@ namespace watcher
             enum 
             { 
                 header_length = 
-                    sizeof(unsigned short) +   /// Payload length 
+                    sizeof(uint32_t) +   /// Payload length 
                     sizeof(unsigned short)     /// Number of messages
             };
 

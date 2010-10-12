@@ -417,13 +417,18 @@ namespace watcher {
         TRACE_EXIT();
     }
 
-    void ServerConnection::handle_write(const boost::system::error_code& e, MessagePtr message)
+    void ServerConnection::handle_write(const boost::system::error_code& e, size_t bytes_transferred, MessagePtr message, DataMarshaller::NetworkMarshalBuffersPtr outBuf)
     {
         TRACE_ENTER(); 
 
+	{
+	    boost::mutex::scoped_lock lock(outBuffersLock);
+	    outBuffers.remove(outBuf);
+	}
+
         if (!e)
         {
-            LOG_DEBUG("Successfully sent message to client: " << message); 
+            LOG_DEBUG("Successfully sent message to client(size=" << bytes_transferred << "): " << message); 
 
             BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers)
             {
@@ -483,19 +488,29 @@ namespace watcher {
             }
         }
 
-        DataMarshaller::NetworkMarshalBuffers outBuffers;
-        DataMarshaller::marshalPayload(msg, outBuffers);
+	// pointer to memory must persist until async handler is completed
+        DataMarshaller::NetworkMarshalBuffersPtr outBuf(new DataMarshaller::NetworkMarshalBuffers);
+        DataMarshaller::marshalPayload(msg, *outBuf);
+	// the lock must be released prior to async write because it is possible this thread
+	// will enter the handler, and we aren't using re-entrant lock
+	{
+	    boost::mutex::scoped_lock lock(outBuffersLock);
+	    outBuffers.push_back(outBuf);
+	}
+
 
         /// FIXME melkins 2004-04-19
         // is it safe to call async_write and async_read from different
         // threads at the same time?  asio::tcp::socket() is listed at not
         // shared thread safe
         async_write(theSocket,
-                    outBuffers,
+                    *outBuf,
                     write_strand_.wrap( boost::bind( &ServerConnection::handle_write,
                                                shared_from_this(),
                                                placeholders::error,
-                                               msg)));
+					       placeholders::bytes_transferred,
+                                               msg,
+					       outBuf)));
         TRACE_EXIT();
     }
 
@@ -531,18 +546,28 @@ namespace watcher {
             }
         }
 
-        DataMarshaller::NetworkMarshalBuffers outBuffers;
-        DataMarshaller::marshalPayload(messageList, outBuffers);
+
+	// pointer to memory must persist until async handler is completed
+        DataMarshaller::NetworkMarshalBuffersPtr outBuf(new DataMarshaller::NetworkMarshalBuffers);
+        DataMarshaller::marshalPayload(messageList, *outBuf);
+	// the lock must be released prior to async write because it is possible this thread
+	// will enter the handler, and we aren't using re-entrant lock
+	{
+	    boost::mutex::scoped_lock lock(outBuffersLock);
+	    outBuffers.push_back(outBuf);
+	}
 
         /// FIXME melkins 2004-04-19
         // is it safe to call async_write and async_read from different
         // threads at the same time?
         async_write(theSocket,
-                    outBuffers,
+                    *outBuf,
                     write_strand_.wrap( boost::bind( &ServerConnection::handle_write,
                                                shared_from_this(),
                                                placeholders::error,
-                                               msgs.front())));
+					       placeholders::bytes_transferred,
+                                               msgs.front(),
+					       outBuf)));
         TRACE_EXIT();
     }
 

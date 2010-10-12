@@ -80,6 +80,17 @@ static MessagePtr unused_M_Ptr=MessagePtr(new ConnectivityMessage);
 
 #define UNMARSHALSHORT(a,b)  {b=(*(a+0)<<8) | *(a+1); a+=2;}
 
+#define MARSHALINT32(a,b) \
+    do\
+    {\
+	*a++=((unsigned char)((b) >> 24));\
+	*a++=((unsigned char)((b) >> 16));\
+	*a++=((unsigned char)((b) >> 8)); \
+	*a++=((unsigned char)(b)); \
+    } while(0)
+
+#define UNMARSHALINT32(a,b)  {b = (*(a+0)<<24) | (*(a+1)<<16) | (*(a+2)<<8) | *(a+3); a+=4;}
+
 // static 
 bool DataMarshaller::unmarshalHeader(const char *buffer, const size_t &bufferSize, size_t &payloadSize, unsigned short &messageNum)
 {
@@ -95,13 +106,18 @@ bool DataMarshaller::unmarshalHeader(const char *buffer, const size_t &bufferSiz
         return false;
     }
 
+    if (bufferSize > 0xffffffff)
+    {
+	LOG_ERROR("buffer size " << bufferSize << " is too large to fit into an uint32.");
+        TRACE_EXIT_RET("false");
+        return false;
+    }
+
     const unsigned char *bufPtr=(const unsigned char*)buffer; 
-    unsigned short pSize; 
-    UNMARSHALSHORT(bufPtr, pSize);
+    UNMARSHALINT32(bufPtr, payloadSize);
     UNMARSHALSHORT(bufPtr, messageNum);
 
-    payloadSize=pSize;  // ushort to size_t conversion.
-    LOG_DEBUG("Header data: payload size: " << pSize << " messageNum: " << messageNum); 
+    LOG_DEBUG("Header data: payload size: " << payloadSize << " messageNum: " << messageNum); 
 
     return true;
 }
@@ -115,7 +131,7 @@ bool DataMarshaller::unmarshalPayload(MessagePtr &message, const char *buffer, c
     istringstream s(string(buffer, bufferSize));
     message=Message::unpack(s);
 
-    LOG_DEBUG("Unmarshalled payload data: " << s.str()); 
+    //LOG_DEBUG("Unmarshalled payload data: " << s.str()); 
 
     TRACE_EXIT_RET((message?"true":"false"));
     return static_cast<bool>(message);          // cast may be redundant 
@@ -127,6 +143,7 @@ bool DataMarshaller::unmarshalPayload(std::vector<MessagePtr> &messages, unsigne
     TRACE_ENTER();
 
     istringstream is(string(buffer, bufferSize)); 
+    LOG_DEBUG("Unmarshalling payload data(size=" << bufferSize << "): " << is.str()); 
     unsigned short i=0;
     for(i=0; i<numOfMessages; i++)
     {
@@ -141,7 +158,7 @@ bool DataMarshaller::unmarshalPayload(std::vector<MessagePtr> &messages, unsigne
         messages.push_back(m);      // marshalled with push_front, so should get same order on unmarshalling.
     }
 
-    LOG_DEBUG("Unmarshalled payload data: " << is.str()); 
+    //LOG_DEBUG("Unmarshalled payload data: " << is.str()); 
     LOG_DEBUG("Successfully unmarshalled " << i << " message" << (i>0?"s":"")); 
 
     TRACE_EXIT_RET("true"); 
@@ -168,7 +185,7 @@ bool DataMarshaller::marshalPayload(const vector<MessagePtr> &messages, NetworkM
 
     // Add serialized Messages first, then prepend the header once we know 
     // how large the payload will be.
-    unsigned short payloadSize=0;
+    size_t payloadSize=0;
     unsigned short messageNum=messages.size(); 
 
     // Putting each Message in a separate buffer may speed up sent/recv as
@@ -192,7 +209,7 @@ bool DataMarshaller::marshalPayload(const vector<MessagePtr> &messages, NetworkM
     // GTL - may be nice to put the header itself into a class that supports archive/serialization...
     unsigned char header[header_length];
     unsigned char *bufPtr=header; 
-    MARSHALSHORT(bufPtr, payloadSize);
+    MARSHALINT32(bufPtr, payloadSize);
     MARSHALSHORT(bufPtr, messageNum);
 
     // Put the header on the front.

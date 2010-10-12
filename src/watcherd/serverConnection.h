@@ -35,6 +35,7 @@
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/thread.hpp>
 
 #include "libwatcher/message.h"
 #include "libwatcher/connection.h"
@@ -85,7 +86,7 @@ namespace watcher
                     unsigned short messageNum); 
 
             /// Handle completion of a write operation.
-            void handle_write(const boost::system::error_code& e, event::MessagePtr reply);
+            void handle_write(const boost::system::error_code& e, size_t bytes_transferred, event::MessagePtr reply, DataMarshaller::NetworkMarshalBuffersPtr);
 
             void read_error(const boost::system::error_code &e);
 
@@ -103,6 +104,11 @@ namespace watcher
             /// Buffer for incoming data.
             typedef std::vector<char> IncomingBuffer;
             IncomingBuffer incomingBuffer;
+
+	    /// Buffers for outgoing data.
+	    //
+	    boost::mutex outBuffersLock;
+	    std::list<DataMarshaller::NetworkMarshalBuffersPtr> outBuffers;
 
             /// What type of connection is this?
             enum connection_type { unknown, feeder, gui };
