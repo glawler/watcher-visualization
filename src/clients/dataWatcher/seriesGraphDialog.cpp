@@ -181,6 +181,17 @@ SeriesGraphDialog::SeriesGraphDialog(const QString& name) : firstEvent(-1), last
 
     QObject::connect(listWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()));
 
+    // adjust default widget sizes
+    QList<int> defaultWidgetSizes;
+    defaultWidgetSizes.push_back(850);
+    defaultWidgetSizes.push_back(150);
+    splitter_2->setSizes(defaultWidgetSizes);
+
+    defaultWidgetSizes.clear();
+    defaultWidgetSizes.push_back(550);
+    defaultWidgetSizes.push_back(450);
+    splitter->setSizes(defaultWidgetSizes);
+
     TRACE_EXIT();
 }
 
