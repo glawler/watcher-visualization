@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( output_test )
 {
     LOG_INFO("Checking Graph output operator,"); 
 
-    WatcherGraph wg;
+    WatcherGraph wg(100, 50); 
 
     cout << "Empty Graph:" << endl << wg << endl;
 
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE( output_test )
 
 BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
 {
-    WatcherGraph wg; 
+    WatcherGraph wg(100, 50); 
 
     NodeIdentifier node1=asio::ip::address::from_string("192.168.1.101");
     NodeIdentifier node2=asio::ip::address::from_string("192.168.1.102");

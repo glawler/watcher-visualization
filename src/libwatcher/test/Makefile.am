@@ -26,12 +26,14 @@ check_PROGRAMS=\
 	testTestMessage \
 	colorTest \
 	testConnectivityMessage \
-	testWatcherGraph \
-	testWatcherGraphNode \
-	testWatcherGraphEdge \
 	testLoadSaveDisplayInfo \
 	testMessageStream \
 	testMessageStreamFilter 
+
+# GTL - unit tests need to be re-written for watcher graph classes
+# testWatcherGraph 
+# testWatcherGraphNode 
+# testWatcherGraphEdge
 
 TESTS=$(check_PROGRAMS)
 
@@ -45,9 +47,11 @@ testSpeedMessage_SOURCES=testSpeedMessage.cpp
 testTestMessage_SOURCES=testTestMessage.cpp
 colorTest_SOURCES=colorTest.cpp
 testConnectivityMessage_SOURCES=testConnectivityMessage.cpp
-testWatcherGraph_SOURCES=testWatcherGraph.cpp
-testWatcherGraphNode_SOURCES=testWatcherGraphNode.cpp
-testWatcherGraphEdge_SOURCES=testWatcherGraphEdge.cpp
 testLoadSaveDisplayInfo_SOURCES=testLoadSaveDisplayInfo.cpp
 testMessageStream_SOURCES=testMessageStream.cpp
 testMessageStreamFilter_SOURCES=testMessageStreamFilter.cpp
+
+# GTL - unit tests need to be re-written for watcher graph classes
+# testWatcherGraph_SOURCES=testWatcherGraph.cpp
+# testWatcherGraphNode_SOURCES=testWatcherGraphNode.cpp
+# testWatcherGraphEdge_SOURCES=testWatcherGraphEdge.cpp
