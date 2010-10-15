@@ -30,7 +30,8 @@ check_PROGRAMS=\
 	testWatcherGraphNode \
 	testWatcherGraphEdge \
 	testLoadSaveDisplayInfo \
-	testMessageStream
+	testMessageStream \
+	testMessageStreamFilter 
 
 TESTS=$(check_PROGRAMS)
 
@@ -49,3 +50,4 @@ testWatcherGraphNode_SOURCES=testWatcherGraphNode.cpp
 testWatcherGraphEdge_SOURCES=testWatcherGraphEdge.cpp
 testLoadSaveDisplayInfo_SOURCES=testLoadSaveDisplayInfo.cpp
 testMessageStream_SOURCES=testMessageStream.cpp
+testMessageStreamFilter_SOURCES=testMessageStreamFilter.cpp
