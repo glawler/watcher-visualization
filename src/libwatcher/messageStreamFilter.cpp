@@ -80,30 +80,34 @@ MessageStreamFilter &MessageStreamFilter::operator=(const MessageStreamFilter &o
 bool MessageStreamFilter::passFilter(const MessagePtr m) const
 {
     TRACE_ENTER();
-    // Just handle message types and layers for now.
-
     // Really need to make layers a member of a base class...
-    bool retVal=true;
-    switch (m->type)
-    {
-        case LABEL_MESSAGE_TYPE: 
-            retVal=layer==(boost::dynamic_pointer_cast<LabelMessage>(m))->layer; 
-            break;
-        case EDGE_MESSAGE_TYPE: 
-            retVal=layer==(boost::dynamic_pointer_cast<EdgeMessage>(m))->layer; 
-            break;
-        case COLOR_MESSAGE_TYPE: 
-            retVal=layer==(boost::dynamic_pointer_cast<ColorMessage>(m))->layer; 
-            break;
-        case CONNECTIVITY_MESSAGE_TYPE: 
-            retVal=layer==(boost::dynamic_pointer_cast<ConnectivityMessage>(m))->layer; 
-            break;
-        case NODE_PROPERTIES_MESSAGE_TYPE: 
-            retVal=layer==(boost::dynamic_pointer_cast<NodePropertiesMessage>(m))->layer; 
-            break;
-        default: 
-            break;
+    bool isMessageType=false, isLayer=false;
+    if (messageType) 
+       isMessageType=messageType==m->type; 
+    if (!layer.empty()) { 
+        switch (m->type)
+        {
+            case LABEL_MESSAGE_TYPE: 
+                isLayer=layer==(boost::dynamic_pointer_cast<LabelMessage>(m))->layer; 
+                break;
+            case EDGE_MESSAGE_TYPE: 
+                isLayer=layer==(boost::dynamic_pointer_cast<EdgeMessage>(m))->layer; 
+                break;
+            case COLOR_MESSAGE_TYPE: 
+                isLayer=layer==(boost::dynamic_pointer_cast<ColorMessage>(m))->layer; 
+                break;
+            case CONNECTIVITY_MESSAGE_TYPE: 
+                isLayer=layer==(boost::dynamic_pointer_cast<ConnectivityMessage>(m))->layer; 
+                break;
+            case NODE_PROPERTIES_MESSAGE_TYPE: 
+                isLayer=layer==(boost::dynamic_pointer_cast<NodePropertiesMessage>(m))->layer; 
+                break;
+            default: 
+                break;
+        }
     }
+    
+    bool retVal=(isMessageType||isLayer);
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
 }
