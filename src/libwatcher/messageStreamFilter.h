@@ -44,9 +44,12 @@ namespace watcher
     {
         public:
             /**
-             * Create a filter which filters a message stream.
+             * Create a filter which filters a message stream. If argument is true, then
+             * all criteria in this filter will be ANDed when the filter is applied, 
+             * otherwise they will be ORed. (AND==all criteria must match, OR==only one 
+             * criteria must match). Default is OR.
              */
-            MessageStreamFilter();
+            MessageStreamFilter(bool opAND=false);
 
             /**
              * Clone me.
@@ -121,6 +124,7 @@ namespace watcher
             std::string layer;
             unsigned int messageType;  
             WatcherRegion region;
+            bool opAND;
 
         protected:
 

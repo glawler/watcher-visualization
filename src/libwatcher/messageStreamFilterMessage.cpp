@@ -118,6 +118,7 @@ namespace watcher {
             ar & enableAllFiltering;
             ar & theFilter.layer;
             ar & theFilter.messageType;
+            ar & theFilter.opAND;
             // region is currently data free, so don't bother serializing
             // ar & theFilter.region;
             TRACE_EXIT();

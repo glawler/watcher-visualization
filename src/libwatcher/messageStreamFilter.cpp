@@ -29,8 +29,8 @@ using namespace watcher;
 
 INIT_LOGGER(MessageStreamFilter, "MessageStreamFilter");
 
-MessageStreamFilter::MessageStreamFilter() : 
-            layer(), messageType(0), region()
+MessageStreamFilter::MessageStreamFilter(bool op) : 
+            layer(), messageType(0), region(), opAND(op)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -62,7 +62,8 @@ bool MessageStreamFilter::operator==(const MessageStreamFilter &other) const
     bool retVal=
         layer==other.layer && 
         messageType==other.messageType && 
-        region==other.region;
+        region==other.region &&
+        opAND==other.opAND;
 
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
@@ -74,16 +75,19 @@ MessageStreamFilter &MessageStreamFilter::operator=(const MessageStreamFilter &o
     layer=other.layer;
     messageType=other.messageType;
     region=other.region;
+    opAND=other.opAND;
     TRACE_EXIT();
 }
 
 bool MessageStreamFilter::passFilter(const MessagePtr m) const
 {
     TRACE_ENTER();
-    // Really need to make layers a member of a base class...
     bool isMessageType=false, isLayer=false;
+
     if (messageType) 
        isMessageType=messageType==m->type; 
+
+    // Really need to make layers a member of a base class...
     if (!layer.empty()) { 
         switch (m->type)
         {
@@ -107,7 +111,7 @@ bool MessageStreamFilter::passFilter(const MessagePtr m) const
         }
     }
     
-    bool retVal=(isMessageType||isLayer);
+    bool retVal=opAND==true?(isMessageType&&isLayer):(isMessageType||isLayer); 
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
 }
@@ -118,7 +122,8 @@ std::ostream &MessageStreamFilter::toStream(std::ostream &out) const
     TRACE_ENTER();
     out << " layer: " << layer 
         << " type: " << messageType 
-        << " region: " << region; 
+        << " region: " << region
+        << " op: " << (opAND==true?"AND":"OR");
     TRACE_EXIT();
     return out; 
 }
