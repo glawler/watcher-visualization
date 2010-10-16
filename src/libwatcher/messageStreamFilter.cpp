@@ -30,7 +30,7 @@ using namespace watcher;
 INIT_LOGGER(MessageStreamFilter, "MessageStreamFilter");
 
 MessageStreamFilter::MessageStreamFilter(bool op) : 
-            layer(), messageType(0), region(), opAND(op)
+            layers(), messageTypes(), /* region(), */ opAND(op)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -49,20 +49,17 @@ MessageStreamFilter::~MessageStreamFilter()
     TRACE_EXIT();
 }
 
-GUILayer MessageStreamFilter::getLayer() const { return layer; } 
-void MessageStreamFilter::setLayer(const GUILayer &l) { layer=l; }
-unsigned int MessageStreamFilter::getMessageType() const { return messageType; } 
-void MessageStreamFilter::setMessageType(const unsigned int &t) { messageType=t; }
-WatcherRegion MessageStreamFilter::getRegion() const { return region; } 
-void MessageStreamFilter::setRegion(const WatcherRegion &r) { region=r; } 
+void MessageStreamFilter::addLayer(const GUILayer &l) { layers.push_back(l); }
+void MessageStreamFilter::addMessageType(const unsigned int &t) { messageTypes.push_back(t); }
+// void MessageStreamFilter::addRegion(const WatcherRegion &r) { region=r; } 
 
 bool MessageStreamFilter::operator==(const MessageStreamFilter &other) const 
 {
     TRACE_ENTER();
     bool retVal=
-        layer==other.layer && 
-        messageType==other.messageType && 
-        region==other.region &&
+        layers==other.layers && 
+        messageTypes==other.messageTypes && 
+        // region==other.region &&
         opAND==other.opAND;
 
     TRACE_EXIT_RET_BOOL(retVal);
@@ -72,9 +69,9 @@ bool MessageStreamFilter::operator==(const MessageStreamFilter &other) const
 MessageStreamFilter &MessageStreamFilter::operator=(const MessageStreamFilter &other) 
 {
     TRACE_ENTER();
-    layer=other.layer;
-    messageType=other.messageType;
-    region=other.region;
+    layers=other.layers;
+    messageTypes=other.messageTypes;
+    // region=other.region;
     opAND=other.opAND;
     TRACE_EXIT();
 }
@@ -82,36 +79,61 @@ MessageStreamFilter &MessageStreamFilter::operator=(const MessageStreamFilter &o
 bool MessageStreamFilter::passFilter(const MessagePtr m) const
 {
     TRACE_ENTER();
-    bool isMessageType=false, isLayer=false;
+    
+    // If we're in AND mode, then one false --> return false. 
+    // If we're in AND mode and we make it to the end, all are true, return true
+    // If we're in OR mode, then one true --> return true.
+    // If we're in OR mode and we make it to the end all are false, return false
 
-    if (messageType) 
-       isMessageType=messageType==m->type; 
+    if (messageTypes.size()) 
+        for (std::vector<unsigned int>::const_iterator t=messageTypes.begin(); t!=messageTypes.end(); t++) {
+            if (opAND) {
+                if ((*t)!=(unsigned int)m->type)
+                    return false; 
+            }
+            else {
+                if ((*t)==(unsigned int)m->type)
+                    return true;
+            }
+        }
 
-    // Really need to make layers a member of a base class...
-    if (!layer.empty()) { 
+    if (layers.size()) {
+        std::string layer;
+        // Really need to make layers a member of a base class...
         switch (m->type)
         {
             case LABEL_MESSAGE_TYPE: 
-                isLayer=layer==(boost::dynamic_pointer_cast<LabelMessage>(m))->layer; 
+                layer=(boost::dynamic_pointer_cast<LabelMessage>(m))->layer; 
                 break;
             case EDGE_MESSAGE_TYPE: 
-                isLayer=layer==(boost::dynamic_pointer_cast<EdgeMessage>(m))->layer; 
+                layer=(boost::dynamic_pointer_cast<EdgeMessage>(m))->layer; 
                 break;
             case COLOR_MESSAGE_TYPE: 
-                isLayer=layer==(boost::dynamic_pointer_cast<ColorMessage>(m))->layer; 
+                layer=(boost::dynamic_pointer_cast<ColorMessage>(m))->layer; 
                 break;
             case CONNECTIVITY_MESSAGE_TYPE: 
-                isLayer=layer==(boost::dynamic_pointer_cast<ConnectivityMessage>(m))->layer; 
+                layer=(boost::dynamic_pointer_cast<ConnectivityMessage>(m))->layer; 
                 break;
             case NODE_PROPERTIES_MESSAGE_TYPE: 
-                isLayer=layer==(boost::dynamic_pointer_cast<NodePropertiesMessage>(m))->layer; 
+                layer=(boost::dynamic_pointer_cast<NodePropertiesMessage>(m))->layer; 
                 break;
             default: 
                 break;
         }
+        if (layer.size()) 
+            for (std::vector<std::string>::const_iterator l=layers.begin(); l!=layers.end(); l++) {
+                if (opAND) {
+                    if (layer!=*l)
+                        return false;
+                } 
+                else {
+                    if (layer==*l)
+                        return true;
+                }
+            }
     }
-    
-    bool retVal=opAND==true?(isMessageType&&isLayer):(isMessageType||isLayer); 
+
+    bool retVal=opAND==true?true:false;  // could just return opAND here but may be confusing. Compiler may take care of it.
     TRACE_EXIT_RET_BOOL(retVal);
     return retVal;
 }
@@ -120,14 +142,15 @@ bool MessageStreamFilter::passFilter(const MessagePtr m) const
 std::ostream &MessageStreamFilter::toStream(std::ostream &out) const
 {
     TRACE_ENTER();
-    out << " layer: " << layer 
-        << " type: " << messageType 
-        << " region: " << region
-        << " op: " << (opAND==true?"AND":"OR");
+    out << " layers (" << layers.size() << "): ";
+    std::copy(layers.begin(), layers.end(), std::ostream_iterator<std::string>(out, " "));
+    out << ", message types:  (" << messageTypes.size() << "): ";
+    std::copy(messageTypes.begin(), messageTypes.end(), std::ostream_iterator<unsigned int>(out, " "));
+    // << " region: " << region
+    out << " op: " << (opAND==true?"AND":"OR");
     TRACE_EXIT();
     return out; 
 }
-
 
 std::ostream &watcher::operator<<(std::ostream &out, const MessageStreamFilter &messStreamFilter)
 {

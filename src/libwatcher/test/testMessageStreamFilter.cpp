@@ -58,8 +58,8 @@ BOOST_AUTO_TEST_CASE( and_or_filter )
 
     // test AND
     MessageStreamFilterPtr f=MessageStreamFilterPtr(new MessageStreamFilter(true)); 
-    f->setMessageType(cm->type);   
-    f->setLayer(cm->layer);      
+    f->addMessageType(cm->type);   
+    f->addLayer(cm->layer);      
     BOOST_CHECK_EQUAL(true, f->passFilter(cm));         // same layer same type
     BOOST_CHECK_EQUAL(false, f->passFilter(lm));        // same layer diff type
     BOOST_CHECK_EQUAL(false, f->passFilter(cmDiff));    // diff layer same type
@@ -67,18 +67,49 @@ BOOST_AUTO_TEST_CASE( and_or_filter )
 
     // test OR  
     f=MessageStreamFilterPtr(new MessageStreamFilter(false)); 
-    f->setMessageType(cm->type); 
-    f->setLayer(lm->layer);     
+    f->addMessageType(cm->type); 
+    f->addLayer(lm->layer);     
     BOOST_CHECK_EQUAL(true, f->passFilter(cm));         // same layer same type
     BOOST_CHECK_EQUAL(true, f->passFilter(lm));         // same layer diff type
     BOOST_CHECK_EQUAL(true, f->passFilter(cmDiff));     // diff layer same type
     BOOST_CHECK_EQUAL(false, f->passFilter(em));        // diff layer diff type
 }
 
+BOOST_AUTO_TEST_CASE( multi_value_filter )
+{
+    LabelMessagePtr lm=LabelMessagePtr(new LabelMessage);
+    lm->layer="layerOne";
+
+    ConnectivityMessagePtr cm=ConnectivityMessagePtr(new ConnectivityMessage); 
+    cm->layer="layerOne"; 
+
+    EdgeMessagePtr em=EdgeMessagePtr(new EdgeMessage);  
+    em->layer="layerTwo"; 
+
+    // test AND
+    MessageStreamFilterPtr f=MessageStreamFilterPtr(new MessageStreamFilter(true)); 
+    f->addMessageType(cm->type);   
+    f->addMessageType(lm->type);   
+    f->addMessageType(em->type);   
+
+    BOOST_CHECK_EQUAL(false, f->passFilter(lm));    // AND cannot match all types 
+    BOOST_CHECK_EQUAL(false, f->passFilter(cm));    // AND cannot match all types 
+    BOOST_CHECK_EQUAL(false, f->passFilter(em));    // AND cannot match all types 
+
+    // test OR  
+    f=MessageStreamFilterPtr(new MessageStreamFilter(false)); 
+    f->addMessageType(cm->type);   
+    f->addMessageType(lm->type);   
+    f->addMessageType(em->type);   
+
+    BOOST_CHECK_EQUAL(true, f->passFilter(lm));    // OR matches lm->type
+    BOOST_CHECK_EQUAL(true, f->passFilter(cm));    // OR matches cm->type
+    BOOST_CHECK_EQUAL(true, f->passFilter(em));    // OR matches em->type
+}
 BOOST_AUTO_TEST_CASE( layer_filter )
 {
     MessageStreamFilterPtr f=MessageStreamFilterPtr(new MessageStreamFilter);
-    f->setLayer("FauxLayer"); 
+    f->addLayer("FauxLayer"); 
 
     LabelMessagePtr lm=LabelMessagePtr(new LabelMessage("HelloWorld")); 
     lm->layer="NotTheRightLayer"; 
@@ -93,7 +124,7 @@ BOOST_AUTO_TEST_CASE( message_type_filter )
     ConnectivityMessagePtr cm=ConnectivityMessagePtr(new ConnectivityMessage); 
 
     MessageStreamFilterPtr f=MessageStreamFilterPtr(new MessageStreamFilter);
-    f->setMessageType(cm->type); 
+    f->addMessageType(cm->type); 
 
     BOOST_CHECK_EQUAL(true, f->passFilter(cm)); 
 

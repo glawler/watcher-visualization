@@ -26,7 +26,8 @@
 
 #include <ostream>
 #include <boost/shared_ptr.hpp>
-#include "watcherRegion.h"
+#include <vector>
+// #include "watcherRegion.h"
 #include "messageTypesAndVersions.h"  // for GUILayer
 #include "message_fwd.h"
 #include "declareLogger.h"
@@ -68,34 +69,20 @@ namespace watcher
             bool passFilter(const MessagePtr m) const;
 
             /**
-             * Returns the current layer of this filter
+             * @param layer add the layer of this filter to be the value passed in.
              */
-            GUILayer getLayer() const; 
+            void addLayer(const GUILayer &layer); 
 
             /**
-             * @param layer set the layer of this filter to be the value passed in.
+             * @param type add the messageType of this filter to be the value passed in.
              */
-            void setLayer(const GUILayer &layer); 
+            void addMessageType(const unsigned int &type); 
 
             /**
-             * @return Returns the current message type of this filter
+             * @param region add the region of this filter to be the value passed in.
              */
-            unsigned int getMessageType() const; 
-
-            /**
-             * @param type set the messageType of this filter to be the value passed in.
-             */
-            void setMessageType(const unsigned int &type); 
-
-            /**
-             * @return the current region of this filter
-             */
-            WatcherRegion getRegion() const; 
-
-            /**
-             * @param region set the region of this filter to be the value passed in.
-             */
-            void setRegion(const WatcherRegion &region); 
+            // GTL not supported yet.
+            // void addRegion(const WatcherRegion &region); 
 
             /** judge me */
             bool operator==(const MessageStreamFilter &other) const;
@@ -121,9 +108,10 @@ namespace watcher
             /** Annoying, but the easiest (only?) way to go when using boost::serialize
              * just pretented these are private for now. Blah.
              */
-            std::string layer;
-            unsigned int messageType;  
-            WatcherRegion region;
+            std::vector<std::string> layers;
+            std::vector<unsigned int> messageTypes;  
+            // GTL - region is not yet supported.
+            // WatcherRegion region;
             bool opAND;
 
         protected:

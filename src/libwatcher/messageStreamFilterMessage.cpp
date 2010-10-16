@@ -116,8 +116,8 @@ namespace watcher {
             ar & boost::serialization::base_object<Message>(*this);
             ar & applyFilter;
             ar & enableAllFiltering;
-            ar & theFilter.layer;
-            ar & theFilter.messageType;
+            ar & theFilter.layers;
+            ar & theFilter.messageTypes;
             ar & theFilter.opAND;
             // region is currently data free, so don't bother serializing
             // ar & theFilter.region;
