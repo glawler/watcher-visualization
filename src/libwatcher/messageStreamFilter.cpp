@@ -23,6 +23,7 @@
 #include "connectivityMessage.h"
 #include "colorMessage.h"
 #include "nodePropertiesMessage.h"
+#include "gpsMessage.h"
 #include "logger.h"
 
 using namespace watcher;
@@ -102,6 +103,9 @@ bool MessageStreamFilter::passFilter(const MessagePtr m) const
         // Really need to make layers a member of a base class...
         switch (m->type)
         {
+            case GPS_MESSAGE_TYPE: 
+                layer=(boost::dynamic_pointer_cast<GPSMessage>(m))->layer; 
+                break;
             case LABEL_MESSAGE_TYPE: 
                 layer=(boost::dynamic_pointer_cast<LabelMessage>(m))->layer; 
                 break;
