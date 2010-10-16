@@ -1570,14 +1570,14 @@ void manetGLView::setupStream()
 
     // Tell the watcherd that we want/don't want messages for this layer.
     if (messageStreamFiltering) { 
-	for (size_t l=0; l<wGraph->numValidLayers; l++) { 
-	    MessageStreamFilterPtr f(new MessageStreamFilter);
-	    f->setLayer(wGraph->layers[l].layerName); 
-	    if (wGraph->layers[l].isActive) 
-		messageStream->addMessageFilter(f);
-	    else
-		messageStream->removeMessageFilter(f);
-	}
+        for (size_t l=0; l<wGraph->numValidLayers; l++) { 
+            MessageStreamFilterPtr f(new MessageStreamFilter);
+            f->addLayer(wGraph->layers[l].layerName); 
+            if (wGraph->layers[l].isActive) 
+                messageStream->addMessageFilter(f);
+            else
+                messageStream->removeMessageFilter(f);
+        }
     }
 
     TRACE_EXIT();
@@ -2897,7 +2897,7 @@ void manetGLView::streamFilteringEnabled(bool isEnabled)
         for (size_t l=0; l<wGraph->numValidLayers; l++) { 
             messageStream->enableFiltering(isEnabled); 
             MessageStreamFilterPtr f(new MessageStreamFilter);
-            f->setLayer(wGraph->layers[l].layerName); 
+            f->addLayer(wGraph->layers[l].layerName); 
             // If enabling filtering turn on all currently active filters
             // else remove them all
             if (isEnabled && wGraph->layers[l].isActive) 
@@ -3000,7 +3000,7 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
     if (messageStreamFiltering && messageStream && messageStream->connected()) {
         // Tell the watcherd that we want/don't want messages for this layer.
         MessageStreamFilterPtr f(new MessageStreamFilter);
-        f->setLayer(name); 
+        f->addLayer(name); 
         if (turnOn)
             messageStream->addMessageFilter(f);
         else
