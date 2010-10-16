@@ -529,14 +529,16 @@ namespace watcher {
                 // Need to figure out if filters are ANDed or ORed or something else
                 // for now if it passes any - it's in.
                 BOOST_FOREACH(const MessageStreamFilter &f, messageStreamFilters) 
-                    if (f.passFilter(m))  
+                    if (f.passFilter(m)) {
                         passed=true;
+                        break;
+                    }
                 if (passed) {  
-                    LOG_DEBUG("Message passes all filters - sending it."); 
+                    LOG_DEBUG("Message passed at least one filter - sending it."); 
                     messageList.push_back(m); 
                 }
                 else 
-                    LOG_DEBUG("Not sending message as it did not pass the current set of message filters"); 
+                    LOG_DEBUG("Not sending message as it did not pass any of the current set of message filters"); 
             }
 
             if (!messageList.size()) { 
