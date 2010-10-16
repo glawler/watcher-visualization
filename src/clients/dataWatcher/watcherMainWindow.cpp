@@ -88,14 +88,25 @@ void MainWindow::checkIO()
 	MsgStream->subscribeToStream(watcher::config::StreamUid);
     }
 
+    // We only care about data point (and (some) control) messages. 
+    MessageStreamFilterPtr f(new MessageStreamFilter); 
+    unsigned int ourMessageTypes[] = { DATA_POINT_MESSAGE_TYPE, PLAYBACK_TIME_RANGE_MESSAGE_TYPE, 
+        SPEED_MESSAGE_TYPE, SEEK_MESSAGE_TYPE, LIST_STREAMS_MESSAGE_TYPE }; 
+    for (size_t t=0; t<(sizeof(ourMessageTypes)/sizeof(ourMessageTypes[0])); t++) 
+        f->addMessageType(ourMessageTypes[t]); 
+    MsgStream->addMessageFilter(f);
+
     MessagePtr msg;
     QString layer;
     while (MsgStream->getNextMessage(msg)) {
+        if (watcher::event::isFeederEvent(msg->type))
+            LOG_DEBUG("Got feeder message of type: " << msg->type); 
 	if (msg->type == DATA_POINT_MESSAGE_TYPE) {
 	    LOG_DEBUG("got DataPointMessage");
 	    CurrentTS = msg->timestamp;
 	    if (CurrentTS > MaxTS)
 		MaxTS = CurrentTS;
+	    emit clockTick(msg->timestamp);
 	    watcher::event::DataPointMessagePtr dp = boost::dynamic_pointer_cast<DataPointMessage>(msg);
 	    // TODO:
 	    // - add layer when DataPointMessage supports its
@@ -119,11 +130,9 @@ void MainWindow::checkIO()
 		EventStreamInfoPtr ev ( lsm->evstreams[i] );
 		streamsDialog->addStream(ev->uid, ev->description);
 	    }
-	} else if (watcher::event::isFeederEvent(msg->type)) {
-	    CurrentTS = msg->timestamp;
-	    if (CurrentTS > MaxTS)
-		MaxTS = CurrentTS;
-	    emit clockTick(msg->timestamp);
+	} else {
+        // GTL - should not happen except at start as we're filtering by message type.
+        LOG_WARN("Recv'd unwanted message type"); 
 	}
     }
 
