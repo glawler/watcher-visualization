@@ -58,7 +58,6 @@ class manetGLView : public QGLWidget
         void setLayerMenu(QMenu *m) { layerMenu=m; }
         void setPlaybackSlider(QSlider *s);
 
-        /** Only gets called once the configuration has been loaded. */
         void setWatcherGUIConfig(watcher::WatcherGUIConfig *); 
 
         /** Update the slider based on current values */
@@ -218,6 +217,7 @@ signals:
             ScaleAndShiftUpdateOnChange,
             ScaleAndShiftUpdateAlways,
         };
+        void getNodeRectangle(double &xMin, double &xMax, double &yMin, double &yMax, double &zMin, double &zMax);
         void scaleAndShiftToSeeOnManet(double xMin,double yMin,double xMax,double yMax,double z, ScaleAndShiftUpdate onChangeOrAlways);
         void scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways); 
         void getShiftAmount(GLdouble &x_ret, GLdouble &y_ret); 

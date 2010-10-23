@@ -625,11 +625,22 @@ void manetGLView::scaleAndShiftToSeeOnManet(
 //
 void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
 {
-    double xMin = DBL_MAX;
-    double xMax = -DBL_MAX;
-    double yMin = DBL_MAX;
-    double yMax = -DBL_MAX;
-    double zMin = DBL_MAX;
+    double xMin, xMax, yMin, yMax, zMin, zMax;
+    getNodeRectangle(xMin, xMax, yMin, yMax, zMin, zMax); 
+    if (xMin==xMax || yMin==yMax) { // no nodes? 
+        return;
+    }
+    scaleAndShiftToSeeOnManet(xMin, yMin, xMax, yMax, zMin, onChangeOrAlways);
+} // scaleAndShiftToCenter
+
+void manetGLView::getNodeRectangle(double &xMin, double &xMax, double &yMin, double &yMax, double &zMin, double &zMax)
+{
+    xMin = DBL_MAX;
+    xMax = -DBL_MAX;
+    yMin = DBL_MAX;
+    yMax = -DBL_MAX;
+    zMin = DBL_MAX;
+    zMax = -DBL_MAX;
     bool includeAntenna = false;     // antenna currently broken
     // bool includeHierarchy = isActive(HIERARCHY_LAYER); 
 
@@ -648,17 +659,17 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
             double nodeXMax = wGraph->nodes[i].x + r;
             double nodeYMin = wGraph->nodes[i].y - r;
             double nodeYMax = wGraph->nodes[i].y + r;
+            double nodeZMin = wGraph->nodes[i].z - r;
+            double nodeZMax = wGraph->nodes[i].z + r;
             if(nodeXMin < xMin) xMin = nodeXMin;
             if(nodeXMax > xMax) xMax = nodeXMax;
             if(nodeYMin < yMin) yMin = nodeYMin;
             if(nodeYMax > yMax) yMax = nodeYMax;
+            if(nodeZMin < zMin) zMin = nodeZMin;
+            if(nodeZMax > zMax) zMax = nodeZMax;
         }
-        if(wGraph->nodes[i].z < zMin)
-            zMin = wGraph->nodes[i].z;
     }
-    scaleAndShiftToSeeOnManet(xMin, yMin, xMax, yMax, zMin, onChangeOrAlways);
-} // scaleAndShiftToCenter
-
+}
 
 void manetGLView::getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
 {
@@ -2375,6 +2386,17 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     if (mods & Qt::ShiftModifier) {
         BackgroundImage &bg=BackgroundImage::getInstance();
         bg.centerImage(true); 
+    }
+    else if (mods & Qt::ControlModifier) {
+        // click to zoom
+        size_t nodeId=getNodeIdAtCoords(event->x(), event->y());
+        if(nodeId<conf->maxNodes) {
+            resetPosition(); 
+            conf->manetAdj.shiftX=-wGraph->nodes[nodeId].x;
+            conf->manetAdj.shiftY=-wGraph->nodes[nodeId].y;
+            conf->manetAdj.scaleX *= 10.0; // GTL - shrug. If I could figure this out, I'd do a ratio of viewport.
+            conf->manetAdj.scaleY = conf->manetAdj.scaleX;
+        }
     }
     else {
         size_t nodeId=getNodeIdAtCoords(event->x(), event->y());
