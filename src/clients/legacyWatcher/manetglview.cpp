@@ -627,7 +627,7 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
 {
     double xMin, xMax, yMin, yMax, zMin, zMax;
     getNodeRectangle(xMin, xMax, yMin, yMax, zMin, zMax); 
-    if (xMin==xMax || yMin==yMax) { // no nodes? 
+    if (xMin==xMax || yMin==yMax) { // no nodes or no GPS data? Then do nothing. 
         return;
     }
     scaleAndShiftToSeeOnManet(xMin, yMin, xMax, yMax, zMin, onChangeOrAlways);
