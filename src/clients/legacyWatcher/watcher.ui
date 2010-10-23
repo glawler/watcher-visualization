@@ -48,6 +48,31 @@
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>
+      <widget class="watcher::WatcherQtGUIConfig" name="watcherQtGUIConfig" native="true">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>5</x>
+         <y>5</y>
+         <width>1</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1</width>
+         <height>1</height>
+        </size>
+       </property>
+      </widget>
      </widget>
     </item>
     <item row="1" column="0">
@@ -537,16 +562,44 @@ p, li { white-space: pre-wrap; }
    <container>1</container>
    <slots>
     <signal>nodeClicked(int)</signal>
-    <signal>groundGridToggled(bool)</signal>
+    <signal>changeBackgroundColor()</signal>
     <slot>listStreams()</slot>
     <slot>spawnStreamDescription()</slot>
     <slot>clearAllEdges()</slot>
     <slot>resetPosition()</slot>
     <slot>configureLayers()</slot>
-    <slot>loadBackgroundImage()</slot>
     <slot>spawnNodeConfigurationDialog()</slot>
     <slot>spawnBackgroundColorDialog()</slot>
+    <slot>streamFilteringEnabled(bool)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>watcher::WatcherQtGUIConfig</class>
+   <extends>QWidget</extends>
+   <header location="global">watcherQtGUIConfig.h</header>
+   <container>1</container>
+   <slots>
+    <signal>monochromeToggled(bool)</signal>
+    <signal>threeDViewToggled(bool)</signal>
+    <signal>backgroundImageToggled(bool)</signal>
+    <signal>loopPlaybackToggled(bool)</signal>
+    <signal>checkPlaybackTime(bool)</signal>
+    <signal>checkPlaybackRange(bool)</signal>
+    <signal>checkWallTime(bool)</signal>
+    <signal>groundGridToggled(bool)</signal>
+    <signal>enableStreamFiltering(bool)</signal>
+    <slot>toggleMonochrome(bool)</slot>
+    <slot>toggleThreeDView(bool)</slot>
+    <slot>toggleBackgroundImage(bool)</slot>
+    <slot>toggleLoopPlayback(bool)</slot>
+    <slot>showPlaybackTime(bool)</slot>
+    <slot>showPlaybackRange(bool)</slot>
+    <slot>showWallTime(bool)</slot>
     <slot>toggleGroundGrid(bool)</slot>
+    <slot>spawnBackgroundColorDialog()</slot>
+    <slot>streamFilteringEnabled(bool)</slot>
+    <slot>setGPSScale()</slot>
+    <slot>loadBackgroundImage()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -597,54 +650,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>action3DNodes</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>toggleThreeDView(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>382</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>threeDViewToggled(bool)</signal>
-   <receiver>action3DNodes</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>382</x>
-     <y>295</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionMonochrome</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>toggleMonochrome(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>382</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionClearAllEdges</sender>
    <signal>activated()</signal>
    <receiver>manetGLViewWindow</receiver>
@@ -677,38 +682,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>actionBackgroundImage</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>toggleBackgroundImage(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>382</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>backgroundImageToggled(bool)</signal>
-   <receiver>actionBackgroundImage</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>382</x>
-     <y>295</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>manetGLViewWindow</sender>
    <signal>enableBackgroundImage(bool)</signal>
    <receiver>actionBackgroundImage</receiver>
@@ -737,102 +710,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>464</x>
      <y>375</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionPlaybackRange</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>showPlaybackRange(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>464</x>
-     <y>207</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionWallTime</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>showWallTime(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>464</x>
-     <y>207</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionPlaybackTime</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>showPlaybackTime(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>464</x>
-     <y>207</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>checkPlaybackRange(bool)</signal>
-   <receiver>actionPlaybackRange</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>464</x>
-     <y>207</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>checkPlaybackTime(bool)</signal>
-   <receiver>actionPlaybackTime</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>464</x>
-     <y>207</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>checkWallTime(bool)</signal>
-   <receiver>actionWallTime</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>464</x>
-     <y>207</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
     </hint>
    </hints>
   </connection>
@@ -871,7 +748,7 @@ p, li { white-space: pre-wrap; }
   <connection>
    <sender>actionSetGPSScale</sender>
    <signal>activated()</signal>
-   <receiver>manetGLViewWindow</receiver>
+   <receiver>watcherQtGUIConfig</receiver>
    <slot>setGPSScale()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -879,52 +756,20 @@ p, li { white-space: pre-wrap; }
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>464</x>
-     <y>375</y>
+     <x>9</x>
+     <y>36</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>actionLoopPlayback</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
-   <slot>toggleLoopPlayback(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>464</x>
-     <y>375</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
-   <signal>loopPlaybackToggled(bool)</signal>
-   <receiver>actionLoopPlayback</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>464</x>
-     <y>375</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>manetGLViewWindow</sender>
+   <sender>watcherQtGUIConfig</sender>
    <signal>enableStreamFiltering(bool)</signal>
    <receiver>actionStreamFiltering</receiver>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>464</x>
-     <y>389</y>
+     <x>9</x>
+     <y>36</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>
@@ -944,7 +789,7 @@ p, li { white-space: pre-wrap; }
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
-     <y>389</y>
+     <y>373</y>
     </hint>
    </hints>
   </connection>
@@ -1175,7 +1020,7 @@ p, li { white-space: pre-wrap; }
   <connection>
    <sender>actionLoadBackgroundImageFromFile</sender>
    <signal>activated()</signal>
-   <receiver>manetGLViewWindow</receiver>
+   <receiver>watcherQtGUIConfig</receiver>
    <slot>loadBackgroundImage()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1183,8 +1028,8 @@ p, li { white-space: pre-wrap; }
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>464</x>
-     <y>365</y>
+     <x>9</x>
+     <y>36</y>
     </hint>
    </hints>
   </connection>
@@ -1207,7 +1052,7 @@ p, li { white-space: pre-wrap; }
   <connection>
    <sender>actionBackgroundColor</sender>
    <signal>activated()</signal>
-   <receiver>manetGLViewWindow</receiver>
+   <receiver>watcherQtGUIConfig</receiver>
    <slot>spawnBackgroundColorDialog()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1215,15 +1060,175 @@ p, li { white-space: pre-wrap; }
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>464</x>
-     <y>365</y>
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>backgroundImageToggled(bool)</signal>
+   <receiver>actionBackgroundImage</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>monochromeToggled(bool)</signal>
+   <receiver>actionMonochrome</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>threeDViewToggled(bool)</signal>
+   <receiver>action3DNodes</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>loopPlaybackToggled(bool)</signal>
+   <receiver>actionLoopPlayback</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>checkPlaybackRange(bool)</signal>
+   <receiver>actionPlaybackRange</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>checkPlaybackTime(bool)</signal>
+   <receiver>actionPlaybackTime</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>checkWallTime(bool)</signal>
+   <receiver>actionWallTime</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>groundGridToggled(bool)</signal>
+   <receiver>actionGroundGrid</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action3DNodes</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>toggleThreeDView(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBackgroundImage</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>toggleBackgroundImage(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>actionGroundGrid</sender>
    <signal>toggled(bool)</signal>
-   <receiver>manetGLViewWindow</receiver>
+   <receiver>watcherQtGUIConfig</receiver>
    <slot>toggleGroundGrid(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1231,24 +1236,120 @@ p, li { white-space: pre-wrap; }
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoopPlayback</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>toggleLoopPlayback(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionMonochrome</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>toggleMonochrome(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPlaybackRange</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>showPlaybackRange(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPlaybackTime</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>showPlaybackTime(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWallTime</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>showWallTime(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>enableStreamFiltering(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>streamFilteringEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
      <x>464</x>
-     <y>365</y>
+     <y>373</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>manetGLViewWindow</sender>
-   <signal>groundGridToggled(bool)</signal>
-   <receiver>actionGroundGrid</receiver>
-   <slot>setChecked(bool)</slot>
+   <signal>changeBackgroundColor()</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>spawnBackgroundColorDialog()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>464</x>
-     <y>365</y>
+     <y>373</y>
     </hint>
     <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
+     <x>14</x>
+     <y>41</y>
     </hint>
    </hints>
   </connection>

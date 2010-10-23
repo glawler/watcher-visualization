@@ -25,6 +25,7 @@
 #define WATCHER_BG_IMAGRE_H
 #include <string>
 #include "declareLogger.h"
+#include <GL/gl.h>
 
 namespace watcher 
 {

@@ -40,6 +40,7 @@ namespace watcher {
 	class WatcherStreamListDialog;
     class LayerConfigurationDialog;
     class NodeConfigurationDialog;
+    class WatcherGUIConfig;
 }
 
 class manetGLView : public QGLWidget
@@ -51,13 +52,14 @@ class manetGLView : public QGLWidget
         manetGLView(QWidget *parent = 0);
         ~manetGLView();
 
-        bool loadConfiguration(); 
-
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
         void setLayerMenu(QMenu *m) { layerMenu=m; }
         void setPlaybackSlider(QSlider *s);
+
+        /** Only gets called once the configuration has been loaded. */
+        void setWatcherGUIConfig(watcher::WatcherGUIConfig *); 
 
         /** Update the slider based on current values */
         void updatePlaybackSliderRange();
@@ -67,33 +69,17 @@ class manetGLView : public QGLWidget
         void resetPosition();
         void fitToWindow();
         void checkIO();
-
         // timeout callback for watcher to do "idle" work.
         void watcherIdle();
-
         // void layerToggled(QString, bool);
         void layerToggle(const QString &layer, const bool turnOn);
         void newLayerConnect(const QString name); 
-
         void clearAllLabels();
         void clearAllEdges();
         void clearAll();
-
         void configureLayers(); 
-
-        void toggleMonochrome(bool isOn);
-        void toggleThreeDView(bool isOn);
-        void toggleBackgroundImage(bool isOn);
-        void toggleLoopPlayback(bool inOn);
         void showKeyboardShortcuts(); 
-
-        void setGPSScale();  // spawn dialog to get new scale value
-        void setEdgeWidth(); // spawn dialog to get default edge width
-
-        void showPlaybackTime(bool isOn);
-        void showPlaybackRange(bool isOn);
-        void showWallTime(bool isOn);
-
+        void setEdgeWidth();
         void pausePlayback();
         void normalPlayback();
         void reversePlayback();
@@ -104,63 +90,33 @@ class manetGLView : public QGLWidget
         void listStreams();
         void selectStream(unsigned long uid);
         void spawnStreamDescription();
-	void reconnect();
-
+    	void reconnect();
         void toggleNodeSelectedForGraph(unsigned int nodeId);
         void showNodeSelectedForGraph(unsigned int nodeId, bool);
-
         void scrollingGraphActivated(QString graphName);
-
         void updatePlaybackSliderFromGUI();
         void sliderMovedInGUI(int newVal);
         void sliderPressedInGUI();
-
         void spawnAboutBox(); 
         void spawnNodeConfigurationDialog();
-        void spawnBackgroundColorDialog();
-        void saveConfiguration();
-        void streamFilteringEnabled(bool isEnabled); 
-        void loadBackgroundImage(void);
-
-        void toggleGroundGrid(bool);
-
+        void streamFilteringEnabled(bool isOn); 
         void shutdown(); 
 
 signals:
         void positionReset();
-
         void layerToggled(const QString &, bool);
         void connectNewLayer(const QString); 
         void spawnLayerConfigureDialog(); 
-
         void labelsCleared();
         void edgesCleared(); 
-
-        void monochromeToggled(bool isOn);
-        void threeDViewToggled(bool isOn); 
-        void backgroundImageToggled(bool isOn); 
-        void loopPlaybackToggled(bool inOn);
-
-        void checkPlaybackTime(bool isOn);
-        void checkPlaybackRange(bool isOn);
-        void checkWallTime(bool isOn);
-
         void changeBackgroundColor();
-
-
         void nodeDataInGraphsToggled(unsigned int nodeId); 
         void nodeDataInGraphsShowed(unsigned int, bool); 
-
         void nodeClicked(size_t nodeId);
-
         // Emitted when the rate of the stream is changed.
         void streamRateSet(double); 
-
         // Emitted when view->backgroun image should be enabled/disabled.
         void enableBackgroundImage(bool);
-
-        void enableStreamFiltering(bool); 
-        void groundGridToggled(bool show);
 
     protected:
         DECLARE_LOGGER();
@@ -170,7 +126,6 @@ signals:
 
         void initializeGL();
         void paintGL();
-
         void resizeGL(int width, int height);
 
         void mouseDoubleClickEvent(QMouseEvent *event);
@@ -185,6 +140,8 @@ signals:
         void drawDebugInfo();
 
     private:
+
+        watcher::WatcherGUIConfig *conf;
 
         /** Where we keep our dynamic layers in the GUI */
         QMenu *layerMenu;
@@ -203,7 +160,7 @@ signals:
         std::string serverName; 
 
         void connectStream(); // connect to watherd and init the message stream. blocking...
-	void setupStream();
+    	void setupStream();
         boost::thread *watcherdConnectionThread;
         boost::thread *maintainGraphThread;
         boost::thread *checkIOThread;
@@ -211,8 +168,6 @@ signals:
 
         float streamRate; 
         bool playbackPaused;
-        bool autorewind;
-        bool messageStreamFiltering;
         bool sliderPressed;
 
         watcher::event::GPSMessage gpsDataFormat;
@@ -222,58 +177,6 @@ signals:
         watcher::Timestamp currentMessageTimestamp;
         watcher::Timestamp playbackRangeEnd;
         watcher::Timestamp playbackRangeStart;
-
-        struct DisplayStatus
-        {
-            int scaleText;
-            float scaleLine;
-            int monochromeMode;
-            int threeDView;
-            int backgroundImage; 
-        }; 
-
-        struct ManetAdj
-        {
-            float angleX;
-            float angleY;
-            float angleZ;
-            float scaleX;
-            float scaleY;
-            float scaleZ;
-            float shiftX;
-            float shiftY;
-            float shiftZ;
-        }; 
-
-        ManetAdj manetAdj; 
-        ManetAdj manetAdjInit;
-        bool showWallTimeinStatusString;
-        bool showPlaybackTimeInStatusString;
-        bool showPlaybackRangeString;
-        bool showVerboseStatusString;
-        bool showDebugInfo;
-        bool showStreamDescription;
-
-        float scaleText;
-        float scaleLine;
-        float gpsScale; 
-        float layerPadding;
-        float antennaRadius; 
-        float ghostLayerTransparency;
-
-        int statusFontPointSize; 
-        size_t maxNodes;
-        size_t maxLayers;
-
-        bool monochromeMode;
-        bool threeDView;
-        bool backgroundImage; 
-        bool showGroundGrid;
-
-        std::string statusFontName;
-        watcher::Color hierarchyRingColor;
-
-        watcher::Timestamp playbackStartTime;
 
         void drawNodeLabel(const watcher::NodeDisplayInfo &node, bool physical);
         bool gps2openGLPixels(double &x, double &y, double &z, const watcher::event::GPSMessage::DataFormat &format);
@@ -332,7 +235,6 @@ signals:
         void shiftCenterIn(double shift);
         void shiftCenterOut();
         void shiftCenterOut(double shift);
-        void viewpointReset(void);
         void zoomOut();
         void zoomIn();
         void compressDistance();
@@ -374,6 +276,8 @@ signals:
         watcher::NodeConfigurationDialog *nodeConfigurationDialog;
 
         size_t prevClickedNodeId;
+
+        bool loadConfiguration(); 
 };
 
 #endif

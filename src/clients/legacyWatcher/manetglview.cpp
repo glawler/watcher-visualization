@@ -40,7 +40,6 @@
 #include <libwatcher/streamDescriptionMessage.h>
 
 #include "watcherAboutDialog.h"
-#include "watcherConfigurationDialog.h"
 #include "manetglview.h"
 #include "singletonConfig.h"
 #include "backgroundImage.h"
@@ -49,6 +48,7 @@
 #include "layerConfigurationDialog.h"
 #include "nodeConfigurationDialog.h"
 #include "skybox.h"
+#include "watcherGUIConfig.h"
 
 INIT_LOGGER(manetGLView, "manetGLView");
 
@@ -557,11 +557,11 @@ void manetGLView::scaleAndShiftToSeeOnManet(
         glPushMatrix();
         glLoadIdentity();
         glTranslatef(0.0, 0.0, -20.0);
-        glScalef(1.0, 1.0, manetAdj.scaleZ); // getting scale x and y so start with unity
-        glRotatef(manetAdj.angleX, 1.0, 0.0, 0.0);
-        glRotatef(manetAdj.angleY, 0.0, 1.0, 0.0);
-        glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
-        glTranslatef(0.0, 0.0, manetAdj.shiftZ + 3); // getting shift x and y so start with zero
+        glScalef(1.0, 1.0, conf->manetAdj.scaleZ); // getting scale x and y so start with unity
+        glRotatef(conf->manetAdj.angleX, 1.0, 0.0, 0.0);
+        glRotatef(conf->manetAdj.angleY, 0.0, 1.0, 0.0);
+        glRotatef(conf->manetAdj.angleZ, 0.0, 0.0, 1.0);
+        glTranslatef(0.0, 0.0, conf->manetAdj.shiftZ + 3); // getting shift x and y so start with zero
         glGetDoublev(GL_MODELVIEW_MATRIX, modelmatrix);
         glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
         glPopMatrix();
@@ -570,21 +570,21 @@ void manetGLView::scaleAndShiftToSeeOnManet(
             // static time_t tick = 0;
             // time_t now = time(0);
             // get shift and scale
-            manetAdj.shiftX = ((wXMin + wXMax) / 2) - ((xMin + xMax) / 2);
-            manetAdj.shiftY = ((wYMin + wYMax) / 2) - ((yMin + yMax) / 2);
-            manetAdj.scaleX = (wXMax - wXMin) / nodesWidth;
-            manetAdj.scaleY = (wYMax - wYMin) / nodesHeight;
-            if(manetAdj.scaleX > manetAdj.scaleY)
-                manetAdj.scaleX = manetAdj.scaleY;
+            conf->manetAdj.shiftX = ((wXMin + wXMax) / 2) - ((xMin + xMax) / 2);
+            conf->manetAdj.shiftY = ((wYMin + wYMax) / 2) - ((yMin + yMax) / 2);
+            conf->manetAdj.scaleX = (wXMax - wXMin) / nodesWidth;
+            conf->manetAdj.scaleY = (wYMax - wYMin) / nodesHeight;
+            if(conf->manetAdj.scaleX > conf->manetAdj.scaleY)
+                conf->manetAdj.scaleX = conf->manetAdj.scaleY;
             else
-                manetAdj.scaleY = manetAdj.scaleX;
+                conf->manetAdj.scaleY = conf->manetAdj.scaleX;
 
             BackgroundImage &bgImage=BackgroundImage::getInstance(); 
             if (bgImage.centerImage())
             {
                 GLfloat x,y,z,w,h;
                 bgImage.getDrawingCoords(x,w,y,h,z);
-                bgImage.setDrawingCoords(manetAdj.shiftX, w, manetAdj.shiftY, h, z); 
+                bgImage.setDrawingCoords(conf->manetAdj.shiftX, w, conf->manetAdj.shiftY, h, z); 
                 bgImage.centerImage(false); 
             }
         }
@@ -641,7 +641,7 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
 
         double r = 0;
         if(includeAntenna)
-            r = antennaRadius; 
+            r = conf->antennaRadius; 
 
         {
             double nodeXMin = wGraph->nodes[i].x - r;
@@ -670,11 +670,11 @@ void manetGLView::getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(0.0, 0.0, -20.0);
-    glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
-    glRotatef(manetAdj.angleX, 1.0, 0.0, 0.0);
-    glRotatef(manetAdj.angleY, 0.0, 1.0, 0.0);
-    glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
-    glTranslatef(manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ + 3);
+    glScalef(conf->manetAdj.scaleX, conf->manetAdj.scaleY, conf->manetAdj.scaleZ);
+    glRotatef(conf->manetAdj.angleX, 1.0, 0.0, 0.0);
+    glRotatef(conf->manetAdj.angleY, 0.0, 1.0, 0.0);
+    glRotatef(conf->manetAdj.angleZ, 0.0, 0.0, 1.0);
+    glTranslatef(conf->manetAdj.shiftX, conf->manetAdj.shiftY, conf->manetAdj.shiftZ + 3);
     glGetDoublev(GL_MODELVIEW_MATRIX, modelmatrix);
     glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -749,7 +749,7 @@ void manetGLView::shiftCenterRight()
 }
 void manetGLView::shiftCenterRight(double shift)
 {
-    manetAdj.shiftX -= shift;
+    conf->manetAdj.shiftX -= shift;
     autoCenterNodesFlag=false;
 } 
 
@@ -761,7 +761,7 @@ void manetGLView::shiftCenterLeft()
 }
 void manetGLView::shiftCenterLeft(double shift)
 {
-    manetAdj.shiftX += shift;
+    conf->manetAdj.shiftX += shift;
     autoCenterNodesFlag=false;
 } 
 
@@ -773,7 +773,7 @@ void manetGLView::shiftCenterDown()
 }
 void manetGLView::shiftCenterDown(double shift)
 {
-    manetAdj.shiftY += shift;
+    conf->manetAdj.shiftY += shift;
     autoCenterNodesFlag=false;
 } 
 
@@ -785,7 +785,7 @@ void manetGLView::shiftCenterUp()
 }
 void manetGLView::shiftCenterUp(double shift)
 {
-    manetAdj.shiftY -= shift;
+    conf->manetAdj.shiftY -= shift;
     autoCenterNodesFlag=false;
 } 
 
@@ -797,7 +797,7 @@ void manetGLView::shiftCenterIn()
 }
 void manetGLView::shiftCenterIn(double shift)
 {
-    manetAdj.shiftZ -= shift;
+    conf->manetAdj.shiftZ -= shift;
     autoCenterNodesFlag=false;
 } 
 
@@ -809,44 +809,38 @@ void manetGLView::shiftCenterOut()
 }
 void manetGLView::shiftCenterOut(double shift)
 {
-    manetAdj.shiftZ += shift;
+    conf->manetAdj.shiftZ += shift;
     autoCenterNodesFlag=false;
 } 
 
-void manetGLView::viewpointReset(void)
-{
-    manetAdj = manetAdjInit;
-    update();
-}
-
 void manetGLView::zoomOut()
 {
-    manetAdj.scaleX /= 1.05;
-    if (manetAdj.scaleX < 0.001) 
-        manetAdj.scaleX = 0.001;
-    manetAdj.scaleY = manetAdj.scaleX;
+    conf->manetAdj.scaleX /= 1.05;
+    if (conf->manetAdj.scaleX < 0.001) 
+        conf->manetAdj.scaleX = 0.001;
+    conf->manetAdj.scaleY = conf->manetAdj.scaleX;
     autoCenterNodesFlag = 0;
 }
 
 void manetGLView::zoomIn()
 {
-    manetAdj.scaleX *= 1.05;
-    manetAdj.scaleY = manetAdj.scaleX;
+    conf->manetAdj.scaleX *= 1.05;
+    conf->manetAdj.scaleY = conf->manetAdj.scaleX;
     autoCenterNodesFlag = 0;
 }
 
 void manetGLView::compressDistance()
 {
-    manetAdj.scaleZ -= 0.1;
-    if (manetAdj.scaleZ < 0.02)
-        manetAdj.scaleZ = 0.02;
+    conf->manetAdj.scaleZ -= 0.1;
+    if (conf->manetAdj.scaleZ < 0.02)
+        conf->manetAdj.scaleZ = 0.02;
     if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
 
 void manetGLView::expandDistance()
 {
-    manetAdj.scaleZ += 0.1;
+    conf->manetAdj.scaleZ += 0.1;
 } 
 
 #define TEXT_SCALE 20
@@ -854,53 +848,53 @@ void manetGLView::expandDistance()
 
 void manetGLView::textZoomReset(void)
 {
-    scaleText=TEXT_SCALE;
+    conf->scaleText=TEXT_SCALE;
 }
 
 void manetGLView::arrowZoomReset(void)
 {
-    scaleLine= 1.0;
+    conf->scaleLine= 1.0;
 }
 
 void manetGLView::arrowZoomIn(void)
 {
-    scaleLine*= ARROW_SCALE_ZOOM_FACTOR;
+    conf->scaleLine*=ARROW_SCALE_ZOOM_FACTOR;
 }
 
 void manetGLView::arrowZoomOut(void)
 {
-    scaleLine/= ARROW_SCALE_ZOOM_FACTOR;
+    conf->scaleLine/=ARROW_SCALE_ZOOM_FACTOR;
 }
 
 void manetGLView::rotateX(float deg)
 {
-    manetAdj.angleX += deg;
-    while(manetAdj.angleX >= 360.0)
-        manetAdj.angleX -= 360.0;
-    while(manetAdj.angleX < 0)
-        manetAdj.angleX += 360.0;
+    conf->manetAdj.angleX += deg;
+    while(conf->manetAdj.angleX >= 360.0)
+        conf->manetAdj.angleX -= 360.0;
+    while(conf->manetAdj.angleX < 0)
+        conf->manetAdj.angleX += 360.0;
     if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
 
 void manetGLView::rotateY(float deg)
 {
-    manetAdj.angleY += deg;
-    while(manetAdj.angleY >= 360.0)
-        manetAdj.angleY -= 360.0;
-    while(manetAdj.angleY < 0)
-        manetAdj.angleY += 360.0;
+    conf->manetAdj.angleY += deg;
+    while(conf->manetAdj.angleY >= 360.0)
+        conf->manetAdj.angleY -= 360.0;
+    while(conf->manetAdj.angleY < 0)
+        conf->manetAdj.angleY += 360.0;
     if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
 
 void manetGLView::rotateZ(float deg)
 {
-    manetAdj.angleZ += deg;
-    while(manetAdj.angleZ >= 360.0)
-        manetAdj.angleZ -= 360.0;
-    while(manetAdj.angleZ < 0)
-        manetAdj.angleZ += 360.0;
+    conf->manetAdj.angleZ += deg;
+    while(conf->manetAdj.angleZ >= 360.0)
+        conf->manetAdj.angleZ -= 360.0;
+    while(conf->manetAdj.angleZ < 0)
+        conf->manetAdj.angleZ += 360.0;
     if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
@@ -946,8 +940,8 @@ bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMes
         if (inx > 180) 
             LOG_WARN("Received GPS data (" << inx << ", " << iny << ", " << inz << ") that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
 
-        x=inx*gpsScale;
-        y=iny*gpsScale;
+        x=inx*conf->gpsScale;
+        y=iny*conf->gpsScale;
         z=inz;
 
         static double xOff=0.0, yOff=0.0;
@@ -982,34 +976,10 @@ manetGLView::manetGLView(QWidget *parent) :
     checkIOThread(NULL),
     streamRate(1.0),
     playbackPaused(false),
-    autorewind(false), 
-    messageStreamFiltering(false), 
     sliderPressed(false),
     currentMessageTimestamp(0),
     playbackRangeEnd(0),
     playbackRangeStart(0),
-    showWallTimeinStatusString(true),
-    showPlaybackTimeInStatusString(true),
-    showPlaybackRangeString(true),
-    showVerboseStatusString(false),
-    showDebugInfo(false), 
-    showStreamDescription(true),
-    scaleText(20.0), 
-    scaleLine(1.0), 
-    gpsScale(60000), 
-    layerPadding(2.0), 
-    antennaRadius(100.0),
-    ghostLayerTransparency(0.15),
-    statusFontPointSize(10),
-    maxNodes(0),
-    maxLayers(0),
-    monochromeMode(false), 
-    threeDView(false),
-    backgroundImage(false), 
-    showGroundGrid(false),
-    statusFontName("Helvetica"),
-    hierarchyRingColor(colors::blue),
-    playbackStartTime(SeekMessage::eof),  // live mode
     autoCenterNodesFlag(false),
     nodesDrawn(0), edgesDrawn(0), labelsDrawn(0),
     framesDrawn(0), fpsTimeBase(0), framesPerSec(0.0),
@@ -1018,15 +988,6 @@ manetGLView::manetGLView(QWidget *parent) :
     prevClickedNodeId(-1) // since unsigned, will set to large value.
 {
     TRACE_ENTER();
-    manetAdjInit.angleX=0.0;
-    manetAdjInit.angleY=0.0;
-    manetAdjInit.angleZ=0.0;
-    manetAdjInit.scaleX=0.035;
-    manetAdjInit.scaleY=0.035;
-    manetAdjInit.scaleZ=0.03;
-    manetAdjInit.shiftX=0.0;
-    manetAdjInit.shiftY=0.0;
-    manetAdjInit.shiftZ=0.0;
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
 
     // Don't oeverwrite QPAinter...
@@ -1035,7 +996,6 @@ manetGLView::manetGLView(QWidget *parent) :
     connect(this, SIGNAL(connectNewLayer(const QString)), this, SLOT(newLayerConnect(const QString)));
     connect(this, SIGNAL(spawnLayerConfigureDialog()), this, SLOT(configureLayers())); 
     connect(this, SIGNAL(nodeClicked(size_t)), nodeConfigurationDialog, SLOT(nodeClicked(size_t)));
-    connect(this, SIGNAL(changeBackgroundColor()), this, SLOT(spawnBackgroundColorDialog()));
 
     TRACE_EXIT();
 }
@@ -1060,7 +1020,12 @@ void manetGLView::shutdown()
         // messageStream.reset(); 
     }
 
-    saveConfiguration();
+    conf->saveConfiguration();
+
+    if (wGraph) 
+        wGraph->saveConfiguration(); 
+
+    SingletonConfig::saveConfig();
 
     // order is important here. Destroy in dependency order. 
     boost::thread *threads[]={
@@ -1140,364 +1105,6 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
     TRACE_EXIT();
 }
 
-void manetGLView::showPlaybackTime(bool isOn)
-{
-    TRACE_ENTER();
-    showPlaybackTimeInStatusString=isOn;
-    TRACE_EXIT();
-}
-void manetGLView::showPlaybackRange(bool isOn)
-{
-    TRACE_ENTER();
-    showPlaybackRangeString=isOn;
-    TRACE_EXIT();
-}
-void manetGLView::showWallTime(bool isOn)
-{
-    TRACE_ENTER();
-    showWallTimeinStatusString=isOn;
-    TRACE_EXIT();
-}
-
-bool manetGLView::loadConfiguration()
-{
-    TRACE_ENTER();
-
-    scaleText=TEXT_SCALE;
-    scaleLine=1.0;
-    monochromeMode = false;
-    threeDView = true;
-    backgroundImage = true;
-    showGroundGrid=false;
-    bool retVal=true;
-
-
-    //
-    // Check configuration for GUI settings.
-    //
-    Config &cfg=SingletonConfig::instance();
-    SingletonConfig::lock();
-    libconfig::Setting &root=cfg.getRoot();
-
-    root.lookupValue("maxNodes", maxNodes);
-    root.lookupValue("maxLayers", maxLayers); 
-
-    if (!root.lookupValue("server", serverName)) {
-        serverName="localhost"; 
-        LOG_WARN("Please specify the server name in the cfg file");
-        LOG_WARN("I set the default to localhost, but that may not be what you want."); 
-        root.add("server", Setting::TypeString)=serverName;
-    }
-
-    while (maxNodes==0 || maxLayers==0 || serverName.empty()) { 
-        WatcherConfigurationDialog *d=new WatcherConfigurationDialog(serverName, maxNodes, maxLayers);  
-        d->setModal(true); 
-        d->exec();
-        LOG_DEBUG("WatcherConfigDialog result: " << ((d->result()==QDialog::Rejected)?"Rejected":"Accepted")); 
-        if (d->result()==QDialog::Rejected) { 
-            SingletonConfig::unlock();
-            LOG_FATAL("User did not give needed info to start, exiting."); 
-            return false;
-        }
-        LOG_DEBUG("Got values from conf dialog - server: " << serverName << ", maxNodes: " << maxNodes << ", maxLayers: " << maxLayers); 
-        if (!root.exists("server"))
-            root.add("server", Setting::TypeString);
-        root["server"]=serverName;
-        if (!root.exists("maxNodes"))
-            root.add("maxNodes", Setting::TypeInt);
-        root["maxNodes"]=static_cast<int>(maxNodes);
-        if (!root.exists("maxLayers"))
-            root.add("maxLayers", Setting::TypeInt);
-        root["maxLayers"]=static_cast<int>(maxLayers);
-    }
-
-    // WatcherGraph() grabs the Config lock, so it must be unlocked when created.
-    SingletonConfig::unlock();
-    wGraph=new WatcherGraph(maxNodes, maxLayers); 
-    wGraph->locationTranslationFunction=boost::bind(&manetGLView::gps2openGLPixels, this, _1, _2, _3, _4); 
-    nodeConfigurationDialog->setGraph(wGraph);
-    SingletonConfig::lock();
-
-    try {
-        string prop="layers";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-
-        libconfig::Setting &layers=cfg.lookup(prop);
-
-        // antenna radius is not a layer, move to 'view' menu or elsewhere
-        // // We cheat a little here and always make sure there's an antenna radius "layer"
-        // if (!layers.exists(ANTENNARADIUS_LAYER))
-        //     layers.add(ANTENNARADIUS_LAYER, Setting::TypeBoolean)=false;
-
-        LOG_INFO("Reading layer states from cfg file");
-        bool foundPhy=false;
-        int layerNum=layers.getLength();
-        for (int i=0; i<layerNum; i++)
-        {
-            string name(layers[i].getName());
-            LOG_DEBUG("Reading layer menu config for " << name); 
-            bool val=true;
-            if (!layers.lookupValue(name, val))
-                layers.add(name, Setting::TypeBoolean)=val;  // Shouldn't happen unless misformed cfg file. 
-            SingletonConfig::unlock();
-            addLayerMenuItem(name, val);
-            SingletonConfig::lock();
-            if (name==PHYSICAL_LAYER) 
-                foundPhy=true;
-        }
-        if (!foundPhy) {
-            SingletonConfig::unlock();
-            addLayerMenuItem(PHYSICAL_LAYER, true);
-            SingletonConfig::lock();
-        }
-
-        struct 
-        {
-            const char *prop; 
-            bool def; 
-            bool *val; 
-        } boolVals[] = 
-        {
-            { "nodes3d", true, &threeDView },
-            { "monochrome", false, &monochromeMode }, 
-            { "displayBackgroundImage", true, &backgroundImage },
-            { "showGroundGrid", false, &showGroundGrid },
-            { "showVerboseStatusString", false, &showVerboseStatusString }, 
-            { "showWallTime", true, &showWallTimeinStatusString }, 
-            { "showPlaybackTime", true, &showPlaybackTimeInStatusString },
-            { "showPlaybackRange", true, &showPlaybackRangeString },
-            { "showDebugInfo", false, &showDebugInfo },
-            { "autorewind", true, &autorewind },
-            { "messageStreamFiltering", false, &messageStreamFiltering }
-        }; 
-        for (size_t i=0; i<sizeof(boolVals)/sizeof(boolVals[0]); i++)
-        {
-            prop=boolVals[i].prop;
-            bool boolVal=boolVals[i].def; 
-            if (!root.lookupValue(prop, boolVal))
-                root.add(prop, libconfig::Setting::TypeBoolean)=boolVal;
-            LOG_DEBUG("Setting " << boolVals[i].prop << " to " << (boolVal?"true":"false")); 
-            *boolVals[i].val=boolVal; 
-        }
-        emit threeDViewToggled(threeDView);
-        emit monochromeToggled(monochromeMode);
-        emit backgroundImageToggled(backgroundImage);
-        emit groundGridToggled(showGroundGrid);
-        emit loopPlaybackToggled(autorewind);
-        emit enableStreamFiltering(messageStreamFiltering);
-        emit checkPlaybackTime(showPlaybackTimeInStatusString);
-        emit checkPlaybackRange(showPlaybackRangeString);
-        emit checkWallTime(showWallTimeinStatusString);
-
-        string hrc("blue");
-        struct 
-        {
-            const char *prop; 
-            const char *def; 
-            string *val; 
-        } strVals[] = 
-        {
-            { "statusFontName", "Helvetica", &statusFontName },
-            { "hierarchyRingColor", "blue", &hrc } 
-        }; 
-        for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++)
-        {
-            prop=strVals[i].prop;
-            string strVal=strVals[i].def; 
-            if (!root.lookupValue(prop, strVal))
-                root.add(prop, libconfig::Setting::TypeString)=strVal;
-            *strVals[i].val=strVal; 
-            LOG_DEBUG("Setting " << strVals[i].prop << " to " << strVal);
-        }
-        hierarchyRingColor.fromString(hrc);
-
-        struct 
-        {
-            const char *prop; 
-            float def; 
-            float *val; 
-        } floatVals[] = 
-        {
-            { "scaleText", 1.0, &scaleText }, 
-            { "scaleLine", 1.0, &scaleLine }, 
-            { "layerPadding", 1.0, &layerPadding }, 
-            { "gpsScale", 80000.0, &gpsScale }, 
-            { "antennaRadius", 200.0, &antennaRadius },
-            { "ghostLayerTransparency", 0.15, &ghostLayerTransparency }
-        }; 
-        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++)
-        {
-            prop=floatVals[i].prop;
-            float floatVal=floatVals[i].def;
-            if (!root.lookupValue(prop, floatVal))
-                root.add(prop, libconfig::Setting::TypeFloat)=floatVals[i].def;
-            *floatVals[i].val=floatVal;
-            LOG_DEBUG("Setting " << floatVals[i].prop << " to " << *floatVals[i].val); 
-        }
-
-        struct 
-        {
-            const char *prop; 
-            int def; 
-            int *val; 
-        } intVals[] = 
-        {
-            { "statusFontPointSize", 12, &statusFontPointSize }
-        }; 
-        for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++)
-        {
-            prop=intVals[i].prop;
-            int intVal=intVals[i].def; 
-            if (!root.lookupValue(prop, intVal))
-                root.add(prop, libconfig::Setting::TypeInt)=intVal;
-            *intVals[i].val=intVal; 
-            LOG_DEBUG("Setting " << intVals[i].prop << " to " << intVal);
-        }
-
-        struct 
-        {
-            const char *prop; 
-            long long int def;
-            long long int *val; 
-        } longlongIntVals[] = 
-        {
-            { "playbackStartTime", SeekMessage::eof, &playbackStartTime } 
-        }; 
-        for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++) {
-            prop=longlongIntVals[i].prop;
-            long long int intVal=longlongIntVals[i].def; 
-            if (!root.lookupValue(prop, intVal))
-                root.add(prop, libconfig::Setting::TypeInt64)=intVal;
-            *longlongIntVals[i].val=intVal; 
-            LOG_DEBUG("Setting " << longlongIntVals[i].prop << " to " << intVal);
-        }
-
-        //
-        // Load background image settings
-        //
-        prop="backgroundImage";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &s=cfg.lookup(prop);
-
-        prop="imageFile"; 
-        string strVal;
-        if (!s.lookupValue(prop, strVal) || strVal=="none")   // If we don't have the setting or the it's set to 'do not use bg image'
-        {
-            LOG_INFO("watcherBackground:imageFile entry not found (or it equals \"none\") in configuration file, "
-                    "disabling background image functionality");
-            if (strVal.empty())
-                s.add(prop, libconfig::Setting::TypeString)="none";
-            toggleBackgroundImage(false);
-            emit enableBackgroundImage(false);
-        }
-        else {
-            if (!BackgroundImage::getInstance().loadImageFile(strVal)) {
-                LOG_WARN("Error loading background image file, " << strVal); 
-            }
-        }
-
-        // bg image location and size.
-        prop="coordinates";
-        float coordVals[5]={0.0, 0.0, 0.0, 0.0, 0.0};
-        if (!s.exists(prop))
-        {
-            s.add(prop, libconfig::Setting::TypeArray);
-            for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
-                s[prop].add(libconfig::Setting::TypeFloat)=coordVals[i];
-        }
-        else
-        {
-            for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
-                coordVals[i]=s[prop][i];
-            BackgroundImage &bg=BackgroundImage::getInstance();
-            bg.setDrawingCoords(coordVals[0], coordVals[1], coordVals[2], coordVals[3], coordVals[4]); 
-        }
-
-        //
-        // Load viewpoint
-        //
-        prop="viewPoint";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &vp=cfg.lookup(prop); 
-
-        struct 
-        {
-            const char *type;
-            float *data[3];
-        } viewPoints[] =
-        {
-            { "angle", { &manetAdj.angleX, &manetAdj.angleY, &manetAdj.angleZ }},
-            { "scale", { &manetAdj.scaleX, &manetAdj.scaleY, &manetAdj.scaleZ }},
-            { "shift", { &manetAdj.shiftX, &manetAdj.shiftY, &manetAdj.shiftZ }}
-        };
-        for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++)
-        {
-            if (!vp.exists(viewPoints[i].type))
-            {
-                vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
-                for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
-                    vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
-            }
-            else
-            {
-                libconfig::Setting &s=vp[viewPoints[i].type];
-                for (int j=0; j<s.getLength(); j++)
-                    *viewPoints[i].data[j]=s[j];
-            }
-        }
-
-        LOG_INFO("Set viewpoint - angle: " << manetAdj.angleX << ", " << manetAdj.angleY << ", " << manetAdj.angleZ);
-        LOG_INFO("Set viewpoint - scale: " << manetAdj.scaleX << ", " << manetAdj.scaleY << ", " << manetAdj.scaleZ);
-        LOG_INFO("Set viewpoint - shift: " << manetAdj.shiftX << ", " << manetAdj.shiftY << ", " << manetAdj.shiftZ);
-
-        // background color
-        prop="backgroundColor";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &bgColSet=cfg.lookup(prop);
-
-        struct 
-        {
-            const char *name;
-            float val;
-        } bgColors[] = 
-        {
-            { "r", 0.0 }, 
-            { "g", 0.0 }, 
-            { "b", 0.0 }, 
-            { "a", 255.0 }
-        };
-        for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
-            if (!bgColSet.lookupValue(bgColors[i].name, bgColors[i].val))
-                bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
-
-        glClearColor(bgColors[0].val, bgColors[1].val,bgColors[2].val,bgColors[3].val);
-
-    }
-    catch (const libconfig::SettingException &e) {
-        LOG_ERROR("Error loading configuration at " << e.getPath() << ": " << e.what());
-        retVal=false;
-    }
-
-    SingletonConfig::unlock();
-
-    // 
-    // Set up timer callbacks.
-    //
-    QTimer *watcherIdleTimer = new QTimer(this);
-    QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
-    watcherIdleTimer->start(40);  // This is ~25 FPS
-
-    // start work threads
-    watcherdConnectionThread=new boost::thread(boost::bind(&manetGLView::connectStream, this));
-
-    TRACE_EXIT();
-    return retVal;
-}
-
 QSize manetGLView::minimumSizeHint() const
 {
     TRACE_ENTER();
@@ -1566,10 +1173,10 @@ void manetGLView::setupStream()
     messageStream->setDescription("legacy watcher gui");
     messageStream->startStream();
     messageStream->getMessageTimeRange();
-    messageStream->enableFiltering(messageStreamFiltering);
+    messageStream->enableFiltering(conf->messageStreamFiltering);
 
     // Tell the watcherd that we want/don't want messages for this layer.
-    if (messageStreamFiltering) { 
+    if (conf->messageStreamFiltering) { 
         for (size_t l=0; l<wGraph->numValidLayers; l++) { 
             MessageStreamFilterPtr f(new MessageStreamFilter);
             f->addLayer(wGraph->layers[l].layerName); 
@@ -1590,12 +1197,12 @@ void manetGLView::connectStream()
 
         this_thread::interruption_point();
         if (!messageStream) 
-            messageStream=MessageStreamPtr(new MessageStream(serverName)); 
+            messageStream=MessageStreamPtr(new MessageStream(conf->serverName)); 
 
         while (!messageStream->connected()) {
             this_thread::interruption_point();
             if (!messageStream->connect(true)) { 
-                LOG_WARN("Unable to connect to server at " << serverName << ". Trying again in 2 seconds");
+                LOG_WARN("Unable to connect to server at " << conf->serverName << ". Trying again in 2 seconds");
                 sleep(2); 
             }
         }
@@ -1642,8 +1249,8 @@ void manetGLView::checkIO()
                         playbackSlider->setRange(playbackRangeStart/1000, playbackRangeEnd/1000);
                     if (!currentMessageTimestamp)
                         currentMessageTimestamp=
-                            playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
-                            playbackStartTime==SeekMessage::eof ? playbackRangeEnd : playbackStartTime;
+                            conf->playbackStartTime==SeekMessage::epoch ? playbackRangeStart : 
+                            conf->playbackStartTime==SeekMessage::eof ? playbackRangeEnd : conf->playbackStartTime;
                     timeRangeMessageSent=false;
                 } else if (message->type == LIST_STREAMS_MESSAGE_TYPE) {
                     ListStreamsMessagePtr m(dynamic_pointer_cast<ListStreamsMessage>(message));
@@ -1725,7 +1332,7 @@ void manetGLView::watcherIdle()
 {
     TRACE_ENTER();
 
-    if (autorewind) {
+    if (conf->autorewind) {
         static time_t noNewMessagesForSeconds=0;
         if (currentMessageTimestamp==playbackRangeEnd) { 
             time_t now=time(NULL);
@@ -1779,7 +1386,7 @@ void manetGLView::paintGL()
         // after all openGL calls
         drawStatusString(); 
 
-        if (showDebugInfo)
+        if (conf->showDebugInfo)
             drawDebugInfo();
 
         glPopAttrib(); 
@@ -1819,7 +1426,7 @@ void manetGLView::drawDebugInfo()
 
     QPainter painter(this);
     QString text(info.str().c_str());
-    QFont font(statusFontName.c_str(), statusFontPointSize); 
+    QFont font(conf->statusFontName.c_str(), conf->statusFontPointSize); 
     QFontMetrics metrics = QFontMetrics(font);
     int border = qMax(4, metrics.leading());
     QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignLeft | Qt::TextWordWrap, text);
@@ -1895,7 +1502,7 @@ void manetGLView::drawNotConnectedState()
 
 
     QString errMess("Unable to connect to watcher daemon on ");
-    errMess+=serverName.c_str();
+    errMess+=conf->serverName.c_str();
     errMess+=". Trying to reconnect every 2 seconds.";
     renderText(12, height()-12, errMess); 
 
@@ -1939,7 +1546,7 @@ void manetGLView::drawGroundGrid()
     GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
     glGetFloatv(GL_CURRENT_COLOR, cols);
     const GLfloat black[]={0.0,0.0,0.0,1.0};
-    if (monochromeMode)
+    if (conf->monochromeMode)
         glColor4fv(black);
     else
         glColor4f(0.0, 1.0, 0.0, 0.5);
@@ -1963,25 +1570,26 @@ void manetGLView::drawGroundGrid()
 void manetGLView::drawManet(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(conf->rgbaBGColors[0], conf->rgbaBGColors[1], conf->rgbaBGColors[2], conf->rgbaBGColors[3]); 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     glTranslatef(0.0, 0.0, -20.0);
 
-    glScalef(manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ);
-    glRotatef(manetAdj.angleX, 1.0, 0.0, 0.0);
-    glRotatef(manetAdj.angleY, 0.0, 1.0, 0.0);
-    glRotatef(manetAdj.angleZ, 0.0, 0.0, 1.0);
-    glTranslatef(manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ);
+    glScalef(conf->manetAdj.scaleX, conf->manetAdj.scaleY, conf->manetAdj.scaleZ);
+    glRotatef(conf->manetAdj.angleX, 1.0, 0.0, 0.0);
+    glRotatef(conf->manetAdj.angleY, 0.0, 1.0, 0.0);
+    glRotatef(conf->manetAdj.angleZ, 0.0, 0.0, 1.0);
+    glTranslatef(conf->manetAdj.shiftX, conf->manetAdj.shiftY, conf->manetAdj.shiftZ);
 
-    if (showGroundGrid)
+    if (conf->showGroundGrid)
         drawGroundGrid();
 
     // watcher::Skybox *sb=watcher::Skybox::getSkybox();
     // if (sb)
-    //     sb->drawSkybox(manetAdj.angleX, manetAdj.angleY, manetAdj.angleZ);
+    //     sb->drawSkybox(conf->manetAdj.angleX, conf->manetAdj.angleY, conf->manetAdj.angleZ);
 
-    if (backgroundImage)        // need to draw this fisrt for transparency to work properly. 
+    if (conf->backgroundImage)        // need to draw this fisrt for transparency to work properly. 
     {
         BackgroundImage &bgi=BackgroundImage::getInstance();
         GLfloat minx, width, miny, height, z;
@@ -2047,7 +1655,7 @@ void manetGLView::drawGraph(WatcherGraph *&graph)
         }
         // move up "layerPadding" units before drawing the next layer if the previous layer was not empty.
         if (!layerEmpty) 
-            glTranslatef(0.0, 0.0, layerPadding);  
+            glTranslatef(0.0, 0.0, conf->layerPadding);  
     }
 }
 
@@ -2070,22 +1678,22 @@ void manetGLView::drawStatusString()
     else
         buf="(playback)";
 
-    if (showStreamDescription) {
+    if (conf->showStreamDescription) {
         buf += "\nDescription: ";
         buf += streamDescription;
     }
 
-    if (showWallTimeinStatusString)
+    if (conf->showWallTimeinStatusString)
     {
         buf+="\nWall Time: ";
         buf+=posix_time::to_iso_extended_string(now);
     }
-    if (showPlaybackTimeInStatusString)
+    if (conf->showPlaybackTimeInStatusString)
     {
         buf+="\nPlay Time: ";
         buf+=posix_time::to_iso_extended_string(from_time_t(currentMessageTimestamp/1000));
     }
-    if (showPlaybackRangeString)
+    if (conf->showPlaybackRangeString)
     {
         buf+="\nTime Range: ";
         buf+=posix_time::to_iso_extended_string(from_time_t(playbackRangeStart/1000));
@@ -2094,24 +1702,24 @@ void manetGLView::drawStatusString()
     }
 
     if (nowTS-2500.0<currentMessageTimestamp)
-        painter.setPen(QColor(monochromeMode ? "black" : "green")); 
+        painter.setPen(QColor(conf->monochromeMode ? "black" : "green")); 
     else if (playbackRangeEnd==currentMessageTimestamp && nowTS > playbackRangeEnd)
-        painter.setPen(QColor(monochromeMode ? "black" : "blue")); 
+        painter.setPen(QColor(conf->monochromeMode ? "black" : "blue")); 
     else
-        painter.setPen(QColor(monochromeMode ? "black" : "red")); 
+        painter.setPen(QColor(conf->monochromeMode ? "black" : "red")); 
 
-    if (showVerboseStatusString)
+    if (conf->showVerboseStatusString)
     {
         char buff[256];
         snprintf(buff, sizeof(buff), "\nLoc: %3.1f, %3.1f, %3.1f, scale: %f, %f, %f, text: %f lpad: %f",
-                manetAdj.shiftX, manetAdj.shiftY, manetAdj.shiftZ, 
-                manetAdj.scaleX, manetAdj.scaleY, manetAdj.scaleZ, 
-                scaleText, layerPadding); 
+                conf->manetAdj.shiftX, conf->manetAdj.shiftY, conf->manetAdj.shiftZ, 
+                conf->manetAdj.scaleX, conf->manetAdj.scaleY, conf->manetAdj.scaleZ, 
+                conf->scaleText, conf->layerPadding); 
         buf+=string(buff); 
     }
 
     QString text(buf.c_str());
-    QFont font(statusFontName.c_str(), statusFontPointSize); 
+    QFont font(conf->statusFontName.c_str(), conf->statusFontPointSize); 
     QFontMetrics metrics = QFontMetrics(font);
     int border = qMax(4, metrics.leading());
     QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
@@ -2136,6 +1744,37 @@ void manetGLView::setPlaybackSlider(QSlider *s)
     connect(playbackSlider, SIGNAL(sliderReleased()), this, SLOT(updatePlaybackSliderFromGUI()));
     connect(playbackSlider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMovedInGUI(int)));
     connect(playbackSlider, SIGNAL(sliderPressed()), this, SLOT(sliderPressedInGUI()));
+}
+
+void manetGLView::setWatcherGUIConfig(WatcherGUIConfig *c) 
+{
+    conf=c;
+
+    if(!conf->loadConfiguration()) {
+        LOG_FATAL("Error in cfg file, unable to continue"); 
+        exit(EXIT_FAILURE); 
+    }
+   
+    // now a little setup based on loaded config.
+    glClearColor(conf->rgbaBGColors[0], conf->rgbaBGColors[1], conf->rgbaBGColors[2],conf->rgbaBGColors[3]);
+
+    wGraph=new WatcherGraph(conf->maxNodes, conf->maxLayers); 
+    wGraph->locationTranslationFunction=boost::bind(&manetGLView::gps2openGLPixels, this, _1, _2, _3, _4); 
+    nodeConfigurationDialog->setGraph(wGraph);
+
+    BOOST_FOREACH(WatcherGUIConfig::InitialLayers::value_type const &l, conf->initialLayers)
+       addLayerMenuItem(l.first, l.second); 
+
+    // 
+    // Set up timer callbacks.
+    //
+    QTimer *watcherIdleTimer = new QTimer(this);
+    QObject::connect(watcherIdleTimer, SIGNAL(timeout()), this, SLOT(watcherIdle()));
+    watcherIdleTimer->start(40);  // This is ~25 FPS
+
+    // start work threads
+    // we wait until here so that we know the server string is set. 
+    watcherdConnectionThread=new boost::thread(boost::bind(&manetGLView::connectStream, this));
 }
 
 void manetGLView::sliderPressedInGUI()
@@ -2201,12 +1840,12 @@ void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &n
     };
 
     const GLfloat black[]={0.0,0.0,0.0,1.0};
-    if (monochromeMode)
+    if (conf->monochromeMode)
         glColor4fv(black);
     else
         glColor4fv(edgeColor);
 
-    if (!threeDView)
+    if (!conf->threeDView)
     {
         double ax=fast_arctan2(x1-x2,y1-y2);
         double cmx = sin(ax)*width;   // cos(a-M_PI_2)*width
@@ -2260,7 +1899,7 @@ void manetGLView::drawEdge(const EdgeDisplayInfo &edge, const NodeDisplayInfo &n
     // draw the edge's label, if there is one.
     if (edge.label!="none")
     {
-        if (monochromeMode)
+        if (conf->monochromeMode)
         {
             const GLfloat localblack[]={0.0,0.0,0.0,1.0};
             glColor4fv(localblack);
@@ -2319,12 +1958,12 @@ void manetGLView::drawNode(const NodeDisplayInfo &node, bool physical)
         node.color.r/255.0, 
         node.color.g/255.0, 
         node.color.b/255.0, 
-        physical ? node.color.a/255.0 : ghostLayerTransparency
+        physical ? node.color.a/255.0 : conf->ghostLayerTransparency
     };
 
     drawNodeLabel(node, physical);
 
-    if (monochromeMode)
+    if (conf->monochromeMode)
         glColor4fv(black);
     else
         glColor4fv(nodeColor);
@@ -2332,7 +1971,7 @@ void manetGLView::drawNode(const NodeDisplayInfo &node, bool physical)
     // Handle size after drawing antenna so as to not scale it
     handleSize(node);
     handleProperties(node);
-    handleSpin(threeDView, node);
+    handleSpin(conf->threeDView, node);
 
     switch(node.shape)
     {
@@ -2358,10 +1997,10 @@ void manetGLView::drawNodeLabel(const NodeDisplayInfo &node, bool physical)
         node.labelColor.r/255.0, 
         node.labelColor.g/255.0, 
         node.labelColor.b/255.0, 
-        physical ? node.labelColor.a/255.0 : ghostLayerTransparency
+        physical ? node.labelColor.a/255.0 : conf->ghostLayerTransparency
     };
 
-    if (monochromeMode)
+    if (conf->monochromeMode)
         glColor4fv(black);
     else
         glColor4fv(nodeColor);
@@ -2370,7 +2009,7 @@ void manetGLView::drawNodeLabel(const NodeDisplayInfo &node, bool physical)
 
     renderText(0, 6, 3, QString(node.get_label().c_str()),
             QFont(node.labelFont.c_str(), 
-                (int)(node.labelPointSize*scaleText))); 
+                (int)(node.labelPointSize*conf->scaleText))); 
 
     TRACE_EXIT();
 }
@@ -2393,7 +2032,7 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
         label.backgroundColor.a
     };
 
-    if (monochromeMode)
+    if (conf->monochromeMode)
         for (unsigned int i=0; i<sizeof(bgColor)/sizeof(bgColor[0]); i++)
             if (i==3)
                 fgColor[i]=255;
@@ -2407,23 +2046,6 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
     renderText(inx+offset, iny, inz+(labelCount*label.pointSize), label.labelText.c_str(), f); 
 
     TRACE_EXIT(); 
-}
-
-void manetGLView::loadBackgroundImage(void)
-{
-    QString filename;
-    filename=QFileDialog::getOpenFileName(this, "Choose a background image file", ".", "*.bmp"); 
-    if (!filename.isEmpty()) {
-        if (!BackgroundImage::getInstance().loadImageFile(filename.toStdString())) {
-            if (QMessageBox::Yes==QMessageBox::question(NULL, 
-                        tr("Error loading file"), tr("Error loading the image file. Try again?"), QMessageBox::Yes, QMessageBox::No))
-                loadBackgroundImage();
-        }
-        else {
-            toggleBackgroundImage(true);
-            emit enableBackgroundImage(true);
-        }
-    }
 }
 
 void manetGLView::resizeGL(int width, int height)
@@ -2446,7 +2068,7 @@ void manetGLView::resizeGL(int width, int height)
 void manetGLView::resetPosition()
 {
     TRACE_ENTER();
-    manetAdj = manetAdjInit;
+    conf->manetAdj = conf->manetAdjInit;
     updateGL();
     TRACE_EXIT();
 }
@@ -2492,35 +2114,6 @@ void manetGLView::spawnAboutBox()
     TRACE_EXIT();
 }
 
-void manetGLView::setGPSScale() 
-{
-    TRACE_ENTER();
-    bool ok;
-    double value=QInputDialog::getDouble(this, tr("GPS Scale"), tr("Please enter the new GPS Scale value"), 
-            gpsScale, 1, DBL_MAX, 1, &ok);
-
-    if (ok) {
-        LOG_DEBUG("Setting GPS scale to " << value); 
-        gpsScale=value;
-
-        Config &cfg=SingletonConfig::instance();
-        SingletonConfig::lock();
-        libconfig::Setting &root=cfg.getRoot();
-        root["gpsScale"]=gpsScale;
-        SingletonConfig::unlock();
-    }
-    TRACE_EXIT();
-}
-
-void manetGLView::spawnBackgroundColorDialog()
-{
-    QRgb rgb=0xffffffff;
-    bool ok=false;
-    rgb=QColorDialog::getRgba(rgb, &ok);
-    if (ok)
-        glClearColor(qRed(rgb)/255.0, qGreen(rgb)/255.0, qBlue(rgb)/255.0, qAlpha(rgb)/255.0);
-}
-
 void manetGLView::setEdgeWidth()
 {
     TRACE_ENTER();
@@ -2554,8 +2147,8 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
         case Qt::Key_M:     shiftCenterOut(); break;
         case Qt::Key_Q:     zoomOut(); break;
         case Qt::Key_W:     zoomIn(); break;
-        case Qt::Key_A:     scaleText++; break;
-        case Qt::Key_S:     scaleText--; if (scaleText<1) scaleText=1; break;
+        case Qt::Key_A:     conf->scaleText++; break;
+        case Qt::Key_S:     conf->scaleText--; if (conf->scaleText<1) conf->scaleText=1; break;
         case Qt::Key_Z:     compressDistance(); break;
         case Qt::Key_X:     expandDistance(); break;
         case Qt::Key_E:     rotateX(-5.0); break;
@@ -2564,7 +2157,7 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                                 if (kbMods & Qt::ShiftModifier) { 
 
                                     LOG_DEBUG("Got cap D turning on debugging info"); 
-                                    showDebugInfo=!showDebugInfo;
+                                    conf->showDebugInfo=!conf->showDebugInfo;
                                     if (messageStream) { 
                                         messageStream->messagesSent=0;
                                         messageStream->messagesArrived=0;
@@ -2580,12 +2173,12 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
 
                                 LOG_DEBUG("Got cap F in keyPressEvent - spawning font chooser for info string"); 
                                 bool ok;
-                                QFont initial(statusFontName.c_str(), statusFontPointSize); 
+                                QFont initial(conf->statusFontName.c_str(), conf->statusFontPointSize); 
                                 QFont font=QFontDialog::getFont(&ok, initial, this); 
                                 if (ok)
                                 {
-                                    statusFontName=font.family().toStdString(); 
-                                    statusFontPointSize=font.pointSize(); 
+                                    conf->statusFontName=font.family().toStdString(); 
+                                    conf->statusFontPointSize=font.pointSize(); 
                                 }
                             }
                             else { 
@@ -2601,16 +2194,16 @@ void manetGLView::keyPressEvent(QKeyEvent * event)
                             }
                             break;
         case Qt::Key_V:     rotateZ(5.0); break;
-        case Qt::Key_K:     gpsScale+=10; break;
-        case Qt::Key_L:     gpsScale-=10; break;
+        case Qt::Key_K:     conf->gpsScale+=10; break;
+        case Qt::Key_L:     conf->gpsScale-=10; break;
         case Qt::Key_T:     {
                                 if (kbMods & Qt::ShiftModifier)  
-                                    layerPadding=0;
+                                    conf->layerPadding=0;
                                 else
-                                    layerPadding+=2; break;
+                                    conf->layerPadding+=2; break;
                             }
                             break;
-        case Qt::Key_Y:     layerPadding-=2; if (layerPadding<=0) layerPadding=0; break;
+        case Qt::Key_Y:     conf->layerPadding-=2; if (conf->layerPadding<=0) conf->layerPadding=0; break;
                             // case Qt::Key_B:     
                             //     layerToggle(BANDWIDTH_LAYER, isActive(BANDWIDTH_LAYER)); 
                             //     emit bandwidthToggled(isActive(BANDWIDTH_LAYER));
@@ -2785,10 +2378,10 @@ void manetGLView::mouseDoubleClickEvent(QMouseEvent *event)
     }
     else {
         size_t nodeId=getNodeIdAtCoords(event->x(), event->y());
-        if(nodeId<maxNodes) {
+        if(nodeId<conf->maxNodes) {
             emit nodeDataInGraphsToggled(nodeId);
             emit nodeClicked(nodeId);
-            if (prevClickedNodeId<=maxNodes && prevClickedNodeId!=nodeId)
+            if (prevClickedNodeId<=conf->maxNodes && prevClickedNodeId!=nodeId)
                 toggleNodeProperty(wGraph, prevClickedNodeId, NodePropertiesMessage::CHOSEN);
             toggleNodeProperty(wGraph, nodeId, NodePropertiesMessage::CHOSEN);
             prevClickedNodeId=(nodeId!=prevClickedNodeId?nodeId:-1);
@@ -2881,17 +2474,12 @@ void manetGLView::toggleNodeSelectedForGraph(unsigned int)
     TRACE_EXIT();
 }
 
-void manetGLView::toggleGroundGrid(bool show)
-{
-    showGroundGrid=show;
-}
-
 void manetGLView::streamFilteringEnabled(bool isEnabled) 
 {
     TRACE_ENTER();
     LOG_DEBUG("Change in stream filtering. Filtering is now " << (isEnabled?"enabled":"disabled") << ".");
 
-    messageStreamFiltering=isEnabled;
+    conf->messageStreamFiltering=isEnabled;
 
     if (messageStream && messageStream->connected()) { 
         for (size_t l=0; l<wGraph->numValidLayers; l++) { 
@@ -2997,7 +2585,7 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
     size_t layerIndex=wGraph->name2LayerIndex(name);
     wGraph->layers[layerIndex].isActive=turnOn;
     LOG_DEBUG("Turned layer " << name << " (" << layerIndex << ") " << (turnOn ? "on" : "off")); 
-    if (messageStreamFiltering && messageStream && messageStream->connected()) {
+    if (conf->messageStreamFiltering && messageStream && messageStream->connected()) {
         // Tell the watcherd that we want/don't want messages for this layer.
         MessageStreamFilterPtr f(new MessageStreamFilter);
         f->addLayer(name); 
@@ -3009,48 +2597,6 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
     if (layerConfigurationDialog)
         layerConfigurationDialog->layerToggle(name); 
 
-    TRACE_EXIT();
-}
-
-void manetGLView::toggleMonochrome(bool isOn)
-{
-    TRACE_ENTER();
-    static GLfloat previousBackgroundColor[4]={0.0, 0.0, 0.0, 0.0}; 
-    monochromeMode=isOn;
-    emit monochromeToggled(isOn); 
-    if (isOn) {
-        glGetFloatv(GL_COLOR_CLEAR_VALUE, previousBackgroundColor);
-        glClearColor(1, 1, 1, 1.0);
-    }
-    else {
-        glClearColor(previousBackgroundColor[0], previousBackgroundColor[1], previousBackgroundColor[2], previousBackgroundColor[3]); 
-    }
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleThreeDView(bool isOn)
-{
-    TRACE_ENTER();
-    threeDView=isOn;
-    emit threeDViewToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleBackgroundImage(bool isOn)
-{
-    TRACE_ENTER();
-    LOG_DEBUG("Turning background image " << (isOn==true?"on":"off")); 
-    backgroundImage=isOn; 
-    emit backgroundImageToggled(isOn); 
-    updateGL();
-    TRACE_EXIT();
-}
-void manetGLView::toggleLoopPlayback(bool isOn) 
-{
-    TRACE_ENTER();
-    LOG_DEBUG("Toggling looped playback: " << (isOn==true?"on":"off"));
-    autorewind=isOn;
-    emit loopPlaybackToggled(isOn);
     TRACE_EXIT();
 }
 
@@ -3066,8 +2612,8 @@ void manetGLView::clearAllEdges()
     TRACE_ENTER();
     for (size_t l=0; l<wGraph->numValidLayers; l++) {
         for (size_t n=0; n<wGraph->numValidNodes; n++) { 
-            std::fill_n(wGraph->layers[l].edges[n], maxNodes, 0); 
-            std::fill_n(wGraph->layers[l].edgeExpirations[n], maxNodes, watcher::Infinity); 
+            std::fill_n(wGraph->layers[l].edges[n], conf->maxNodes, 0); 
+            std::fill_n(wGraph->layers[l].edgeExpirations[n], conf->maxNodes, watcher::Infinity); 
         }
     }
     emit edgesCleared(); 
@@ -3133,10 +2679,10 @@ void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
 
             case NodePropertiesMessage::ROOT:         
                 if (isActive(HIERARCHY_LAYER)) { 
-                    if (monochromeMode) 
+                    if (conf->monochromeMode) 
                         glColor4fv(black); 
                     else 
-                        glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
+                        glColor4ub(conf->hierarchyRingColor.r, conf->hierarchyRingColor.g, conf->hierarchyRingColor.b, conf->hierarchyRingColor.a);
                     drawTorus(1, 13);
                     drawTorus(1, 10);
                     drawTorus(1, 7); 
@@ -3144,20 +2690,20 @@ void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
                 break;
             case NodePropertiesMessage::REGIONAL:     
                 if (isActive(HIERARCHY_LAYER)) { 
-                    if (monochromeMode) 
+                    if (conf->monochromeMode) 
                         glColor4fv(black); 
                     else 
-                        glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
+                        glColor4ub(conf->hierarchyRingColor.r, conf->hierarchyRingColor.g, conf->hierarchyRingColor.b, conf->hierarchyRingColor.a);
                     drawTorus(1, 10);
                     drawTorus(1, 7);
                 }
                 break;
             case NodePropertiesMessage::NEIGHBORHOOD: 
                 if (isActive(HIERARCHY_LAYER)) {
-                    if (monochromeMode) 
+                    if (conf->monochromeMode) 
                         glColor4fv(black); 
                     else 
-                        glColor4ub(hierarchyRingColor.r, hierarchyRingColor.g, hierarchyRingColor.b, hierarchyRingColor.a);
+                        glColor4ub(conf->hierarchyRingColor.r, conf->hierarchyRingColor.g, conf->hierarchyRingColor.b, conf->hierarchyRingColor.a);
                     drawTorus(1, 7);
                 }
                 break;
@@ -3168,7 +2714,7 @@ void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
             case NodePropertiesMessage::VICTIM: 
                 break;
             case NodePropertiesMessage::CHOSEN:
-                if (monochromeMode) 
+                if (conf->monochromeMode) 
                     glColor4fv(black); 
                 else  {
                     // GTL - Doesn't work - figure out why
@@ -3188,7 +2734,7 @@ void manetGLView::handleProperties(const NodeDisplayInfo &ndi)
 
 void manetGLView::drawWireframeSphere(GLdouble radius)
 {
-    if (threeDView)
+    if (conf->threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
@@ -3208,7 +2754,7 @@ void manetGLView::drawPyramid(GLdouble radius)
 {
     // fprintf(stdout, "Drawing triangle with \"radius\" : %f. x/y offset is %f\n", radius, offset); 
 
-    if (threeDView)
+    if (conf->threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
         glScalef(radius*1.2, radius*1.2, radius*1.2);
@@ -3273,7 +2819,7 @@ void manetGLView::drawCube(GLdouble radius)
 {
     GLfloat widthScaled=radius; 
 
-    if (threeDView)
+    if (conf->threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
@@ -3340,7 +2886,7 @@ void manetGLView::drawTeapot(GLdouble radius)
 {
     GLfloat widthScaled=radius; 
 
-    if (threeDView)
+    if (conf->threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
@@ -3364,7 +2910,7 @@ void manetGLView::drawTeapot(GLdouble radius)
 
 void manetGLView::drawTorus(GLdouble inner, GLdouble outer)
 {
-    if (threeDView)
+    if (conf->threeDView)
     {
         glPushAttrib(GL_NORMALIZE);
         glNormal3f(0.0, 0.0, 1.0);
@@ -3382,7 +2928,7 @@ void manetGLView::drawTorus(GLdouble inner, GLdouble outer)
 
 void manetGLView::drawSphere(GLdouble radius)
 {
-    if (threeDView)
+    if (conf->threeDView)
     {
         GLUquadricObj *quadric=gluNewQuadric();
         gluQuadricNormals(quadric, GLU_SMOOTH);
@@ -3444,220 +2990,6 @@ void manetGLView::drawFrownyCircle(GLdouble /* radius */)
     return; 
 } /* drawFrownyCircle */ 
 
-void manetGLView::saveConfiguration()
-{
-    TRACE_ENTER();
-    LOG_DEBUG("Got close event, saving modified configuration"); 
-
-    Config &cfg=SingletonConfig::instance();
-    SingletonConfig::lock(); 
-    Setting &root=cfg.getRoot();
-
-    try {
-
-        struct 
-        {
-            const char *prop;
-            bool boolVal;
-        } boolConfigs[] =
-        {
-            { "nodes3d",        threeDView },
-            { "monochrome",     monochromeMode },
-            { "displayBackgroundImage", backgroundImage },
-            { "showGroundGrid", showGroundGrid },
-            { "showVerboseStatusString", showVerboseStatusString }, 
-            { "showWallTime", showWallTimeinStatusString }, 
-            { "showPlaybackTime", showPlaybackTimeInStatusString },
-            { "showPlaybackRange", showPlaybackRangeString },
-            { "showDebugInfo", showDebugInfo },
-            { "autorewind", autorewind },
-            { "messageStreamFiltering", messageStreamFiltering }
-        };
-
-        for (size_t i = 0; i < sizeof(boolConfigs)/sizeof(boolConfigs[0]); i++) {
-            if (!root.exists(boolConfigs[i].prop))
-                root.add(boolConfigs[i].prop, Setting::TypeBoolean)=boolConfigs[i].boolVal;
-            else
-                root[boolConfigs[i].prop]=boolConfigs[i].boolVal;
-        }
-
-        struct 
-        {
-            const char *prop; 
-            float *val; 
-        } floatVals[] = 
-        {
-            { "scaleText", &scaleText }, 
-            { "scaleLine", &scaleLine }, 
-            { "layerPadding", &layerPadding }, 
-            { "gpsScale", &gpsScale }, 
-            { "antennaRadius", &antennaRadius },
-            { "ghostLayerTransparency", &ghostLayerTransparency }
-        }; 
-        for (size_t i=0; i<sizeof(floatVals)/sizeof(floatVals[0]); i++) {
-            if (!root.exists(floatVals[i].prop))
-                root.add(floatVals[i].prop, Setting::TypeFloat)=*floatVals[i].val;
-            else
-                root[floatVals[i].prop]=*floatVals[i].val;
-        }
-
-        string hrc(hierarchyRingColor.toString());
-        struct 
-        {
-            const char *prop; 
-            string *val; 
-        } strVals[] = 
-        {
-            { "statusFontName", &statusFontName },
-            { "hierarchyRingColor", &hrc }
-        }; 
-        for (size_t i=0; i<sizeof(strVals)/sizeof(strVals[0]); i++) {
-            if (!root.exists(strVals[i].prop))  
-                root.add(strVals[i].prop, Setting::TypeString)=*strVals[i].val;
-            else
-                root[strVals[i].prop]=*strVals[i].val;
-        }
-
-        struct 
-        {
-            const char *prop; 
-            int *val; 
-        } intVals[] = 
-        {
-            { "statusFontPointSize", &statusFontPointSize },
-            { "maxNodes", (int*)&maxNodes },
-            { "maxLayers", (int*)&maxLayers }
-        }; 
-        for (size_t i=0; i<sizeof(intVals)/sizeof(intVals[0]); i++) {
-            if (!root.exists(intVals[i].prop))
-                root.add(intVals[i].prop, Setting::TypeInt)=*intVals[i].val;
-            else
-                root[intVals[i].prop]=*intVals[i].val;
-        }
-
-        struct 
-        {
-            const char *prop; 
-            long long int *val; 
-        } longlongIntVals[] = 
-        {
-            { "playbackStartTime", &playbackStartTime } 
-        }; 
-        for (size_t i=0; i<sizeof(longlongIntVals)/sizeof(longlongIntVals[0]); i++) {
-            if (!root.exists(longlongIntVals[i].prop)) 
-                root.add(longlongIntVals[i].prop, Setting::TypeInt64)=(int)(*longlongIntVals[i].val); 
-            else
-                root[longlongIntVals[i].prop]=*longlongIntVals[i].val;
-        }
-
-        string prop="viewPoint";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &vp=cfg.lookup(prop); 
-
-        struct 
-        {
-            const char *type;
-            float *data[3];
-        } viewPoints[] =
-        {
-            { "angle", { &manetAdj.angleX, &manetAdj.angleY, &manetAdj.angleZ }},
-            { "scale", { &manetAdj.scaleX, &manetAdj.scaleY, &manetAdj.scaleZ }},
-            { "shift", { &manetAdj.shiftX, &manetAdj.shiftY, &manetAdj.shiftZ }}
-        };
-        for (size_t i=0; i<sizeof(viewPoints)/sizeof(viewPoints[0]);i++) {
-            if (!vp.exists(viewPoints[i].type)) {
-                vp.add(viewPoints[i].type, libconfig::Setting::TypeArray);
-                for (size_t j=0; j<sizeof(viewPoints[i].data)/sizeof(viewPoints[i].data[0]); j++)
-                    vp[viewPoints[i].type].add(libconfig::Setting::TypeFloat);
-            }
-        }
-        root["viewPoint"]["angle"][0]=fpclassify(manetAdj.angleX)==FP_NAN ? 0.0 : manetAdj.angleX;
-        root["viewPoint"]["angle"][1]=fpclassify(manetAdj.angleY)==FP_NAN ? 0.0 : manetAdj.angleY;
-        root["viewPoint"]["angle"][2]=fpclassify(manetAdj.angleZ)==FP_NAN ? 0.0 : manetAdj.angleZ;
-        root["viewPoint"]["scale"][0]=fpclassify(manetAdj.scaleX)==FP_NAN ? 0.0 : manetAdj.scaleX;
-        root["viewPoint"]["scale"][1]=fpclassify(manetAdj.scaleY)==FP_NAN ? 0.0 : manetAdj.scaleY;
-        root["viewPoint"]["scale"][2]=fpclassify(manetAdj.scaleZ)==FP_NAN ? 0.0 : manetAdj.scaleZ;
-        root["viewPoint"]["shift"][0]=fpclassify(manetAdj.shiftX)==FP_NAN ? 0.0 : manetAdj.shiftX;
-        root["viewPoint"]["shift"][1]=fpclassify(manetAdj.shiftY)==FP_NAN ? 0.0 : manetAdj.shiftY;
-        root["viewPoint"]["shift"][2]=fpclassify(manetAdj.shiftZ)==FP_NAN ? 0.0 : manetAdj.shiftZ;
-
-        BackgroundImage &bg=BackgroundImage::getInstance();
-        float bgfloatVals[5];
-        bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
-
-        prop="backgroundImage";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &bgset=cfg.lookup(prop);
-
-        prop="imageFile"; 
-        if (!bgset.exists(prop))
-            bgset.add(prop, libconfig::Setting::TypeString);
-        string imageFile=bg.getImageFile();
-        if (!imageFile.empty() || imageFile=="none") 
-            root["backgroundImage"]["imageFile"]=bg.getImageFile();
-        else 
-            root["backgroundImage"]["imageFile"]="none";
-
-        prop="coordinates";
-        if (!bgset.exists(prop)) { 
-            bgset.add(prop, libconfig::Setting::TypeArray);
-            // for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
-            //     bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
-        }
-
-        root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
-        root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
-        root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
-        root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
-        root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
-
-        prop="showGroundGrid";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeBoolean);
-        root[prop]=showGroundGrid;
-
-        prop="backgroundColor";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &bgColSet=cfg.lookup(prop);
-
-        struct 
-        {
-            const char *name;
-            float val;
-        } bgColors[] = 
-        {
-            { "r", 0.0 }, 
-            { "g", 0.0 }, 
-            { "b", 0.0 }, 
-            { "a", 255.0 }
-        };
-        for (size_t i=0; i<sizeof(bgColors)/sizeof(bgColors[0]);i++)
-            if (!bgColSet.exists(bgColors[i].name))
-                bgColSet.add(bgColors[i].name, libconfig::Setting::TypeFloat)=bgColors[i].val;
-
-        GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
-        glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
-        root["backgroundColor"]["r"]=cols[0];
-        root["backgroundColor"]["g"]=cols[1];
-        root["backgroundColor"]["b"]=cols[2];
-        root["backgroundColor"]["a"]=cols[3];
-
-        SingletonConfig::unlock();
-
-        if (wGraph) 
-            wGraph->saveConfiguration(); 
-
-        SingletonConfig::saveConfig();
-    }
-    catch (const libconfig::SettingException &e) {
-        LOG_ERROR("Error saving configuration at " << e.getPath() << ": " << e.what() << "  " << __FILE__ << ":" << __LINE__); 
-    }
-
-    TRACE_EXIT();
-}
 
 void manetGLView::pausePlayback()
 {

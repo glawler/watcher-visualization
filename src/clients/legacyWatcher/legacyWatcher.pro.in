@@ -53,7 +53,9 @@ HEADERS += \
     watcherStreamListDialog.h \
     watcherConfigurationDialog.h \
     layerConfigurationDialog.h \
-    nodeConfigurationDialog.h
+    nodeConfigurationDialog.h \
+    watcherQtGUIConfig.h \
+    watcherGUIConfig.h
 
 FORMS += \
     watcher.ui \
@@ -75,6 +77,11 @@ SOURCES += \
     watcherStreamListDialog.cpp \
     watcherConfigurationDialog.cpp \
     layerConfigurationDialog.cpp \
-    nodeConfigurationDialog.cpp
+    nodeConfigurationDialog.cpp \
+    watcherQtGUIConfig.cpp \
+    watcherGUIConfig.cpp
 
 RESOURCES += watcherResources.qrc
+
+
+

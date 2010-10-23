@@ -199,14 +199,8 @@ int main(int argc, char *argv[])
     glutInit(&argc, argv); 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-    if (!ui.manetGLViewWindow->loadConfiguration())
-    {
-        LOG_FATAL("Error in cfg file, unable to continue"); 
-        // writes what confugration we have
-        delete ui.manetGLViewWindow;
-        TRACE_EXIT();
-        return EXIT_FAILURE; 
-    }
+    // set config. side effect -> configuration is loaded. 
+    ui.manetGLViewWindow->setWatcherGUIConfig(ui.watcherQtGUIConfig); 
 
     // ...and go.
     window->show();
