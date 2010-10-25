@@ -230,9 +230,6 @@ AC_CONFIG_FILES([ \
     clients/Makefile \
     clients/routeFeeder/Makefile \
     clients/commandlineFeeders/Makefile \
-    clients/randomScenario/Makefile \
-    clients/gps2eventdb/Makefile \
-    clients/gps2eventdb/test/Makefile
 ])
 
 if test x$enable_testnodeonly == xno; then
@@ -243,6 +240,9 @@ if test x$enable_testnodeonly == xno; then
        clients/connectivity2dot/Makefile \
        clients/legacyWatcher/legacyWatcher.pro \
        clients/dataWatcher/Makefile.config
+       clients/randomScenario/Makefile \
+       clients/gps2eventdb/Makefile \
+       clients/gps2eventdb/test/Makefile
     ])
 
     if test x$enable_watcher3d != xno; then
