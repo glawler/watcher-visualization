@@ -5,7 +5,7 @@ WHC_DIR = watcherHierarchyClient
 endif 
 
 if !ENABLE_TESTNODEONLY
-FULL_DIRS = messageStream2Text connectivity2dot
+FULL_DIRS = messageStream2Text connectivity2dot randomScenario gps2eventdb
 endif 
 
 if ENABLE_WATCHER3D
@@ -23,8 +23,6 @@ endif
 SUBDIRS=\
 	routeFeeder \
 	commandlineFeeders \
-	randomScenario \
-	gps2eventdb \
 	$(WHC_DIR) \
 	$(FULL_DIRS) \
 	$(W3D_DIR) \
