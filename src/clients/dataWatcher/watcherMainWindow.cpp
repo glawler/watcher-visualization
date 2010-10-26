@@ -172,16 +172,20 @@ void MainWindow::seekStream(qlonglong t)
 void MainWindow::listStreams()
 {
     TRACE_ENTER();
-    if (!streamsDialog) {
-	streamsDialog = new WatcherStreamListDialog;
-	connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
-	connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
-	connect(streamsDialog, SIGNAL(reconnect()), this, SLOT(reconnect()));
-    }
-    streamsDialog->treeWidget->clear();
-    streamsDialog->show();
+    if (MsgStream->connected()) {
+	if (!streamsDialog) {
+	    streamsDialog = new WatcherStreamListDialog;
+	    connect(streamsDialog, SIGNAL(streamChanged(unsigned long)), this, SLOT(selectStream(unsigned long)));
+	    connect(streamsDialog->refreshButton, SIGNAL(clicked()), this, SLOT(listStreams()));
+	    connect(streamsDialog, SIGNAL(reconnect()), this, SLOT(reconnect()));
+	}
+	streamsDialog->treeWidget->clear();
+	streamsDialog->show();
 
-    MsgStream->listStreams();
+	MsgStream->listStreams();
+    } else {
+	LOG_WARN("unable to list streams; not connected to watcherd");
+    }
     TRACE_EXIT();
 }
 
@@ -190,9 +194,13 @@ void MainWindow::selectStream(unsigned long uid)
 {
     TRACE_ENTER();
     LOG_INFO("subscribing to new stream uid " << uid);
-    MsgStream->clearMessageCache();
-    MsgStream->subscribeToStream(uid);
-    closeAllGraphs();
+    if (MsgStream->connected()) {
+	MsgStream->clearMessageCache();
+	MsgStream->subscribeToStream(uid);
+	closeAllGraphs();
+    } else {
+	LOG_WARN("unable to select stream; not connected to watcherd");
+    }
     TRACE_EXIT();
 }
 
