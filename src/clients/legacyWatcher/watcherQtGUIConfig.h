@@ -53,6 +53,7 @@ namespace watcher
             void showPlaybackTime(bool isOn); 
             void showPlaybackRange(bool isOn); 
             void showWallTime(bool isOn); 
+            void toggleGlobalView(bool isOn); 
             void toggleGroundGrid(bool isOn); 
             void spawnBackgroundColorDialog(); 
             void setGPSScale(); 
@@ -63,6 +64,7 @@ namespace watcher
             void threeDViewToggled(bool threeDView);
             void monochromeToggled(bool monochromeMode);
             void backgroundImageToggled(bool backgroundImage);
+            void globalViewToggled(bool showGlobalView); 
             void groundGridToggled(bool showGroundGrid);
             void loopPlaybackToggled(bool autorewind);
             void enableStreamFiltering(bool messageStreamFiltering);
@@ -70,6 +72,7 @@ namespace watcher
             void checkPlaybackRange(bool showPlaybackRangeString);
             void checkWallTime(bool showWallTimeinStatusString);
             void enableBackgroundImage(bool backgroundImage);        // greys the GUI checkbox
+            void gpsScaleUpdated(double prevGpsScale); 
 
         protected: 
             DECLARE_LOGGER(); 

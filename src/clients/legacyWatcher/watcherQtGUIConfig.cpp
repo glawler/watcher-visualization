@@ -72,6 +72,11 @@ namespace watcher
         showWallTimeinStatusString=isOn;
         TRACE_EXIT();
     }
+    void WatcherQtGUIConfig::toggleGlobalView(bool isOn) {
+        TRACE_ENTER();
+        showGlobalView=isOn;
+        TRACE_EXIT();
+    }
     void WatcherQtGUIConfig::toggleGroundGrid(bool isOn) {
         TRACE_ENTER();
         showGroundGrid=isOn;
@@ -111,7 +116,10 @@ namespace watcher
 
         if (ok) {
             LOG_DEBUG("Setting GPS scale to " << value); 
+
+            double oldValue=gpsScale; 
             gpsScale=value;
+            emit gpsScaleUpdated(oldValue); 
 
             libconfig::Config &cfg=SingletonConfig::instance();
             SingletonConfig::lock();
@@ -161,6 +169,7 @@ namespace watcher
             emit threeDViewToggled(threeDView);
             emit monochromeToggled(monochromeMode);
             emit backgroundImageToggled(backgroundImage);
+            emit globalViewToggled(showGlobalView); 
             emit groundGridToggled(showGroundGrid);
             emit loopPlaybackToggled(autorewind);
             emit enableStreamFiltering(messageStreamFiltering);

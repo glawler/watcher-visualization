@@ -61,6 +61,7 @@ namespace watcher
             bool showVerboseStatusString;
             bool showDebugInfo;
             bool showStreamDescription;
+            bool showGlobalView;
 
             bool autorewind;
             bool messageStreamFiltering;
@@ -107,10 +108,18 @@ namespace watcher
              * when layers are added or toggled active.
              * bool==true when the layer should be active at start, 
              * false otherwise.
+             *
+             * InitialLayers -- the layers read from the config file in
+             * the order they were read. 
+             *
+             * ActiveLayers -- the current runtime state of layer "activeness". 
              */
-            typedef std::pair<std::string, bool> ActiveLayer;
-            typedef std::vector<ActiveLayer> InitialLayers;
-            InitialLayers initialLayers;
+            typedef std::pair<std::string, bool> InitialLayer;
+            typedef std::vector<InitialLayer> InitialLayers;     // a vector as order in important. 
+            InitialLayers initialLayers; 
+
+            typedef std::map<std::string, bool> ActiveLayers;      // a map as access by layer name is important. 
+            ActiveLayers activeLayers; 
 
         protected:
 

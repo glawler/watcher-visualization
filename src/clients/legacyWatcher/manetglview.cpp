@@ -909,72 +909,70 @@ void manetGLView::rotateZ(float deg)
     if(autoCenterNodesFlag)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
+
+void manetGLView::gpsScaleUpdated(double prevGpsScale)
+{
+    maxNodeArea[0]/=prevGpsScale;
+    maxNodeArea[1]/=prevGpsScale;
+    maxNodeArea[2]/=prevGpsScale;
+    minNodeArea[0]/=prevGpsScale;
+    minNodeArea[1]/=prevGpsScale;
+    minNodeArea[2]/=prevGpsScale;
+
+    maxNodeArea[0]*=conf->gpsScale;
+    maxNodeArea[1]*=conf->gpsScale;
+    maxNodeArea[2]*=conf->gpsScale;
+    minNodeArea[0]*=conf->gpsScale;
+    minNodeArea[1]*=conf->gpsScale;
+    minNodeArea[2]*=conf->gpsScale;
+}
+
 //static 
 bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMessage::DataFormat &format)
 {
-    // TRACE_ENTER();
+    LOG_DEBUG("Got GPS: long:" << x << " lat:" << y << " alt:" << z); 
+    const double inx=x, iny=y, inz=z;
 
-    double inx=x, iny=y, inz=z;
-
-    if (format==GPSMessage::UTM)
-    {
-        //
-        // There is no UTM zone information in the UTM GPS packet, so we assume all data is in a single
-        // zone. Because of this, no attempt is made to place the nodes in the correct positions on the 
-        // planet surface. We just use the "lat" "long" data as pure x and y coords in a plane, offset
-        // by the first coord we get. (Nodes are all centered around 0,0 where, 0,0 is defined 
-        // by the first coord we receive. 
-        //
-        // if (iny < 91 && inx > 0) 
-        //     LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
-
-        static double utmXOffset=0.0, utmYOffset=0.0;
-        static bool utmOffInit=false;
-        if (utmOffInit==false)
-        {
-            utmOffInit=true;
-            utmXOffset=inx;
-            utmYOffset=iny; 
-
-            LOG_INFO("Got first UTM coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" << utmXOffset << " y=" << utmYOffset);
-        }
-
-        x=inx-utmXOffset;
-        y=iny-utmYOffset;    
-        z=inz;
-
-        // LOG_DEBUG("UTM given locations: lon=" << location->lon << " lat=" << location->lat << " alt=" << location->alt);
-        // LOG_DEBUG("UTM node coords: x=" << us->x << " y=" << us->y << " z=" << us->z);
+    switch (format) { 
+        case GPSMessage::UTM: 
+            if (y < 91 && x > 0) 
+                LOG_WARN("Received GPS data that looks like lat/long in degrees, but GPS data format mode is set to UTM in cfg file."); 
+            break;
+        case GPSMessage::LAT_LONG_ALT_WGS84:
+            if (x > 180)  
+                LOG_WARN("Received GPS data (" << x << ", " << y << ", " << z << ") that may be UTM (long>180)"); 
+            break;
     }
-    else // default to lat/long/alt WGS84
-    {
-        if (inx > 180) 
-            LOG_WARN("Received GPS data (" << inx << ", " << iny << ", " << inz << ") that may be UTM (long>180), but GPS data format mode is set to lat/long degrees in cfg file."); 
 
-        x=inx*conf->gpsScale;
-        y=iny*conf->gpsScale;
-        z=inz;
+    // GTL - need to dynamically figure a good gps scaling factor based on current 
+    // max/min node area. 
+    x*=conf->gpsScale;
+    y*=conf->gpsScale;
 
-        static double xOff=0.0, yOff=0.0;
-        static bool xOffInit=false;
-        if (xOffInit==false)
-        {
-            xOffInit=true;
-            xOff=inx;
-            yOff=iny;
-
-            LOG_INFO("Got first Lat/Long coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" 
-                    << xOff << " y=" << yOff);
-        }
-
-        x-=xOff;
-        y-=yOff;
-
-        // LOG_DEBUG("Got GPS: long:" << location->lon << " lat:" << location->lat << " alt:" << location->alt); 
-        // LOG_DEBUG("translated GPS: x:" << us->x << " y:" << us->y << " z:" << us->z); 
+    // Center nodes close to the origin based on first datapoint recv'd. 
+    static double xOff=0.0, yOff=0.0;
+    static bool firstGPSPoint=false;
+    if (firstGPSPoint==false) {
+        firstGPSPoint=true;
+        xOff=x;
+        yOff=y;  
+        LOG_INFO("Got first Lat/Long coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" 
+                << xOff << " y=" << yOff);
     }
-    // LOG_DEBUG("Converted GPS from " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
-    // TRACE_EXIT();
+
+    x-=xOff;
+    y-=yOff; 
+
+    LOG_DEBUG("translated GPS: x:" << x << " y:" << y << " z:" << z); 
+
+    // GTL 
+    // Don't know if this is the smartest place for this. May want to just loop over
+    // all nodes once every few seconds in watcherIdle() or somesuch, instead.
+    if (x>maxNodeArea[0]) { maxNodeArea[0]=x; } else if (x<minNodeArea[0]) { minNodeArea[0]=x; } 
+    if (y>maxNodeArea[1]) { maxNodeArea[1]=y; } else if (y<minNodeArea[1]) { minNodeArea[1]=y; } 
+    if (z>maxNodeArea[2]) { maxNodeArea[2]=z; } else if (z<minNodeArea[2]) { minNodeArea[2]=z; } 
+
+    LOG_DEBUG("Converted GPS to opengl: " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
     return true;
 }
 
@@ -1000,6 +998,13 @@ manetGLView::manetGLView(QWidget *parent) :
 {
     TRACE_ENTER();
     setFocusPolicy(Qt::StrongFocus); // tab and click to focus
+
+    maxNodeArea[0]=numeric_limits<double>::min(); 
+    maxNodeArea[1]=numeric_limits<double>::min(); 
+    maxNodeArea[2]=numeric_limits<double>::min(); 
+    minNodeArea[0]=numeric_limits<double>::max(); 
+    minNodeArea[1]=numeric_limits<double>::max(); 
+    minNodeArea[2]=numeric_limits<double>::max(); 
 
     // Don't oeverwrite QPAinter...
     setAutoFillBackground(false);
@@ -1388,7 +1393,11 @@ void manetGLView::paintGL()
     }
     else 
     {
+        // Draw MANET normally.
         drawManet();
+
+        if (conf->showGlobalView)  
+            drawGlobalView(); 
 
         glPushMatrix();
         glPushAttrib(GL_ALL_ATTRIB_BITS); 
@@ -1578,10 +1587,69 @@ void manetGLView::drawGroundGrid()
     glPopMatrix();
 }
 
-void manetGLView::drawManet(void)
+void manetGLView::drawGlobalView()
 {
+    GLdouble wx=3*width()/4, ww=width()/4, wh=height()/4;
+    glViewport(wx, 0, ww, wh); 
+    glEnable(GL_SCISSOR_TEST); 
+    glScissor(wx, 0, ww, wh); 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(conf->rgbaBGColors[0], conf->rgbaBGColors[1], conf->rgbaBGColors[2], conf->rgbaBGColors[3]); 
+
+    glPushMatrix(); 
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glTranslatef(0.0, 0.0, -20.0);
+
+    // GTL figure scale from max/minNodeArea. 
+    glScalef(conf->manetAdjInit.scaleX, conf->manetAdjInit.scaleY, conf->manetAdjInit.scaleZ);
+    glTranslated( 
+        -(((abs(maxNodeArea[0]-minNodeArea[0]))/2.0)+minNodeArea[0]),
+        -(((abs(maxNodeArea[1]-minNodeArea[1]))/2.0)+minNodeArea[1]),
+        -30);   // GTL - figure out a z coord based on node area. 
+
+    if (conf->showGroundGrid)
+        drawGroundGrid();
+
+    // remove all but physical and one hop nbr layers for drawing.
+    for (size_t l=0; l<wGraph->numValidLayers; l++) {
+        if (wGraph->layers[l].layerName==PHYSICAL_LAYER || wGraph->layers[l].layerName==ONE_HOP_ROUTING_LAYER) 
+            wGraph->layers[l].isActive=true;
+        else
+            wGraph->layers[l].isActive=false;
+    }
+
+    // scale down the node label text. 
+    conf->scaleText/=4; 
+
+    drawGraph(wGraph);
+    
+    conf->scaleText*=4; 
+
+    // restore layers to correct activity state.
+    for (size_t l=0; l<wGraph->numValidLayers; l++) 
+        wGraph->layers[l].isActive=conf->activeLayers[wGraph->layers[l].layerName];
+
+    glDisable(GL_SCISSOR_TEST); 
+
+    // draw lines around the global view
+    // GTL - to do. 
+
+    glPopMatrix(); 
+    glViewport(0, 0, width(), height()); 
+}
+
+void manetGLView::drawManet(void)
+{
+    glViewport(0, 0, width(), height()); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(conf->rgbaBGColors[0], conf->rgbaBGColors[1], conf->rgbaBGColors[2], conf->rgbaBGColors[3]); 
+
+    // glMatrixMode(GL_PROJECTION); 
+    // glLoadIdentity(); 
+    // gluPerspective(40.0, GLfloat(width()) / GLfloat(height()), 1.0, 50.0);
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -1773,7 +1841,7 @@ void manetGLView::setWatcherGUIConfig(WatcherGUIConfig *c)
     wGraph->locationTranslationFunction=boost::bind(&manetGLView::gps2openGLPixels, this, _1, _2, _3, _4); 
     nodeConfigurationDialog->setGraph(wGraph);
 
-    BOOST_FOREACH(WatcherGUIConfig::InitialLayers::value_type const &l, conf->initialLayers)
+    BOOST_FOREACH(WatcherGUIConfig::ActiveLayers::value_type const &l, conf->initialLayers)
        addLayerMenuItem(l.first, l.second); 
 
     // 
@@ -2618,6 +2686,8 @@ void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
     }
     if (layerConfigurationDialog)
         layerConfigurationDialog->layerToggle(name); 
+
+    conf->activeLayers[name]=turnOn;
 
     TRACE_EXIT();
 }
