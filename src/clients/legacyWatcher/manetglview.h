@@ -100,6 +100,7 @@ class manetGLView : public QGLWidget
         void spawnNodeConfigurationDialog();
         void streamFilteringEnabled(bool isOn); 
         void shutdown(); 
+        void gpsScaleUpdated(double prevGpsScale); 
 
 signals:
         void positionReset();
@@ -185,6 +186,7 @@ signals:
         void drawNotConnectedState(); 
         bool autoCenterNodesFlag; 
         void drawManet(void);
+        void drawGlobalView();
         void drawGroundGrid();
         void drawGraph(watcher::WatcherGraph *&graph); 
         struct QuadranglePoint
@@ -278,6 +280,8 @@ signals:
         size_t prevClickedNodeId;
 
         bool loadConfiguration(); 
+
+        GLdouble maxNodeArea[3], minNodeArea[3]; 
 };
 
 #endif

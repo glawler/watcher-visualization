@@ -21,6 +21,7 @@ WatcherGUIConfig::WatcherGUIConfig() :
     showPlaybackTimeInStatusString(true),
     showPlaybackRangeString(true),
     showVerboseStatusString(false),
+    showGlobalView(false),
     showDebugInfo(false), 
     showStreamDescription(true),
     autorewind(false), 
@@ -95,12 +96,15 @@ bool WatcherGUIConfig::loadConfiguration()
             bool val=true;
             if (!layers.lookupValue(name, val))
                 layers.add(name, libconfig::Setting::TypeBoolean)=val;  // Shouldn't happen unless misformed cfg file. 
-            initialLayers.push_back(ActiveLayer(name, val)); 
+            activeLayers[name]=val; 
+            initialLayers.push_back(InitialLayer(name, val)); 
             if (name==event::PHYSICAL_LAYER) 
                 foundPhy=true;
         }
-        if (!foundPhy) 
-            initialLayers.push_back(ActiveLayer(event::PHYSICAL_LAYER, true)); 
+        if (!foundPhy) { 
+            activeLayers[event::PHYSICAL_LAYER]=true; 
+            initialLayers.push_back(InitialLayer(event::PHYSICAL_LAYER, true)); 
+        }
 
         struct 
         {
@@ -112,6 +116,7 @@ bool WatcherGUIConfig::loadConfiguration()
             { "nodes3d", true, &threeDView },
             { "monochrome", false, &monochromeMode }, 
             { "displayBackgroundImage", true, &backgroundImage },
+            { "showGlobalView", false, &showGlobalView },
             { "showGroundGrid", false, &showGroundGrid },
             { "showVerboseStatusString", false, &showVerboseStatusString }, 
             { "showWallTime", true, &showWallTimeinStatusString }, 
@@ -350,6 +355,7 @@ bool WatcherGUIConfig::saveConfiguration()
             { "nodes3d",        threeDView },
             { "monochrome",     monochromeMode },
             { "displayBackgroundImage", backgroundImage },
+            { "showGlobalView", showGlobalView },
             { "showGroundGrid", showGroundGrid },
             { "showVerboseStatusString", showVerboseStatusString }, 
             { "showWallTime", showWallTimeinStatusString }, 

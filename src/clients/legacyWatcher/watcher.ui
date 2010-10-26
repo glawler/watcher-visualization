@@ -344,6 +344,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="action3DNodes"/>
     <addaction name="actionMonochrome"/>
     <addaction name="actionBackgroundImage"/>
+    <addaction name="actionGlobal_View"/>
     <addaction name="actionGroundGrid"/>
     <addaction name="separator"/>
     <addaction name="actionWallTime"/>
@@ -553,6 +554,14 @@ p, li { white-space: pre-wrap; }
     <string>Ground Grid</string>
    </property>
   </action>
+  <action name="actionGlobal_View">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Global View</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -571,6 +580,7 @@ p, li { white-space: pre-wrap; }
     <slot>spawnNodeConfigurationDialog()</slot>
     <slot>spawnBackgroundColorDialog()</slot>
     <slot>streamFilteringEnabled(bool)</slot>
+    <slot>gpsScaleUpdated(double)</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -588,6 +598,8 @@ p, li { white-space: pre-wrap; }
     <signal>checkWallTime(bool)</signal>
     <signal>groundGridToggled(bool)</signal>
     <signal>enableStreamFiltering(bool)</signal>
+    <signal>gpsScaleUpdated(double)</signal>
+    <signal>globalViewToggled(bool)</signal>
     <slot>toggleMonochrome(bool)</slot>
     <slot>toggleThreeDView(bool)</slot>
     <slot>toggleBackgroundImage(bool)</slot>
@@ -600,6 +612,7 @@ p, li { white-space: pre-wrap; }
     <slot>streamFilteringEnabled(bool)</slot>
     <slot>setGPSScale()</slot>
     <slot>loadBackgroundImage()</slot>
+    <slot>toggleGlobalView(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -1346,6 +1359,54 @@ p, li { white-space: pre-wrap; }
     <hint type="sourcelabel">
      <x>464</x>
      <y>373</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>14</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>gpsScaleUpdated(double)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>gpsScaleUpdated(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>14</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>373</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>globalViewToggled(bool)</signal>
+   <receiver>actionGlobal_View</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>14</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGlobal_View</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>toggleGlobalView(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>14</x>
