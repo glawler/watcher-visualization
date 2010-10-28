@@ -59,9 +59,9 @@ namespace watcher
             bool showPlaybackTimeInStatusString;
             bool showPlaybackRangeString;
             bool showVerboseStatusString;
+            bool showGlobalView;
             bool showDebugInfo;
             bool showStreamDescription;
-            bool showGlobalView;
 
             bool autorewind;
             bool messageStreamFiltering;

@@ -1646,10 +1646,6 @@ void manetGLView::drawManet(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(conf->rgbaBGColors[0], conf->rgbaBGColors[1], conf->rgbaBGColors[2], conf->rgbaBGColors[3]); 
 
-    // glMatrixMode(GL_PROJECTION); 
-    // glLoadIdentity(); 
-    // gluPerspective(40.0, GLfloat(width()) / GLfloat(height()), 1.0, 50.0);
-
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -2130,14 +2126,17 @@ void manetGLView::drawLabel(GLfloat inx, GLfloat iny, GLfloat inz, const LabelDi
 void manetGLView::resizeGL(int width, int height)
 {
     TRACE_ENTER();
-    // GLint viewport[4];
-    // glGetIntegerv(GL_VIEWPORT, viewport);
-    // fprintf(stderr, "Reshape cur (%d, %d)\n", viewport[2], viewport[3]);
-    // fprintf(stderr, "Reshape given (%d, %d)\n", awidth, aheight);
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(40.0, GLfloat(width) / GLfloat(height), 1.0, 50.0);
+    if (conf->showGlobalView) {
+        GLdouble wx=3*width/4, ww=width/4, wh=height/4;
+        glViewport(wx, 0, ww, wh); 
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(40.0, GLfloat(width) / GLfloat(height), 1.0, 50.0);
+    }
     if(autoCenterNodesFlag) 
         scaleAndShiftToCenter(ScaleAndShiftUpdateOnChange);
 
