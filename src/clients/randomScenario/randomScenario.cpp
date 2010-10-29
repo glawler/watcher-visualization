@@ -98,17 +98,22 @@ int main(int argc, char **argv)
         GPSMessagePtr gpsMess(GPSMessagePtr(new GPSMessage)); 
         ConnectivityMessagePtr connMess(ConnectivityMessagePtr(new ConnectivityMessage));
 
+        struct timeval now;
+        gettimeofday(&now, NULL);
+
         for (int i=0; i<nodeNum; i++) {
             NodeIdentifier nid=boost::asio::ip::address_v4::address_v4(i+1);
             gpsMess->x=positions[i].x/60000.0;  // make it look like GPS data. 
             gpsMess->y=positions[i].y/60000.0; 
             gpsMess->z=positions[i].z; 
             gpsMess->fromNodeID=nid;
+            gpsMess->timestamp=((long long int)now.tv_sec*1000)+((long long int)now.tv_usec/1000)-(rand()%500); // introduce some jitter.
             if (!client.sendMessage(gpsMess)) 
                 cerr << "Error sending gps message #" << i << endl;
 
             if (rand()%100 <= (unsigned int)nodeLabelPercentage) { 
                 LabelMessagePtr lm(new LabelMessage("Label", nid)); 
+                lm->layer="RandomLabels";
                 if (!client.sendMessage(lm)) 
                     cerr << "Error sending node label message"; 
             }
@@ -126,6 +131,7 @@ int main(int argc, char **argv)
                         cout << nbr->to_string() << " ";
                     cout << endl;
                 }
+                connMess->timestamp=gpsMess->timestamp; 
                 if (!client.sendMessage(connMess)) 
                     cerr << "Error sending connectivity message." << endl;
                 connMess->neighbors.clear();
