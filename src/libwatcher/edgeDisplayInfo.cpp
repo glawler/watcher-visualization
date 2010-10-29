@@ -134,7 +134,7 @@ void EdgeDisplayInfo::saveConfiguration() const
         edgeSetting["labelColor"]=labelColor.toString(); 
     }
     catch (const SettingException &e) {
-        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+        LOG_ERROR("Error saving configuration at " << e.getPath() << ": " << e.what() << "  " << __FILE__ << ":" << __LINE__);
     }
 
     TRACE_EXIT();

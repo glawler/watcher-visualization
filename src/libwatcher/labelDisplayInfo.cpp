@@ -160,7 +160,7 @@ void LabelDisplayInfo::saveConfiguration() const
         labelSetting["pointSize"]=pointSize;
     }
     catch (const SettingException &e) {
-        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+        LOG_ERROR("Error saving configuration at " << e.getPath() << ": " << e.what() << "  " << __FILE__ << ":" << __LINE__);
     }
 
     TRACE_EXIT();

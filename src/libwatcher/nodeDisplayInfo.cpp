@@ -238,7 +238,7 @@ void NodeDisplayInfo::saveConfiguration() const
         nodeSetting["labelPointSize"]=labelPointSize;
     }
     catch (const SettingException &e) {
-        LOG_ERROR("Error in configuration setting \"" << e.getPath() << "\"");
+        LOG_ERROR("Error saving configuration at " << e.getPath() << ": " << e.what() << "  " << __FILE__ << ":" << __LINE__);
     }
 }
 

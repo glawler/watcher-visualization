@@ -31,6 +31,7 @@
 #include "edgeMessage.h"
 #include "colorMessage.h"
 #include "singletonConfig.h"
+#include "messageTypesAndVersions.h"
 
 using namespace std;
 using namespace boost;
@@ -90,11 +91,14 @@ bool WatcherGraph::layerExists(const std::string &name) const
 }
 size_t WatcherGraph::name2LayerIndex(const std::string &name) 
 {
+    if (name.empty()) {         // shouldn't happen, but need to protect ourselves.
+        return name2LayerIndex(UNDEFINED_LAYER); // all unknowns are pushed unto the undefined layer
+    }
     Name2LayerIndexMap::const_iterator layer=layerIndexMap.find(name);
     if (layer==layerIndexMap.end()) { 
         if (numValidLayers==maxNumLayers) { // adding this layer would go past static layers array.
             LOG_FATAL("Requested access to layer " << name << " which doesn't exist. Creating the layer would cause us to go past the hard limit of "
-                      << maxNumLayers << " specified in the configuration file. Please increase this number and re-run."); 
+                    << maxNumLayers << " specified in the configuration file. Please increase this number and re-run."); 
             LOG_FATAL("Current layers:"); 
             for (size_t l=0; l<numValidLayers; l++) 
                 LOG_FATAL("\t" << layers[l].layerName); 
@@ -102,6 +106,7 @@ size_t WatcherGraph::name2LayerIndex(const std::string &name)
         }
         layers[numValidLayers].initialize(name, maxNumNodes);  // will exit() on error
         layerIndexMap[name]=numValidLayers; 
+        LOG_DEBUG("new layer added: " << name << " at location " << numValidLayers); 
         numValidLayers++;
         return numValidLayers-1;
     }
@@ -427,14 +432,19 @@ bool WatcherGraph::saveConfiguration(void)
     if (numValidLayers) { 
         SingletonConfig::lock(); 
         libconfig::Config &cfg=SingletonConfig::instance();
-        string prop("layers"); 
-        if (!cfg.getRoot().exists(prop))
-            cfg.getRoot().add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &layerCfg=cfg.lookup(prop); 
-        for (size_t l=0; l!=numValidLayers; l++)  {
-            if (!layerCfg.exists(layers[l].layerName))
-                layerCfg.add(layers[l].layerName, libconfig::Setting::TypeBoolean);
-            layerCfg[layers[l].layerName]=layers[l].isActive;
+        try { 
+            string prop("layers"); 
+            if (!cfg.getRoot().exists(prop))
+                cfg.getRoot().add(prop, libconfig::Setting::TypeGroup);
+            libconfig::Setting &layerCfg=cfg.lookup(prop); 
+            for (size_t l=0; l!=numValidLayers; l++)  {
+                if (!layerCfg.exists(layers[l].layerName))
+                    layerCfg.add(layers[l].layerName, libconfig::Setting::TypeBoolean);
+                layerCfg[layers[l].layerName]=layers[l].isActive;
+            }
+        }
+        catch (const libconfig::SettingException &e) {
+            LOG_ERROR("Error saving configuration at " << e.getPath() << ": " << e.what() << "  " << __FILE__ << ":" << __LINE__); 
         }
         SingletonConfig::unlock();
     }
