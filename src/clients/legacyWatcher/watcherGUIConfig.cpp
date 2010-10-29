@@ -168,7 +168,7 @@ bool WatcherGUIConfig::loadConfiguration()
             { "scaleText", 1.0, &scaleText }, 
             { "scaleLine", 1.0, &scaleLine }, 
             { "layerPadding", 1.0, &layerPadding }, 
-            { "gpsScale", 80000.0, &gpsScale }, 
+            { "gpsScale", 512.0, &gpsScale }, 
             { "antennaRadius", 200.0, &antennaRadius },
             { "ghostLayerTransparency", 0.15, &ghostLayerTransparency }
         }; 

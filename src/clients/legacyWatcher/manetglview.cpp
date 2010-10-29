@@ -1072,6 +1072,8 @@ void manetGLView::shutdown()
 
 void manetGLView::newLayerConnect(const QString name) 
 {
+    LOG_DEBUG("New layer connected: " << name.toStdString()); 
+
     QAction *action=new QAction(name, (QObject*)this);
     action->setCheckable(true);
 
@@ -1112,6 +1114,7 @@ void manetGLView::addLayerMenuItem(const GUILayer &layer, bool active)
     TRACE_ENTER();
 
     if (layerMenu) {
+        LOG_DEBUG("Adding " << (active?"checked":"unchecked") << " layer menu item for layer " << layer); 
         if (!wGraph->layerExists(layer)) {
             size_t l=wGraph->name2LayerIndex(layer);
             wGraph->layers[l].isActive=active;
@@ -1227,7 +1230,7 @@ void manetGLView::connectStream()
             }
         }
 
-	setupStream();
+        setupStream();
 
         // spawn work threads
         if (!checkIOThread) 
@@ -1235,14 +1238,14 @@ void manetGLView::connectStream()
         if (!maintainGraphThread) 
             maintainGraphThread=new boost::thread(boost::bind(&manetGLView::maintainGraph, this));
 
-	/* check every two seconds that the connection is still alive */
+        /* check every two seconds that the connection is still alive */
         do {
             sleep(2); 
             this_thread::interruption_point();
             if (!messageStream || !messageStream->connected()) {
-		LOG_INFO("connection to server lost, reconnecting");
+                LOG_INFO("connection to server lost, reconnecting");
                 break;
-	    }
+            }
         } while (true);
     }
     TRACE_EXIT();

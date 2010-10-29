@@ -130,6 +130,7 @@ namespace watcher
         TRACE_EXIT();
     }
     bool WatcherQtGUIConfig::loadConfiguration() {
+        // base class will load most everything for us.
         if (WatcherGUIConfig::loadConfiguration()) {
             libconfig::Config &cfg=SingletonConfig::instance();
             SingletonConfig::lock();
@@ -166,6 +167,7 @@ namespace watcher
             SingletonConfig::unlock();
 
             // Let anyone who's interested in the config get notified of init settings.
+            // (These values were loaded by WatcherGUIConfig::loadConfiguration().
             emit threeDViewToggled(threeDView);
             emit monochromeToggled(monochromeMode);
             emit backgroundImageToggled(backgroundImage);
