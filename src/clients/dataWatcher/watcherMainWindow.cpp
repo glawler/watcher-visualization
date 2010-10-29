@@ -46,6 +46,8 @@ Timestamp MaxTS; // the timestamp of the last event in the stream
 Timestamp CurrentTS;
 MessageStreamPtr MsgStream;
 
+const char *streamDesc="data Watcher"; 
+
 MainWindow::MainWindow() : checkIOThread(0), streamsDialog(0)
 {
     TRACE_ENTER();
@@ -82,7 +84,7 @@ void MainWindow::checkIO()
     MsgStream->connect(true);
     MsgStream->getMessageTimeRange();
     if (watcher::config::StreamUid == -1) {
-	MsgStream->setDescription("data Watcher");
+	MsgStream->setDescription(streamDesc); 
 	MsgStream->startStream();
     } else {
 	MsgStream->subscribeToStream(watcher::config::StreamUid);
@@ -211,6 +213,7 @@ void MainWindow::reconnect()
     LOG_INFO("reconnecting to server upon user request");
     MsgStream->clearMessageCache();
     MsgStream->reconnect();
+    MsgStream->setDescription(streamDesc);
     closeAllGraphs();
     TRACE_EXIT();
 }
