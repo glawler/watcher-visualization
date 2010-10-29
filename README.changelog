@@ -1,3 +1,19 @@
+Versions 0.6.5.2:
+- watcher
+    - added crude global view option. Displays a global view of the playing field in the 
+    lower right of the window when toggled.
+    - adde click to zoom functionality. When the user control-double-clicks on a node, 
+    the display will zoom into that node. 
+    - gpsScale now takes into account the size of the current playing field, so the
+    value is more reasonable: 50-1000 instead of 1-80000. A single value should work for 
+    most mobility scenarios. 
+- other
+    - randomScenario: make gps look like gps data instead of meters from 0,0,0. renamed 
+    width/height/depth command line args to --eastWest (-E), --northSouth (-N), and 
+    --upDown (-U) to make things clearer
+Versions 0.6.5.1:
+- other
+    - bug fix for build system. Was attempting to build gps2eventdb in a test node only build. 
 Versions 0.6.5:
 - dataWatcher
     - now it exists. 
