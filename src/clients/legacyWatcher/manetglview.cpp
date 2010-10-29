@@ -910,21 +910,14 @@ void manetGLView::rotateZ(float deg)
         scaleAndShiftToCenter(ScaleAndShiftUpdateAlways);
 } 
 
-void manetGLView::gpsScaleUpdated(double prevGpsScale)
+void manetGLView::gpsScaleUpdated(double /* prevGpsScale */)
 {
-    maxNodeArea[0]/=prevGpsScale;
-    maxNodeArea[1]/=prevGpsScale;
-    maxNodeArea[2]/=prevGpsScale;
-    minNodeArea[0]/=prevGpsScale;
-    minNodeArea[1]/=prevGpsScale;
-    minNodeArea[2]/=prevGpsScale;
-
-    maxNodeArea[0]*=conf->gpsScale;
-    maxNodeArea[1]*=conf->gpsScale;
-    maxNodeArea[2]*=conf->gpsScale;
-    minNodeArea[0]*=conf->gpsScale;
-    minNodeArea[1]*=conf->gpsScale;
-    minNodeArea[2]*=conf->gpsScale;
+    maxNodeArea[0]=numeric_limits<double>::min(); 
+    maxNodeArea[1]=numeric_limits<double>::min(); 
+    maxNodeArea[2]=numeric_limits<double>::min(); 
+    minNodeArea[0]=numeric_limits<double>::max(); 
+    minNodeArea[1]=numeric_limits<double>::max(); 
+    minNodeArea[2]=numeric_limits<double>::max(); 
 }
 
 //static 
@@ -967,9 +960,8 @@ bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMes
 
     // GTL - need to dynamically figure a good gps scaling factor based on current 
     // max/min node area. 
-    const double maxSize=conf->gpsScale;
-    x*=(maxSize-xOrig)/(maxNodeArea[0]-minNodeArea[0]); 
-    y*=(maxSize-yOrig)/(maxNodeArea[1]-minNodeArea[1]); 
+    x*=(conf->gpsScale-xOrig)/(maxNodeArea[0]-minNodeArea[0]); 
+    y*=(conf->gpsScale-yOrig)/(maxNodeArea[1]-minNodeArea[1]); 
 
     // x*=conf->gpsScale;
     // y*=conf->gpsScale;
@@ -1569,11 +1561,8 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
 
 void manetGLView::drawGroundGrid()
 {
-    
     glDisable(GL_LIGHTING); 
     glPushMatrix();
-    GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
-    glGetFloatv(GL_CURRENT_COLOR, cols);
     const GLfloat black[]={0.0,0.0,0.0,1.0};
     if (conf->monochromeMode)
         glColor4fv(black);
@@ -1592,7 +1581,6 @@ void manetGLView::drawGroundGrid()
         glVertex2f(i, i*2*w); 
     }
     glEnd(); 
-    glColor4fv(cols);
     glPopMatrix();
     glEnable(GL_LIGHTING); 
 }
@@ -1617,7 +1605,7 @@ void manetGLView::drawGlobalView()
     glTranslated( 
         -(((abs(maxNodeArea[0]-minNodeArea[0]))/2.0)+minNodeArea[0]),
         -(((abs(maxNodeArea[1]-minNodeArea[1]))/2.0)+minNodeArea[1]),
-        -30);   // GTL - figure out a z coord based on node area. 
+        -(((abs(maxNodeArea[0]-minNodeArea[0]))/2.0)+minNodeArea[0])*2); 
 
     if (conf->showGroundGrid)
         drawGroundGrid();
@@ -1641,11 +1629,35 @@ void manetGLView::drawGlobalView()
     for (size_t l=0; l<wGraph->numValidLayers; l++) 
         wGraph->layers[l].isActive=conf->activeLayers[wGraph->layers[l].layerName];
 
-    glDisable(GL_SCISSOR_TEST); 
 
     // draw lines around the global view
-    // GTL - to do. 
+    GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, cols);
+    glMatrixMode(GL_MODELVIEW); 
+    glPushMatrix(); 
+        glLoadIdentity(); 
+        glMatrixMode(GL_PROJECTION); 
+        glDisable(GL_LIGHTING); 
+        glPushMatrix(); 
+            glLoadIdentity();
+            if (cols[0]==1.0 && cols[1]==1.0 && cols[2]==1.0)  // if white
+                glColor4f(0.0, 0.0, 0.0, 1.0);                 // draw black
+            else                                               // else 
+                glColor4f(1.0, 1.0, 1.0, 1.0);                 // draw white
+            glLineWidth(5.0);
+            glBegin(GL_LINE_LOOP);
+                glVertex2f(-1.0, -1.0);
+                glVertex2f( 1.0, -1.0);
+                glVertex2f( 1.0,  1.0);
+                glVertex2f(-1.0,  1.0); 
+            glEnd();
+            glLineWidth(1.0); 
+        glPopMatrix(); 
+        glMatrixMode(GL_MODELVIEW); 
+        glEnable(GL_LIGHTING); 
+    glPopMatrix(); 
 
+    glDisable(GL_SCISSOR_TEST); 
     glPopMatrix(); 
     glViewport(0, 0, width(), height()); 
 }
