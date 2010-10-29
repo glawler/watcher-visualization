@@ -21,7 +21,7 @@ namespace po=boost::program_options;
 namespace rs=randomScenario;
 
 typedef struct {
-    double x, y, z;
+    double x, y, z;  // in positive meters from 0,0,0 in cartiesian space
     double speed;
     double theta;
     double phi;
@@ -31,9 +31,9 @@ void computeEdges(unsigned int *edges, const NodePos *nodes, const unsigned int 
 void doMobility(NodePos *nodes, const unsigned int nodeNum);
 
 static bool debug=false;
-static unsigned int maxWidth=0;
-static unsigned int maxHeight=0;
-static unsigned int maxDepth=0; 
+static unsigned int maxEastWest=0;
+static unsigned int maxNorthSouth=0; 
+static unsigned int maxUpDown=0;
 static unsigned int radius=0;
 
 int main(int argc, char **argv) 
@@ -53,9 +53,9 @@ int main(int argc, char **argv)
     unsigned int layerNum=config["layerNum"].as<unsigned int>();
     int duration=config["duration"].as<int>(); 
     string server=config["server"].as<string>(); 
-    maxWidth=config["width"].as<unsigned int>();
-    maxHeight=config["height"].as<unsigned int>();
-    maxDepth=config["depth"].as<unsigned int>();
+    maxEastWest=config["eastWest"].as<unsigned int>();
+    maxNorthSouth=config["northSouth"].as<unsigned int>();
+    maxUpDown=config["upDown"].as<unsigned int>();
     radius=config["radius"].as<unsigned int>();
     debug=config["debug"].as<bool>();
 
@@ -76,9 +76,9 @@ int main(int argc, char **argv)
 
     // init positions
     for (int i=0; i<nodeNum; i++) {
-        positions[i].x=rand()%maxWidth; 
-        positions[i].y=rand()%maxHeight; 
-        positions[i].z=rand()%maxDepth; 
+        positions[i].x=rand()%maxEastWest; 
+        positions[i].y=rand()%maxNorthSouth; 
+        positions[i].z=rand()%maxUpDown; 
         positions[i].speed=(rand()%(maxSpeed-minSpeed))+minSpeed; 
         positions[i].theta=((rand()%(((int)M_PI*100)*2))-((int)M_PI*100))/100.0;     // random # between -PI..PI w/2 sig digits
         positions[i].phi=((rand()%(((int)M_PI*50)*2))-((int)M_PI*50))/100.0;         // random # between -PI/2..PI/2 w/2 sig digits
@@ -100,8 +100,8 @@ int main(int argc, char **argv)
 
         for (int i=0; i<nodeNum; i++) {
             NodeIdentifier nid=boost::asio::ip::address_v4::address_v4(i+1);
-            gpsMess->x=positions[i].x;
-            gpsMess->y=positions[i].y;
+            gpsMess->x=positions[i].x/60000.0;  // make it look like GPS data. 
+            gpsMess->y=positions[i].y/60000.0; 
             gpsMess->z=positions[i].z; 
             gpsMess->fromNodeID=nid;
             if (!client.sendMessage(gpsMess)) 
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
             // All layers have the same edges. How to fix this? radius per layer maybe?
             for (unsigned int l=0; l<layerNum; l++) {
                 connMess->fromNodeID=nid;
-                connMess->layer="ConnectivityMessages_" + boost::lexical_cast<string>(l);
+                connMess->layer="RandScenConn" + boost::lexical_cast<string>(l);
                 for (int j=0; j<nodeNum; j++)  
                     if (*(edges+(i*nodeNum)+j)) 
                         connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4(j+1)); 
@@ -184,9 +184,9 @@ void doMobility(NodePos *nodes, const unsigned int nodeNum)
         nodes[i].y+=sin(nodes[i].theta)*nodes[i].speed;
         nodes[i].z+=sin(nodes[i].phi)*nodes[i].speed;
 
-        nodes[i].x=nodes[i].x>maxWidth ?nodes[i].x-maxWidth :nodes[i].x<0? maxWidth-nodes[i].x:nodes[i].x;
-        nodes[i].y=nodes[i].y>maxHeight?nodes[i].y-maxHeight:nodes[i].y<0?maxHeight-nodes[i].y:nodes[i].y;
-        nodes[i].z=nodes[i].z>maxDepth ?nodes[i].z-maxDepth :nodes[i].z<0? maxDepth-nodes[i].z:nodes[i].z;
+        nodes[i].x=nodes[i].x>maxEastWest ?nodes[i].x-maxEastWest :nodes[i].x<0? maxEastWest-nodes[i].x:nodes[i].x;
+        nodes[i].y=nodes[i].y>maxNorthSouth ?nodes[i].y-maxNorthSouth :nodes[i].y<0? maxNorthSouth-nodes[i].y:nodes[i].y;
+        nodes[i].z=nodes[i].z>maxUpDown?nodes[i].z-maxUpDown:nodes[i].z<0?maxUpDown-nodes[i].z:nodes[i].z;
     }
     if (debug) 
         cout << "node 1 new position: " << nodes[0].x << ", " << nodes[0].y << ", " << nodes[0].z << endl;
