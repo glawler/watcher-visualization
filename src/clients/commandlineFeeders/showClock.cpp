@@ -99,6 +99,7 @@ int main(int argc, char **argv)
     bool showSecondRing=true, showHourRing=true;
     double offsetLong=0, offsetLat=0;
     double gpsScale=1;
+    const double coordToGpsFactor=60000.0;
     // dataPoint values for each node
     int minuteDP[60] = {0,};
     int secDP[60] = {0,};
@@ -208,7 +209,7 @@ int main(int argc, char **argv)
         vector<MessagePtr> messages; 
 
         // Draw center node
-        GPSMessagePtr gpsMess(new GPSMessage(gpsScale*(offsetLong+radius), gpsScale*(offsetLat+radius), 0));
+        GPSMessagePtr gpsMess(new GPSMessage((gpsScale*(offsetLong+radius))/coordToGpsFactor, (gpsScale*(offsetLat+radius))/coordToGpsFactor, 0));
         gpsMess->layer=hourLayer; // meh.
         gpsMess->fromNodeID=centerId;
 
@@ -227,8 +228,8 @@ int main(int argc, char **argv)
 
             // Move hour. min, and sec nodes to appropriate locations. 
             GPSMessagePtr gpsMess(new GPSMessage(
-                        gpsScale*(offsetLong+(sin(nodeData[i].theta)*nodeData[i].length)+radius), 
-                        gpsScale*(offsetLat+(cos(nodeData[i].theta)*nodeData[i].length)+radius), 
+                        (gpsScale*(offsetLong+(sin(nodeData[i].theta)*nodeData[i].length)+radius))/coordToGpsFactor, 
+                        (gpsScale*(offsetLat+(cos(nodeData[i].theta)*nodeData[i].length)+radius))/coordToGpsFactor, 
                         (double)i));
             gpsMess->layer=nodeData[i].layer;
             gpsMess->fromNodeID=*nodeData[i].id;
@@ -281,8 +282,8 @@ int main(int argc, char **argv)
             {
                 NodeIdentifier thisId=NodeIdentifier::from_string("192.168.2." + lexical_cast<string>(i+1));
                 GPSMessagePtr gpsMess(new GPSMessage(
-                            gpsScale*(offsetLong+((sin(theta)*radius)+radius)), 
-                            gpsScale*(offsetLat+((cos(theta)*radius)+radius)), 
+                            (gpsScale*(offsetLong+((sin(theta)*radius)+radius)))/coordToGpsFactor, 
+                            (gpsScale*(offsetLat+((cos(theta)*radius)+radius)))/coordToGpsFactor, 
                             0.0));
                 gpsMess->layer=hourRingLayer;
                 gpsMess->fromNodeID=thisId;
@@ -300,8 +301,8 @@ int main(int argc, char **argv)
                 NodeIdentifier thisId=NodeIdentifier::from_string("192.168.3." + lexical_cast<string>(i+1));
                 double faceRad=radius*1.15;
                 GPSMessagePtr gpsMess(new GPSMessage(
-                            gpsScale*(offsetLong+((sin(theta)*faceRad)+radius)), 
-                            gpsScale*(offsetLat+((cos(theta)*faceRad)+radius)), 0.0)); 
+                            (gpsScale*(offsetLong+((sin(theta)*faceRad)+radius)))/coordToGpsFactor, 
+                            (gpsScale*(offsetLat+((cos(theta)*faceRad)+radius)))/coordToGpsFactor, 0.0)); 
                 gpsMess->layer=secRingLayer;
                 gpsMess->fromNodeID=thisId;
 
