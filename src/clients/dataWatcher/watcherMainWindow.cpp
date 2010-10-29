@@ -214,6 +214,7 @@ void MainWindow::reconnect()
     MsgStream->clearMessageCache();
     MsgStream->reconnect();
     MsgStream->setDescription(streamDesc);
+	MsgStream->startStream();
     closeAllGraphs();
     TRACE_EXIT();
 }
