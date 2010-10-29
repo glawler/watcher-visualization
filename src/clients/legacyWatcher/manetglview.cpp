@@ -944,26 +944,16 @@ bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMes
             break;
     }
 
-    // GTL - need to dynamically figure a good gps scaling factor based on current 
-    // max/min node area. 
-    x*=conf->gpsScale;
-    y*=conf->gpsScale;
-
     // Center nodes close to the origin based on first datapoint recv'd. 
-    static double xOff=0.0, yOff=0.0;
+    static double xOrig=0.0, yOrig=0.0;
     static bool firstGPSPoint=false;
     if (firstGPSPoint==false) {
         firstGPSPoint=true;
-        xOff=x;
-        yOff=y;  
+        xOrig=x;
+        yOrig=y;  
         LOG_INFO("Got first Lat/Long coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" 
-                << xOff << " y=" << yOff);
+                << xOrig << " y=" << yOrig);
     }
-
-    x-=xOff;
-    y-=yOff; 
-
-    LOG_DEBUG("translated GPS: x:" << x << " y:" << y << " z:" << z); 
 
     // GTL 
     // Don't know if this is the smartest place for this. May want to just loop over
@@ -971,6 +961,20 @@ bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMes
     if (x>maxNodeArea[0]) { maxNodeArea[0]=x; } else if (x<minNodeArea[0]) { minNodeArea[0]=x; } 
     if (y>maxNodeArea[1]) { maxNodeArea[1]=y; } else if (y<minNodeArea[1]) { minNodeArea[1]=y; } 
     if (z>maxNodeArea[2]) { maxNodeArea[2]=z; } else if (z<minNodeArea[2]) { minNodeArea[2]=z; } 
+
+    x-=xOrig;
+    y-=yOrig; 
+
+    // GTL - need to dynamically figure a good gps scaling factor based on current 
+    // max/min node area. 
+    const double maxSize=conf->gpsScale;
+    x*=(maxSize-xOrig)/(maxNodeArea[0]-minNodeArea[0]); 
+    y*=(maxSize-yOrig)/(maxNodeArea[1]-minNodeArea[1]); 
+
+    // x*=conf->gpsScale;
+    // y*=conf->gpsScale;
+
+    LOG_DEBUG("translated GPS: x:" << x << " y:" << y << " z:" << z); 
 
     LOG_DEBUG("Converted GPS to opengl: " << inx << ", " << iny << ", " << inz << " to " << x << ", " << y << ", " << z); 
     return true;
@@ -1562,6 +1566,8 @@ void manetGLView::drawText( GLdouble x, GLdouble y, GLdouble z, GLdouble scale, 
 
 void manetGLView::drawGroundGrid()
 {
+    
+    glDisable(GL_LIGHTING); 
     glPushMatrix();
     GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
     glGetFloatv(GL_CURRENT_COLOR, cols);
@@ -1585,6 +1591,7 @@ void manetGLView::drawGroundGrid()
     glEnd(); 
     glColor4fv(cols);
     glPopMatrix();
+    glEnable(GL_LIGHTING); 
 }
 
 void manetGLView::drawGlobalView()
