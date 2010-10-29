@@ -41,7 +41,7 @@ namespace watcher {
             background(colors::black),
             expiration(0),
             addLabel(true),
-            layer(),
+            layer(UNDEFINED_LAYER),
             lat(0),
             lng(0),
             alt(0)
@@ -58,7 +58,7 @@ namespace watcher {
             background(colors::black),
             expiration(0),
             addLabel(true),
-            layer(),
+            layer(UNDEFINED_LAYER),
             lat(0),
             lng(0),
             alt(0)
@@ -76,7 +76,7 @@ namespace watcher {
             background(colors::black),
             expiration(0),
             addLabel(true),
-            layer(),
+            layer(UNDEFINED_LAYER), 
             lat(lat_),
             lng(lng_),
             alt(alt_)
