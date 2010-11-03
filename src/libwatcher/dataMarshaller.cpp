@@ -185,7 +185,7 @@ bool DataMarshaller::marshalPayload(const vector<MessagePtr> &messages, NetworkM
 
     // Add serialized Messages first, then prepend the header once we know 
     // how large the payload will be.
-    size_t payloadSize=0;
+    uint32_t payloadSize=0;
     unsigned short messageNum=messages.size(); 
 
     // Putting each Message in a separate buffer may speed up sent/recv as
@@ -197,7 +197,7 @@ bool DataMarshaller::marshalPayload(const vector<MessagePtr> &messages, NetworkM
     {
         (*m)->pack(os); 
         s = os.str();
-        payloadSize += s.size(); 
+        payloadSize += static_cast<uint32_t>(s.size()); 
         outBuffers.push_back(NetworkMarshalBuffer(s)); 
         LOG_DEBUG("Marshalled payload: " << s); 
         os.str(""); 
