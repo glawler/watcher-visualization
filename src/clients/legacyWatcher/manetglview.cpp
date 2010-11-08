@@ -920,6 +920,16 @@ void manetGLView::gpsScaleUpdated(double /* prevGpsScale */)
     minNodeArea[2]=numeric_limits<double>::max(); 
 }
 
+void manetGLView::boundingBoxToggled(bool isOn)
+{
+    maxNodeArea[0]=numeric_limits<double>::min(); 
+    maxNodeArea[1]=numeric_limits<double>::min(); 
+    maxNodeArea[2]=numeric_limits<double>::min(); 
+    minNodeArea[0]=numeric_limits<double>::max(); 
+    minNodeArea[1]=numeric_limits<double>::max(); 
+    minNodeArea[2]=numeric_limits<double>::max(); 
+}
+
 //static 
 bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMessage::DataFormat &format)
 {
@@ -940,6 +950,8 @@ bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMes
     // Center nodes close to the origin based on first datapoint recv'd. 
     static double xOrig=0.0, yOrig=0.0;
     static bool firstGPSPoint=false;
+    static double maxUnscaledNodeArea[3]={numeric_limits<double>::min(), numeric_limits<double>::min(), numeric_limits<double>::min()}; 
+    static double minUnscaledNodeArea[3]={numeric_limits<double>::max(), numeric_limits<double>::max(), numeric_limits<double>::max()}; 
     if (firstGPSPoint==false) {
         firstGPSPoint=true;
         xOrig=x;
@@ -947,24 +959,26 @@ bool manetGLView::gps2openGLPixels(double &x, double &y, double &z, const GPSMes
         LOG_INFO("Got first Lat/Long coordinate. Using it for x and y offsets for all other coords. Offsets are: x=" 
                 << xOrig << " y=" << yOrig);
     }
+    
+    x-=xOrig;
+    y-=yOrig; 
 
-    // GTL 
+    if (x>maxUnscaledNodeArea[0]) { maxUnscaledNodeArea[0]=x; } else if (x<minUnscaledNodeArea[0]) { minUnscaledNodeArea[0]=x; } 
+    if (y>maxUnscaledNodeArea[1]) { maxUnscaledNodeArea[1]=y; } else if (y<minUnscaledNodeArea[1]) { minUnscaledNodeArea[1]=y; } 
+    if (z>maxUnscaledNodeArea[2]) { maxUnscaledNodeArea[2]=z; } else if (z<minUnscaledNodeArea[2]) { minUnscaledNodeArea[2]=z; } 
+
+
+    // GTL - need to dynamically figure a good gps scaling factor based on current 
+    // max/min node area. 
+    x*=conf->gpsScale/(maxUnscaledNodeArea[0]-minUnscaledNodeArea[0]);      // GTL - This should be the playing area diagonal, not just the x length
+    y*=conf->gpsScale/(maxUnscaledNodeArea[0]-minUnscaledNodeArea[0]); 
+
     // Don't know if this is the smartest place for this. May want to just loop over
     // all nodes once every few seconds in watcherIdle() or somesuch, instead.
     if (x>maxNodeArea[0]) { maxNodeArea[0]=x; } else if (x<minNodeArea[0]) { minNodeArea[0]=x; } 
     if (y>maxNodeArea[1]) { maxNodeArea[1]=y; } else if (y<minNodeArea[1]) { minNodeArea[1]=y; } 
     if (z>maxNodeArea[2]) { maxNodeArea[2]=z; } else if (z<minNodeArea[2]) { minNodeArea[2]=z; } 
 
-    x-=xOrig;
-    y-=yOrig; 
-
-    // GTL - need to dynamically figure a good gps scaling factor based on current 
-    // max/min node area. 
-    x*=(conf->gpsScale-xOrig)/(maxNodeArea[0]-minNodeArea[0]); 
-    y*=(conf->gpsScale-yOrig)/(maxNodeArea[1]-minNodeArea[1]); 
-
-    // x*=conf->gpsScale;
-    // y*=conf->gpsScale;
 
     LOG_DEBUG("translated GPS: x:" << x << " y:" << y << " z:" << z); 
 
@@ -1587,7 +1601,8 @@ void manetGLView::drawGroundGrid()
 
 void manetGLView::drawGlobalView()
 {
-    GLdouble wx=3*width()/4, ww=width()/4, wh=height()/4;
+    double windowScale=4;
+    GLdouble wx=3*width()/windowScale, ww=width()/windowScale, wh=height()/windowScale;
     glViewport(wx, 0, ww, wh); 
     glEnable(GL_SCISSOR_TEST); 
     glScissor(wx, 0, ww, wh); 
@@ -1602,10 +1617,15 @@ void manetGLView::drawGlobalView()
 
     // GTL figure scale from max/minNodeArea. 
     glScalef(conf->manetAdjInit.scaleX, conf->manetAdjInit.scaleY, conf->manetAdjInit.scaleZ);
+    // double playingFieldDiagonalLength=sqrt( 
+    //         ((maxNodeArea[0]-minNodeArea[0])*(maxNodeArea[0]-minNodeArea[0]))+
+    //         ((maxNodeArea[1]-minNodeArea[1])*(maxNodeArea[1]-minNodeArea[1]))+
+    //         ((maxNodeArea[2]-minNodeArea[2])*(maxNodeArea[2]-minNodeArea[2]))); 
     glTranslated( 
-        -(((abs(maxNodeArea[0]-minNodeArea[0]))/2.0)+minNodeArea[0]),
-        -(((abs(maxNodeArea[1]-minNodeArea[1]))/2.0)+minNodeArea[1]),
-        -(((abs(maxNodeArea[0]-minNodeArea[0]))/2.0)+minNodeArea[0])*2); 
+        -(((maxNodeArea[0]-minNodeArea[0])/2.0)+minNodeArea[0]),
+        -(((maxNodeArea[0]-minNodeArea[0])/2.0)+minNodeArea[0]),
+        -(((maxNodeArea[1]-minNodeArea[1])/2.0)+minNodeArea[1])*3.0); 
+        // -playingFieldDiagonalLength*2.0); 
 
     if (conf->showGroundGrid)
         drawGroundGrid();
@@ -1619,16 +1639,15 @@ void manetGLView::drawGlobalView()
     }
 
     // scale down the node label text. 
-    conf->scaleText/=4; 
+    conf->scaleText/=windowScale; 
 
     drawGraph(wGraph);
     
-    conf->scaleText*=4; 
+    conf->scaleText*=windowScale; 
 
     // restore layers to correct activity state.
     for (size_t l=0; l<wGraph->numValidLayers; l++) 
         wGraph->layers[l].isActive=conf->activeLayers[wGraph->layers[l].layerName];
-
 
     // draw lines around the global view
     GLfloat cols[4]={0.0, 0.0, 0.0, 0.0}; 
@@ -1657,11 +1676,74 @@ void manetGLView::drawGlobalView()
         glEnable(GL_LIGHTING); 
     glPopMatrix(); 
 
+    // draw square around current MANET view
+    // GTL - does not work.
+    // glMatrixMode(GL_MODELVIEW); 
+    // glPushMatrix(); 
+    //     glLoadIdentity(); 
+    //     glScalef(conf->manetAdj.scaleX/windowScale, conf->manetAdj.scaleY/windowScale, conf->manetAdj.scaleZ/windowScale);
+    //     glRotatef(conf->manetAdj.angleX, 1.0, 0.0, 0.0);
+    //     glRotatef(conf->manetAdj.angleY, 0.0, 1.0, 0.0);
+    //     glRotatef(conf->manetAdj.angleZ, 0.0, 0.0, 1.0);
+    //     glTranslatef(conf->manetAdj.shiftX/windowScale , conf->manetAdj.shiftY/windowScale, conf->manetAdj.shiftZ/windowScale);
+    //     glMatrixMode(GL_PROJECTION); 
+    //     glDisable(GL_LIGHTING); 
+    //     glPushMatrix(); 
+    //         glLoadIdentity();
+    //         if (cols[0]==1.0 && cols[1]==1.0 && cols[2]==1.0)  // if white
+    //             glColor4f(0.0, 0.0, 0.0, 1.0);                 // draw black
+    //         else                                               // else 
+    //             glColor4f(1.0, 1.0, 1.0, 1.0);                 // draw white
+    //         glBegin(GL_LINE_LOOP);
+    //             glVertex2f(-1.0, -1.0);
+    //             glVertex2f( 1.0, -1.0);
+    //             glVertex2f( 1.0,  1.0);
+    //             glVertex2f(-1.0,  1.0); 
+    //         glEnd();
+    //     glPopMatrix(); 
+    //     glMatrixMode(GL_MODELVIEW); 
+    //     glEnable(GL_LIGHTING); 
+    // glPopMatrix(); 
+
+
     glDisable(GL_SCISSOR_TEST); 
     glPopMatrix(); 
     glViewport(0, 0, width(), height()); 
 }
 
+void manetGLView::drawBoundingBox()
+{
+    GLdouble center[3]={
+        ((maxNodeArea[0]-minNodeArea[0])/2.0)+minNodeArea[0],
+        ((maxNodeArea[1]-minNodeArea[1])/2.0)+minNodeArea[1],
+        ((maxNodeArea[2]-minNodeArea[2])/2.0)+minNodeArea[2]
+    };
+
+    glPushMatrix();
+    {
+        glDisable(GL_LIGHTING);
+        glColor4f(1.0, 1.0, 1.0, 1.0);
+        glTranslated(center[0], center[1], center[2]);
+        glScaled(maxNodeArea[0]-minNodeArea[0], maxNodeArea[1]-minNodeArea[1], maxNodeArea[2]-minNodeArea[2]); 
+        glutWireCube(1.0);
+        // draw nodeArea axis
+        glScaled(0.5, 0.5, 0.5); // cube is 1*2=2 wide, so mutliply by 0.5 to normalize
+        glBegin(GL_LINES);
+        {
+            // x, y, z --> r, g, b
+            glColor4f(1.0, 0.0, 0.0, 1.0);
+            glVertex3d(-1.0,  0.0,  0.0); glVertex3d(1.0, 0.0, 0.0);
+            glColor4f(0.0, 1.0, 0.0, 1.0);
+            glVertex3d( 0.0, -1.0,  0.0); glVertex3d(0.0, 1.0, 0.0);
+            glColor4f(0.0, 0.0, 1.0, 1.0);
+            glVertex3d( 0.0,  0.0, -1.0); glVertex3d(0.0, 0.0, 1.0);
+        }
+        glEnd();
+        glEnable(GL_LIGHTING); 
+    }
+    glPopMatrix();
+}
+        
 void manetGLView::drawManet(void)
 {
     glViewport(0, 0, width(), height()); 
@@ -1678,6 +1760,9 @@ void manetGLView::drawManet(void)
     glRotatef(conf->manetAdj.angleY, 0.0, 1.0, 0.0);
     glRotatef(conf->manetAdj.angleZ, 0.0, 0.0, 1.0);
     glTranslatef(conf->manetAdj.shiftX, conf->manetAdj.shiftY, conf->manetAdj.shiftZ);
+
+    if (conf->showBoundingBox)
+        drawBoundingBox(); 
 
     if (conf->showGroundGrid)
         drawGroundGrid();

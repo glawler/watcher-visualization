@@ -54,6 +54,7 @@ namespace watcher
             void showPlaybackRange(bool isOn); 
             void showWallTime(bool isOn); 
             void toggleGlobalView(bool isOn); 
+            void toggleBoundingBox(bool inOn);
             void toggleGroundGrid(bool isOn); 
             void spawnBackgroundColorDialog(); 
             void setGPSScale(); 
@@ -65,6 +66,7 @@ namespace watcher
             void monochromeToggled(bool monochromeMode);
             void backgroundImageToggled(bool backgroundImage);
             void globalViewToggled(bool showGlobalView); 
+            void boundingBoxToggled(bool showBoundingBox); 
             void groundGridToggled(bool showGroundGrid);
             void loopPlaybackToggled(bool autorewind);
             void enableStreamFiltering(bool messageStreamFiltering);

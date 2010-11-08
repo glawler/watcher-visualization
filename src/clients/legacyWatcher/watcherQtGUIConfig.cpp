@@ -82,6 +82,12 @@ namespace watcher
         showGroundGrid=isOn;
         TRACE_EXIT();
     }
+    void WatcherQtGUIConfig::toggleBoundingBox(bool isOn) {
+        TRACE_ENTER();
+        showBoundingBox=isOn;
+        emit boundingBoxToggled(isOn); 
+        TRACE_EXIT();
+    }
     void WatcherQtGUIConfig::spawnBackgroundColorDialog() {
         QRgb rgb=0xffffffff;
         bool ok=false;
@@ -172,6 +178,7 @@ namespace watcher
             emit monochromeToggled(monochromeMode);
             emit backgroundImageToggled(backgroundImage);
             emit globalViewToggled(showGlobalView); 
+            emit boundingBoxToggled(showBoundingBox); 
             emit groundGridToggled(showGroundGrid);
             emit loopPlaybackToggled(autorewind);
             emit enableStreamFiltering(messageStreamFiltering);

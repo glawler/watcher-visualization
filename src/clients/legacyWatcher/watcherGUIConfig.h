@@ -60,6 +60,7 @@ namespace watcher
             bool showPlaybackRangeString;
             bool showVerboseStatusString;
             bool showGlobalView;
+            bool showBoundingBox; 
             bool showDebugInfo;
             bool showStreamDescription;
 

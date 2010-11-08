@@ -31,50 +31,6 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="manetGLView" name="manetGLViewWindow" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>1</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::StrongFocus</enum>
-      </property>
-      <widget class="watcher::WatcherQtGUIConfig" name="watcherQtGUIConfig" native="true">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>5</x>
-         <y>5</y>
-         <width>1</width>
-         <height>1</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>1</width>
-         <height>1</height>
-        </size>
-       </property>
-      </widget>
-     </widget>
-    </item>
     <item row="1" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
@@ -314,6 +270,50 @@ p, li { white-space: pre-wrap; }
       </item>
      </layout>
     </item>
+    <item row="0" column="0">
+     <widget class="manetGLView" name="manetGLViewWindow" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+      <widget class="watcher::WatcherQtGUIConfig" name="watcherQtGUIConfig" native="true">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>5</x>
+         <y>5</y>
+         <width>1</width>
+         <height>1</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1</width>
+         <height>1</height>
+        </size>
+       </property>
+      </widget>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -344,6 +344,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="action3DNodes"/>
     <addaction name="actionMonochrome"/>
     <addaction name="actionBackgroundImage"/>
+    <addaction name="actionBoundingBox"/>
     <addaction name="actionGlobal_View"/>
     <addaction name="actionGroundGrid"/>
     <addaction name="separator"/>
@@ -562,6 +563,14 @@ p, li { white-space: pre-wrap; }
     <string>Global View</string>
    </property>
   </action>
+  <action name="actionBoundingBox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bounding Bo&amp;x</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -581,6 +590,7 @@ p, li { white-space: pre-wrap; }
     <slot>spawnBackgroundColorDialog()</slot>
     <slot>streamFilteringEnabled(bool)</slot>
     <slot>gpsScaleUpdated(double)</slot>
+    <slot>boundingBoxToggled(bool)</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -600,6 +610,7 @@ p, li { white-space: pre-wrap; }
     <signal>enableStreamFiltering(bool)</signal>
     <signal>gpsScaleUpdated(double)</signal>
     <signal>globalViewToggled(bool)</signal>
+    <signal>boundingBoxToggled(bool)</signal>
     <slot>toggleMonochrome(bool)</slot>
     <slot>toggleThreeDView(bool)</slot>
     <slot>toggleBackgroundImage(bool)</slot>
@@ -613,6 +624,7 @@ p, li { white-space: pre-wrap; }
     <slot>setGPSScale()</slot>
     <slot>loadBackgroundImage()</slot>
     <slot>toggleGlobalView(bool)</slot>
+    <slot>toggleBoundingBox(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -1411,6 +1423,54 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>14</x>
      <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBoundingBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>watcherQtGUIConfig</receiver>
+   <slot>toggleBoundingBox(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>14</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>boundingBoxToggled(bool)</signal>
+   <receiver>actionBoundingBox</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>14</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>watcherQtGUIConfig</sender>
+   <signal>boundingBoxToggled(bool)</signal>
+   <receiver>manetGLViewWindow</receiver>
+   <slot>boundingBoxToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>14</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>373</y>
     </hint>
    </hints>
   </connection>

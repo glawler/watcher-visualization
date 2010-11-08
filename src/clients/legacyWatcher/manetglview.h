@@ -101,6 +101,7 @@ class manetGLView : public QGLWidget
         void streamFilteringEnabled(bool isOn); 
         void shutdown(); 
         void gpsScaleUpdated(double prevGpsScale); 
+        void boundingBoxToggled(bool isOn); 
 
 signals:
         void positionReset();
@@ -187,6 +188,7 @@ signals:
         bool autoCenterNodesFlag; 
         void drawManet(void);
         void drawGlobalView();
+        void drawBoundingBox(); 
         void drawGroundGrid();
         void drawGraph(watcher::WatcherGraph *&graph); 
         struct QuadranglePoint
