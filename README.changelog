@@ -1,3 +1,6 @@
+Versions 0.6.5.3:
+- dataWatcher
+    - added [-s server] and [-l loglevel] as command line arguments. 
 Versions 0.6.5.2:
 - watcher
     - added crude global view option. Displays a global view of the playing field in the 
