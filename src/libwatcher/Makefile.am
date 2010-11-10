@@ -11,6 +11,7 @@ libwatcher_a_include_HEADERS=\
 	messageHandler.h \
 	sendMessageHandler.h \
 	messageStreamFilter.h \
+	messageStreamReactor.h \
 	watcherTypes.h \
 	watcherGlobalFunctions.h \
 	watcherColors.h \
@@ -31,7 +32,7 @@ libwatchermsg_la_include_HEADERS=\
 	messageStreamFilterMessage.h \
 	nodePropertiesMessage.h \
 	nodeStatusMessage.h \
-	watcherMessageFwd.h
+	watcherMessageFwd.h 
 	
 libwatchermsg_la_SOURCES=\
 	message.h message.cpp \
@@ -70,6 +71,7 @@ libwatcher_a_SOURCES= \
 	messageStatus.cpp messageStatus.h \
 	messageStream.h messageStream.cpp \
 	messageStreamFilter.h messageStreamFilter.cpp \
+	messageStreamReactor.cpp messageStreamReactor.h \
 	nodeDisplayInfo.cpp nodeDisplayInfo.h \
 	watcherGlobalFunctions.cpp watcherGlobalFunctions.h \
 	watcherGraph.cpp watcherGraph.h \

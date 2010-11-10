@@ -18,11 +18,47 @@
 
 #include "messageTypesAndVersions.h"
 #include "logger.h"
+#include "message.h"
+#include "labelMessage.h"
+#include "edgeMessage.h"
+#include "colorMessage.h"
+#include "connectivityMessage.h"
+#include "nodePropertiesMessage.h"
 
 using namespace std;
 
 namespace watcher {
     namespace event {
+        bool hasLayer(MessagePtr m, GUILayer &layer)
+        {
+            bool retVal=
+                m->type==LABEL_MESSAGE_TYPE || 
+                m->type==EDGE_MESSAGE_TYPE || 
+                m->type==COLOR_MESSAGE_TYPE || 
+                m->type==CONNECTIVITY_MESSAGE_TYPE;
+
+            if (retVal)
+                switch (m->type)
+                {
+                    case LABEL_MESSAGE_TYPE: 
+                        layer=(boost::dynamic_pointer_cast<LabelMessage>(m))->layer; 
+                        break;
+                    case EDGE_MESSAGE_TYPE: 
+                        layer=(boost::dynamic_pointer_cast<EdgeMessage>(m))->layer; 
+                        break;
+                    case COLOR_MESSAGE_TYPE: 
+                        layer=(boost::dynamic_pointer_cast<ColorMessage>(m))->layer; 
+                        break;
+                    case CONNECTIVITY_MESSAGE_TYPE: 
+                        layer=(boost::dynamic_pointer_cast<ConnectivityMessage>(m))->layer; 
+                        break;
+                    case NODE_PROPERTIES_MESSAGE_TYPE: 
+                        layer=(boost::dynamic_pointer_cast<NodePropertiesMessage>(m))->layer; 
+                        break;
+                    default: break;
+                }
+            return retVal;
+        }
         ostream& operator<<(ostream &out, const MessageType &type)
         {
             out << "\"";

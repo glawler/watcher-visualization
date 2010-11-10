@@ -24,6 +24,8 @@
 #ifndef message_fwd_h
 #define message_fwd_h
 
+#include <boost/shared_ptr.hpp>
+
 namespace watcher {
     namespace event {
         class Message;

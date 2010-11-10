@@ -25,6 +25,7 @@
 #define MESSAGETYPES_AND_VERSIONS_H
 
 #include <ostream>
+#include "message_fwd.h"
 
 namespace watcher {
     namespace event {
@@ -53,9 +54,9 @@ namespace watcher {
             SPEED_MESSAGE_TYPE        = 0x0000ff03,
             PLAYBACK_TIME_RANGE_MESSAGE_TYPE = 0x0000ff04,
             MESSAGE_STREAM_FILTER_MESSAGE_TYPE = 0x0000ff05,
-	    SUBSCRIBE_STREAM_MESSAGE_TYPE = 0x0000ff06,
-	    STREAM_DESCRIPTION_MESSAGE_TYPE = 0x0000ff07,
-	    LIST_STREAMS_MESSAGE_TYPE = 0x0000ff08,
+            SUBSCRIBE_STREAM_MESSAGE_TYPE = 0x0000ff06,
+            STREAM_DESCRIPTION_MESSAGE_TYPE = 0x0000ff07,
+            LIST_STREAMS_MESSAGE_TYPE = 0x0000ff08,
 
             USER_DEFINED_MESSAGE_TYPE = 0xffff0000
         } MessageType;
@@ -121,6 +122,12 @@ namespace watcher {
          * @retval false otherwise
          */
         inline bool isFeederEvent(MessageType t) { return t < SEEK_MESSAGE_TYPE; }
+
+        /** Determine if the message references a layer or not.
+         * @retval true if it does and the layer is put in 'layer'
+         * @retval false if it does not.
+         */
+        bool hasLayer(MessagePtr m, GUILayer &layer);
     }
 }
 
