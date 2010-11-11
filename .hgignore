@@ -256,8 +256,10 @@ share/info/dir
 #
 # OGRE based watcher
 #
+^src/clients/ogreWatcher/build/*
+^src/clients/ogreWatcher/qtBuildFiles/*
 ^src/clients/ogreWatcher/Makefile
-^src/clients/ogreWatcher/ogreWatcher
+
 
 #
 # Google Earth Watcher GUI

@@ -3,7 +3,8 @@
 
 #include "QOgreWindowWidget.h"
 
-namespace QOgreBites {
+// Forward decl of our custom Qt-based camera manager
+namespace OgreBites {
     class QSdkCameraMan;
 }
 
@@ -42,19 +43,11 @@ namespace QtOgre
             //
             // ########## Private variables ##########
             //
-            bool m_mousePressed;
-            QPoint m_mousePressPos;
-            Ogre::Quaternion m_orientationPressed;
-
             Ogre::SceneNode *m_mainNode;
             Ogre::SceneManager *mSceneMgr;
             Ogre::Camera *mCamera;
             Ogre::Viewport *m_vp;
-            QOgreBites::QSdkCameraMan *mCameraMgr; 
-
-            Ogre::FrameEvent mFrameEvent;
-
-            static const float m_RADIUS; 
+            OgreBites::QSdkCameraMan *mCameraMgr; 
     };
 } // namespace
 #endif

@@ -143,7 +143,7 @@ namespace QtOgre
         mCamera->lookAt(Ogre::Vector3(0, 0, -300));
         mCamera->setNearClipDistance(5);
 
-        mCameraMgr=new QOgreBites::QSdkCameraMan(mCamera); 
+        mCameraMgr=new OgreBites::QSdkCameraMan(mCamera); 
         m_ogreRoot->addFrameListener(mCameraMgr); 
 
         // Create one viewport, entire window
@@ -164,6 +164,19 @@ namespace QtOgre
     }
     void QOgreWidget::keyPressEvent(QKeyEvent *e) {
         // std::cout << "got key press event " << e->text().toStdString() << std::endl;
+        if (e->key()==Qt::Key_Space) { 
+            switch(mCameraMgr->getStyle()) { 
+                case OgreBites::CS_FREELOOK: 
+                    mCameraMgr->setTarget(m_mainNode); 
+                    mCameraMgr->setStyle(OgreBites::CS_ORBIT); 
+                    break;
+                case OgreBites::CS_MANUAL: 
+                case OgreBites::CS_ORBIT: 
+                    mCameraMgr->setTarget(NULL); 
+                    mCameraMgr->setStyle(OgreBites::CS_FREELOOK); 
+                    break;
+            }
+        }
         mCameraMgr->injectKeyDown(*e); 
         update(); 
     }
@@ -178,10 +191,6 @@ namespace QtOgre
     /// Private constants this class uses
     ///
     //@{
-    ///
-    /// The radius used for rotating
-    ///
-    const float QOgreWidget::m_RADIUS = 0.8;
     //@}
     //
     //
