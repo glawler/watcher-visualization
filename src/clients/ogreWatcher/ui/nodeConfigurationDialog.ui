@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>nodeConfigurationDialog</class>
+ <widget class="QDialog" name="nodeConfigurationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>384</width>
+    <height>206</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Node Configuration</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="watcherResources.qrc">
+    <normaloff>:/icons/resources/watcher.png</normaloff>:/icons/resources/watcher.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Node Affected: </string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="2">
+      <widget class="QLabel" name="labelWhichNode">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Label  Text:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QComboBox" name="labelComboBox">
+       <item>
+        <property name="text">
+         <string>last octet</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>two octets</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>three octets</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>four octets</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>hostname</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>free form</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>none</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="nodeShapeLabel">
+       <property name="text">
+        <string>Node Shape:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" colspan="2">
+      <widget class="QComboBox" name="nodeShapeComboBox">
+       <item>
+        <property name="text">
+         <string>Sphere (Circle)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cube (Square)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Torus (Circle)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Teapot (Square)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Pyramid (Triangle)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="nodeShapeLabel_2">
+       <property name="text">
+        <string>Node Size:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" colspan="2">
+      <widget class="QSpinBox" name="nodeSizeSpinBox"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QToolButton" name="labelColorButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Label Color</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="labelFontButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>27</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Label Font</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="nodeColorButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Node Color</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="watcherResources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>labelColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>setNodeLabelColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>82</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>labelFontButton</sender>
+   <signal>clicked()</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>setNodeLabelFont()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>82</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nodeColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>setNodeColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>82</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>labelComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>setNodeLabel(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>220</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>82</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nodeShapeComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>setNodeShape(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>220</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nodeSizeSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>nodeConfigurationDialog</receiver>
+   <slot>setNodeSize(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>setNodeColor()</slot>
+  <slot>setNodeLabelFont()</slot>
+  <slot>setNodeLabelColor()</slot>
+  <slot>setNodeLabel(QString)</slot>
+  <slot>setNodeShape(QString)</slot>
+  <slot>setNodeProperty(QString)</slot>
+  <slot>setNodeSize(int)</slot>
+  <slot>nodeClicked(int)</slot>
+ </slots>
+</ui>
