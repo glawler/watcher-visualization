@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/buttonImages" >
+  <qresource prefix="icons">
     <file>resources/gtk-media-forward-ltr.png</file>
     <file>resources/gtk-media-forward-rtl.png</file>
     <file>resources/gtk-media-next-ltr.png</file>
@@ -13,8 +13,6 @@
     <file>resources/gtk-media-rewind-ltr.png</file>
     <file>resources/gtk-media-rewind-rtl.png</file>
     <file>resources/gtk-media-stop.png</file>
-  </qresource>
-  <qresource prefix="icons" >
     <file>resources/watcher.png</file>
   </qresource>
 </RCC>

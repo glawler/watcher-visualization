@@ -37,17 +37,15 @@ namespace QtOgre
             void keyReleaseEvent(QKeyEvent *e); 
             void createScene(void);
 
-        private:
-            void setupResources(void);
-            void setupScene(void);
-            //
-            // ########## Private variables ##########
-            //
             Ogre::SceneNode *m_mainNode;
             Ogre::SceneManager *mSceneMgr;
             Ogre::Camera *mCamera;
-            Ogre::Viewport *m_vp;
             OgreBites::QSdkCameraMan *mCameraMgr; 
+
+        private:
+            void setupResources(void);
+            void setupScene(void);
+            Ogre::Viewport *m_vp;
     };
 } // namespace
 #endif

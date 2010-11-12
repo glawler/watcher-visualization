@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <author>Geoff Lawler</author>
+ <class>OgreWatcherMainWindow</class>
+ <widget class="QMainWindow" name="OgreWatcherMainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>796</width>
+    <height>640</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../data/qtResources/watcherResources.qrc">
+    <normaloff>:/icons/resources/watcher.png</normaloff>:/icons/resources/watcher.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -32,7 +37,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>796</width>
      <height>27</height>
     </rect>
    </property>
@@ -45,6 +50,18 @@
    <addaction name="menu_File"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="playbackDockWidget">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea</set>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="watcher::QMessageStreamPlaybackWidget" name="messageStreamPlaybackWidget"/>
+  </widget>
   <action name="action_Quit">
    <property name="text">
     <string>&amp;Quit</string>
@@ -79,7 +96,15 @@
    <header>QOgreWidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>watcher::QMessageStreamPlaybackWidget</class>
+   <extends>QWidget</extends>
+   <header>QMessageStreamPlaybackWidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../data/qtResources/watcherResources.qrc"/>
+ </resources>
  <connections/>
 </ui>

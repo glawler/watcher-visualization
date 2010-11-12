@@ -3,7 +3,7 @@ message("--- Project General Settings ---")
 TEMPLATE = app
 TARGET = ogreWatcher
 DEPENDPATH += .
-INCLUDEPATH += .
+INCLUDEPATH += . qtBuildFiles/ui
 MOC_DIR = qtBuildFiles/moc
 OBJECTS_DIR = qtBuildFiles/obj
 RCC_DIR = qtBuildFiles/rcc
@@ -29,18 +29,22 @@ Debug {
 message("--- Project Input Files ---")
 HEADERS += \
     QOgreWindowWidget.h \
-    QOgreWidget.h 
+    QOgreWidget.h \
+    QOgreWatcherWidget.h \
+    QMessageStreamPlaybackWidget.h 
 SOURCES += \
     main.cpp \
     QOgreWindowWidget.cpp \
     QOgreWidget.cpp \
-    qtBuildFiles/ui/ui_ogreWatcher.h \
-    QSdkCameraMan.h 
+    QSdkCameraMan.h \
+    QOgreWatcherWidget.cpp QOgreWatcherWidget.h \
+    QMessageStreamPlaybackWidget.cpp QMessageStreamPlaybackWidget.h
 #
 # Platform specific 
 #
 macx {
 	message("--- Mac OS X specific configuration ---")
+    error("watcher libs are not supported on macOS"); 
 	CONFIG += x86 ppc
 	LIBS += -framework Ogre -framework AGL
 	INCLUDEPATH += /Library/Frameworks/Ogre.framework/Headers
@@ -55,7 +59,7 @@ else:unix {
 
     # Tell qmake which pkg-config supported libs to use. 
     CONFIG += link_pkgconfig
-    PKGCONFIG += OGRE OIS
+    PKGCONFIG += OGRE OIS watcher watchermsg watcher
 
     # If we're using debug and release libs, put them here. 
 	Release {
@@ -65,6 +69,7 @@ else:unix {
 } 
 else:win32 {
 	message("--- Windows specific configuration ---")
+    error("watcher libs are not supported on win32"); 
 	TEMPLATE = vcapp
 	CONFIG += console
 	INCLUDEPATH += $$(OGRE_HOME)\include
@@ -81,4 +86,5 @@ else:win32 {
 # UI elements. 
 # 
 FORMS = \
-    ui/ogreWatcher.ui
+    ui/ogreWatcher.ui \
+    ui/QMessageStreamPlaybackWidget.ui
