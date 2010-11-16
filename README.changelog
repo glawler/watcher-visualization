@@ -1,3 +1,8 @@
+Versions 0.6.5.4:
+- all 
+    - watcherd and all GUIs now handle configuration file permissions sanely instead of
+    exiting with unhandled exception.  If no-read, exit. If no-write, warn the user at 
+    start and end time that changes are not saved.
 Versions 0.6.5.3:
 - dataWatcher
     - added [-s server] and [-l loglevel] as command line arguments. 

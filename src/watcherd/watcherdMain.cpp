@@ -46,9 +46,9 @@ void usage(const char *progName, bool exitp)
 {
     cout << "Usage: " << basename(progName) << " [-c config filename]" << endl;
     cout << "Args: " << endl; 
-    cout << "\t-h\t\tshow this messsage and exit." << endl; 
-    cout << "\t-d database\t\t use this event database when running watcherd" << endl; 
-    cout << "\t-c configfile\t\tIf not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
+    cout << "\t-h,--help\t\tshow this messsage and exit." << endl; 
+    cout << "\t-d,--database database\t\t use this event database when running watcherd" << endl; 
+    cout << "\t-c,--config configfile\t\tIf not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
     cout << "\t-r, --read-only\t\t do not write events to the database." << endl;
     cout << "\t-l,--logLevel level\t\tSet the default log level. Must be one of\n";
     cout << "\t                     \t\t\toff, fatal, error, warn, info, debug, or trace.\n";
