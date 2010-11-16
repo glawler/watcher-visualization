@@ -7,6 +7,10 @@ Versions 0.6.5.4:
     - watcherd now takes --address and --port args on the command line. Command line 
     overrides cfg and is saved to cfg on exit. Attempts to use an address that is not 
     locally valid causes an exeception.
+- dataWatcher
+    - dataWatcher now automatically tell watcherd to only send it control and data 
+    point messages. This should drastically reduce the number of unneeded messages on 
+    the wire send to dataWatcher instances. 
 Versions 0.6.5.3:
 - dataWatcher
     - added [-s server] and [-l loglevel] as command line arguments. 
