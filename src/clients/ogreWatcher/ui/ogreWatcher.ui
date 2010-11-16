@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <author>Geoff Lawler</author>
- <class>OgreWatcherMainWindow</class>
- <widget class="QMainWindow" name="OgreWatcherMainWindow">
+ <class>WatcherMainWindow</class>
+ <widget class="QWatcherMainWindow" name="WatcherMainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -21,13 +21,17 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QtOgre::QOgreWidget" name="QtOgreWidgetInstance" native="true"/>
-    </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="quitButton">
-      <property name="text">
-       <string>&amp;Quit Now!</string>
-      </property>
+     <widget class="QtOgre::QOgreWidget" name="ogreWidget" native="true">
+      <widget class="watcher::QWatcherGUIConfig" name="qWatcherConfig" native="true">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>120</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -100,6 +104,18 @@
    <class>watcher::QMessageStreamPlaybackWidget</class>
    <extends>QWidget</extends>
    <header>QMessageStreamPlaybackWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QWatcherMainWindow</class>
+   <extends>QMainWindow</extends>
+   <header>QWatcherMainWindow.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>watcher::QWatcherGUIConfig</class>
+   <extends>QWidget</extends>
+   <header>QWatcherGUIConfig.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
