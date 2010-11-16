@@ -370,6 +370,12 @@ int main(int argc, char **argv)
     SingletonConfig::setConfigFile(ConfigFilename);
     SingletonConfig::unlock();
 
+    if (0!=access(ConfigFilename.c_str(), W_OK)) {
+        std::cerr << "------------------------------------------------------------------------" << std::endl;
+        std::cerr << "--- cfg file is read only, will not be able to save runtime changes. ---" << std::endl;
+        std::cerr << "------------------------------------------------------------------------" << std::endl;
+    }
+
     /* handle log.properties file as a special case */
     std::string logConf(PROPERTY_FILE);
     if (!config.lookupValue("logProperties", logConf)) {

@@ -31,6 +31,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "watcherMainWindow.h"
+#include "initConfig.h"
 
 #include "logger.h"
 #include "libconfig.h++"
@@ -123,8 +124,14 @@ int main(int argc, char *argv[])
             ofstream f(configFilename.c_str(), ios_base::in | ios_base::out); 
             f.close();
         }
-        else 
-            config.readFile(configFilename.c_str());
+        else { 
+            if (false==initConfig(config, argc, argv, configFilename))
+            {
+                cerr << "Error reading configuration file, unable to continue." << endl;
+                cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
+                return 1;
+            }
+        }
         SingletonConfig::setConfigFile(configFilename);
     }
     catch (ParseException &e)

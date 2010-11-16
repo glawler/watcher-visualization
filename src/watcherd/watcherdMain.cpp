@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     // Save any configuration changes made during the run.
     LOG_INFO("Saving last known configuration to " << configFilename); 
     SingletonConfig::lock();
-    config.writeFile(configFilename.c_str());
+    SingletonConfig::saveConfig(); 
 
     return 0;
 }

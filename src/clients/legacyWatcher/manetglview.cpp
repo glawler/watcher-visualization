@@ -920,7 +920,7 @@ void manetGLView::gpsScaleUpdated(double /* prevGpsScale */)
     minNodeArea[2]=numeric_limits<double>::max(); 
 }
 
-void manetGLView::boundingBoxToggled(bool isOn)
+void manetGLView::boundingBoxToggled(bool /*isOn*/)
 {
     maxNodeArea[0]=numeric_limits<double>::min(); 
     maxNodeArea[1]=numeric_limits<double>::min(); 

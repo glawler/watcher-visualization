@@ -54,6 +54,19 @@ static bool readConfig(libconfig::Config &config, const string &filename)
     return false;
 }
 
+static void checkAndWarnFilePermissions(const char *filename)
+{
+    if (0!=access(filename, R_OK)) { 
+        fprintf(stderr, "Configuration file, %s, is not readable. Please check the file permissions. Unable to continue.\n", filename); 
+        exit(EXIT_FAILURE); 
+    }
+    if (0!=access(filename, W_OK)) { 
+        fprintf(stderr, "------------------------------------\n"); 
+        fprintf(stderr, "Warning: config file %s is read only, changes made during run time will not be saved.\n", filename); 
+        fprintf(stderr, "------------------------------------\n"); 
+    }
+}
+
 bool watcher::initConfig(
             libconfig::Config &config, 
             int argc, 
@@ -76,6 +89,7 @@ bool watcher::initConfig(
 
     while(-1!=(c = getopt_long(argc, argv, args, long_options, NULL))) {
         if (c==configFileChar) {
+            checkAndWarnFilePermissions(optarg); 
             if(true==(retVal=readConfig(config, optarg))) {
                 configFilename=optarg;
                 break;
@@ -89,6 +103,7 @@ bool watcher::initConfig(
         string fname(bf::basename(argv[0])); 
         fname+=".cfg"; 
 
+        checkAndWarnFilePermissions(fname.c_str()); 
         retVal=readConfig(config, fname);
         if(retVal)
             configFilename=fname;

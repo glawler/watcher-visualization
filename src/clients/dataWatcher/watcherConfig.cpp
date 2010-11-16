@@ -24,6 +24,7 @@
 #include <boost/filesystem.hpp>
 
 #include "libconfig.h++"
+#include "initConfig.h"
 #include "singletonConfig.h"
 #include "logger.h"
 
@@ -89,16 +90,21 @@ namespace watcher {
 				}
 			}
 
-			try {
-				// make sure it exists. 
-				if (!boost::filesystem::exists(configFilename)) {
-					std::cerr << "Configuration file \"" << configFilename << "\", not found. Creating it." << std::endl;
-					std::ofstream f(configFilename.c_str(), std::ios_base::in | std::ios_base::out); 
-					f.close();
-				} else 
-					config.readFile(configFilename.c_str());
-				watcher::SingletonConfig::setConfigFile(configFilename);
-			} catch (libconfig::ParseException &e) {
+            try {
+                // make sure it exists. 
+                if (!boost::filesystem::exists(configFilename)) {
+                    std::cerr << "Configuration file \"" << configFilename << "\", not found. Creating it." << std::endl;
+                    std::ofstream f(configFilename.c_str(), std::ios_base::in | std::ios_base::out); 
+                    f.close();
+                } else {
+                    if (false==initConfig(config, argc, argv, configFilename)) {
+                        std::cerr << "Error reading configuration file, unable to continue." << std::endl;
+                        exit(EXIT_FAILURE); 
+                    }
+                }
+
+                watcher::SingletonConfig::setConfigFile(configFilename);
+            } catch (libconfig::ParseException &e) {
 				std::cerr << "Error reading configuration file " << configFilename << ": " << e.what() << std::endl;
 				std::cerr << "Error: \"" << e.getError() << "\" on line: " << e.getLine() << std::endl;
 				exit(EXIT_FAILURE);  // !!!
