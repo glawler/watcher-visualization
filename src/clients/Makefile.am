@@ -12,9 +12,10 @@ if ENABLE_WATCHER3D
 W3D_DIR = watcher3D 
 endif
 
-if ENABLE_OGREWATCHER
-ORGE_DIR = ogreWatcher 
-endif
+# GTL - ogreWatcher build is temp. disabled. 
+# if ENABLE_OGREWATCHER
+# ORGE_DIR = ogreWatcher 
+# endif
 
 if ENABLE_EARTHWATCHER
 EARTH_DIR=earthWatcher

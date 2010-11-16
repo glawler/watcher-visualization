@@ -66,7 +66,7 @@ MessageStreamPtr MessageStream::createNewMessageStream(const string &serverName_
                                                        const float streamRate_)
 {
     TRACE_ENTER();
-    MessageStreamPtr retVal(new MessageStream(serverName_,"watcherd",startTime_,streamRate_));
+    MessageStreamPtr retVal(new MessageStream(serverName_,"",startTime_,streamRate_));
     retVal->initConnection();
     TRACE_EXIT();
     return retVal;

@@ -59,14 +59,15 @@ if test x$enable_testnodeonly == xno; then
     #
     PKG_CHECK_MODULES(SQLITE3, [sqlite3 >= 3.5.9])
 
-    # allow optional disabling of ogreWatcher
-    AC_MSG_CHECKING(whether to build ogreWatcher)
-    AC_ARG_ENABLE(ogreWatcher,
-          [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
-          [enable_ogreWatcher=$enableval],
-          [enable_ogreWatcher="no"])
-    AC_MSG_RESULT($enable_ogreWatcher)
-    AM_CONDITIONAL([ENABLE_OGREWATCHER], [test x$enable_ogreWatcher != xno])
+    # GTL - ogreWatcher is not buildable right now. 
+    # # allow optional disabling of ogreWatcher
+    # AC_MSG_CHECKING(whether to build ogreWatcher)
+    # AC_ARG_ENABLE(ogreWatcher,
+    #       [AS_HELP_STRING([--enable-ogreWatcher],[enable compilation of ogreWatcher])],
+    #       [enable_ogreWatcher=$enableval],
+    #       [enable_ogreWatcher="no"])
+    # AC_MSG_RESULT($enable_ogreWatcher)
+    # AM_CONDITIONAL([ENABLE_OGREWATCHER], [test x$enable_ogreWatcher != xno])
 
     # allow optional disabling of watcher3d
     AC_MSG_CHECKING(whether to build watcher3d)
@@ -126,27 +127,28 @@ if test x$enable_testnodeonly == xno; then
         KML_LDADD="-lkmlbase -lkmlconvenience -lkmlengine -lkmldom"
         AC_SUBST(KML_LDADD)
     fi
+    
+    # GTL - OgreWatcher is not buildable right now, so we don't need these checks.
+    # # OGRE, OIS, and CEGUI
+    # if test x$enable_ogreWatcher != xno; then
+    #     AC_DEFINE(FEAT_OGREWATCHER)
 
-    # OGRE, OIS, and CEGUI
-    if test x$enable_ogreWatcher != xno; then
-        AC_DEFINE(FEAT_OGREWATCHER)
-
-        PKG_CHECK_MODULES(OGRE, [OGRE >= 1.2])
-        AC_SUBST(OGRE_CFLAGS)
-        AC_SUBST(OGRE_LIBS)
-    
-        PKG_CHECK_MODULES(OIS, [OIS >= 1.0])
-        AC_SUBST(OIS_CFLAGS)
-        AC_SUBST(OIS_LIBS)
-    
-        PKG_CHECK_MODULES(CEGUI, [CEGUI >= 0.5.0])
-        AC_SUBST(CEGUI_CFLAGS)
-        AC_SUBST(CEGUI_LIBS)
-    
-        # PKG_CHECK_MODULES(CEGUI-OGRE, [CEGUI-OGRE >= 1.4.5])
-        # AC_SUBST(CEGUI-OGRE_CFLAGS)
-        # AC_SUBST(CEGUI-OGRE_LIBS)
-    fi
+    #     PKG_CHECK_MODULES(OGRE, [OGRE >= 1.2])
+    #     AC_SUBST(OGRE_CFLAGS)
+    #     AC_SUBST(OGRE_LIBS)
+    # 
+    #     PKG_CHECK_MODULES(OIS, [OIS >= 1.0])
+    #     AC_SUBST(OIS_CFLAGS)
+    #     AC_SUBST(OIS_LIBS)
+    # 
+    #     PKG_CHECK_MODULES(CEGUI, [CEGUI >= 0.5.0])
+    #     AC_SUBST(CEGUI_CFLAGS)
+    #     AC_SUBST(CEGUI_LIBS)
+    # 
+    #     # PKG_CHECK_MODULES(CEGUI-OGRE, [CEGUI-OGRE >= 1.4.5])
+    #     # AC_SUBST(CEGUI-OGRE_CFLAGS)
+    #     # AC_SUBST(CEGUI-OGRE_LIBS)
+    # fi
 
     # Check for Qt, even if we use qmake to find/link to it.
     PKG_CHECK_MODULES(QTGUI, [QtGui >= 4.3.0])
@@ -200,7 +202,7 @@ else
     #
     # testnodeonly build section
     #
-    AM_CONDITIONAL([ENABLE_OGREWATCHER], [test 1 == 0])
+    # AM_CONDITIONAL([ENABLE_OGREWATCHER], [test 1 == 0]) GTL - disable OgreWatcher build for now.
     AM_CONDITIONAL([ENABLE_WATCHER3D], [test 1 == 0])
     AM_CONDITIONAL([ENABLE_EARTHWATCHER], [test 1 == 0])
 fi
@@ -249,9 +251,10 @@ if test x$enable_testnodeonly == xno; then
         AC_CONFIG_FILES([clients/watcher3D/Makefile])
     fi
 
-    if test x$enable_ogreWatcher != xno; then
-        AC_CONFIG_FILES([clients/ogreWatcher/Makefile])
-    fi
+    # GTL - OgreWatcher is not currently buildable
+    # if test x$enable_ogreWatcher != xno; then
+    #     AC_CONFIG_FILES([clients/ogreWatcher/Makefile])
+    # fi
 fi
 
 if test x$enable_hierarchy_client != xno; then

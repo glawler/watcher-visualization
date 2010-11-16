@@ -68,7 +68,7 @@ namespace watcher
          */
         MessageStream(
                 const std::string &serverName, 
-                const std::string &service="watcherd",  // can be port num or service name
+                const std::string &service="",  // can be port num or service name. If "" serverName will be parsed for host:service format
                 const Timestamp &startTime=0, 
                 const float streamRate=1.0); 
 

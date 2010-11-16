@@ -30,8 +30,8 @@ Client::Client(
         const std::string& server_, 
         const std::string& service_) :
     ioService(),
-    server(server_),
-    service(service_),
+    server(Connection::getServerHost(server_)),
+    service(Connection::getServerService(server_,service_)),
     clientConnection(new ClientConnection(ioService, server, service))
 {
     TRACE_ENTER();

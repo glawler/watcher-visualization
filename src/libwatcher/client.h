@@ -45,14 +45,17 @@ namespace watcher
     {
         public:
             /**
-             * Construct the Client to connect to the specified TCP address and service.
-             * to send messages. Default service is "watcherd" - a watcherd running somewhere.
+             * Construct the Client to connect to the specified hostname and service.
+             * to send messages. 
+	     * If service is not specified, server may be of the form "host:service", and
+	     * otherwise the default service name "watcherd" is used.
+	     * If hostname is empty (server is "" or ":service"), "localhost" is used.
              * @param[in] server the host to connect to
              * @param[in] service the service/port on the server
              */
             explicit Client(
                     const std::string& server, 
-                    const std::string& service="watcherd");
+                    const std::string& service="");
 
             virtual ~Client();
 
