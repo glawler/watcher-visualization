@@ -34,11 +34,13 @@ using namespace libconfig;
 
 option Options[] = {
     { "help", 0, NULL, 'h' },
-    { "config", 1, NULL, 'c' },
-    { "database", 1, NULL, 'd' },
-    { "read-only", 1, NULL, 'r' },
-    { "logLevel", 1, NULL, 'l' },
-    { "logProperties", 1, NULL, 'L' },
+    { "address", required_argument, NULL, 'a' },
+    { "port", required_argument, NULL, 'p' },
+    { "config", required_argument, NULL, 'c' },
+    { "database", required_argument, NULL, 'd' },
+    { "read-only", required_argument, NULL, 'r' },
+    { "logLevel", required_argument, NULL, 'l' },
+    { "logProperties", required_argument, NULL, 'L' },
     { 0, 0, NULL, 0 }
 };
 
@@ -49,7 +51,9 @@ void usage(const char *progName, bool exitp)
     cout << "\t-h,--help\t\tshow this messsage and exit." << endl; 
     cout << "\t-d,--database database\t\t use this event database when running watcherd" << endl; 
     cout << "\t-c,--config configfile\t\tIf not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
-    cout << "\t-r, --read-only\t\t do not write events to the database." << endl;
+    cout << "\t-r,--read-only\t\t do not write events to the database." << endl;
+    cout << "\t-p,--port port\t\tThe service/port to listen on. Can also be number or service name from /etc/services." << endl;
+    cout << "\t-a,--address address\t\tThe address to listen on. Useful for multi-NIC machines. Can also be the hostname." << endl;
     cout << "\t-l,--logLevel level\t\tSet the default log level. Must be one of\n";
     cout << "\t                     \t\t\toff, fatal, error, warn, info, debug, or trace.\n";
     cout << "\t-L,--logProperties filename\t\tThe log.properties filename\n";
@@ -67,9 +71,12 @@ int main(int argc, char* argv[])
 
     int i;
     bool readOnly = false;
-    std::string dbPath, logLevel, logPropsFilename;
-    while ((i = getopt_long(argc, argv, "hc:d:rl:L:", Options, NULL)) != -1) {
+    std::string dbPath, logLevel, logPropsFilename, service, address;
+    while ((i = getopt_long(argc, argv, "hc:d:a:p:rl:L:", Options, NULL)) != -1) {
         switch (i) {
+            case 'a':
+                address=optarg; 
+                break;
             case 'c':
                 //handled below
                 break;
@@ -91,6 +98,9 @@ int main(int argc, char* argv[])
             case 'L':
                 logPropsFilename=optarg;
                 break;
+            case 'p':
+                service=optarg;
+                break;
             default:
                 usage(argv[0], true); 
         }
@@ -105,6 +115,7 @@ int main(int argc, char* argv[])
         cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
         return 1;
     }
+    SingletonConfig::setConfigFile(configFilename); 
     SingletonConfig::unlock();
 
     string logConf("log.properties");
@@ -130,22 +141,34 @@ int main(int argc, char* argv[])
         Logger::getRootLogger()->setLevel(Level::toLevel(logLevel)); 
     }
 
-    string address("localhost");
-    string port("8095");
     size_t numThreads=8;
 
-    if (!config.lookupValue("server", address))
-    {
-        LOG_INFO("'server' not found in the configuration file, using default: " << address 
-                << " and adding this to the configuration file.");
-        config.getRoot().add("server", libconfig::Setting::TypeString) = address;
+    if (address.empty()) {
+        if (!config.lookupValue("server", address)) {
+            LOG_INFO("'server' not found in the configuration file, using default: " << address 
+                    << " and adding this to the configuration file.");
+            config.getRoot().add("server", libconfig::Setting::TypeString) = address;
+        }
+    }
+    else {
+        LOG_INFO("Using command line arg " << address << " for server address."); 
+        if (!config.exists("server"))
+            config.getRoot().add("server", libconfig::Setting::TypeString)=address;
+        config.getRoot()["server"]=address; 
     }
 
-    if (!config.lookupValue("port", port))
-    {
-        LOG_INFO("'port' not found in the configuration file, using default: " << port  
-                << " and adding this to the configuration file.");
-        config.getRoot().add("port", libconfig::Setting::TypeString)=port;
+    if (service.empty()) {
+        if (!config.lookupValue("port", service)) {
+            LOG_INFO("'port' not found in the configuration file, using default: " << service  
+                    << " and adding this to the configuration file.");
+            config.getRoot().add("port", libconfig::Setting::TypeString)=service;
+        }
+    }
+    else {
+        LOG_INFO("Using command line arg " << service << " for service/port."); 
+        if (!config.exists("port"))
+            config.getRoot().add("port", libconfig::Setting::TypeString)=service;
+       config.getRoot()["port"]=service; 
     }
 
     if (!config.lookupValue("serverThreadNum", numThreads))
@@ -168,7 +191,7 @@ int main(int argc, char* argv[])
     WatcherdPtr theWatcherDaemon(new Watcherd(readOnly));
     try
     {
-        theWatcherDaemon->run(address, port, (int)numThreads);
+        theWatcherDaemon->run(address, service, (int)numThreads);
     }
     catch (std::exception &e)
     {

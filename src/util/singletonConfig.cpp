@@ -64,7 +64,7 @@ void SingletonConfig::saveConfig()
     TRACE_ENTER();
     if (0!=access(filename.c_str(), W_OK)) { 
         LOG_WARN("--------------------------------------------------------------------------"); 
-        LOG_WARN("--- Not saving configuration changes as the cfg file is read only --------"); 
+        LOG_WARN("--- Not saving configuration changes as the cfg file, " << filename << " is read only --------"); 
         LOG_WARN("--------------------------------------------------------------------------"); 
     }
     else 
