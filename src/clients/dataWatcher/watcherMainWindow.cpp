@@ -91,6 +91,7 @@ void MainWindow::checkIO()
     }
 
     // We only care about data point (and (some) control) messages. 
+    MsgStream->enableFiltering(true); 
     MessageStreamFilterPtr f(new MessageStreamFilter); 
     unsigned int ourMessageTypes[] = { DATA_POINT_MESSAGE_TYPE, PLAYBACK_TIME_RANGE_MESSAGE_TYPE, 
         SPEED_MESSAGE_TYPE, SEEK_MESSAGE_TYPE, LIST_STREAMS_MESSAGE_TYPE }; 
