@@ -157,7 +157,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Label Color</string>
+        <string>Label Color...</string>
        </property>
       </widget>
      </item>
@@ -170,7 +170,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Label Font</string>
+        <string>Label Font...</string>
        </property>
       </widget>
      </item>
@@ -183,7 +183,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Node Color</string>
+        <string>Node Color...</string>
        </property>
       </widget>
      </item>

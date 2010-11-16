@@ -448,7 +448,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionKeyboardShortcuts">
    <property name="text">
-    <string>&amp;Keyboard Shortcuts</string>
+    <string>&amp;Keyboard Shortcuts...</string>
    </property>
   </action>
   <action name="actionWallTime">
@@ -487,7 +487,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSetEdgeWidth">
    <property name="text">
-    <string>Set &amp;Edge Width</string>
+    <string>Set &amp;Edge Width...</string>
    </property>
   </action>
   <action name="actionLoopPlayback">
@@ -511,37 +511,37 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="action_About">
    <property name="text">
-    <string>&amp;About</string>
+    <string>&amp;About...</string>
    </property>
   </action>
   <action name="actionSetStreamName">
    <property name="text">
-    <string>&amp;Set Stream Name</string>
+    <string>&amp;Set Stream Name...</string>
    </property>
   </action>
   <action name="actionLayers">
    <property name="text">
-    <string>La&amp;yer Properties</string>
+    <string>La&amp;yer Properties...</string>
    </property>
   </action>
   <action name="actionChangeStream">
    <property name="text">
-    <string>&amp;Change Stream</string>
+    <string>&amp;Change Stream...</string>
    </property>
   </action>
   <action name="actionLoadBackgroundImageFromFile">
    <property name="text">
-    <string>&amp;Background Image</string>
+    <string>&amp;Background Image...</string>
    </property>
   </action>
   <action name="actionNodeConfiguration">
    <property name="text">
-    <string>&amp;Node Properties</string>
+    <string>&amp;Node Properties...</string>
    </property>
   </action>
   <action name="actionBackgroundColor">
    <property name="text">
-    <string>Background &amp;Color</string>
+    <string>Background &amp;Color...</string>
    </property>
   </action>
   <action name="actionGroundGrid">

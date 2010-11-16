@@ -67,7 +67,7 @@
       <item>
        <widget class="QPushButton" name="newStreamButton">
         <property name="text">
-         <string>New Stream</string>
+         <string>New Stream...</string>
         </property>
        </widget>
       </item>
