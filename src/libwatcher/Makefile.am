@@ -10,8 +10,10 @@ libwatcher_a_include_HEADERS=\
 	message_fwd.h \
 	messageHandler.h \
 	sendMessageHandler.h \
+	messageStream.h \
 	messageStreamFilter.h \
 	messageStreamReactor.h \
+	watcherdAPIMessageHandler.h \
 	watcherTypes.h \
 	watcherGlobalFunctions.h \
 	watcherColors.h \
@@ -30,6 +32,11 @@ libwatchermsg_la_include_HEADERS=\
 	messageTypesAndVersions.h \
 	messageStreamFilter.h \
 	messageStreamFilterMessage.h \
+	seekWatcherMessage.h \
+	playbackTimeRange.h \
+	listStreamsMessage.h \
+	speedWatcherMessage.h \
+	streamDescriptionMessage.h \
 	nodePropertiesMessage.h \
 	nodeStatusMessage.h \
 	watcherMessageFwd.h 

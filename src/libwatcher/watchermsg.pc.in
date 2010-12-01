@@ -7,6 +7,6 @@ Name: watcher
 Description: Collection of watcher messages. 
 Requires: 
 Version: @VERSION@
-Libs: -L${libdir} -Wl,-rpath=${libdir} -lwatchermsg
+Libs: -L${libdir} -Wl,-rpath=${libdir} -lwatchermsg -lwatcher
 Cflags: -I${includedir}
 

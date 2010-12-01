@@ -24,14 +24,14 @@
 #define WATCHER_MESSAGE_STREAM_REACTOR_H
 
 #include <boost/scoped_ptr.hpp>
-#include "messageTypesAndVersions.h"
-#include "messageStream.h"
+#include "libwatcher/messageTypesAndVersions.h"
+#include "libwatcher/messageStream.h"
 #include "declareLogger.h"
 
 namespace watcher {
 
-    /** forward decl for private implementation details. */
-    class MessageStreamReactorImpl;
+    /** forward decl for private implementation details, please ignore. */
+    class MSRImpl;
 
     /**
      * MessageStreamReactor is a wrapper around messages stream that 
@@ -42,30 +42,42 @@ namespace watcher {
         public: 
             /** 
              * @param ms The messageStream to monitor for events. 
-             * @param reconnect if true, have this class reconnect if the message stream
-             * gets disconnected. 
              */
-            MessageStreamReactor(MessageStreamPtr ms, bool reconnect=true);
+            MessageStreamReactor(MessageStreamPtr ms); 
             virtual ~MessageStreamReactor();
 
             /**
              * seems like a lot of work to implement function pointers/callbacks. 
-             * code sample:
+             * code sample that adds a class instance's member function as a callback
+             * looks much like this ugly ugly code:
              * MessageStreamReactor *msr(new MessageStreamReactor(messageStream); 
-             * msr->nodeLocationUpdateFunction=
-             *      boost::bind(&myClass::myFunc, this, _1, _2, _3, _4, _5); 
+             * msr->addNodeLocationUpdateFunction(
+             *      boost::bind(&myClass::myFunc, this, _1, _2, _3, _4, _5)); 
              */
-            typedef boost::function<bool (double x, double y, double z, unsigned long nodeID)> NodeLocationUpdateFunction;
-            NodeLocationUpdateFunction nodeLocationUpdateFunction;
+            typedef boost::function<bool (double x, double y, double z, const std::string &nodeID)> NodeLocationUpdateFunction;
 
-            typedef boost::function<void (MessagePtr m)> MessageCallbackFunction;
-            MessageCallbackFunction gotFeederMessage;
-            MessageCallbackFunction gotDataMessage;
-            MessageCallbackFunction newNodeSeen;
-            MessageCallbackFunction newLayerSeen;
+            /** Add a function callback when a node's GPS data is updated. */
+            void addNodeLocationUpdateFunction(NodeLocationUpdateFunction); 
 
             /**
-             * Callback for specfic message type.
+             * Basic function callback is a function called with the relevant message.
+             */
+            typedef boost::function<void (MessagePtr m)> MessageCallbackFunction;
+
+            /** Called when a feeder message arrives. */
+            void addFeederMessageCallback(MessageCallbackFunction); 
+
+            /** Called when a control message arrives. */
+            void addControlMessageCallback(MessageCallbackFunction); 
+
+            /** Called when a new node is seen for the first time. */
+            void addNewNodeSeenCallback(MessageCallbackFunction); 
+
+            /** Called when a new layer is seen for the first time. */
+            void addNewLayerSeenCallback(MessageCallbackFunction); 
+
+            /**
+             * Callback for specfic message type. A generic "subscription" API. 
              */
             void addMessageTypeCallback(MessageCallbackFunction, watcher::event::MessageType type); 
 
@@ -75,9 +87,10 @@ namespace watcher {
 
             DECLARE_LOGGER(); 
             void getMessageLoop(); 
-            boost::scoped_ptr<MessageStreamReactorImpl> impl;
-            
             MessageStreamReactor(const MessageStreamReactor &); // no copies
+
+            // most of the private stuff for this class is hidden in the .cpp 
+            boost::scoped_ptr<MSRImpl> impl;
     };
 } // namespace
 

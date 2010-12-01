@@ -33,12 +33,13 @@ namespace watcher {
 
     /** 
      * Implementation class for MSR. Hides gritty details from 
-     * clients of the class. 
+     * clients of the class. MSR==Message Stream Reactor.
      */
-    class MessageStreamReactorImpl {
+    class MSRImpl {
         public: 
-            MessageStreamReactorImpl(MessageStreamPtr ms) {}; 
-            ~MessageStreamReactorImpl() {
+            MSRImpl(MessageStreamPtr ms) : mStream(ms), ioThread(NULL) {
+            }; 
+            ~MSRImpl() {
                 if (ioThread) {
                     ioThread->interrupt(); 
                     ioThread->join(); 
@@ -47,74 +48,108 @@ namespace watcher {
                 }
             } 
             
-            MessageStreamPtr ms; 
             boost::thread *ioThread;
 
             // These need to be very fast lookup. 
+            // Maybe use tr1 unordered_list
+            // or a hash
             typedef std::map<std::string, bool> SeenLayerMap;
             SeenLayerMap seenLayerMap;
             typedef std::map<unsigned int, bool> SeenNodeMap;
             SeenNodeMap seenNodeMap;
 
             MessageStreamPtr mStream;
-            bool reconnect;
 
-            typedef std::map<watcher::event::MessageType, MessageStreamReactor::MessageCallbackFunction> CallbackTable;
+            // keep track of callbacks in multimap indexed by message type
+            typedef std::multimap<watcher::event::MessageType, MessageStreamReactor::MessageCallbackFunction> CallbackTable;
+            typedef std::pair<watcher::event::MessageType, MessageStreamReactor::MessageCallbackFunction> CallbackTablePair;
+            typedef std::pair<CallbackTable::const_iterator, CallbackTable::const_iterator> CallbackRange;
             CallbackTable callbackTable; 
-    };
 
-    MessageStreamReactor::MessageStreamReactor(MessageStreamPtr ms, bool recon) : 
-        impl(new MessageStreamReactorImpl(ms)) {
+            // Keep track of non-generic callbacks in vectors of functions.
+            typedef std::vector<MessageStreamReactor::NodeLocationUpdateFunction> NodeLocationUpdateFunctions; 
+            NodeLocationUpdateFunctions nodeLocationUpdateFunctions;
+
+            // Keep track of generic callbacks in vector as well.
+            typedef std::vector<MessageStreamReactor::MessageCallbackFunction> CallbackVector;
+            CallbackVector feederMessageCallbacks;
+            CallbackVector controlMessageCallbacks;
+            CallbackVector newNodeSeenCallbacks;
+            CallbackVector newLayerSeenCallbacks;
+
+            void doMessageCallbacks(const CallbackVector &v, MessagePtr m) { 
+                MSRImpl::CallbackVector::const_iterator i;
+                for (i=v.begin(); i!=v.end(); ++i)
+                    (*i)(m); 
+            }
+    };
+    MessageStreamReactor::MessageStreamReactor(MessageStreamPtr ms) : 
+        impl(new MSRImpl(ms)) {
         TRACE_ENTER();
         impl->mStream=ms;
-        impl->reconnect=recon;
         if (!impl->ioThread) 
             impl->ioThread=new boost::thread(boost::bind(&MessageStreamReactor::getMessageLoop, this));
         TRACE_EXIT();
     }
     MessageStreamReactor::~MessageStreamReactor() {
     }
-    void MessageStreamReactor::addMessageTypeCallback(MessageCallbackFunction f, watcher::event::MessageType type) {
-        impl->callbackTable[type]=f;
+    void MessageStreamReactor::addNodeLocationUpdateFunction(NodeLocationUpdateFunction f) {
+       impl->nodeLocationUpdateFunctions.push_back(f);  
+    }
+    void MessageStreamReactor::addNewNodeSeenCallback(MessageCallbackFunction f) {
+       impl->newNodeSeenCallbacks.push_back(f);  
+    }
+    void MessageStreamReactor::addNewLayerSeenCallback(MessageCallbackFunction f) {
+       impl->newLayerSeenCallbacks.push_back(f);  
+    }
+    void MessageStreamReactor::addFeederMessageCallback(MessageCallbackFunction f) {
+       impl->feederMessageCallbacks.push_back(f);  
+    }
+    void MessageStreamReactor::addControlMessageCallback(MessageCallbackFunction f) {
+       impl->controlMessageCallbacks.push_back(f);  
+    }
+    void MessageStreamReactor::addMessageTypeCallback(MessageCallbackFunction f, watcher::event::MessageType t) {
+        impl->callbackTable.insert(MSRImpl::CallbackTablePair(t,f)); 
     }
     void MessageStreamReactor::getMessageLoop() {
         while (true) {
-            while (impl->reconnect && !impl->mStream->connected()) {
-                this_thread::interruption_point();
-                if (!impl->mStream->connect(true)) {
-                    LOG_WARN("Unable to connect to server. Trying again in 1 second");
-                    sleep(1);
-                }
-            }
             this_thread::interruption_point();
             MessagePtr message;
             while(impl->mStream && impl->mStream->getNextMessage(message)) {
-                if (isFeederEvent(message->type) && gotFeederMessage)
-                    gotFeederMessage(message); 
+                LOG_DEBUG("Got message in MessageStreamReactor::getMessageLoop, type: " << message->type); 
+                if (!isFeederEvent(message->type)) {
+                    impl->doMessageCallbacks(impl->controlMessageCallbacks, message); 
+                    LOG_DEBUG("Sent control message to " << impl->controlMessageCallbacks.size() << " subscribers"); 
+                }
                 else {
-                    if (gotDataMessage) 
-                        gotDataMessage(message); 
-                    if (impl->seenNodeMap.end()!=impl->seenNodeMap.find(message->fromNodeID.to_v4().to_ulong())) {
-                        if (newNodeSeen) 
-                            newNodeSeen(message); 
+                    impl->doMessageCallbacks(impl->feederMessageCallbacks, message); 
+                    LOG_DEBUG("Sent feeder message to " << impl->feederMessageCallbacks.size() << " subscribers"); 
+                    if (impl->seenNodeMap.end()==impl->seenNodeMap.find(message->fromNodeID.to_v4().to_ulong())) {
+                        impl->doMessageCallbacks(impl->newNodeSeenCallbacks, message); 
+                        LOG_DEBUG("Invoked new node callback " << impl->newNodeSeenCallbacks.size() << " times."); 
                         impl->seenNodeMap[message->fromNodeID.to_v4().to_ulong()]=true;
                     }
-                    if (message->type==GPS_MESSAGE_TYPE && nodeLocationUpdateFunction) {
+                    if (message->type==GPS_MESSAGE_TYPE) {
                         GPSMessagePtr gm=boost::dynamic_pointer_cast<GPSMessage>(message);
-                        nodeLocationUpdateFunction(gm->x, gm->y, gm->z, gm->fromNodeID.to_v4().to_ulong()); 
+                        MSRImpl::NodeLocationUpdateFunctions::const_iterator i;
+                        for (i=impl->nodeLocationUpdateFunctions.begin(); i!=impl->nodeLocationUpdateFunctions.end(); ++i)
+                            (*i)(gm->x, gm->y, gm->z, gm->fromNodeID.to_string()); 
+                        LOG_DEBUG("Invoked node location update callback " << impl->nodeLocationUpdateFunctions.size() << " times."); 
                     }
                     GUILayer layer;
-                    if (hasLayer(message, layer) && impl->seenLayerMap.end()!=impl->seenLayerMap.find(layer)) {
-                        if (newLayerSeen) 
-                            newLayerSeen(message); 
+                    if (hasLayer(message, layer) && impl->seenLayerMap.end()==impl->seenLayerMap.find(layer)) {
+                        impl->doMessageCallbacks(impl->newLayerSeenCallbacks, message); 
+                        LOG_DEBUG("Invoked new layer callback " << impl->newLayerSeenCallbacks.size() << " times."); 
                         impl->seenLayerMap[layer]=true;
                     }
                 }
-                // GTL - holy shit this is ugly. 
                 if (impl->callbackTable.size()) { 
-                    MessageStreamReactorImpl::CallbackTable::iterator f=impl->callbackTable.find(message->type); 
-                    if (f!=impl->callbackTable.end())
-                        f->second(message); 
+                    MSRImpl::CallbackRange range;
+                    range=impl->callbackTable.equal_range(message->type); 
+                    unsigned int cnt=0;
+                    for (MSRImpl::CallbackTable::const_iterator i=range.first; i!=range.second; ++i, cnt++)
+                        i->second(message); 
+                    LOG_DEBUG("Sent type " << message->type << " message to " << cnt << " subscribers"); 
                 }
             }
         }
