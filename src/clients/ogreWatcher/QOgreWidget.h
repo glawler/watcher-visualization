@@ -2,11 +2,7 @@
 #define QOGRE_WIDGET_H
 
 #include "QOgreWindowWidget.h"
-
-// Forward decl of our custom Qt-based camera manager
-namespace OgreBites {
-    class QSdkCameraMan;
-}
+#include "QSdkCameraMan.h"
 
 namespace QtOgre 
 {
@@ -23,6 +19,16 @@ namespace QtOgre
             QOgreWidget(QWidget* parent);
             ~QOgreWidget(void);
 
+        public slots:
+
+        signals:
+            /** 
+             * Called when OGRE is finished loading and all ogre components
+             * are initalized and ready to go. Derived classes should not 
+             * use OGRE pointers until after this signal is given.
+             */
+            void ogreInitialized(); 
+
         protected:
             //
             // ########## Protected functions ##########
@@ -35,7 +41,12 @@ namespace QtOgre
             void mouseMoveEvent(QMouseEvent *e);
             void keyPressEvent(QKeyEvent *e); 
             void keyReleaseEvent(QKeyEvent *e); 
-            void createScene(void);
+
+            /** 
+             * Overload to create your own scene. Base class sets ambient light
+             * and creates a single light source, "MainLight". 
+             */
+            virtual void createScene(void);
 
             Ogre::SceneNode *m_mainNode;
             Ogre::SceneManager *mSceneMgr;

@@ -1,17 +1,22 @@
 #include <iostream>
+#include <fstream>
 #include <getopt.h>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <QApplication>
 #include "QWatcherMainWindow.h"
+#include "ui_ogreWatcher.h"      // the UI class/file for this window: Ui_WatcherMainWindow
 
 #include "logger.h"
 #include "libconfig.h++"
 #include "singletonConfig.h"
+#include "initConfig.h"
 
 using namespace std;
 using namespace watcher;
 using namespace libconfig;
+
+DECLARE_GLOBAL_LOGGER("ogreGlobalLogger"); 
 
 int main(int argc, char **argv) 
 {
@@ -92,8 +97,16 @@ int main(int argc, char **argv)
             ofstream f(configFilename.c_str(), ios_base::in | ios_base::out); 
             f.close();
         }
-        else 
-            config.readFile(configFilename.c_str());
+        else { 
+            if (false==initConfig(config, argc, argv, configFilename))
+            {
+                cerr << "Error reading configuration file, unable to continue." << endl;
+                cerr << "Usage: " << basename(argv[0]) << " [-c|--configFile] configfile" << endl;
+                return 1;
+            }
+        }
+
+        config.readFile(configFilename.c_str());
         SingletonConfig::setConfigFile(configFilename);
     }
     catch (ParseException &e)
@@ -148,15 +161,14 @@ int main(int argc, char **argv)
 
     QApplication::setColorSpec(QApplication::CustomColor);
     QApplication app(argc, argv);
-    QWatcherMainWindow window;
+    Ui_WatcherMainWindow ui; 
+    QWatcherMainWindow window(ui); 
 
     // setup app signals/slots
-    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-    QObject::connect(window.quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
-    QObject::connect(window.action_Quit, SIGNAL(activated()), &app, SLOT(quit()));
+    QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+    QObject::connect(ui.action_Quit, SIGNAL(activated()), &app, SLOT(quit()));
 
     // Let's go!
     window.show();
-
     return app.exec();
 }

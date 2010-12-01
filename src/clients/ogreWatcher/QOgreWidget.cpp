@@ -45,6 +45,9 @@ namespace QtOgre
             createRenderWindow();
             setupResources();
             setupScene();
+            createScene();
+            startTimer(20);
+            emit ogreInitialized(); 
         }
 
         update();
@@ -54,6 +57,7 @@ namespace QtOgre
     /// \param e The event data
     ///
     void QOgreWidget::timerEvent(QTimerEvent *) {
+        // std::cout << "Timer event called." << std::endl;
         update();
     }
     ///
@@ -94,8 +98,6 @@ namespace QtOgre
         Ogre::Entity* mesh = mSceneMgr->createEntity("Head", "ogrehead.mesh");
         m_mainNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
         m_mainNode->attachObject(mesh);
-        
-        // mCamera->setAutoTracking(true, m_mainNode);
     }
 
     ///
@@ -152,27 +154,22 @@ namespace QtOgre
         m_vp->setClearEveryFrame(true);
 
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-        createScene();
 
         Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(Ogre::TFO_BILINEAR);
         Ogre::MaterialManager::getSingleton().setDefaultAnisotropy(1);
 
         // Alter the camera aspect ratio to match the viewport
         mCamera->setAspectRatio(Ogre::Real(m_vp->getActualWidth()) / Ogre::Real(m_vp->getActualHeight()));
-
-        startTimer(20);
     }
     void QOgreWidget::keyPressEvent(QKeyEvent *e) {
         // std::cout << "got key press event " << e->text().toStdString() << std::endl;
         if (e->key()==Qt::Key_Space) { 
             switch(mCameraMgr->getStyle()) { 
                 case OgreBites::CS_FREELOOK: 
-                    mCameraMgr->setTarget(m_mainNode); 
                     mCameraMgr->setStyle(OgreBites::CS_ORBIT); 
                     break;
                 case OgreBites::CS_MANUAL: 
                 case OgreBites::CS_ORBIT: 
-                    mCameraMgr->setTarget(NULL); 
                     mCameraMgr->setStyle(OgreBites::CS_FREELOOK); 
                     break;
             }
@@ -184,7 +181,6 @@ namespace QtOgre
         mCameraMgr->injectKeyUp(*e); 
         update(); 
     }
-
     //@}
     ///
     /// \name Private constants

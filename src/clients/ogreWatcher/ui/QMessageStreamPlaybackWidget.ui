@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>651</width>
-    <height>69</height>
+    <width>720</width>
+    <height>120</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,215 +16,295 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <property name="spacing">
-      <number>6</number>
-     </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetMinimumSize</enum>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>6</number>
        </property>
        <item>
-        <widget class="QPushButton" name="rewindToStartButton">
-         <property name="toolTip">
-          <string>Rewind to start of data</string>
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
          </property>
-         <property name="statusTip">
-          <string>Rewind to start of data</string>
-         </property>
-         <property name="whatsThis">
-          <string>Rewind to start of data</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
-           <normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</iconset>
-         </property>
-        </widget>
+         <item>
+          <widget class="QPushButton" name="rewindToStartButton">
+           <property name="toolTip">
+            <string>Rewind to start of data</string>
+           </property>
+           <property name="statusTip">
+            <string>Rewind to start of data</string>
+           </property>
+           <property name="whatsThis">
+            <string>Rewind to start of data</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
+             <normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</normaloff>:/buttonImages/resources/gtk-media-previous-ltr.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rewindButton">
+           <property name="toolTip">
+            <string>View stream in reverse direction at current rate  (or click again to double current rate)</string>
+           </property>
+           <property name="statusTip">
+            <string>View stream in reverse direction at current rate  (or click again to double current rate)</string>
+           </property>
+           <property name="whatsThis">
+            <string>Go backward in time at current rate</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
+             <normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="playButton">
+           <property name="toolTip">
+            <string>Play in forward direction at normal rate</string>
+           </property>
+           <property name="statusTip">
+            <string>Play in forward direction at normal rate</string>
+           </property>
+           <property name="whatsThis">
+            <string>Play in forward direction at normal rate</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
+             <normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pauseButton">
+           <property name="toolTip">
+            <string>Pause/Unpause playback</string>
+           </property>
+           <property name="statusTip">
+            <string>Pause/Unpause playback</string>
+           </property>
+           <property name="whatsThis">
+            <string>Pause/Unpause playback</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
+             <normaloff>:/buttonImages/resources/gtk-media-pause.png</normaloff>:/buttonImages/resources/gtk-media-pause.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="forwardButton">
+           <property name="toolTip">
+            <string>View stream in forward direction at current rate (or click again to double current rate)</string>
+           </property>
+           <property name="statusTip">
+            <string>View stream in forward direction at current rate (or click again to double current rate)</string>
+           </property>
+           <property name="whatsThis">
+            <string>Go forward in time at current rate</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
+             <normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="forwardToEndButton">
+           <property name="toolTip">
+            <string>Jump to end of playback data or the live stream</string>
+           </property>
+           <property name="statusTip">
+            <string>Jump to end of playback data or the live stream</string>
+           </property>
+           <property name="whatsThis">
+            <string>Jump to end of playback data or the live stream</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
+             <normaloff>:/buttonImages/resources/gtk-media-previous-rtl.png</normaloff>:/buttonImages/resources/gtk-media-previous-rtl.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="streamRateSpinBox">
+           <property name="toolTip">
+            <string>Set playback rate</string>
+           </property>
+           <property name="statusTip">
+            <string>Set playback rate</string>
+           </property>
+           <property name="whatsThis">
+            <string>Set playback rate</string>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
+           <property name="correctionMode">
+            <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="minimum">
+            <double>-100.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.500000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Stream Name:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="descriptionLabel">
+             <property name="toolTip">
+              <string>Connected Message Stream Description</string>
+             </property>
+             <property name="statusTip">
+              <string>Connected Message Stream Description</string>
+             </property>
+             <property name="whatsThis">
+              <string>Connected Message Stream Description</string>
+             </property>
+             <property name="text">
+              <string>Description Text</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="rewindButton">
-         <property name="toolTip">
-          <string>View stream in reverse direction at current rate  (or click again to double current rate)</string>
-         </property>
-         <property name="statusTip">
-          <string>View stream in reverse direction at current rate  (or click again to double current rate)</string>
-         </property>
-         <property name="whatsThis">
-          <string>Go backward in time at current rate</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
-           <normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</normaloff>:/buttonImages/resources/gtk-media-forward-rtl.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="playButton">
-         <property name="toolTip">
-          <string>Play in forward direction at normal rate</string>
-         </property>
-         <property name="statusTip">
-          <string>Play in forward direction at normal rate</string>
-         </property>
-         <property name="whatsThis">
-          <string>Play in forward direction at normal rate</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
-           <normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</normaloff>:/buttonImages/resources/gtk-media-play-ltr.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pauseButton">
-         <property name="toolTip">
-          <string>Pause/Unpause playback</string>
-         </property>
-         <property name="statusTip">
-          <string>Pause/Unpause playback</string>
-         </property>
-         <property name="whatsThis">
-          <string>Pause/Unpause playback</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
-           <normaloff>:/buttonImages/resources/gtk-media-pause.png</normaloff>:/buttonImages/resources/gtk-media-pause.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="forwardButton">
-         <property name="toolTip">
-          <string>View stream in forward direction at current rate (or click again to double current rate)</string>
-         </property>
-         <property name="statusTip">
-          <string>View stream in forward direction at current rate (or click again to double current rate)</string>
-         </property>
-         <property name="whatsThis">
-          <string>Go forward in time at current rate</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
-           <normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</normaloff>:/buttonImages/resources/gtk-media-forward-ltr.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="forwardToEndButton">
-         <property name="toolTip">
-          <string>Jump to end of playback data or the live stream</string>
-         </property>
-         <property name="statusTip">
-          <string>Jump to end of playback data or the live stream</string>
-         </property>
-         <property name="whatsThis">
-          <string>Jump to end of playback data or the live stream</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../data/qtResources/QMessageStreamPlaybackWidget.qrc">
-           <normaloff>:/buttonImages/resources/gtk-media-previous-rtl.png</normaloff>:/buttonImages/resources/gtk-media-previous-rtl.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="streamRateSpinBox">
-         <property name="toolTip">
-          <string>Set playback rate</string>
-         </property>
-         <property name="statusTip">
-          <string>Set playback rate</string>
-         </property>
-         <property name="whatsThis">
-          <string>Set playback rate</string>
-         </property>
-         <property name="accelerated">
+        <widget class="QSlider" name="playbackSlider">
+         <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="correctionMode">
-          <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+         <property name="toolTip">
+          <string>Drag and drop to desired playback location</string>
          </property>
-         <property name="keyboardTracking">
-          <bool>false</bool>
+         <property name="statusTip">
+          <string>Drag and drop to desired playback location</string>
          </property>
-         <property name="minimum">
-          <double>-100.000000000000000</double>
+         <property name="whatsThis">
+          <string>Drag and drop to desired playback location</string>
          </property>
-         <property name="maximum">
-          <double>100.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.500000000000000</double>
-         </property>
-         <property name="value">
-          <double>1.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
+         <property name="invertedAppearance">
+          <bool>false</bool>
          </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="playbackTimeLabel">
-         <property name="text">
-          <string>Current Playback Time</string>
+         <property name="invertedControls">
+          <bool>false</bool>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
          </property>
         </widget>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QSlider" name="playbackSlider">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>Drag and drop to desired playback location</string>
-       </property>
-       <property name="statusTip">
-        <string>Drag and drop to desired playback location</string>
-       </property>
-       <property name="whatsThis">
-        <string>Drag and drop to desired playback location</string>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="invertedAppearance">
-        <bool>false</bool>
-       </property>
-       <property name="invertedControls">
-        <bool>false</bool>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Playback Time:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="playbackTimeLabel">
+           <property name="text">
+            <string>Playback Time</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Time Range</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="playbackRangeLabel">
+           <property name="text">
+            <string>Time Range:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -268,6 +348,7 @@
   <slot>rewindToStartOfPlayback()</slot>
   <slot>forwardToEndOfPlayback()</slot>
   <slot>playbackSetSpeed(double)</slot>
-  <slot>setStreamPlaybackTime()</slot>
+  <slot>setStreamPlaybackTimeFromSlider()</slot>
+  <slot>messageStreamConnected(bool)</slot>
  </slots>
 </ui>

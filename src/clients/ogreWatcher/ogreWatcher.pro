@@ -31,14 +31,26 @@ HEADERS += \
     QOgreWindowWidget.h \
     QOgreWidget.h \
     QOgreWatcherWidget.h \
-    QMessageStreamPlaybackWidget.h 
+    QMessageStreamPlaybackWidget.h \
+    singletonConfig.h \
+    QWatcherMainWindow.h \
+    QWatcherGUIConfig.h \
+    WatcherGUIConfig.h \
+    WatcherConfigurationDialog.h \
+    initConfig.h
 SOURCES += \
     main.cpp \
     QOgreWindowWidget.cpp \
     QOgreWidget.cpp \
-    QSdkCameraMan.h \
+    QSdkCameraMan.h QSdkCameraMan.cpp \
     QOgreWatcherWidget.cpp QOgreWatcherWidget.h \
-    QMessageStreamPlaybackWidget.cpp QMessageStreamPlaybackWidget.h
+    QMessageStreamPlaybackWidget.cpp QMessageStreamPlaybackWidget.h \
+    singletonConfig.cpp \
+    QWatcherMainWindow.cpp \
+    QWatcherGUIConfig.cpp \
+    WatcherGUIConfig.cpp \
+    WatcherConfigurationDialog.cpp \
+    initConfig.cpp
 #
 # Platform specific 
 #
@@ -87,4 +99,5 @@ else:win32 {
 # 
 FORMS = \
     ui/ogreWatcher.ui \
-    ui/QMessageStreamPlaybackWidget.ui
+    ui/QMessageStreamPlaybackWidget.ui \
+    ui/configurationInformation.ui

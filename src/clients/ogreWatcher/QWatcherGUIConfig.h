@@ -29,7 +29,7 @@
 #include <libwatcher/watcherColors.h>
 #include <libwatcher/watcherTypes.h>
 #include <declareLogger.h>
-#include "watcherGUIConfig.h"
+#include "WatcherGUIConfig.h"
 
 namespace watcher
 {

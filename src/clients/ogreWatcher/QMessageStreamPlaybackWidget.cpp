@@ -1,8 +1,8 @@
-#include <seekWatcherMessage.h>  // for epoch, eof
-#include <playbackTimeRange.h>  // for epoch, eof
-#include <listStreamsMessage.h>
-#include <speedWatcherMessage.h>
-#include <streamDescriptionMessage.h>
+#include <libwatcher/seekWatcherMessage.h>  // for epoch, eof
+#include <libwatcher/playbackTimeRange.h>  // for epoch, eof
+#include <libwatcher/listStreamsMessage.h>
+#include <libwatcher/speedWatcherMessage.h>
+#include <libwatcher/streamDescriptionMessage.h>
 
 // #include "watcherStreamListDialog.h"
 #include "QMessageStreamPlaybackWidget.h"
@@ -13,29 +13,26 @@ namespace watcher {
 
     QMessageStreamPlaybackWidget::QMessageStreamPlaybackWidget(QWidget *parent) : 
         QWidget(parent), 
-        server("localhost"),
         isPlaybackPaused(false), 
-        autoRewind(false), 
         streamRate(1.0),
-        reconnectTimeout(1.0), 
-        reconnectTimerId(0), 
-        timeRangeQueryTimerId(0),
-        autoRewindTimerId(0) 
+        minTime(0), maxTime(0),
+        timeRangeQueryTimerId(0)
     {
         setupUi(this); 
+
+        descriptionLabel->setText("Not connected"); 
+        playbackTimeLabel->setNum(-1); 
+        playbackRangeLabel->setText("Unknown Range"); 
 
         // setup slots/signals
         connect(rewindToStartButton, SIGNAL(clicked()), this, SLOT(rewindToStartOfPlayback())); 
         connect(rewindButton, SIGNAL(clicked()), this, SLOT(reversePlayback())); 
-        connect(playButton, SIGNAL(clicked()), this, SLOT(forwardPlayback())); 
+        connect(playButton, SIGNAL(clicked()), this, SLOT(normalPlayback())); 
         connect(pauseButton, SIGNAL(clicked()), this, SLOT(pausePlayback())); 
         connect(forwardButton, SIGNAL(clicked()), this, SLOT(forwardPlayback())); 
         connect(forwardToEndButton, SIGNAL(clicked()), this, SLOT(forwardToEndOfPlayback())); 
-        connect(playbackSlider, SIGNAL(sliderReleased()), this, SLOT(setStreamPlaybackTime())); 
+        connect(playbackSlider, SIGNAL(sliderReleased()), this, SLOT(setStreamPlaybackTimeFromSlider())); 
         connect(streamRateSpinBox, SIGNAL(valueChanged(double)), this, SLOT(playbackSetSpeed(double))); 
-
-        timeRangeQueryTimerId=startTimer(10000);  // every ten seconds, request the new time range.
-        autoRewindTimerId=startTimer(10000);      // every ten seconds, check for auto rewind
     }
     // virtual 
     QMessageStreamPlaybackWidget::~QMessageStreamPlaybackWidget() {
@@ -44,154 +41,169 @@ namespace watcher {
         // We request a timerange update every so often to set the slider 
         // correctly. 
         if (te->timerId()==timeRangeQueryTimerId) 
-            messageStream->getMessageTimeRange();
-        if (te->timerId()==autoRewindTimerId) { 
-            if (autoRewind) { 
-                static time_t noNewMessagesForSeconds=0;
-                if (currentMessageTimestamp==playbackSlider->maximum) { 
-                    time_t now=time(NULL);
-                    if (!noNewMessagesForSeconds)
-                        noNewMessagesForSeconds=now;
-                    if (now-noNewMessagesForSeconds>10) {
-                        LOG_WARN("Autorewind engaged - jumping to start of data...");
-                        LOG_DEBUG("playbackRangeEnd " << playbackSlider->maximum << " noNewMessagesForSeconds: " 
-                                << noNewMessagesForSeconds); 
-                        noNewMessagesForSeconds=0;
-                        rewindToStartOfPlayback();
-                    }
-                }
-                else 
-                    noNewMessagesForSeconds=0;
-            }
-        }
+            if (mStream)
+                mStream->getMessageTimeRange();
     }
-    void QMessageStreamPlaybackWidget::setServer(QString serverAddrOrName) {
-        server=serverAddrOrName; 
+    void QMessageStreamPlaybackWidget::playbackTimeUpdated(watcher::Timestamp ts) {
+        LOG_DEBUG("Got new message timestamp: epoch: " << ts << ", offset: " << ((ts-minTime)/1000)); 
+        if (ts>maxTime) {
+            maxTime=ts;
+            playbackSlider->setRange(0, (maxTime-minTime)/1000); 
+            playbackRangeLabel->setText(QString("0 - %1").arg((maxTime-minTime)/1000)); 
+        }
+        else if (ts<minTime) {   // may happen at start before we get our first time range message
+            minTime=ts;
+            playbackSlider->setRange(0, (maxTime-minTime)/1000); 
+            playbackRangeLabel->setText(QString("0 - %1").arg((maxTime-minTime)/1000)); 
+        }
+        playbackTimeLabel->setNum(static_cast<int>((ts-minTime)/1000)); 
+        playbackSlider->setValue(static_cast<int>((ts-minTime)/1000));
+    }
+    void QMessageStreamPlaybackWidget::messageStreamConnected(bool connected) {
+        LOG_DEBUG("QMessageStreamPlaybackWidget " << (connected?"":"dis-") << "connected " << 
+                (connected?"to":"from") << " message stream."); 
+        if (connected) {
+            timeRangeQueryTimerId=startTimer(10000);  // every five seconds, request the new time range.
+            playbackSlider->setEnabled(true); 
+        }
+        else {
+            killTimer(timeRangeQueryTimerId);          
+            timeRangeQueryTimerId=0;
+            descriptionLabel->setText("Not connected"); 
+            playbackTimeLabel->setNum(-1); 
+            playbackRangeLabel->setText("Unknown Range"); 
+            minTime=0;
+            maxTime=0; 
+            playbackSlider->setEnabled(false); 
+        }
     }
     bool QMessageStreamPlaybackWidget::isPaused(void) const { 
         return isPlaybackPaused;
     }
     void QMessageStreamPlaybackWidget::setMessageStream(MessageStreamPtr ms) {
-        messageStream=ms;
-    }
-    MessageStreamPtr QMessageStreamPlaybackWidget::getMessageStream() { 
-        return messageStream;
+        mStream=ms;
     }
     void QMessageStreamPlaybackWidget::pausePlayback() {
         TRACE_ENTER();
-        if (!messageStream || !messageStream->connected()) {
+        if (!mStream || !mStream->connected()) {
             TRACE_EXIT();
             return;
         }
-        if (!isPlaybackPaused)
-            messageStream->stopStream(); 
-        else 
-            messageStream->startStream();
-        emit playbackPaused(); 
+        // bool pause=!isPlaybackPaused; 
+        // if (pause) {
+            isPlaybackPaused=true;
+            mStream->stopStream(); 
+            emit playbackPaused(); 
+        // }
+        // else {
+        //     isPlaybackPaused=false;
+        //     mStream->startStream();
+        //     emit playbackNormal(); 
+        // }
+
         TRACE_EXIT();
     }
     void QMessageStreamPlaybackWidget::normalPlayback() {
         TRACE_ENTER();
-        if (!messageStream || !messageStream->connected()) {
+        if (!mStream || !mStream->connected()) {
             TRACE_EXIT();
             return;
         }
         playbackSetSpeed(1.0);
-        messageStream->startStream(); 
+        mStream->startStream(); 
         emit playbackNormal(); 
         TRACE_EXIT();
     }
     void QMessageStreamPlaybackWidget::reversePlayback() {
         TRACE_ENTER();
-        if (!messageStream || !messageStream->connected()) {
+        if (!mStream || !mStream->connected()) {
             TRACE_EXIT();
             return;
         }
-        pausePlayback(); 
         if (streamRate != 0.0) {
             if (streamRate < 0.0)
                 playbackSetSpeed(-abs(streamRate*2));
             else
                 playbackSetSpeed(-abs(streamRate));
-            messageStream->startStream(); 
+            mStream->startStream(); 
         }
         emit playbackReversed(); 
         TRACE_EXIT();
     }
     void QMessageStreamPlaybackWidget::forwardPlayback() {
         TRACE_ENTER();
-        if (!messageStream || !messageStream->connected()) {
+        if (!mStream || !mStream->connected()) {
             TRACE_EXIT();
             return;
         }
-        pausePlayback(); 
         if (streamRate != 0.0) {
             if (streamRate > 0.0)
                 playbackSetSpeed(abs(streamRate*2));
             else
                 playbackSetSpeed(abs(streamRate));
-            messageStream->startStream(); 
+            mStream->startStream(); 
         }
         emit playbackForward();
         TRACE_EXIT();
     }
     void QMessageStreamPlaybackWidget::rewindToStartOfPlayback() {
         TRACE_ENTER();
-        if (!messageStream || !messageStream->connected()) {
+        if (!mStream || !mStream->connected()) {
             TRACE_EXIT();
             return;
         }
-        pausePlayback(); 
-        messageStream->setStreamTimeStart(SeekMessage::epoch); 
+        mStream->setStreamTimeStart(SeekMessage::epoch); 
         if (streamRate < 0.0)
             normalPlayback();
         else
-            messageStream->startStream(); 
+            mStream->startStream(); 
         emit rewoundToStartOfPlayback();
         TRACE_EXIT();
     }
     void QMessageStreamPlaybackWidget::forwardToEndOfPlayback() {
         TRACE_ENTER();
-        if (!messageStream || !messageStream->connected()) {
+        if (!mStream || !mStream->connected()) {
             TRACE_EXIT();
             return;
         }
-        pausePlayback();
-        messageStream->setStreamTimeStart(SeekMessage::eof); 
+        mStream->setStreamTimeStart(SeekMessage::eof); 
         normalPlayback();
         emit forwardedToEndOfPlayback();
         TRACE_EXIT();
     }
     void QMessageStreamPlaybackWidget::playbackSetSpeed(double x) {
         TRACE_ENTER();
-        if (!messageStream || !messageStream->connected()) {
+        if (!mStream || !mStream->connected()) {
             TRACE_EXIT();
             return;
         }
-        messageStream->setStreamRate(x);
+        mStream->setStreamRate(x);
         emit streamRateSet(x); 
         TRACE_EXIT();
     }
-    void QMessageStreamPlaybackWidget::setStreamPlaybackTime() {
+    void QMessageStreamPlaybackWidget::setStreamPlaybackTimeFromSlider() {
+        if (!mStream)
+            return;
         int value=playbackSlider->value(); 
-        playbackTimeLabel->setText(QString::number(value)); 
-        Timestamp newStart(value); 
-        LOG_DEBUG("slider update - new start time: " << newStart << " slider position: " << value << " cur mess ts: " << currentMessageTimestamp);
-        currentMessageTimestamp=newStart;  // So it displays in status string immediately.
-        newStart*=1000;
-        messageStream->clearMessageCache();
-        messageStream->setStreamTimeStart(newStart);
-        messageStream->startStream();
-        emit currentTimestampUpdated(currentMessageTimestamp); 
+        playbackTimeLabel->setNum(value); 
+        Timestamp newStart(minTime+(value*1000)); 
+        LOG_DEBUG("message stream slider update - offset time: " << value << ", message stream time: " << newStart << " (cur range: [ " << minTime << " - " << maxTime << "])"); 
+        mStream->clearMessageCache();
+        mStream->setStreamTimeStart(newStart);
+        mStream->startStream();
     }
-    void QMessageStreamPlaybackWidget::setAutoRewind(bool val) {
-        autoRewind=val;
+    void QMessageStreamPlaybackWidget::setAutoRewind(bool) {
+        LOG_WARN("Auto-rewind not yet implemented in ogreWatcher"); 
     }
     void QMessageStreamPlaybackWidget::handleStreamRelatedMessage(event::MessagePtr m) {
+        // LOG_DEBUG("Got message of type: " << m->type); 
         if (m->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE) {
             PlaybackTimeRangeMessagePtr trm(boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(m));
-            playbackSlider->setRange(trm->max_/1000, trm->min_/1000);
-            emit currentTimestampRangeUpdated(trm->max_/1000, trm->min_/1000); 
+            maxTime=trm->max_;
+            minTime=trm->min_; 
+            playbackSlider->setRange(0, (maxTime-minTime)/1000); 
+            playbackRangeLabel->setText(QString("0 - %1").arg((maxTime-minTime)/1000)); 
+            LOG_DEBUG("Got new range: epoch: [" << minTime << " - " << maxTime << "], offset from start: [0 - " << (maxTime-minTime)/1000);  
         }
         else if (m->type == SPEED_MESSAGE_TYPE) {
             // notification from the watcher daemon that the shared stream speed has changed
@@ -201,16 +213,25 @@ namespace watcher {
             streamRate=sm->speed;
             streamRateSpinBox->setValue(streamRate); 
             emit streamRateSet(streamRate); 
-            if (streamRate == 0)
+            if (streamRate == 0) {
                 isPlaybackPaused = true;
+                mStream->stopStream(); 
+                emit playbackPaused(); 
+            }
         } 
-        else if (m->type == STOP_MESSAGE_TYPE) 
+        else if (m->type == STOP_MESSAGE_TYPE) {
             isPlaybackPaused = true;
-        else if (m->type == START_MESSAGE_TYPE) 
+            mStream->stopStream(); 
+            emit playbackPaused(); 
+        }
+        else if (m->type == START_MESSAGE_TYPE) {
             isPlaybackPaused = false;
-        // else if (m->type == STREAM_DESCRIPTION_MESSAGE_TYPE) {
-        //     StreamDescriptionMessagePtr m(dynamic_pointer_cast<StreamDescriptionMessage>(m));
-        //     streamDescription = m->desc;
-        // }
+            mStream->startStream(); 
+            emit playbackPaused(); 
+        }
+        else if (m->type == STREAM_DESCRIPTION_MESSAGE_TYPE) {
+            StreamDescriptionMessagePtr mess(boost::dynamic_pointer_cast<StreamDescriptionMessage>(m));
+            descriptionLabel->setText(QString(mess->desc.c_str())); 
+        }
     }
 } // namespace

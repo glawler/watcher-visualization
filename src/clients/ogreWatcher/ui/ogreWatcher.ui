@@ -2,7 +2,7 @@
 <ui version="4.0">
  <author>Geoff Lawler</author>
  <class>WatcherMainWindow</class>
- <widget class="QWatcherMainWindow" name="WatcherMainWindow">
+ <widget class="watcher::QWatcherMainWindow" name="WatcherMainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -21,7 +21,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QtOgre::QOgreWidget" name="ogreWidget" native="true">
+     <widget class="watcher::QOgreWatcherWidget" name="ogreWidget" native="true">
       <widget class="watcher::QWatcherGUIConfig" name="qWatcherConfig" native="true">
        <property name="geometry">
         <rect>
@@ -51,7 +51,23 @@
     </property>
     <addaction name="action_Quit"/>
    </widget>
+   <widget class="QMenu" name="menuLayers">
+    <property name="title">
+     <string>Layers</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="action_Reset_Camera"/>
+    <addaction name="action_Ground"/>
+    <addaction name="action_Sky"/>
+    <addaction name="action_Fullscreen"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuView"/>
+   <addaction name="menuLayers"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="playbackDockWidget">
@@ -79,35 +95,76 @@
     <string>Toggle Mesh</string>
    </property>
   </action>
-  <action name="actionFull_Screen">
+  <action name="action_Reset_Camera">
+   <property name="text">
+    <string>&amp;Reset Camera</string>
+   </property>
+  </action>
+  <action name="action_Ground">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Ground</string>
+   </property>
+  </action>
+  <action name="action_Sky">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Sky</string>
+   </property>
+  </action>
+  <action name="action_Fullscreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Full Screen</string>
-   </property>
-  </action>
-  <action name="actionNormal_Screen">
-   <property name="text">
-    <string>Normal Screen</string>
+    <string>&amp;Fullscreen</string>
    </property>
   </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QtOgre::QOgreWidget</class>
-   <extends>QWidget</extends>
-   <header>QOgreWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>watcher::QMessageStreamPlaybackWidget</class>
    <extends>QWidget</extends>
    <header>QMessageStreamPlaybackWidget.h</header>
    <container>1</container>
+   <slots>
+    <signal>testSignal(bool)</signal>
+    <signal>playbackPaused()</signal>
+    <signal>playbackNormal()</signal>
+    <signal>playbackReversed()</signal>
+    <signal>playbackForward()</signal>
+    <signal>rewoundToStartOfPlayback()</signal>
+    <signal>forwardedToEndOfPlayback()</signal>
+    <signal>streamRateSet(double)</signal>
+    <signal>currentTimestampUpdated(watcher::Timestamp)</signal>
+    <signal>messageStreamDirectionChange()</signal>
+    <slot>testSlot(bool)</slot>
+    <slot>pausePlayback()</slot>
+    <slot>normalPlayback()</slot>
+    <slot>reversePlayback()</slot>
+    <slot>forwardPlayback()</slot>
+    <slot>rewindToStartOfPlayback()</slot>
+    <slot>forwardToEndOfPlayback()</slot>
+    <slot>playbackSetSpeed(double)</slot>
+    <slot>setStreamPlaybackTimeFromSlider()</slot>
+    <slot>messageStreamConnected(bool)</slot>
+   </slots>
   </customwidget>
   <customwidget>
-   <class>QWatcherMainWindow</class>
+   <class>watcher::QWatcherMainWindow</class>
    <extends>QMainWindow</extends>
    <header>QWatcherMainWindow.h</header>
    <container>1</container>
@@ -118,9 +175,124 @@
    <header>QWatcherGUIConfig.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>watcher::QOgreWatcherWidget</class>
+   <extends>QWidget</extends>
+   <header>QOgreWatcherWidget.h</header>
+   <container>1</container>
+   <slots>
+    <signal>groundToggled(bool)</signal>
+    <signal>skyToggled(bool)</signal>
+    <slot>resetPosition()</slot>
+    <slot>toggleGround(bool)</slot>
+    <slot>toggleSky(bool)</slot>
+    <slot>toggleFullscreen(bool)</slot>
+   </slots>
+  </customwidget>
  </customwidgets>
  <resources>
   <include location="../data/qtResources/watcherResources.qrc"/>
+  <include location="../data/qtResources/QMessageStreamPlaybackWidget.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>action_Reset_Camera</sender>
+   <signal>activated()</signal>
+   <receiver>ogreWidget</receiver>
+   <slot>resetPosition()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Ground</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ogreWidget</receiver>
+   <slot>toggleGround(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Sky</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ogreWidget</receiver>
+   <slot>toggleSky(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ogreWidget</sender>
+   <signal>groundToggled(bool)</signal>
+   <receiver>action_Ground</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>397</x>
+     <y>300</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ogreWidget</sender>
+   <signal>skyToggled(bool)</signal>
+   <receiver>action_Sky</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>397</x>
+     <y>300</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Fullscreen</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ogreWidget</receiver>
+   <slot>toggleFullscreen(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>messageStreamConnected(bool)</slot>
+ </slots>
 </ui>

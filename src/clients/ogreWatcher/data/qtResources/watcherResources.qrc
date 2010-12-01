@@ -1,18 +1,5 @@
 <RCC>
   <qresource prefix="icons">
-    <file>resources/gtk-media-forward-ltr.png</file>
-    <file>resources/gtk-media-forward-rtl.png</file>
-    <file>resources/gtk-media-next-ltr.png</file>
-    <file>resources/gtk-media-next-rtl.png</file>
-    <file>resources/gtk-media-pause.png</file>
-    <file>resources/gtk-media-play-ltr.png</file>
-    <file>resources/gtk-media-play-rtl.png</file>
-    <file>resources/gtk-media-previous-ltr.png</file>
-    <file>resources/gtk-media-previous-rtl.png</file>
-    <file>resources/gtk-media-record.png</file>
-    <file>resources/gtk-media-rewind-ltr.png</file>
-    <file>resources/gtk-media-rewind-rtl.png</file>
-    <file>resources/gtk-media-stop.png</file>
     <file>resources/watcher.png</file>
   </qresource>
 </RCC>

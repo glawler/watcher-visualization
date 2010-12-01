@@ -2,9 +2,9 @@
 #include <libconfig.h++>
 #include <values.h>  // DBL_MAX
 
-#include "watcherQtGUIConfig.h"
-#include "watcherConfigurationDialog.h"
-#include "backgroundImage.h"
+#include "QWatcherGUIConfig.h"
+#include "WatcherConfigurationDialog.h"
+// #include "BackgroundImage.h"
 #include "logger.h"
 #include "singletonConfig.h"
 
@@ -100,19 +100,20 @@ namespace watcher
         }
     }
     void QWatcherGUIConfig::loadBackgroundImage(void) {
-        QString filename;
-        filename=QFileDialog::getOpenFileName(this, "Choose a background image file", ".", "*.bmp"); 
-        if (!filename.isEmpty()) {
-            if (!BackgroundImage::getInstance().loadImageFile(filename.toStdString())) {
-                if (QMessageBox::Yes==QMessageBox::question(NULL, 
-                            tr("Error loading file"), tr("Error loading the image file. Try again?"), QMessageBox::Yes, QMessageBox::No))
-                    loadBackgroundImage();
-            }
-            else {
-                toggleBackgroundImage(true);
-                emit enableBackgroundImage(true);
-            }
-        }
+    // background image not supported in ogreWather
+    //     QString filename;
+    //     filename=QFileDialog::getOpenFileName(this, "Choose a background image file", ".", "*.bmp"); 
+    //     if (!filename.isEmpty()) {
+    //         if (!BackgroundImage::getInstance().loadImageFile(filename.toStdString())) {
+    //             if (QMessageBox::Yes==QMessageBox::question(NULL, 
+    //                         tr("Error loading file"), tr("Error loading the image file. Try again?"), QMessageBox::Yes, QMessageBox::No))
+    //                 loadBackgroundImage();
+    //         }
+    //         else {
+    //             toggleBackgroundImage(true);
+    //             emit enableBackgroundImage(true);
+    //         }
+    //     }
     }
     void QWatcherGUIConfig::setGPSScale() {
         TRACE_ENTER();
@@ -149,16 +150,21 @@ namespace watcher
             }
 
             while (maxNodes==0 || maxLayers==0 || serverName.empty()) { 
-                WatcherConfigurationDialog *d=new WatcherConfigurationDialog(serverName, maxNodes, maxLayers);  
-                d->setModal(true); 
-                d->exec();
-                LOG_DEBUG("WatcherConfigDialog result: " << ((d->result()==QDialog::Rejected)?"Rejected":"Accepted")); 
-                if (d->result()==QDialog::Rejected) { 
-                    SingletonConfig::unlock();
-                    LOG_FATAL("User did not give needed info to start, exiting."); 
-                    return false;
-                }
-                LOG_DEBUG("Got values from conf dialog - server: " << serverName << ", maxNodes: " << maxNodes << ", maxLayers: " << maxLayers); 
+                // WatcherConfigurationDialog *d=new WatcherConfigurationDialog(serverName, maxNodes, maxLayers);  
+                // d->setModal(true); 
+                // d->exec();
+                // LOG_DEBUG("WatcherConfigDialog result: " << ((d->result()==QDialog::Rejected)?"Rejected":"Accepted")); 
+                // if (d->result()==QDialog::Rejected) { 
+                //     SingletonConfig::unlock();
+                //     LOG_FATAL("User did not give needed info to start, exiting."); 
+                //     return false;
+                // }
+                // LOG_DEBUG("Got values from conf dialog - server: " << serverName << ", maxNodes: " << maxNodes << ", maxLayers: " << maxLayers); 
+                // GTL - hardcode for now. 
+                maxNodes=100;
+                maxLayers=25;
+                serverName="localhost"; 
+
                 if (!root.exists("server"))
                     root.add("server", libconfig::Setting::TypeString);
                 root["server"]=serverName;

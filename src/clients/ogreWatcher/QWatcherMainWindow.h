@@ -26,36 +26,47 @@
 
 #include <string>
 #include <QtGui/QMainWindow>
+#include <libwatcher/messageStream.h>
+#include <libwatcher/messageStreamReactor.h>
 #include "declareLogger.h"
-#include "ui_ogreWatcher.h"      // the UI class/file for this window: Ui_WatcherMainWindow
+
+// Foreward decl of main window GUI implementation (designer generated)
+class Ui_WatcherMainWindow; 
 
 namespace watcher
 {
-    class QWatcherMainWindow : public QMainWindow, public Ui_WatcherMainWindow
+
+    class QWatcherMainWindow : public QMainWindow
     {
         Q_OBJECT
 
         public:
 
-            explicit QWatcherMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+            explicit QWatcherMainWindow(Ui_WatcherMainWindow &ui, QWidget *parent = 0, Qt::WindowFlags flags = 0);
             ~QWatcherMainWindow(); 
 
-            void loadUi(Ui_WatcherMainWindow &ui); 
-
         public slots:
+            /** invoked when OGRE is ready to go. */
+            void ogreInitialized(); 
 
         signals:
+
+            void messageStreamConnected(bool connected); 
 
         protected:
             DECLARE_LOGGER();
 
+            Ui_WatcherMainWindow &ui;
+
             MessageStreamPtr messageStream;
-            MessageStreamReactor messageStreamReactor;
+            MessageStreamReactor *messageStreamReactor;
             // GTL - could stick a manetGLView in here if we wanted. 
 
         private:
 
-
+            void connectStream(); // connect to watherd and init the message stream. blocking...
+            boost::thread *messageStreamConnectionThread;
+            void initMessageStream();
     };
 }
 

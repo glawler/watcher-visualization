@@ -4,8 +4,8 @@
 #include <libwatcher/seekWatcherMessage.h>
 #include <libwatcher/messageTypesAndVersions.h>
 
-#include "watcherQtGUIConfig.h"
-#include "backgroundImage.h"
+#include "WatcherGUIConfig.h"
+// #include "backgroundImage.h"
 #include "singletonConfig.h"
 
 using namespace watcher;
@@ -239,11 +239,11 @@ bool WatcherGUIConfig::loadConfiguration()
                 s.add(prop, libconfig::Setting::TypeString)="none";
             backgroundImage=false;
         }
-        else {
-            if (!BackgroundImage::getInstance().loadImageFile(strVal)) {
-                LOG_WARN("Error loading background image file, " << strVal); 
-            }
-        }
+        // else {
+        //     if (!BackgroundImage::getInstance().loadImageFile(strVal)) {
+        //         LOG_WARN("Error loading background image file, " << strVal); 
+        //     }
+        // }
 
         // bg image location and size.
         prop="coordinates";
@@ -258,8 +258,8 @@ bool WatcherGUIConfig::loadConfiguration()
         {
             for (size_t i=0; i<sizeof(coordVals)/sizeof(coordVals[0]); i++)
                 coordVals[i]=s[prop][i];
-            BackgroundImage &bg=BackgroundImage::getInstance();
-            bg.setDrawingCoords(coordVals[0], coordVals[1], coordVals[2], coordVals[3], coordVals[4]); 
+            // BackgroundImage &bg=BackgroundImage::getInstance();
+            // bg.setDrawingCoords(coordVals[0], coordVals[1], coordVals[2], coordVals[3], coordVals[4]); 
         }
 
         //
@@ -477,36 +477,36 @@ bool WatcherGUIConfig::saveConfiguration()
         root["viewPoint"]["shift"][1]=std::fpclassify(manetAdj.shiftY)==FP_NAN ? 0.0 : manetAdj.shiftY;
         root["viewPoint"]["shift"][2]=std::fpclassify(manetAdj.shiftZ)==FP_NAN ? 0.0 : manetAdj.shiftZ;
 
-        BackgroundImage &bg=BackgroundImage::getInstance();
-        float bgfloatVals[5];
-        bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
+        // BackgroundImage &bg=BackgroundImage::getInstance();
+        // float bgfloatVals[5];
+        // bg.getDrawingCoords(bgfloatVals[0], bgfloatVals[1], bgfloatVals[2], bgfloatVals[3], bgfloatVals[4]); 
 
-        prop="backgroundImage";
-        if (!root.exists(prop))
-            root.add(prop, libconfig::Setting::TypeGroup);
-        libconfig::Setting &bgset=cfg.lookup(prop);
+        // prop="backgroundImage";
+        // if (!root.exists(prop))
+        //     root.add(prop, libconfig::Setting::TypeGroup);
+        // libconfig::Setting &bgset=cfg.lookup(prop);
 
-        prop="imageFile"; 
-        if (!bgset.exists(prop))
-            bgset.add(prop, libconfig::Setting::TypeString);
-        std::string imageFile=bg.getImageFile();
-        if (!imageFile.empty() || imageFile=="none") 
-            root["backgroundImage"]["imageFile"]=bg.getImageFile();
-        else 
-            root["backgroundImage"]["imageFile"]="none";
+        // prop="imageFile"; 
+        // if (!bgset.exists(prop))
+        //     bgset.add(prop, libconfig::Setting::TypeString);
+        // std::string imageFile=bg.getImageFile();
+        // if (!imageFile.empty() || imageFile=="none") 
+        //     root["backgroundImage"]["imageFile"]=bg.getImageFile();
+        // else 
+        //     root["backgroundImage"]["imageFile"]="none";
 
-        prop="coordinates";
-        if (!bgset.exists(prop)) { 
-            bgset.add(prop, libconfig::Setting::TypeArray);
-            // for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
-            //     bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
-        }
+        // prop="coordinates";
+        // if (!bgset.exists(prop)) { 
+        //     bgset.add(prop, libconfig::Setting::TypeArray);
+        //     // for (size_t i=0; i<sizeof(bgfloatVals)/sizeof(bgfloatVals[0]); i++)
+        //     //     bgset[prop].add(libconfig::Setting::TypeFloat);                 // I dislike libconfig++
+        // }
 
-        root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
-        root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
-        root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
-        root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
-        root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
+        // root["backgroundImage"]["coordinates"][0]=bgfloatVals[0];
+        // root["backgroundImage"]["coordinates"][1]=bgfloatVals[1];
+        // root["backgroundImage"]["coordinates"][2]=bgfloatVals[2];
+        // root["backgroundImage"]["coordinates"][3]=bgfloatVals[3];
+        // root["backgroundImage"]["coordinates"][4]=bgfloatVals[4];
 
         prop="showGroundGrid";
         if (!root.exists(prop))

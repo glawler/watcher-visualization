@@ -59,7 +59,8 @@ namespace watcher
             void rewindToStartOfPlayback();
             void forwardToEndOfPlayback();
             void playbackSetSpeed(double speed);
-            void setStreamPlaybackTime(); 
+            void setStreamPlaybackTimeFromSlider(); 
+            void playbackTimeUpdated(watcher::Timestamp); 
 
             /** 
              * These slots should be called from external entities, to modify the behavior
@@ -67,6 +68,9 @@ namespace watcher
              */
             /** Will jump to start of playback when a new message is not recieved for 10 seconds. */
             void setAutoRewind(bool); 
+
+            void setMessageStream(MessageStreamPtr ms); 
+            void messageStreamConnected(bool);   // true-->connected to server, false-->disconnected.
 
         signals:
             void playbackPaused(); 
@@ -77,26 +81,21 @@ namespace watcher
             void forwardedToEndOfPlayback();
 
             void streamRateSet(double); 
-            void currentTimestampUpdated(watcher::Timestamp); 
-            void currentTimestampRangeUpdated(watcher::Timestamp, watcher::Timestamp); 
             void messageStreamDirectionChange(bool);    // true-->forward, false-->backward
             
-            void messageStreamConnected(bool);                       // true-->connected to server, false-->disconnected.
 
         protected:
             DECLARE_LOGGER();
             void timerEvent(QTimerEvent *); 
 
         private:
-            watcher::MessageStreamPtr messageStream;
-            std::string server;
+            MessageStreamPtr mStream;
             bool isPlaybackPaused;
-            bool autoRewind;
             float streamRate;
+            watcher::Timestamp minTime, maxTime;  /* smallest and greatest timestamps seen - in unix epoch time */
 
             /** QTimer Ids for our timer callbacks. */
             int timeRangeQueryTimerId; 
-            int autoRewindTimerId; 
 
             /** dialog for display list of streams */
             // watcher::WatcherStreamListDialog *streamsDialog;
