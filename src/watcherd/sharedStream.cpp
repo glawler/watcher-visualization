@@ -165,7 +165,7 @@ void SharedStream::range(ServerConnectionPtr conn)
     TRACE_ENTER();
 
     TimeRange r(event_range());
-    PlaybackTimeRangeMessagePtr p(new PlaybackTimeRangeMessage(r.first, r.second));
+    PlaybackTimeRangeMessagePtr p(new PlaybackTimeRangeMessage(r.first, r.second, impl_->replay_->tell())); 
     conn->sendMessage(p);
 
     TRACE_EXIT();

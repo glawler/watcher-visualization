@@ -29,9 +29,9 @@ namespace event {
 
 INIT_LOGGER(PlaybackTimeRangeMessage, "Message.PlaybackTimeRangeMessage");
 
-PlaybackTimeRangeMessage::PlaybackTimeRangeMessage(Timestamp tmin, Timestamp tmax)
+PlaybackTimeRangeMessage::PlaybackTimeRangeMessage(Timestamp tmin, Timestamp tmax, Timestamp tcur)
 	: Message(PLAYBACK_TIME_RANGE_MESSAGE_TYPE, PLAYBACK_TIME_RANGE_MESSAGE_VERSION),
-	min_(tmin), max_(tmax)
+	min_(tmin), max_(tmax), cur_(tcur)
 {
     TRACE_ENTER();
     TRACE_EXIT();
@@ -39,12 +39,12 @@ PlaybackTimeRangeMessage::PlaybackTimeRangeMessage(Timestamp tmin, Timestamp tma
 
 std::ostream& operator<< (std::ostream& os, const PlaybackTimeRangeMessage& m)
 {
-    return os << "PlaybackTimeRangeMessage(" << m.min_ << ',' << m.max_ << ')';
+    return os << "PlaybackTimeRangeMessage(" << m.min_ << ',' << m.max_ << ',' << m.cur_ << ')'; 
 }
 
 bool operator== (const PlaybackTimeRangeMessage& lhs , const PlaybackTimeRangeMessage& rhs)
 {
-    return lhs.min_ == rhs.min_ && lhs.max_ == rhs.max_;
+    return lhs.min_ == rhs.min_ && lhs.max_ == rhs.max_ && lhs.cur_ == rhs.cur_; 
 };
 
 template <typename Archive>
@@ -54,6 +54,7 @@ void PlaybackTimeRangeMessage::serialize(Archive & ar, const unsigned int /* ver
     ar & boost::serialization::base_object<Message>(*this);
     ar & min_;
     ar & max_;
+    ar & cur_; 
     TRACE_EXIT();
 }
 

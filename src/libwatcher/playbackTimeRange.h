@@ -40,10 +40,11 @@ namespace watcher {
          */
         class PlaybackTimeRangeMessage : public Message {
             public:
-                PlaybackTimeRangeMessage(Timestamp tmin = 0, Timestamp tmax = 0); 
+                PlaybackTimeRangeMessage(Timestamp tmin = 0, Timestamp tmax = 0, Timestamp tcur = 0); 
 
                 Timestamp min_;
                 Timestamp max_;
+                Timestamp cur_;     // The current timestamp of the stream. 
             private:
                 template <typename Archive> void serialize(Archive & ar, const unsigned int version);
                 friend class boost::serialization::access;
