@@ -149,7 +149,8 @@ std::ostream &MessageStreamFilter::toStream(std::ostream &out) const
     out << " layers (" << layers.size() << "): ";
     std::copy(layers.begin(), layers.end(), std::ostream_iterator<std::string>(out, " "));
     out << ", message types:  (" << messageTypes.size() << "): ";
-    std::copy(messageTypes.begin(), messageTypes.end(), std::ostream_iterator<unsigned int>(out, " "));
+    for (std::vector<unsigned int>::const_iterator t=messageTypes.begin(); t!=messageTypes.end(); ++t)
+        out << watcher::MessageType(*t) << " "; 
     // << " region: " << region
     out << " op: " << (opAND==true?"AND":"OR");
     TRACE_EXIT();
