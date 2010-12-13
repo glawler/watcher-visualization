@@ -323,3 +323,17 @@ share/info/dir
 ^src/clients/dataWatcher/ui_mainwindow.h
 ^src/clients/dataWatcher/ui_streamlist.h
 
+^src/clients/messageStreamControl/Makefile
+^src/clients/messageStreamControl/build/*
+^src/clients/messageStreamControl/qtBuildFiles/moc/moc_QMessageStreamPlaybackWidget.cpp
+^src/clients/messageStreamControl/qtBuildFiles/moc/moc_QWatcherMainWindow.cpp
+^src/clients/messageStreamControl/qtBuildFiles/moc/moc_watcherStreamListDialog.cpp
+^src/clients/messageStreamControl/qtBuildFiles/rcc/qrc_QMessageStreamPlaybackWidget.cpp
+^src/clients/messageStreamControl/qtBuildFiles/release/ui/QMessageStreamPlaybackWidget.h
+^src/clients/messageStreamControl/qtBuildFiles/release/ui/messageStreamControl.h
+^src/clients/messageStreamControl/qtBuildFiles/release/ui/streamlist.h
+^src/clients/messageStreamControl/qtBuildFiles/ui/ui_QMessageStreamPlaybackWidget.h
+^src/clients/messageStreamControl/qtBuildFiles/ui/ui_messageStreamControl.h
+^src/clients/messageStreamControl/qtBuildFiles/ui/ui_streamlist.h
+
+
