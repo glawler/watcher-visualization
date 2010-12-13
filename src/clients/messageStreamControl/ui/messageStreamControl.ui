@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Geoff Lawler</author>
+ <class>WatcherMainWindow</class>
+ <widget class="watcher::QWatcherMainWindow" name="WatcherMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>538</width>
+    <height>165</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Watcher Message Stream Control</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/QMessageStreamPlaybackWidget.qrc">
+    <normaloff>:/icons/watcher.png</normaloff>:/icons/watcher.png</iconset>
+  </property>
+  <widget class="QFrame" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="watcher::QMessageStreamPlaybackWidget" name="messageStreamPlaybackWidget" native="true"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>538</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="action_Quit"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_Quit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="action_Connect_to">
+   <property name="text">
+    <string>&amp;Connect to...</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>watcher::QMessageStreamPlaybackWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QMessageStreamPlaybackWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>watcher::QWatcherMainWindow</class>
+   <extends>QMainWindow</extends>
+   <header>QWatcherMainWindow.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resources/QMessageStreamPlaybackWidget.qrc"/>
+ </resources>
+ <connections/>
+</ui>
