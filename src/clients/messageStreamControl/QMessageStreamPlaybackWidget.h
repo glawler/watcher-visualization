@@ -58,6 +58,8 @@ namespace watcher
             void forwardToEndOfPlayback();
             void playbackSetSpeed(double speed);
             void setStreamPlaybackTimeFromSlider(); 
+
+            /** @param timestamp, current playback time in unix epoch time */
             void playbackTimeUpdated(watcher::Timestamp); 
 
             /** 

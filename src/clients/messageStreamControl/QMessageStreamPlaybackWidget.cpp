@@ -65,7 +65,7 @@ namespace watcher {
                 mStream->getMessageTimeRange();
     }
     void QMessageStreamPlaybackWidget::playbackTimeUpdated(watcher::Timestamp ts) {
-        // LOG_DEBUG("Got new message timestamp: epoch: " << ts << ", offset: " << ((ts-minTime)/1000)); 
+        LOG_DEBUG("Got new message timestamp: epoch: " << ts << ", offset: " << ((ts-minTime)/1000)); 
         if (ts>maxTime) 
             maxTime=ts;
         else if (ts<minTime)  // may happen at start before we get our first time range message
@@ -262,16 +262,19 @@ namespace watcher {
         }
         else if (m->type==PLAYBACK_TIME_RANGE_MESSAGE_TYPE) {
             PlaybackTimeRangeMessagePtr trm(boost::dynamic_pointer_cast<PlaybackTimeRangeMessage>(m));
-            LOG_DEBUG("Got new range: epoch: [" << minTime << " - " << maxTime << "], offset from start: [0 - " << ((maxTime-minTime)/1000) << "] curtime: " << trm->cur_); 
             maxTime=trm->max_;
             minTime=trm->min_;
-            if (trm->cur_!=event::SeekMessage::eof)
+            if (trm->cur_==event::SeekMessage::eof)
+                playbackTimeUpdated(maxTime);
+            else if (trm->cur_==event::SeekMessage::epoch)
+                playbackTimeUpdated(minTime); 
+            else
                 playbackTimeUpdated(trm->cur_); 
-            else 
-                playbackTimeUpdated(maxTime); 
             int max=static_cast<int>((maxTime-minTime)/1000); 
             maxTimeLabel->setNum(max); 
             playbackSlider->setRange(0,max); 
+            LOG_DEBUG("Got new range (min/cur/max) - epoch: [" << trm->min_ << "/" << trm->cur_ << "/" << trm->max_ 
+                    << "], offset: [0/" << ((maxTime-trm->cur_)/1000) << "/" << ((maxTime-minTime)/1000) << "]"); 
         }
         else if (m->type == SPEED_MESSAGE_TYPE) {
             // notification from the watcher daemon that the shared stream speed has changed

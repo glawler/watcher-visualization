@@ -73,6 +73,8 @@ QWatcherMainWindow::~QWatcherMainWindow()
 
 void QWatcherMainWindow::initMessageStream()
 {
+    messageStream->stopStream(); 
+
     // We only want the control messages.
     messageStream->enableFiltering(true); 
     MessageStreamFilterPtr filter=MessageStreamFilterPtr(new MessageStreamFilter); 
