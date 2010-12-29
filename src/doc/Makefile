@@ -61,7 +61,8 @@ includes.tex		?= \
 	messageStream2Text.tex \
 	legacyWatcher.tex \
 	ogreWatcher.tex \
-	watcher3d.tex 
+	watcher3d.tex \
+	messageStreamController.tex 
 #includes.tex.sh	?=
 #includes.rst		?=
 #includes.fig		?=

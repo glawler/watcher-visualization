@@ -1,0 +1,30 @@
+\subsection{Data Watcher}
+\label{DataWatcher}
+
+The Data Watcher (aka dataWatcher), displays periodically generated data points from the test nodes. It gives a global and local window
+into the data point stream. The data points are opaque, the meaning attached to the data is given by the test node in the name of the data point stream.
+The Data Watcher lets the user choose specific test nodes' data to view. The local window can be moved to show an arbitrary slice of the data point
+stream.
+
+{\it dataWatcher} source code can be found in {\tt .\slash src\slash
+clients\slash dataWatcher}. The binary produced after building is 
+named {\tt dataWatcher}. This is a Qt-based application, and thus uses the Qt build system, qmake. To build: {\tt qmake, make}.
+
+\subsubsection{Command Line Options}
+\begin{itemize}
+\item {\tt -h, --help}, show a usage message and exit. 
+\item {\tt -s, --server}, connect to the watcher daemon at this address or hostname. Supports host:port, address:port syntax.
+\item more ...
+\end{itemize}
+
+\subsubsection{Configuration}
+\begin{itemize}
+\item {\tt server}, name or ipaddress of the server to connect to.
+\end{itemize}
+
+\subsubsection{Usage}
+
+Push the buttons, slide the slider, etc.
+
+
+

@@ -279,6 +279,9 @@ share/info/dir
 ^src/doc/legWatcherViewMenu\.eps$
 ^src/doc/watcherBandwidthGraphDialog\.eps$
 ^src/doc/watcherWithBackground\.eps$
+^src/doc/messageStreamControllerMain.eps$
+^src/doc/messageStreamControllerRename.eps$
+^src/doc/messageStreamControllerStreamConfig.eps$
 ^src/doc/.*\.aux$
 ^src/doc/.*\.make$
 ^src/doc/.*\.d$
