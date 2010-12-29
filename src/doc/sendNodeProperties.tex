@@ -1,0 +1,29 @@
+\newpage
+\label{sendNodePropertiesMessage}
+\subsubsection{sendNodePropertiesMessage}
+{\bf sendNodePropertiesMessage} is a test node command line program that sends a NodePropertiesMessage message to the watcher daemon, specifing that a node property should change. 
+\\\\
+{\tt
+        Usage: sendNodePropertiesMessage [args]
+        Args:
+           -s, --server=address        The address of the node running watcherd.
+
+        Optional args:
+            -n, --node=address          The node to modify, if empty the local node's address is used.
+            -l, --layer=layer           The layer to apply these properties to. string, e.g. "hierachy". 
+            -a, --shape=shape           The shape to make the node. One of: circle, triangle, square, torus, teapot.
+            -e, --effect=effect         The effect to apply to the node, one of: flash, spin, sparkle.
+            This agrument can be used multiple times. Not all GUIs support all effects.
+            -P, --property=prop         Tell the daemon that this node has a certain property, one of
+            leafnode, neighborhoor, regional, root, attacker, victim. This argument can be used
+            more than once.
+            -c, --color=color           Set the node's color to color. Color can be string, e.g. "blue", or 
+            hex RRGGBBAA (red, green, blue, alpha) value, "0xff00ff64"
+            -z, --size=float            How large (or small) to make the node relative to other nodes.
+            -T, --timestamp=ms          Optionally specify a timestamp for this event
+            -r, --logProps              log.properties file, which controls logging for this program
+                                        Default value is sendMessage.log.properties.
+            -h, --help                  Show this message
+}
+
+Examples:
