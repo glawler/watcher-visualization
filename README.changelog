@@ -1,3 +1,14 @@
+Version 0.6.5.5:
+- New GUI: messageStreamController. This is a self-contained message stream manipulation GUI. 
+    It is essentially the message stream control widgets from the legacy watcher, ripped
+    out and put in a stand alone GUI. Using the messageStreamController you can pause/FF/rew
+    a message stream. Also you can rename, join, exit from message streams. The use case
+    for messageStreamController is that you start one to control all GUIs attached to 
+    a specfic message stream. Useful as some of the GUIs (earthWatcher, dataWatcher)
+    don't have built-in message stream manipulation widgets/functionality.
+- all: various bugfixes!
+- some user guide updates. Still woefully out of data though. Next release will be a 
+    documention update, so stay tuned. 
 Versions 0.6.5.4:
 - all 
     - watcherd and all GUIs now handle configuration file permissions sanely instead of
