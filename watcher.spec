@@ -1,14 +1,14 @@
-%define	_project	cta
+%define	_project	Watcher
 %define	_name		watcher
 %define	_prefix		/usr/%{_project}
 
-Summary:	ARL1X/CTA Watcher
+Summary:	Visualization tool for large networks
 Name:		%{_project}-%{_name}
 Version:	20100818
 Release:	1
 License:	Other
-Group:		Applications/CTA
-URL:		http://fill.me.in/
+Group:		Applications/System
+URL:		http://code.google.com/p/watcher-visualization/
 Vendor:		SPARTA
 Source:		%{name}-%{version}.tar.gz
 

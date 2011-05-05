@@ -1,4 +1,4 @@
-%define	_project	cta
+%define	_project	watcher
 %define	_name		logger
 %define	_prefix		/usr/%{_project}
 
@@ -6,9 +6,9 @@ Summary:	A small wrapper around Apache's log4cxx library.
 Name:		%{_project}-%{_name}
 Version:	20100803
 Release:	1
-License:	Other
-Group:		Libraries/CTA
-URL:		http://fill.me.in/
+License:	GPL
+Group:		Development/Libraries
+URL:		http://code.google.com/p/watcher-visualization/
 Vendor:		SPARTA
 Source:		%{name}-%{version}.tar.gz
 
@@ -24,7 +24,7 @@ BuildRequires:	libtool
 %description
 
 %package devel
-Group:		Development/CTA
+Group:		Development/Libraries
 Summary:	A small wrapper around Apache's log4cxx library.
 Requires:	%{name}	= %{version}
 
