@@ -48,4 +48,16 @@ server-dist:
 	$(RM) -r $(TMPDISTDIR)
 	@echo server-dist complete, server-dist is $(top_srcdir)/server-dist.tbz
 
+# build the tar files used by rpmbuild to build RPM and SRPM distributions. 
+rpm-source-dist:
+	@mkdir -p dist-tmp/{SOURCES,SPECS}
+	@echo creating watcher-logger dist
+	tar zcvf dist-tmp/SOURCES/watcher-logger-$(PACKAGE_VERSION)-$(PACKAGE_RELEASE).tar.gz logger
+	@echo creating watcher dist
+	hg archive --type tgz dist-tmp/watcher-$(PACKAGE_VERSION)-$(PACKAGE_RELEASE).tar.gz
+	cp ../watcher.spec logger/logger.spec dist-tmp/SPECS
+	(cd dist-tmp && tar zcvf ../watcher-$(PACKAGE_VERSION)-$(PACKAGE_RELEASE)-rpm-source-dist.tgz .)
+	rm -rf dist-tmp
+
+
 
