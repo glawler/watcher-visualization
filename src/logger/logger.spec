@@ -4,11 +4,11 @@
 
 Summary:	A small wrapper around Apache's log4cxx library.
 Name:		%{_project}-%{_name}
-Version:	20100803
+Version:	1.0.0
 Release:	1
 License:	GPL
 Group:		Development/Libraries
-URL:		http://code.google.com/p/watcher-visualization/
+URL:		http://code.google.com/p/watcher-visualization
 Vendor:		SPARTA
 Source:		%{name}-%{version}.tar.gz
 
@@ -25,7 +25,7 @@ BuildRequires:	libtool
 
 %package devel
 Group:		Development/Libraries
-Summary:	A small wrapper around Apache's log4cxx library.
+Summary:	A small wrapper around Apache's log4cxx library. Exports a standard-ish MACRO-based logging interface. 
 Requires:	%{name}	= %{version}
 
 %description devel
