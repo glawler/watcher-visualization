@@ -63,6 +63,8 @@ libwatchermsg_la_SOURCES=\
 	subscribeStreamMessage.cpp subscribeStreamMessage.h \
 	testMessage.cpp testMessage.h
 
+libwatchermsg_la_LDFLAGS = -version-info 1:1:0
+
 libwatcher_a_SOURCES= \
 	client.h client.cpp \
 	clientConnection.h clientConnection.cpp \
