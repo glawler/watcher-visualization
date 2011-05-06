@@ -79,6 +79,7 @@ share/info/dir
 ^src/watcher/legacyWatcher/labeltest$
 ^src/watcher/legacyWatcher/routingdetector$
 ^src/watcher/legacyWatcher/watchergraphtest$
+^src/watcher-.*-rpm-source-dist.tgz
 ^bin/edgetest
 ^bin/labeltest
 ^bin/routingdetector
