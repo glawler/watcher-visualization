@@ -25,6 +25,9 @@
 #include <getopt.h>
 #include <stdint.h>
 
+#include <sys/types.h>   // Ubuntu wants these
+#include <sys/stat.h>
+
 #include <cassert>
 #include <iostream>
 #include <cstdlib>
