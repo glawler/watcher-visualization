@@ -62,13 +62,17 @@ void SingletonConfig::setConfigFile(const std::string &filename_)
 void SingletonConfig::saveConfig()
 {
     TRACE_ENTER();
-    if (0!=access(filename.c_str(), W_OK)) { 
+    if (0!=access(filename.c_str(), F_OK)) { // File doesn't exist 
+	LOG_DEBUG("Writing new configuration file, \"" << filename << "\"");
+    }
+    else if (0!=access(filename.c_str(), W_OK)) { 
         LOG_WARN("--------------------------------------------------------------------------"); 
         LOG_WARN("--- Not saving configuration changes as the cfg file, " << filename << " is read only --------"); 
         LOG_WARN("--------------------------------------------------------------------------"); 
+	TRACE_EXIT();
+	return;
     }
-    else 
-        instance().writeFile(filename.data());
+    instance().writeFile(filename.data());
     TRACE_EXIT();
 }
 
