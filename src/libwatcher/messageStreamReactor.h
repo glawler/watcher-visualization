@@ -24,6 +24,7 @@
 #define WATCHER_MESSAGE_STREAM_REACTOR_H
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/function.hpp>
 #include "libwatcher/messageTypesAndVersions.h"
 #include "libwatcher/messageStream.h"
 #include "declareLogger.h"
