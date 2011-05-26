@@ -1,0 +1,82 @@
+
+#
+# Global logging level
+#
+# log4j.rootLogger=fatal, stdout
+log4j.rootLogger=error, stdout
+# log4j.rootLogger=warn, stdout
+# log4j.rootLogger=info, stdout
+# log4j.rootLogger=debug, stdout, flog
+# log4j.rootLogger=trace, stdout
+
+#
+# Set levels per watcherd module
+#
+# log4j.logger.global=trace
+# log4j.logger.ClientConnection=trace
+# log4j.logger.Client=trace
+# log4j.logger.MessageHandler.FeederAPIMessageHandler=trace
+# log4j.logger.MessageHandler.WatcherdAPIMessageHandler=trace
+# log4j.logger.DataMarshaller=trace
+# log4j.logger.MessageFactory=trace
+# log4j.logger.MessageHandler=trace
+# log4j.logger.MessageStream=debug
+# log4j.logger.MessageStreamFilter=trace
+# log4j.logger.Connection.ServerConnection=debug
+# log4j.logger.ReplayState=trace
+# log4j.logger.Server=trace
+# log4j.logger.MessageHandler.ServerMessageHandler=trace
+# log4j.logger.SingletonConfig=trace
+# log4j.logger.Watcherd=trace
+log4j.logger.WatcherGraph=fatal
+# log4j.logger.DisplayInfo=trace
+# log4j.logger.LayerDisplayInfo=trace
+# log4j.logger.NodeDisplayInfo=trace
+# log4j.logger.EdgeDisplayInfo=trace
+# log4j.logger.LabelDisplayInfo=trace
+# log4j.logger.Database.SqliteDatabase=info
+# log4j.logger.BackgroundImage=debug
+# log4j.logger.SharedStream=trace
+# log4j.logger.ReplayState=trace
+
+
+#
+# set levels for libwatcher module
+#
+# log4j.logger.Message.ColorMessage=trace
+# log4j.logger.Message.DataRequestMessage=trace
+# log4j.logger.Message.EdgeMessage=trace
+# log4j.logger.Message.GPSMessage=trace
+# log4j.logger.Message.LabelMessage=trace
+# log4j.logger.Message.Connectivity=trace
+# log4j.logger.Message=trace
+# log4j.logger.Message.Status=trace
+# log4j.logger.WatcherMessage.NodeStatusMessage=trace
+# log4j.logger.WatcherMessage.SeekMessage=trace
+# log4j.logger.WatcherMessage.SpeedMessage=trace
+# log4j.logger.WatcherMessage.StartMessage=trace
+# log4j.logger.WatcherMessage.StopMessage=trace
+# log4j.logger.Message.TestMessage=trace
+# log4j.logger.Color=trace
+# log4j.logger.WatcherRegion=trace
+
+# log4j.logger.earthWatcher=trace
+
+#
+# stdout is set to be a ConsoleAppender.
+#
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c (%F:%L) - %m%n
+# log4j.appender.stdout.layout.ConversionPattern=[%-5p] (%F:%L) - %m%n
+
+#
+# flog is set to log to a file, not appended
+#
+log4j.appender.flog=org.apache.log4j.FileAppender
+log4j.appender.flog.layout=org.apache.log4j.PatternLayout
+log4j.appender.flog.file=watcherd.log
+log4j.appender.flog.append=false
+log4j.appender.flog.layout.ConversionPattern=%-4r [%t] %-5p %c (%-12F:%-4L) - %m%n
+
+
