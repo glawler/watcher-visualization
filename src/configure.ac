@@ -154,53 +154,77 @@ if test x$enable_testnodeonly == xno; then
     #     # AC_SUBST(CEGUI-OGRE_LIBS)
     # fi
 
-    # Check for Qt, even if we use qmake to find/link to it.
-    PKG_CHECK_MODULES(QTGUI, [QtGui >= 4.3.0])
-    PKG_CHECK_MODULES(QTCORE, [QtCore >= 4.3.0])
-    PKG_CHECK_MODULES(QTOPENGL, [QtOpenGL >= 4.3.0])
+    # allow optional disabling of legacyWatcher
+    AC_MSG_CHECKING(whether to build legacyWatcher)
+    AC_ARG_ENABLE(legacyWatcher,
+          [AS_HELP_STRING([--enable-legacyWatcher],[enable compilation of legacyWatcher GUI])],
+          [enable_legacyWatcher=$enableval],
+          [enable_legacyWatcher="no"])
+    AC_MSG_RESULT($enable_legacyWatcher)
+    AM_CONDITIONAL([ENABLE_LEGACYWATCHER], [test x$enable_legacyWatcher != xno])
 
-    ac_cv_qwt=no
-    AC_ARG_WITH([qwt], 
-                [AS_HELP_STRING([--with-qwt=PREFIX],[use the Qwt lib installed in the PREFIX directory])],
-                [ac_cv_qwt=$withval])
+    # allow optional disabling of dataWatcher
+    AC_MSG_CHECKING(whether to build dataWatcher)
+    AC_ARG_ENABLE(dataWatcher,
+          [AS_HELP_STRING([--enable-dataWatcher],[enable compilation of dataWatcher GUI])],
+          [enable_legacyWatcher=$enableval],
+          [enable_legacyWatcher="no"])
+    AC_MSG_RESULT($enable_dataWatcher)
+    AM_CONDITIONAL([ENABLE_DATAWATCHER], [test x$enable_dataWatcher != xno])
 
-    ac_cv_qwt_libdir=no
-    AC_ARG_WITH([qwt-libdir], 
-                [AS_HELP_STRING([--with-qwt-libdir=LIBDIR],[use the libdir installed in LIBDIR when looking for qwt libs])],
-                [ac_cv_qwt_libdir=$withval])
-
-    # ubuntu 10.04 is /usr/include/qwt-qt4/ and -lqwt-qt4
-    ac_cv_qwt_ext=''
-    AC_ARG_WITH([qwt-ext],
-        [AS_HELP_STRING([--with-qwt-ext=STRING],[use the Qwt library named qwt-STRING])],
-        [ac_cv_qwt_ext=$withval])
-
-    AC_MSG_CHECKING(for qwt)
-    if test x$ac_cv_qwt = xno; then
-        AC_MSG_RESULT(/usr/local/qwt)
-        AC_MSG_WARN("QWT prefix not defined via --with-qwt.")
-        AC_MSG_WARN(["Assuming /usr/local/qwt, which is almost certainly incorrect..."])
-        QWT_INCLUDES="/usr/local/qwt/include"
-        if test x$ac_cv_qwt_libdir = xno; then
-            QWT_LIB="-L/usr/local/qwt/$local_libsubdir -lqwt"
-        else
-            QWT_LIB="-L$ac_cv_qwt_libdir -lqwt"
-        fi
-    else 
-        AC_MSG_RESULT($ac_cv_qwt)
-        if test x$ac_cv_qwt_ext != x; then
-            ac_cv_qwt_ext="-$ac_cv_qwt_ext"
-        fi
-        QWT_INCLUDES="$ac_cv_qwt/include/qwt$ac_cv_qwt_ext $ac_cv_qwt/include"
-        if test x$ac_cv_qwt_libdir = xno; then
-            QWT_LIB="-L/$ac_cv_qwt/$local_libsubdir -lqwt$ac_cv_qwt_ext"
-        else
-            QWT_LIB="-L$ac_cv_qwt_libdir -lqwt$ac_cv_qwt_ext"
-        fi
+    if test x$enable_legacyWatcher = xyes -o x$enable_dataWatcher = xyes ; then
+        # Check for Qt, even if we use qmake to find/link to it.
+        PKG_CHECK_MODULES(QTGUI, [QtGui >= 4.3.0])
+        PKG_CHECK_MODULES(QTCORE, [QtCore >= 4.3.0])
+        PKG_CHECK_MODULES(QTOPENGL, [QtOpenGL >= 4.3.0])
     fi
 
-    AC_SUBST(QWT_INCLUDES)
-    AC_SUBST(QWT_LIB)
+    # Looking for qwt is error prone and a pain. Submitted a bugfix to add a pkg-config .pc to it, 
+    # but it has yet to get into the tree. 
+    if test x$enable_dataWatcher = xyes; then
+        ac_cv_qwt=no
+        AC_ARG_WITH([qwt], 
+                    [AS_HELP_STRING([--with-qwt=PREFIX],[use the Qwt lib installed in the PREFIX directory])],
+                    [ac_cv_qwt=$withval])
+
+        ac_cv_qwt_libdir=no
+        AC_ARG_WITH([qwt-libdir], 
+                    [AS_HELP_STRING([--with-qwt-libdir=LIBDIR],[use the libdir installed in LIBDIR when looking for qwt libs])],
+                    [ac_cv_qwt_libdir=$withval])
+
+        # ubuntu 10.04 is /usr/include/qwt-qt4/ and -lqwt-qt4
+        ac_cv_qwt_ext=''
+        AC_ARG_WITH([qwt-ext],
+            [AS_HELP_STRING([--with-qwt-ext=STRING],[use the Qwt library named qwt-STRING])],
+            [ac_cv_qwt_ext=$withval])
+
+        AC_MSG_CHECKING(for qwt)
+        if test x$ac_cv_qwt = xno; then
+            AC_MSG_RESULT(/usr/local/qwt)
+            AC_MSG_WARN("QWT prefix not defined via --with-qwt.")
+            AC_MSG_WARN(["Assuming /usr/local/qwt, which is almost certainly incorrect..."])
+            QWT_INCLUDES="/usr/local/qwt/include"
+            if test x$ac_cv_qwt_libdir = xno; then
+                QWT_LIB="-L/usr/local/qwt/$local_libsubdir -lqwt"
+            else
+                QWT_LIB="-L$ac_cv_qwt_libdir -lqwt"
+            fi
+        else 
+            AC_MSG_RESULT($ac_cv_qwt)
+            if test x$ac_cv_qwt_ext != x; then
+                ac_cv_qwt_ext="-$ac_cv_qwt_ext"
+            fi
+            QWT_INCLUDES="$ac_cv_qwt/include/qwt$ac_cv_qwt_ext $ac_cv_qwt/include"
+            if test x$ac_cv_qwt_libdir = xno; then
+                QWT_LIB="-L/$ac_cv_qwt/$local_libsubdir -lqwt$ac_cv_qwt_ext"
+            else
+                QWT_LIB="-L$ac_cv_qwt_libdir -lqwt$ac_cv_qwt_ext"
+            fi
+        fi
+
+        AC_SUBST(QWT_INCLUDES)
+        AC_SUBST(QWT_LIB)
+    fi 
 
 else
     #
@@ -244,12 +268,18 @@ if test x$enable_testnodeonly == xno; then
        watcherd/Makefile \
        clients/messageStream2Text/Makefile \
        clients/connectivity2dot/Makefile \
-       clients/legacyWatcher/legacyWatcher.pro \
-       clients/dataWatcher/Makefile.config
        clients/randomScenario/Makefile \
        clients/gps2eventdb/Makefile \
        clients/gps2eventdb/test/Makefile
     ])
+
+    if test x$enable_legacyWatcher != xno; then
+        AC_CONFIG_FILES([clients/legacyWatcher/legacyWatcher.pro])
+    fi
+
+    if test x$enable_dataWatcher != xno; then
+       AC_CONFIG_FILES([clients/dataWatcher/Makefile.config])
+    fi 
 
     if test x$enable_watcher3d != xno; then
         AC_CONFIG_FILES([clients/watcher3D/Makefile])
