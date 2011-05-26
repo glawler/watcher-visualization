@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     SingletonConfig::setConfigFile(configFilename); 
     SingletonConfig::unlock();
 
-    string logConf("log.properties");
+    string logConf("/usr/local/etc/watcher.log.props"); 
     if (!logPropsFilename.empty())
         logConf=logPropsFilename;
     if (!config.lookupValue("logPropertiesFile", logConf))
