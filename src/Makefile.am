@@ -8,6 +8,9 @@ endif
 
 SUBDIRS=util libwatcher $(FULL_BUILD_DIRS) clients
 
+# Install the generic log props file all the time
+dist_sysconf_DATA=etc/watcher.log.props
+
 .PHONY: doc
 
 doc:

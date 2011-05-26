@@ -3,6 +3,8 @@ include $(top_srcdir)/Makefile.top
 # melkins - compilation for Fedora 10
 -include ../Makefile.local
 
+dist_sysconf_DATA=../etc/watcherd.cfg
+
 CPPFLAGS += -I../sqlite_wrapper
 CPPFLAGS += @SQLITE3_CFLAGS@
 
