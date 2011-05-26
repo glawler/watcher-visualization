@@ -83,7 +83,7 @@ void usage(const char *name)
             "-n IPaddr - node to affect - if not given, effect the local node\n"
             "-g string (graph name)\n"
             "-d double (data point), this argument can be given multiple times for multiple data points, if needed\n"
-            "-l file - the log.property file. If not given, looks  for \"sendMessage.log.properties\"\n",
+            "-l file - the log.property file. If not given, looks  for \"/usr/local/etc/watcher.log.props\"\n",
             basename(name)); 
 }
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 {
     string serverName;
     DataPointMessagePtr message(new DataPointMessage);
-    string logPropsFile("sendMessage.log.properties");
+    string logPropsFile("/usr/local/etc/watcher.log.props");
     int ch;
 
 	while ((ch = getopt(argc, argv, "s:g:d:n:l:hH?")) != -1)

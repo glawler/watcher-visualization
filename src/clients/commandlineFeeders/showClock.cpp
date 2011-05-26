@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
     int c;
     string server;
-    string logProps(string(basename(argv[0]))+string(".log.properties"));
+    string logProps("/usr/local/etc/watcher.log.props"); 
     double radius=50.0; 
     bool showSecondRing=true, showHourRing=true;
     double offsetLong=0, offsetLat=0;

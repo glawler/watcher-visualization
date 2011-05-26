@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     int c;
     string label;
     string server;
-    string logProps("sendMessage.log.properties");
+    string logProps("/usr/local/etc/watcher.log.props");
     unsigned int fontSize=0;
     asio::ip::address address;
     Color bg=colors::black;

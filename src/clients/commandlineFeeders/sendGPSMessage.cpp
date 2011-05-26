@@ -182,7 +182,7 @@ int main(int argc, char **argv)
     // Now do some actual work.
     // 
     printf("Initializing logging system\n"); 
-    LOAD_LOG_PROPS(logProps ? logProps : "sendMessage.log.properties");
+    LOAD_LOG_PROPS(logProps ? logProps : "/usr/local/etc/watcher.log.props");
 
     watcher::Client client(serverName); 
     printf("Connecting to %s and sending message.\n", serverName);

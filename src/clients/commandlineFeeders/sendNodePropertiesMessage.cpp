@@ -71,7 +71,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -T, --timestamp=ms          Optionally specify a timestamp for this event\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "   -r, --logProps              log.properties file, which controls logging for this program\n");
-    fprintf(stderr, "                                    Default value is sendMessage.log.properties.\n"); 
+    fprintf(stderr, "                                    Default value is /usr/local/etc/watcher.log.props.\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "   -h, --help                  Show this message\n"); 
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
     int c;
     Color color(colors::red);
-    string server, logProps("sendMessage.log.properties");
+    string server, logProps("/usr/local/etc/watcher.log.props");
 
     NodePropertiesMessagePtr message(new NodePropertiesMessage);
 

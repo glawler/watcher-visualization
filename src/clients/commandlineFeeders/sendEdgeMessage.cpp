@@ -137,7 +137,7 @@ int main(int argc, char **argv)
     uint32_t expiration=watcher::Infinity;
     Timestamp timestamp=0;
 
-    string logProps("sendMessage.log.properties");
+    string logProps("/usr/local/etc/watcher.log.props");
 
     while (true) 
     {

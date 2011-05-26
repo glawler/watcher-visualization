@@ -119,7 +119,7 @@ int main(int argc, char **argv)
     asio::ip::address nodeAddr=boost::asio::ip::address::from_string("127.0.0.1"); 
     Timestamp flashTime=0;
     Timestamp expiration=0; 
-    string logProps("sendMessage.log.properties");
+    string logProps("/usr/local/etc/watcher.log.props");
 
     bool colorSet=false;
 
