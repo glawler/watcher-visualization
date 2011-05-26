@@ -68,6 +68,10 @@
 
 #include "logger.h"
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("sendDataPointMessage"); 
 
 using namespace watcher;
@@ -83,7 +87,7 @@ void usage(const char *name)
             "-n IPaddr - node to affect - if not given, effect the local node\n"
             "-g string (graph name)\n"
             "-d double (data point), this argument can be given multiple times for multiple data points, if needed\n"
-            "-l file - the log.property file. If not given, looks  for \"/usr/local/etc/watcher.log.props\"\n",
+            "-l file - the log.property file. If not given, looks  for \"watcher.log.props\" in the system configuration directory.\n",
             basename(name)); 
 }
 
@@ -91,7 +95,7 @@ int main(int argc, char *argv[])
 {
     string serverName;
     DataPointMessagePtr message(new DataPointMessage);
-    string logPropsFile("/usr/local/etc/watcher.log.props");
+    string logPropsFile(SYSCONFDIR "/watcher.log.props");
     int ch;
 
 	while ((ch = getopt(argc, argv, "s:g:d:n:l:hH?")) != -1)

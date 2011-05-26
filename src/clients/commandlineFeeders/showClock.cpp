@@ -59,6 +59,10 @@
 #include <libwatcher/sendMessageHandler.h>
 #include <libwatcher/dataPointMessage.h>
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("showClock"); 
 
 using namespace std;
@@ -94,7 +98,7 @@ int main(int argc, char **argv)
 
     int c;
     string server;
-    string logProps("/usr/local/etc/watcher.log.props"); 
+    string logProps(SYSCONFDIR "/watcher.log.props"); 
     double radius=50.0; 
     bool showSecondRing=true, showHourRing=true;
     double offsetLong=0, offsetLat=0;

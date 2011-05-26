@@ -233,6 +233,8 @@ else
     # AM_CONDITIONAL([ENABLE_OGREWATCHER], [test 1 == 0]) GTL - disable OgreWatcher build for now.
     AM_CONDITIONAL([ENABLE_WATCHER3D], [test 1 == 0])
     AM_CONDITIONAL([ENABLE_EARTHWATCHER], [test 1 == 0])
+    AM_CONDITIONAL([ENABLE_DATAWATCHER], [test 1 == 0])
+    AM_CONDITIONAL([ENABLE_LEGACYWATCHER], [test 1 == 0])
 fi
 
 # allow optional disabling of watcherHierarchyClient

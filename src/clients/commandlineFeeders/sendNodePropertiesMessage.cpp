@@ -46,6 +46,10 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace boost;
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("sendNodePropertiesMessage"); 
 
 void usage(const char *progName)
@@ -71,7 +75,7 @@ void usage(const char *progName)
     fprintf(stderr, "   -T, --timestamp=ms          Optionally specify a timestamp for this event\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "   -r, --logProps              log.properties file, which controls logging for this program\n");
-    fprintf(stderr, "                                    Default value is /usr/local/etc/watcher.log.props.\n"); 
+    fprintf(stderr, "                                    Default value is watcher.log.props in the system config directory.\n"); 
     fprintf(stderr, "\n");
     fprintf(stderr, "   -h, --help                  Show this message\n"); 
 
@@ -84,7 +88,7 @@ int main(int argc, char **argv)
 
     int c;
     Color color(colors::red);
-    string server, logProps("/usr/local/etc/watcher.log.props");
+    string server, logProps(SYSCONFDIR "/watcher.log.props");
 
     NodePropertiesMessagePtr message(new NodePropertiesMessage);
 

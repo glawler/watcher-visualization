@@ -41,6 +41,10 @@ using namespace std;
 using namespace watcher;
 using namespace libconfig;
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("watcherGlobalLogger"); 
 
 int main(int argc, char *argv[])
@@ -62,7 +66,7 @@ int main(int argc, char *argv[])
 
     string server, logLevel;
     string configFilename(string(basename(argv[0]))+string(".cfg")); 
-    string logPropsFilename(string(basename(argv[0]))+string(".log.properties")); 
+    string logPropsFilename(SYSCONFDIR "/watcher.log.props"); 
     int maxLayers=-1, maxNodes=-1;
     while (true) {
         int option_index = 0;

@@ -28,6 +28,10 @@
 #include "singletonConfig.h"
 #include "watcherd.h"
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 using namespace std;
 using namespace watcher;
 using namespace libconfig; 
@@ -118,7 +122,7 @@ int main(int argc, char* argv[])
     SingletonConfig::setConfigFile(configFilename); 
     SingletonConfig::unlock();
 
-    string logConf("/usr/local/etc/watcher.log.props"); 
+    string logConf(SYSCONFDIR "/watcher.log.props"); 
     if (!logPropsFilename.empty())
         logConf=logPropsFilename;
     if (!config.lookupValue("logPropertiesFile", logConf))

@@ -84,6 +84,10 @@
 #include <libwatcher/colors.h>
 #include <libwatcher/sendMessageHandler.h>
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("sendColorMessage");
 
 using namespace std;
@@ -119,7 +123,7 @@ int main(int argc, char **argv)
     asio::ip::address nodeAddr=boost::asio::ip::address::from_string("127.0.0.1"); 
     Timestamp flashTime=0;
     Timestamp expiration=0; 
-    string logProps("/usr/local/etc/watcher.log.props");
+    string logProps(SYSCONFDIR "/watcher.log.props");
 
     bool colorSet=false;
 

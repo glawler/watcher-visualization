@@ -73,6 +73,10 @@
 #include <libwatcher/messageTypesAndVersions.h>    // for GUILayer
 #include <libwatcher/sendMessageHandler.h>
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("sendEdgeMessage"); 
 
 using namespace std;
@@ -137,7 +141,7 @@ int main(int argc, char **argv)
     uint32_t expiration=watcher::Infinity;
     Timestamp timestamp=0;
 
-    string logProps("/usr/local/etc/watcher.log.props");
+    string logProps(SYSCONFDIR "/watcher.log.props");
 
     while (true) 
     {

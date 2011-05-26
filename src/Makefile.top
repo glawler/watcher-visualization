@@ -1,5 +1,7 @@
 # This file gets included in every Makefile.in
 
+CPPFLAGS = -DDATADIR='"$(datadir)"'  -DSYSCONFDIR='"$(sysconfdir)"' @CPPFLAGS@
+
 # "Fixes" warning in log4cxx about type punning. 
 CPPFLAGS += -fno-strict-aliasing
 # CPPFLAGS += -O3

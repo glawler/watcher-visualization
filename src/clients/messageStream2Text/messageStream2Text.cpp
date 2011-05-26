@@ -69,6 +69,10 @@
 #include "libwatcher/messageStream.h"
 #include "logger.h"
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 #define DEFAULT_DESCRIPTION "messageStream2Text client"
 
 DECLARE_GLOBAL_LOGGER("messageStream2Text"); 
@@ -156,8 +160,7 @@ int main(int argc, char **argv)
     }
     SingletonConfig::unlock();
 
-    string logConf(basename(argv[0]));
-    logConf+=".log.properties"; 
+    string logConf(SYSCONFDIR "/watcher.log.props"); 
     if (!config.lookupValue("logPropertiesFile", logConf))
     {
         cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf 

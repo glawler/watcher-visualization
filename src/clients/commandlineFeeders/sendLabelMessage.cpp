@@ -77,6 +77,10 @@
 #include <libwatcher/sendMessageHandler.h>
 #include <libwatcher/colors.h>
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("sendLabelMessage"); 
 
 using namespace std;
@@ -120,7 +124,7 @@ int main(int argc, char **argv)
     int c;
     string label;
     string server;
-    string logProps("/usr/local/etc/watcher.log.props");
+    string logProps(SYSCONFDIR "/watcher.log.props");
     unsigned int fontSize=0;
     asio::ip::address address;
     Color bg=colors::black;

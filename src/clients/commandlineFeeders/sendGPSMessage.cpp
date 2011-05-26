@@ -68,6 +68,10 @@
 #include <libwatcher/watcherTypes.h> // for NodeIdentifer
 #include <libwatcher/sendMessageHandler.h>
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 DECLARE_GLOBAL_LOGGER("sendGPSMessage"); 
 
 using namespace std;
@@ -182,7 +186,7 @@ int main(int argc, char **argv)
     // Now do some actual work.
     // 
     printf("Initializing logging system\n"); 
-    LOAD_LOG_PROPS(logProps ? logProps : "/usr/local/etc/watcher.log.props");
+    LOAD_LOG_PROPS(logProps ? logProps : SYSCONFDIR "/watcher.log.props");
 
     watcher::Client client(serverName); 
     printf("Connecting to %s and sending message.\n", serverName);

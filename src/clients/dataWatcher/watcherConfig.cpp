@@ -28,6 +28,10 @@
 #include "singletonConfig.h"
 #include "logger.h"
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 namespace {
 
 class singleton_config_lock {
@@ -60,7 +64,7 @@ namespace watcher {
 			bool serverSpecified=false;
 
 			std::string configFilename(std::string(boost::filesystem::basename(argv[0])) + ".cfg");
-			std::string logPropsFilename(std::string(boost::filesystem::basename(argv[0])) + ".log.properties");
+			std::string logPropsFilename(SYSCONFDIR "/watcher.log.props"); 
 			std::string logLevel;
 
 			int i;
