@@ -32,6 +32,8 @@
 #include "initConfig.h"
 #include "singletonConfig.h"
 
+#include <list>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 

@@ -23,7 +23,7 @@
 
 #ifndef sqlite_database_h
 #define sqlite_database_h
-
+#include <boost/scoped_ptr.hpp>
 #include "database.h"
 #include "declareLogger.h"
 #include "sqlite_wrapper_fwd.h"

@@ -102,7 +102,7 @@ int main(int argc, char **argv)
         gettimeofday(&now, NULL);
 
         for (int i=0; i<nodeNum; i++) {
-            NodeIdentifier nid=boost::asio::ip::address_v4::address_v4(i+1);
+            NodeIdentifier nid(boost::asio::ip::address_v4(i+1));
             gpsMess->x=positions[i].x/60000.0;  // make it look like GPS data. 
             gpsMess->y=positions[i].y/60000.0; 
             gpsMess->z=positions[i].z; 
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
                 connMess->layer="RandScenConn" + boost::lexical_cast<string>(l);
                 for (int j=0; j<nodeNum; j++)  
                     if (*(edges+(i*nodeNum)+j)) 
-                        connMess->neighbors.push_back(boost::asio::ip::address_v4::address_v4(j+1)); 
+                        connMess->neighbors.push_back(boost::asio::ip::address_v4(j+1)); 
                 if (debug) {
                     cout << "Nbrs of node " << i+1 << ": ";
                     for (ConnectivityMessage::NeighborList::const_iterator nbr=connMess->neighbors.begin(); nbr!=connMess->neighbors.end(); nbr++)
