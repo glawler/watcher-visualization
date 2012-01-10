@@ -52,7 +52,24 @@ There are a few options to ./configure that control what gets built:
                         messages. If you aren't using the dynamic hierachy, 
                         you don't want this. 
 
-cd src
+Build on Fedora 16
+------------------
+sudo yum install -y log4cxx-devel libconfig-devel libkml-devel sqlite-devel uriparser-devel qt4-devel boost-devel qwt-devel
+rm ./src/aclocal/ax_boost*
+edit and comment out lines starting with AX_BOOST in ./src/configure.ac
+# build logger lib
+cd src/logger
+./autogen.sh
+./configure
+make && sudo make install 
+# logger supports pkg_config and installs to /usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+# build watcherlib and watcherd
+cd ..
+./configure --enable-earthWatcher --enable-legacyWatcher --enable-dataWatcher
+
+Build Generic
+-------------
 ./autogen.sh
 ./configure --enable-earthWatcher
 make 

@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
         Logger::getRootLogger()->setLevel(Level::toLevel(logLevel)); 
     }
 
-    size_t numThreads=8;
+    int numThreads=8;
 
     if (address.empty()) {
         if (!config.lookupValue("server", address)) {

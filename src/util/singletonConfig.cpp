@@ -55,6 +55,7 @@ void SingletonConfig::unlock()
 void SingletonConfig::setConfigFile(const std::string &filename_)
 {
     TRACE_ENTER();
+	LOG_INFO("Setting configuration file to " << filename_); 
     filename=filename_;
     TRACE_EXIT();
 }

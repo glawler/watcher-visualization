@@ -75,45 +75,61 @@ bool watcher::initConfig(
             const char configFileChar,
             const char *configFileString)
 {
-    int c;
-    bool retVal=false;
-    static struct option long_options[] = {
-        {configFileString, required_argument, 0, configFileChar},
-        {0, 0, 0, 0}
-    };
+	int c;
+	bool retVal=false;
+	static struct option long_options[] = {
+		{configFileString, required_argument, 0, configFileChar},
+		{0, 0, 0, 0}
+	};
 
-    opterr=0; // Don't print message just because we see an option we don't understand.
-    optind=1; // reset so getopt starts at the start again.
+	opterr=0; // Don't print message just because we see an option we don't understand.
+	optind=1; // reset so getopt starts at the start again.
 
-    char args[] = { configFileChar, ':', '\0' };
+	char args[] = { configFileChar, ':', '\0' };
 
-    while(-1!=(c = getopt_long(argc, argv, args, long_options, NULL))) {
-        if (c==configFileChar) {
-            checkAndWarnFilePermissions(optarg); 
-            if(true==(retVal=readConfig(config, optarg))) {
-                configFilename=optarg;
-                break;
-            }
-        }
-    }
+	while(-1!=(c = getopt_long(argc, argv, args, long_options, NULL))) {
+		if (c==configFileChar) {
+			checkAndWarnFilePermissions(optarg); 
+			if(true==(retVal=readConfig(config, optarg))) {
+				configFilename=optarg;
+				break;
+			}
+		}
+	}
 
-    // Last ditch: look for a file called `echo argv[0]`.cfg.
-    if(retVal==false)
-    {
-        string fname(bf::basename(argv[0])); 
-        fname+=".cfg"; 
+	// Last ditch: look for various files in various places. 
+	// 1) [PROGRAM_NAME].cfg 
+	// 2) watcher.cfg 
+	// 3) {/usr/local/etc/,/etc/watcher}/[PROGRAM_NAME].cfg
+	// 4) {/usr/local/etc/,/etc/watcher}/watcher.cfg
+	if(retVal==false)
+	{
+		string basename=bf::basename(argv[0]); 
+		const string possPaths[] = { 
+			basename + ".cfg", 
+			"watcher.cfg", 
+			"/etc/watcher/" + basename + ".cfg", 
+			"/usr/local/etc/watcher/" + basename + ".cfg", 
+			"/etc/watcher/watcher.cfg", 
+			"/usr/local/etc/watcher.cfg", 
+		}; 
 
-        checkAndWarnFilePermissions(fname.c_str()); 
-        retVal=readConfig(config, fname);
-        if(retVal)
-            configFilename=fname;
-        else
-            configFilename="";
-    }
+		for (int i=0; i<sizeof(possPaths)/sizeof(possPaths[0]); i++) {
+			if (bf::exists(possPaths[i])) {
+				checkAndWarnFilePermissions(possPaths[i].c_str()); 
+				if(true==(retVal=readConfig(config, possPaths[i]))) {
+					configFilename=possPaths[i];
+					break;
+				}
+			}
+		}
+		if (configFilename.empty())
+			configFilename="";
+	}
 
-    opterr=1; 
-    optind=1; // reset so getopt starts at the start again in case someone else calls getopt()...
+	opterr=1; 
+	optind=1; // reset so getopt starts at the start again in case someone else calls getopt()...
 
-    return retVal;
+	return retVal;
 }
 
