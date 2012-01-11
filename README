@@ -35,6 +35,34 @@ You should have received a copy of the GNU Affero General Public License
 along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------
 
+Build on Ubuntu 10.04 STD
+-------------------------
+sudo apt-get update
+sudo apt-get -y install pkg-config liblog4cxx10 liblog4cxx10-dev libconfig++8 libconfig++8-dev
+cd ./src/logger
+./autogen.sh
+./autoreconf -iv
+./configure
+make 
+sudo make install 
+cd ..
+./autogen.sh
+# on a test node:
+	./configure --enable-testnodeonly
+	make -j4
+	sudo make install 
+# on a server node:
+	./configure 
+	sudo make install 
+# on a console
+	./configure --enable-earthWatcher --enable-legacyWatcher
+
+# For an "untarrable" installation:
+	./configure [args] --prefix /tmp/watcher
+	make && make install 
+	pushd /tmp/watcher
+	tar zcvf ~/watcher.install.tgz lib bin
+
 To build: 
 ---------
 There are a few options to ./configure that control what gets built:
@@ -47,6 +75,8 @@ There are a few options to ./configure that control what gets built:
 --enable-earthWatcher   enable compilation of earthWatcher, a command line
                         daemon that feeds watcher data to GoogleEarth via
                         a KML file.
+--enable-legacyWatcher  enable a build with the Qt-based geographical GUI
+
 --enable-hierarchy_client  enable compilation of hierarchy_client, 
                         a test node daemon that handles watcher hierarchy
                         messages. If you aren't using the dynamic hierachy, 
