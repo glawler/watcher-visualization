@@ -25,6 +25,7 @@
 #include <libwatcher/listStreamsMessage.h>
 
 #include <boost/foreach.hpp>
+#include <signal.h>
 
 using namespace watcher;
 using namespace watcher::event;
