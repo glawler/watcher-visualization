@@ -18,10 +18,8 @@
 
 /** @file listStreamsMessage.cpp
  */
-#include "watcherSerialize.h"
 #include "listStreamsMessage.h"
 #include "logger.h"
-
 #include <boost/foreach.hpp>
 
 namespace watcher {
@@ -41,22 +39,6 @@ ListStreamsMessage::ListStreamsMessage() : Message(LIST_STREAMS_MESSAGE_TYPE, LI
 {
     TRACE_ENTER();
     TRACE_EXIT();
-}
-
-template <typename Archive> void ListStreamsMessage::serialize(Archive& ar, const unsigned int /* version */)
-{
-    TRACE_ENTER();
-    ar & boost::serialization::base_object<Message>(*this);
-    ar & evstreams;
-    TRACE_EXIT();
-}
-
-template <typename Archive> void EventStreamInfo::serialize(Archive& ar, const unsigned int /* version */)
-{
-    //TRACE_ENTER();
-    ar & uid;
-    ar & description;
-    //TRACE_EXIT();
 }
 
 std::ostream& operator<< (std::ostream& os, const EventStreamInfo& p)
@@ -79,9 +61,33 @@ std::ostream& ListStreamsMessage::toStream(std::ostream& os) const
     return Message::toStream(os) << *this;
 }
 
-} // namespace
+
+YAML::Emitter &ListStreamsMessage::serialize(YAML::Emitter &e) const {
+	e << YAML::Flow << YAML::BeginMap;
+	Message::serialize(e); 
+	e << YAML::Key << "events" << YAML::Value; 
+		e << YAML::Flow << YAML::BeginSeq; 
+		BOOST_FOREACH(const EventStreamInfoPtr ev, evstreams) {
+			e << YAML::Key << "uid" << YAML::Value << ev->uid;
+			e << YAML::Key << "description" << YAML::Value << ev->description;
+		}
+	e << YAML::EndSeq; 
+	e << YAML::EndMap; 
+	return e; 
+}
+YAML::Node &ListStreamsMessage::serialize(YAML::Node &node) {
+	// Do not serialize base data GTL - Message::serialize(node); 
+	const YAML::Node &events=node["events"]; 
+	for (unsigned i=0;i<events.size();i++) {
+		EventStreamInfoPtr ev(new EventStreamInfo); 
+		events["uid"] >> ev->uid;
+		events["description"] >> ev->description;
+		evstreams.push_back(ev); 
+	}
+	return node;
+}
 
 } // namespace
 
-BOOST_CLASS_EXPORT(watcher::event::EventStreamInfo)
-BOOST_CLASS_EXPORT(watcher::event::ListStreamsMessage)
+} // namespace
+

@@ -18,42 +18,45 @@
 
 /** @file streamDescriptionMessage.cpp
  */
-#include "watcherSerialize.h"
 #include "streamDescriptionMessage.h"
 #include "logger.h"
 
 namespace watcher {
-    namespace event {
-        INIT_LOGGER(StreamDescriptionMessage, "Message.StreamDescriptionMessage");
+	namespace event {
+		INIT_LOGGER(StreamDescriptionMessage, "Message.StreamDescriptionMessage");
 
-        StreamDescriptionMessage::StreamDescriptionMessage() :
-		Message(STREAM_DESCRIPTION_MESSAGE_TYPE, STREAM_DESCRIPTION_MESSAGE_VERSION)
-        {
-            TRACE_ENTER();
-            TRACE_EXIT();
-        }
+		StreamDescriptionMessage::StreamDescriptionMessage() :
+			Message(STREAM_DESCRIPTION_MESSAGE_TYPE, STREAM_DESCRIPTION_MESSAGE_VERSION)
+		{
+			TRACE_ENTER();
+			TRACE_EXIT();
+		}
 
-        StreamDescriptionMessage::StreamDescriptionMessage(const std::string& desc_) :
-		Message(STREAM_DESCRIPTION_MESSAGE_TYPE, STREAM_DESCRIPTION_MESSAGE_VERSION),
-		desc(desc_)
-        {
-            TRACE_ENTER();
-            TRACE_EXIT();
-        }
+		StreamDescriptionMessage::StreamDescriptionMessage(const std::string& desc_) :
+			Message(STREAM_DESCRIPTION_MESSAGE_TYPE, STREAM_DESCRIPTION_MESSAGE_VERSION),
+			desc(desc_)
+		{
+			TRACE_ENTER();
+			TRACE_EXIT();
+		}
 
-        template <typename Archive> void StreamDescriptionMessage::serialize(Archive& ar, const unsigned int /* version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-	    ar & desc;
-            TRACE_EXIT();
-        }
+		std::ostream& operator<< (std::ostream& os, const StreamDescriptionMessagePtr& p)
+		{
+			return os << "[StreamDescriptionMessage desc=" << p->desc << "]\n";
+		}
 
-	std::ostream& operator<< (std::ostream& os, const StreamDescriptionMessagePtr& p)
-	{
-	    return os << "[StreamDescriptionMessage desc=" << p->desc << "]\n";
+		YAML::Emitter &StreamDescriptionMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "desc" << YAML::Value << desc;
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &StreamDescriptionMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["desc"] >> desc;
+			return node;
+		}
 	}
-    }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::StreamDescriptionMessage)

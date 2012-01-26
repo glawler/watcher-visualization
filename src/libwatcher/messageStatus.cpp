@@ -15,9 +15,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "watcherSerialize.h"
-
 #include "messageStatus.h"
 #include "logger.h"
 
@@ -104,14 +101,22 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void MessageStatus::serialize(Archive & ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & status;
-            TRACE_EXIT();
-        }
+		YAML::Emitter &MessageStatus::serialize(YAML::Emitter &e) const {
+			// e << YAML::Comment("MessageStatus"); 
+			e << YAML::Flow;
+			e << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "status" << YAML::Value << (unsigned short&)status; 
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &MessageStatus::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			unsigned short tmp;
+			node["status"] >> tmp;
+			status=(Status)tmp; 
+			return node;
+		}
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::MessageStatus);

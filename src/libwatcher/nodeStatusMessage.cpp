@@ -21,7 +21,6 @@
  * @author Geoff Lawler <geoff.lawler@cobham.com>
  * @date 2009-03-23
  */
-#include "watcherSerialize.h"
 #include "nodeStatusMessage.h"
 #include "logger.h"
 
@@ -32,93 +31,95 @@ using namespace watcher::event;
 INIT_LOGGER(NodeStatusMessage, "Message.NodeStatusMessage");
 
 NodeStatusMessage::NodeStatusMessage(const statusEvent &event_) : 
-    Message(NODE_STATUS_MESSAGE_TYPE, NODE_STATUS_MESSAGE_VERSION), 
-    event(event_),
-    layer(PHYSICAL_LAYER)
+	Message(NODE_STATUS_MESSAGE_TYPE, NODE_STATUS_MESSAGE_VERSION), 
+	event(event_),
+	layer(PHYSICAL_LAYER)
 {
-    TRACE_ENTER();
-    TRACE_EXIT(); 
+	TRACE_ENTER();
+	TRACE_EXIT(); 
 }
 
 NodeStatusMessage::NodeStatusMessage(const NodeStatusMessage &rhs) : 
-    Message(rhs.type, rhs.version),
-    event(rhs.event),
-    layer(rhs.layer)
+	Message(rhs.type, rhs.version),
+	event(rhs.event),
+	layer(rhs.layer)
 {
-    TRACE_ENTER();
-    TRACE_EXIT(); 
+	TRACE_ENTER();
+	TRACE_EXIT(); 
 }
 
 NodeStatusMessage::~NodeStatusMessage()
 {
-    TRACE_ENTER();
-    TRACE_EXIT();
+	TRACE_ENTER();
+	TRACE_EXIT();
 }
 
 bool NodeStatusMessage::operator==(const NodeStatusMessage &other) const
 {
-    TRACE_ENTER();
-    bool retVal = 
-        Message::operator==(other) && 
-        event==other.event && 
-        layer==other.layer; 
-    TRACE_EXIT_RET(retVal);
-    return retVal;
+	TRACE_ENTER();
+	bool retVal = 
+		Message::operator==(other) && 
+		event==other.event && 
+		layer==other.layer; 
+	TRACE_EXIT_RET(retVal);
+	return retVal;
 }
 
 NodeStatusMessage &NodeStatusMessage::operator=(const NodeStatusMessage &other)
 {
-    TRACE_ENTER();
-    Message::operator=(other);
-    event=other.event;
-    layer=other.layer; 
-    TRACE_EXIT();
-    return *this;
+	TRACE_ENTER();
+	Message::operator=(other);
+	event=other.event;
+	layer=other.layer; 
+	TRACE_EXIT();
+	return *this;
 }
 
 // virtual 
 std::ostream &NodeStatusMessage::toStream(std::ostream &out) const
 {
-    TRACE_ENTER();
-    Message::toStream(out); 
-    out << "event: " << statusEventToString(event) << " layer: " << layer; 
-    TRACE_EXIT();
-    return out;
+	TRACE_ENTER();
+	Message::toStream(out); 
+	out << "event: " << statusEventToString(event) << " layer: " << layer; 
+	TRACE_EXIT();
+	return out;
 }
 
 std::ostream &NodeStatusMessage::operator<<(std::ostream &out) const
 {
-    TRACE_ENTER();
-    TRACE_EXIT();
-    return toStream(out); 
+	TRACE_ENTER();
+	TRACE_EXIT();
+	return toStream(out); 
 }
-
-
-template <typename Archive>
-void NodeStatusMessage::serialize(Archive& ar, const unsigned int /* version */)
-{
-    TRACE_ENTER();
-    ar & boost::serialization::base_object<Message>(*this);
-    ar & event;
-    ar & layer; 
-    TRACE_EXIT();
-}
-
 // static
 string NodeStatusMessage::statusEventToString(const NodeStatusMessage::statusEvent &e)
 {
-    switch(e)
-    {
-        case connect: return "connect"; break;
-        case disconnect: return "disconnect"; break;
-    }
-    return ""; 
+	switch(e)
+	{
+		case connect: return "connect"; break;
+		case disconnect: return "disconnect"; break;
+	}
+	return ""; 
 }
 
 ostream &operator<<(ostream &out, const NodeStatusMessage &mess)
 {
-    mess.operator<<(out);
-    return out;
+	mess.operator<<(out);
+	return out;
 }
 
-BOOST_CLASS_EXPORT(watcher::event::NodeStatusMessage);
+
+YAML::Emitter &NodeStatusMessage::serialize(YAML::Emitter &e) const {
+	e << YAML::Flow << YAML::BeginMap;
+	Message::serialize(e); 
+	e << YAML::Key << "event" << YAML::Value << static_cast<unsigned short>(event);
+	e << YAML::Key << "layer" << YAML::Value << layer;
+	e << YAML::EndMap; 
+	return e; 
+}
+YAML::Node &NodeStatusMessage::serialize(YAML::Node &node) {
+	// Do not serialize base data GTL - Message::serialize(node); 
+	node["event"] >> (unsigned short &)event;
+	node["layer"] >> layer;
+	return node;
+}

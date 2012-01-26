@@ -21,13 +21,9 @@
  * @author Geoff Lawler <geoff.lawer@cobham.com>
  * @date 2009-07-15
  */
-#include <boost/asio.hpp>
-
-#include "watcherGlobalFunctions.h"
-#include "watcherSerialize.h"
-
 #include <iosfwd>
 
+#include "marshalYAML.h"
 #include "edgeMessage.h"
 #include "messageTypesAndVersions.h"
 #include "watcherGlobalFunctions.h"         // for address serialize(). 
@@ -202,27 +198,61 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void EdgeMessage::serialize(Archive& ar, const unsigned int /* file_version */) 
-        {
-            TRACE_ENTER();
-
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & node1;
-            ar & node2;
-            ar & edgeColor;
-            ar & expiration;
-            ar & width;
-            ar & layer;
-            ar & addEdge;
-            ar & node1Label;
-            ar & middleLabel;
-            ar & node2Label;
-            ar & bidirectional;
-
-            TRACE_EXIT();
-        }
-
+		YAML::Emitter &EdgeMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "node1" << YAML::Value << node1.to_string(); 
+			e << YAML::Key << "node2" << YAML::Value <<  node2.to_string(); 
+			e << YAML::Key << "edgeColor" << YAML::Value << edgeColor.toString(); 
+			e << YAML::Key << "expiration" << YAML::Value << expiration;
+			e << YAML::Key << "width" << YAML::Value << width;
+			e << YAML::Key << "layer" << YAML::Value << layer;
+			e << YAML::Key << "addEdge" << YAML::Value << addEdge;
+			if (node1Label) {
+				e << YAML::Key << "node1Label" << YAML::Value; 
+				node1Label->serialize(e); 
+			}
+			if (middleLabel) { 
+				e << YAML::Key << "middleLabel" << YAML::Value; 
+				middleLabel->serialize(e); 
+			}
+			if (node2Label) {
+				e << YAML::Key << "node2Label" << YAML::Value; 
+				node2Label->serialize(e); 
+			}
+			e << YAML::Key << "bidirectional" << YAML::Value << bidirectional;
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &EdgeMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			string str; 
+			node["node1"] >> str; 
+			node1=NodeIdentifier::from_string(str); 
+			node["node2"] >> str; 
+			node2=NodeIdentifier::from_string(str); 
+			node["edgeColor"] >> str; 
+			edgeColor.fromString(str); 
+			node["expiration"] >> expiration;
+			node["width"] >> width;
+			node["layer"] >> layer;
+			node["addEdge"] >> addEdge;
+			const YAML::Node *subNode;
+			if (NULL!=(subNode=node.FindValue("node1Label"))) {
+				node1Label=LabelMessagePtr(new LabelMessage); 
+				node1Label->serialize(*(const_cast<YAML::Node*>(subNode))); 
+			}
+			if (NULL!=(subNode=node.FindValue("middleLabel"))) {
+				middleLabel=LabelMessagePtr(new LabelMessage);
+				middleLabel->serialize(*(const_cast<YAML::Node*>(subNode))); 
+			}
+			if (NULL!=(subNode=node.FindValue("node2Label"))) {
+				node2Label=LabelMessagePtr(new LabelMessage);
+				node2Label->serialize(*(const_cast<YAML::Node*>(subNode))); 
+			}
+			node["bidirectional"] >> bidirectional;
+			return node;
+		}
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::EdgeMessage);

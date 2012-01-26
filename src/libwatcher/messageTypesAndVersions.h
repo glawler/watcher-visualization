@@ -37,7 +37,7 @@ namespace watcher {
             // feeder API messages
             UNKNOWN_MESSAGE_TYPE      = 0x00000000,
             MESSAGE_STATUS_TYPE       = 0x00000001,
-            TEST_MESSAGE_TYPE         = 0x00000002,
+        	// TEST_MESSAGE_TYPE         = 0x00000002,
             GPS_MESSAGE_TYPE          = 0x00000003,
             LABEL_MESSAGE_TYPE        = 0x00000004,
             EDGE_MESSAGE_TYPE         = 0x00000005,

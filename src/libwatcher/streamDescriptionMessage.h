@@ -21,30 +21,41 @@
 #ifndef STREAM_DESCRIPTION_MESSAGE_H
 #define STREAM_DESCRIPTION_MESSAGE_H
 
+#include <yaml.h>
 #include "message.h"
 
 namespace watcher {
-    namespace event {
+	namespace event {
 
-        /**
-         * Get/Set the description name for a stream.
-         */
-        class StreamDescriptionMessage : public Message {
-            public:
-            StreamDescriptionMessage(); 
-            StreamDescriptionMessage(const std::string&); 
+		/**
+		 * Get/Set the description name for a stream.
+		 */
+		class StreamDescriptionMessage : public Message {
+			public:
+				StreamDescriptionMessage(); 
+				StreamDescriptionMessage(const std::string&); 
 
-	    std::string desc;
+				std::string desc;
 
-            private:
-            friend class boost::serialization::access;
-            template <typename Archive> void serialize(Archive& ar, const unsigned int version);
-            DECLARE_LOGGER();
-        };
+				/** Serialize this message using a YAML::Emitter
+				 * @param e the emitter to serialize to
+				 * @return the emitter emitted to.
+				 */
+				virtual YAML::Emitter &serialize(YAML::Emitter &e) const; 
 
-        typedef boost::shared_ptr<StreamDescriptionMessage> StreamDescriptionMessagePtr;
+				/** Serialize from a YAML::Parser. 
+				 * @param p the Parser to read from 
+				 * @return the parser read from. 
+				 */
+				virtual YAML::Node &serialize(YAML::Node &node); 
 
-	std::ostream& operator<< (std::ostream&, const StreamDescriptionMessagePtr&);
-    }
+			private:
+				DECLARE_LOGGER();
+		};
+
+		typedef boost::shared_ptr<StreamDescriptionMessage> StreamDescriptionMessagePtr;
+
+		std::ostream& operator<< (std::ostream&, const StreamDescriptionMessagePtr&);
+	}
 }
 #endif

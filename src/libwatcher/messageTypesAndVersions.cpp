@@ -70,9 +70,6 @@ namespace watcher {
                 case MESSAGE_STATUS_TYPE: 
                     out << static_cast<int>(MESSAGE_STATUS_TYPE) << " (status)";
                     break;
-                case TEST_MESSAGE_TYPE: 
-                    out << static_cast<int>(TEST_MESSAGE_TYPE) << " (test)"; 
-                    break;
                 case GPS_MESSAGE_TYPE: 
                     out << static_cast<int>(GPS_MESSAGE_TYPE) << " (gps)";
                     break;

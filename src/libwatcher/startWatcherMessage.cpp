@@ -20,7 +20,6 @@
  * @author Michael Elkins <michael.elkins@cobham.com>
  * @date 2009-03-20
  */
-#include "watcherSerialize.h"
 #include "startWatcherMessage.h"
 #include "logger.h"
 
@@ -41,14 +40,18 @@ namespace watcher {
 
         bool operator== (const StartMessage& /* lhs */, const StartMessage& /* rhs */) { return true; };
 
-        template <typename Archive> void StartMessage::serialize(Archive & ar, const unsigned int /* version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            TRACE_EXIT();
-        }
 
+		YAML::Emitter &StartMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::EndMap; 
+			return e; 
+		}
+
+		YAML::Node &StartMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			return node;
+		}
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::StartMessage);

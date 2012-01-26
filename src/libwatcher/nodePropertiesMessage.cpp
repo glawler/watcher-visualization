@@ -24,7 +24,7 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>       // for iequals();
 
-#include "watcherSerialize.h"
+#include "marshalYAML.h"
 #include "nodePropertiesMessage.h"
 #include "messageTypesAndVersions.h"
 #include "colors.h"
@@ -146,22 +146,52 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void NodePropertiesMessage::serialize(Archive & ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & layer;
-            ar & color;
-            ar & useColor;
-            ar & size;
-            ar & shape;
-            ar & useShape;
-            ar & displayEffects;
-            ar & nodeProperties;
-            TRACE_EXIT();
-        }
-
-
+		YAML::Emitter &NodePropertiesMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "layer" << YAML::Value << layer;
+			e << YAML::Key << "color" << YAML::Value << color.toString();
+			e << YAML::Key << "useColor" << YAML::Value << useColor;
+			e << YAML::Key << "size" << YAML::Value << size;
+			e << YAML::Key << "shape" << YAML::Value << static_cast<unsigned short>(shape);
+			e << YAML::Key << "useShape" << YAML::Value << useShape;
+			e << YAML::Key << "displayEffects" << YAML::Value; 
+				e << YAML::Flow << YAML::BeginSeq; 
+				BOOST_FOREACH(const NodePropertiesMessage::DisplayEffect &de, displayEffects) 
+					e << de;
+				e << YAML::EndSeq; 
+			e << YAML::Key << "nodeProperties" << YAML::Value; 
+				e << YAML::Flow << YAML::BeginSeq; 
+				BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &np, nodeProperties) 
+					e << np;
+				e << YAML::EndSeq; 
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &NodePropertiesMessage::serialize(YAML::Node &node) {
+			string str; 
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["layer"] >> layer;
+			node["color"] >> str;
+			color.fromString(str); 
+			node["useColor"] >> useColor;
+			node["size"] >> size;
+			node["shape"] >> (unsigned short &)shape; 
+			node["useShape"] >> useShape;
+			const YAML::Node &deseq=node["displayEffects"]; 
+			for (unsigned i=0;i<deseq.size();i++) {
+				NodePropertiesMessage::DisplayEffect e; 
+				deseq[i] >> (unsigned short &)e; 
+				displayEffects.push_back(e); 
+			}
+			const YAML::Node &npseq=node["nodeProperties"]; 
+			for (unsigned i=0;i<npseq.size();i++) {
+				NodePropertiesMessage::NodeProperty e; 
+				npseq[i] >> (unsigned short &)e; 
+				nodeProperties.push_back(e); 
+			}
+			return node;
+		}
         // static 
         string NodePropertiesMessage::nodeShapeToString(const NodePropertiesMessage::NodeShape &shape)
         {
@@ -274,7 +304,4 @@ namespace watcher {
         }
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::NodePropertiesMessage);
-
 

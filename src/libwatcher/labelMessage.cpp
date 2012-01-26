@@ -21,8 +21,8 @@
  * @author Geoff Lawler <geoff.lawer@cobham.com>
  * @date 2009-07-15
  */
-#include "watcherSerialize.h"
 #include "labelMessage.h"
+#include "marshalYAML.h"
 #include "messageTypesAndVersions.h"
 #include "colors.h"
 #include "logger.h"
@@ -175,26 +175,39 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void LabelMessage::serialize(Archive & ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & label;
-            ar & foreground;
-            ar & background;
-            ar & expiration;
-            ar & fontSize;
-            ar & addLabel;
-            ar & layer; 
-            ar & lat;
-            ar & lng;
-            ar & alt;
-            TRACE_EXIT();
-        }
-
+		YAML::Emitter &LabelMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "label" << YAML::Value << label;
+			e << YAML::Key << "foreground" << YAML::Value << foreground.toString(); 
+			e << YAML::Key << "background" << YAML::Value << background.toString(); 
+			e << YAML::Key << "expiration" << YAML::Value << expiration;
+			e << YAML::Key << "fontSize" << YAML::Value << fontSize;
+			e << YAML::Key << "addLabel" << YAML::Value << addLabel;
+			e << YAML::Key << "layer" << YAML::Value << layer;
+			e << YAML::Key << "lat" << YAML::Value << lat;
+			e << YAML::Key << "lng" << YAML::Value << lng;
+			e << YAML::Key << "alt" << YAML::Value << alt;
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &LabelMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			string str; 
+			node["label"] >> label;
+			node["foreground"] >> str;
+			foreground.fromString(str); 
+			node["background"] >> str;
+			background.fromString(str); 
+			node["expiration"] >> expiration;
+			node["fontSize"] >> fontSize;
+			node["addLabel"] >> addLabel;
+			node["layer"] >> layer;
+			node["lat"] >> lat;
+			node["lng"] >> lng;
+			node["alt"] >> alt;
+			return node;
+		}
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::LabelMessage);
-
 

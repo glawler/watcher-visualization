@@ -21,8 +21,7 @@
  * @author Geoff Lawler <geoff.lawer@cobham.com>
  * @date 2009-07-15
  */
-#include "watcherSerialize.h"
-#include "watcherGlobalFunctions.h" // for address serialization
+#include "marshalYAML.h"
 #include "colorMessage.h"
 #include "colors.h"
 #include "logger.h"
@@ -122,17 +121,26 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void ColorMessage::serialize(Archive& ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & color;
-            ar & flashPeriod;
-            ar & expiration;
-            ar & layer; 
-            TRACE_EXIT();
-        }
+		YAML::Emitter &ColorMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap; 
+			Message::serialize(e); 
+			e << YAML::Key << "flashPeriod" << YAML::Value << flashPeriod;
+			e << YAML::Key << "expiration" << YAML::Value << expiration;
+			e << YAML::Key << "layer" << YAML::Value << layer; 
+			e << YAML::Key << "color" << YAML::Value << color.toString(); 
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &ColorMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["flashPeriod"] >> flashPeriod;
+			node["expiration"] >> expiration;
+			node["layer"] >> layer; 
+			string tmp; 
+			node["color"] >> tmp; 
+			color.fromString(tmp); 
+			return node;
+		}
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::ColorMessage);

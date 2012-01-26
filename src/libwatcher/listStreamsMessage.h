@@ -21,43 +21,50 @@
 #ifndef LIST_STREAMS_MESSAGE_H
 #define LIST_STREAMS_MESSAGE_H
 
+#include <yaml.h>
 #include "message.h"
 
 namespace watcher {
-    namespace event {
+	namespace event {
+		class EventStreamInfo {
+			public:
+				EventStreamInfo();
+				EventStreamInfo(uint32_t, const std::string&);
+				uint32_t uid;			//< unique identifier for this stream
+				std::string description;	//< human readable string describing this event stream
+			private:
+		};
+		typedef boost::shared_ptr<EventStreamInfo> EventStreamInfoPtr;
 
-	class EventStreamInfo {
-	    public:
-		EventStreamInfo();
-		EventStreamInfo(uint32_t, const std::string&);
-		uint32_t uid;			//< unique identifier for this stream
-		std::string description;	//< human readable string describing this event stream
-	    private:
-		friend class boost::serialization::access;
-		template <typename Archive> void serialize(Archive& ar, const unsigned int version);
-	};
-	typedef boost::shared_ptr<EventStreamInfo> EventStreamInfoPtr;
+		/**
+		 * Request/List of Watcher event streams.
+		 */
+		class ListStreamsMessage : public Message {
+			public:
+				ListStreamsMessage(); 
+				/*virtual*/ std::ostream& toStream(std::ostream&) const;
 
-        /**
-         * Request/List of Watcher event streams.
-         */
-        class ListStreamsMessage : public Message {
-            public:
-            ListStreamsMessage(); 
-	    /*virtual*/ std::ostream& toStream(std::ostream&) const;
+				std::vector<EventStreamInfoPtr> evstreams;
 
-	    std::vector<EventStreamInfoPtr> evstreams;
+				/** Serialize this message using a YAML::Emitter
+				 * @param e the emitter to serialize to
+				 * @return the emitter emitted to.
+				 */
+				virtual YAML::Emitter &serialize(YAML::Emitter &e) const; 
 
-            private:
-            friend class boost::serialization::access;
-            template <typename Archive> void serialize(Archive& ar, const unsigned int version);
-            DECLARE_LOGGER();
-        };
+				/** Serialize from a YAML::Parser. 
+				 * @param p the Parser to read from 
+				 * @return the parser read from. 
+				 */
+				virtual YAML::Node &serialize(YAML::Node &n); 
+			private:
+				DECLARE_LOGGER();
+		};
 
-        typedef boost::shared_ptr<ListStreamsMessage> ListStreamsMessagePtr;
+		typedef boost::shared_ptr<ListStreamsMessage> ListStreamsMessagePtr;
 
-	std::ostream& operator<< (std::ostream& os, const EventStreamInfo& p);
-	std::ostream& operator<< (std::ostream& os, const ListStreamsMessage& p);
-    }
+		std::ostream& operator<< (std::ostream& os, const EventStreamInfo& p);
+		std::ostream& operator<< (std::ostream& os, const ListStreamsMessage& p);
+	}
 }
 #endif

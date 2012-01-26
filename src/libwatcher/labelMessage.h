@@ -25,11 +25,9 @@
 #define WATCHER_LABEL_MESSAGE_DATA_H
 
 #include <string>
-#include <boost/asio.hpp>
-
+#include <yaml.h>
 #include "message.h"
 #include "watcherColors.h"
-#include "watcherGlobalFunctions.h"
 #include "watcherTypes.h" 
 
 namespace watcher {
@@ -123,9 +121,18 @@ namespace watcher {
                  */
                 std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
+				/** Serialize this message using a YAML::Emitter
+				 * @param e the emitter to serialize to
+				 * @return the emitter emitted to.
+				 */
+				virtual YAML::Emitter &serialize(YAML::Emitter &e) const; 
+
+				/** Serialize from a YAML::Parser. 
+				 * @param p the Parser to read from 
+				 * @return the parser read from. 
+				 */
+				virtual YAML::Node &serialize(YAML::Node &node); 
             private:
-                friend class boost::serialization::access;
-                template <typename Archive> void serialize(Archive & ar, const unsigned int file_version);
                 DECLARE_LOGGER();
         };
 

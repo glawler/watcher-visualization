@@ -23,7 +23,6 @@
  */
 #include <boost/foreach.hpp>
 
-#include "watcherSerialize.h"
 #include "messageStreamFilterMessage.h"
 #include "logger.h"
 
@@ -110,20 +109,32 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void MessageStreamFilterMessage::serialize(Archive& ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & applyFilter;
-            ar & enableAllFiltering;
-            ar & theFilter.layers;
-            ar & theFilter.messageTypes;
-            ar & theFilter.opAND;
-            // region is currently data free, so don't bother serializing
-            // ar & theFilter.region;
-            TRACE_EXIT();
-        }
+		YAML::Emitter &MessageStreamFilterMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "applyFilter" << YAML::Value << applyFilter;
+			e << YAML::Key << "enableAllFiltering" << YAML::Value << enableAllFiltering;
+			e << YAML::Key << "theFilter" << YAML::Value; 
+				e << YAML::Flow << YAML::BeginMap; 
+				e << YAML::Key << "layers" << YAML::Value << theFilter.layers;
+				e << YAML::Key << "messageTypes" << YAML::Value << theFilter.messageTypes;
+				e << YAML::Key << "opAND" << YAML::Value << theFilter.opAND; 
+				// region is currently data free, so don't bother serializing
+				e << YAML::EndMap; 
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &MessageStreamFilterMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["applyFilter"] >> applyFilter;
+			node["enableAllFiltering"] >> enableAllFiltering;
+			const YAML::Node &filter=node["theFilter"]; 
+			filter["layers"] >> theFilter.layers; 
+			filter["messageTypes"] >> theFilter.messageTypes; 
+			filter["opAND"] >> theFilter.opAND; 
+			// region not encoded. 
+			return node;
+		}
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::MessageStreamFilterMessage);

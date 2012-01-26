@@ -19,7 +19,6 @@
 /** @file
  * @date 2009-06-24
  */
-#include "watcherSerialize.h"
 #include "playbackTimeRange.h"
 #include "logger.h"
 
@@ -47,19 +46,25 @@ bool operator== (const PlaybackTimeRangeMessage& lhs , const PlaybackTimeRangeMe
     return lhs.min_ == rhs.min_ && lhs.max_ == rhs.max_ && lhs.cur_ == rhs.cur_; 
 };
 
-template <typename Archive>
-void PlaybackTimeRangeMessage::serialize(Archive & ar, const unsigned int /* version */)
-{
-    TRACE_ENTER();
-    ar & boost::serialization::base_object<Message>(*this);
-    ar & min_;
-    ar & max_;
-    ar & cur_; 
-    TRACE_EXIT();
+
+YAML::Emitter &PlaybackTimeRangeMessage::serialize(YAML::Emitter &e) const {
+	e << YAML::Flow << YAML::BeginMap;
+	Message::serialize(e); 
+	e << YAML::Key << "min" << YAML::Value << min_;
+	e << YAML::Key << "max" << YAML::Value << max_;
+	e << YAML::Key << "cur" << YAML::Value << cur_;
+	e << YAML::EndMap; 
+	return e; 
+}
+YAML::Node &PlaybackTimeRangeMessage::serialize(YAML::Node &node) {
+	// Do not serialize base data GTL - Message::serialize(node); 
+	node["min"] >> min_;
+	node["max"] >> max_;
+	node["cur"] >> cur_;
+	return node;
 }
 
 } // namespace
 
 } // namespace
 
-BOOST_CLASS_EXPORT(watcher::event::PlaybackTimeRangeMessage);

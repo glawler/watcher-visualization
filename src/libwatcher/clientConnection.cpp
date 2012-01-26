@@ -245,70 +245,70 @@ void ClientConnection::run()
 
 void ClientConnection::handle_read_header(const boost::system::error_code &e, std::size_t bytes_transferred)
 {
-    TRACE_ENTER();
+	TRACE_ENTER();
 
-    if (!e) {
-        LOG_DEBUG("Recv'd header"); 
-        size_t payloadSize;
-        unsigned short messageNum;
-        if (!DataMarshaller::unmarshalHeader(&incomingBuffer[0], bytes_transferred, payloadSize, messageNum)) {
-            LOG_ERROR("Unable to parse incoming message header"); 
-        } else {
-            LOG_DEBUG("Parsed header - now reading " << messageNum << " message" << (messageNum>1?"s":"") 
-                    << " from a buffer of " << payloadSize << " bytes."); 
+	if (!e) {
+		LOG_DEBUG("Recv'd header"); 
+		size_t payloadSize;
+		unsigned short messageNum;
+		if (!DataMarshaller::unmarshalHeader(&incomingBuffer[0], bytes_transferred, payloadSize, messageNum)) {
+			LOG_ERROR("Unable to parse incoming message header"); 
+		} else {
+			LOG_DEBUG("Parsed header - now reading " << messageNum << " message" << (messageNum>1?"s":"") 
+					<< " from a buffer of " << payloadSize << " bytes."); 
 
-	    // ensure buffer is large enough to get entire payload in one asio::read()
-	    if (incomingBuffer.size() < payloadSize)
-	    {
-		LOG_INFO("increaing incoming buffer size to " << payloadSize << " bytes.");
-		incomingBuffer.resize(payloadSize);
-	    }
-            bool closeConnection = false;
-            size_t bytesRead=0;
-            if (payloadSize != (bytesRead=asio::read(theSocket, asio::buffer(incomingBuffer, payloadSize)))) {
-                LOG_ERROR("Read " << bytesRead << " bytes when we wanted to read " << payloadSize << " bytes from server.");
-                if (bytesRead==incomingBuffer.size() && bytesRead < payloadSize) { 
-                    // just read the rest of the messages into the buffer and do nothing. We can't parse messages larger than the buffer size
-                    // GTL -- or can we? Look into dynamic sized arrays for this. 
-                    // asio::read() can take a basic_stream_buf instance - maybe use that instead of a statically 
-                    // sized array?
-                    size_t bytesRemaining=payloadSize-bytesRead; 
-                    while (bytesRead=asio::read(theSocket, asio::buffer(incomingBuffer, bytesRemaining))) { 
-                        LOG_ERROR("Read " << bytesRead << " more bytes, " << payloadSize << " remaining to read"); 
-                        bytesRemaining-=bytesRead; 
-                    }
-                }
-                else 
-                    closeConnection=true;
-            } else {
-                vector<MessagePtr> arrivedMessages; 
-                if(!DataMarshaller::unmarshalPayload(arrivedMessages, messageNum, &incomingBuffer[0], payloadSize)) {
-                    LOG_WARN("Unable to parse incoming server message ");
-                    closeConnection = true;
-                } else if (messageHandlers.empty()) {
-                    LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intentional)"); 
-                    closeConnection = true;
-                } else {
-                    BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers) {
-                        closeConnection |= mh->handleMessagesArrive(shared_from_this(), arrivedMessages);
-                    }
-                }
-            }
+			// ensure buffer is large enough to get entire payload in one asio::read()
+			if (incomingBuffer.size() < payloadSize)
+			{
+				LOG_INFO("increaing incoming buffer size to " << payloadSize << " bytes.");
+				incomingBuffer.resize(payloadSize);
+			}
+			bool closeConnection = false;
+			size_t bytesRead=0;
+			if (payloadSize != (bytesRead=asio::read(theSocket, asio::buffer(incomingBuffer, payloadSize)))) {
+				LOG_ERROR("Read " << bytesRead << " bytes when we wanted to read " << payloadSize << " bytes from server.");
+				if (bytesRead==incomingBuffer.size() && bytesRead < payloadSize) { 
+					// just read the rest of the messages into the buffer and do nothing. We can't parse messages larger than the buffer size
+					// GTL -- or can we? Look into dynamic sized arrays for this. 
+					// asio::read() can take a basic_stream_buf instance - maybe use that instead of a statically 
+					// sized array?
+					size_t bytesRemaining=payloadSize-bytesRead; 
+					while (bytesRead=asio::read(theSocket, asio::buffer(incomingBuffer, bytesRemaining))) { 
+						LOG_ERROR("Read " << bytesRead << " more bytes, " << payloadSize << " remaining to read"); 
+						bytesRemaining-=bytesRead; 
+					}
+				}
+				else 
+					closeConnection=true;
+			} else {
+				vector<MessagePtr> arrivedMessages; 
+				if(!DataMarshaller::unmarshalPayload(arrivedMessages, messageNum, &incomingBuffer[0], payloadSize)) {
+					LOG_WARN("Unable to parse incoming server message ");
+					closeConnection = true;
+				} else if (messageHandlers.empty()) {
+					LOG_WARN("Ignoring server response - we don't have a message handler set. (This may be intentional)"); 
+					closeConnection = true;
+				} else {
+					BOOST_FOREACH(MessageHandlerPtr mh, messageHandlers) {
+						closeConnection |= mh->handleMessagesArrive(shared_from_this(), arrivedMessages);
+					}
+				}
+			}
 
-            if (!closeConnection) {
-                run(); // start another read
-            } else {
-                LOG_DEBUG("error occurred, or handler requested connection shut down");
-            }
-        }
-    }
-    else
-    {
-        LOG_DEBUG("Error reading inbound message header: " << e.message()); 
-        doClose();
-    }
+			if (!closeConnection) {
+				run(); // start another read
+			} else {
+				LOG_DEBUG("error occurred, or handler requested connection shut down");
+			}
+		}
+	}
+	else
+	{
+		LOG_DEBUG("Error reading inbound message header: " << e.message()); 
+		doClose();
+	}
 
-    TRACE_EXIT(); 
+	TRACE_EXIT(); 
 }
 
 // vim:sw=4

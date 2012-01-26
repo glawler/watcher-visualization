@@ -21,12 +21,9 @@
  * @author geoff lawler <geoff.lawler@cobham.com>
  * @date 2009-05-06
  */
-#include <boost/asio.hpp>
-
-#include "watcherSerialize.h"
-#include "watcherGlobalFunctions.h"             // for address serialization
-#include "logger.h"
-
+#include <boost/foreach.hpp>
+#include <logger.h>
+#include "marshalYAML.h"
 #include "connectivityMessage.h"
 
 using namespace std;
@@ -109,16 +106,33 @@ namespace watcher
             return out;
         }
 
-        template <typename Archive> void ConnectivityMessage::serialize(Archive & ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & neighbors;
-            ar & layer;
-            TRACE_EXIT();
-        }
+		// YAML::Emitter &operator<<(YAML::Emitter &out, const watcher::event::ConnectivityMessage::NeighborList &ns); 
+		// void operator>>(const YAML::Node& in, watcher::ConnectivityMessage::NeighborList &ns); 
+
+		YAML::Emitter &ConnectivityMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "layer" << YAML::Value << layer;		
+			e << YAML::Key << "neighbors" << YAML::Value;		
+				e << YAML::Flow << YAML::BeginSeq; 
+				BOOST_FOREACH(const NodeIdentifier &n, neighbors) 
+					e << n.to_string(); 
+				e << YAML::EndSeq; 
+			e << YAML::EndMap; 
+
+			return e; 
+		}
+		YAML::Node &ConnectivityMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["layer"] >> layer; 
+			const YAML::Node &nbrs=node["neighbors"]; 
+			for (unsigned i=0;i<nbrs.size();i++) {
+				string str;
+				nbrs[i] >> str; 
+				neighbors.push_back(NodeIdentifier::from_string(str)); 
+			}
+			return node;
+		}
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::ConnectivityMessage);
 

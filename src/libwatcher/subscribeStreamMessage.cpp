@@ -18,7 +18,6 @@
 
 /** @file subscribeStreamMessage.cpp
  */
-#include "watcherSerialize.h"
 #include "subscribeStreamMessage.h"
 #include "logger.h"
 
@@ -26,21 +25,26 @@ namespace watcher {
     namespace event {
         INIT_LOGGER(SubscribeStreamMessage, "Message.SubscribeStreamMessage");
 
-        SubscribeStreamMessage::SubscribeStreamMessage(uint32_t uid_ = -1) : Message(SUBSCRIBE_STREAM_MESSAGE_TYPE, SUBSCRIBE_STREAM_MESSAGE_VERSION),
-	uid(uid_)
+        SubscribeStreamMessage::SubscribeStreamMessage(uint32_t uid_) : 
+			Message(SUBSCRIBE_STREAM_MESSAGE_TYPE, SUBSCRIBE_STREAM_MESSAGE_VERSION),
+			uid(uid_)
         {
             TRACE_ENTER();
             TRACE_EXIT();
         }
 
-        template <typename Archive> void SubscribeStreamMessage::serialize(Archive& ar, const unsigned int /* version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-	    ar & uid;
-            TRACE_EXIT();
-        }
+		YAML::Emitter &SubscribeStreamMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "uid" << YAML::Value << uid;
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &SubscribeStreamMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["uid"] >> uid;
+			return node;
+		}
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::SubscribeStreamMessage)

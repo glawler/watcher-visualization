@@ -15,9 +15,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "watcherSerialize.h"
-
 #include <boost/lexical_cast.hpp>
 
 #include "logger.h"
@@ -28,8 +25,6 @@
 
 using namespace boost; 
 using namespace std;
-
-BOOST_CLASS_EXPORT(watcher::Color);
 
 namespace watcher {
 

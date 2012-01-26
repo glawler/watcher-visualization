@@ -24,30 +24,4 @@
 #ifndef WATCHER_GLOBAL_FUNCTIONS
 #define WATCHER_GLOBAL_FUNCTIONS
 
-#include <boost/serialization/split_free.hpp>
-#include "watcherTypes.h"
-
-BOOST_SERIALIZATION_SPLIT_FREE(boost::asio::ip::address);
-
-namespace boost 
-{
-    namespace serialization 
-    {
-        template<class Archive>
-            void save(Archive & ar, const watcher::NodeIdentifier &a, const unsigned int /* version */)
-            {
-                unsigned long tmp=a.to_v4().to_ulong();
-                ar & tmp;
-            }
-
-        template<class Archive>
-            void load(Archive & ar, watcher::NodeIdentifier &a, const unsigned int /* version */)
-            {
-                unsigned long tmp;
-                ar & tmp;
-                a=watcher::NodeIdentifier(boost::asio::ip::address_v4(tmp));
-            }
-    }
-}
-
 #endif //  WATCHER_GLOBAL_FUNCTIONS

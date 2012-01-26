@@ -20,7 +20,6 @@
  * @author Michael Elkins <michael.elkins@cobham.com>
  * @date 2009-03-20
  */
-#include "watcherSerialize.h"
 #include "speedWatcherMessage.h"
 #include "logger.h"
 
@@ -48,17 +47,21 @@ namespace watcher {
 	    return rhs.toStream(o);
         }
 
-        template <typename Archive>
-        void SpeedMessage::serialize(Archive & ar, const unsigned int /* version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & speed;
-            TRACE_EXIT();
-        }
+
+		YAML::Emitter &SpeedMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "speed" << YAML::Value << speed;
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &SpeedMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["speed"] >> speed;
+			return node;
+		}
 
         INIT_LOGGER(SpeedMessage, "Message.SpeedMessage");
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::SpeedMessage);

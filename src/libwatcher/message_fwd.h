@@ -28,7 +28,7 @@
 
 namespace watcher {
     namespace event {
-        class Message;
+		class Message; 
         typedef boost::shared_ptr<Message> MessagePtr; 
     }
 }

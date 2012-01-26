@@ -11,17 +11,12 @@ libwatcher_a_include_HEADERS=\
 	messageHandler.h \
 	sendMessageHandler.h \
 	messageStream.h \
-	messageStreamFilter.h \
 	messageStreamReactor.h \
 	watcherdAPIMessageHandler.h \
 	watcherTypes.h \
 	watcherGlobalFunctions.h \
 	watcherColors.h \
-	colors.h
-
-lib_LTLIBRARIES=libwatchermsg.la
-libwatchermsg_la_includedir=$(includedir)/libwatcher
-libwatchermsg_la_include_HEADERS=\
+	colors.h \
 	message.h \
 	colorMessage.h \
 	connectivityMessage.h \
@@ -41,7 +36,7 @@ libwatchermsg_la_include_HEADERS=\
 	nodeStatusMessage.h \
 	watcherMessageFwd.h 
 	
-libwatchermsg_la_SOURCES=\
+libwatcher_a_SOURCES=\
 	message.h message.cpp \
 	colorMessage.cpp colorMessage.h \
 	connectivityMessage.cpp connectivityMessage.h \
@@ -61,11 +56,6 @@ libwatchermsg_la_SOURCES=\
 	stopWatcherMessage.cpp stopWatcherMessage.h \
 	streamDescriptionMessage.cpp streamDescriptionMessage.h \
 	subscribeStreamMessage.cpp subscribeStreamMessage.h \
-	testMessage.cpp testMessage.h
-
-libwatchermsg_la_LDFLAGS = -version-info 1:1:0
-
-libwatcher_a_SOURCES= \
 	client.h client.cpp \
 	clientConnection.h clientConnection.cpp \
 	connection.cpp connection.h \
@@ -77,6 +67,7 @@ libwatcher_a_SOURCES= \
 	floatingLabelDisplayInfo.cpp floatingLabelDisplayInfo.h \
 	messageHandler.h messageHandlerFwd.h messageHandler.cpp \
 	sendMessageHandler.h \
+	messageFactory.h messageFactory.cpp \
 	messageStatus.cpp messageStatus.h \
 	messageStream.h messageStream.cpp \
 	messageStreamFilter.h messageStreamFilter.cpp \
@@ -88,13 +79,16 @@ libwatcher_a_SOURCES= \
 	watcherRegion.h watcherRegion.cpp \
 	watcherdAPIMessageHandler.h watcherdAPIMessageHandler.cpp \
 	watcherTypes.cpp watcherTypes.h \
-	watcherSerialize.h \
 	watcherColors.cpp watcherColors.h \
-	colors.cpp colors.h 
+	colors.cpp colors.h \
+	marshalYAML.h marshalYAML.cpp 
+
+CPPFLAGS += -I/usr/include/yaml-cpp
+# libwatcher_LDADD=-lyaml-cpp
 
 # enable tr1 functionality for libwatcher
 # libwatcher_a_CXXFLAGS=-std=gnu++0x
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = watcher.pc watchermsg.pc
+pkgconfig_DATA = watcher.pc
 

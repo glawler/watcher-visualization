@@ -21,7 +21,7 @@
  * @author Geoff Lawler <geoff.lawler@cobham.com> 
  * @date 2009-07-15
  */
-#include "watcherSerialize.h"
+#include <iomanip>
 #include "gpsMessage.h"
 #include "logger.h"
 
@@ -109,18 +109,25 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void GPSMessage::serialize(Archive & ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & x;
-            ar & y;
-            ar & z;
-            ar & dataFormat;
-            ar & layer; 
-            TRACE_EXIT();
-        }
+		YAML::Emitter &GPSMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "x" << YAML::Value << x;
+			e << YAML::Key << "y" << YAML::Value << y;
+			e << YAML::Key << "z" << YAML::Value << z;
+			e << YAML::Key << "dataFormat" << YAML::Value << static_cast<unsigned short>(dataFormat);
+			e << YAML::Key << "layer" << YAML::Value << layer; 
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &GPSMessage::serialize(YAML::Node &node) {
+			node["x"] >> x;
+			node["y"] >> y;
+			node["z"] >> z;
+			node["dataFormat"] >> (unsigned short&)dataFormat;
+			node["layer"] >> layer;
+			return node;
+		}
     } // ns event
 } // ns watcher
 
-BOOST_CLASS_EXPORT(watcher::event::GPSMessage);

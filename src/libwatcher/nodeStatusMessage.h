@@ -30,6 +30,7 @@
 #define NODE_CONNECTION_MESSAGE_H
 
 #include <string>
+#include <yaml.h>
 
 #include "message.h"
 #include "watcherTypes.h"
@@ -71,11 +72,19 @@ namespace watcher
 
                 GUILayer layer; 
 
+				/** Serialize this message using a YAML::Emitter
+				 * @param e the emitter to serialize to
+				 * @return the emitter emitted to.
+				 */
+				virtual YAML::Emitter &serialize(YAML::Emitter &e) const; 
+
+				/** Serialize from a YAML::Parser. 
+				 * @param p the Parser to read from 
+				 * @return the parser read from. 
+				 */
+				virtual YAML::Node &serialize(YAML::Node &node); 
+
             private:
-
-                friend class boost::serialization::access;
-                template <typename Archive> void serialize(Archive& ar, const unsigned int version);
-
                 DECLARE_LOGGER();
         };
 

@@ -20,7 +20,6 @@
  * @author Michael Elkins <michael.elkins@cobham.com>
  * @date 2009-03-20
  */
-#include "watcherSerialize.h"
 #include "seekWatcherMessage.h"
 #include "logger.h"
 
@@ -54,16 +53,20 @@ namespace watcher {
 	    return m.toStream(o);
         }
 
-        template <typename Archive>
-        void SeekMessage::serialize(Archive& ar, const unsigned int /* version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & offset;
-            ar & rel;
-            TRACE_EXIT();
-        }
+		YAML::Emitter &SeekMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "offset" << YAML::Value << offset;
+			e << YAML::Key << "rel" << YAML::Value << static_cast<unsigned short>(rel); 
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &SeekMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["offset"] >> offset;
+			node["rel"] >> (unsigned short&)rel;
+			return node;
+		}
     }
 }
 
-BOOST_CLASS_EXPORT(watcher::event::SeekMessage);

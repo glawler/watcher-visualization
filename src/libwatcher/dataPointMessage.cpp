@@ -23,7 +23,6 @@
  */
 #include <boost/foreach.hpp>
 
-#include "watcherSerialize.h"
 #include "dataPointMessage.h"
 #include "logger.h"
 
@@ -109,15 +108,20 @@ namespace watcher {
             return out;
         }
 
-        template <typename Archive> void DataPointMessage::serialize(Archive& ar, const unsigned int /* file_version */)
-        {
-            TRACE_ENTER();
-            ar & boost::serialization::base_object<Message>(*this);
-            ar & dataName;
-            ar & dataPoints;
-            TRACE_EXIT();
-        }
+		YAML::Emitter &DataPointMessage::serialize(YAML::Emitter &e) const {
+			e << YAML::Flow << YAML::BeginMap;
+			Message::serialize(e); 
+			e << YAML::Key << "dataName" << YAML::Value << dataName; 
+			// yaml-cpp groks STL
+			e << YAML::Key << "dataPoints" << YAML::Value << dataPoints;	
+			e << YAML::EndMap; 
+			return e; 
+		}
+		YAML::Node &DataPointMessage::serialize(YAML::Node &node) {
+			// Do not serialize base data GTL - Message::serialize(node); 
+			node["dataName"] >> dataName; 
+			node["dataPoints"] >> dataPoints; 
+			return node;
+		}
     }
 }
-
-BOOST_CLASS_EXPORT(watcher::event::DataPointMessage);

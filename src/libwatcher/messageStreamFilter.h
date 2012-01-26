@@ -105,9 +105,6 @@ namespace watcher
              */
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
 
-            /** Annoying, but the easiest (only?) way to go when using boost::serialize
-             * just pretented these are private for now. Blah.
-             */
             std::vector<std::string> layers;
             std::vector<unsigned int> messageTypes;  
             // GTL - region is not yet supported.
