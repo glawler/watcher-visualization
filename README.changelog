@@ -1,3 +1,10 @@
+Version 0.7: 
+- On the wire message represenation is now YAML-based. There is no support for backwards
+compatibility! If people need it, I can write a utility to convert older databases. This was
+done primarily for code clean up and stablility. There is now only one watcher libarary: 
+libwatcher. There is no libwatchermsg anymore. No issues with templates not being 
+instantiated inside a shared library. libwatcher.a can be linked at compile time. 
+
 Version 0.6.5.5:
 - New GUI: messageStreamController. This is a self-contained message stream manipulation GUI. 
     It is essentially the message stream control widgets from the legacy watcher, ripped
