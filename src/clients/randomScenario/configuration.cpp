@@ -64,7 +64,7 @@ namespace randomScenario {
             ("nodeDegreePercentage", value<float>()->default_value(5.0), "The average number of neighbors of each node as percentage.")
             ("nodeLabelPercentage,L", value<float>()->default_value(5.0), "The average number of node that have labels applied as percentage.")
             ("duration,d", value<int>()->default_value(-1), "The duration of the scenario. -1 means go forever.")
-            ("layerNum,l", value<unsigned int>()->default_value(1), "The number of layers to add to the scenario.")
+            ("layerNum,y", value<unsigned int>()->default_value(1), "The number of layers to add to the scenario.")
             ("server,s", value<string>()->default_value("localhost"), "Where the watcherd is running.")
             ("eastWest,E", value<unsigned int>()->default_value(1000), "Max east/west width of the playing field.")
             ("northSouth,N", value<unsigned int>()->default_value(100), "Max north/south width of the playing field.")
