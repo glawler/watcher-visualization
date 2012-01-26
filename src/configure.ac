@@ -12,7 +12,6 @@ AC_SUBST(PACKAGE_RELEASE)
 # Boost 1.36 is when asio appeared
 AX_BOOST_BASE(1.36)
 AX_BOOST_SYSTEM
-AX_BOOST_SERIALIZATION
 AX_BOOST_FILESYSTEM
 AX_BOOST_ASIO
 AX_BOOST_REGEX
@@ -49,6 +48,7 @@ AM_CONDITIONAL([ENABLE_TESTNODEONLY], [test x$enable_testnodeonly != xno])
 # Things we always want
 PKG_CHECK_MODULES(LOG4CXX, [liblog4cxx >= 0.10.0])
 PKG_CHECK_MODULES(LIBCONFIG, [libconfig++ >= 1.3.1])
+PKG_CHECK_MODULES(LIBYAML, [yaml-cpp >= 0.2.6])
 
 # Not entirely correct. Will break if 3rd party libs not installed in standard locations
 # relative to that lib's PREFIX. Will also break when doing 64/32 bit cross compilation.

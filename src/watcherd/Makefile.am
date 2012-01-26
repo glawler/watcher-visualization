@@ -6,10 +6,10 @@ include $(top_srcdir)/Makefile.top
 dist_sysconf_DATA=../etc/watcherd.cfg
 
 CPPFLAGS += -I../sqlite_wrapper
-CPPFLAGS += @SQLITE3_CFLAGS@
+CPPFLAGS += @SQLITE3_CFLAGS@ @LIBYAML_CFLAGS@
 
 # system libraries
-LIBS += @SQLITE3_LIBS@
+LIBS += @SQLITE3_LIBS@ @LIBYAML_LIBS@
 
 # 
 # .cfg and .log.properties build rules are below
@@ -40,7 +40,6 @@ watcherd_SOURCES=\
 	sharedStream.cpp \
 	sharedStreamFwd.h
 
-watcherd_LDADD = ../libwatcher/libwatchermsg.la 
-watcherd_LDADD += ../libwatcher/libwatcher.a 
+watcherd_LDADD = ../libwatcher/libwatcher.a 
 watcherd_LDADD += ../sqlite_wrapper/libsqlite_wrapper.a
 watcherd_LDADD += ../util/libwatcherutils.a 

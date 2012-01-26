@@ -725,7 +725,7 @@ void manetGLView::getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
         if(xyAtZForModelProjViewXY( xyz, sizeof(xyz) / sizeof(xyz[0]), modelmatrix, projmatrix, viewport) ==  0)
         {
             x_ret = xyz[0].worldX_ret - xyz[1].worldX_ret;
-            y_ret = xyz[1].worldY_ret - xyz[2].worldY_ret;
+            y_ret = xyz[0].worldY_ret - xyz[1].worldY_ret;
         }
         else
         {

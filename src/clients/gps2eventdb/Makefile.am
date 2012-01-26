@@ -17,18 +17,18 @@ gps2eventdb_SOURCES=\
 
 gps2eventdb_LDADD=\
 	@SQLITE3_LIBS@ \
+	@LIBYAML_LIBS@ \
 	../../watcherd/database.o \
 	../../watcherd/sqliteDatabase.o \
 	../../watcherd/watcherdConfig.o \
 	../../sqlite_wrapper/libsqlite_wrapper.a \
-	../../libwatcher/libwatchermsg.la \
 	../../libwatcher/libwatcher.a \
-	../../sqlite_wrapper/libsqlite_wrapper.a \
 	../../util/libwatcherutils.a 
 
 
 gps2eventdb_CPPFLAGS=\
 	@SQLITE3_CFLAGS@ \
+	@LIBYAML_CFLAGS@ \
 	-I../../watcherd \
 	-I../../sqlite_wrapper \
 	-I../../libwatcher

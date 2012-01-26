@@ -76,8 +76,11 @@ bool WatcherGUIConfig::loadConfiguration()
     SingletonConfig::lock();
     libconfig::Setting &root=cfg.getRoot();
 
-    root.lookupValue("maxNodes", maxNodes);
-    root.lookupValue("maxLayers", maxLayers); 
+	unsigned int tmp; 
+    root.lookupValue("maxNodes", tmp);
+	maxNodes=tmp; 
+    root.lookupValue("maxLayers", tmp); 
+	maxLayers=tmp; 
     root.lookupValue("server", serverName); 
 
     try {
