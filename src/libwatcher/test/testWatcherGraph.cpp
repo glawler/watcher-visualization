@@ -23,11 +23,9 @@
 #define BOOST_TEST_MODULE watcher::watcherGraph test
 #include <boost/test/unit_test.hpp>
 
-#include "libwatcher/watcherSerialize.h"
-#include "libwatcher/watcherGraph.h"
-#include "libwatcher/colors.h"
-
-#include "logger.h"
+#include "../watcherSerialize.h"
+#include "../watcherGraph.h"
+#include "../colors.h"
 
 using namespace std;
 using namespace boost;
@@ -36,8 +34,6 @@ using namespace watcher::event;
 using namespace watcher::colors;
 using namespace boost::unit_test_framework;
 using namespace boost::archive;
-
-DECLARE_GLOBAL_LOGGER("testWatcherGraph"); 
 
 EdgeMessagePtr createEdgeMessage()
 {
@@ -80,15 +76,13 @@ EdgeMessagePtr createEdgeMessage()
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
-    // Do this in first test so we can log.
-    LOAD_LOG_PROPS("test.log.properties"); 
 
     WatcherGraph wg();
 }
 
 BOOST_AUTO_TEST_CASE( output_test )
 {
-    LOG_INFO("Checking Graph output operator,"); 
+    BOOST_TEST_MESSAGE("Checking Graph output operator,"); 
 
     WatcherGraph wg(100, 50); 
 
@@ -156,8 +150,8 @@ BOOST_AUTO_TEST_CASE( output_test )
 //     text_iarchive ia(is);
 //     ia >> wgdup;
 // 
-//     LOG_DEBUG("output: " << os.str());
-//     LOG_DEBUG("input: " << is.str());
+//     BOOST_TEST_MESSAGE("output: " << os.str());
+//     BOOST_TEST_MESSAGE("input: " << is.str());
 // 
 //     // BOOST_CHECK_EQUAL(wg, wgdup); 
 // }
@@ -183,8 +177,8 @@ BOOST_AUTO_TEST_CASE( output_test )
 //     istringstream is(os.str());
 //     wgdup.unpack(is); 
 // 
-//     LOG_DEBUG("output: " << os.str());
-//     LOG_DEBUG("input: " << is.str());
+//     BOOST_TEST_MESSAGE("output: " << os.str());
+//     BOOST_TEST_MESSAGE("input: " << is.str());
 // 
 //     // BOOST_CHECK_EQUAL(wg, wgdup); 
 // }
@@ -217,10 +211,10 @@ BOOST_AUTO_TEST_CASE( graph_edge_expiration_test )
 
     for (unsigned int i=0; i < numEdges; i++)
     {
-        LOG_INFO("Current edges in graph at " << Timestamp(time(NULL))*1000); 
+        BOOST_TEST_MESSAGE("Current edges in graph at " << Timestamp(time(NULL))*1000); 
         WatcherGraph::edgeIterator ei, eEnd; 
         for(tie(ei, eEnd)=edges(wg.theGraph); ei!=eEnd; ++ei) {
-            LOG_INFO("Edge: " << wg.theGraph[*ei]); 
+            BOOST_TEST_MESSAGE("Edge: " << wg.theGraph[*ei]); 
         }
 
         BOOST_CHECK_EQUAL(numEdges-i, num_edges(wg.theGraph)); 
@@ -265,10 +259,10 @@ BOOST_AUTO_TEST_CASE( graph_node_floating_label_expiration_test )
     {
         WatcherGraph::FloatingLabelList::iterator labelIterBegin=wg.floatingLabels.begin(); 
         WatcherGraph::FloatingLabelList::iterator labelIterEnd=wg.floatingLabels.end();
-        LOG_INFO("Current floating lables (" << wg.floatingLabels.size() << ") at " << Timestamp(time(NULL))*1000); 
+        BOOST_TEST_MESSAGE("Current floating lables (" << wg.floatingLabels.size() << ") at " << Timestamp(time(NULL))*1000); 
         for( ;labelIterBegin!=labelIterEnd; ++labelIterBegin)
         {
-            LOG_INFO("\t" << (*labelIterBegin)->labelText); 
+            BOOST_TEST_MESSAGE("\t" << (*labelIterBegin)->labelText); 
         }
 
         BOOST_CHECK_EQUAL( numLabels-i, wg.floatingLabels.size() );
@@ -322,10 +316,10 @@ BOOST_AUTO_TEST_CASE( graph_node_label_expiration_test )
     {
         WatcherGraphNode::LabelList::iterator labelIterBegin=wg.theGraph[*theNodeIter].labels.begin(); 
         WatcherGraphNode::LabelList::iterator labelIterEnd=wg.theGraph[*theNodeIter].labels.end(); 
-        LOG_INFO("Current lables on node " << wg.theGraph[*theNodeIter].nodeId << " at " << Timestamp(time(NULL))*1000); 
+        BOOST_TEST_MESSAGE("Current lables on node " << wg.theGraph[*theNodeIter].nodeId << " at " << Timestamp(time(NULL))*1000); 
         for( ;labelIterBegin!=labelIterEnd; ++labelIterBegin)
         {
-            LOG_INFO("\t" << (*labelIterBegin)->labelText); 
+            BOOST_TEST_MESSAGE("\t" << (*labelIterBegin)->labelText); 
         }
 
         BOOST_CHECK_EQUAL( numLabels-i, wg.theGraph[*theNodeIter].labels.size() );

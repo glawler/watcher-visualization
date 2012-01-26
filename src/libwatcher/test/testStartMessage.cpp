@@ -22,11 +22,9 @@
  */
 #define BOOST_TEST_MODULE testStartMessage
 #include <boost/test/unit_test.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 #include <sstream>
 
-#include <libwatcher/startWatcherMessage.h>
+#include "../startWatcherMessage.h"
 
 using namespace std;
 using namespace watcher::event;
@@ -48,7 +46,7 @@ BOOST_AUTO_TEST_CASE( pack_test )
 
     BOOST_TEST_MESSAGE("serialized: " << os.str());
     istringstream is(os.str());
-    MessagePtr newmsg = Message::unpack(is);
+    MessagePtr newmsg(Message::unpack(is));
     BOOST_REQUIRE(newmsg.get() != 0);
 
     StartMessagePtr pnewmsg = dynamic_pointer_cast<StartMessage>(newmsg);

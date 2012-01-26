@@ -22,16 +22,9 @@
  */
 #define BOOST_TEST_MODULE testSpeedMessage
 #include <boost/test/unit_test.hpp>
-#if 0
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#endif
 #include <sstream>
 
-#include <libwatcher/speedWatcherMessage.h>
-
-#include "logger.h"
+#include "../speedWatcherMessage.h"
 
 using namespace std;
 //using namespace watcher;
@@ -41,8 +34,6 @@ using namespace boost;
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
-    LOAD_LOG_PROPS("log.properties"); 
-
     /* Ensure the class can be instantiated */
     SpeedMessage m1;
 
@@ -56,13 +47,13 @@ BOOST_AUTO_TEST_CASE( pack_test )
     BOOST_TEST_MESSAGE("serializing shared pointer to base class");
     SpeedMessagePtr msg( new SpeedMessage(42) );
     ostringstream os;
-    msg->pack(os);
+    msg->pack(os); 
 
     BOOST_TEST_MESSAGE("serialized: " << os.str());
 
     BOOST_TEST_MESSAGE("de-serializing shared pointer to base class");
     istringstream is(os.str());
-    MessagePtr newmsg = Message::unpack(is);
+    MessagePtr newmsg(Message::unpack(is)); 
     BOOST_REQUIRE(newmsg.get() != 0);
 
     SpeedMessagePtr pnewmsg = dynamic_pointer_cast<SpeedMessage>(newmsg);
@@ -136,10 +127,10 @@ BOOST_AUTO_TEST_CASE ( shared_archive_base_test )
     BOOST_CHECK_EQUAL( *dmsg, *dnewmsg );
 
     // GTL - check that the pointers are pointing to correct vtables
-    LOG_DEBUG("     *msg: " << *msg); 
-    LOG_DEBUG("  *newmsg: " << *newmsg); 
-    LOG_DEBUG("    *dmsg: " << *dmsg); 
-    LOG_DEBUG(" *dnewmsg: " << *dnewmsg); 
+    BOOST_TEST_MESSAGE("     *msg: " << *msg); 
+    BOOST_TEST_MESSAGE("  *newmsg: " << *newmsg); 
+    BOOST_TEST_MESSAGE("    *dmsg: " << *dmsg); 
+    BOOST_TEST_MESSAGE(" *dnewmsg: " << *dnewmsg); 
 
     string dStr("SpeedMessage(speed=37)");  // This is the output of operator<< on derived speedTest
     ostringstream boutput, doutput;
@@ -149,7 +140,7 @@ BOOST_AUTO_TEST_CASE ( shared_archive_base_test )
     BOOST_CHECK_NE( dStr, boutput.str() );
     BOOST_CHECK_EQUAL( dStr, doutput.str() );
 
-    LOG_DEBUG("   base: " << boutput.str()); 
-    LOG_DEBUG("derived: " << doutput.str()); 
+    BOOST_TEST_MESSAGE("   base: " << boutput.str()); 
+    BOOST_TEST_MESSAGE("derived: " << doutput.str()); 
 }
 #endif

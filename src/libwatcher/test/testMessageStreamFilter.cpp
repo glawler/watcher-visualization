@@ -25,11 +25,10 @@
 #define BOOST_TEST_MODULE watcher::messageStreamFilter test
 #include <boost/test/unit_test.hpp>
 
-#include "logger.h"
-#include "libwatcher/messageStreamFilter.h"
-#include "libwatcher/labelMessage.h"
-#include "libwatcher/connectivityMessage.h"
-#include "libwatcher/edgeMessage.h"
+#include "../messageStreamFilter.h"
+#include "../labelMessage.h"
+#include "../connectivityMessage.h"
+#include "../edgeMessage.h"
 
 using namespace std;
 using namespace boost;

@@ -23,7 +23,6 @@
 #define BOOST_TEST_MODULE watcher::watcherGraphEdge test
 #include <boost/test/unit_test.hpp>
 
-#include "logger.h"
 #include "../watcherGraphEdge.h"
 
 using namespace std;
@@ -32,19 +31,15 @@ using namespace watcher;
 using namespace watcher::event;
 using namespace boost::unit_test_framework;
 
-DECLARE_GLOBAL_LOGGER("testWatcherGraphEdge"); 
 
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
-    // Do this in first test so we can log.
-    LOAD_LOG_PROPS("test.log.properties"); 
-
     WatcherGraphEdge wge;
 }
 
 BOOST_AUTO_TEST_CASE( output_test )
 {
-    LOG_INFO("Checking Graph Edge output operator,"); 
+    BOOST_TEST_MESSAGE("Checking Graph Edge output operator,"); 
 
     WatcherGraphEdge wge;
 

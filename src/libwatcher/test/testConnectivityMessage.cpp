@@ -27,21 +27,15 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <sstream>
 
-#include <libwatcher/connectivityMessage.h>
-#include <libwatcher/watcherGlobalFunctions.h>
-#include <logger.h>
+#include "../connectivityMessage.h"
 
 using namespace std;
 using namespace watcher;
 using namespace watcher::event;
 using namespace boost;
 
-DECLARE_GLOBAL_LOGGER("testConnectivityMessage"); 
-
 BOOST_AUTO_TEST_CASE( ctor_test )
 {
-    LOAD_LOG_PROPS("log.properties");    // must be in first test case
-
     /* Ensure the class can be instantiated */
     BOOST_REQUIRE_NO_THROW( watcher::event::ConnectivityMessage() );
     watcher::event::ConnectivityMessage m;
@@ -60,10 +54,10 @@ BOOST_AUTO_TEST_CASE( pack_test )
     ostringstream os;
     cm->pack(os);
 
-    LOG_DEBUG("the message: " << *cm); 
+    BOOST_TEST_MESSAGE("the message: " << *cm); 
 
     BOOST_TEST_MESSAGE("serialized: " << os.str());
-    LOG_DEBUG("serialized: " << os.str());
+    BOOST_TEST_MESSAGE("serialized: " << os.str());
     istringstream is(os.str());
     MessagePtr newmsg = Message::unpack(is);
     BOOST_REQUIRE(newmsg.get() != 0);
@@ -73,8 +67,8 @@ BOOST_AUTO_TEST_CASE( pack_test )
 
     BOOST_CHECK_EQUAL(*cm, *pnewmsg);
 
-    LOG_DEBUG("cm:" << *cm);
-    LOG_DEBUG("pnewmsg:" << *pnewmsg);
+    BOOST_TEST_MESSAGE("cm:" << *cm);
+    BOOST_TEST_MESSAGE("pnewmsg:" << *pnewmsg);
 
     // ConnectivityMessagePtr cmp(new ConnectivityMessage);
     // istringstream is2(os.str());

@@ -25,11 +25,6 @@
 #define BOOST_TEST_MODULE watcher::Color test
 #include <boost/test/unit_test.hpp>
 
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
-#include <boost/archive/polymorphic_binary_iarchive.hpp>
-#include <boost/archive/polymorphic_binary_oarchive.hpp>
-
 #include "../watcherColors.h"
 #include "../colors.h"
 #include "logger.h"
@@ -72,39 +67,6 @@ BOOST_AUTO_TEST_CASE( ctors_test )
     val = c2.fromString("green");
     BOOST_CHECK_EQUAL( val, true ); 
     BOOST_CHECK_EQUAL( c2, green );
-}
-
-BOOST_AUTO_TEST_CASE( archive_test )
-{
-    Color green(green);
-    ostringstream os1;
-    archive::polymorphic_text_oarchive oa1(os1);
-    oa1 << green;
-
-    LOG_DEBUG("Serialized green: (" << os1.str() << ")"); 
-
-    Color c;
-    istringstream is1(os1.str());
-    archive::polymorphic_text_iarchive ia1(is1);
-    ia1 >> c;
-
-    LOG_INFO( "Checking text archiving..." ); 
-    BOOST_CHECK_EQUAL( c, green );
-    BOOST_CHECK_EQUAL( c, green );
-    BOOST_CHECK_EQUAL( green, green );
-
-    ostringstream os2;
-    archive::polymorphic_binary_oarchive oa2(os2);
-    oa2 << green;
-
-    istringstream is2(os2.str());
-    archive::polymorphic_binary_iarchive ia2(is2);
-    ia2 >> c;
-
-    LOG_INFO( "Checking binary archiving..." ); 
-    BOOST_CHECK_EQUAL( c, green );
-    BOOST_CHECK_EQUAL( c, green );
-    BOOST_CHECK_EQUAL( green, green );
 }
 
 BOOST_AUTO_TEST_CASE( output_test )

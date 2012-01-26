@@ -22,14 +22,9 @@
  */
 #define BOOST_TEST_MODULE testSeekMessage
 #include <boost/test/unit_test.hpp>
-#if 0
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#endif
 #include <sstream>
 
-#include <libwatcher/seekWatcherMessage.h>
+#include <../seekWatcherMessage.h>
 
 using namespace std;
 //using namespace watcher;
@@ -54,7 +49,7 @@ BOOST_AUTO_TEST_CASE( pack_test )
     BOOST_TEST_MESSAGE("serializing shared pointer to base class");
     SeekMessagePtr msg( new SeekMessage );
     ostringstream os;
-    msg->pack(os);
+    msg.get()->pack(os);
 
     BOOST_TEST_MESSAGE("serialized: " << os.str());
 

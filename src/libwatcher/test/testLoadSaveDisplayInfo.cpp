@@ -27,11 +27,10 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 
-#include "logger.h"
-#include "libwatcher/edgeDisplayInfo.h"
-#include "libwatcher/nodeDisplayInfo.h"
-#include "libwatcher/labelDisplayInfo.h"
-#include "libwatcher/messageTypesAndVersions.h"
+#include "../edgeDisplayInfo.h"
+#include "../nodeDisplayInfo.h"
+#include "../labelDisplayInfo.h"
+#include "../messageTypesAndVersions.h"
 #include "singletonConfig.h"
 #include "initConfig.h"
 
@@ -42,8 +41,6 @@ using namespace watcher::event;
 using namespace libconfig;
 using namespace boost::unit_test_framework;
 namespace bf=boost::filesystem;
-
-DECLARE_GLOBAL_LOGGER("testLoadSaveDisplayInfo"); 
 
 bool configConfig(char *filename)
 {
@@ -72,7 +69,6 @@ bool configConfig(char *filename)
 
 BOOST_AUTO_TEST_CASE( ctors_test )
 {
-    LOAD_LOG_PROPS("test.log.properties"); 
     EdgeDisplayInfo edi;
     NodeDisplayInfo ndi;
     LabelDisplayInfo lbdi;
@@ -254,9 +250,9 @@ BOOST_AUTO_TEST_CASE( label_config_test )
     ldip3->loadConfiguration(layer); 
     ldip3->labelText="ldip3"; 
 
-    LOG_DEBUG("ldip1: " << *ldip1); 
-    LOG_DEBUG("ldip2: " << *ldip2); 
-    LOG_DEBUG("ldip3: " << *ldip3); 
+    BOOST_TEST_MESSAGE("ldip1: " << *ldip1); 
+    BOOST_TEST_MESSAGE("ldip2: " << *ldip2); 
+    BOOST_TEST_MESSAGE("ldip3: " << *ldip3); 
 
     BOOST_CHECK( ldip2->backgroundColor!=ldip1->backgroundColor ); 
     BOOST_CHECK( ldip3->backgroundColor==ldip2->backgroundColor ); 
