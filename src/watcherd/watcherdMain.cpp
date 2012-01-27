@@ -43,6 +43,7 @@ option Options[] = {
     { "config", required_argument, NULL, 'c' },
     { "database", required_argument, NULL, 'd' },
     { "read-only", required_argument, NULL, 'r' },
+    { "overwrite", required_argument, NULL, 'o' },
     { "logLevel", required_argument, NULL, 'l' },
     { "logProperties", required_argument, NULL, 'L' },
     { 0, 0, NULL, 0 }
@@ -56,6 +57,7 @@ void usage(const char *progName, bool exitp)
     cout << "\t-d,--database database\t\t use this event database when running watcherd" << endl; 
     cout << "\t-c,--config configfile\t\tIf not given a filename of the form \""<< basename(progName) << ".cfg\" is assumed." << endl;
     cout << "\t-r,--read-only\t\t do not write events to the database." << endl;
+    cout << "\t-o,--overwrite\t\t If given a database file at start, overwrite it during this session." << endl;
     cout << "\t-p,--port port\t\tThe service/port to listen on. Can also be number or service name from /etc/services." << endl;
     cout << "\t-a,--address address\t\tThe address to listen on. Useful for multi-NIC machines. Can also be the hostname." << endl;
     cout << "\t-l,--logLevel level\t\tSet the default log level. Must be one of\n";
@@ -74,9 +76,9 @@ int main(int argc, char* argv[])
     TRACE_ENTER();
 
     int i;
-    bool readOnly = false;
+    bool readOnly = false, overWrite = false; 
     std::string dbPath, logLevel, logPropsFilename, service, address;
-    while ((i = getopt_long(argc, argv, "hc:d:a:p:rl:L:", Options, NULL)) != -1) {
+    while ((i = getopt_long(argc, argv, "hc:d:a:p:rl:L:o", Options, NULL)) != -1) {
         switch (i) {
             case 'a':
                 address=optarg; 
@@ -105,6 +107,9 @@ int main(int argc, char* argv[])
             case 'p':
                 service=optarg;
                 break;
+			case 'o':
+				overWrite=true; 
+				break;
             default:
                 usage(argv[0], true); 
         }
@@ -189,8 +194,17 @@ int main(int argc, char* argv[])
                 << " and adding this to the configuration file.");
            config.getRoot().add("databasePath", libconfig::Setting::TypeString)=tmpDBPath;
     }
+	if (overWrite && dbPath.size()) {
+		if (boost::filesystem::exists(dbPath)) { 
+			if (!boost::filesystem::remove(dbPath)) 
+				LOG_WARN("Unable to remove database file, " << dbPath << ", even though I was told to overwrite it, exiting."); 
+			else
+				LOG_INFO("Removing database file " << dbPath << " as requested."); 
+		}
+	}
     if (dbPath.size())  
         config.getRoot()["databasePath"]=dbPath;
+
 
     WatcherdPtr theWatcherDaemon(new Watcherd(readOnly));
     try
