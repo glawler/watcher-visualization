@@ -52,10 +52,20 @@ cd ..
 	make -j4
 	sudo make install 
 # on a server node:
-	./configure 
+	./configure --enable-earthWatcher --enable-dataWatcher
 	sudo make install 
 # on a console
-	./configure --enable-earthWatcher --enable-legacyWatcher
+	sudo apt-get -y install libqt4-dev freeglut3-dev # legacy watcher
+	sudo apt-get -y install liburiparser-dev	# earth watcher
+	sudo apt-get -y install libkml-dev
+	sudo apt-get -y install libqwt5-qt4-dev		# data watcher
+	./configure --enable-earthWatcher --enable-legacyWatcher --enable-dataWatcher
+	make -C clients/earthWatcher/
+	pushd clients/dataWatcher/
+	make
+	popd
+
+	
 
 # For an "untarrable" installation:
 	./configure [args] --prefix /tmp/watcher
