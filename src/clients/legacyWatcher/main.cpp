@@ -148,12 +148,17 @@ int main(int argc, char *argv[])
     // now that the default config has been loaded (or not), load the command line args
     // to override.
     libconfig::Setting &root=config.getRoot();
-    if (!root.lookupValue("logProperties", logPropsFilename)) {
-        cerr << "Unable to find logProperties setting in the configuration file, using default: " << logPropsFilename << endl;
-        root.add("logProperties", Setting::TypeString)=logPropsFilename;
-    }
+	if (!logPropsFilename.size()) {
+		if (!root.lookupValue("logProperties", logPropsFilename)) {
+			cerr << "Unable to find logProperties setting in the configuration file, using default: " << logPropsFilename << endl;
+			root.add("logProperties", Setting::TypeString)=logPropsFilename;
+		}
+		else 
+			root["logProperties"]=logPropsFilename;
+	}
     else 
         root["logProperties"]=logPropsFilename;
+
 
     if (!server.empty()) {
         if (!root.exists("server"))
