@@ -125,9 +125,9 @@ signals:
         // Overload the close so we can save the configuration.
         // void closeEvent(QCloseEvent *event);
 
-        void initializeGL();
-        void paintGL();
-        void resizeGL(int width, int height);
+        virtual void initializeGL();
+        virtual void paintGL();
+        virtual void resizeGL(int width, int height);
 
         void mouseDoubleClickEvent(QMouseEvent *event);
         void mousePressEvent(QMouseEvent *event);

@@ -1170,8 +1170,6 @@ void manetGLView::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE); 
 
-    glEnable(GL_TEXTURE_2D);
-
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientLight);
 
     glShadeModel(GL_SMOOTH); 
@@ -1778,7 +1776,8 @@ void manetGLView::drawManet(void)
         bgi.getDrawingCoords(minx, width, miny, height, z); 
         if (z>-25)
             bgi.setDrawingCoords(minx, width, miny, height, -25); 
-        qglColor(QColor("white")); 
+        // qglColor(QColor("white")); 
+		glColor3f(1,1,1); 
         bgi.drawImage(); 
     }
 

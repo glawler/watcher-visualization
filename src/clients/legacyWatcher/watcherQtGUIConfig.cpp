@@ -101,7 +101,7 @@ namespace watcher
     }
     void WatcherQtGUIConfig::loadBackgroundImage(void) {
         QString filename;
-        filename=QFileDialog::getOpenFileName(this, "Choose a background image file", ".", "*.bmp"); 
+        filename=QFileDialog::getOpenFileName(this, "Choose a background image file", ".", ""); 
         if (!filename.isEmpty()) {
             if (!BackgroundImage::getInstance().loadImageFile(filename.toStdString())) {
                 if (QMessageBox::Yes==QMessageBox::question(NULL, 

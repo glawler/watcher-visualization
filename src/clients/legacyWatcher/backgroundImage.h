@@ -44,13 +44,6 @@ namespace watcher
              */
             bool loadImageFile(const std::string &filename);
 
-            // returns false if unable to load image.
-            // Or bad image format.
-            bool loadPPMFile(const char *filename);
-
-            // Loads a BMP/DIB file, returns false on error
-            bool loadBMPFile(const char *filename);
-
             //
             void setDrawingCoords(GLfloat xcoord, GLfloat width, GLfloat ycoord, GLfloat height, GLfloat z);
             void getDrawingCoords(GLfloat &xcoord, GLfloat &width, GLfloat &ycoord, GLfloat &height, GLfloat &z);
@@ -68,6 +61,7 @@ namespace watcher
         protected:
 
         private:
+            DECLARE_LOGGER();
 
             bool imageLoaded;
             bool imageCenter;
@@ -82,15 +76,16 @@ namespace watcher
             GLfloat envColor[4];
             GLfloat borderColor[4];
 
-            GLenum imageFormat;
-            GLenum imageType;
-
-            DECLARE_LOGGER();
 
             BackgroundImage();
             virtual ~BackgroundImage(); 
 
             std::string imageFile;
+
+			void loadSDLSurfaceTexture(const std::string &filename); 
+			bool genDisplayList(); 
+			GLuint itemList; 
+        	GLuint textureIntID;
     };
 }
 
