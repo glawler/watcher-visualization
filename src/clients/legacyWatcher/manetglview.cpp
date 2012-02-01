@@ -1016,7 +1016,8 @@ manetGLView::manetGLView(QWidget *parent) :
     minNodeArea[1]=numeric_limits<double>::max(); 
     minNodeArea[2]=numeric_limits<double>::max(); 
 
-    // Don't oeverwrite QPAinter...
+    // Don't overwrite QPainter which is used to draw debug and status string data
+	// on the overlaywindow.
     setAutoFillBackground(false);
 
     connect(this, SIGNAL(connectNewLayer(const QString)), this, SLOT(newLayerConnect(const QString)));
@@ -1169,6 +1170,8 @@ void manetGLView::initializeGL()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE); 
+
+	glEnable(GL_MULTISAMPLE); 
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbientLight);
 
@@ -1415,11 +1418,17 @@ void manetGLView::paintGL()
 
         // drawStatusString uses QPainter so must be called 
         // after all openGL calls
-        drawStatusString(); 
+		{
+			QPainter painter(this);
+    		painter.setRenderHint(QPainter::TextAntialiasing);
+			drawStatusString(painter); 
 
-        if (conf->showDebugInfo)
-            drawDebugInfo();
+			if (conf->showDebugInfo)
+				drawDebugInfo(painter);
 
+			// let painter destroy itself. 
+			// (as painters are wont to do.) 
+		}
         glPopAttrib(); 
         glPopMatrix();
     }
@@ -1427,7 +1436,7 @@ void manetGLView::paintGL()
     TRACE_EXIT();
 }
 
-void manetGLView::drawDebugInfo()
+void manetGLView::drawDebugInfo(QPainter &painter)
 {
     TRACE_ENTER();
 
@@ -1455,18 +1464,15 @@ void manetGLView::drawDebugInfo()
     // info << "spec light: " << specLight0[0] << endl;
     // info << "global amb light: " << globalAmbientLight[0] << endl;
 
-    QPainter painter(this);
     QString text(info.str().c_str());
     QFont font(conf->statusFontName.c_str(), conf->statusFontPointSize); 
     QFontMetrics metrics = QFontMetrics(font);
     int border = qMax(4, metrics.leading());
     QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignLeft | Qt::TextWordWrap, text);
-    painter.setRenderHint(QPainter::TextAntialiasing);
     painter.setFont(font);
     painter.setPen(Qt::white); 
     double padding=0.01;
     painter.drawText(width()*padding, height()*padding, rect.width(), rect.height(), Qt::AlignLeft | Qt::TextWordWrap, text);
-    painter.end();
 
     TRACE_EXIT();
 }
@@ -1840,11 +1846,8 @@ void manetGLView::drawGraph(WatcherGraph *&graph)
     }
 }
 
-void manetGLView::drawStatusString()
+void manetGLView::drawStatusString(QPainter &painter)
 {
-    // // draw status string
-    QPainter painter(this);
-
     ptime now = from_time_t(time(NULL));
 
     string buf;
@@ -1904,11 +1907,9 @@ void manetGLView::drawStatusString()
     QFontMetrics metrics = QFontMetrics(font);
     int border = qMax(4, metrics.leading());
     QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125), Qt::AlignCenter | Qt::TextWordWrap, text);
-    painter.setRenderHint(QPainter::TextAntialiasing);
     painter.setFont(font);
     double padding=0.01;
     painter.drawText(width()*padding, height()-rect.height()-(height()*padding), rect.width(), rect.height(), Qt::AlignLeft | Qt::TextWordWrap, text);
-    painter.end();
 }
 
 void manetGLView::setPlaybackSlider(QSlider *s)

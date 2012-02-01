@@ -158,7 +158,6 @@ void BackgroundImage::drawImage()
 	glPushMatrix(); 
 	glTranslatef(0,0,z); 
 	glBindTexture(GL_TEXTURE_2D, textureIntID); 
-	// glColor4f(1.0, 1.0, 1.0, 1.0); 
 	glCallList(itemList); 
 	glPopMatrix(); 
 

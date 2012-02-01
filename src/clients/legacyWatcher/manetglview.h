@@ -137,8 +137,8 @@ signals:
         void keyPressEvent(QKeyEvent * event);
 
         size_t getNodeIdAtCoords(const int x, const int y);
-        void drawStatusString(); 
-        void drawDebugInfo();
+        void drawStatusString(QPainter &); 
+        void drawDebugInfo(QPainter &);
 
     private:
 
