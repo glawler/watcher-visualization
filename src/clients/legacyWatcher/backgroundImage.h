@@ -83,8 +83,6 @@ namespace watcher
             std::string imageFile;
 
 			void loadSDLSurfaceTexture(const std::string &filename); 
-			bool genDisplayList(); 
-			GLuint itemList; 
         	GLuint textureIntID;
     };
 }

@@ -227,6 +227,7 @@ signals:
         void getShiftAmount(GLdouble &x_ret, GLdouble &y_ret); 
         void shiftBackgroundCenterLeft(double dx);
         void shiftBackgroundCenterUp(double dy);
+		void zoomBackground(const int &delta); 
         void shiftCenterRight();
         void shiftCenterRight(double shift);
         void shiftCenterLeft();

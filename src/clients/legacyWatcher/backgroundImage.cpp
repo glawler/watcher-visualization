@@ -58,9 +58,7 @@ BackgroundImage::BackgroundImage() :
     z(0.0),
     imageWidth(0),
     imageHeight(0),
-    imageFile(""),
-	itemList(0)
-
+    imageFile("")
 {
     TRACE_ENTER();
 
@@ -80,10 +78,6 @@ BackgroundImage::BackgroundImage() :
 BackgroundImage::~BackgroundImage()
 {
     TRACE_ENTER();
-
-	if (itemList)
-		glDeleteLists(itemList, 1); 
-
     TRACE_EXIT();
 }
 
@@ -149,18 +143,22 @@ void BackgroundImage::drawImage()
         return;
     }
 
-	static bool listGend=false;
-	if (!listGend) {
-		genDisplayList(); 
-		listGend=true;
-	}
-
 	glPushMatrix(); 
 	glTranslatef(0,0,z); 
-	glBindTexture(GL_TEXTURE_2D, textureIntID); 
-	glCallList(itemList); 
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glEnable(GL_TEXTURE_2D); 
+	glDisable(GL_LIGHTING); 
+	glDisable(GL_BLEND); 
+	// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
+	glBegin(GL_QUADS);
+	glTexCoord2f(0,0); glVertex2f(minx        ,miny+yoffset);
+	glTexCoord2f(1,0); glVertex2f(minx+xoffset,miny+yoffset);
+	glTexCoord2f(1,1); glVertex2f(minx+xoffset,miny);
+	glTexCoord2f(0,1); glVertex2f(minx        ,miny);
+	glEnd();
+	glPopAttrib(); 
 	glPopMatrix(); 
-
+	glEndList(); 
     TRACE_EXIT();
 }
 
@@ -199,26 +197,3 @@ bool BackgroundImage::centerImage() const
     return imageCenter;
 }
 
-bool BackgroundImage::genDisplayList() {
-	TRACE_ENTER(); 
-	itemList=glGenLists(1); 
-	glNewList(itemList, GL_COMPILE); 
-	glPushMatrix(); 
-	glTranslatef(0,0,z); 
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glEnable(GL_TEXTURE_2D); 
-	glDisable(GL_LIGHTING); 
-	glDisable(GL_BLEND); 
-	// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
-	glBegin(GL_QUADS);
-	glTexCoord2f(0,0); glVertex2f(minx        ,miny+yoffset);
-	glTexCoord2f(1,0); glVertex2f(minx+xoffset,miny+yoffset);
-	glTexCoord2f(1,1); glVertex2f(minx+xoffset,miny);
-	glTexCoord2f(0,1); glVertex2f(minx        ,miny);
-	glEnd();
-	glPopAttrib(); 
-	glPopMatrix(); 
-	glEndList(); 
-	TRACE_EXIT(); 
-	return true; 
-}

@@ -752,6 +752,21 @@ void manetGLView::shiftBackgroundCenterUp(double dy)
     bg.setDrawingCoords(x, w, y+dy, h, z);
 }
 
+void manetGLView::zoomBackground(const int &delta)
+{
+	int degs=delta/8; 
+	int steps=degs/15; 	// for most mice.
+	LOG_INFO("zoomdata: delta: " << delta << " degs: " << degs << " steps: " << steps); 
+    GLfloat x, y, w, h, z;
+    BackgroundImage &bg=BackgroundImage::getInstance();
+    bg.getDrawingCoords(x, w, y, h, z);
+	w+=w*steps*0.1;
+	w=w<10?10:w;  // don't go negative
+	h+=h*steps*0.1;
+	h=h<10?10:h;  // don't go negative
+    bg.setDrawingCoords(x, w, y, h, z);
+}
+
 void manetGLView::shiftCenterRight()
 {
     GLdouble shift, dummy;
@@ -2766,11 +2781,17 @@ void manetGLView::mouseMoveEvent(QMouseEvent *event)
 
 void manetGLView::wheelEvent(QWheelEvent *event)
 {
-    if(event->delta()>0)
-        zoomIn();
-    else
-        zoomOut();
-    update();
+	Qt::KeyboardModifiers mods=event->modifiers();
+	if (mods & Qt::ShiftModifier) {
+		zoomBackground(event->delta()); 
+	}
+	else {
+		if(event->delta()>0)
+			zoomIn();
+		else
+			zoomOut();
+	}
+	update();
 }
 
 void manetGLView::layerToggle(const QString &layerName, const bool turnOn)
