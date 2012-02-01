@@ -128,14 +128,16 @@ int main(int argc, char* argv[])
     SingletonConfig::unlock();
 
     string logConf(SYSCONFDIR "/watcher.log.props"); 
-    if (!logPropsFilename.empty())
+    if (!logPropsFilename.empty()) {
         logConf=logPropsFilename;
-    if (!config.lookupValue("logPropertiesFile", logConf))
-    {
-        cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf 
-             << " and adding it to the configuration file." << endl;
-        config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
-    }
+		if (!config.exists("logPropertiesFile")) 
+			config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
+	}
+	else if(!config.lookupValue("logPropertiesFile", logConf)) {
+		cout << "Unable to find logPropertiesFile setting in the configuration file, using default: " << logConf 
+			<< " and adding it to the configuration file." << endl;
+		config.getRoot().add("logPropertiesFile", libconfig::Setting::TypeString)=logConf;
+	}
 
     if (!boost::filesystem::exists(logConf)) {
         cerr << "Log properties file not found - logging disabled." << endl;
