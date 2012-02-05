@@ -61,7 +61,6 @@ namespace watcher {
 		{
 			libconfig::Config& config = watcher::SingletonConfig::instance();
 			singleton_config_lock lock;
-			bool serverSpecified=false;
 
 			std::string configFilename(std::string(boost::filesystem::basename(argv[0])) + ".cfg");
 			std::string logPropsFilename(SYSCONFDIR "/watcher.log.props"); 
@@ -78,7 +77,6 @@ namespace watcher {
 						break;
 					case 's':
 						Server = std::string(optarg);
-						serverSpecified=true;
 						break;
 					case 'l':
 						logLevel = std::string(optarg);

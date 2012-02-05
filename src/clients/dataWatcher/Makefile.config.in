@@ -1,7 +1,8 @@
-INCPATH += ../../ ../../util
-INCPATH += @QWT_INCLUDES@
+INCLUDEPATH += ../../ ../../util
+INCLUDEPATH += @QWT_INCLUDES@
 
 QMAKE_CXXFLAGS += @BOOST_CPPFLAGS@ @LOGGER_CFLAGS@ @LIBCONFIG_CFLAGS@
+QMAKE_CXXFLAGS += @LIBYAML_CFLAGS@
 QMAKE_LFLAGS += -Wl,-rpath,../../libwatcher/.libs
 
 LIBS += -L../../libwatcher/.libs -L../../libwatcher -lwatcher -L../../util -lwatcherutils
@@ -10,4 +11,4 @@ LIBS += @LOGGER_LIBS@
 LIBS += @QWT_LIB@ 
 LIBS += @BOOST_LDFLAGS@ @BOOST_FILESYSTEM_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_SYSTEM_LIB@
 LIBS += @BOOST_THREAD_LIB@ @BOOST_REGEX_LIB@
-LIBS += @LIBYAML_LIB@
+LIBS += @LIBYAML_LIBS@
