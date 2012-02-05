@@ -156,8 +156,12 @@ int main(int argc, char *argv[])
 		else 
 			root["logProperties"]=logPropsFilename;
 	}
-    else 
-        root["logProperties"]=logPropsFilename;
+    else {
+		if (!root.exists("logProperties")) 
+			root.add("logProperties", Setting::TypeString)=logPropsFilename;
+		else
+	        root["logProperties"]=logPropsFilename;
+	}
 
 
     if (!server.empty()) {
