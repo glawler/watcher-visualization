@@ -30,7 +30,8 @@ check_PROGRAMS=\
 	testMessageStream \
 	testMessageStreamFilter \
 	testYAML \
-	testDataMarshal
+	testDataMarshal \
+	testSubscribeMessages
 
 # GTL - unit tests need to be re-written for watcher graph classes
 # testWatcherGraph 
@@ -54,6 +55,7 @@ testMessageStream_SOURCES=testMessageStream.cpp
 testMessageStreamFilter_SOURCES=testMessageStreamFilter.cpp
 testYAML_SOURCES=testYAML.cpp
 testDataMarshal_SOURCES=testDataMarshal.cpp
+testSubscribeMessages_SOURCES=testSubscribeMessages.cpp
 
 # GTL - unit tests need to be re-written for watcher graph classes
 # testWatcherGraph_SOURCES=testWatcherGraph.cpp
