@@ -68,20 +68,22 @@ YAML::Emitter &ListStreamsMessage::serialize(YAML::Emitter &e) const {
 	e << YAML::Key << "events" << YAML::Value; 
 		e << YAML::Flow << YAML::BeginSeq; 
 		BOOST_FOREACH(const EventStreamInfoPtr ev, evstreams) {
+			e << YAML::Flow << YAML::BeginMap;
 			e << YAML::Key << "uid" << YAML::Value << ev->uid;
 			e << YAML::Key << "description" << YAML::Value << ev->description;
+			e << YAML::EndMap; 
 		}
-	e << YAML::EndSeq; 
+		e << YAML::EndSeq; 
 	e << YAML::EndMap; 
 	return e; 
 }
 YAML::Node &ListStreamsMessage::serialize(YAML::Node &node) {
 	// Do not serialize base data GTL - Message::serialize(node); 
-	const YAML::Node &events=node["events"]; 
+	const YAML::Node &events=node["events"];  // a Sequence
 	for (unsigned i=0;i<events.size();i++) {
 		EventStreamInfoPtr ev(new EventStreamInfo); 
-		events["uid"] >> ev->uid;
-		events["description"] >> ev->description;
+		events[i]["uid"] >> ev->uid;
+		events[i]["description"] >> ev->description;
 		evstreams.push_back(ev); 
 	}
 	return node;
