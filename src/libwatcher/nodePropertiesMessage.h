@@ -81,6 +81,9 @@ namespace watcher {
                 /** Suggested effects */
                 DisplayEffectList displayEffects;
 
+				// A string to use in place of the ip address as a label. 
+				std::string label;
+
                 /** Possible abstract properies of the node. NONE to unset. */
                 enum NodeProperty { 
                     NOPROPERTY=0, 
@@ -92,6 +95,7 @@ namespace watcher {
                     VICTIM, 
                     CHOSEN
                 }; 
+
                 static std::string nodePropertyToString(const NodeProperty &p);
                 /** Convert a string into a property. Sets argument to empty string if unsuccessful. */
                 static bool stringToNodeProperty(const std::string &s, NodeProperty &p);

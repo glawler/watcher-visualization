@@ -47,6 +47,7 @@ namespace watcher {
             shape(NOSHAPE),
             useShape(false),
             displayEffects(),
+			label(""),
             nodeProperties()
         {
             TRACE_ENTER();
@@ -62,6 +63,7 @@ namespace watcher {
             shape(other.shape),
             useShape(other.useShape),
             displayEffects(other.displayEffects),
+			label(other.label),
             nodeProperties(other.nodeProperties)
         {
             TRACE_ENTER();
@@ -87,6 +89,7 @@ namespace watcher {
                 shape==other.shape &&
                 useShape==other.useShape &&
                 displayEffects==other.displayEffects &&
+				label==other.label &&
                 nodeProperties==other.nodeProperties;
 
             TRACE_EXIT_RET(retVal);
@@ -105,6 +108,7 @@ namespace watcher {
             shape=other.shape;
             useShape=other.useShape;
             displayEffects=other.displayEffects;
+			label=other.label; 
             nodeProperties=other.nodeProperties;
 
             TRACE_EXIT();
@@ -129,6 +133,8 @@ namespace watcher {
             BOOST_FOREACH(const DisplayEffect &e, displayEffects)
                 out << displayEffectToString(e) << ",";
             out << "]";
+
+			out << " label: " << label; 
 
             out << " properties: ";
             out << "[";
@@ -160,6 +166,7 @@ namespace watcher {
 				BOOST_FOREACH(const NodePropertiesMessage::DisplayEffect &de, displayEffects) 
 					e << de;
 				e << YAML::EndSeq; 
+			e << YAML::Key << "label" << YAML::Value << label; 
 			e << YAML::Key << "nodeProperties" << YAML::Value; 
 				e << YAML::Flow << YAML::BeginSeq; 
 				BOOST_FOREACH(const NodePropertiesMessage::NodeProperty &np, nodeProperties) 
@@ -184,6 +191,7 @@ namespace watcher {
 				deseq[i] >> (unsigned short &)e; 
 				displayEffects.push_back(e); 
 			}
+			node["label"] >> label;
 			const YAML::Node &npseq=node["nodeProperties"]; 
 			for (unsigned i=0;i<npseq.size();i++) {
 				NodePropertiesMessage::NodeProperty e; 
