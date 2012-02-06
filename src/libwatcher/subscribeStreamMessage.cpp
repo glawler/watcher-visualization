@@ -25,7 +25,7 @@ namespace watcher {
     namespace event {
         INIT_LOGGER(SubscribeStreamMessage, "Message.SubscribeStreamMessage");
 
-        SubscribeStreamMessage::SubscribeStreamMessage(uint32_t uid_) : 
+        SubscribeStreamMessage::SubscribeStreamMessage(int32_t uid_) : 
 			Message(SUBSCRIBE_STREAM_MESSAGE_TYPE, SUBSCRIBE_STREAM_MESSAGE_VERSION),
 			uid(uid_)
         {

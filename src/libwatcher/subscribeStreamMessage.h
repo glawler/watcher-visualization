@@ -29,22 +29,22 @@ namespace watcher {
 	    /** Allows a Watcher GUI to subscribe to a specified event stream, or create a new one. */
         class SubscribeStreamMessage : public Message {
             public:
-            SubscribeStreamMessage(uint32_t uid=-1); 
+            SubscribeStreamMessage(int32_t uid=-1); 
 
-	    /** The uid of the stream to join.  uid==-1 means "create a new stream" */
-	    uint32_t uid;
+		    /** The uid of the stream to join.  uid==-1 means "create a new stream" */
+		    int32_t uid;
 
-				/** Serialize this message using a YAML::Emitter
-				 * @param e the emitter to serialize to
-				 * @return the emitter emitted to.
-				 */
-				virtual YAML::Emitter &serialize(YAML::Emitter &e) const; 
+			/** Serialize this message using a YAML::Emitter
+			 * @param e the emitter to serialize to
+			 * @return the emitter emitted to.
+			 */
+			virtual YAML::Emitter &serialize(YAML::Emitter &e) const; 
 
-				/** Serialize from a YAML::Parser. 
-				 * @param p the Parser to read from 
-				 * @return the parser read from. 
-				 */
-				virtual YAML::Node &serialize(YAML::Node &node); 
+			/** Serialize from a YAML::Parser. 
+			 * @param p the Parser to read from 
+			 * @return the parser read from. 
+			 */
+			virtual YAML::Node &serialize(YAML::Node &node); 
 
             private:
             DECLARE_LOGGER();
