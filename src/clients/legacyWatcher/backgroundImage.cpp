@@ -150,6 +150,7 @@ void BackgroundImage::drawImage()
 	glDisable(GL_LIGHTING); 
 	glDisable(GL_BLEND); 
 	// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
+	glBindTexture(GL_TEXTURE_2D, textureIntID);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0,0); glVertex2f(minx        ,miny+yoffset);
 	glTexCoord2f(1,0); glVertex2f(minx+xoffset,miny+yoffset);
@@ -158,7 +159,6 @@ void BackgroundImage::drawImage()
 	glEnd();
 	glPopAttrib(); 
 	glPopMatrix(); 
-	glEndList(); 
     TRACE_EXIT();
 }
 
