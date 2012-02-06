@@ -71,6 +71,7 @@ void usage(const char *progName)
     // fprintf(stderr, "   -x, --expiration=seconds    How long in seconds to apply the properties. 0==forever, default forever.\n"); 
     fprintf(stderr, "   -c, --color=color           Set the node's color to color. Color can be string, e.g. \"blue\", or \n"); 
     fprintf(stderr, "                                   hex RRGGBBAA (red, green, blue, alpha) value, \"0xff00ff64\"\n"); 
+    fprintf(stderr, "   -L, --label=string          The label attached to the node\n"); 
     fprintf(stderr, "   -z, --size=float            How large (or small) to make the node relative to other nodes.\n"); 
     fprintf(stderr, "   -T, --timestamp=ms          Optionally specify a timestamp for this event\n");
     fprintf(stderr, "\n");
@@ -106,6 +107,7 @@ int main(int argc, char **argv)
             {"property", required_argument, 0, 'P'},
             // {"expiration", required_argument, 0, 'x'},
             {"color", required_argument, 0, 'c'},
+            {"label", required_argument, 0, 'L'},
             {"size", required_argument, 0, 'z'},
             {"logProps", required_argument, 0, 'r'},
             {"timestamp", required_argument, 0, 'T'},
@@ -113,7 +115,7 @@ int main(int argc, char **argv)
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "s:n:l:a:e:p:x:c:z:r:hHT:?", long_options, &option_index);
+        c = getopt_long(argc, argv, "s:n:l:a:e:p:x:c:n:z:r:hHT:?", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -185,6 +187,8 @@ int main(int argc, char **argv)
                           }
                           message->useColor=true;
                       }
+                      break;
+            case 'L': message->label=string(optarg); 
                       break;
             case 'z': {
                           try
