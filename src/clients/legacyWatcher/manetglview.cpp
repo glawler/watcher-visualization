@@ -635,40 +635,51 @@ void manetGLView::scaleAndShiftToCenter(ScaleAndShiftUpdate onChangeOrAlways)
 
 void manetGLView::getNodeRectangle(double &xMin, double &xMax, double &yMin, double &yMax, double &zMin, double &zMax)
 {
-    xMin = DBL_MAX;
-    xMax = -DBL_MAX;
-    yMin = DBL_MAX;
-    yMax = -DBL_MAX;
-    zMin = DBL_MAX;
-    zMax = -DBL_MAX;
-    bool includeAntenna = false;     // antenna currently broken
-    // bool includeHierarchy = isActive(HIERARCHY_LAYER); 
+	xMin = DBL_MAX;
+	xMax = -DBL_MAX;
+	yMin = DBL_MAX;
+	yMax = -DBL_MAX;
+	zMin = DBL_MAX;
+	zMax = -DBL_MAX;
+	bool includeAntenna = false;     // antenna currently broken
+	// bool includeHierarchy = isActive(HIERARCHY_LAYER); 
 
-    // find drawing extents
-    for (size_t i=0; i<wGraph->numValidNodes; i++) 
-    {
-        if (!wGraph->nodes[i].isActive) 
-            continue;
+	// find drawing extents
+	for (size_t i=0; i<wGraph->numValidNodes; i++) 
+	{
+		if (!wGraph->nodes[i].isActive) 
+			continue;
 
-        double r = 0;
-        if(includeAntenna)
-            r = conf->antennaRadius; 
+		double r = 0;
+		if(includeAntenna)
+			r = conf->antennaRadius; 
 
-        {
-            double nodeXMin = wGraph->nodes[i].x - r;
-            double nodeXMax = wGraph->nodes[i].x + r;
-            double nodeYMin = wGraph->nodes[i].y - r;
-            double nodeYMax = wGraph->nodes[i].y + r;
-            double nodeZMin = wGraph->nodes[i].z - r;
-            double nodeZMax = wGraph->nodes[i].z + r;
-            if(nodeXMin < xMin) xMin = nodeXMin;
-            if(nodeXMax > xMax) xMax = nodeXMax;
-            if(nodeYMin < yMin) yMin = nodeYMin;
-            if(nodeYMax > yMax) yMax = nodeYMax;
-            if(nodeZMin < zMin) zMin = nodeZMin;
-            if(nodeZMax > zMax) zMax = nodeZMax;
-        }
-    }
+		{
+			double nodeXMin = wGraph->nodes[i].x - r;
+			double nodeXMax = wGraph->nodes[i].x + r;
+			double nodeYMin = wGraph->nodes[i].y - r;
+			double nodeYMax = wGraph->nodes[i].y + r;
+			double nodeZMin = wGraph->nodes[i].z - r;
+			double nodeZMax = wGraph->nodes[i].z + r;
+			if(nodeXMin < xMin) xMin = nodeXMin;
+			if(nodeXMax > xMax) xMax = nodeXMax;
+			if(nodeYMin < yMin) yMin = nodeYMin;
+			if(nodeYMax > yMax) yMax = nodeYMax;
+			if(nodeZMin < zMin) zMin = nodeZMin;
+			if(nodeZMax > zMax) zMax = nodeZMax;
+		}
+	}
+	if (conf->backgroundImage) {
+		BackgroundImage &bgi=BackgroundImage::getInstance();
+		GLfloat bg_minx, bg_width, bg_miny, bg_height, bg_z;
+		bgi.getDrawingCoords(bg_minx, bg_width, bg_miny, bg_height, bg_z); 
+		if(bg_minx < xMin) xMin = bg_minx;
+		if(bg_minx + bg_width > xMax) xMax = bg_minx + bg_width;
+		if(bg_miny < yMin) yMin = bg_miny;
+		if(bg_miny + bg_height > yMax) yMax = bg_miny + bg_height;
+		if(bg_z < zMin) zMin = bg_z;
+		if(bg_z > zMax) zMax = bg_z;
+	}
 }
 
 void manetGLView::getShiftAmount(GLdouble &x_ret, GLdouble &y_ret)
@@ -756,7 +767,7 @@ void manetGLView::zoomBackground(const int &delta)
 {
 	int degs=delta/8; 
 	int steps=degs/15; 	// for most mice.
-	LOG_INFO("zoomdata: delta: " << delta << " degs: " << degs << " steps: " << steps); 
+	// LOG_INFO("zoomdata: delta: " << delta << " degs: " << degs << " steps: " << steps); 
     GLfloat x, y, w, h, z;
     BackgroundImage &bg=BackgroundImage::getInstance();
     bg.getDrawingCoords(x, w, y, h, z);
