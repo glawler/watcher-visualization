@@ -350,6 +350,8 @@ bool WatcherGraph::updateNodeProperties(const NodePropertiesMessagePtr &message)
                 case NodePropertiesMessage::SPARKLE: nodes[index].sparkle=!nodes[index].sparkle; break;
             }
     }
+	if (!message->label.empty()) 
+		nodes[index].rebuildLabel(message->label); 
     if (message->nodeProperties.size()) 
         nodes[index].nodeProperties=message->nodeProperties;
 
