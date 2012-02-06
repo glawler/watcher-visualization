@@ -49,8 +49,6 @@ AM_CONDITIONAL([ENABLE_TESTNODEONLY], [test x$enable_testnodeonly != xno])
 PKG_CHECK_MODULES(LOG4CXX, [liblog4cxx >= 0.10.0])
 PKG_CHECK_MODULES(LIBCONFIG, [libconfig++ >= 1.3.1])
 PKG_CHECK_MODULES(LIBYAML, [yaml-cpp >= 0.2.6])
-PKG_CHECK_MODULES(SDL, sdl)
-PKG_CHECK_MODULES(SDLIMAGE, SDL_image)
 
 # Not entirely correct. Will break if 3rd party libs not installed in standard locations
 # relative to that lib's PREFIX. Will also break when doing 64/32 bit cross compilation.
@@ -179,6 +177,8 @@ if test x$enable_testnodeonly == xno; then
         PKG_CHECK_MODULES(QTGUI, [QtGui >= 4.3.0])
         PKG_CHECK_MODULES(QTCORE, [QtCore >= 4.3.0])
         PKG_CHECK_MODULES(QTOPENGL, [QtOpenGL >= 4.3.0])
+		PKG_CHECK_MODULES(SDL, sdl)
+		PKG_CHECK_MODULES(SDLIMAGE, SDL_image)
     fi
 
     # Looking for qwt is error prone and a pain. Submitted a bugfix to add a pkg-config .pc to it, 
