@@ -32,7 +32,7 @@
 #include <ostream>
 
 // yaml-cpp library interface. 
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 #include "watcherColors.h" 
 #include "watcherTypes.h"
 

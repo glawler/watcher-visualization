@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( ctor_test )
     lm1.fromNodeID=asio::ip::address_v4((0x7f000001));   // 127.0.0.1
     lm1.foreground=black;
     lm1.background=white;
-    lm1.expiration=10;
+    lm1.expiration=10000;
     lm1.addLabel=true;
 
     BOOST_TEST_MESSAGE("Testing operator=()..."); 
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( archive_test )
     lmOut->fromNodeID=asio::ip::address::from_string("127.0.0.1"); 
     lmOut->foreground=black;
     lmOut->background=white;
-    lmOut->expiration=10;
+    lmOut->expiration=10000;
     lmOut->addLabel=false;       // Normally you would not mix address, and (lat,lng, alt), but 
     lmOut->lat=1.23456789;       // for testing it's ok. 
     lmOut->lng=1.23456789;
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE( output_test )
     lmp1->fromNodeID=boost::asio::ip::address::from_string("127.0.0.1");  
     lmp1->foreground=black;
     lmp1->background=white;
-    lmp1->expiration=10;
+    lmp1->expiration=10000;
 
     BOOST_TEST_MESSAGE("*lmp1 :" << *lmp1); 
 

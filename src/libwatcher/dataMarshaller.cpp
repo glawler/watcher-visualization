@@ -18,7 +18,7 @@
 
 #include <iomanip>
 #include <sstream>
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 
 #include "dataMarshaller.h"
 #include "logger.h"

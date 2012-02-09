@@ -23,7 +23,7 @@
 #ifndef START_WATCHER_MESSAGE_H
 #define START_WATCHER_MESSAGE_H
 
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 #include "message.h"
 
 namespace watcher {

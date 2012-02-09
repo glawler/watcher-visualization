@@ -35,6 +35,11 @@ You should have received a copy of the GNU Affero General Public License
 along with Watcher.  If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------
 
+Note: if you build yaml-cpp from source, the include paths differ. To build watcher
+with a locally build yaml-cpp, put the following in your build environment before
+./configuring:
+export LIBYAML_CFLAGS='-I/usr/local/include/yaml-cpp'
+
 Build on Ubuntu 10.04 STD
 -------------------------
 sudo apt-get update

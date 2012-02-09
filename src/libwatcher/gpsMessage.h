@@ -25,7 +25,7 @@
 #define WATCHER_GPS__MESSAGE_DATA_H
 
 #include <string>
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 
 #include "message.h"
 #include "messageTypesAndVersions.h"

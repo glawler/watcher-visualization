@@ -30,7 +30,7 @@
 #define NODE_CONNECTION_MESSAGE_H
 
 #include <string>
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 
 #include "message.h"
 #include "watcherTypes.h"

@@ -303,7 +303,6 @@ void WatcherGraph::doMaintanence(const watcher::Timestamp &ts)
     // May add these back as toggable functionality for use in smaller test bed scenarios
     // removed: support for flashing
     // removed: support for spinning
-    // removed: support for labels on edges
 }
 
 bool WatcherGraph::updateNodeLocation(const GPSMessagePtr &message)

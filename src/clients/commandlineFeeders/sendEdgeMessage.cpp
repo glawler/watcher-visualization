@@ -251,6 +251,7 @@ int main(int argc, char **argv)
 		em->timestamp=timestamp;
     em->width=width;
     em->layer=layer;
+	lm->expiration=expiration;
     em->setMiddleLabel(lm); 
     em->bidirectional=bidirectional;
     em->addEdge=!remove; 

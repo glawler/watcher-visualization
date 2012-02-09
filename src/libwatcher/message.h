@@ -25,7 +25,7 @@
 #define BASE_MESSAGE_H
 
 #include <boost/shared_ptr.hpp>
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 
 #include "declareLogger.h"
 #include "messageTypesAndVersions.h"

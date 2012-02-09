@@ -68,7 +68,7 @@ namespace watcher {
             TRACE_EXIT();
         }
 
-        LabelMessage::LabelMessage(const std::string &label_, const float &lat_, const float &lng_, const float &alt_, const int fontSize_) : 
+        LabelMessage::LabelMessage(const std::string &label_, const double &lat_, const double &lng_, const double &alt_, const int fontSize_) : 
             Message(LABEL_MESSAGE_TYPE, LABEL_MESSAGE_VERSION),
             label(label_),
             fontSize(fontSize_),

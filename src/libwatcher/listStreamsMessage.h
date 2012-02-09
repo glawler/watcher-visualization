@@ -21,7 +21,7 @@
 #ifndef LIST_STREAMS_MESSAGE_H
 #define LIST_STREAMS_MESSAGE_H
 
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 #include "message.h"
 
 namespace watcher {

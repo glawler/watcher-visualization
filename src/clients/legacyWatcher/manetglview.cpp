@@ -2021,6 +2021,7 @@ void manetGLView::updatePlaybackSliderFromGUI()
     messageStream->clearMessageCache();
     messageStream->setStreamTimeStart(newStart); 
     messageStream->startStream(); 
+	clearAll(); 
 
     sliderPressed=false;
     TRACE_EXIT();

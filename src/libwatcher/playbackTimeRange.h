@@ -28,7 +28,7 @@
 #ifndef PLAYBACK_TIME_RANGE_H
 #define PLAYBACK_TIME_RANGE_H
 
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 #include "message.h"
 
 namespace watcher {

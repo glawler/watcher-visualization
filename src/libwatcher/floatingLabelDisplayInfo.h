@@ -44,7 +44,7 @@ namespace watcher
             void initialize(const watcher::event::LabelMessagePtr &m); 
 
             /** The coordinates of the floating label */
-            float lat, lng, alt;
+            double lat, lng, alt;
 
             virtual std::ostream &toStream(std::ostream &out) const;
             std::ostream &operator<<(std::ostream &out) const { return toStream(out); }
