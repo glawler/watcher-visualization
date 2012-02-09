@@ -25,7 +25,7 @@
 #define MESSAGE_STREAM_FILTER_MESSAGE
 
 #include <string>
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 #include "message.h"
 #include "messageStreamFilter.h"
 

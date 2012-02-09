@@ -23,7 +23,7 @@
 #define BOOST_TEST_MODULE testYAML
 #include <boost/test/unit_test.hpp>
 #include <boost/shared_ptr.hpp>
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 
 using namespace std;
 

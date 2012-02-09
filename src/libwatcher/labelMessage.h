@@ -25,7 +25,7 @@
 #define WATCHER_LABEL_MESSAGE_DATA_H
 
 #include <string>
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 #include "message.h"
 #include "watcherColors.h"
 #include "watcherTypes.h" 
@@ -65,7 +65,7 @@ namespace watcher {
                 GUILayer layer;             // which layer to put the label on 
 
                 /** The coordinates of the label, if free floating */
-                float lat, lng, alt; 
+                double lat, lng, alt; 
 
                 /**
                  * Attach a label to this node.
@@ -90,7 +90,7 @@ namespace watcher {
                  * @param alt the altitude of the label
                  * @param fontSize the size of the font, if 0 use the GUI default size.
                  */
-                LabelMessage(const std::string &label, const float &lat, const float &lng, const float &alt, const int fontSize=0);
+                LabelMessage(const std::string &label, const double &lat, const double &lng, const double &alt, const int fontSize=0);
 
                 /** copy a the message 
                  * @param other the message to copy 

@@ -180,6 +180,7 @@ int main(int argc, char **argv)
     // client.addMessageHandler(SendMessageHandler::create());
 
     unsigned int loopTime=1; 
+	int expireFactor=1050; 
     // Create hour, min, sec, and center nodes.
     NodeIdentifier centerId=NodeIdentifier::from_string("192.168.1.100");
     NodeIdentifier hourId=NodeIdentifier::from_string("192.168.1.101");
@@ -241,11 +242,11 @@ int main(int argc, char **argv)
             messages.push_back(gpsMess); 
 
             EdgeMessagePtr edge(new EdgeMessage(centerId, *nodeData[i].id, nodeData[i].layer, 
-                        colors::blue, 2.0, false, loopTime*1500, true)); 
+                        colors::blue, 2.0, false, loopTime*expireFactor, true)); 
 
             LabelMessagePtr labMess(new LabelMessage(nodeData[i].label));
             labMess->layer=nodeData[i].layer;
-            labMess->expiration=loopTime*1500; 
+            labMess->expiration=loopTime*expireFactor; 
             edge->middleLabel=labMess;
 
             LabelMessagePtr numLabMess(new LabelMessage);
@@ -256,7 +257,7 @@ int main(int argc, char **argv)
             else if(*nodeData[i].id==secId)
                 numLabMess->label=boost::lexical_cast<string>(now->tm_sec); 
             numLabMess->layer=nodeData[i].layer;
-            numLabMess->expiration=loopTime*1500; 
+            numLabMess->expiration=loopTime*expireFactor; 
             edge->node2Label=numLabMess;
 
             messages.push_back(edge);

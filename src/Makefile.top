@@ -15,6 +15,7 @@ CPPFLAGS += -Wno-deprecated
 CPPFLAGS += -I$(top_srcdir)
 CPPFLAGS += -I$(top_srcdir)/util
 CPPFLAGS += $(BOOST_CPPFLAGS) @LOGGER_CFLAGS@ @LIBCONFIG_CFLAGS@ @LOG4CXX_CFLAGS@
+CPPFLAGS += @LIBYAML_CFLAGS@
 
 # root of the watcher tree, one directory up from the srcdir
 TOPDIR=$(top_srcdir)/..

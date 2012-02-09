@@ -28,6 +28,8 @@
 #include <sys/types.h>   // Ubuntu wants these
 #include <sys/stat.h>
 
+#include <signal.h>		// for signal stuff
+
 #include <cassert>
 #include <iostream>
 #include <cstdlib>
@@ -122,8 +124,7 @@ sigset_t Signals;
 
 void init_signals()
 {
-    if (sigemptyset(&Signals) ||
-        sigaddset(&Signals, SIGHUP) ||
+    if (sigemptyset(&Signals) || sigaddset(&Signals, SIGHUP) ||
         sigaddset(&Signals, SIGTERM) ||
         sigaddset(&Signals, SIGINT)) {
         throw std::runtime_error("failed to initialiaze sigset_t");

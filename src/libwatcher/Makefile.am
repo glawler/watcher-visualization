@@ -83,12 +83,6 @@ libwatcher_a_SOURCES=\
 	colors.cpp colors.h \
 	marshalYAML.h marshalYAML.cpp 
 
-CPPFLAGS += -I/usr/include/yaml-cpp
-# libwatcher_LDADD=-lyaml-cpp
-
-# enable tr1 functionality for libwatcher
-# libwatcher_a_CXXFLAGS=-std=gnu++0x
-
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = watcher.pc
 

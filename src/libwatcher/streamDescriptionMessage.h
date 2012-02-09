@@ -21,7 +21,7 @@
 #ifndef STREAM_DESCRIPTION_MESSAGE_H
 #define STREAM_DESCRIPTION_MESSAGE_H
 
-#include <yaml.h>
+#include <yaml-cpp/yaml.h>
 #include "message.h"
 
 namespace watcher {
